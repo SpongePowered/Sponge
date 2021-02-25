@@ -27,28 +27,34 @@ package org.spongepowered.common.advancement.criterion;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
+import org.spongepowered.common.util.SpongeCriterionUtil;
 
 import java.util.Arrays;
+import java.util.Objects;
 
 public interface DefaultedAdvancementCriterion extends AdvancementCriterion {
 
     @Override
-    default AdvancementCriterion and(Iterable<AdvancementCriterion> criteria) {
-        return SpongeCriterionHelper.build(AndCriterion.class, SpongeAndCriterion::new, this, criteria);
+    default AdvancementCriterion and(final Iterable<AdvancementCriterion> criteria) {
+        Objects.requireNonNull(criteria);
+        return SpongeCriterionUtil.build(AndCriterion.class, SpongeAndCriterion::new, this, criteria);
     }
 
     @Override
-    default AdvancementCriterion and(AdvancementCriterion... criteria) {
-        return SpongeCriterionHelper.build(AndCriterion.class, SpongeAndCriterion::new, this, Arrays.asList(criteria));
+    default AdvancementCriterion and(final AdvancementCriterion... criteria) {
+        Objects.requireNonNull(criteria);
+        return SpongeCriterionUtil.build(AndCriterion.class, SpongeAndCriterion::new, this, Arrays.asList(criteria));
     }
 
     @Override
-    default AdvancementCriterion or(Iterable<AdvancementCriterion> criteria) {
-        return SpongeCriterionHelper.build(OrCriterion.class, SpongeOrCriterion::new, this, criteria);
+    default AdvancementCriterion or(final Iterable<AdvancementCriterion> criteria) {
+        Objects.requireNonNull(criteria);
+        return SpongeCriterionUtil.build(OrCriterion.class, SpongeOrCriterion::new, this, criteria);
     }
 
     @Override
-    default AdvancementCriterion or(AdvancementCriterion... criteria) {
-        return SpongeCriterionHelper.build(OrCriterion.class, SpongeOrCriterion::new, this, Arrays.asList(criteria));
+    default AdvancementCriterion or(final AdvancementCriterion... criteria) {
+        Objects.requireNonNull(criteria);
+        return SpongeCriterionUtil.build(OrCriterion.class, SpongeOrCriterion::new, this, Arrays.asList(criteria));
     }
 }

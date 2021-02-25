@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -45,18 +45,19 @@ public final class UpdateConnectingBlocksEffect implements ProcessingSideEffect 
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
-        final BlockState newState, final SpongeBlockChangeFlag flag) {
-        final ServerWorld world = pipeline.getServerWorld();
+        final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
+    ) {
+        final ServerLevel world = pipeline.getServerWorld();
         final BlockPos pos = oldState.pos;
-        if (flag.notifyObservers()) {
-            // final int i = flags & -2; // Vanilla negates 2 to flip the neighbor notification mask
-            final int newFlag = flag.withUpdateNeighbors(false).getRawFlag();
-            // blockstate.updateDiagonalNeighbors(this, pos, i);
-            oldState.state.updateDiagonalNeighbors(world, pos, newFlag);
-            // newWorldState.updateNeighbors(this, pos, i);
-            newState.updateNeighbors(world, pos, newFlag);
-            // newWorldState.updateDiagonalNeighbors(this, pos, i);
-            newState.updateDiagonalNeighbors(world, pos, newFlag);
+        if (flag.notifyObservers() && flag.getRawFlag() > 0) {
+            // int i = p_241211_3_ & -34; // Vanilla negates 34 to flip neighbor notification and and "is moving?"
+            final int strangeFlag = flag.getRawFlag() & -34;
+            // blockstate.updateIndirectNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
+            oldState.state.updateIndirectNeighbourShapes(world, pos, strangeFlag, limit - 1);
+            // p_241211_2_.updateNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
+            newState.updateNeighbourShapes(world, pos, strangeFlag, limit - 1);
+            // p_241211_2_.updateIndirectNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
+            newState.updateIndirectNeighbourShapes(world, pos, strangeFlag, limit - 1);
         }
 
         return EffectResult.NULL_PASS;

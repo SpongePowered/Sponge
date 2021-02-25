@@ -23,9 +23,9 @@ jobs:
             ${{ github.workspace}}/buildSrc/.gradle/caches
             ${{ github.workspace}}/build/fg_cache
             ${{ github.workspace}}/forge/build/fg_cache
-          key: ${{ runner.os }}-gradle-${{ hashFiles('**/*.gradle*') }}
+          key: ${{ runner.os }}-minecraft-${{ hashFiles('**/*.gradle*') }}
           restore-keys: |
-            ${{ runner.os }}-gradle-
+            ${{ runner.os }}-minecraft-
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
@@ -33,7 +33,7 @@ jobs:
       - name: Grant execute permission for gradlew
         run: chmod +x gradlew
       - name: Build with Gradle
-        run: ./gradlew -PenableTestPlugins=true -PenableSpongeForge=true build
+        run: ./gradlew -PenableTestPlugins=true build --stacktrace
       - name: Archive artifacts for build
         uses: actions/upload-artifact@v2
         with:

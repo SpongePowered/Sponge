@@ -36,17 +36,20 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import org.spongepowered.configurate.ConfigurationNode;
+import net.minecraft.core.Registry;
 import org.spongepowered.api.Platform;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.network.RconConnection;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
+import org.spongepowered.configurate.ConfigurationNode;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
@@ -60,7 +63,6 @@ import java.net.URL;
 import java.util.List;
 import java.util.Map.Entry;
 import java.util.Set;
-import java.util.StringJoiner;
 import java.util.zip.GZIPOutputStream;
 
 class TimingsExport extends Thread {
@@ -90,14 +92,14 @@ class TimingsExport extends Thread {
      * Builds an XML report of the timings to be uploaded for parsing.
      */
     static void reportTimings() {
-        if (requestingReport.isEmpty()) {
+        if (TimingsExport.requestingReport.isEmpty()) {
             return;
         }
-        TimingsReportListener listeners = new TimingsReportListener(requestingReport);
+        TimingsReportListener listeners = new TimingsReportListener(TimingsExport.requestingReport);
 
-        requestingReport.clear();
+        TimingsExport.requestingReport.clear();
         long now = System.currentTimeMillis();
-        final long lastReportDiff = now - lastReport;
+        final long lastReportDiff = now - TimingsExport.lastReport;
         if (lastReportDiff < 60000) {
             listeners.send(Component.text("Please wait at least 1 minute in between Timings reports. (" + (int)((60000 - lastReportDiff) / 1000) + " seconds)", NamedTextColor.RED));
             listeners.done();
@@ -110,7 +112,7 @@ class TimingsExport extends Thread {
             return;
         }
         listeners.send(Component.text("Preparing Timings Report...", NamedTextColor.GREEN));
-        lastReport = now;
+        TimingsExport.lastReport = now;
 
         Platform platform = SpongeCommon.getGame().getPlatform();
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
@@ -121,16 +123,16 @@ class TimingsExport extends Thread {
                 .add("end", System.currentTimeMillis() / 1000)
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
-            builder.add("server", getServerName())
-                    .add("motd", SpongeAdventure.plain(Sponge.getServer().getMotd()))
-                    .add("online-mode", Sponge.getServer().getOnlineMode())
-                    .add("icon", SpongeCommon.getServer().getServerStatusResponse().getFavicon());
+            builder.add("server", TimingsExport.getServerName())
+                    .add("motd", SpongeAdventure.plain(Sponge.getServer().getMOTD()))
+                    .add("online-mode", Sponge.getServer().isOnlineModeEnabled())
+                    .add("icon", SpongeCommon.getServer().getStatus().getFavicon());
         }
 
         final Runtime runtime = Runtime.getRuntime();
         RuntimeMXBean runtimeBean = ManagementFactory.getRuntimeMXBean();
         builder.add("system", JSONUtil.objectBuilder()
-                .add("timingcost", getCost())
+                .add("timingcost", TimingsExport.getCost())
                 .add("name", System.getProperty("os.name"))
                 .add("version", System.getProperty("os.version"))
                 .add("jvmversion", System.getProperty("java.version"))
@@ -138,25 +140,25 @@ class TimingsExport extends Thread {
                 .add("maxmem", runtime.maxMemory())
                 .add("cpu", runtime.availableProcessors())
                 .add("runtime", ManagementFactory.getRuntimeMXBean().getUptime())
-                .add("flags", RUNTIME_FLAG_JOINER.join(runtimeBean.getInputArguments()))
+                .add("flags", TimingsExport.RUNTIME_FLAG_JOINER.join(runtimeBean.getInputArguments()))
                 .add("gc", JSONUtil.mapArrayToObject(ManagementFactory.getGarbageCollectorMXBeans(), (input) -> {
                     return JSONUtil.singleObjectPair(input.getName(), JSONUtil.arrayOf(input.getCollectionCount(), input.getCollectionTime()));
                 })));
 
-        Set<BlockEntityType> tileEntityTypeSet = Sets.newHashSet();
+        Set<BlockEntityType> blockEntityTypeSet = Sets.newHashSet();
         Set<EntityType<?>> entityTypeSet = Sets.newHashSet();
 
         int size = TimingsManager.HISTORY.size();
         TimingHistory[] history = new TimingHistory[size + 1];
         int i = 0;
         for (TimingHistory timingHistory : TimingsManager.HISTORY) {
-            tileEntityTypeSet.addAll(timingHistory.tileEntityTypeSet);
+            blockEntityTypeSet.addAll(timingHistory.tileEntityTypeSet);
             entityTypeSet.addAll(timingHistory.entityTypeSet);
             history[i++] = timingHistory;
         }
 
         history[i] = new TimingHistory(); // Current snapshot
-        tileEntityTypeSet.addAll(history[i].tileEntityTypeSet);
+        blockEntityTypeSet.addAll(history[i].tileEntityTypeSet);
         entityTypeSet.addAll(history[i].entityTypeSet);
 
         JsonObjectBuilder handlersBuilder = JSONUtil.objectBuilder();
@@ -177,10 +179,20 @@ class TimingsExport extends Thread {
                 .add("handlers", handlersBuilder)
                 .add("worlds", JSONUtil.mapArrayToObject(TimingHistory.worldMap.entrySet(), (entry) ->
                         JSONUtil.singleObjectPair(entry.getValue(), entry.getKey())))
-                .add("tileentity", JSONUtil.mapArrayToObject(tileEntityTypeSet, (tileEntityType) ->
-                        JSONUtil.singleObjectPair(TimingsPls.getTileEntityId(tileEntityType), tileEntityType.getKey().toString())))
+                .add("blockentity", JSONUtil.mapArrayToObject(blockEntityTypeSet, (blockEntityType) ->
+                    {
+                        final ResourceKey resourceKey =
+                                Sponge.getGame().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(blockEntityType);
+                        return JSONUtil.singleObjectPair(TimingsPls.getBlockEntityId(blockEntityType), resourceKey);
+                    })
+                )
                 .add("entity", JSONUtil.mapArrayToObject(entityTypeSet, (entityType) ->
-                        JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), entityType.getKey().toString()))));
+                        {
+                            final ResourceKey resourceKey = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) entityType);
+                            return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entityType), resourceKey);
+                        })
+                )
+        );
 
         // Information about loaded plugins
 
@@ -189,14 +201,14 @@ class TimingsExport extends Thread {
                     .add("version", plugin.getMetadata().getVersion())
                     .add("description", plugin.getMetadata().getDescription().orElse(""))
                     .add("website", plugin.getMetadata().getLinks().getHomepage())
-                    .add("authors", AUTHOR_LIST_JOINER.join(plugin.getMetadata().getContributors()))
+                    .add("authors", TimingsExport.AUTHOR_LIST_JOINER.join(plugin.getMetadata().getContributors()))
             ).build();
         }));
 
         // Information on the users Config
 
         builder.add("config", JSONUtil.objectBuilder()
-                .add("sponge", serializeConfigNode(SpongeConfigs.getCommon().getNode())));
+                .add("sponge", TimingsExport.serializeConfigNode(SpongeConfigs.getCommon().getNode())));
 
         new TimingsExport(listeners, builder.build(), history).start();
     }
@@ -240,18 +252,18 @@ class TimingsExport extends Thread {
         if (node.isMap()) {
             final JsonObject object = new JsonObject();
             for (final Entry<Object, ? extends ConfigurationNode> entry : node.childrenMap().entrySet()) {
-                final String fullPath = CONFIG_PATH_JOINER.join(entry.getValue().path());
+                final String fullPath = TimingsExport.CONFIG_PATH_JOINER.join(entry.getValue().path());
                 if (fullPath.equals("sponge.sql") || TimingsManager.hiddenConfigs.contains(fullPath)) {
                     continue;
                 }
-                object.add(entry.getKey().toString(), serializeConfigNode(entry.getValue()));
+                object.add(entry.getKey().toString(), TimingsExport.serializeConfigNode(entry.getValue()));
             }
             return object;
         }
         if (node.isList()) {
             final JsonArray array = new JsonArray();
             for (final ConfigurationNode child : node.childrenList()) {
-                array.add(serializeConfigNode(child));
+                array.add(TimingsExport.serializeConfigNode(child));
             }
             return array;
         }
@@ -294,7 +306,7 @@ class TimingsExport extends Thread {
             }
             HttpURLConnection con = (HttpURLConnection) new URL("https://timings.aikar.co/post").openConnection();
             con.setDoOutput(true);
-            String name = TimingsManager.privacy ? "" : getServerName();
+            String name = TimingsManager.privacy ? "" : TimingsExport.getServerName();
             con.setRequestProperty("User-Agent", "Sponge/" + name + "/" + hostname);
             con.setRequestMethod("POST");
             con.setInstanceFollowRedirects(false);

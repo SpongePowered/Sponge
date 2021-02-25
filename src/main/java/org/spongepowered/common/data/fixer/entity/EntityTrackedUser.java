@@ -31,11 +31,11 @@ import com.mojang.datafixers.TypeRewriteRule;
 import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
-import net.minecraft.util.datafix.TypeReferences;
+import net.minecraft.util.datafix.fixes.References;
 import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
 import org.spongepowered.common.util.Constants;
 
-public class EntityTrackedUser extends DataFix {
+public final class EntityTrackedUser extends DataFix {
 
     public EntityTrackedUser(Schema outputSchema, boolean changesType) {
         super(outputSchema, changesType);
@@ -43,12 +43,12 @@ public class EntityTrackedUser extends DataFix {
 
     @Override
     protected TypeRewriteRule makeRule() {
-        final Type<?> entityType = this.getInputSchema().getType(TypeReferences.ENTITY);
+        final Type<?> entityType = this.getInputSchema().getType(References.ENTITY);
         final Type<?> forgeDataType = entityType.findFieldType(Constants.Forge.FORGE_DATA);
-        final Type<?> spongeDataType = forgeDataType.findFieldType(Constants.Sponge.SPONGE_DATA);
+        final Type<?> spongeDataType = forgeDataType.findFieldType(Constants.Sponge.Data.V2.SPONGE_DATA);
 
         final OpticFinder<?> forgeDataFinder = DSL.fieldFinder(Constants.Forge.FORGE_DATA, forgeDataType);
-        final OpticFinder<?> spongeDataFinder = DSL.fieldFinder(Constants.Sponge.SPONGE_DATA, spongeDataType);
+        final OpticFinder<?> spongeDataFinder = DSL.fieldFinder(Constants.Sponge.Data.V2.SPONGE_DATA, spongeDataType);
 
         return TypeRewriteRule.seq(this.fixTracked(forgeDataFinder, spongeDataFinder, spongeDataType, Constants.Sponge.SPONGE_ENTITY_CREATOR),
                                    this.fixTracked(forgeDataFinder, spongeDataFinder, spongeDataType, Constants.Sponge.SPONGE_ENTITY_NOTIFIER));
@@ -58,7 +58,7 @@ public class EntityTrackedUser extends DataFix {
         final Type<?> trackedType = spongeDataType.findFieldType(name);
         final OpticFinder<?> trackedFinder = DSL.fieldFinder(name, trackedType);
 
-        return this.fixTypeEverywhereTyped("Entity" + name + "UserFix", this.getInputSchema().getType(TypeReferences.ENTITY),
+        return this.fixTypeEverywhereTyped("Entity" + name + "UserFix", this.getInputSchema().getType(References.ENTITY),
                 type -> {
                     final Typed<?> forge = type.getTyped(forgeDataFinder);
                     final Typed<?> sponge = forge.getTyped(spongeDataFinder);

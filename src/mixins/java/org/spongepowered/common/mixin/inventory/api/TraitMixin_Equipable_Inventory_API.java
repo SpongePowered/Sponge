@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 
-@Mixin(value = {ArmorStandEntity.class, MobEntity.class})
+@Mixin(value = {ArmorStand.class, Mob.class})
 public abstract class TraitMixin_Equipable_Inventory_API implements Equipable {
 
     private EquipmentInventory impl$equipmentInventory = null;
@@ -46,7 +45,7 @@ public abstract class TraitMixin_Equipable_Inventory_API implements Equipable {
             final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
             this.impl$equipmentInventory = (EquipmentInventory) lens.getAdapter(inv.inventoryAdapter$getFabric(), null);
         }
-        return impl$equipmentInventory;
+        return this.impl$equipmentInventory;
     }
 
 }

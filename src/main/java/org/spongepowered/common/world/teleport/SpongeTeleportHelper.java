@@ -26,16 +26,14 @@ package org.spongepowered.common.world.teleport;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
-import net.minecraft.world.border.WorldBorder;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.math.GenericMath;
 import org.spongepowered.math.vector.Vector3i;
@@ -49,6 +47,7 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
+import net.minecraft.world.level.border.WorldBorder;
 
 @Singleton
 public final class SpongeTeleportHelper implements TeleportHelper {
@@ -60,35 +59,25 @@ public final class SpongeTeleportHelper implements TeleportHelper {
         final Set<TeleportHelperFilter> filters = Sets.newHashSet(additionalFilters);
         filters.add(filter);
 
-        if (SpongeConfigs.getCommon().get().getTeleportHelper().isForceBlacklistOn()) {
+        if (SpongeConfigs.getCommon().get().teleportHelper.forceBlacklist) {
             // Always force this into the set if the user has requested it.
             filters.add(TeleportHelperFilters.CONFIG.get());
         }
 
-        final ServerChunkProviderBridge chunkProviderServer = (ServerChunkProviderBridge)((net.minecraft.world.server.ServerWorld) world).getChunkProvider();
-        final boolean previous = chunkProviderServer.bridge$getForceChunkRequests();
-        chunkProviderServer.bridge$setForceChunkRequests(true);
-
-        try {
-            // Get the vectors to check, and get the block types with them.
-            // The vectors should be sorted by distance from the centre of the checking region, so
-            // this makes it easier to try to get close, because we can just iterate and get progressively further out.
-            Optional<Vector3i> result = this.getSafeLocation(world, this.getBlockLocations(location, height, width), distanceToDrop, filters);
-            return result.map(vector3i -> ServerLocation.of(world, vector3i.toDouble().add(0.5, 0, 0.5)));
-        } finally {
-            // Just in case some exception occurs, we want this to disable again.
-            chunkProviderServer.bridge$setForceChunkRequests(previous);
-        }
-
+        // Get the vectors to check, and get the block types with them.
+        // The vectors should be sorted by distance from the centre of the checking region, so
+        // this makes it easier to try to get close, because we can just iterate and get progressively further out.
+        Optional<Vector3i> result = this.getSafeLocation(world, this.getBlockLocations(location, height, width), distanceToDrop, filters);
+        return result.map(vector3i -> ServerLocation.of(world, vector3i.toDouble().add(0.5, 0, 0.5)));
     }
 
     private Stream<Vector3i> getBlockLocations(ServerLocation worldLocation, int height, int width) {
         // We don't want to warp outside of the world border, so we want to check that we're within it.
-        WorldBorder worldBorder = (WorldBorder) worldLocation.getWorld().getProperties().getWorldBorder();
-        int worldBorderMinX = GenericMath.floor(worldBorder.minX());
-        int worldBorderMinZ = GenericMath.floor(worldBorder.minZ());
-        int worldBorderMaxX = GenericMath.floor(worldBorder.maxX());
-        int worldBorderMaxZ = GenericMath.floor(worldBorder.maxZ());
+        final WorldBorder worldBorder = (WorldBorder) worldLocation.getWorld().getProperties().worldBorder();
+        int worldBorderMinX = GenericMath.floor(worldBorder.getMinX());
+        int worldBorderMinZ = GenericMath.floor(worldBorder.getMinZ());
+        int worldBorderMaxX = GenericMath.floor(worldBorder.getMaxX());
+        int worldBorderMaxZ = GenericMath.floor(worldBorder.getMaxZ());
 
         // Get the World and get the maximum Y value.
         int worldMaxY = worldLocation.getWorld().getBlockMax().getY();

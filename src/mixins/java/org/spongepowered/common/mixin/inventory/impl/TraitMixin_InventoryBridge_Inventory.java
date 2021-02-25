@@ -24,22 +24,9 @@
  */
 package org.spongepowered.common.mixin.inventory.impl;
 
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.item.minecart.ContainerMinecartEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.CraftResultInventory;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.DoubleSidedInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.Inventory;
-import net.minecraft.inventory.MerchantInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.tileentity.LockableTileEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
-import org.spongepowered.common.bridge.inventory.LensGeneratorBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.LensGeneratorBridge;
 import org.spongepowered.common.entity.player.SpongeUserInventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.CustomInventory;
@@ -49,25 +36,40 @@ import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.Container;
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.inventory.MerchantContainer;
+import net.minecraft.world.inventory.ResultContainer;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 
 /**
- * Mixin into all known vanilla {@link IInventory} and {@link Container}
+ * Mixin into all known vanilla {@link Container} and {@link AbstractContainerMenu}
  */
 @Mixin(value = {
         Slot.class,
-        PlayerInventory.class,
-        DoubleSidedInventory.class,
-        LockableTileEntity.class,
-        CustomInventory.class,
         Inventory.class,
+        CompoundContainer.class,
+        BaseContainerBlockEntity.class,
+        CustomInventory.class,
+        SimpleContainer.class,
         SpongeUserInventory.class,
-        CraftingInventory.class,
-        CraftResultInventory.class,
-        ContainerMinecartEntity.class,
-        ArmorStandEntity.class,
-        MobEntity.class,
-        MerchantInventory.class
-}, targets = "net.minecraft.tileentity.LecternTileEntity$1", priority = 999)
+        CraftingContainer.class,
+        ResultContainer.class,
+        AbstractMinecartContainer.class,
+        ArmorStand.class,
+        Mob.class,
+        MerchantContainer.class,
+        CampfireBlockEntity.class
+}, targets = "net.minecraft.world.level.block.entity.LecternBlockEntity$1", priority = 999)
 public abstract class TraitMixin_InventoryBridge_Inventory implements InventoryAdapter, InventoryBridge {
 
     @Nullable private SlotLensProvider impl$provider;

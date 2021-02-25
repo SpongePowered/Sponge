@@ -27,7 +27,7 @@ package org.spongepowered.common.inventory.query;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.query.Query;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.EmptyInventoryImpl;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;

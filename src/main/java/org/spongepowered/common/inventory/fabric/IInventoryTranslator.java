@@ -25,54 +25,54 @@
 package org.spongepowered.common.inventory.fabric;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 
 import java.util.Collection;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
 
 /**
- * Provides {@link Fabric} access to an {@link IInventory}
+ * Provides {@link Fabric} access to an {@link Container}
  */
-class IInventoryTranslator implements InventoryTranslator<IInventory> {
+class IInventoryTranslator implements InventoryTranslator<Container> {
     @Override
-    public Collection<InventoryBridge> allInventories(IInventory inventory) {
+    public Collection<InventoryBridge> allInventories(Container inventory) {
         return ImmutableSet.of((InventoryBridge) inventory);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public InventoryBridge get(IInventory inventory, int index) {
+    public InventoryBridge get(Container inventory, int index) {
         return (InventoryBridge) inventory;
     }
 
     @Override
-    public ItemStack getStack(IInventory inventory, int index) {
-        return inventory.getStackInSlot(index);
+    public ItemStack getStack(Container inventory, int index) {
+        return inventory.getItem(index);
     }
 
     @Override
-    public void setStack(IInventory inventory, int index, ItemStack stack) {
-        inventory.setInventorySlotContents(index, stack);
+    public void setStack(Container inventory, int index, ItemStack stack) {
+        inventory.setItem(index, stack);
     }
 
     @Override
-    public int getMaxStackSize(IInventory inventory) {
-        return inventory.getInventoryStackLimit();
+    public int getMaxStackSize(Container inventory) {
+        return inventory.getMaxStackSize();
     }
 
     @Override
-    public int getSize(IInventory inventory) {
-        return inventory.getSizeInventory();
+    public int getSize(Container inventory) {
+        return inventory.getContainerSize();
     }
 
     @Override
-    public void clear(IInventory inventory) {
-        inventory.clear();
+    public void clear(Container inventory) {
+        inventory.clearContent();
     }
 
     @Override
-    public void markDirty(IInventory inventory) {
-        inventory.markDirty();
+    public void markDirty(Container inventory) {
+        inventory.setChanged();
     }
 }

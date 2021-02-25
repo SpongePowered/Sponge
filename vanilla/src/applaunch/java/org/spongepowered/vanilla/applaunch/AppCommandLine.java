@@ -42,9 +42,9 @@ import java.util.jar.Manifest;
 public final class AppCommandLine {
 
     private static final OptionParser PARSER = new OptionParser();
-    private static final ArgumentAcceptingOptionSpec<String> LAUNCH_TARGET_ARG = PARSER.accepts("launchTarget", "Launch Target")
+    private static final ArgumentAcceptingOptionSpec<String> LAUNCH_TARGET_ARG = AppCommandLine.PARSER.accepts("launchTarget", "Launch Target")
             .withRequiredArg();
-    private static final ArgumentAcceptingOptionSpec<Path> GAME_DIRECTORY_ARG = PARSER.accepts("gameDir", "Alternative game directory")
+    private static final ArgumentAcceptingOptionSpec<Path> GAME_DIRECTORY_ARG = AppCommandLine.PARSER.accepts("gameDir", "Alternative game directory")
             .withRequiredArg().withValuesConvertedBy(new PathConverter(PathProperties.DIRECTORY_EXISTING)).defaultsTo(Paths.get("."));
 
     public static String[] RAW_ARGS;

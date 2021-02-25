@@ -33,19 +33,15 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
 import java.util.List;
 import java.util.Optional;
 
-public final class SpongeNoneValueParameter extends CatalogedArgumentParser<Void> {
+public final class SpongeNoneValueParameter extends ResourceKeyedArgumentValueParser<Void> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("none");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeNoneValueParameter.RESOURCE_KEY;
+    public SpongeNoneValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

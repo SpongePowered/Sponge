@@ -32,14 +32,14 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShape;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.Optional;
 
-public class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<FireworkEffect> implements DataBuilder<FireworkEffect> {
+public final class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<FireworkEffect> implements DataBuilder<FireworkEffect> {
 
     private final static int SUPPORTED_VERSION = 1;
 
@@ -51,8 +51,8 @@ public class SpongeFireworkEffectDataBuilder extends AbstractDataBuilder<Firewor
     protected Optional<FireworkEffect> buildContent(DataView container) throws InvalidDataException {
         if (container.contains(Constants.Item.Fireworks.FIREWORK_SHAPE, Constants.Item.Fireworks.FIREWORK_COLORS, Constants.Item.Fireworks.FIREWORK_FADE_COLORS,
                 Constants.Item.Fireworks.FIREWORK_FLICKERS, Constants.Item.Fireworks.FIREWORK_TRAILS)) {
-            final ResourceKey key = container.getKey(Constants.Item.Fireworks.FIREWORK_SHAPE).get();
-            final Optional<FireworkShape> shapeOptional = Sponge.getRegistry().getCatalogRegistry().get(FireworkShape.class, key);
+            final ResourceKey key = container.getResourceKey(Constants.Item.Fireworks.FIREWORK_SHAPE).get();
+            final Optional<FireworkShape> shapeOptional = Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE).findValue(key);
             if (!shapeOptional.isPresent()) {
                 throw new InvalidDataException("Could not find the FireworkShape for the provided id: " + key);
             }

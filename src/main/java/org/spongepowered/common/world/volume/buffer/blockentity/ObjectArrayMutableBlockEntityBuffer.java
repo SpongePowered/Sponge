@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.world.volume.buffer.blockentity;
 
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
@@ -39,6 +37,7 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
+import net.minecraft.core.BlockPos;
 
 public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEntityBuffer<ObjectArrayMutableBlockEntityBuffer> {
 
@@ -66,8 +65,7 @@ public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEnt
 
     @Override
     public VolumeStream<ObjectArrayMutableBlockEntityBuffer, BlockEntity> getBlockEntityStream(final Vector3i min, final Vector3i max,
-        final StreamOptions options
-    ) {
+            final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(min, max, this.getBlockMin(), this.getBlockMax(), options);
 
         final Stream<VolumeElement<ObjectArrayMutableBlockEntityBuffer, BlockEntity>> blockEntityStream = this.blockEntities.stream()
@@ -88,8 +86,7 @@ public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEnt
         }).findFirst();
     }
 
-    @Nullable
-    public TileEntity getTileEntity(final BlockPos blockPos) {
-        return (TileEntity) this.getBlockEntity(blockPos.getX(), blockPos.getY(), blockPos.getZ()).orElse(null);
+    public net.minecraft.world.level.block.entity.@Nullable BlockEntity getTileEntity(final BlockPos blockPos) {
+        return (net.minecraft.world.level.block.entity.BlockEntity) this.getBlockEntity(blockPos.getX(), blockPos.getY(), blockPos.getZ()).orElse(null);
     }
 }

@@ -24,29 +24,28 @@
  */
 package org.spongepowered.common.mixin.tracker;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.passive.TameableEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.TamableAnimal;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
-import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.util.Constants;
 
 import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.UUID;
 
-@Mixin({Entity.class, TileEntity.class})
+@Mixin({Entity.class, BlockEntity.class})
 public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridge {
 
     @Nullable private UUID tracker$creator;
@@ -66,8 +65,8 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
 
     @Override
     public void tracked$setCreatorReference(@Nullable final User creator) {
-        this.tracker$creator = creator == null ? null : creator.getUniqueId();
         this.tracker$creatorUser = new WeakReference<>(creator);
+        this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, creator == null ? null : creator.getUniqueId());
     }
 
     @Override
@@ -86,7 +85,7 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
     @Override
     public void tracked$setNotifier(@Nullable final User notifier) {
         this.tracker$notifierUser = new WeakReference<>(notifier);
-        this.tracker$notifier = notifier == null ? null : notifier.getUniqueId();
+        this.tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, notifier == null ? null : notifier.getUniqueId());
     }
 
     @Override
@@ -137,26 +136,19 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
     public void tracked$setTrackedUUID(final PlayerTracker.Type type, @Nullable final UUID uuid) {
         if (PlayerTracker.Type.CREATOR == type) {
             this.tracker$creator = uuid;
+            if (uuid == null) {
+                ((SpongeDataHolderBridge) this).bridge$remove(Keys.CREATOR);
+            } else {
+                ((SpongeDataHolderBridge) this).bridge$offer(Keys.CREATOR, uuid);
+            }
         } else if (PlayerTracker.Type.NOTIFIER == type) {
             this.tracker$notifier = uuid;
+            if (uuid == null) {
+                ((SpongeDataHolderBridge) this).bridge$remove(Keys.NOTIFIER);
+            } else {
+                ((SpongeDataHolderBridge) this).bridge$offer(Keys.NOTIFIER, uuid);
+            }
         }
-//        if (((DataCompoundHolder) this).data$hasSpongeCompound()) {
-//            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
-//            if (uuid == null) {
-//                if (spongeData.contains(type.compoundKey)) {
-//                    spongeData.remove(type.compoundKey);
-//                }
-//                return;
-//            }
-//            if (!spongeData.contains(type.compoundKey)) {
-//                final CompoundNBT sourceNbt = new CompoundNBT();
-//                sourceNbt.putUniqueId(Constants.UUID, uuid);
-//                spongeData.put(type.compoundKey, sourceNbt);
-//            } else {
-//                final CompoundNBT compoundTag = spongeData.getCompound(type.compoundKey);
-//                compoundTag.putUniqueId(Constants.UUID, uuid);
-//            }
-//        }
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -165,33 +157,16 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
         if (this.tracker$creator != null && PlayerTracker.Type.CREATOR == type) {
             return this.tracker$creator;
         }
-        if ((Object)this instanceof TameableEntity) {
-            final TameableEntity ownable = (TameableEntity) (Object) this;
+        if ((Object)this instanceof TamableAnimal) {
+            final TamableAnimal ownable = (TamableAnimal) (Object) this;
             final Entity owner = ownable.getOwner();
-            if (owner instanceof PlayerEntity) {
-                this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, owner.getUniqueID());
-                return owner.getUniqueID();
+            if (owner instanceof Player) {
+                this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, owner.getUUID());
+                return owner.getUUID();
             }
         } else if (this.tracker$notifier != null && PlayerTracker.Type.NOTIFIER == type) {
             return this.tracker$notifier;
         }
-        final CompoundNBT compound = ((DataCompoundHolder) this).data$getSpongeData();
-        if (!compound.contains(type.compoundKey)) {
-            return null;
-        }
-        final CompoundNBT creatorNbt = compound.getCompound(type.compoundKey);
-
-
-        if (!creatorNbt.contains(Constants.UUID_MOST) && !creatorNbt.contains(Constants.UUID_LEAST)) {
-            return null;
-        }
-
-        final UUID uniqueId = creatorNbt.getUniqueId(Constants.UUID);
-        if (PlayerTracker.Type.CREATOR == type) {
-            this.tracker$creator = uniqueId;
-        } else if (PlayerTracker.Type.NOTIFIER == type) {
-            this.tracker$notifier = uniqueId;
-        }
-        return uniqueId;
+        return null;
     }
 }

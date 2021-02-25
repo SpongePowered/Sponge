@@ -24,13 +24,7 @@
  */
 package org.spongepowered.common.event.cause.entity.damage;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeDamageModifierType extends SpongeCatalogType implements DamageModifierType {
-
-    public SpongeDamageModifierType(final ResourceKey key) {
-        super(key);
-    }
+public final class SpongeDamageModifierType implements DamageModifierType {
 }

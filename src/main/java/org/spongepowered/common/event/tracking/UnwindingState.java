@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.event.tracking;
 
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 
-@SuppressWarnings("rawtypes")
 public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> {
 
     public static UnwindingState getInstance() {
@@ -90,27 +90,24 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     @SuppressWarnings("unchecked")
     @Override
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final UnwindingPhaseContext context) {
-        final IPhaseState<?> phaseState = context.getUnwindingState();
-        final PhaseContext<?> unwinding = context.getUnwindingContext();
-        ((IPhaseState) phaseState).appendContextPreExplosion(explosionContext, unwinding);
+        final PhaseContext<@NonNull ?> unwinding = context.getUnwindingContext();
+        unwinding.appendContextPreExplosion(explosionContext);
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void associateNeighborStateNotifier(final UnwindingPhaseContext context, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-                                               final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
-        final IPhaseState<?> unwindingState = context.getUnwindingState();
-        final PhaseContext<?> unwindingContext = context.getUnwindingContext();
-        ((IPhaseState) unwindingState).associateNeighborStateNotifier(unwindingContext, sourcePos, block, notifyPos, minecraftWorld, notifier);
+                                               final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
+        final PhaseContext<@NonNull ?> unwindingContext = context.getUnwindingContext();
+        unwindingContext.associateNeighborStateNotifier(sourcePos, block, notifyPos, minecraftWorld, notifier);
     }
 
-    @SuppressWarnings({"unchecked", "try"})
+    @SuppressWarnings({"try"})
     @Override
     public void unwind(final UnwindingPhaseContext context) {
-        final IPhaseState<?> unwindingState = context.getUnwindingState();
-        final PhaseContext<?> unwindingContext = context.getUnwindingContext();
+        final PhaseContext<@NonNull ?> unwindingContext = context.getUnwindingContext();
         try {
-
+            // TODO - figure out what goes here.
+//            TrackingUtil.processBlockCaptures(unwindingContext);
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }

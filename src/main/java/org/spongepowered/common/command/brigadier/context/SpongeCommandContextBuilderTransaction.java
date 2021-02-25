@@ -30,16 +30,17 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.tree.CommandNode;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilderTransaction.ArgumentCapture;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
+import net.minecraft.commands.CommandSourceStack;
 
 public final class SpongeCommandContextBuilderTransaction implements CommandContext.Builder.Transaction {
 
@@ -47,7 +48,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
 
     public static SpongeCommandContextBuilderTransaction getTransactionFromPool(final SpongeCommandContextBuilder builder) {
         SpongeCommandContextBuilderTransaction chosenTransaction = null;
-        for (final SpongeCommandContextBuilderTransaction transaction : TRANSACTION_POOL) {
+        for (final SpongeCommandContextBuilderTransaction transaction : SpongeCommandContextBuilderTransaction.TRANSACTION_POOL) {
             // isActive does GC checks.
             if (!transaction.isActive() && chosenTransaction == null) {
                 chosenTransaction = transaction.activateTransaction(builder);
@@ -59,7 +60,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
         }
 
         final SpongeCommandContextBuilderTransaction transaction = new SpongeCommandContextBuilderTransaction().activateTransaction(builder);
-        TRANSACTION_POOL.add(transaction);
+        SpongeCommandContextBuilderTransaction.TRANSACTION_POOL.add(transaction);
         return transaction;
     }
 
@@ -68,12 +69,12 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
     private SpongeCommandContextBuilder copyBuilder;
 
     private final Object2IntOpenHashMap<String> flagCapture = new Object2IntOpenHashMap<>();
-    private final LinkedList<Tuple<String, ParsedArgument<CommandSource, ?>>> withArgumentCapture = new LinkedList<>();
-    private final LinkedList<CommandSource> withSourceCapture = new LinkedList<>();
-    private final LinkedList<Tuple<CommandNode<CommandSource>, StringRange>> withNodeCapture = new LinkedList<>();
+    private final LinkedList<ArgumentCapture> withArgumentCapture = new LinkedList<>();
+    private final LinkedList<CommandSourceStack> withSourceCapture = new LinkedList<>();
+    private final LinkedList<Tuple<CommandNode<CommandSourceStack>, StringRange>> withNodeCapture = new LinkedList<>();
     private final LinkedList<Tuple<Parameter.@NonNull Key<?>, ?>> putEntryCapture = new LinkedList<>();
-    private final LinkedList<CommandContextBuilder<CommandSource>> withChildCapture = new LinkedList<>();
-    private final LinkedList<Command<CommandSource>> withCommandCapture = new LinkedList<>();
+    private final LinkedList<CommandContextBuilder<CommandSourceStack>> withChildCapture = new LinkedList<>();
+    private final LinkedList<Command<CommandSourceStack>> withCommandCapture = new LinkedList<>();
     private org.spongepowered.api.command.Command.Parameterized currentTargetCommandCapture = null;
 
     private boolean isActive = false;
@@ -103,35 +104,35 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
         throw new IllegalStateException("Transaction is not active.");
     }
 
-    public SpongeCommandContextBuilder withArgument(final String name, final ParsedArgument<CommandSource, ?> argument) {
+    public SpongeCommandContextBuilder withArgument(final String name, final ParsedArgument<CommandSourceStack, ?> argument, final boolean addToSpongeMap) {
         final SpongeCommandContextBuilder builder = this.getReference();
-        this.withArgumentCapture.add(Tuple.of(name, argument));
-        this.copyBuilder.withArgument(name, argument);
+        this.withArgumentCapture.add(new ArgumentCapture(name, argument, addToSpongeMap));
+        this.copyBuilder.withArgumentInternal(name, argument, addToSpongeMap);
         return builder;
     }
 
-    public SpongeCommandContextBuilder withSource(final CommandSource source) {
+    public SpongeCommandContextBuilder withSource(final CommandSourceStack source) {
         final SpongeCommandContextBuilder builder = this.getReference();
         this.withSourceCapture.add(source);
         this.copyBuilder.withSource(source);
         return builder;
     }
 
-    public SpongeCommandContextBuilder withNode(final CommandNode<CommandSource> node, final StringRange range) {
+    public SpongeCommandContextBuilder withNode(final CommandNode<CommandSourceStack> node, final StringRange range) {
         final SpongeCommandContextBuilder builder = this.getReference();
         this.withNodeCapture.add(Tuple.of(node, range));
         this.copyBuilder.withNode(node, range);
         return builder;
     }
 
-    public SpongeCommandContextBuilder withChild(final CommandContextBuilder<CommandSource> child) {
+    public SpongeCommandContextBuilder withChild(final CommandContextBuilder<CommandSourceStack> child) {
         final SpongeCommandContextBuilder builder = this.getReference();
         this.withChildCapture.add(child);
         this.copyBuilder.withChild(child);
         return builder;
     }
 
-    public CommandContextBuilder<CommandSource> withCommand(final Command<CommandSource> command) {
+    public CommandContextBuilder<CommandSourceStack> withCommand(final Command<CommandSourceStack> command) {
         final SpongeCommandContextBuilder builder = this.getReference();
         this.withCommandCapture.add(command);
         this.copyBuilder.withCommand(command);
@@ -177,7 +178,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
     public void commit() {
         final SpongeCommandContextBuilder builderRef = this.builder.get();
         if (builderRef != null) {
-            this.withArgumentCapture.forEach(x -> builderRef.withArgument(x.getFirst(), x.getSecond()));
+            this.withArgumentCapture.forEach(x -> builderRef.withArgumentInternal(x.name, x.parsedArgument, x.addToSponge));
             this.withSourceCapture.forEach(builderRef::withSource);
             this.withNodeCapture.forEach(x -> builderRef.withNode(x.getFirst(), x.getSecond()));
             this.withChildCapture.forEach(builderRef::withChild);
@@ -204,6 +205,20 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
         this.currentTargetCommandCapture = null;
         this.copyBuilder = null;
         this.builder = null;
+    }
+
+    static final class ArgumentCapture {
+
+        public final String name;
+        public final ParsedArgument<CommandSourceStack, ?> parsedArgument;
+        public final boolean addToSponge;
+
+        ArgumentCapture(final String name, final ParsedArgument<CommandSourceStack, ?> parsedArgument, final boolean addToSponge) {
+            this.name = name;
+            this.parsedArgument = parsedArgument;
+            this.addToSponge = addToSponge;
+        }
+
     }
 
 }

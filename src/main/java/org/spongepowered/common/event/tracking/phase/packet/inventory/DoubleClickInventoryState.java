@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -34,13 +32,15 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.bridge.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Optional;
 
@@ -58,7 +58,7 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer,
+    public ClickContainerEvent createInventoryEvent(final ServerPlayer playerMP, final Container openContainer,
         final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {
@@ -68,10 +68,10 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
     }
 
     @Override
-    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet,
+    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet,
         final InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
-        ((TrackedContainerBridge) playerMP.openContainer).bridge$setFirePreview(false);
+        ((TrackedContainerBridge) playerMP.containerMenu).bridge$setFirePreview(false);
     }
 
     @Override

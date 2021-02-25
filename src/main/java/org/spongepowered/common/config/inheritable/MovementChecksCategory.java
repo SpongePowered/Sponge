@@ -24,35 +24,29 @@
  */
 package org.spongepowered.common.config.inheritable;
 
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
-public class MovementChecksCategory {
-
-    @Setting("player-moved-too-quickly")
-    @Comment("Controls whether the 'player moved too quickly!' check will be enforced")
-    private boolean playerMovedTooQuickly = true;
-
-    @Setting("player-vehicle-moved-too-quickly")
-    @Comment("Controls whether the 'vehicle of player moved too quickly!' check will be enforced")
-    private boolean playerVehicleMovedTooQuickly = true;
+public final class MovementChecksCategory {
 
     @Setting("moved-wrongly")
     @Comment("Controls whether the 'player/entity moved wrongly!' check will be enforced")
-    private boolean movedWrongly = true;
+    public boolean movedWrongly = true;
 
-    public boolean playerMovedTooQuickly() {
-        return this.playerMovedTooQuickly;
+    @Setting
+    public final PlayerSubCategory player = new PlayerSubCategory();
+
+    @ConfigSerializable
+    public static final class PlayerSubCategory {
+
+        @Setting("moved-too-quickly")
+        @Comment("Controls whether the 'player moved too quickly!' check will be enforced")
+        public boolean movedTooQuickly = true;
+
+        @Setting("vehicle-moved-too-quickly")
+        @Comment("Controls whether the 'vehicle of player moved too quickly!' check will be enforced")
+        public boolean vehicleMovedTooQuickly = true;
     }
-
-    public boolean playerVehicleMovedTooQuickly() {
-        return this.playerVehicleMovedTooQuickly;
-    }
-
-    public boolean movedWrongly() {
-        return this.movedWrongly;
-    }
-
 }

@@ -38,8 +38,9 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.ServicesCategory;
 import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
+import org.spongepowered.common.event.lifecycle.AbstractProvideServiceEventImpl;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.service.SpongeServiceProvider.Registration;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -110,7 +111,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
         }
 
         final ServicesCategory.ServicePluginSubCategory servicePluginSubCategory =
-                SpongeConfigs.getCommon().get().getServicesCategory().getServicePlugin();
+                SpongeConfigs.getCommon().get().services.plugins;
 
         // We loop over all available services and try to discover each one.
         // This does NOT support third party service interfaces, only impls.
@@ -208,12 +209,12 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
         return registration;
     }
 
-    protected abstract <T> ProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service);
+    protected abstract <T> AbstractProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service);
 
     @Nullable
     private <T> Registration<T> getSpecificRegistration(final PluginContainer container, final Service<T> service) {
         // This is the actual query - a generic event.
-        final ProvideServiceEventImpl<T> event = this.createEvent(container, service);
+        final AbstractProvideServiceEventImpl<T> event = this.createEvent(container, service);
         try {
             ((SpongeEventManager) this.getGame().getEventManager()).post(event, container);
         } catch (final Exception ex) {

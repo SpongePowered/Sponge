@@ -43,7 +43,7 @@ import java.util.stream.Stream;
 public final class SpongeUserManager implements UserManager {
 
     public static final UUID FAKEPLAYER_UUID = UUID.fromString("41C82C87-7AFB-4024-BA57-13D2C99CAE77");
-    public static final GameProfile FAKEPLAYER_PROFILE = new SpongeGameProfile(FAKEPLAYER_UUID, null);
+    public static final GameProfile FAKEPLAYER_PROFILE = new SpongeGameProfile(SpongeUserManager.FAKEPLAYER_UUID, null);
 
     private final ServerUserProvider serverUserProvider;
 
@@ -111,7 +111,7 @@ public final class SpongeUserManager implements UserManager {
         if (profile.getUniqueId().equals(SpongeGameProfile.EMPTY_UUID)) {
             final String name = profile.getName().orElse(null);
             // Use Forge's FakePlayer UUID
-            return new SpongeGameProfile(FAKEPLAYER_UUID, name);
+            return new SpongeGameProfile(SpongeUserManager.FAKEPLAYER_UUID, name);
         }
         return profile;
     }

@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.fish.PufferfishEntity;
+import net.minecraft.world.entity.animal.Pufferfish;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.passive.fish.PufferfishEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.PufferfishAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class PufferfishData {
@@ -37,9 +37,9 @@ public final class PufferfishData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PufferfishEntity.class)
+                .asMutable(Pufferfish.class)
                     .create(Keys.SCALE)
-                        .get(h -> (double) PufferfishEntityAccessor.accessor$getPuffSize(h.getPuffState()));
+                        .get(h -> (double) PufferfishAccessor.invoker$getScale(h.getPuffState()));
     }
     // @formatter:on
 }

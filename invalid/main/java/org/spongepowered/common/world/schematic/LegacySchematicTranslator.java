@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.world.schematic;
 
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
-import com.google.common.reflect.TypeToken;
 import com.mojang.datafixers.DataFixer;
-import net.minecraft.block.Block;
+import io.leangen.geantyref.TypeToken;
 import net.minecraft.nbt.CompoundNBT;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.datafix.FixTypes;
+import net.minecraft.util.registry.Registry;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -46,21 +45,24 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.extent.worker.procedure.BlockVolumeVisitor;
 import org.spongepowered.api.world.schematic.Palette;
+import org.spongepowered.api.world.schematic.PaletteTypes;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeImplHooks;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
-import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.registry.type.block.TileEntityTypeRegistryModule;
 import org.spongepowered.common.registry.type.entity.EntityTypeRegistryModule;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.gen.ArrayMutableBlockBuffer;
+import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -74,32 +76,23 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
     private static DataFixer VANILLA_FIXER;
 
     public static LegacySchematicTranslator get() {
-        return INSTANCE;
+        return LegacySchematicTranslator.INSTANCE;
     }
 
     private LegacySchematicTranslator() {
 
     }
 
-    @Override
-    public String getId() {
-        return "sponge:legacy_schematic";
-    }
-
-    @Override
-    public String getName() {
-        return "Legacy Schematic translator";
-    }
 
     @Override
     public TypeToken<Schematic> getToken() {
-        return TYPE_TOKEN;
+        return LegacySchematicTranslator.TYPE_TOKEN;
     }
 
     @Override
     public Schematic translate(DataView view) throws InvalidDataException {
-        if (VANILLA_FIXER == null) {
-            VANILLA_FIXER = ((MinecraftServerAccessor) SpongeCommon.getServer()).accessor$getDataFixer();
+        if (LegacySchematicTranslator.VANILLA_FIXER == null) {
+            LegacySchematicTranslator.VANILLA_FIXER = ((MinecraftServerAccessor) SpongeCommon.getServer()).accessor$fixerUpper();
         }
         // We default to sponge as the assumption should be that if this tag
         // (which is not in the sponge schematic specification) is not present
@@ -115,14 +108,16 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         int width = view.getShort(Constants.Sponge.Schematic.WIDTH).get();
         int height = view.getShort(Constants.Sponge.Schematic.HEIGHT).get();
         int length = view.getShort(Constants.Sponge.Schematic.LENGTH).get();
-        if (width > MAX_SIZE || height > MAX_SIZE || length > MAX_SIZE) {
+        if (width > LegacySchematicTranslator.MAX_SIZE || height > LegacySchematicTranslator.MAX_SIZE || length > LegacySchematicTranslator.MAX_SIZE) {
             throw new InvalidDataException(String.format(
-                    "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
+                    "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length,
+                LegacySchematicTranslator.MAX_SIZE
+            ));
         }
         int offsetX = view.getInt(Constants.Sponge.Schematic.Legacy.WE_OFFSET_X).orElse(0);
         int offsetY = view.getInt(Constants.Sponge.Schematic.Legacy.WE_OFFSET_Y).orElse(0);
         int offsetZ = view.getInt(Constants.Sponge.Schematic.Legacy.WE_OFFSET_Z).orElse(0);
-        Palette<BlockState> palette = GlobalPalette.getBlockPalette();
+        Palette<BlockState, BlockType> palette = PaletteTypes.BLOCK_STATE_PALETTE.get().create(Sponge.getGame().registries(), RegistryTypes.BLOCK_TYPE);
         final SpongeSchematicBuilder builder = new SpongeSchematicBuilder();
         ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(new Vector3i(-offsetX, -offsetY, -offsetZ),
                 new Vector3i(width, height, length));
@@ -139,24 +134,24 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                     if (add_block != null) {
                         palette_id |= add_block[index] << 12;
                     }
-                    Optional<BlockState> blockState = palette.get(palette_id);
+                    Optional<BlockState> blockState = palette.get(palette_id, Sponge.getGame().registries());
                     if (!blockState.isPresent()) {
                         // At the very least get the default state id
-                        blockState = Optional.of(((BlockType) Block.REGISTRY.getObjectById(default_state_id)).getDefaultState());
+                        blockState = Optional.of(((BlockType) Registry.BLOCK.byId(default_state_id)).getDefaultState());
                     }
-                    BlockState block = blockState.orElseGet(BlockTypes.COBBLESTONE::getDefaultState);
+                    BlockState block = blockState.orElseGet(() -> BlockTypes.COBBLESTONE.get().getDefaultState());
                     buffer.setBlock(x - offsetX, y - offsetY, z - offsetZ, block);
                 }
             }
         }
-        Map<Vector3i, BlockEntityArchetype> tiles = Maps.newHashMap();
+        Map<Vector3i, BlockEntityArchetype> tiles = new HashMap<>();
         List<DataView> tiledata = view.getViewList(Constants.Sponge.Schematic.Legacy.TILE_ENTITIES).orElse(null);
         if (tiledata != null) {
             for (DataView tile : tiledata) {
                 int x = tile.getInt(Constants.Sponge.Schematic.Legacy.X_POS).get();
                 int y = tile.getInt(Constants.Sponge.Schematic.Legacy.Y_POS).get();
                 int z = tile.getInt(Constants.Sponge.Schematic.Legacy.Z_POS).get();
-                final String tileType = tile.getString(TILE_ID).get();
+                final String tileType = tile.getString(LegacySchematicTranslator.TILE_ID).get();
                 final ResourceLocation name = new ResourceLocation(tileType);
                 BlockEntityType type = TileEntityTypeRegistryModule.getInstance()
                         .getForClass(TileEntityAccessor.accessor$getRegistry().getOrDefault(name));
@@ -166,7 +161,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                 final DataView upgraded;
 
                 CompoundNBT tileNbt = NbtTranslator.getInstance().translate(tile);
-                tileNbt = VANILLA_FIXER.process(FixTypes.BLOCK_ENTITY, tileNbt, 0);
+                tileNbt = LegacySchematicTranslator.VANILLA_FIXER.process(FixTypes.BLOCK_ENTITY, tileNbt, 0);
                 upgraded = NbtTranslator.getInstance().translate(tileNbt);
 
                 if (type!= null && SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) state)) {
@@ -192,7 +187,7 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
                     final DataView upgraded;
 
                     CompoundNBT entityNbt = NbtTranslator.getInstance().translate(entity);
-                    entityNbt = VANILLA_FIXER.process(FixTypes.ENTITY, entityNbt, 0);
+                    entityNbt = LegacySchematicTranslator.VANILLA_FIXER.process(FixTypes.ENTITY, entityNbt, 0);
                     upgraded = NbtTranslator.getInstance().translate(entityNbt);
                     upgraded.set(Queries.POSITION, new Vector3i(x - offsetX, y - offsetY, z - offsetZ));
                     final EntityArchetype build = new SpongeEntityArchetypeBuilder().type(type).entityData(upgraded).build();
@@ -226,9 +221,11 @@ public class LegacySchematicTranslator implements DataTranslator<Schematic> {
         final int width = schematic.getBlockSize().getX();
         final int height = schematic.getBlockSize().getY();
         final int length = schematic.getBlockSize().getZ();
-        if (width > MAX_SIZE || height > MAX_SIZE || length > MAX_SIZE) {
+        if (width > LegacySchematicTranslator.MAX_SIZE || height > LegacySchematicTranslator.MAX_SIZE || length > LegacySchematicTranslator.MAX_SIZE) {
             throw new IllegalArgumentException(String.format(
-                    "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length, MAX_SIZE));
+                    "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width, height, length,
+                LegacySchematicTranslator.MAX_SIZE
+            ));
         }
         data.set(Constants.Sponge.Schematic.WIDTH, width);
         data.set(Constants.Sponge.Schematic.HEIGHT, height);

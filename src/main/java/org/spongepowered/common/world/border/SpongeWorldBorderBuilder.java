@@ -87,12 +87,12 @@ public class SpongeWorldBorderBuilder implements WorldBorder.Builder {
 
     @Override
     public WorldBorder build() throws IllegalStateException {
-        final net.minecraft.world.border.WorldBorder border = new net.minecraft.world.border.WorldBorder();
+        final net.minecraft.world.level.border.WorldBorder border = new net.minecraft.world.level.border.WorldBorder();
         border.setCenter(this.center.getX(), this.center.getZ());
         border.setDamagePerBlock(this.damageAmount);
-        border.setDamageBuffer(this.damageThreshold);
-        border.setTransition(this.diameter);
-        border.setWarningDistance((int) this.warningDistance);
+        border.setDamageSafeZone(this.damageThreshold);
+        border.setSize(this.diameter);
+        border.setWarningBlocks((int) this.warningDistance);
         border.setWarningTime((int) this.warningTime.getSeconds());
         return (WorldBorder) border;
     }

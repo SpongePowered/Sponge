@@ -25,38 +25,40 @@
 package org.spongepowered.common.applaunch.config.core;
 
 import com.google.common.collect.ImmutableSet;
+import io.leangen.geantyref.GenericTypeReflector;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.plugin.Blackboard;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
 
-import java.io.File;
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
+import java.util.function.Supplier;
 import java.util.stream.Stream;
 
 /**
  * Common utility methods for sponge configurations and necessary helpers for early init.
  */
 public final class SpongeConfigs {
-
 
     public static final Blackboard.Key<Boolean> IS_VANILLA_PLATFORM = Blackboard.Key.of("is_vanilla", Boolean.class);
 
@@ -75,13 +77,16 @@ public final class SpongeConfigs {
             .build();
 
     public static final ConfigurationOptions OPTIONS = ConfigurationOptions.defaults()
-            .header(HEADER)
+            .header(SpongeConfigs.HEADER)
             .serializers(collection -> collection.register(TokenHoldingString.SERIALIZER)
-                    .registerAnnotatedObjects(OBJECT_MAPPERS));
+                    .register(type -> {
+                        final Class<?> erasure = GenericTypeReflector.erase(type);
+                        return erasure.isAnnotationPresent(ConfigSerializable.class) || Config.class.isAssignableFrom(erasure);
+                    }, SpongeConfigs.OBJECT_MAPPERS.asTypeSerializer()));
 
     static final Logger LOGGER = LogManager.getLogger();
 
-    private static final Lock initLock = new ReentrantLock();
+    public static final Lock initLock = new ReentrantLock();
     private static @MonotonicNonNull PluginEnvironment environment;
     private static Path configDir;
 
@@ -103,7 +108,7 @@ public final class SpongeConfigs {
 
     public static Path getDirectory() {
         if (SpongeConfigs.configDir == null) {
-            SpongeConfigs.configDir = getPluginEnvironment().getBlackboard()
+            SpongeConfigs.configDir = SpongeConfigs.getPluginEnvironment().getBlackboard()
                     .get(PluginKeys.BASE_DIRECTORY)
                     .orElseThrow(() -> new IllegalStateException("No base directory was set"))
                     .resolve("config")
@@ -125,45 +130,45 @@ public final class SpongeConfigs {
                     // Load global config first so we can migrate over old settings
                     SpongeConfigs.splitFiles();
                     // Then load the actual configuration based on the new file
-                    SpongeConfigs.sponge = create(new CommonConfig(), CommonConfig.FILE_NAME);
+                    SpongeConfigs.sponge = SpongeConfigs.create(CommonConfig.class, CommonConfig::transformation, CommonConfig.FILE_NAME);
                 }
             } finally {
                 SpongeConfigs.initLock.unlock();
             }
         }
-        return sponge;
+        return SpongeConfigs.sponge;
     }
 
 
     // Config-internal
     // everything below here should (mostly) not be directly accessed
 
-    public static HoconConfigurationLoader createLoader(final Path path) {
+    public static HoconConfigurationLoader createLoader(final Path path) throws IOException {
         return SpongeConfigs.createLoader(path, SpongeConfigs.OPTIONS);
     }
 
-    public static HoconConfigurationLoader createLoader(final Path path, final ConfigurationOptions options) {
-        // use File for slightly better performance on directory creation
-        // Files.exists uses an exception for this :(
-        final File parentFile = path.getParent().toFile();
-        if (!parentFile.exists()) {
-            parentFile.mkdirs();
-        }
+    public static HoconConfigurationLoader createLoader(final Path path, final ConfigurationOptions options) throws IOException {
+        Files.createDirectories(path.getParent());
 
         return HoconConfigurationLoader.builder()
             .source(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
-            .sink(() -> Files.newBufferedWriter(path, StandardCharsets.UTF_8))
+            .sink(() -> Files.newBufferedWriter(path,
+                                                StandardCharsets.UTF_8,
+                                                StandardOpenOption.CREATE,
+                                                StandardOpenOption.TRUNCATE_EXISTING,
+                                                StandardOpenOption.WRITE,
+                                                StandardOpenOption.DSYNC))
             .defaultOptions(options)
             .build();
     }
 
-    public static <T extends Config> ConfigHandle<T> create(final T instance, final String fileName) {
-        final HoconConfigurationLoader loader = createLoader(SpongeConfigs.getDirectory().resolve(fileName));
+    public static <T extends Config> ConfigHandle<T> create(final Class<T> instance, final @Nullable Supplier<ConfigurationTransformation> versionModifier, final String fileName) {
         try {
-            final ConfigHandle<T> handle = new ConfigHandle<>(instance, loader);
+            final HoconConfigurationLoader loader = SpongeConfigs.createLoader(SpongeConfigs.getDirectory().resolve(fileName));
+            final ConfigHandle<T> handle = new ConfigHandle<>(instance, versionModifier, loader);
             handle.load();
             return handle;
-        } catch (final ConfigurateException ex) {
+        } catch (final IOException ex) {
             SpongeConfigs.LOGGER.error("Unable to load configuration {}. Sponge will operate in "
                             + "fallback mode, with default configuration options and will not write to the invalid file", fileName, ex);
             return new ConfigHandle<>(instance);
@@ -221,12 +226,13 @@ public final class SpongeConfigs {
             return;
         }
 
-        final ConfigurationTransformation xform = ConfigurationTransformation.chain(
-                new FileMovingConfigurationTransformation(MIGRATE_SPONGE_PATHS, SpongeConfigs.createLoader(commonFile), true),
-                new FileMovingConfigurationTransformation(MIGRATE_METRICS_PATHS, SpongeConfigs.createLoader(metricsFile), true));
-        final ConfigurationLoader<CommentedConfigurationNode> globalLoader = createLoader(oldGlobalFile);
 
         try {
+            final ConfigurationTransformation xform = ConfigurationTransformation.chain(
+                    new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_SPONGE_PATHS, SpongeConfigs.createLoader(commonFile), true),
+                    new FileMovingConfigurationTransformation(SpongeConfigs.MIGRATE_METRICS_PATHS, SpongeConfigs.createLoader(metricsFile), true));
+            final ConfigurationLoader<CommentedConfigurationNode> globalLoader = SpongeConfigs.createLoader(oldGlobalFile);
+
             Files.copy(oldGlobalFile, oldGlobalFile.resolveSibling(SpongeConfigs.GLOBAL_NAME + ".old-backup"));
             final CommentedConfigurationNode source = globalLoader.load();
             xform.apply(source);

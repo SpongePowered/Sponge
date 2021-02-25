@@ -25,24 +25,16 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameters;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.accessor.world.ExplosionAccessor;
+import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -52,13 +44,18 @@ import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTr
 
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, ExplosionContext> EXPLOSION_MODIFIER =
         super.getFrameModifier().andThen((frame, context) -> {
             final Explosion explosion = context.getExplosion();
-            final @Nullable LivingEntity placedBy = explosion.getExplosivePlacedBy();
+            final @Nullable LivingEntity placedBy = explosion.getSourceMob();
             if (placedBy != null) {
                 if (placedBy instanceof CreatorTrackedBridge) {
                     ((CreatorTrackedBridge) placedBy).tracked$getCreatorReference()
@@ -68,7 +65,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
                 }
                 frame.addContext(EventContextKeys.IGNITER, (Living) placedBy);
             }
-            final @Nullable Entity exploder = ((ExplosionAccessor) explosion).accessor$getExploder();
+            final @Nullable Entity exploder = ((ExplosionAccessor) explosion).accessor$source();
             if (exploder != null) {
                 frame.pushCause(exploder);
             }
@@ -97,41 +94,16 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     @Override
     public void populateLootContext(final ExplosionContext phaseContext, final LootContext.Builder lootBuilder) {
         final Explosion explosion = phaseContext.getExplosion();
-        lootBuilder.withNullableParameter(LootParameters.THIS_ENTITY, ((ExplosionAccessor) explosion).accessor$getExploder());
+        lootBuilder.withOptionalParameter(LootContextParams.THIS_ENTITY, ((ExplosionAccessor) explosion).accessor$source());
 
-        if (((ExplosionAccessor) explosion).accessor$getMode() == net.minecraft.world.Explosion.Mode.DESTROY) {
-            lootBuilder.withParameter(LootParameters.EXPLOSION_RADIUS, ((ExplosionAccessor) explosion).accessor$getSize());
+        if (((ExplosionAccessor) explosion).accessor$blockInteraction() == net.minecraft.world.level.Explosion.BlockInteraction.DESTROY) {
+            lootBuilder.withParameter(LootContextParams.EXPLOSION_RADIUS, ((ExplosionAccessor) explosion).accessor$radius());
         }
-
     }
 
     @Override
     public void unwind(final ExplosionContext context) {
         TrackingUtil.processBlockCaptures(context);
-//        context.getCapturedEntitySupplier()
-//            .acceptAndClearIfNotEmpty(entities -> {
-//                try (final CauseStackManager.StackFrame smaller = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-//                    smaller.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.TNT_IGNITE);
-//                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
-//                }
-//            });
-//        context.getBlockItemDropSupplier().acceptAndClearIfNotEmpty(drops -> drops.asMap()
-//            .forEach((pos, items) -> {
-//                if (ShouldFire.DROP_ITEM_EVENT_DESTRUCT) {
-//                    final List<Entity> itemEntities = items.stream().map(entity -> (Entity) entity).collect(Collectors.toList());
-//                    final DropItemEvent.Destruct event =
-//                        SpongeEventFactory.createDropItemEventDestruct(PhaseTracker.getCauseStackManager().getCurrentCause(), itemEntities);
-//                    SpongeCommon.postEvent(event);
-//                    if (!event.isCancelled()) {
-//                        EntityUtil.processEntitySpawnsFromEvent(context, event);
-//                    }
-//                } else {
-//                    items
-//                        .forEach(item -> EntityUtil.processEntitySpawn((Entity) item, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context)));
-//                }
-//            })
-//        );
-
     }
 
     @Override
@@ -144,16 +116,10 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
         if (parent instanceof ChangeBlock) {
             return SpongeEventFactory.createDropItemEventDestruct(currentCause,
                 collect.stream()
-                    .map(Tuple::getFirst)
+                    .map(t -> (org.spongepowered.api.entity.Entity) t.getFirst())
                     .collect(Collectors.toList()));
         }
         return super.createSpawnEvent(context, parent, collect, currentCause);
-    }
-
-    @Override
-    public ChangeBlockEvent.Post createChangeBlockPostEvent(final ExplosionContext context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
-        final Cause cause) {
-        return SpongeEventFactory.createExplosionEventPost(cause, context.getSpongeExplosion(), transactions);
     }
 
 }

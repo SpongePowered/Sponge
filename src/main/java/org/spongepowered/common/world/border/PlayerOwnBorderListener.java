@@ -24,63 +24,62 @@
  */
 package org.spongepowered.common.world.border;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.server.SWorldBorderPacket;
-import net.minecraft.world.border.IBorderListener;
-import net.minecraft.world.border.WorldBorder;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
+import net.minecraft.world.level.border.BorderChangeListener;
+import net.minecraft.world.level.border.WorldBorder;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.common.accessor.world.border.WorldBorderAccessor;
+import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
 
-public class PlayerOwnBorderListener implements IBorderListener {
+public final class PlayerOwnBorderListener implements BorderChangeListener {
 
-    private ServerPlayerEntity player;
+    private final net.minecraft.server.level.ServerPlayer player;
 
-    public PlayerOwnBorderListener(ServerPlayerEntity player) {
+    public PlayerOwnBorderListener(final net.minecraft.server.level.ServerPlayer player) {
         this.player = player;
     }
 
     @Override
-    public void onSizeChanged(WorldBorder border, double newSize) {
-        this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_SIZE));
+    public void onBorderSizeSet(final WorldBorder border, final double newSize) {
+        this.sendBorderPacket(new ClientboundSetBorderPacket(border, ClientboundSetBorderPacket.Type.SET_SIZE));
     }
 
     @Override
-    public void onTransitionStarted(WorldBorder border, double oldSize, double newSize, long time) {
-        this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.LERP_SIZE));
+    public void onBorderSizeLerping(final WorldBorder border, final double oldSize, final double newSize, final long time) {
+        this.sendBorderPacket(new ClientboundSetBorderPacket(border, ClientboundSetBorderPacket.Type.LERP_SIZE));
     }
 
     @Override
-    public void onCenterChanged(WorldBorder border, double x, double z) {
-        this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_CENTER));
+    public void onBorderCenterSet(final WorldBorder border, final double x, final double z) {
+        this.sendBorderPacket(new ClientboundSetBorderPacket(border, ClientboundSetBorderPacket.Type.SET_CENTER));
     }
 
     @Override
-    public void onWarningTimeChanged(WorldBorder border, int newTime) {
-        this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_TIME));
+    public void onBorderSetWarningTime(final WorldBorder border, final int newTime) {
+        this.sendBorderPacket(new ClientboundSetBorderPacket(border, ClientboundSetBorderPacket.Type.SET_WARNING_TIME));
     }
 
     @Override
-    public void onWarningDistanceChanged(WorldBorder border, int newDistance) {
-        this.sendBorderPacket(new SWorldBorderPacket(border, SWorldBorderPacket.Action.SET_WARNING_BLOCKS));
+    public void onBorderSetWarningBlocks(final WorldBorder border, final int newDistance) {
+        this.sendBorderPacket(new ClientboundSetBorderPacket(border, ClientboundSetBorderPacket.Type.SET_WARNING_BLOCKS));
     }
 
     @Override
-    public void onDamageAmountChanged(WorldBorder border, double newAmount) {
+    public void onBorderSetDamagePerBlock(final WorldBorder border, final double newAmount) {
     }
 
     @Override
-    public void onDamageBufferChanged(WorldBorder border, double newSize) {
+    public void onBorderSetDamageSafeZOne(final WorldBorder border, final double newSize) {
     }
     
     /**
      * This method is for cleaning up the player reference once they disconnect.
      */
     public void onPlayerDisconnect() {
-        ((ServerPlayer) this.player).getWorldBorder().ifPresent(border -> ((WorldBorderAccessor) border).accessor$getListeners().remove(this));
+        ((ServerPlayer) this.player).getWorldBorder().ifPresent(border -> ((WorldBorderAccessor) border).accessor$listeners().remove(this));
     }
 
-    private void sendBorderPacket(IPacket<?> packet) {
-        this.player.connection.sendPacket(packet);
+    private void sendBorderPacket(final Packet<?> packet) {
+        this.player.connection.send(packet);
     }
 }

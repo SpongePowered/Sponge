@@ -30,7 +30,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
 @ConfigSerializable
-public class OptimizationCategory {
+public final class OptimizationCategory {
 
     @Setting("drops-pre-merge")
     @Comment("If 'true', block item drops are pre-processed to avoid \n"
@@ -39,24 +39,16 @@ public class OptimizationCategory {
               + "and when not to, however, in certain cases, some mods rely on items not being \n"
               + "pre-merged and actually spawned, in which case, the items will flow right through \n"
               + "without being merged.")
-    private boolean preItemDropMerge = false;
+    public boolean dropsPreMerge;
 
     @Setting("cache-tameable-owners")
     @Comment("Caches tameable entities owners to avoid constant lookups against data watchers. If mods \n"
              + "cause issues, disable this.")
-    private boolean cacheTameableOwners = true;
-
-    @Setting("structure-saving")
-    @Comment("Handles structures that are saved to disk. Certain structures can take up large amounts \n"
-             + "of disk space for very large maps and the data for these structures is only needed while the \n"
-             + "world around them is generating. Disabling saving of these structures can save disk space and \n"
-             + "time during saves if your world is already fully generated. \n"
-             + "Warning: disabling structure saving will break the vanilla locate command.")
-    private StructureSaveCategory structureSaving = new StructureSaveCategory();
+    public boolean cacheTameableOwners = true;
 
     @Setting("eigen-redstone")
     @Comment("Uses theosib's redstone algorithms to completely overhaul the way redstone works.")
-    private EigenRedstoneCategory eigenRedstone = new EigenRedstoneCategory();
+    public final EigenRedstoneCategory eigenRedstone = new EigenRedstoneCategory();
 
     @Setting("faster-thread-checks")
     @Comment("If 'true', allows for Sponge to make better assumptions on single threaded\n"
@@ -64,16 +56,16 @@ public class OptimizationCategory {
                + "This is default to true due to Sponge being able to precisely inject when\n"
                + "the server thread is available. This should make an already fast operation\n"
                + "much faster for better thread checks to ensure stability of sponge's systems.")
-    private boolean fasterThreadChecks = true;
+    public boolean fasterThreadChecks = true;
 
-    @Setting("map-optimization")
+    @Setting("optimize-maps")
     @Comment("If 'true', re-writes the incredibly inefficient Vanilla Map code.\n"
-            + "This yields enormous performance enhancements when using many maps, but has a tiny chance of breaking mods that invasively modify Vanilla."
-            + "It is strongly reccomended to keep this on, unless explicitly advised otherwise by a Sponge developer")
-    private boolean mapOptimization = true;
+            + "This yields enormous performance enhancements when using many maps, but has a tiny chance of breaking mods that modify Vanilla."
+            + "It is strongly recommended to keep this on, unless explicitly advised otherwise by a Sponge developer")
+    public boolean optimizeMaps = true;
 
     @Setting("optimize-hoppers")
-    @Comment("Based on Aikar's optimizationo of Hoppers, setting this to 'true'\n"
+    @Comment("Based on Aikar's optimization of Hoppers, setting this to 'true'\n"
            + "will allow for hoppers to save performing server -> client updates\n"
            + "when transferring items. Because hoppers can transfer items multiple\n"
            + "times per tick, these updates can get costly on the server, with\n"
@@ -82,7 +74,13 @@ public class OptimizationCategory {
            + "foretell whether mod compatibility will fail with these changes or not.\n"
            + "Refer to: https://github.com/PaperMC/Paper/blob/8175ec916f31dcd130fe0884fe46bdc187d829aa/Spigot-Server-Patches/0269-Optimize-Hoppers.patch\n"
            + "for more details.")
-    private boolean optimizeHoppers = false;
+    public boolean optimizeHoppers = false;
+
+    @Setting("optimize-block-entity-ticking")
+    @Comment("Based on Paper's TileEntity Ticking optimization\n"
+        + "setting this to 'true' prevents unnecessary ticking in Chests and EnderChests\n"
+        + "See https://github.com/PaperMC/Paper/blob/bb4002d82e355f033906fc894cc2320f665ba72d/Spigot-Server-Patches/0022-Optimize-TileEntity-Ticking.patch")
+    public boolean optimizeBlockEntityTicking = true;
 
     @Setting("use-active-chunks-for-collisions")
     @Comment("Vanilla performs a lot of is area loaded checks during\n"
@@ -95,13 +93,7 @@ public class OptimizationCategory {
                + "asking the world if those chunks are loaded, the entity\n"
                + "would know whether it's chunks are loaded and that neighbor's\n"
                + "chunks are loaded.")
-    private boolean useActiveChunkForCollisions = false;
-
-    @Setting("tileentity-ticking-optimization")
-    @Comment("Based on Paper's TileEntity Ticking optimization\n"
-            + "setting this to 'true' prevents unnecessary ticking in Chests and EnderChests\n"
-            + "See https://github.com/PaperMC/Paper/blob/bb4002d82e355f033906fc894cc2320f665ba72d/Spigot-Server-Patches/0022-Optimize-TileEntity-Ticking.patch")
-    private boolean optimizeTileEntityTicking = true;
+    public boolean useActiveChunksForCollisions = false;
 
     @Setting("disable-failing-deserialization-log-spam")
     @Comment("Occasionally, some built in advancements, \n" +
@@ -110,69 +102,19 @@ public class OptimizationCategory {
             "and the original provider of the failing content\n" +
             "is not able to fix. This provides an option to\n" +
             "suppress the exceptions printing out in the log.")
-    private boolean disableFailingAdvancementDeserialization = true;
+    public boolean disableFailingDeserializationLogSpam = true;
+
+    @Setting("disable-scheduled-updates-for-persistent-leaf-blocks")
+    @Comment("Leaf blocks placed by players will normally schedule\n" +
+        "updates for themselves after placement, and on neighboring\n" +
+        "placement. This optimization is relatively small but effectively\n" +
+        "disables scheduling updates and reactive updates to leaves that\n" +
+        "are `persistent`. Does not drastically improve performance.")
+    public boolean disableScheduledUpdatesForPersistentLeafBlocks = true;
 
     public OptimizationCategory() {
         // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
         // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-        this.preItemDropMerge = SpongeConfigs.getPluginEnvironment().getBlackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
+        this.dropsPreMerge = SpongeConfigs.getPluginEnvironment().getBlackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
     }
-
-    public StructureSaveCategory getStructureSaving() {
-        return this.structureSaving;
-    }
-
-    public boolean useStructureSave() {
-        return this.structureSaving.isEnabled();
-    }
-
-    public boolean useMapOptimization() {
-        return this.mapOptimization;
-    }
-
-    /**
-     * This defines whether items can be pre-merged as item stacks, prior to spawning an entity. This has the ramification
-     * that some items are simply "dropped" and some other items during particular contexts, say when a mod is performing
-     * drops of their own, cannot be pre-merged as the item entity NEEDS to be created for them. In most cases, this is
-     * perfectly fine to perform in vanilla, but in forge mod environments, it is highly incompatible with a majority of
-     * more "advanced" or "complex" mods.
-     *
-     * @return Whether item pre-merging is enabled
-     */
-    public boolean doDropsPreMergeItemDrops() {
-        return this.preItemDropMerge;
-    }
-
-    public boolean useCacheTameableOwners() {
-        return this.cacheTameableOwners;
-    }
-
-    public EigenRedstoneCategory getEigenRedstoneCategory() {
-        return this.eigenRedstone;
-    }
-
-    public boolean useEigenRedstone() {
-        return this.eigenRedstone.isEnabled();
-    }
-
-    public boolean useFastThreadChecks() {
-        return this.fasterThreadChecks;
-    }
-
-    public boolean isOptimizeHoppers() {
-        return this.optimizeHoppers;
-    }
-
-    public boolean isUseActiveChunkForCollisions() {
-        return this.useActiveChunkForCollisions;
-    }
-
-    public boolean isOptimizedTileEntityTicking() {
-        return this.optimizeTileEntityTicking;
-    }
-
-    public boolean disableFailingAdvancementDeserialization() {
-        return this.disableFailingAdvancementDeserialization;
-    }
-
 }

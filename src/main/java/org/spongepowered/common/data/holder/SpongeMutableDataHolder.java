@@ -37,7 +37,7 @@ import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.common.data.key.SpongeKey;
-import org.spongepowered.common.data.util.EnsureMutable;
+import org.spongepowered.common.util.DataUtil;
 
 import java.util.Collection;
 import java.util.Map;
@@ -62,7 +62,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
 
     @Override
     default <E> DataTransactionResult offer(Key<? extends Value<E>> key, E value) {
-        return this.getProviderFor(key).offer(this.delegateDataHolder(), value);
+        return this.getProviderFor(requireNonNull(key, "key")).offer(this.delegateDataHolder(), value);
     }
 
     @Override
@@ -79,7 +79,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
             return DataTransactionResult.failNoData();
         }
         final Collection<E> collection = provider.get(this.delegateDataHolder())
-                .map(EnsureMutable::ensureMutable)
+                .map(DataUtil::ensureMutable)
                 .orElseGet(key0.getDefaultValueSupplier());
         if (!collection.add(element)) {
             return DataTransactionResult.failNoData();
@@ -96,7 +96,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
             return DataTransactionResult.failNoData();
         }
         final Collection<E> collection = provider.get(this.delegateDataHolder())
-                .map(EnsureMutable::ensureMutable)
+                .map(DataUtil::ensureMutable)
                 .orElseGet(key0.getDefaultValueSupplier());
         if (!collection.addAll(elements)) {
             return DataTransactionResult.failNoData();
@@ -116,7 +116,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
             return DataTransactionResult.failNoData();
         }
         final Map<K, V> copy = provider.get(this.delegateDataHolder())
-                .map(EnsureMutable::ensureMutable)
+                .map(DataUtil::ensureMutable)
                 .orElseGet(((SpongeKey) key).getDefaultValueSupplier());
         copy.put(valueKey, value);
         return provider.offer(this.delegateDataHolder(), copy);
@@ -132,7 +132,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
             return DataTransactionResult.failNoData();
         }
         final Map<K, V> map = provider.get(this.delegateDataHolder())
-                .map(EnsureMutable::ensureMutable)
+                .map(DataUtil::ensureMutable)
                 .orElseGet(((SpongeKey) key).getDefaultValueSupplier());
         map.putAll(values);
         return provider.offer(this.delegateDataHolder(), map);
@@ -152,7 +152,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
             return DataTransactionResult.failNoData();
         }
         final Optional<Collection<E>> optCollection = provider.get(this.delegateDataHolder())
-                .map(EnsureMutable::ensureMutable);
+                .map(DataUtil::ensureMutable);
         if (!optCollection.isPresent()) {
             return DataTransactionResult.failNoData();
         }
@@ -175,7 +175,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
             return DataTransactionResult.failNoData();
         }
         final Optional<Collection<E>> optCollection = provider.get(this.delegateDataHolder())
-                .map(EnsureMutable::ensureMutable);
+                .map(DataUtil::ensureMutable);
         if (!optCollection.isPresent()) {
             return DataTransactionResult.failNoData();
         }
@@ -203,7 +203,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         if (!optionalMap.isPresent() || !optionalMap.get().containsKey(mapKey)) {
             return DataTransactionResult.failNoData();
         }
-        final Map<K, Object> map = EnsureMutable.ensureMutable(optionalMap.get());
+        final Map<K, Object> map = DataUtil.ensureMutable(optionalMap.get());
         map.remove(mapKey);
         return provider.offer(this.delegateDataHolder(), map);
     }
@@ -218,7 +218,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
             return DataTransactionResult.failNoData();
         }
         final Optional<Map<K, V>> optionalMap = provider.get(this.delegateDataHolder())
-                .map(EnsureMutable::ensureMutable);
+                .map(DataUtil::ensureMutable);
         if (!optionalMap.isPresent()) {
             return DataTransactionResult.failNoData();
         }

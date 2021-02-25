@@ -25,22 +25,21 @@
 package org.spongepowered.common.data.datasync.entity;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.accessor.entity.EntityAccessor;
-
 import java.util.List;
 import java.util.Optional;
 
-public class EntityCustomNameConverter extends DataParameterConverter<String> {
+public final class EntityCustomNameConverter extends DataParameterConverter<String> {
 
     public EntityCustomNameConverter() {
-        super(EntityAccessor.accessor$getCustomName());
+        super(EntityAccessor.accessor$DATA_CUSTOM_NAME());
     }
 
     @Override
@@ -58,7 +57,7 @@ public class EntityCustomNameConverter extends DataParameterConverter<String> {
     @Override
     public String getValueFromEvent(final String originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> value : immutableValues) {
-            if (value.getKey() == Keys.DISPLAY_NAME.get()) {
+            if (value.getKey() == Keys.DISPLAY_NAME) {
                 try {
                     return SpongeAdventure.legacySection((Component) value.get());
                 } catch (Exception e) {

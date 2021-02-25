@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.TripWireBlock;
+import net.minecraft.world.level.block.TripWireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionalUtils;
+import org.spongepowered.common.util.DirectionalUtil;
 
 public final class TripWireData {
 
@@ -40,38 +40,38 @@ public final class TripWireData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
-                        .get(h -> DirectionalUtils.getHorizontalFrom(h, TripWireBlock.EAST, TripWireBlock.WEST, TripWireBlock.NORTH,
+                        .get(h -> DirectionalUtil.getHorizontalFrom(h, TripWireBlock.EAST, TripWireBlock.WEST, TripWireBlock.NORTH,
                                 TripWireBlock.SOUTH))
-                        .set((h, v) -> DirectionalUtils.setHorizontal(h, v, TripWireBlock.EAST, TripWireBlock.WEST, TripWireBlock.NORTH,
+                        .set((h, v) -> DirectionalUtil.setHorizontal(h, v, TripWireBlock.EAST, TripWireBlock.WEST, TripWireBlock.NORTH,
                                 TripWireBlock.SOUTH))
                         .supports(h -> h.getBlock() instanceof TripWireBlock)
                     .create(Keys.IS_ATTACHED)
-                        .get(h -> h.get(TripWireBlock.ATTACHED))
-                        .set((h, v) -> h.with(TripWireBlock.ATTACHED, v))
+                        .get(h -> h.getValue(TripWireBlock.ATTACHED))
+                        .set((h, v) -> h.setValue(TripWireBlock.ATTACHED, v))
                         .supports(h -> h.getBlock() instanceof TripWireBlock)
                     .create(Keys.IS_DISARMED)
-                        .get(h -> h.get(TripWireBlock.DISARMED))
-                        .set((h, v) -> h.with(TripWireBlock.DISARMED, v))
+                        .get(h -> h.getValue(TripWireBlock.DISARMED))
+                        .set((h, v) -> h.setValue(TripWireBlock.DISARMED, v))
                         .supports(h -> h.getBlock() instanceof TripWireBlock)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(TripWireBlock.POWERED))
-                        .set((h, v) -> h.with(TripWireBlock.POWERED, v))
+                        .get(h -> h.getValue(TripWireBlock.POWERED))
+                        .set((h, v) -> h.setValue(TripWireBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof TripWireBlock)
                     .create(Keys.IS_CONNECTED_EAST)
-                        .get(h -> h.get(TripWireBlock.EAST))
-                        .set((h, v) -> h.with(TripWireBlock.EAST, v))
+                        .get(h -> h.getValue(TripWireBlock.EAST))
+                        .set((h, v) -> h.setValue(TripWireBlock.EAST, v))
                         .supports(h -> h.getBlock() instanceof TripWireBlock)
                     .create(Keys.IS_CONNECTED_NORTH)
-                        .get(h -> h.get(TripWireBlock.NORTH))
-                        .set((h, v) -> h.with(TripWireBlock.NORTH, v))
+                        .get(h -> h.getValue(TripWireBlock.NORTH))
+                        .set((h, v) -> h.setValue(TripWireBlock.NORTH, v))
                         .supports(h -> h.getBlock() instanceof TripWireBlock)
                     .create(Keys.IS_CONNECTED_SOUTH)
-                        .get(h -> h.get(TripWireBlock.SOUTH))
-                        .set((h, v) -> h.with(TripWireBlock.SOUTH, v))
+                        .get(h -> h.getValue(TripWireBlock.SOUTH))
+                        .set((h, v) -> h.setValue(TripWireBlock.SOUTH, v))
                         .supports(h -> h.getBlock() instanceof TripWireBlock)
                     .create(Keys.IS_CONNECTED_WEST)
-                        .get(h -> h.get(TripWireBlock.WEST))
-                        .set((h, v) -> h.with(TripWireBlock.WEST, v))
+                        .get(h -> h.getValue(TripWireBlock.WEST))
+                        .set((h, v) -> h.setValue(TripWireBlock.WEST, v))
                         .supports(h -> h.getBlock() instanceof TripWireBlock);
     }
     // @formatter:on

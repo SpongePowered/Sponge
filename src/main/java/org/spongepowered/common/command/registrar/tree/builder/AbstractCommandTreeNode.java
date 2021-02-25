@@ -28,7 +28,6 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
@@ -42,11 +41,12 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
+import net.minecraft.commands.SharedSuggestionProvider;
 
-public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull T>, O extends CommandNode<ISuggestionProvider>>
+public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull T>, O extends CommandNode<SharedSuggestionProvider>>
         implements CommandTreeNode<@NonNull T> {
 
-    public final static Command<ISuggestionProvider> EXECUTABLE = isp -> 1;
+    public final static Command<SharedSuggestionProvider> EXECUTABLE = isp -> 1;
 
     @Nullable private CommandTreeNode<?> redirect = null;
     @Nullable private Map<String, AbstractCommandTreeNode<?, ?>> children = null;
@@ -133,14 +133,14 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
 
     protected final void addChildNodesToTree(
             final CommandCause cause,
-            final CommandNode<ISuggestionProvider> node,
-            final Map<AbstractCommandTreeNode<?, ?>, CommandNode<ISuggestionProvider>> nodeToSuggestionProvider,
+            final CommandNode<SharedSuggestionProvider> node,
+            final Map<AbstractCommandTreeNode<?, ?>, CommandNode<SharedSuggestionProvider>> nodeToSuggestionProvider,
             final Map<ForcedRedirectNode, AbstractCommandTreeNode<?, ?>> redirectsToApply) {
         this.getChildren().forEach((key, value) -> {
             if (value.requirement.test(cause)) {
-                final CommandNode<ISuggestionProvider> providerCommandNode =
+                final CommandNode<SharedSuggestionProvider> providerCommandNode =
                         nodeToSuggestionProvider.computeIfAbsent(value, k -> {
-                            final CommandNode<ISuggestionProvider> ret = k.createElement(key);
+                            final CommandNode<SharedSuggestionProvider> ret = k.createElement(key);
                             if (k.redirect instanceof AbstractCommandTreeNode<?, ?> && ret instanceof ForcedRedirectNode) {
                                 redirectsToApply.put((ForcedRedirectNode) ret, (AbstractCommandTreeNode<?, ?>) k.redirect);
                             } else {

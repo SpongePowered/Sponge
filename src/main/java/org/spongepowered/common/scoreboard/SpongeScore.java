@@ -25,14 +25,13 @@
 package org.spongepowered.common.scoreboard;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.scoreboard.ScoreObjective;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.objective.Objective;
+import org.spongepowered.common.accessor.world.scores.ObjectiveAccessor;
+import org.spongepowered.common.accessor.world.scores.ScoreAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
-import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
-import org.spongepowered.common.accessor.scoreboard.ScoreAccessor;
-import org.spongepowered.common.accessor.scoreboard.ScoreObjectiveAccessor;
+import org.spongepowered.common.bridge.world.scores.ScoreBridge;
+import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
@@ -47,7 +46,7 @@ public final class SpongeScore implements Score {
     private int score;
     private boolean locked;
 
-    private final Map<ScoreObjective, net.minecraft.scoreboard.Score> scores = new HashMap<>();
+    private final Map<net.minecraft.world.scores.Objective, net.minecraft.world.scores.Score> scores = new HashMap<>();
 
     public SpongeScore(final Component name) {
         this.name = name;
@@ -84,14 +83,14 @@ public final class SpongeScore implements Score {
     }
 
     private void updateScore() {
-        for (final net.minecraft.scoreboard.Score score : this.scores.values()) {
-            final int j = ((ScoreAccessor) score).accessor$getScorePoints();
-            ((ScoreAccessor) score).accessor$setScorePoints(this.score);
+        for (final net.minecraft.world.scores.Score score : this.scores.values()) {
+            final int j = ((ScoreAccessor) score).accessor$count();
+            ((ScoreAccessor) score).accessor$count(this.score);
 
-            if (j != this.score || ((ScoreAccessor) score).accessor$getForceUpdate())
+            if (j != this.score || ((ScoreAccessor) score).accessor$forceUpdate())
             {
-                ((ScoreAccessor) score).accessor$setForceUpdate(false);
-                score.getScoreScoreboard().onScoreChanged(score);
+                ((ScoreAccessor) score).accessor$forceUpdate(false);
+                score.getScoreboard().onScoreChanged(score);
             }
         }
     }
@@ -99,23 +98,23 @@ public final class SpongeScore implements Score {
     @Override
     public Set<Objective> getObjectives() {
         final Set<Objective> objectives = new HashSet<>();
-        for (final ScoreObjective objective: this.scores.keySet()) {
-            objectives.add(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
+        for (final net.minecraft.world.scores.Objective objective: this.scores.keySet()) {
+            objectives.add(((ObjectiveBridge) objective).bridge$getSpongeObjective());
         }
         return objectives;
     }
 
     @SuppressWarnings("ConstantConditions")
-    public net.minecraft.scoreboard.Score getScoreFor(final ScoreObjective objective) {
+    public net.minecraft.world.scores.Score getScoreFor(final net.minecraft.world.scores.Objective objective) {
         if (this.scores.containsKey(objective)) {
             return this.scores.get(objective);
         }
-        final net.minecraft.scoreboard.Score score = new net.minecraft.scoreboard.Score(((ScoreObjectiveAccessor) objective).accessor$getScoreboard(), objective, this.legacyName);
+        final net.minecraft.world.scores.Score score = new net.minecraft.world.scores.Score(((ObjectiveAccessor) objective).accessor$scoreboard(), objective, this.legacyName);
 
         // We deliberately set the fields here instead of using the methods.
         // Since a new score is being created here, we want to avoid
         // sending packets until everything is in the proper state.
-        ((ScoreAccessor) score).accessor$setScorePoints(this.score);
+        ((ScoreAccessor) score).accessor$count(this.score);
 
         ((ScoreBridge) score).bridge$setSpongeScore(this);
         this.scores.put(objective, score);
@@ -123,7 +122,7 @@ public final class SpongeScore implements Score {
         return score;
     }
 
-    public void removeScoreFor(final ScoreObjective objective) {
+    public void removeScoreFor(final net.minecraft.world.scores.Objective objective) {
         if (this.scores.remove(objective) == null) {
             throw new IllegalStateException("Attempting to remove an score without an entry!");
         }

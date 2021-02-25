@@ -24,21 +24,20 @@
  */
 package org.spongepowered.common.data.datasync.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
-
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.world.entity.Entity;
 
-public class LivingEntityArrowCountConverter extends DataParameterConverter<Integer> {
+public final class LivingEntityArrowCountConverter extends DataParameterConverter<Integer> {
 
     public LivingEntityArrowCountConverter() {
-        super(LivingEntityAccessor.accessor$getArrowCountInEntity());
+        super(LivingEntityAccessor.accessor$DATA_ARROW_COUNT_ID());
     }
 
     @Override
@@ -53,7 +52,7 @@ public class LivingEntityArrowCountConverter extends DataParameterConverter<Inte
     @Override
     public Integer getValueFromEvent(final Integer originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.STUCK_ARROWS.get()) {
+            if (immutableValue.getKey() == Keys.STUCK_ARROWS) {
                 return (Integer) immutableValue.get();
             }
         }

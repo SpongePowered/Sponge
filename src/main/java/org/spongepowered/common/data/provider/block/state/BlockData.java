@@ -24,32 +24,29 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.ChestBlock;
-import net.minecraft.block.FallingBlock;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.block.material.Material;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.Item;
-import net.minecraft.state.properties.ChestType;
-import net.minecraft.state.properties.NoteBlockInstrument;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
-import org.spongepowered.api.data.type.MatterStates;
-import org.spongepowered.api.data.type.WoodTypes;
+import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.common.accessor.block.BlockAccessor;
-import org.spongepowered.common.accessor.block.FireBlockAccessor;
+import org.spongepowered.common.accessor.world.level.block.BaseFireBlockAccessor;
+import org.spongepowered.common.accessor.world.level.block.state.BlockBehaviourAccessor;
+import org.spongepowered.common.accessor.world.level.block.state.BlockBehaviour_PropertiesAccessor;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collections;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.FallingBlock;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.ChestType;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import net.minecraft.world.level.material.Material;
 
 public final class BlockData {
 
@@ -61,20 +58,20 @@ public final class BlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.BLAST_RESISTANCE)
-                        .get(h -> (double) ((BlockAccessor) h.getBlock()).accessor$getBlockResistance())
+                        .get(h -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) h.getBlock()).accessor$properties()).accessor$explosionResistance())
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
-                            if (h.get(ChestBlock.TYPE) == ChestType.SINGLE) {
+                            if (h.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
                                 return null;
                             }
-                            return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getDirectionToAttached(h)));
+                            return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getConnectedDirection(h)));
                         })
-                        .supports(h -> h.has(ChestBlock.TYPE))
+                        .supports(h -> h.hasProperty(ChestBlock.TYPE))
                     .create(Keys.DYE_COLOR)
                         .get(h -> ((DyeColorBlockBridge) h.getBlock()).bridge$getDyeColor().orElse(null))
                         .supports(h -> h.getBlock() instanceof DyeColorBlockBridge)
-                    .create(Keys.HARDNESS)
-                        .get(h -> (double) ((BlockAccessor) h.getBlock()).accessor$getBlockHardness())
+                    .create(Keys.DESTROY_SPEED)
+                        .get(state -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) state.getBlock()).accessor$properties()).accessor$destroyTime())
                     .create(Keys.HELD_ITEM)
                         .get(h -> {
                             final Item item = h.getBlock().asItem();
@@ -87,11 +84,11 @@ public final class BlockData {
                     .create(Keys.IS_GRAVITY_AFFECTED)
                         .get(h -> h.getBlock() instanceof FallingBlock)
                     .create(Keys.IS_PASSABLE)
-                        .get(h -> !h.getMaterial().blocksMovement())
+                        .get(h -> !h.getMaterial().blocksMotion())
                     .create(Keys.IS_UNBREAKABLE)
-                        .get(h -> ((BlockAccessor) h.getBlock()).accessor$getBlockHardness() < 0)
+                        .get(h -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) h.getBlock()).accessor$properties()).accessor$destroyTime() < 0)
                     .create(Keys.IS_FLAMMABLE)
-                        .get(h -> ((FireBlockAccessor) Blocks.FIRE).accessor$func_220274_q(h) > 0)
+                        .get(((BaseFireBlockAccessor) Blocks.FIRE)::invoker$canBurn)
                     .create(Keys.IS_SOLID)
                         .get(h -> h.getMaterial().isSolid())
                     .create(Keys.IS_REPLACEABLE)
@@ -99,45 +96,19 @@ public final class BlockData {
                     .create(Keys.IS_SURROGATE_BLOCK)
                         .get(h -> ((BlockBridge) h.getBlock()).bridge$isDummy())
                     .create(Keys.LIGHT_EMISSION)
-                        .get(BlockState::getLightValue)
-                    .create(Keys.MATTER_STATE)
+                        .get(BlockState::getLightEmission)
+                    .create(Keys.MATTER_TYPE)
                         .get(h -> {
-                            if (h.getBlock() instanceof FlowingFluidBlock) {
-                                return MatterStates.LIQUID.get();
+                            if (h.getBlock() instanceof LiquidBlock) {
+                                return MatterTypes.LIQUID.get();
                             } else if (h.getMaterial() == Material.AIR) {
-                                return MatterStates.GAS.get();
+                                return MatterTypes.GAS.get();
                             } else {
-                                return MatterStates.SOLID.get();
+                                return MatterTypes.SOLID.get();
                             }
                         })
                     .create(Keys.REPRESENTED_INSTRUMENT)
-                        .get(h -> (InstrumentType) (Object) NoteBlockInstrument.byState(h))
-                    .create(Keys.WOOD_TYPE)
-                        .get(h -> {
-                            // Get the resource key of the block and stop if we're not in the minecraft namespace
-                            final ResourceKey key = ((BlockType) h.getBlock()).getKey();
-                            if (!key.getNamespace().equals(PluginManager.MINECRAFT_PLUGIN_ID)) {
-                                return null;
-                            }
-
-                            // Compare ids and determine the wood type to return
-                            final String id = key.getValue();
-                            if (id.contains("acacia_")) {
-                                return WoodTypes.ACACIA.get();
-                            } else if (id.contains("birch_")) {
-                                return WoodTypes.BIRCH.get();
-                            } else if (id.contains("dark_oak_")) {
-                                return WoodTypes.DARK_OAK.get();
-                            } else if (id.contains("jungle_")) {
-                                return WoodTypes.JUNGLE.get();
-                            } else if (id.contains("oak_")) {
-                                return WoodTypes.OAK.get();
-                            } else if (id.contains("spruce_")) {
-                                return WoodTypes.SPRUCE.get();
-                            }
-
-                            return null;
-                        });
+                        .get(h -> (InstrumentType) (Object) NoteBlockInstrument.byState(h));
     }
     // @formatter:on
 }

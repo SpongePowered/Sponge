@@ -26,8 +26,8 @@ package org.spongepowered.common.command.parameter;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandException;
-import net.minecraft.util.text.StringTextComponent;
+import net.minecraft.commands.CommandRuntimeException;
+import net.minecraft.network.chat.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
@@ -44,17 +44,12 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import java.util.function.Function;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
 
 public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
-   // private final static Text NEW_LINE = Text.of("\n");
-   // private final static Text GENERIC_EXCEPTION_ERROR = t("Could not parse element");
-
     private final ImmutableList<ValueParser<? extends T>> parsers;
-    @Nullable private final SpongeDefaultValueParser<? extends T> defaultParser;
     private final ValueCompleter completer;
     private final Predicate<CommandCause> requirement;
     @Nullable private final ValueUsage usage;
@@ -65,7 +60,6 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
     public SpongeParameterValue(
             final ImmutableList<ValueParser<? extends T>> parsers,
-            @Nullable final Function<CommandCause, ? extends T> defaultParser,
             final ValueCompleter completer,
             @Nullable final ValueUsage usage,
             final Predicate<CommandCause> requirement,
@@ -74,7 +68,6 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
             final boolean consumeAll,
             final boolean terminal) {
         this.parsers = parsers;
-        this.defaultParser = defaultParser == null ? null : new SpongeDefaultValueParser<>(defaultParser);
         this.completer = completer;
         this.requirement = requirement;
         this.usage = usage;
@@ -130,20 +123,9 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
             }
         }
 
-        try {
-            if (this.defaultParser != null) {
-                this.defaultParser.getValue(this.key, args, context);
-            }
-        } catch (final ArgumentParseException ex) {
-            if (currentExceptions == null) {
-                currentExceptions = new ArrayList<>();
-            }
-            currentExceptions.add(ex);
-        }
-
         // If we get this far, we failed to parse, return the exceptions
         if (currentExceptions == null) {
-            throw new CommandException(new StringTextComponent("Could not parse element"));
+            throw new CommandRuntimeException(new TextComponent("Could not parse element"));
             // throw new ArgumentParseException(t("Could not parse element"), args.getInput(), args.getCursor());
         } else if (currentExceptions.size() == 1) {
             throw currentExceptions.get(0);
@@ -212,10 +194,6 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     @Override
     public boolean isOptional() {
         return this.isOptional;
-    }
-
-    public SpongeDefaultValueParser<? extends T> getDefaultParser() {
-        return this.defaultParser;
     }
 
     @Override

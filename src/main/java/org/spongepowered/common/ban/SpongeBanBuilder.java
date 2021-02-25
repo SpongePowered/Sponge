@@ -28,15 +28,15 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.server.management.IPBanEntry;
-import net.minecraft.server.management.IPBanList;
-import net.minecraft.server.management.ProfileBanEntry;
+import net.minecraft.server.players.IpBanList;
+import net.minecraft.server.players.IpBanListEntry;
+import net.minecraft.server.players.UserBanListEntry;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.server.management.IPBanListAccessor;
+import org.spongepowered.common.accessor.server.players.IpBanListAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
@@ -120,14 +120,14 @@ public final class SpongeBanBuilder implements Ban.Builder {
 
         if (this.banType == BanTypes.PROFILE.get()) {
             checkState(this.profile != null, "User cannot be null!");
-            return (Ban) new ProfileBanEntry(SpongeGameProfile.toMcProfile(this.profile.withoutProperties()),
+            return (Ban) new UserBanListEntry(SpongeGameProfile.toMcProfile(this.profile.withoutProperties()),
                     Date.from(this.start), sourceName, this.toDate(this.end), reason);
         }
         checkState(this.address != null, "Address cannot be null!");
 
         // This *should* be a static method, but apparently not...
-        final IPBanList ipBans = SpongeCommon.getServer().getPlayerList().getBannedIPs();
-        return (Ban) new IPBanEntry(((IPBanListAccessor) ipBans).accessor$addressToString(new InetSocketAddress(this.address, 0)),
+        final IpBanList ipBans = SpongeCommon.getServer().getPlayerList().getIpBans();
+        return (Ban) new IpBanListEntry(((IpBanListAccessor) ipBans).invoker$getIpFromAddress(new InetSocketAddress(this.address, 0)),
                 Date.from(this.start), sourceName, this.toDate(this.end), reason);
     }
 
@@ -143,7 +143,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
         if (this.banType.equals(BanTypes.PROFILE.get())) {
             this.profile = ((Ban.Profile) ban).getProfile();
         } else {
-            this.address = ((Ban.Ip) ban).getAddress();
+            this.address = ((Ban.IP) ban).getAddress();
         }
 
         this.reason = ban.getReason().orElse(null);

@@ -38,8 +38,8 @@ public final class LocationTargetingData {
         registrator
                 .asMutable(LocationTargetingBridge.class)
                     .create(Keys.TARGET_LOCATION)
-                        .get(LocationTargetingBridge::bridge$getTargetedLocation)
-                        .set(LocationTargetingBridge::bridge$setTargetedLocation);
+                        .get(LocationTargetingBridge::bridge$getTargetedPosition)
+                        .set(LocationTargetingBridge::bridge$setTargetedPosition);
     }
     // @formatter:on
 }

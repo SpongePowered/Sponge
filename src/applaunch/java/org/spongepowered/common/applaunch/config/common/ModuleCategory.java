@@ -29,119 +29,45 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
-public class ModuleCategory {
+public final class ModuleCategory {
 
-    @Setting("bungeecord")
-    private boolean pluginBungeeCord = false;
+    @Setting
+    @Comment("Enables support for BungeeCord and Velocity IP forwarding.\n" +
+        "Additional options must be configured in the 'ip-forwarding' configuration section.")
+    public boolean ipForwarding = false;
 
     @Setting("entity-activation-range")
-    private boolean pluginEntityActivation = true;
+    public boolean entityActivationRange = true;
 
-    @Setting("tileentity-activation")
-    @Comment("Controls block range and tick rate of tileentities. \n"
+    @Setting("block-entity-activation")
+    @Comment("Controls block range and tick rate of block entities. \n"
              + "Use with caution as this can break intended functionality.")
-    private boolean pluginTileEntityActivation = false;
+    public boolean blockEntityActivationRange = false;
 
-    @Setting("entity-collisions")
-    private boolean pluginEntityCollisions = true;
+    @Setting("entity-collision")
+    public boolean entityCollision = true;
 
-    @Setting("timings")
-    private boolean pluginTimings = true;
+    @Setting
+    public boolean timings = true;
 
-    @Setting("exploits")
+    @Setting
     @Comment("Controls whether any exploit patches are applied.\n"
              + "If there are issues with any specific exploits, please\n"
              + "test in the exploit category first, before disabling all\n"
              + "exploits with this toggle.")
-    private boolean enableExploitPatches = true;
+    public boolean exploits = true;
 
-    @Setting("optimizations")
-    private boolean enableOptimizationPatches = true;
+    @Setting
+    public boolean optimizations = true;
 
-    @Setting("tracking")
-    private boolean tracking = true;
+    @Setting
+    public boolean tracking = true;
 
-    @Setting("realtime")
+    @Setting("real-time")
     @Comment("Use real (wall) time instead of ticks as much as possible")
-    private boolean pluginRealTime = false;
+    public boolean realTime = false;
 
     @Setting("movement-checks")
     @Comment("Allows configuring Vanilla movement and speed checks")
-    private boolean movementChecks = false;
-
-    @Setting("broken-mod")
-    @Comment("Enables experimental fixes for broken mods")
-    private boolean brokenMods = false;
-
-    public boolean useBrokenMods() {
-        return this.brokenMods;
-    }
-
-    public boolean usePluginBungeeCord() {
-        return this.pluginBungeeCord;
-    }
-
-    public void setPluginBungeeCord(final boolean state) {
-        this.pluginBungeeCord = state;
-    }
-
-    public boolean usePluginEntityActivation() {
-        return this.pluginEntityActivation;
-    }
-
-    public boolean usePluginTileEntityActivation() {
-        return this.pluginTileEntityActivation;
-    }
-
-    public void setPluginEntityActivation(final boolean state) {
-        this.pluginEntityActivation = state;
-    }
-
-    public boolean usePluginEntityCollisions() {
-        return this.pluginEntityCollisions;
-    }
-
-    public void setPluginEntityCollisions(final boolean state) {
-        this.pluginEntityCollisions = state;
-    }
-
-    public boolean usePluginTimings() {
-        return this.pluginTimings;
-    }
-
-    public void setPluginTimings(final boolean state) {
-        this.pluginTimings = state;
-    }
-
-    public boolean useExploitPatches() {
-        return this.enableExploitPatches;
-    }
-
-    public void setExploitPatches(final boolean enableExploitPatches) {
-        this.enableExploitPatches = enableExploitPatches;
-    }
-
-    public boolean useOptimizations() {
-        return this.enableOptimizationPatches;
-    }
-
-    public boolean useTracking() {
-        return this.tracking;
-    }
-
-    public void setTracking(final boolean tracking) {
-        this.tracking = tracking;
-    }
-
-    public boolean useMovementChecks() {
-        return this.movementChecks;
-    }
-
-    public boolean usePluginRealTime() {
-        return this.pluginRealTime;
-    }
-
-    public void setPluginRealTime(final boolean state) {
-        this.pluginRealTime = state;
-    }
+    public boolean movementChecks = false;
 }

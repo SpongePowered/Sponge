@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.SharedMonsterAttributes;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.HandSide;
+import net.minecraft.world.entity.HumanoidArm;
+import net.minecraft.world.entity.ai.attributes.Attributes;
+import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandPreference;
-import org.spongepowered.common.accessor.entity.player.PlayerAbilitiesAccessor;
-import org.spongepowered.common.accessor.entity.player.PlayerEntityAccessor;
-import org.spongepowered.common.accessor.util.FoodStatsAccessor;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.accessor.world.entity.player.AbilitiesAccessor;
+import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
+import org.spongepowered.common.accessor.world.food.FoodDataAccessor;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.ExperienceHolderUtils;
+import org.spongepowered.common.util.ExperienceHolderUtil;
 
 public final class PlayerData {
 
@@ -49,82 +49,82 @@ public final class PlayerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PlayerEntity.class)
+                .asMutable(Player.class)
                     .create(Keys.CAN_FLY)
-                        .get(h -> h.abilities.allowFlying)
+                        .get(h -> h.abilities.mayfly)
                         .set((h, v) -> {
-                            h.abilities.allowFlying = v;
-                            h.sendPlayerAbilities();
+                            h.abilities.mayfly = v;
+                            h.onUpdateAbilities();
                         })
                     .create(Keys.DOMINANT_HAND)
-                        .get(h -> (HandPreference) (Object) h.getPrimaryHand())
-                        .set((h, v) -> h.setPrimaryHand((HandSide) (Object) v))
+                        .get(h -> (HandPreference) (Object) h.getMainArm())
+                        .set((h, v) -> h.setMainArm((HumanoidArm) (Object) v))
                     .create(Keys.EXHAUSTION)
-                        .get(h -> (double) ((FoodStatsAccessor) h.getFoodStats()).accessor$getFoodExhaustionLevel())
+                        .get(h -> (double) ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel())
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > EXHAUSTION_MAX) {
+                            if (v < 0 || v > PlayerData.EXHAUSTION_MAX) {
                                 return false;
                             }
-                            ((FoodStatsAccessor) h.getFoodStats()).accessor$setFoodExhaustionLevel(v.floatValue());
+                            ((FoodDataAccessor) h.getFoodData()).accessor$exhaustionLevel(v.floatValue());
                             return true;
                         })
                     .create(Keys.EXPERIENCE)
-                        .get(h -> h.experienceTotal)
-                        .set(ExperienceHolderUtils::setExperience)
-                        .delete(h -> ExperienceHolderUtils.setExperience(h, 0))
+                        .get(h -> h.totalExperience)
+                        .set(ExperienceHolderUtil::setExperience)
+                        .delete(h -> ExperienceHolderUtil.setExperience(h, 0))
                     .create(Keys.EXPERIENCE_FROM_START_OF_LEVEL)
-                        .get(PlayerEntity::xpBarCap)
+                        .get(Player::getXpNeededForNextLevel)
                     .create(Keys.EXPERIENCE_LEVEL)
                         .get(h -> h.experienceLevel)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.experienceTotal = ExperienceHolderUtils.xpAtLevel(v);
-                            h.experience = 0;
+                            h.totalExperience = ExperienceHolderUtil.xpAtLevel(v);
+                            h.experienceProgress = 0;
                             h.experienceLevel = v;
-                            ((ServerPlayerEntityBridge) h).bridge$refreshExp();
+                            ((ServerPlayerBridge) h).bridge$refreshExp();
                             return true;
                         })
                     .create(Keys.EXPERIENCE_SINCE_LEVEL)
-                        .get(h -> ((PlayerEntityBridge) h).bridge$getExperienceSinceLevel())
+                        .get(h -> ((PlayerBridge) h).bridge$getExperienceSinceLevel())
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            ExperienceHolderUtils.setExperienceSinceLevel(h, v);
+                            ExperienceHolderUtil.setExperienceSinceLevel(h, v);
                             return true;
                         })
-                        .delete(h -> ExperienceHolderUtils.setExperience(h, 0))
+                        .delete(h -> ExperienceHolderUtil.setExperience(h, 0))
                     .create(Keys.FLYING_SPEED)
-                        .get(h -> (double) h.abilities.getFlySpeed())
+                        .get(h -> (double) h.abilities.getFlyingSpeed())
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            ((PlayerAbilitiesAccessor) h.abilities).accessor$setFlySpeed(v.floatValue());
-                            h.sendPlayerAbilities();
+                            ((AbilitiesAccessor) h.abilities).accessor$flyingSpeed(v.floatValue());
+                            h.onUpdateAbilities();
                             return true;
                         })
                     .create(Keys.FOOD_LEVEL)
-                        .get(h -> h.getFoodStats().getFoodLevel())
+                        .get(h -> h.getFoodData().getFoodLevel())
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > FOOD_LEVEL_MAX) {
+                            if (v < 0 || v > PlayerData.FOOD_LEVEL_MAX) {
                                 return false;
                             }
-                            h.getFoodStats().setFoodLevel(v);
+                            h.getFoodData().setFoodLevel(v);
                             return true;
                         })
                     .create(Keys.IS_FLYING)
-                        .get(h -> h.abilities.isFlying)
+                        .get(h -> h.abilities.flying)
                         .set((h, v) -> {
-                            h.abilities.isFlying = v;
-                            h.sendPlayerAbilities();
+                            h.abilities.flying = v;
+                            h.onUpdateAbilities();
                         })
                     .create(Keys.IS_SLEEPING)
-                        .get(PlayerEntity::isSleeping)
+                        .get(Player::isSleeping)
                     .create(Keys.IS_SLEEPING_IGNORED)
-                        .get(PlayerEntity::isSleeping)
+                        .get(Player::isSleeping)
                     .create(Keys.MAX_EXHAUSTION)
                         .get(h -> PlayerData.EXHAUSTION_MAX)
                     .create(Keys.MAX_FOOD_LEVEL)
@@ -132,28 +132,28 @@ public final class PlayerData {
                     .create(Keys.MAX_SATURATION)
                         .get(h -> PlayerData.SATURATION_MAX)
                     .create(Keys.SATURATION)
-                        .get(h -> (double) h.getFoodStats().getSaturationLevel())
+                        .get(h -> (double) h.getFoodData().getSaturationLevel())
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > SATURATION_MAX) {
+                            if (v < 0 || v > PlayerData.SATURATION_MAX) {
                                 return false;
                             }
-                            ((FoodStatsAccessor) h.getFoodStats()).accessor$setFoodSaturationLevel(v.floatValue());
+                            ((FoodDataAccessor) h.getFoodData()).accessor$saturationLevel(v.floatValue());
                             return true;
                         })
                     .create(Keys.SLEEP_TIMER)
-                        .get(PlayerEntity::getSleepTimer)
-                        .set((p, i) -> ((PlayerEntityAccessor) p).accessor$setSleepTimer(i))
+                        .get(Player::getSleepTimer)
+                        .set((p, i) -> ((PlayerAccessor) p).accessor$sleepCounter(i))
                     .create(Keys.WALKING_SPEED)
-                        .get(h -> (double) h.abilities.getWalkSpeed())
+                        .get(h -> (double) h.abilities.getWalkingSpeed())
                         .set((h, v) -> {
-                            ((PlayerAbilitiesAccessor) h.abilities).accessor$setWalkSpeed(v.floatValue());
-                            h.getAttribute(SharedMonsterAttributes.MOVEMENT_SPEED).setBaseValue(v);
-                            h.sendPlayerAbilities();
+                            ((AbilitiesAccessor) h.abilities).accessor$walkingSpeed(v.floatValue());
+                            h.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(v);
+                            h.onUpdateAbilities();
                         })
-                .asMutable(PlayerEntityBridge.class)
+                .asMutable(PlayerBridge.class)
                     .create(Keys.AFFECTS_SPAWNING)
-                        .get(PlayerEntityBridge::bridge$affectsSpawning)
-                        .set(PlayerEntityBridge::bridge$setAffectsSpawning);
+                        .get(PlayerBridge::bridge$affectsSpawning)
+                        .set(PlayerBridge::bridge$setAffectsSpawning);
     }
     // @formatter:on
 }

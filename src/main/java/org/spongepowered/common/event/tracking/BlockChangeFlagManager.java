@@ -42,31 +42,14 @@ import java.util.StringJoiner;
 
 public final class BlockChangeFlagManager {
 
-    public static final class BlockChangeFlagFactory implements BlockChangeFlag.Factory {
-        @Nullable private BlockChangeFlag none;
-        @Override
-        public BlockChangeFlag empty() {
-            if (this.none == null) {
-                this.none = BlockChangeFlagManager.getInstance().maskedFlags.get(0);
-            }
-            return this.none;
-        }
-        BlockChangeFlagFactory() {}
-    }
-
     private final Map<String, SpongeBlockChangeFlag> flags = new LinkedHashMap<>();
     private final Int2ObjectMap<SpongeBlockChangeFlag> maskedFlags = new Int2ObjectLinkedOpenHashMap<>(70);
     private static BlockChangeFlagManager INSTANCE = new BlockChangeFlagManager();
-    private final BlockChangeFlagFactory FACTORY = new BlockChangeFlagFactory();
     private static final SpongeBlockChangeFlag PHYSICS_OBSERVER = new SpongeBlockChangeFlag("PHYSICS_OBSERVER", Constants.BlockChangeFlags.PHYSICS_OBSERVER);
     private static final SpongeBlockChangeFlag DEFAULT = new SpongeBlockChangeFlag("PHYSICS_OBSERVER", Constants.BlockChangeFlags.DEFAULT);
 
     public static BlockChangeFlagManager getInstance() {
         return BlockChangeFlagManager.INSTANCE;
-    }
-
-    public BlockChangeFlagFactory getFactory() {
-        return this.FACTORY;
     }
 
     public static SpongeBlockChangeFlag fromNativeInt(final int flag) {
@@ -205,7 +188,19 @@ public final class BlockChangeFlagManager {
             this.name = name;
             this.mask = mask;
         }
-
     }
 
+    public static final class Factory implements BlockChangeFlag.Factory {
+
+        @Nullable private BlockChangeFlag none;
+
+        @Override
+        public BlockChangeFlag empty() {
+            if (this.none == null) {
+                this.none = BlockChangeFlagManager.getInstance().maskedFlags.get(0);
+            }
+            return this.none;
+        }
+        public Factory() {}
+    }
 }

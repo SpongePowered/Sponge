@@ -30,7 +30,6 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import net.minecraft.server.management.OpList;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionDescription;
@@ -42,6 +41,8 @@ import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
+import javax.annotation.Nullable;
+import net.minecraft.server.players.ServerOpList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -51,8 +52,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Predicate;
-
-import javax.annotation.Nullable;
 
 /**
  * Permission service representing the vanilla operator permission structure.
@@ -73,14 +72,16 @@ public final class SpongePermissionService implements PermissionService {
     @Inject
     public SpongePermissionService(final Game game) {
         this.game = game;
-        this.subjects.put(SUBJECTS_DEFAULT, (this.defaultCollection = this.newCollection(SUBJECTS_DEFAULT)));
-        this.subjects.put(SUBJECTS_USER, new UserCollection(this));
-        this.subjects.put(SUBJECTS_GROUP, new OpLevelCollection(this));
+        this.subjects.put(SpongePermissionService.SUBJECTS_DEFAULT, (this.defaultCollection = this.newCollection(SpongePermissionService.SUBJECTS_DEFAULT)));
+        this.subjects.put(PermissionService.SUBJECTS_USER, new UserCollection(this));
+        this.subjects.put(PermissionService.SUBJECTS_GROUP, new OpLevelCollection(this));
 
-        this.subjects.put(SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(SUBJECTS_COMMAND_BLOCK, this,
+        this.subjects.put(PermissionService.SUBJECTS_COMMAND_BLOCK, new DataFactoryCollection(
+            PermissionService.SUBJECTS_COMMAND_BLOCK, this,
                 s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(2).asSubjectReference())));
 
-        this.subjects.put(SUBJECTS_SYSTEM, new DataFactoryCollection(SUBJECTS_SYSTEM, this,
+        this.subjects.put(PermissionService.SUBJECTS_SYSTEM, new DataFactoryCollection(
+            PermissionService.SUBJECTS_SYSTEM, this,
                 s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(4).asSubjectReference())
 //                ,
 //                s -> {
@@ -93,15 +94,15 @@ public final class SpongePermissionService implements PermissionService {
 //                }
                 ));
 
-        this.defaultData = this.getDefaultCollection().get(SUBJECTS_DEFAULT);
+        this.defaultData = this.getDefaultCollection().get(SpongePermissionService.SUBJECTS_DEFAULT);
     }
 
-    static OpList getOps() {
-        return SpongeCommon.getServer().getPlayerList().getOppedPlayers();
+    static ServerOpList getOps() {
+        return SpongeCommon.getServer().getPlayerList().getOps();
     }
 
     static int getServerOpLevel() {
-        return SpongeCommon.getServer().getOpPermissionLevel();
+        return SpongeCommon.getServer().getOperatorUserPermissionLevel();
     }
 
     public Subject getGroupForOpLevel(final int level) {

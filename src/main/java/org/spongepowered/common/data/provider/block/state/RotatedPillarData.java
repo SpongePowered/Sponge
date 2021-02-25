@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.RotatedPillarBlock;
-import net.minecraft.state.EnumProperty;
-import net.minecraft.util.Direction;
+import net.minecraft.core.Direction;
+import net.minecraft.world.level.block.RotatedPillarBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.AxisUtils;
+import org.spongepowered.common.util.AxisUtil;
 
 public final class RotatedPillarData {
 
@@ -42,14 +42,14 @@ public final class RotatedPillarData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.AXIS)
-                        .get(h -> AxisUtils.getFor(h.get(RotatedPillarBlock.AXIS)))
+                        .get(h -> AxisUtil.getFor(h.getValue(RotatedPillarBlock.AXIS)))
                         .set((h, v) -> {
-                            final Direction.Axis axis = AxisUtils.getFor(v);
+                            final Direction.Axis axis = AxisUtil.getFor(v);
                             final EnumProperty<Direction.Axis> property = RotatedPillarBlock.AXIS;
-                            if (property.getAllowedValues().size() < 3 && !property.getAllowedValues().contains(axis)) {
+                            if (property.getPossibleValues().size() < 3 && !property.getPossibleValues().contains(axis)) {
                                 return h;
                             }
-                            return h.with(property, axis);
+                            return h.setValue(property, axis);
                         })
                         .supports(h -> h.getBlock() instanceof RotatedPillarBlock);;
     }

@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.data.provider.block.location;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.util.INameable;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.LightType;
-import net.minecraft.world.World;
-import net.minecraft.world.biome.Biome;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.Nameable;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.NameableBlockEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -50,49 +50,49 @@ public final class ServerLocationData {
                 .asMutable(ServerLocation.class)
                     .create(Keys.BIOME_TEMPERATURE)
                         .get(h -> {
-                            final World world = (World) h.getWorld();
+                            final Level world = (Level) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h);
                             final Biome biome = world.getBiome(pos);
-                            return (double) biome.getDefaultTemperature();
+                            return (double) biome.getBaseTemperature();
                         })
                     .create(Keys.BLOCK_LIGHT)
                         .get(h -> {
-                            final World world = (World) h.getWorld();
-                            return world.getLightFor(LightType.BLOCK, VecHelper.toBlockPos(h));
+                            final Level world = (Level) h.getWorld();
+                            return world.getBrightness(LightLayer.BLOCK, VecHelper.toBlockPos(h));
                         })
                     .create(Keys.BLOCK_TEMPERATURE)
                         .get(h -> {
-                            final World world = (World) h.getWorld();
+                            final Level world = (Level) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h);
                             final Biome biome = world.getBiome(pos);
                             return (double) biome.getTemperature(pos);
                         })
                     .create(Keys.SKY_LIGHT)
                         .get(h -> {
-                            final World world = (World) h.getWorld();
+                            final Level world = (Level) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h);
-                            return world.getLightFor(LightType.SKY, pos);
+                            return world.getBrightness(LightLayer.SKY, pos);
                         })
                     .create(Keys.IS_FULL_BLOCK)
                         .get(h -> {
                             final BlockState block = (BlockState) h.getBlock();
-                            final World world = (World) h.getWorld();
+                            final Level world = (Level) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h.getPosition());
-                            return block.isOpaqueCube(world, pos);
+                            return block.isSolidRender(world, pos);
                         })
                     .create(Keys.IS_INDIRECTLY_POWERED)
                         .get(h -> {
-                            final World world = (World) h.getWorld();
+                            final Level world = (Level) h.getWorld();
                             final BlockPos pos = VecHelper.toBlockPos(h);
-                            return world.getRedstonePowerFromNeighbors(pos) > 0;
+                            return world.getBestNeighborSignal(pos) > 0;
                         })
                     .create(Keys.DISPLAY_NAME)
-                        .get(h -> SpongeAdventure.asAdventure(((INameable)h.getBlockEntity().get()).getDisplayName()))
+                        .get(h -> SpongeAdventure.asAdventure(((Nameable)h.getBlockEntity().get()).getDisplayName()))
                         .supports(h -> h.getBlockEntity().isPresent() && h.getBlockEntity().get() instanceof NameableBlockEntity)
                     .create(Keys.CUSTOM_NAME)
                         .get(h -> {
                             final BlockEntity blockEntity = h.getBlockEntity().get();
-                            return ((INameable) blockEntity).hasCustomName() ? SpongeAdventure.asAdventure(((INameable)blockEntity).getCustomName()) : null;
+                            return ((Nameable) blockEntity).hasCustomName() ? SpongeAdventure.asAdventure(((Nameable)blockEntity).getCustomName()) : null;
                         })
                         .set((h, v) -> (((CustomNameableBridge)h.getBlockEntity().get())).bridge$setCustomDisplayName(SpongeAdventure.asVanilla(v)))
                         .delete(h -> (((CustomNameableBridge)h.getBlockEntity().get())).bridge$setCustomDisplayName(null))

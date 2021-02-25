@@ -35,53 +35,29 @@ import java.util.UUID;
 @ConfigSerializable
 public final class WorldCategory {
 
-    @Setting(value = "auto-player-save-interval")
+    @Setting(value = "player-auto-save-interval")
     @Comment("The auto-save tick interval used when saving global player data. (Default: 6000) \n"
                                                           + "Note: 20 ticks is equivalent to 1 second. Set to 0 to disable.")
-    private int autoPlayerSaveInterval = 6000;
+    public int playerAutoSaveInterval = 6000;
 
     @Setting(value = "leaf-decay")
     @Comment("If 'true', natural leaf decay is allowed.")
-    private boolean leafDecay = true;
+    public boolean leafDecay = true;
 
-    @Setting(value = "gameprofile-lookup-task-interval")
+    @Setting(value = "game-profile-lookup-task-interval")
     @Comment("The interval, in seconds, used by the GameProfileQueryTask to process queued GameProfile requests. (Default: 4) \n"
                                                                  + "Note: This setting should be raised if you experience the following error: \n"
                                                                  + "\"The client has sent too many requests within a certain amount of time\". \n"
                                                                  + "Finally, if set to 0 or less, the default interval will be used.")
-    private int gameProfileQueryTaskInterval = 4;
+    public int gameProfileQueryTaskInterval = 4;
 
     @Setting(value = "invalid-lookup-uuids")
     @Comment("The list of uuid's that should never perform a lookup against Mojang's session server. \n"
                                                      + "Note: If you are using SpongeForge, make sure to enter any mod fake player's UUID to this list.")
-    private List<UUID> invalidLookupUuids = new ArrayList<>();
+    public final List<UUID> invalidLookupUuids = new ArrayList<>();
 
     public WorldCategory() {
         this.invalidLookupUuids.add(UUID.fromString("00000000-0000-0000-0000-000000000000"));
-        this.invalidLookupUuids.add(UUID.fromString("0d0c4ca0-4ff1-11e4-916c-0800200c9a66")); // ComputerCraft FakePlayer
         this.invalidLookupUuids.add(UUID.fromString("41c82c87-7afb-4024-ba57-13d2c99cae77")); // Forge FakePlayer
-    }
-
-    public int getAutoPlayerSaveInterval() {
-        return this.autoPlayerSaveInterval;
-    }
-
-    public boolean getLeafDecay() {
-        return this.leafDecay;
-    }
-
-    public void setLeafDecay(final boolean flag) {
-        this.leafDecay = flag;
-    }
-
-    public int getGameProfileQueryTaskInterval() {
-        if (this.gameProfileQueryTaskInterval <= 0) {
-            this.gameProfileQueryTaskInterval = 4;
-        }
-        return this.gameProfileQueryTaskInterval;
-    }
-
-    public List<UUID> getInvalidLookupUuids() {
-        return this.invalidLookupUuids;
     }
 }

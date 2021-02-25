@@ -38,9 +38,7 @@ import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
-import java.util.function.Function;
 import java.util.function.Predicate;
-import java.util.function.Supplier;
 
 public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Builder<T> {
 
@@ -52,7 +50,6 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     @Nullable private ValueCompleter completer;
     @Nullable private ValueUsage usage;
     @Nullable private Predicate<CommandCause> executionRequirements;
-    @Nullable private Function<CommandCause, T> defaultValueFunction;
     private boolean consumesAll;
     private boolean isOptional;
     private boolean terminal;
@@ -93,7 +90,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     @Override
     public Parameter.Value.@NonNull Builder<T> setRequiredPermission(@Nullable final String permission) {
         if (permission == null) {
-            return this.setUsage(null);
+            return this.setRequirements(null);
         } else {
             return this.setRequirements(commandCause -> commandCause.getSubject().hasPermission(permission));
         }
@@ -118,17 +115,6 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> orDefault(@NonNull final Supplier<T> defaultValueSupplier) {
-        return this.orDefault((cause) -> defaultValueSupplier.get());
-    }
-
-    @Override
-    public Parameter.Value.@NonNull Builder<T> orDefault(@Nullable final Function<CommandCause, T> defaultValueFunction) {
-        this.defaultValueFunction = defaultValueFunction;
-        return this;
-    }
-
-    @Override
     public Parameter.Value.@NonNull Builder<T> terminal() {
         this.terminal = true;
         return this;
@@ -138,7 +124,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     @NonNull
     public SpongeParameterValue<T> build() throws IllegalStateException {
         Preconditions.checkState(this.key != null, "The command key may not be null");
-        Preconditions.checkState(!this.parsers.isEmpty() || this.defaultValueFunction != null, "There must be parsers or a default");
+        Preconditions.checkState(!this.parsers.isEmpty(), "There must be parsers");
         final ImmutableList.Builder<ValueParser<? extends T>> parsersBuilder = ImmutableList.builder();
         parsersBuilder.addAll(this.parsers);
 
@@ -172,7 +158,6 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
 
         return new SpongeParameterValue<>(
                 parsersBuilder.build(),
-                this.defaultValueFunction,
                 completer,
                 this.usage,
                 this.executionRequirements == null ? commandCause -> true : this.executionRequirements,
@@ -189,7 +174,6 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
         this.parsers.clear();
         this.completer = null;
         this.usage = null;
-        this.defaultValueFunction = null;
         this.isOptional = false;
         this.consumesAll = false;
         return this;

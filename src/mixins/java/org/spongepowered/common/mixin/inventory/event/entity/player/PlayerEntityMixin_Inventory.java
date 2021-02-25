@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity.player;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -41,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -49,46 +44,52 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(value = PlayerEntity.class)
+@Mixin(value = Player.class)
 public class PlayerEntityMixin_Inventory {
 
-    @Final @Shadow public net.minecraft.entity.player.PlayerInventory inventory;
-    @Shadow public Container openContainer;
+    @Final @Shadow public net.minecraft.world.entity.player.Inventory inventory;
+    @Shadow public AbstractContainerMenu containerMenu;
 
-    @Inject(method = "setItemStackToSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/util/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
-    private void onSetItemStackToSlot(final EquipmentSlotType slotIn, final ItemStack stack, final CallbackInfo ci)
+    @Inject(method = "setItemSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
+    private void onSetItemStackToSlot(final EquipmentSlot slotIn, final ItemStack stack, final CallbackInfo ci)
     {
         if (((TrackedInventoryBridge) this.inventory).bridge$capturingInventory()) {
             List<SlotTransaction> slotTransactions = ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions();
-            if (slotIn == EquipmentSlotType.MAINHAND) {
-                final ItemStack orig = this.inventory.mainInventory.get(this.inventory.currentItem);
-                final Slot slot = ((PlayerInventory) this.inventory).getPrimary().getHotbar().getSlot(this.inventory.currentItem).get();
+            if (slotIn == EquipmentSlot.MAINHAND) {
+                final ItemStack orig = this.inventory.items.get(this.inventory.selected);
+                final Slot slot = ((PlayerInventory) this.inventory).getPrimary().getHotbar().getSlot(this.inventory.selected).get();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
-            } else if (slotIn == EquipmentSlotType.OFFHAND) {
-                final ItemStack orig = this.inventory.offHandInventory.get(0);
+            } else if (slotIn == EquipmentSlot.OFFHAND) {
+                final ItemStack orig = this.inventory.offhand.get(0);
                 final Slot slot = ((PlayerInventory) this.inventory).getOffhand();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
-            } else if (slotIn.getSlotType() == EquipmentSlotType.Group.ARMOR) {
-                final ItemStack orig = this.inventory.armorInventory.get(slotIn.getIndex());
+            } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
+                final ItemStack orig = this.inventory.armor.get(slotIn.getIndex());
                 final Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(slotIn.getIndex()).get();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             }
         }
     }
 
-    @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/inventory/container/Container;onContainerClosed(Lnet/minecraft/entity/player/PlayerEntity;)V"))
-    private void onOnContainerClosed(final Container container, final PlayerEntity player) {
+    @Redirect(method = "remove", at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;removed(Lnet/minecraft/world/entity/player/Player;)V"))
+    private void inventory$switchToCloseWindowState(final AbstractContainerMenu container, final Player player) {
 
         // TODO Minecraft 1.14 - Know if the server is shutting down
 
         // Corner case where the server is shutting down on the client, the server player is also being killed off.
         if (Sponge.isServerAvailable() && Sponge.isClientAvailable()) {
-            container.onContainerClosed(player);
+            container.removed(player);
             return;
         }
-        if (player instanceof ServerPlayerEntity) {
-            final ServerPlayerEntity serverPlayer = (ServerPlayerEntity) player;
+        if (player instanceof ServerPlayer) {
+            final ServerPlayer serverPlayer = (ServerPlayer) player;
 
             try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext(PhaseTracker.SERVER)
                     .source(serverPlayer)
@@ -96,13 +97,13 @@ public class PlayerEntityMixin_Inventory {
                     .openContainer(container)) {
                 // intentionally missing the lastCursor to not double throw close event
                 ctx.buildAndSwitch();
-                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getItemStack());
-                container.onContainerClosed(player);
-                SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.openContainer, serverPlayer, cursor, ItemStackSnapshot.empty(), false);
+                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getCarried());
+                container.removed(player);
+                SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.containerMenu, serverPlayer, cursor, ItemStackSnapshot.empty(), false);
             }
         } else {
             // Proceed as normal with client code
-            container.onContainerClosed(player);
+            container.removed(player);
         }
     }
 

@@ -24,16 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.inventory.container;
 
-import net.minecraft.enchantment.EnchantmentData;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.EnchantmentContainer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.IntReferenceHolder;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -53,29 +43,38 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
 import java.util.Random;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.enchantment.EnchantmentHelper;
+import net.minecraft.world.item.enchantment.EnchantmentInstance;
+import net.minecraft.world.level.Level;
 
-@Mixin(value = EnchantmentContainer.class)
+@Mixin(value = EnchantmentMenu.class)
 public abstract class EnchantmentContainerMixin_Inventory {
 
-    @Shadow @Final private Random rand;
-    @Shadow @Final private IntReferenceHolder xpSeed;
-    @Shadow @Final private IInventory tableInventory;
+    @Shadow @Final private DataSlot enchantmentSeed;
+    @Shadow @Final private Container enchantSlots;
 
     private ItemStackSnapshot prevItem;
     private ItemStackSnapshot prevLapis;
 
     // onCraftMatrixChanged lambda
-    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/enchantment/EnchantmentHelper;calcItemStackEnchantability(Ljava/util/Random;IILnet/minecraft/item/ItemStack;)I"), require = 1)
+    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/enchantment/EnchantmentHelper;getEnchantmentCost(Ljava/util/Random;IILnet/minecraft/world/item/ItemStack;)I"), require = 1)
     private int impl$onCalcItemStackEnchantability(Random random, int option, int power, ItemStack itemStack) {
-        int levelRequirement = EnchantmentHelper.calcItemStackEnchantability(random, option, power, itemStack);
-        levelRequirement = InventoryEventFactory.callEnchantEventLevelRequirement((EnchantmentContainer)(Object) this, this.xpSeed.get(), option, power, itemStack, levelRequirement);
+        int levelRequirement = EnchantmentHelper.getEnchantmentCost(random, option, power, itemStack);
+        levelRequirement = InventoryEventFactory.callEnchantEventLevelRequirement((EnchantmentMenu)(Object) this, this.enchantmentSeed.get(), option, power, itemStack, levelRequirement);
         return levelRequirement;
     }
 
     @Inject(method = "getEnchantmentList", cancellable = true, at = @At(value = "RETURN"))
-    private void impl$onBuildEnchantmentList(ItemStack stack, int enchantSlot, int level, CallbackInfoReturnable<List<EnchantmentData>> cir) {
-        List<EnchantmentData> newList = InventoryEventFactory
-                .callEnchantEventEnchantmentList((EnchantmentContainer) (Object) this, this.xpSeed.get(), stack, enchantSlot, level, cir.getReturnValue());
+    private void impl$onBuildEnchantmentList(ItemStack stack, int enchantSlot, int level, CallbackInfoReturnable<List<EnchantmentInstance>> cir) {
+        List<EnchantmentInstance> newList = InventoryEventFactory
+                .callEnchantEventEnchantmentList((EnchantmentMenu) (Object) this, this.enchantmentSeed.get(), stack, enchantSlot, level, cir.getReturnValue());
 
         if (cir.getReturnValue() != newList) {
             cir.setReturnValue(newList);
@@ -83,29 +82,29 @@ public abstract class EnchantmentContainerMixin_Inventory {
     }
 
     // enchantItem lambda
-    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;onEnchant(Lnet/minecraft/item/ItemStack;I)V"), require = 1)
+    @Inject(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;onEnchantmentPerformed(Lnet/minecraft/world/item/ItemStack;I)V"), require = 1)
     private void impl$beforeEnchantItem(CallbackInfo ci) {
-        this.prevItem = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(0));
-        this.prevLapis = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(1));
+        this.prevItem = ItemStackUtil.snapshotOf(this.enchantSlots.getItem(0));
+        this.prevLapis = ItemStackUtil.snapshotOf(this.enchantSlots.getItem(1));
     }
 
     // enchantItem lambda
     @Inject(method = "*", cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/PlayerEntity;addStat(Lnet/minecraft/util/ResourceLocation;)V"), require = 1)
-    private void impl$afterEnchantItem(ItemStack itemstack, int id, PlayerEntity playerIn, int i, ItemStack itemstack1, World arg5, BlockPos arg6, CallbackInfo ci) {
-        ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(0));
-        ItemStackSnapshot newLapis = ItemStackUtil.snapshotOf(this.tableInventory.getStackInSlot(1));
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;awardStat(Lnet/minecraft/resources/ResourceLocation;)V"), require = 1)
+    private void impl$afterEnchantItem(ItemStack itemstack, int id, Player playerIn, int i, ItemStack itemstack1, Level arg5, BlockPos arg6, CallbackInfo ci) {
+        ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(this.enchantSlots.getItem(0));
+        ItemStackSnapshot newLapis = ItemStackUtil.snapshotOf(this.enchantSlots.getItem(1));
 
-        org.spongepowered.api.item.inventory.Container container = ContainerUtil.fromNative((Container) (Object) this);
+        org.spongepowered.api.item.inventory.Container container = ContainerUtil.fromNative((AbstractContainerMenu) (Object) this);
 
         Slot slotItem = ((InventoryAdapter) container).inventoryAdapter$getSlot(0).get();
         Slot slotLapis = ((InventoryAdapter) container).inventoryAdapter$getSlot(1).get();
 
         EnchantItemEvent.Post event =
-                InventoryEventFactory.callEnchantEventEnchantPost(playerIn, (EnchantmentContainer) (Object) this,
+                InventoryEventFactory.callEnchantEventEnchantPost(playerIn, (EnchantmentMenu) (Object) this,
                         new SlotTransaction(slotItem, this.prevItem, newItem),
                         new SlotTransaction(slotLapis, this.prevLapis, newLapis),
-                        id, this.xpSeed.get());
+                        id, this.enchantmentSeed.get());
 
         if (event.isCancelled()) {
             ci.cancel();

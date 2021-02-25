@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.builder.item;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundNBT;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataBuilder;
@@ -34,7 +34,8 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.Constants;
@@ -43,6 +44,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
 
 public final class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilder<ItemStackSnapshot> implements DataBuilder<ItemStackSnapshot> {
 
@@ -53,15 +55,15 @@ public final class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilde
     @Override
     protected Optional<ItemStackSnapshot> buildContent(DataView container) throws InvalidDataException {
         if (container.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
-            final ItemType itemType = container.getCatalogType(Constants.ItemStack.TYPE, ItemType.class).get();
+            final ItemType itemType = container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, Sponge.getGame().registries()).get();
             if (itemType == ItemTypes.AIR.get()) {
                 return Optional.of(ItemStackSnapshot.empty());
             }
             final int count = container.getInt(Constants.ItemStack.COUNT).get();
 
-            @Nullable final CompoundNBT compound;
+            @Nullable final CompoundTag compound;
             if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-                compound = NbtTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+                compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
                 SpongeItemStackBuilder.fixEnchantmentData(itemType, compound);
             } else {
                 compound = null;

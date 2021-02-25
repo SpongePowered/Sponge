@@ -25,8 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.client.CEnchantItemPacket;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -36,21 +34,24 @@ import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
+import net.minecraft.server.level.ServerPlayer;
 
 public final class EnchantItemPacketState extends BasicInventoryPacketState {
 
     @Override
     public void unwind(InventoryPacketContext context) {
         // TODO - Pre changes of merging PacketFunction into the phase states, enchantments did NOT have any processing....
-        final ServerPlayerEntity player = context.getPacketPlayer();
+        final ServerPlayer player = context.getPacketPlayer();
 
         // The server will disable the player's crafting after receiving a
         // client packet
@@ -65,22 +66,22 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         // See NetHandlerPlayServerMixin processClickWindow redirect for rest of
         // fix.
         // --bloodmc
-        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
+        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
         if (!trackedInventory.bridge$capturingInventory()) {
             trackedInventory.bridge$getCapturedSlotTransactions().clear();
             return;
         }
 
         // TODO clear this shit out of the context
-        final CEnchantItemPacket packetIn = context.getPacket();
+        final ServerboundContainerButtonClickPacket packetIn = context.getPacket();
         final ItemStackSnapshot lastCursor = context.getCursor();
-        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
+        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
 
-        final net.minecraft.inventory.container.Container openContainer = player.openContainer;
+        final net.minecraft.world.inventory.AbstractContainerMenu openContainer = player.containerMenu;
         final List<SlotTransaction> slotTransactions = trackedInventory.bridge$getCapturedSlotTransactions();
 
-        final int usedButton = packetIn.getButton();
+        final int usedButton = packetIn.getButtonId();
         final List<Entity> capturedItems = new ArrayList<>();
         final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
         try (CauseStackManager.StackFrame frame = causeStackManager.pushCauseFrame()) {
@@ -111,7 +112,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
                 // Therefore, we never add any 'fake' transactions, as the final
                 // packet has everything we want.
                 if (!(inventoryEvent instanceof ClickContainerEvent.Drag)) {
-                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getWindowId(), openContainer, inventoryEvent.getTransactions());
+                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getContainerId(), openContainer, inventoryEvent.getTransactions());
                 }
 
                 SpongeCommon.postEvent(inventoryEvent);
@@ -135,7 +136,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
                         PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
                     }
                     if (inventoryEvent instanceof SpawnEntityEvent) {
-                        processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
+                        PacketState.processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
                     } else {
 //                        context.getCapturedEntitySupplier().acceptAndClearIfNotEmpty(entities -> {
 //                            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);

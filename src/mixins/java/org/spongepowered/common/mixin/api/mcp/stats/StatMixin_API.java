@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.stats;
 
-import net.minecraft.stats.IStatFormatter;
 import net.minecraft.stats.Stat;
+import net.minecraft.stats.StatFormatter;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.stats.StatBridge;
+import org.spongepowered.common.bridge.stats.StatFormatterBridge;
 
 import java.text.NumberFormat;
 import java.util.Optional;
@@ -39,7 +39,9 @@ import java.util.Optional;
 @Mixin(Stat.class)
 public abstract class StatMixin_API implements Statistic {
 
-    @Shadow @Final private IStatFormatter formatter;
+    // @formatter:off
+    @Shadow @Final private StatFormatter formatter;
+    // @formatter:on
 
     @Override
     public Optional<Criterion> getCriterion() {
@@ -48,6 +50,6 @@ public abstract class StatMixin_API implements Statistic {
 
     @Override
     public NumberFormat getFormat() {
-        return ((StatBridge) this.formatter).bridge$getFormat();
+        return ((StatFormatterBridge) this.formatter).bridge$getFormat();
     }
 }

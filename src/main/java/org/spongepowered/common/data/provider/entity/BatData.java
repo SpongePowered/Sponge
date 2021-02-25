@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.BatEntity;
+import net.minecraft.world.entity.ambient.Bat;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -36,10 +36,10 @@ public final class BatData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(BatEntity.class)
+                .asMutable(Bat.class)
                     .create(Keys.IS_SLEEPING)
-                        .get(BatEntity::getIsBatHanging)
-                        .set(BatEntity::setIsBatHanging);
+                        .get(Bat::isResting)
+                        .set(Bat::setResting);
     }
     // @formatter:on
 }

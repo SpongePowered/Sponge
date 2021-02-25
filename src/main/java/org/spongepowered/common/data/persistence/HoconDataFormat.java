@@ -24,17 +24,15 @@
  */
 package org.spongepowered.common.data.persistence;
 
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.CommentedConfigurationNode;
-import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.InvalidDataFormatException;
 import org.spongepowered.api.data.persistence.StringDataFormat;
-import org.spongepowered.common.SpongeCatalogType;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -50,11 +48,7 @@ import java.io.Writer;
 import java.nio.charset.StandardCharsets;
 import java.util.concurrent.Callable;
 
-public class HoconDataFormat extends SpongeCatalogType implements StringDataFormat {
-
-    public HoconDataFormat(final ResourceKey key) {
-        super(key);
-    }
+public final class HoconDataFormat implements StringDataFormat {
 
     @Override
     public DataContainer read(final String input) throws InvalidDataException, IOException {
@@ -92,7 +86,7 @@ public class HoconDataFormat extends SpongeCatalogType implements StringDataForm
 
     @Override
     public void writeTo(final Writer output, final DataView data) throws IOException {
-        HoconDataFormat.writeTo(() -> createBufferedWriter(output), data);
+        HoconDataFormat.writeTo(() -> HoconDataFormat.createBufferedWriter(output), data);
     }
 
     @Override

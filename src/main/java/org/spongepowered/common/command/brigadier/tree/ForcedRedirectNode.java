@@ -25,9 +25,9 @@
 package org.spongepowered.common.command.brigadier.tree;
 
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 public interface ForcedRedirectNode {
 
-    void setForcedRedirect(CommandNode<ISuggestionProvider> node);
+    void setForcedRedirect(CommandNode<SharedSuggestionProvider> node);
 }

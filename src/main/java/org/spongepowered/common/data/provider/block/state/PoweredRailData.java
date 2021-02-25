@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.PoweredRailBlock;
+import net.minecraft.world.level.block.PoweredRailBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,8 +39,8 @@ public final class PoweredRailData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(PoweredRailBlock.POWERED))
-                        .set((h, v) -> h.with(PoweredRailBlock.POWERED, v))
+                        .get(h -> h.getValue(PoweredRailBlock.POWERED))
+                        .set((h, v) -> h.setValue(PoweredRailBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof PoweredRailBlock);
     }
     // @formatter:on

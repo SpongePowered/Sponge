@@ -29,7 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.scoreboard.ScorePlayerTeam;
+import net.minecraft.world.scores.PlayerTeam;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.CollisionRules;
 import org.spongepowered.api.scoreboard.Team;
@@ -43,7 +43,7 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
-public class SpongeTeamBuilder implements Team.Builder {
+public final class SpongeTeamBuilder implements Team.Builder {
 
     @Nullable private String name;
     @Nullable private Component displayName;
@@ -174,7 +174,7 @@ public class SpongeTeamBuilder implements Team.Builder {
         checkState(this.name != null, "Name cannot be null!");
         checkState(this.displayName != null, "DisplayName cannot be null!");
 
-        final Team team = (Team) new ScorePlayerTeam(null, this.name);
+        final Team team = (Team) new PlayerTeam(null, this.name);
         team.setDisplayName(this.displayName);
         team.setColor(this.color);
         team.setPrefix(this.prefix);

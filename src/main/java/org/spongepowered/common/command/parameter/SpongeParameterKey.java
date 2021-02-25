@@ -46,7 +46,7 @@ public final class SpongeParameterKey<T> implements Parameter.Key<T> {
             return (SpongeParameterKey<T>) key;
         }
 
-        return (SpongeParameterKey<T>) keyCache.computeIfAbsent(key, SpongeParameterKey::new);
+        return (SpongeParameterKey<T>) SpongeParameterKey.keyCache.computeIfAbsent(key, SpongeParameterKey::new);
     }
 
     private SpongeParameterKey(final Parameter.@NonNull Key<T> parameterKey) {

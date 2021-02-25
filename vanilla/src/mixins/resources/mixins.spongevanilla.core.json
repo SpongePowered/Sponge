@@ -1,0 +1,41 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "org.spongepowered.vanilla.mixin.core",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "priority": 1301,
+    "client": [
+        "client.ClientBrandRetrieverMixin_Vanilla",
+        "client.MinecraftMixin_Vanilla",
+        "client.gui.screens.TitleScreenMixin_Vanilla",
+        "client.multiplayer.ClientHandshakePacketListenerImplMixin_Vanilla",
+        "client.multiplayer.ClientPacketListenerMixin_Vanilla",
+        "client.server.IntegratedServerMixin_Vanilla"
+    ],
+    "server": [
+        "server.dedicated.DedicatedServerMixin_Vanilla",
+        "server.dedicated.DedicatedServer_1_Mixin_Vanilla"
+    ],
+    "mixins": [
+        "CrashReportMixin_Vanilla",
+        "core.MappedRegistryMixin_Vanilla",
+        "core.RegistryMixin_Vanilla",
+        "core.WritableRegistryMixin_Vanilla",
+        "entity.item.minecart.EnderPearlEntityMixin_Vanilla",
+        "entity.player.EntityMixin_Vanilla",
+        "server.BootstrapMixin_Vanilla",
+        "server.MinecraftServerMixin_Vanilla",
+        "server.level.ServerPlayerMixin_Vanilla",
+        "server.network.ServerGamePacketListenerImplMixin_Vanilla",
+        "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
+        "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
+        "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    },
+    "overwrites": {
+        "conformVisibility": true
+    }
+}

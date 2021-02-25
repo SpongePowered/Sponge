@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
+import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.common.applaunch.config.core.Config;
+import org.spongepowered.configurate.transformation.ConfigurationTransformation;
+import org.spongepowered.configurate.transformation.TransformAction;
 
 import java.util.HashMap;
 import java.util.List;
@@ -41,106 +44,73 @@ import java.util.Map;
  * the configuration and its categories <em>may not reference
  * Minecraft classes</em></p>
  */
-public class CommonConfig implements Config {
+public final class CommonConfig implements Config {
 
     public static final String FILE_NAME = "sponge.conf";
 
     @Setting
-    private GeneralCategory general = new GeneralCategory();
+    public final GeneralCategory general = new GeneralCategory();
 
     @Setting
     @Comment("Configuration options related to the SQL manager, including connection aliases etc")
-    private SqlCategory sql = new SqlCategory();
+    public final SqlCategory sql = new SqlCategory();
 
     @Setting
-    private CommandsCategory commands = new CommandsCategory();
+    public final CommandsCategory commands = new CommandsCategory();
 
     @Setting
-    private PermissionCategory permission = new PermissionCategory();
+    public final PermissionCategory permissions = new PermissionCategory();
 
-    @Setting("modules")
-    private ModuleCategory mixins = new ModuleCategory();
+    @Setting
+    public final ModuleCategory modules = new ModuleCategory();
 
     @Setting("ip-sets")
-    private Map<String, List<String>> ipSets = new HashMap<>();
-
-    @Setting("bungeecord")
-    private BungeeCordCategory bungeeCord = new BungeeCordCategory();
+    public final Map<String, List<String>> ipSets = new HashMap<>();
 
     @Setting
-    private ExploitCategory exploits = new ExploitCategory();
+    public final IpForwardingCategory ipForwarding = new IpForwardingCategory();
 
-    @Setting("optimizations")
-    private OptimizationCategory optimizations = new OptimizationCategory();
+    @Setting
+    public final ExploitCategory exploits = new ExploitCategory();
 
-    @Setting("cause-tracker")
-    private PhaseTrackerCategory causeTracker = new PhaseTrackerCategory();
+    @Setting
+    public final OptimizationCategory optimizations = new OptimizationCategory();
+
+    @Setting("phase-tracker")
+    public final PhaseTrackerCategory phaseTracker = new PhaseTrackerCategory();
 
     @Setting("teleport-helper")
     @Comment("Blocks to blacklist for safe teleportation.")
-    private TeleportHelperCategory teleportHelper = new TeleportHelperCategory();
+    public final TeleportHelperCategory teleportHelper = new TeleportHelperCategory();
 
-    @Setting("broken-mods")
-    @Comment("Stopgap measures for dealing with broken mods")
-    private BrokenModCategory brokenMods = new BrokenModCategory();
-
-    @Setting("service-registration")
+    @Setting
     @Comment("Enables server owners to require specific plugins to provide Sponge services")
-    private ServicesCategory servicesCategory = new ServicesCategory();
+    public final ServicesCategory services = new ServicesCategory();
 
     @Setting
-    private DebugCategory debug = new DebugCategory();
+    public final DebugCategory debug = new DebugCategory();
 
     @Setting
-    private TimingsCategory timings = new TimingsCategory();
+    public final TimingsCategory timings = new TimingsCategory();
 
     @Setting
-    private WorldCategory world = new WorldCategory();
+    public final WorldCategory world = new WorldCategory();
 
-
-    public CommonConfig() {
-        super();
-    }
-
-    public GeneralCategory getGeneral() {
-        return this.general;
-    }
-
-    public BrokenModCategory getBrokenMods() {
-        return this.brokenMods;
-    }
-
-    public BungeeCordCategory getBungeeCord() {
-        return this.bungeeCord;
-    }
-
-    public SqlCategory getSql() {
-        return this.sql;
-    }
-
-    public CommandsCategory getCommands() {
-        return this.commands;
-    }
-
-    public PermissionCategory getPermission() {
-        return this.permission;
-    }
-
-    public ModuleCategory getModules() {
-        return this.mixins;
-    }
-
-    public ServicesCategory getServicesCategory() {
-        return this.servicesCategory;
-    }
-
-
-    public ExploitCategory getExploits() {
-        return this.exploits;
-    }
-
-    public OptimizationCategory getOptimizations() {
-        return this.optimizations;
+    public static ConfigurationTransformation transformation() {
+        return ConfigurationTransformation.versionedBuilder()
+            .makeVersion(1, builder -> {
+                // Update IP forwarding
+                builder.addAction(NodePath.path("modules", "bungeecord"), TransformAction.rename("ip-forwarding"))
+                    .addAction(NodePath.path("bungeecord"), TransformAction.rename("ip-forwarding"))
+                    .addAction(NodePath.path("bungeecord", "ip-forwarding"), (path, value) -> {
+                        if (value.getBoolean()) {
+                            value.parent().node("mode").set(IpForwardingCategory.Mode.LEGACY);
+                        }
+                        value.set(null);
+                        return null;
+                    });
+            })
+            .build();
     }
 
     /* TODO(zml): Reimplement this when bringing in SpongeContextCalculator from invalid
@@ -152,25 +122,4 @@ public class CommonConfig implements Config {
         return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
     }
      */
-
-    public PhaseTrackerCategory getPhaseTracker() {
-        return this.causeTracker;
-    }
-
-    public TeleportHelperCategory getTeleportHelper() {
-        return this.teleportHelper;
-    }
-
-    public DebugCategory getDebug() {
-        return this.debug;
-    }
-
-    public TimingsCategory getTimings() {
-        return this.timings;
-    }
-
-    public WorldCategory getWorld() {
-        return this.world;
-    }
-
 }

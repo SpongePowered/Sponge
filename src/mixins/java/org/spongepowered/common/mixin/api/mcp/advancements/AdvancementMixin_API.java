@@ -28,11 +28,12 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
+import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -52,7 +53,7 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private Set<Advancement> children;
     @Shadow @Final private ResourceLocation id;
-    @Shadow @Final private ITextComponent displayText;
+    @Shadow @Final private net.minecraft.network.chat.Component chatComponent;
     @Shadow @Final private Advancement parent;
 
     @Override
@@ -97,7 +98,7 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
 
     @Override
     public Component asComponent() {
-        return SpongeAdventure.asAdventure(this.displayText);
+        return SpongeAdventure.asAdventure(this.chatComponent);
     }
 
     @Override
@@ -111,5 +112,10 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
             return null;
         }
         return this.display.getBackground().getPath();
+    }
+
+    @Override
+    public DataPackType type() {
+        return DataPackTypes.ADVANCEMENT;
     }
 }

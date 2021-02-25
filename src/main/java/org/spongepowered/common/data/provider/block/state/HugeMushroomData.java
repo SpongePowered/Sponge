@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.HugeMushroomBlock;
+import net.minecraft.world.level.block.HugeMushroomBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionalUtils;
+import org.spongepowered.common.util.DirectionalUtil;
 
 public final class HugeMushroomData {
 
@@ -40,33 +40,33 @@ public final class HugeMushroomData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.HAS_PORES_DOWN)
-                        .get(h -> h.get(HugeMushroomBlock.DOWN))
-                        .set((h, v) -> h.with(HugeMushroomBlock.DOWN, v))
+                        .get(h -> h.getValue(HugeMushroomBlock.DOWN))
+                        .set((h, v) -> h.setValue(HugeMushroomBlock.DOWN, v))
                         .supports(h -> h.getBlock() instanceof HugeMushroomBlock)
                     .create(Keys.HAS_PORES_EAST)
-                        .get(h -> h.get(HugeMushroomBlock.EAST))
-                        .set((h, v) -> h.with(HugeMushroomBlock.EAST, v))
+                        .get(h -> h.getValue(HugeMushroomBlock.EAST))
+                        .set((h, v) -> h.setValue(HugeMushroomBlock.EAST, v))
                         .supports(h -> h.getBlock() instanceof HugeMushroomBlock)
                     .create(Keys.HAS_PORES_NORTH)
-                        .get(h -> h.get(HugeMushroomBlock.NORTH))
-                        .set((h, v) -> h.with(HugeMushroomBlock.NORTH, v))
+                        .get(h -> h.getValue(HugeMushroomBlock.NORTH))
+                        .set((h, v) -> h.setValue(HugeMushroomBlock.NORTH, v))
                         .supports(h -> h.getBlock() instanceof HugeMushroomBlock)
                     .create(Keys.HAS_PORES_SOUTH)
-                        .get(h -> h.get(HugeMushroomBlock.SOUTH))
-                        .set((h, v) -> h.with(HugeMushroomBlock.SOUTH, v))
+                        .get(h -> h.getValue(HugeMushroomBlock.SOUTH))
+                        .set((h, v) -> h.setValue(HugeMushroomBlock.SOUTH, v))
                         .supports(h -> h.getBlock() instanceof HugeMushroomBlock)
                     .create(Keys.HAS_PORES_UP)
-                        .get(h -> h.get(HugeMushroomBlock.UP))
-                        .set((h, v) -> h.with(HugeMushroomBlock.UP, v))
+                        .get(h -> h.getValue(HugeMushroomBlock.UP))
+                        .set((h, v) -> h.setValue(HugeMushroomBlock.UP, v))
                         .supports(h -> h.getBlock() instanceof HugeMushroomBlock)
                     .create(Keys.HAS_PORES_WEST)
-                        .get(h -> h.get(HugeMushroomBlock.WEST))
-                        .set((h, v) -> h.with(HugeMushroomBlock.WEST, v))
+                        .get(h -> h.getValue(HugeMushroomBlock.WEST))
+                        .set((h, v) -> h.setValue(HugeMushroomBlock.WEST, v))
                         .supports(h -> h.getBlock() instanceof HugeMushroomBlock)
                     .create(Keys.PORES)
-                        .get(h -> DirectionalUtils.getHorizontalUpDownFrom(h, HugeMushroomBlock.EAST, HugeMushroomBlock.WEST, HugeMushroomBlock.NORTH,
+                        .get(h -> DirectionalUtil.getHorizontalUpDownFrom(h, HugeMushroomBlock.EAST, HugeMushroomBlock.WEST, HugeMushroomBlock.NORTH,
                                 HugeMushroomBlock.SOUTH, HugeMushroomBlock.UP, HugeMushroomBlock.DOWN))
-                        .set((h, v) -> DirectionalUtils.setHorizontalUpDownFor(h, v, HugeMushroomBlock.EAST, HugeMushroomBlock.WEST,
+                        .set((h, v) -> DirectionalUtil.setHorizontalUpDownFor(h, v, HugeMushroomBlock.EAST, HugeMushroomBlock.WEST,
                                 HugeMushroomBlock.NORTH, HugeMushroomBlock.SOUTH, HugeMushroomBlock.UP, HugeMushroomBlock.DOWN))
                         .supports(h -> h.getBlock() instanceof HugeMushroomBlock);
     }

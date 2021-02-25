@@ -26,7 +26,7 @@ package org.spongepowered.common.advancement.criterion;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.advancements.ICriterionInstance;
+import net.minecraft.advancements.CriterionTriggerInstance;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 
 public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreAdvancementCriterion, ScoreAdvancementCriterion.Builder>
@@ -40,7 +40,7 @@ public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreA
 
     @Override
     ScoreAdvancementCriterion build0() {
-        return new SpongeScoreCriterion(this.name, this.goal, (ICriterionInstance) this.trigger);
+        return new SpongeScoreCriterion(this.name, this.goal, (CriterionTriggerInstance) this.trigger);
     }
 
     @Override

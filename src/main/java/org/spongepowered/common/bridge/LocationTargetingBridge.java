@@ -29,7 +29,7 @@ import org.spongepowered.math.vector.Vector3d;
 
 public interface LocationTargetingBridge {
 
-    Vector3d bridge$getTargetedLocation();
+    Vector3d bridge$getTargetedPosition();
 
-    void bridge$setTargetedLocation(@Nullable Vector3d vec);
+    void bridge$setTargetedPosition(@Nullable Vector3d vec);
 }

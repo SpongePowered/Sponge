@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SkullBlock;
+import net.minecraft.world.level.block.SkullBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.RotationUtils;
+import org.spongepowered.common.util.RotationUtils;
 
 public final class SkullData {
 
@@ -40,7 +40,7 @@ public final class SkullData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> RotationUtils.getFor(h.get(SkullBlock.ROTATION)))
+                        .get(h -> RotationUtils.getFor(h.getValue(SkullBlock.ROTATION)))
                         .set((h, v) -> RotationUtils.set(h, v, SkullBlock.ROTATION))
                         .supports(h -> h.getBlock() instanceof SkullBlock);
     }

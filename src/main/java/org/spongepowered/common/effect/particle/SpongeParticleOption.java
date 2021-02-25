@@ -24,28 +24,25 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.effect.particle.ParticleOption;
-import org.spongepowered.common.SpongeCatalogType;
 
-import javax.annotation.Nullable;
 import java.util.function.Function;
 
-public final class SpongeParticleOption<V> extends SpongeCatalogType implements ParticleOption<V> {
+import javax.annotation.Nullable;
+
+public final class SpongeParticleOption<V> implements ParticleOption<V> {
 
     private final Class<V> valueType;
     @Nullable private final Function<V, IllegalArgumentException> valueValidator;
 
-    public SpongeParticleOption(ResourceKey key, Class<V> valueType,
-                                @Nullable Function<V, IllegalArgumentException> valueValidator) {
-        super(key);
+    public SpongeParticleOption(final Class<V> valueType,
+                                @Nullable final Function<V, IllegalArgumentException> valueValidator) {
         this.valueValidator = valueValidator;
         this.valueType = valueType;
     }
 
-    public SpongeParticleOption(ResourceKey key, Class<V> valueType) {
-        this(key, valueType, null);
+    public SpongeParticleOption(final Class<V> valueType) {
+        this(valueType, null);
     }
 
     @Nullable
@@ -59,12 +56,5 @@ public final class SpongeParticleOption<V> extends SpongeCatalogType implements 
     @Override
     public Class<V> getValueType() {
         return this.valueType;
-    }
-
-    @Override
-    protected MoreObjects.ToStringHelper toStringHelper() {
-        return super.toStringHelper()
-                .omitNullValues()
-                .add("valueType", this.valueType);
     }
 }

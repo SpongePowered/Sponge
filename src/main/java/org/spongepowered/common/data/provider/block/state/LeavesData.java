@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LeavesBlock;
+import net.minecraft.world.level.block.LeavesBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class LeavesData {
 
@@ -40,13 +40,13 @@ public final class LeavesData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_PERSISTENT)
-                        .get(h -> h.get(LeavesBlock.PERSISTENT))
-                        .set((h, v) -> h.with(LeavesBlock.PERSISTENT, v))
+                        .get(h -> h.getValue(LeavesBlock.PERSISTENT))
+                        .set((h, v) -> h.setValue(LeavesBlock.PERSISTENT, v))
                         .supports(h -> h.getBlock() instanceof LeavesBlock)
                     .create(Keys.DECAY_DISTANCE)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.DECAY_DISTANCE, LeavesBlock.DISTANCE))
-                        .get(h -> h.get(LeavesBlock.DISTANCE))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v,  LeavesBlock.DISTANCE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.DECAY_DISTANCE, LeavesBlock.DISTANCE))
+                        .get(h -> h.getValue(LeavesBlock.DISTANCE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v,  LeavesBlock.DISTANCE))
                         .supports(h -> h.getBlock() instanceof LeavesBlock);
     }
     // @formatter:on

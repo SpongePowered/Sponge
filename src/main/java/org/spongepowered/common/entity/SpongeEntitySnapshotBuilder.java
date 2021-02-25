@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.nbt.CompoundNBT;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
@@ -36,15 +36,15 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Transform;
-import org.spongepowered.api.world.storage.WorldProperties;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.data.holder.SimpleNbtDataHolder;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.api.world.server.storage.ServerWorldProperties;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.data.holder.SimpleNBTDataHolder;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
-import org.spongepowered.common.data.util.DataUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.lang.ref.WeakReference;
@@ -53,6 +53,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
 
 public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnapshot> implements EntitySnapshot.Builder {
 
@@ -62,9 +63,9 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     Vector3d scale;
     EntityType<?> entityType;
 
-    @Nullable UUID entityId;
+    @Nullable UUID uniqueId;
     @Nullable DataManipulator.Mutable manipulator;
-    @Nullable CompoundNBT compound;
+    @Nullable CompoundTag compound;
     @Nullable WeakReference<Entity> entityReference;
 
     public SpongeEntitySnapshotBuilder() {
@@ -72,43 +73,43 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder world(WorldProperties worldProperties) {
+    public SpongeEntitySnapshotBuilder world(final ServerWorldProperties worldProperties) {
         this.worldKey = Objects.requireNonNull(worldProperties).getKey();
         return this;
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder type(EntityType<?> entityType) {
+    public SpongeEntitySnapshotBuilder type(final EntityType<?> entityType) {
         this.entityType = Objects.requireNonNull(entityType);
         this.manipulator = null;
         this.compound = null;
-        this.entityId = null;
+        this.uniqueId = null;
         return this;
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder position(Vector3d position) {
+    public SpongeEntitySnapshotBuilder position(final Vector3d position) {
         this.position = Objects.requireNonNull(position);
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder rotation(Vector3d rotation) {
+    public SpongeEntitySnapshotBuilder rotation(final Vector3d rotation) {
         this.rotation = Objects.requireNonNull(rotation);
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder scale(Vector3d scale) {
+    public SpongeEntitySnapshotBuilder scale(final Vector3d scale) {
         this.scale = Objects.requireNonNull(scale);
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder id(UUID entityId) {
-        this.entityId = Objects.requireNonNull(entityId);
+    public SpongeEntitySnapshotBuilder id(final UUID entityId) {
+        this.uniqueId = Objects.requireNonNull(entityId);
         return this;
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder from(Entity entity) {
+    public SpongeEntitySnapshotBuilder from(final Entity entity) {
         this.reset();
         this.entityReference = new WeakReference<>(entity);
         this.worldKey = entity.getServerLocation().getWorldKey();
@@ -116,17 +117,18 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.rotation = entity.getTransform().getRotation();
         this.scale = entity.getTransform().getScale();
         this.entityType = entity.getType();
-        this.entityId = entity.getUniqueId();
-        this.manipulator = ((CustomDataHolderBridge) entity).bridge$getManipulator().copy();
-        this.compound = new CompoundNBT();
-        ((net.minecraft.entity.Entity) entity).writeWithoutTypeId(this.compound);
+        this.uniqueId = entity.getUniqueId();
+        this.manipulator = ((SpongeDataHolderBridge) entity).bridge$getManipulator().copy();
+        this.compound = new CompoundTag();
+        ((net.minecraft.world.entity.Entity) entity).saveWithoutId(this.compound);
         return this;
     }
 
     @Override
-    public <V> EntitySnapshot.Builder add(Key<? extends Value<V>> key, V value) {
-        Objects.requireNonNull(key, "key");
-        Objects.requireNonNull(this.entityType, "Must have a valid entity type before applying data!");
+    public <V> EntitySnapshot.Builder add(final Key<? extends Value<V>> key, final V value) {
+        Objects.requireNonNull(key);
+        Objects.requireNonNull(this.entityType);
+
         if (this.manipulator == null) {
             this.manipulator = DataManipulator.mutableOf();
         }
@@ -135,11 +137,12 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     }
 
     @Override
-    public SpongeEntitySnapshotBuilder from(EntitySnapshot holder) {
+    public SpongeEntitySnapshotBuilder from(final EntitySnapshot holder) {
+        this.reset();
         this.entityType = holder.getType();
         this.worldKey = holder.getWorld();
         if (holder.getUniqueId().isPresent()) {
-            this.entityId = holder.getUniqueId().get();
+            this.uniqueId = holder.getUniqueId().get();
         }
         this.position = holder.getPosition().toDouble();
         final Optional<Transform> optional = holder.getTransform();
@@ -155,21 +158,21 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder from(net.minecraft.entity.Entity minecraftEntity) {
+    public SpongeEntitySnapshotBuilder from(final net.minecraft.world.entity.Entity minecraftEntity) {
         this.entityType = ((Entity) minecraftEntity).getType();
         this.worldKey = ((Entity) minecraftEntity).getServerLocation().getWorldKey();
-        this.entityId = minecraftEntity.getUniqueID();
+        this.uniqueId = minecraftEntity.getUUID();
         final Transform transform = ((Entity) minecraftEntity).getTransform();
         this.position = transform.getPosition();
         this.rotation = transform.getRotation();
         this.scale = transform.getScale();
         this.manipulator = DataManipulator.mutableOf((Entity) minecraftEntity);
-        this.compound = new CompoundNBT();
-        minecraftEntity.writeWithoutTypeId(this.compound);
+        this.compound = new CompoundTag();
+        minecraftEntity.saveWithoutId(this.compound);
         return this;
     }
 
-    public SpongeEntitySnapshotBuilder unsafeCompound(CompoundNBT compound) {
+    public SpongeEntitySnapshotBuilder unsafeCompound(final CompoundTag compound) {
         this.compound = Objects.requireNonNull(compound).copy();
         return this;
     }
@@ -177,7 +180,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     @Override
     public SpongeEntitySnapshotBuilder reset() {
         this.worldKey = null;
-        this.entityId = null;
+        this.uniqueId = null;
         this.position = null;
         this.rotation = null;
         this.scale = null;
@@ -196,15 +199,15 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         Objects.requireNonNull(this.scale);
         Objects.requireNonNull(this.entityType);
 
-        EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
+        final EntitySnapshot snapshot = new SpongeEntitySnapshot(this);
 
         // Write the the manipulator values to NBT
         if (this.manipulator != null && !this.manipulator.getKeys().isEmpty()) {
             if (this.compound == null) {
-                this.compound = new CompoundNBT();
+                this.compound = new CompoundTag();
             }
 
-            final SimpleNbtDataHolder dataHolder = new SimpleNbtDataHolder(this.compound, NBTDataTypes.ENTITY);
+            final SimpleNBTDataHolder dataHolder = new SimpleNBTDataHolder(this.compound, NBTDataTypes.ENTITY);
             dataHolder.copyFrom(this.manipulator);
             this.compound = dataHolder.data$getCompound();
 
@@ -218,7 +221,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     }
 
     @Override
-    protected Optional<EntitySnapshot> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<EntitySnapshot> buildContent(final DataView container) throws InvalidDataException {
         if (!container.contains(Queries.WORLD_KEY, Constants.Entity.TYPE, Constants.Entity.ROTATION, Constants.Entity.SCALE, Constants.Sponge.SNAPSHOT_WORLD_POSITION)) {
             return Optional.empty();
         }
@@ -227,13 +230,13 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
         this.rotation = DataUtil.getPosition3d(container, Constants.Entity.ROTATION);
         this.scale = DataUtil.getPosition3d(container, Constants.Entity.SCALE);
         final String entityTypeId = container.getString(Constants.Entity.TYPE).get();
-        this.entityType = SpongeCommon.getRegistry().getCatalogRegistry().get(EntityType.class, net.kyori.adventure.key.Key.key(entityTypeId)).get();
+        this.entityType = Sponge.getGame().registries().registry(RegistryTypes.ENTITY_TYPE).value(ResourceKey.resolve(entityTypeId));
         this.manipulator = null; // lazy read from nbt
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
-            this.compound = NbtTranslator.getInstance().translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
+            this.compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
         }
         if (container.contains(Constants.Entity.UUID)) {
-            this.entityId = UUID.fromString(container.getString(Constants.Entity.UUID).get());
+            this.uniqueId = UUID.fromString(container.getString(Constants.Entity.UUID).get());
         }
         return Optional.of(this.build());
     }

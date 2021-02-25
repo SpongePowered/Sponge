@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FenceBlock;
+import net.minecraft.world.level.block.FenceBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionalUtils;
+import org.spongepowered.common.util.DirectionalUtil;
 
 public final class FenceData {
 
@@ -40,24 +40,24 @@ public final class FenceData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
-                        .get(h -> DirectionalUtils.getHorizontalFrom(h, FenceBlock.EAST, FenceBlock.WEST, FenceBlock.NORTH, FenceBlock.SOUTH))
-                        .set((h, v) -> DirectionalUtils.setHorizontal(h, v, FenceBlock.EAST, FenceBlock.WEST, FenceBlock.NORTH, FenceBlock.SOUTH))
+                        .get(h -> DirectionalUtil.getHorizontalFrom(h, FenceBlock.EAST, FenceBlock.WEST, FenceBlock.NORTH, FenceBlock.SOUTH))
+                        .set((h, v) -> DirectionalUtil.setHorizontal(h, v, FenceBlock.EAST, FenceBlock.WEST, FenceBlock.NORTH, FenceBlock.SOUTH))
                         .supports(h -> h.getBlock() instanceof FenceBlock)
                     .create(Keys.IS_CONNECTED_EAST)
-                        .get(h -> h.get(FenceBlock.EAST))
-                        .set((h, v) -> h.with(FenceBlock.EAST, v))
+                        .get(h -> h.getValue(FenceBlock.EAST))
+                        .set((h, v) -> h.setValue(FenceBlock.EAST, v))
                         .supports(h -> h.getBlock() instanceof FenceBlock)
                     .create(Keys.IS_CONNECTED_NORTH)
-                        .get(h -> h.get(FenceBlock.NORTH))
-                        .set((h, v) -> h.with(FenceBlock.NORTH, v))
+                        .get(h -> h.getValue(FenceBlock.NORTH))
+                        .set((h, v) -> h.setValue(FenceBlock.NORTH, v))
                         .supports(h -> h.getBlock() instanceof FenceBlock)
                     .create(Keys.IS_CONNECTED_SOUTH)
-                        .get(h -> h.get(FenceBlock.SOUTH))
-                        .set((h, v) -> h.with(FenceBlock.SOUTH, v))
+                        .get(h -> h.getValue(FenceBlock.SOUTH))
+                        .set((h, v) -> h.setValue(FenceBlock.SOUTH, v))
                         .supports(h -> h.getBlock() instanceof FenceBlock)
                     .create(Keys.IS_CONNECTED_WEST)
-                        .get(h -> h.get(FenceBlock.WEST))
-                        .set((h, v) -> h.with(FenceBlock.WEST, v))
+                        .get(h -> h.getValue(FenceBlock.WEST))
+                        .set((h, v) -> h.setValue(FenceBlock.WEST, v))
                         .supports(h -> h.getBlock() instanceof FenceBlock);
     }
     // @formatter:on

@@ -24,11 +24,7 @@
  */
 package org.spongepowered.common.data.provider.nbt;
 
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtHelper;
-import org.spongepowered.common.util.Constants;
 
 public final class NBTComponentData {
 

@@ -24,18 +24,17 @@
  */
 package org.spongepowered.common.service.game;
 
-import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
+import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.service.pagination.PaginationService;
-import org.spongepowered.common.applaunch.config.common.ServicesCategory;
-import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
+import org.spongepowered.common.event.lifecycle.AbstractProvideServiceEventImpl;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.game.pagination.SpongePaginationService;
 import org.spongepowered.plugin.PluginContainer;
@@ -55,15 +54,14 @@ public final class SpongeGameScopedServiceProvider extends SpongeServiceProvider
     protected List<Service<?>> servicesToSelect() {
         return Collections.singletonList(new Service<>(
                 PaginationService.class,
-                ServicesCategory.ServicePluginSubCategory::getPaginationService,
+                servicePluginSubCategory -> servicePluginSubCategory.paginationService,
                 SpongePaginationService.class));
     }
 
     @Override
-    protected final <T> ProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service) {
-        return new ProvideServiceEventImpl<T>(Cause.of(EventContext.empty(), this.getGame()),
-                this.getGame(),
-                TypeToken.get(service.getServiceClass()));
+    protected final <T> AbstractProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service) {
+        return new AbstractProvideServiceEventImpl.GameScopedImpl<>(Cause.of(EventContext.empty(), this.getGame()),
+                this.getGame(), TypeToken.get(service.getServiceClass()));
     }
 
     @Override

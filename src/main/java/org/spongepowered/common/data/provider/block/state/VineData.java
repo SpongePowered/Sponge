@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.VineBlock;
+import net.minecraft.world.level.block.VineBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionalUtils;
+import org.spongepowered.common.util.DirectionalUtil;
 
 public final class VineData {
 
@@ -40,30 +40,30 @@ public final class VineData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
-                        .get(h -> DirectionalUtils.getHorizontalUpFrom(h, VineBlock.EAST, VineBlock.WEST, VineBlock.NORTH, VineBlock.SOUTH,
+                        .get(h -> DirectionalUtil.getHorizontalUpFrom(h, VineBlock.EAST, VineBlock.WEST, VineBlock.NORTH, VineBlock.SOUTH,
                                 VineBlock.UP))
-                        .set((h, v) -> DirectionalUtils.setHorizontalUpFor(h, v, VineBlock.EAST, VineBlock.WEST, VineBlock.NORTH, VineBlock.SOUTH,
+                        .set((h, v) -> DirectionalUtil.setHorizontalUpFor(h, v, VineBlock.EAST, VineBlock.WEST, VineBlock.NORTH, VineBlock.SOUTH,
                                 VineBlock.UP))
                         .supports(h -> h.getBlock() instanceof VineBlock)
                     .create(Keys.IS_CONNECTED_EAST)
-                        .get(h -> h.get(VineBlock.EAST))
-                        .set((h, v) -> h.with(VineBlock.EAST, v))
+                        .get(h -> h.getValue(VineBlock.EAST))
+                        .set((h, v) -> h.setValue(VineBlock.EAST, v))
                         .supports(h -> h.getBlock() instanceof VineBlock)
                     .create(Keys.IS_CONNECTED_NORTH)
-                        .get(h -> h.get(VineBlock.NORTH))
-                        .set((h, v) -> h.with(VineBlock.NORTH, v))
+                        .get(h -> h.getValue(VineBlock.NORTH))
+                        .set((h, v) -> h.setValue(VineBlock.NORTH, v))
                         .supports(h -> h.getBlock() instanceof VineBlock)
                     .create(Keys.IS_CONNECTED_SOUTH)
-                        .get(h -> h.get(VineBlock.SOUTH))
-                        .set((h, v) -> h.with(VineBlock.SOUTH, v))
+                        .get(h -> h.getValue(VineBlock.SOUTH))
+                        .set((h, v) -> h.setValue(VineBlock.SOUTH, v))
                         .supports(h -> h.getBlock() instanceof VineBlock)
                     .create(Keys.IS_CONNECTED_UP)
-                        .get(h -> h.get(VineBlock.UP))
-                        .set((h, v) -> h.with(VineBlock.UP, v))
+                        .get(h -> h.getValue(VineBlock.UP))
+                        .set((h, v) -> h.setValue(VineBlock.UP, v))
                         .supports(h -> h.getBlock() instanceof VineBlock)
                     .create(Keys.IS_CONNECTED_WEST)
-                        .get(h -> h.get(VineBlock.WEST))
-                        .set((h, v) -> h.with(VineBlock.WEST, v))
+                        .get(h -> h.getValue(VineBlock.WEST))
+                        .set((h, v) -> h.setValue(VineBlock.WEST, v))
                         .supports(h -> h.getBlock() instanceof VineBlock);
     }
     // @formatter:on

@@ -27,28 +27,19 @@ package org.spongepowered.common.registry;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.ResourceLocationException;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.ResourceLocationException;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.plugin.PluginContainer;
 
 public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
 
-    @Nullable private String namespace;
+    private String namespace;
     private String value;
 
     @Override
     public ResourceKey.Builder namespace(String namespace) {
         checkNotNull(namespace, "Namespace cannot be null");
         this.namespace = namespace;
-        return this;
-    }
-
-    @Override
-    public ResourceKey.Builder namespace(PluginContainer container) {
-        checkNotNull(container, "PluginContainer cannot be null");
-        this.namespace = container.getMetadata().getId();
         return this;
     }
 
@@ -61,18 +52,11 @@ public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
 
     @Override
     public ResourceKey build() throws IllegalStateException {
+        checkState(this.namespace != null, "Namespace cannot be empty");
         checkState(this.value != null, "Value cannot be empty");
-        if (this.namespace != null) {
-            try {
-                final ResourceLocation resourceLocation = new ResourceLocation(this.namespace, this.value);
-                return (ResourceKey) (Object) resourceLocation;
-            } catch (ResourceLocationException e) {
-                throw new IllegalStateException(e);
-            }
-        }
 
         try {
-            final ResourceLocation resourceLocation = new ResourceLocation(this.value);
+            final ResourceLocation resourceLocation = new ResourceLocation(this.namespace, this.value);
             return (ResourceKey) (Object) resourceLocation;
         } catch (ResourceLocationException e) {
             throw new IllegalStateException(e);

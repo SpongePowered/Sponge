@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.item.recipe.crafting.custom;
 
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.SpecialRecipe;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.CustomRecipe;
+import net.minecraft.world.item.crafting.RecipeSerializer;
+import net.minecraft.world.level.Level;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -44,7 +44,7 @@ import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
 
-public final class SpongeSpecialRecipe extends SpecialRecipe {
+public final class SpongeSpecialRecipe extends CustomRecipe {
 
     private final BiPredicate<CraftingGridInventory, ServerWorld> biPredicate;
     private final Function<CraftingGridInventory, List<org.spongepowered.api.item.inventory.ItemStack>> remainingItemsFunction;
@@ -61,23 +61,23 @@ public final class SpongeSpecialRecipe extends SpecialRecipe {
     }
 
     @Override
-    public boolean matches(CraftingInventory inv, World worldIn) {
+    public boolean matches(CraftingContainer inv, Level worldIn) {
         return this.biPredicate.test(InventoryUtil.toSpongeInventory(inv), (ServerWorld) worldIn);
     }
 
     @Override
-    public ItemStack getCraftingResult(CraftingInventory inv) {
+    public ItemStack assemble(CraftingContainer inv) {
         return ItemStackUtil.toNative(this.resultFunction.apply(InventoryUtil.toSpongeInventory(inv)));
     }
 
     @OnlyIn(Dist.CLIENT)
     @Override
-    public boolean canFit(int width, int height) {
+    public boolean canCraftInDimensions(int width, int height) {
         throw new MissingImplementationException("SpongeSpecialRecipe", "canFit");
     }
 
     @Override
-    public NonNullList<ItemStack> getRemainingItems(CraftingInventory inv) {
+    public NonNullList<ItemStack> getRemainingItems(CraftingContainer inv) {
         if (this.remainingItemsFunction == null) {
             return super.getRemainingItems(inv);
         }
@@ -88,10 +88,10 @@ public final class SpongeSpecialRecipe extends SpecialRecipe {
     }
 
     @Override
-    public IRecipeSerializer<?> getSerializer() {
+    public RecipeSerializer<?> getSerializer() {
         // Fake special crafting serializer
         // because of Unknown recipe serializer when using our serializer with a vanilla client
         // return Registry.RECIPE_SERIALIZER.getOrDefault(this.getId());
-        return IRecipeSerializer.CRAFTING_SPECIAL_BANNERDUPLICATE;
+        return RecipeSerializer.BANNER_DUPLICATE;
     }
 }

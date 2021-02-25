@@ -29,10 +29,9 @@ import org.objectweb.asm.tree.ClassNode;
 import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.applaunch.config.common.OptimizationCategory;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
+import org.spongepowered.common.applaunch.config.common.OptimizationCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
 import java.util.List;
 import java.util.Map;
@@ -53,15 +52,15 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
         final CommonConfig globalConfig = SpongeConfigs.getCommon().get();
-        if (globalConfig.getModules().useOptimizations()) {
-            final Function<OptimizationCategory, Boolean> optimizationCategoryBooleanFunction = mixinEnabledMappings.get(mixinClassName);
+        if (globalConfig.modules.optimizations) {
+            final Function<OptimizationCategory, Boolean> optimizationCategoryBooleanFunction = OptimizationPlugin.mixinEnabledMappings.get(mixinClassName);
             if (optimizationCategoryBooleanFunction == null) {
                 new PrettyPrinter(50).add("Could not find function for optimization patch").centre().hr()
                         .add("Missing function for class: " + mixinClassName)
                         .trace();
                 return false;
             }
-            return optimizationCategoryBooleanFunction.apply(globalConfig.getOptimizations());
+            return optimizationCategoryBooleanFunction.apply(globalConfig.optimizations);
         }
         return false;
     }
@@ -86,39 +85,39 @@ public class OptimizationPlugin implements IMixinConfigPlugin {
     // So that any additional optimizations can be added in succession.
     private static final Map<String, Function<OptimizationCategory, Boolean>> mixinEnabledMappings = ImmutableMap.<String, Function<OptimizationCategory, Boolean>> builder()
             .put("org.spongepowered.common.mixin.optimization.SpongeImplHooksMixin_Item_Pre_Merge",
-                    OptimizationCategory::doDropsPreMergeItemDrops)
-            .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Eigen", OptimizationCategory::useEigenRedstone)
-            .put("org.spongepowered.common.accessor.block.BlockRedstoneWireAccessor_Eigen", OptimizationCategory::useEigenRedstone)
-            .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixinTameable_Cached_Owner",
-                    OptimizationCategory::useCacheTameableOwners)
-            .put("org.spongepowered.common.mixin.invalid.optimization.world.gen.structure.MapGenStructureMixin_Structure_Saving",
-                    OptimizationCategory::useStructureSave)
-            .put("org.spongepowered.common.mixin.optimization.mcp.entity.item.EntityItemFrameMixin_MapOptimization",
-                    OptimizationCategory::useMapOptimization)
+                    optimizationCategory -> optimizationCategory.dropsPreMerge)
+            .put("org.spongepowered.common.mixin.optimization.mcp.block.BlockRedstoneWireMixin_Eigen", optimizationCategory -> optimizationCategory.eigenRedstone.enabled)
+            .put("org.spongepowered.common.accessor.block.BlockRedstoneWireAccessor_Eigen", optimizationCategory -> optimizationCategory.eigenRedstone.enabled)
+            .put("org.spongepowered.common.mixin.optimization.mcp.entity.passive.TameableEntity_Optimization_Owner",
+                    optimizationCategory -> optimizationCategory.cacheTameableOwners)
+            .put("org.spongepowered.common.mixin.optimization.mcp.entity.item.ItemFrameEntityMixin_Optimization_Map",
+                    optimizationCategory -> optimizationCategory.optimizeMaps)
             .put("org.spongepowered.common.mixin.invalid.optimization.entity.EntityTrackerEntryMixin_MapOptimization",
-                    OptimizationCategory::useMapOptimization)
+                    optimizationCategory -> optimizationCategory.optimizeMaps)
             .put("org.spongepowered.common.mixin.optimization.mcp.item.ItemMapMixin_MapOptimization",
-                    OptimizationCategory::useMapOptimization)
+                    optimizationCategory -> optimizationCategory.optimizeMaps)
             .put("org.spongepowered.common.mixin.optimization.mcp.world.storage.MapDataMixin_MapOptimization",
-                    OptimizationCategory::useMapOptimization)
+                    optimizationCategory -> optimizationCategory.optimizeMaps)
             .put("org.spongepowered.common.mixin.optimization.mcp.world.storage.MapInfoMixin_MapOptimization",
-                    OptimizationCategory::useMapOptimization)
+                    optimizationCategory -> optimizationCategory.optimizeMaps)
             .put("org.spongepowered.common.mixin.optimization.mcp.server.MinecraftServerMixin_MapOptimization",
-                    OptimizationCategory::useMapOptimization)
-            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.TileEntityMixin_HopperOptimization",
-                    OptimizationCategory::isOptimizeHoppers)
-            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.TileEntityHopperMixin_HopperOptimization",
-                    OptimizationCategory::isOptimizeHoppers)
+                    optimizationCategory -> optimizationCategory.optimizeMaps)
+            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.TileEntityMixin_Optimization_Hopper",
+                    optimizationCategory -> optimizationCategory.optimizeHoppers)
+            .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.HopperTileEntityMixin_Optimization_Hopper",
+                    optimizationCategory -> optimizationCategory.optimizeHoppers)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixin_UseActiveChunkForCollisions",
-                    OptimizationCategory::isUseActiveChunkForCollisions)
+                    optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
             .put("org.spongepowered.common.mixin.optimization.mcp.world.WorldMixin_UseActiveChunkForCollisions",
-                    OptimizationCategory::isUseActiveChunkForCollisions)
+                    optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
             .put("org.spongepowered.common.mixin.optimization.mcp.world.WorldServerMixin_UseActiveChunkForCollisions",
-                    OptimizationCategory::isUseActiveChunkForCollisions)
+                    optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
             .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.ChestTileEntityMixin_Optimization_TileEntity",
-                    OptimizationCategory::isOptimizedTileEntityTicking)
+                    optimizationCategory -> optimizationCategory.optimizeBlockEntityTicking)
             .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.EnderChestTileEntityMixin_Optimization_TileEntity",
-                    OptimizationCategory::isOptimizedTileEntityTicking)
+                    optimizationCategory -> optimizationCategory.optimizeBlockEntityTicking)
+            .put("org.spongepowered.common.mixin.optimization.mcp.block.LeavesBlockMixin_DisablePersistentScheduledUpdate",
+                    optimizationCategory -> optimizationCategory.disableScheduledUpdatesForPersistentLeafBlocks)
             .build();
 
 }

@@ -25,7 +25,7 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.MobEntity;
+import net.minecraft.world.entity.Mob;
 import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
@@ -77,6 +77,6 @@ public final class SpongeWatchClosestAIBuilder implements LookAtGoal.Builder {
     @Override
     public LookAtGoal build(Agent owner) {
         Preconditions.checkNotNull(this.watchedClass);
-        return (LookAtGoal) new net.minecraft.entity.ai.goal.LookAtGoal((MobEntity) owner, (Class) this.watchedClass, this.maxDistance, this.chance);
+        return (LookAtGoal) new net.minecraft.world.entity.ai.goal.LookAtPlayerGoal((Mob) owner, (Class) this.watchedClass, this.maxDistance, this.chance);
     }
 }

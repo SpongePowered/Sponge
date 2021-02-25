@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -47,6 +45,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Predicate;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Single Slot pointing to a players {@link EquipmentTypes#MAIN_HAND} slot.
@@ -60,27 +59,27 @@ public class HeldHandSlotLens extends AbstractLens implements SlotLens {
         this.hotbarLens = hotbarLens;
     }
 
-    private PlayerInventory getInventoryPlayer(Fabric fabric) {
-        return (PlayerInventory) fabric.fabric$get(0); // Only players have this lens
+    private net.minecraft.world.entity.player.Inventory getInventoryPlayer(Fabric fabric) {
+        return (net.minecraft.world.entity.player.Inventory) fabric.fabric$get(0); // Only players have this lens
     }
 
     @Override
     public ItemStack getStack(Fabric fabric) {
-        PlayerInventory inv = this.getInventoryPlayer(fabric);
-        return inv.getCurrentItem();
+        net.minecraft.world.entity.player.Inventory inv = this.getInventoryPlayer(fabric);
+        return inv.getSelected();
     }
 
     @Override
     public boolean setStack(Fabric fabric, ItemStack stack) {
-        PlayerInventory inv = this.getInventoryPlayer(fabric);
-        inv.mainInventory.set(inv.currentItem, stack);
+        net.minecraft.world.entity.player.Inventory inv = this.getInventoryPlayer(fabric);
+        inv.items.set(inv.selected, stack);
         return true;
     }
 
     @Override
     public int getOrdinal(Fabric fabric) {
-        PlayerInventory inv = this.getInventoryPlayer(fabric);
-        return inv.currentItem;
+        net.minecraft.world.entity.player.Inventory inv = this.getInventoryPlayer(fabric);
+        return inv.selected;
     }
 
     @Override

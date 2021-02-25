@@ -52,7 +52,7 @@ public abstract class SyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    protected void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable) {
+    protected void executeTaskRunnable(final SpongeScheduledTask task, final Runnable runnable) {
         runnable.run();
     }
 }

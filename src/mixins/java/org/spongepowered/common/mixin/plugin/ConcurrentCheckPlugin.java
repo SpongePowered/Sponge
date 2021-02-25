@@ -32,7 +32,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import java.util.List;
 import java.util.Set;
 
-public class ConcurrentCheckPlugin implements IMixinConfigPlugin {
+public final class ConcurrentCheckPlugin implements IMixinConfigPlugin {
 
     @Override
     public void onLoad(String mixinPackage) {
@@ -46,10 +46,8 @@ public class ConcurrentCheckPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        if ("org.spongepowered.common.mixin.concurrentchecks.ClassInheritanceMultiMapMixin".equals(mixinClassName)) {
-            return SpongeConfigs.getCommon().get().getDebug().doConcurrentEntityChecks();
-        } else if ("org.spongepowered.common.mixin.invalid.concurrentchecks.PlayerChunkMapMixin_ConcurrentChecks".equals(mixinClassName)) {
-            return SpongeConfigs.getCommon().get().getDebug().doConcurrentChunkMapChecks();
+        if ("org.spongepowered.common.mixin.concurrentcheck.util.ClassInheritanceMultiMapMixin_ConcurrentCheck".equals(mixinClassName)) {
+            return SpongeConfigs.getCommon().get().debug.concurrentEntityChecks;
         }
         return true;
     }

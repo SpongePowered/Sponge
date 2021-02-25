@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.IronGolemEntity;
+import net.minecraft.world.entity.animal.IronGolem;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -36,10 +36,10 @@ public final class IronGolemData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(IronGolemEntity.class)
+                .asMutable(IronGolem.class)
                     .create(Keys.IS_PLAYER_CREATED)
-                        .get(IronGolemEntity::isPlayerCreated)
-                        .set(IronGolemEntity::setPlayerCreated);
+                        .get(IronGolem::isPlayerCreated)
+                        .set(IronGolem::setPlayerCreated);
     }
     // @formatter:on
 }

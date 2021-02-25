@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.mixin.api.mcp.entity.boss;
 
-import net.minecraft.entity.boss.WitherEntity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.boss.Wither;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
-import org.spongepowered.common.mixin.api.mcp.entity.monster.MonsterEntityMixin_API;
-
+import org.spongepowered.common.mixin.api.mcp.world.entity.monster.MonsterMixin_API;
 import java.util.Set;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 
-@Mixin(value = WitherEntity.class)
-public abstract class WitherEntityMixin_API extends MonsterEntityMixin_API implements Wither {
+@Mixin(value = WitherBoss.class)
+public abstract class WitherEntityMixin_API extends MonsterMixin_API implements Wither {
 
     private int fuseDuration = 220;
 

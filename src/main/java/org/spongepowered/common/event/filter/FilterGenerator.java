@@ -60,7 +60,6 @@ import org.spongepowered.api.event.filter.type.Exclude;
 import org.spongepowered.api.event.filter.type.Include;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.util.generator.GeneratorUtils;
 import org.spongepowered.common.event.filter.delegate.AfterCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.AllCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.BeforeCauseFilterSourceDelegate;
@@ -77,6 +76,7 @@ import org.spongepowered.common.event.filter.delegate.ParameterFilterSourceDeleg
 import org.spongepowered.common.event.filter.delegate.RootCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.SubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.SupportsDataFilterDelegate;
+import org.spongepowered.common.util.generator.GeneratorUtils;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -110,7 +110,7 @@ public class FilterGenerator {
         List<FilterDelegate> additional = Lists.newArrayList();
         boolean cancellation = false;
         for (Annotation anno : method.getAnnotations()) {
-            Object obj = filterFromAnnotation(anno.annotationType());
+            Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
             if (obj == null) {
                 continue;
             }
@@ -165,7 +165,7 @@ public class FilterGenerator {
                 ParameterFilterSourceDelegate source = null;
                 List<ParameterFilterDelegate> paramFilters = Lists.newArrayList();
                 for (Annotation anno : param.getAnnotations()) {
-                    Object obj = filterFromAnnotation(anno.annotationType());
+                    Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
                     if (obj == null) {
                         continue;
                     }
@@ -223,7 +223,7 @@ public class FilterGenerator {
         cw.visitEnd();
         byte[] data = cw.toByteArray();
 
-        if (FILTER_DEBUG) {
+        if (FilterGenerator.FILTER_DEBUG) {
             File outDir = new File(".sponge.debug.out");
             File outFile = new File(outDir, name + ".class");
             if (!outFile.getParentFile().exists()) {
@@ -264,16 +264,16 @@ public class FilterGenerator {
         }
 
         public SubtypeFilterDelegate getDelegate(Annotation anno) {
-            if (this == INCLUDE) {
+            if (this == SubtypeFilter.INCLUDE) {
                 return new IncludeSubtypeFilterDelegate((Include) anno);
-            } else if (this == EXCLUDE) {
+            } else if (this == SubtypeFilter.EXCLUDE) {
                 return new ExcludeSubtypeFilterDelegate((Exclude) anno);
             }
             throw new UnsupportedOperationException();
         }
 
         public static SubtypeFilter valueOf(Class<? extends Annotation> cls) {
-            for (SubtypeFilter value : values()) {
+            for (SubtypeFilter value : SubtypeFilter.values()) {
                 if (value.cls.equals(cls)) {
                     return value;
                 }
@@ -293,14 +293,14 @@ public class FilterGenerator {
         }
 
         public FilterDelegate getDelegate(Annotation anno) {
-            if (this == CANCELLATION) {
+            if (this == EventTypeFilter.CANCELLATION) {
                 return new CancellationEventFilterDelegate(((IsCancelled) anno).value());
             }
             throw new UnsupportedOperationException();
         }
 
         public static EventTypeFilter valueOf(Class<? extends Annotation> cls) {
-            for (EventTypeFilter value : values()) {
+            for (EventTypeFilter value : EventTypeFilter.values()) {
                 if (value.cls.equals(cls)) {
                     return value;
                 }
@@ -326,32 +326,32 @@ public class FilterGenerator {
         }
 
         public ParameterFilterSourceDelegate getDelegate(Annotation anno) {
-            if (this == CAUSE_FIRST) {
+            if (this == ParameterSource.CAUSE_FIRST) {
                 return new FirstCauseFilterSourceDelegate((First) anno);
             }
-            if (this == CAUSE_LAST) {
+            if (this == ParameterSource.CAUSE_LAST) {
                 return new LastCauseFilterSourceDelegate((Last) anno);
             }
-            if (this == CAUSE_BEFORE) {
+            if (this == ParameterSource.CAUSE_BEFORE) {
                 return new BeforeCauseFilterSourceDelegate((Before) anno);
             }
-            if (this == CAUSE_AFTER) {
+            if (this == ParameterSource.CAUSE_AFTER) {
                 return new AfterCauseFilterSourceDelegate((After) anno);
             }
-            if (this == CAUSE_ALL) {
+            if (this == ParameterSource.CAUSE_ALL) {
                 return new AllCauseFilterSourceDelegate((All) anno);
             }
-            if (this == CAUSE_ROOT) {
+            if (this == ParameterSource.CAUSE_ROOT) {
                 return new RootCauseFilterSourceDelegate((Root) anno);
             }
-            if (this == GETTER) {
+            if (this == ParameterSource.GETTER) {
                 return new GetterFilterSourceDelegate((Getter) anno);
             }
             throw new UnsupportedOperationException();
         }
 
         public static ParameterSource valueOf(Class<? extends Annotation> cls) {
-            for (ParameterSource value : values()) {
+            for (ParameterSource value : ParameterSource.values()) {
                 if (value.cls.equals(cls)) {
                     return value;
                 }
@@ -372,17 +372,17 @@ public class FilterGenerator {
         }
 
         public ParameterFilterDelegate getDelegate(Annotation anno) {
-            if (this == SUPPORTS) {
+            if (this == ParameterFilter.SUPPORTS) {
                 return new SupportsDataFilterDelegate((Supports) anno);
             }
-            if (this == HAS) {
+            if (this == ParameterFilter.HAS) {
                 return new HasDataFilterDelegate((Has) anno);
             }
             throw new UnsupportedOperationException();
         }
 
         public static ParameterFilter valueOf(Class<? extends Annotation> cls) {
-            for (ParameterFilter value : values()) {
+            for (ParameterFilter value : ParameterFilter.values()) {
                 if (value.cls.equals(cls)) {
                     return value;
                 }

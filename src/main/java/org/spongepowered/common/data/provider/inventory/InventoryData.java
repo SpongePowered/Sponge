@@ -25,13 +25,12 @@
 package org.spongepowered.common.data.provider.inventory;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.util.INameable;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.Nameable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
-import org.spongepowered.common.bridge.util.text.TextComponentBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.util.InventoryUtil;
@@ -68,9 +67,9 @@ public final class InventoryData {
                 break;
             }
         }
-        if (inventory instanceof INameable) {
-            final ITextComponent displayName = ((INameable) inventory).getDisplayName();
-            return ((TextComponentBridge) displayName).bridge$asAdventureComponent();
+        if (inventory instanceof Nameable) {
+            final net.minecraft.network.chat.Component displayName = ((Nameable) inventory).getDisplayName();
+            return ((BaseComponentBridge) displayName).bridge$asAdventureComponent();
         }
         return null;
     }

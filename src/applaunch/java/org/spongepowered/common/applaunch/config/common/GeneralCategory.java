@@ -30,11 +30,7 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.common.applaunch.config.core.TokenHoldingString;
 
 @ConfigSerializable
-public class GeneralCategory {
-
-    @Setting("file-io-thread-sleep")
-    @Comment("If 'true', sleeping between chunk saves will be enabled, beware of memory issues.")
-    private boolean fileIOThreadSleep = false;
+public final class GeneralCategory {
 
     @Setting("plugins-dir")
     @Comment("Additional directory to search for plugins, relative to the \n"
@@ -43,7 +39,8 @@ public class GeneralCategory {
             + "is going to search for a plugins folder in the mods directory. \n"
             + "If you wish for the plugins folder to reside in the root game \n"
             + "directory, change the value to \"${CANONICAL_GAME_DIR}/plugins\".")
-    private TokenHoldingString pluginsDir = TokenHoldingString.of("${CANONICAL_MODS_DIR}/plugins");
+    public TokenHoldingString pluginsDir = TokenHoldingString.of("${CANONICAL_MODS_DIR}/plugins");
+
     @Setting("config-dir")
     @Comment("The directory for Sponge plugin configurations, relative to the  \n"
            + "execution root or specified as an absolute path. \n"
@@ -53,26 +50,5 @@ public class GeneralCategory {
            + "directory, change the value to, for example, \"${CANONICAL_CONFIG_DIR}/sponge/plugins\". \n"
            + "Note: It is not recommended to set this to \"${CANONICAL_CONFIG_DIR}/sponge\", as there is \n"
            + "a possibility that plugin configurations can conflict the Sponge core configurations. \n")
-    private TokenHoldingString configDir = TokenHoldingString.of("${CANONICAL_GAME_DIR}/config");
-
-    public boolean getFileIoThreadSleep() {
-        return this.fileIOThreadSleep;
-    }
-
-    public String pluginsDir() {
-        return this.pluginsDir.getParsed();
-    }
-
-    public void setPluginsDir(final String pluginsDir) {
-        this.pluginsDir = TokenHoldingString.of(pluginsDir);
-    }
-
-    public String configDir() {
-        return this.configDir.getParsed();
-    }
-
-    public void setConfigDir(final String configDir) {
-        this.configDir = TokenHoldingString.of(configDir);
-    }
-
+    public TokenHoldingString configDir = TokenHoldingString.of("${CANONICAL_GAME_DIR}/config");
 }

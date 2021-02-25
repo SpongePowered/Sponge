@@ -24,19 +24,13 @@
  */
 package org.spongepowered.common.event.cause.entity;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.cause.entity.SpawnType;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeSpawnType extends SpongeCatalogType implements SpawnType {
+public final class SpongeSpawnType implements SpawnType {
 
     private boolean isForced = false;
 
-    public SpongeSpawnType(ResourceKey key) {
-        super(key);
-    }
-
-    public SpongeSpawnType forced() {
+    public SpongeSpawnType setForced() {
         this.isForced = true;
         return this;
     }

@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.entity.player.SpongeUser;
 
 public final class InvulnerableData {
 
@@ -36,10 +37,14 @@ public final class InvulnerableData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(InvulnerableTrackedBridge.class)
+                .asMutable(Entity.class)
                     .create(Keys.INVULNERABLE)
-                        .get(InvulnerableTrackedBridge::bridge$getIsInvulnerable)
-                        .set(InvulnerableTrackedBridge::bridge$setInvulnerable);
+                        .get(Entity::isInvulnerable)
+                        .set(Entity::setInvulnerable)
+                .asMutable(SpongeUser.class)
+                    .create(Keys.INVULNERABLE)
+                        .get(SpongeUser::isInvulnerable)
+                        .set(SpongeUser::setInvulnerable);
     }
     // @formatter:on
 }

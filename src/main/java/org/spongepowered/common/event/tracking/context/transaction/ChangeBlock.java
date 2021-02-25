@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -50,6 +48,8 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 @DefaultQualifier(NonNull.class)
 public final class ChangeBlock extends BlockEventBasedTransaction {
@@ -58,17 +58,17 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
     final int originalOpacity;
     final BlockState newState;
     final SpongeBlockChangeFlag blockChangeFlag;
-    @Nullable public TileEntity queuedRemoval;
-    @Nullable public TileEntity queuedAdd;
+    @Nullable public BlockEntity queuedRemoval;
+    @Nullable public BlockEntity queuedAdd;
 
     ChangeBlock(final SpongeBlockSnapshot attachedSnapshot, final BlockState newState,
         final SpongeBlockChangeFlag blockChange
     ) {
-        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
+        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState(), attachedSnapshot.getWorld());
         this.original = attachedSnapshot;
         this.newState = newState;
         this.blockChangeFlag = blockChange;
-        this.originalOpacity = this.originalState.getOpacity(this.original.getServerWorld().get(), this.affectedPosition);
+        this.originalOpacity = this.originalState.getLightBlock(this.original.getServerWorld().get(), this.affectedPosition);
     }
 
     public BlockState getNewState() {
@@ -100,14 +100,14 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
     }
 
     @Override
-    public boolean acceptTileAddition(final TileEntity tileEntity) {
+    public boolean acceptTileAddition(final BlockEntity tileEntity) {
         if (this.queuedAdd == tileEntity) {
             return true;
         }
         if (this.queuedAdd != null) {
             return false;
         }
-        if (!this.affectedPosition.equals(tileEntity.getPos())) {
+        if (!this.affectedPosition.equals(tileEntity.getBlockPos())) {
             return false;
         }
         this.queuedAdd = tileEntity;
@@ -115,14 +115,14 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
     }
 
     @Override
-    public boolean acceptTileRemoval(final @Nullable TileEntity tileentity) {
+    public boolean acceptTileRemoval(final @Nullable BlockEntity tileentity) {
         if (this.queuedRemoval == tileentity) {
             return true;
         }
         if (this.queuedRemoval != null) {
             return false;
         }
-        if (!this.affectedPosition.equals(tileentity.getPos())) {
+        if (!this.affectedPosition.equals(tileentity.getBlockPos())) {
             return false;
         }
         this.queuedRemoval = tileentity;
@@ -130,7 +130,7 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
     }
 
     @Override
-    public boolean acceptTileReplacement(final @Nullable TileEntity existing, final TileEntity proposed) {
+    public boolean acceptTileReplacement(final @Nullable BlockEntity existing, final BlockEntity proposed) {
         return this.acceptTileRemoval(existing) && this.acceptTileAddition(proposed);
     }
 

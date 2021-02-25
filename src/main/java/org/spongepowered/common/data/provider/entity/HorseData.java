@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.horse.HorseEntity;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.world.entity.animal.horse.Horse;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HorseColor;
 import org.spongepowered.api.data.type.HorseStyle;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.accessor.world.entity.animal.horse.HorseAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.type.SpongeHorseColor;
-import org.spongepowered.common.data.type.SpongeHorseStyle;
-import org.spongepowered.common.registry.MappedRegistry;
 
 public final class HorseData {
 
@@ -42,33 +42,37 @@ public final class HorseData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(HorseEntity.class)
+                .asMutable(Horse.class)
                     .create(Keys.HORSE_COLOR)
                         .get(h -> {
-                            final MappedRegistry<HorseColor, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(HorseColor.class);
-                            return registry.getReverseMapping(getHorseColor(h));
+                            final MappedRegistry<HorseColor> registry = (MappedRegistry<HorseColor>) (Object) Sponge.getGame().registries().registry(RegistryTypes.HORSE_COLOR);
+                            return registry.byId(HorseData.getHorseColor(h));
                         })
                         .set((h, v) -> {
-                            final int style = getHorseStyle(h);
-                            h.setHorseVariant(((SpongeHorseColor) v).getMetadata() | style);
+                            final int style = HorseData.getHorseStyle(h);
+                            final MappedRegistry<HorseColor> registry = (MappedRegistry<HorseColor>) (Object) Sponge.getGame().registries().registry(RegistryTypes.HORSE_COLOR);
+                            final int metadata = registry.getId(v);
+                            ((HorseAccessor) h).invoker$setTypeVariant(metadata | style);
                         })
                     .create(Keys.HORSE_STYLE)
                         .get(h -> {
-                            final MappedRegistry<HorseStyle, Integer> registry = SpongeCommon.getRegistry().getCatalogRegistry().getRegistry(HorseStyle.class);
-                            return registry.getReverseMapping(getHorseStyle(h));
+                            final MappedRegistry<HorseStyle> registry = (MappedRegistry<HorseStyle>) (Object) Sponge.getGame().registries().registry(RegistryTypes.HORSE_STYLE);
+                            return registry.byId(HorseData.getHorseStyle(h));
                         })
                         .set((h, v) -> {
-                            final int color = getHorseColor(h);
-                            h.setHorseVariant((color | ((SpongeHorseStyle) v).getBitMask()));
+                            final int color = HorseData.getHorseColor(h);
+                            final MappedRegistry<HorseStyle> registry = (MappedRegistry<HorseStyle>) (Object) Sponge.getGame().registries().registry(RegistryTypes.HORSE_STYLE);
+                            final int metadata = registry.getId(v);
+                            ((HorseAccessor) h).invoker$setTypeVariant((color | (metadata << 8)));
                         });
     }
     // @formatter:on
 
-    private static int getHorseColor(final HorseEntity holder) {
-        return holder.getHorseVariant() & 0xFF;
+    private static int getHorseColor(final Horse holder) {
+        return ((HorseAccessor) holder).invoker$getTypeVariant() & 0xFF;
     }
 
-    private static int getHorseStyle(final HorseEntity holder) {
-        return (holder.getHorseVariant() & 0xFF00) >> 8;
+    private static int getHorseStyle(final Horse holder) {
+        return (((HorseAccessor) holder).invoker$getTypeVariant() & 0xFF00) >> 8;
     }
 }

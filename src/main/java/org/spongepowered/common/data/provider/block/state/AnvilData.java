@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.AnvilBlock;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.AnvilBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class AnvilData {
 
@@ -40,8 +40,8 @@ public final class AnvilData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(AnvilBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, AnvilBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.getValue(AnvilBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, AnvilBlock.FACING))
                         .supports(h -> h.getBlock() instanceof AnvilBlock);
     }
     // @formatter:on

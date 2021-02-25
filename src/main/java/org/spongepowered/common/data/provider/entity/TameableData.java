@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.TameableEntity;
+import net.minecraft.world.entity.TamableAnimal;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -36,18 +36,18 @@ public final class TameableData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(TameableEntity.class)
+                .asMutable(TamableAnimal.class)
                     .create(Keys.IS_SITTING)
-                        .get(TameableEntity::isSitting)
-                        .set(TameableEntity::setSitting)
+                        .get(TamableAnimal::isInSittingPose)
+                        .set(TamableAnimal::setInSittingPose)
                     .create(Keys.IS_TAMED)
-                        .get(TameableEntity::isTamed)
-                        .set(TameableEntity::setTamed)
+                        .get(TamableAnimal::isTame)
+                        .set(TamableAnimal::setTame)
                     .create(Keys.TAMER)
-                        .get(TameableEntity::getOwnerId)
+                        .get(TamableAnimal::getOwnerUUID)
                         .set((h, v) -> {
-                            h.setOwnerId(v);
-                            h.setTamed(v != null);
+                            h.setOwnerUUID(v);
+                            h.setTame(v != null);
                         });
     }
     // @formatter:on

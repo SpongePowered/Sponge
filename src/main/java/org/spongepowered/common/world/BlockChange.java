@@ -24,101 +24,46 @@
  */
 package org.spongepowered.common.world;
 
-
-import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.framework.qual.DefaultQualifier;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContextKey;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.common.config.inheritable.LoggingCategory;
+import org.spongepowered.api.block.transaction.Operation;
+import org.spongepowered.api.block.transaction.Operations;
 
 @DefaultQualifier(NonNull.class)
 public enum BlockChange {
 
     BREAK() {
         @Override
-        public ChangeBlockEvent createEvent(final Cause cause, final ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventBreak(cause, transactions);
-        }
-
-        @Override
-        public EventContextKey<? extends ChangeBlockEvent> getKey() {
-            return EventContextKeys.BREAK_EVENT.get();
-        }
-
-        @Override
-        public boolean allowsLogging(final LoggingCategory category) {
-            return category.blockBreakLogging();
+        public Operation toOperation() {
+            return Operations.BREAK.get();
         }
     },
     DECAY() {
         @Override
-        public ChangeBlockEvent createEvent(final Cause cause, final ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventDecay(cause, transactions);
-        }
-
-        @Override
-        public EventContextKey<? extends ChangeBlockEvent> getKey() {
-            return EventContextKeys.DECAY_EVENT.get();
+        public Operation toOperation() {
+            return Operations.DECAY.get();
         }
     },
     MODIFY() {
         @Override
-        public ChangeBlockEvent createEvent(final Cause cause, final ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventModify(cause, transactions);
-        }
-
-        @Override
-        public EventContextKey<? extends ChangeBlockEvent> getKey() {
-            return EventContextKeys.MODIFY_EVENT.get();
-        }
-
-        @Override
-        public boolean allowsLogging(final LoggingCategory category) {
-            return category.blockModifyLogging();
+        public Operation toOperation() {
+            return Operations.MODIFY.get();
         }
     },
     PLACE() {
         @Override
-        public ChangeBlockEvent createEvent(final Cause cause, final ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventPlace(cause, transactions);
-        }
-
-        @Override
-        public EventContextKey<? extends ChangeBlockEvent> getKey() {
-            return EventContextKeys.PLACE_EVENT.get();
-        }
-
-        @Override
-        public boolean allowsLogging(final LoggingCategory category) {
-            return category.blockPlaceLogging();
+        public Operation toOperation() {
+            return Operations.PLACE.get();
         }
     },
     GROW() {
         @Override
-        public ChangeBlockEvent createEvent(final Cause cause, final ImmutableList<Transaction<BlockSnapshot>> transactions) {
-            return SpongeEventFactory.createChangeBlockEventGrow(cause, transactions);
-        }
-
-        @Override
-        public EventContextKey<? extends ChangeBlockEvent> getKey() {
-            return EventContextKeys.GROW_EVENT.get();
+        public Operation toOperation() {
+            return Operations.GROWTH.get();
         }
     };
 
-    BlockChange() { }
+    BlockChange() {}
 
-
-    public boolean allowsLogging(final LoggingCategory category) {
-        return false;
-    }
-
-    public abstract ChangeBlockEvent createEvent(Cause cause, ImmutableList<Transaction<BlockSnapshot>> transactions);
-
-    public abstract EventContextKey<? extends ChangeBlockEvent> getKey();
+    public abstract Operation toOperation();
 }

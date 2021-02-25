@@ -24,13 +24,7 @@
  */
 package org.spongepowered.common.inventory.custom;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.INamedContainerProvider;
-import net.minecraft.util.IntArray;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -41,18 +35,22 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.UUID;
-
-import javax.annotation.Nullable;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.SimpleContainerData;
 
 // TODO how to do ticking for "fake" furnace type inventories?
-public class ViewableCustomInventory extends CustomInventory implements INamedContainerProvider {
+public class ViewableCustomInventory extends CustomInventory implements MenuProvider {
 
     private ContainerType type;
     private SpongeViewableInventoryBuilder.ContainerTypeInfo info;
     private boolean vanilla = false;
 
-    private Set<PlayerEntity> viewers = new HashSet<>();
-    private final IntArray data;
+    private Set<Player> viewers = new HashSet<>();
+    private final SimpleContainerData data;
 
     public ViewableCustomInventory(ContainerType type, SpongeViewableInventoryBuilder.ContainerTypeInfo info, int size, Lens lens, SlotLensProvider provider, List<Inventory> inventories, @Nullable UUID identity, @Nullable Carrier carrier) {
         super(size, lens, provider, inventories, identity, carrier);
@@ -71,29 +69,29 @@ public class ViewableCustomInventory extends CustomInventory implements INamedCo
     }
 
     @Override
-    public void openInventory(PlayerEntity player) {
+    public void startOpen(Player player) {
         this.viewers.add(player); // TODO check if this is always called
     }
 
     @Override
-    public void closeInventory(PlayerEntity player) {
+    public void stopOpen(Player player) {
         this.viewers.remove(player);  // TODO check if this is always called
     }
 
-    @Nullable
-    public Container createMenu(int id, PlayerInventory playerInv, PlayerEntity player) {
+    @Override
+    public @Nullable AbstractContainerMenu createMenu(int id, net.minecraft.world.entity.player.Inventory playerInv, Player player) {
         if (this.vanilla) {
             return this.info.containerProvider.createMenu(id, playerInv, player, this);
         }
         return new CustomContainer(id, player, this, this.type);
     }
 
-    public IntArray getData() {
+    public SimpleContainerData getData() {
         return this.data;
     }
 
     @Override
-    public ITextComponent getDisplayName() {
-        return new StringTextComponent("ViewableCustomInventory");
+    public Component getDisplayName() {
+        return new TextComponent("ViewableCustomInventory");
     }
 }

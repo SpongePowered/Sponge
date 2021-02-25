@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.AbstractButtonBlock;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.ButtonBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,9 +39,9 @@ public final class AbstractButtonData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(AbstractButtonBlock.POWERED))
-                        .set((h, v) -> h.with(AbstractButtonBlock.POWERED, v))
-                        .supports(h -> h.getBlock() instanceof AbstractButtonBlock);
+                        .get(h -> h.getValue(ButtonBlock.POWERED))
+                        .set((h, v) -> h.setValue(ButtonBlock.POWERED, v))
+                        .supports(h -> h.getBlock() instanceof ButtonBlock);
     }
     // @formatter:on
 }

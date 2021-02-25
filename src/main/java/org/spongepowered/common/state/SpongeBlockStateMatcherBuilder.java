@@ -27,13 +27,10 @@ package org.spongepowered.common.state;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.data.persistence.DataView;
-import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.state.StateMatcher;
 
 import java.util.ArrayList;
 import java.util.HashMap;
-import java.util.Optional;
 
 public final class SpongeBlockStateMatcherBuilder extends AbstractStateMatcherBuilder<@NonNull BlockState, @NonNull BlockType> {
 

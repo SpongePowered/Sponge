@@ -46,8 +46,8 @@ import org.spongepowered.api.entity.EntityTypes;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.event.lifecycle.RegisterDataEvent;
 import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
@@ -58,7 +58,7 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.TypeTokens;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -94,15 +94,15 @@ public final class CustomDataTest {
 
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<Integer> numberKey = Parameter.integerNumber().orDefault(1).setKey("number").build();
-        final Parameter.Value<Type> type = Parameter.enumValue(Type.class).orDefault(Type.ITEMSTACK).setKey("type").build();
+        final Parameter.Value<Integer> numberKey = Parameter.integerNumber().setKey("number").optional().build();
+        final Parameter.Value<Type> type = Parameter.enumValue(Type.class).setKey("type").optional().build();
         final Command.Parameterized myCommand = Command.builder()
                 .parameter(type)
                 .parameter(numberKey)
                 .setExecutor(context -> {
-                    final Integer number = context.requireOne(numberKey);
+                    final Integer number = context.getOne(numberKey).orElse(1);
                     final ServerPlayer player = context.getCause().first(ServerPlayer.class).get();
-                    switch (context.requireOne(type)) {
+                    switch (context.getOne(type).orElse(Type.ITEMSTACK)) {
                         case ITEMSTACK:
                             final ItemStack stack = ItemStack.of(ItemTypes.PAPER);
                             stack.offer(this.myDataKey, number);
@@ -155,7 +155,7 @@ public final class CustomDataTest {
     }
 
     @Listener
-    public void onRegisterData(final RegisterCatalogEvent<DataRegistration> event) {
+    public void onRegisterData(final RegisterDataEvent event) {
         final ResourceKey key = ResourceKey.of(this.plugin, "mydata");
         this.myDataKey = Key.builder().key(key).elementType(Integer.class).build();
 
@@ -165,17 +165,17 @@ public final class CustomDataTest {
                 .build();
 
 
-        final DataStore dataStore = DataStore.of(this.myDataKey, DataQuery.of("mykey"), ItemStack.class, User.class, ServerPlayer.class, BlockEntity.class);
+        final DataStore dataStore = DataStore.of(this.myDataKey, DataQuery.of("mykey"), ItemStack.class, User.class, ServerPlayer.class, BlockEntity.class, Entity.class);
         final DataRegistration myRegistration = DataRegistration.builder()
                 .dataKey(this.myDataKey)
                 .store(dataStore)
                 .provider(blockDataProvider)
-                .key(key)
                 .build();
 
         event.register(myRegistration);
 
         // Or if it is super simple data
+
         this.mySimpleDataKey = Key.of(this.plugin, "mysimpledata", TypeTokens.STRING_VALUE_TOKEN);
         event.register(DataRegistration.of(this.mySimpleDataKey, ItemStack.class));
 

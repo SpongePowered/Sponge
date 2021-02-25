@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.loot.LootContext;
-import net.minecraft.world.storage.loot.LootParameters;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 public final class AddBlockLootDropsEffect implements ProcessingSideEffect {
@@ -52,24 +52,24 @@ public final class AddBlockLootDropsEffect implements ProcessingSideEffect {
 
     AddBlockLootDropsEffect() {}
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public EffectResult processSideEffect(
-        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag
+        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
         final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
 
-        final ServerWorld world = pipeline.getServerWorld();
-        @Nullable final TileEntity existingTile = oldState.tileEntity;
+        final ServerLevel world = pipeline.getServerWorld();
+        @Nullable final BlockEntity existingTile = oldState.tileEntity;
         final BlockPos pos = oldState.pos;
 
         final LootContext.Builder lootBuilder = (new LootContext.Builder(world))
-            .withRandom(world.rand)
-            .withParameter(LootParameters.POSITION, pos)
-            .withParameter(LootParameters.TOOL, ItemStack.EMPTY)
-            .withNullableParameter(LootParameters.BLOCK_ENTITY, existingTile);
+            .withRandom(world.random)
+            .withParameter(LootContextParams.ORIGIN, VecHelper.toVanillaVector3d(pos))
+            .withParameter(LootContextParams.TOOL, ItemStack.EMPTY)
+            .withOptionalParameter(LootContextParams.BLOCK_ENTITY, existingTile);
 
-        ((IPhaseState) phaseContext.state).populateLootContext(phaseContext, lootBuilder);
+        phaseContext.populateLootContext(lootBuilder);
 
         return new EffectResult(newState, oldState.state.getDrops(lootBuilder), false);
     }

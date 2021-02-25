@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.MusicDiscItem;
-import net.minecraft.tileentity.JukeboxTileEntity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -39,17 +39,17 @@ public final class JukeBoxData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(JukeboxTileEntity.class)
+                .asMutable(JukeboxBlockEntity.class)
                     .create(Keys.ITEM_STACK_SNAPSHOT)
                         .get(h -> h.getRecord().isEmpty() ? null : ItemStackUtil.snapshotOf(h.getRecord()))
                         .setAnd((h, v) -> {
                             final ItemStack record = ItemStackUtil.fromSnapshotToNative(v);
-                            if (record.getItem() instanceof MusicDiscItem) {
+                            if (record.getItem() instanceof RecordItem) {
                                 h.setRecord(record);
                                 return true;
                             }
                             if (record.isEmpty()) {
-                                h.clear();
+                                h.clearContent();
                                 return true;
                             }
                             return false;

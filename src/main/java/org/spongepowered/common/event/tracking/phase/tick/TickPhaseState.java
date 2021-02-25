@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.block.Block;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
@@ -34,6 +32,9 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 
 abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState<C> implements IPhaseState<C> {
 
@@ -47,15 +48,13 @@ abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState
 
     @Override
     public void associateNeighborStateNotifier(final C context, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-                                               final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
+                                               final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
 
     }
 
     @Override
-    public void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
-        if (this == TickPhase.Tick.BLOCK || this == TickPhase.Tick.RANDOM_BLOCK) {
+    public void appendNotifierPreBlockTick(final ServerLevel world, final BlockPos pos, final C context, final LocationBasedTickContext<@NonNull ?> phaseContext) {
 
-        }
     }
 
     @Override

@@ -31,7 +31,6 @@ import static org.hamcrest.core.Is.is;
 import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.junit.runners.Parameterized;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.lwts.runner.LaunchWrapperParameterized;
 
 @RunWith(LaunchWrapperParameterized.class)

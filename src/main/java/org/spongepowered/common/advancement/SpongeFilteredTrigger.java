@@ -25,9 +25,7 @@
 package org.spongepowered.common.advancement;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
-import net.minecraft.advancements.ICriterionInstance;
-import net.minecraft.util.ResourceLocation;
+import com.google.gson.JsonObject;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
@@ -36,22 +34,25 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataSerializable;
 
 import java.io.IOException;
+import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.critereon.SerializationContext;
+import net.minecraft.resources.ResourceLocation;
 
 @SuppressWarnings("rawtypes")
-public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigger {
+public final class SpongeFilteredTrigger implements CriterionTriggerInstance, FilteredTrigger {
 
     private final static Gson GSON = new Gson();
 
-    private final SpongeTrigger triggerType;
+    private final SpongeCriterionTrigger triggerType;
     private final FilteredTriggerConfiguration configuration;
 
-    SpongeFilteredTrigger(final SpongeTrigger triggerType, final FilteredTriggerConfiguration configuration) {
+    SpongeFilteredTrigger(final SpongeCriterionTrigger triggerType, final FilteredTriggerConfiguration configuration) {
         this.triggerType = triggerType;
         this.configuration = configuration;
     }
 
     @Override
-    public ResourceLocation getId() {
+    public ResourceLocation getCriterion() {
         return this.triggerType.getId();
     }
 
@@ -66,16 +67,17 @@ public class SpongeFilteredTrigger implements ICriterionInstance, FilteredTrigge
     }
 
     @Override
-    public JsonElement serialize() {
+    public JsonObject serializeToJson(final SerializationContext arraySerializer) {
         if (this.configuration instanceof DataSerializable) {
             final DataContainer dataContainer = ((DataSerializable) this.configuration).toContainer();
             try {
                 final String json = DataFormats.JSON.get().write(dataContainer);
-                return SpongeFilteredTrigger.GSON.fromJson(json, JsonElement.class);
+                return SpongeFilteredTrigger.GSON.fromJson(json, JsonObject.class);
             } catch (IOException e) {
                 e.printStackTrace();
             }
         }
-        return SpongeFilteredTrigger.GSON.toJsonTree(this.configuration);
+
+        return SpongeFilteredTrigger.GSON.toJsonTree(this.configuration).getAsJsonObject();
     }
 }

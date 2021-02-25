@@ -24,32 +24,32 @@
  */
 package org.spongepowered.common.entity.player;
 
-import net.minecraft.inventory.EnderChestInventory;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.inventory.PlayerEnderChestContainer;
+import net.minecraft.world.item.ItemStack;
 
-public class SpongeUserInventoryEnderchest extends EnderChestInventory {
+public class SpongeUserInventoryEnderchest extends PlayerEnderChestContainer {
 
-    private SpongeUser user;
+    private final SpongeUser user;
 
-    public SpongeUserInventoryEnderchest(SpongeUser user) {
+    public SpongeUserInventoryEnderchest(final SpongeUser user) {
         this.user = user;
     }
 
     @Override
-    public ItemStack removeStackFromSlot(int index) {
+    public ItemStack removeItemNoUpdate(final int index) {
         this.user.markDirty();
-        return super.removeStackFromSlot(index);
+        return super.removeItemNoUpdate(index);
     }
 
     @Override
-    public ItemStack decrStackSize(int index, int count) {
+    public ItemStack removeItem(final int index, final int count) {
         this.user.markDirty();
-        return super.decrStackSize(index, count);
+        return super.removeItem(index, count);
     }
 
     @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
+    public void setItem(final int index, final ItemStack stack) {
         this.user.markDirty();
-        super.setInventorySlotContents(index, stack);
+        super.setItem(index, stack);
     }
 }

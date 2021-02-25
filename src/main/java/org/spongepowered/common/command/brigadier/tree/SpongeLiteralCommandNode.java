@@ -30,25 +30,28 @@ import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
 import java.util.Collection;
+import net.minecraft.commands.CommandSourceStack;
 
-public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSource> implements SpongeNode {
+public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSourceStack> implements SpongeNode {
 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
     private final Command.@Nullable Parameterized subcommandIfApplicable;
+    private CommandNode<CommandSourceStack> forcedRedirect;
 
-    public SpongeLiteralCommandNode(final LiteralArgumentBuilder<CommandSource> argumentBuilder) {
+    private com.mojang.brigadier.Command<CommandSourceStack> executor;
+
+    public SpongeLiteralCommandNode(final LiteralArgumentBuilder<CommandSourceStack> argumentBuilder) {
         this(argumentBuilder, null);
     }
 
     public SpongeLiteralCommandNode(
-            final LiteralArgumentBuilder<CommandSource> argumentBuilder,
+            final LiteralArgumentBuilder<CommandSourceStack> argumentBuilder,
             final Command.@Nullable Parameterized associatedSubcommand) {
         super(argumentBuilder.getLiteral(),
                 argumentBuilder.getCommand(),
@@ -61,21 +64,58 @@ public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSource> 
     }
 
     @Override
-    public void addChild(final CommandNode<CommandSource> node) {
+    public void addChild(final CommandNode<CommandSourceStack> node) {
         super.addChild(node);
         this.nodeHolder.add(node);
     }
 
     @Override
-    public final Collection<CommandNode<CommandSource>> getChildrenForSuggestions() {
+    public final Collection<CommandNode<CommandSourceStack>> getChildrenForSuggestions() {
         return this.nodeHolder.getChildrenForSuggestions();
     }
 
     @Override
-    public void parse(final StringReader reader, final CommandContextBuilder<CommandSource> contextBuilder) throws CommandSyntaxException {
+    public void parse(final StringReader reader, final CommandContextBuilder<CommandSourceStack> contextBuilder) throws CommandSyntaxException {
         super.parse(reader, contextBuilder);
         if (this.subcommandIfApplicable != null && contextBuilder instanceof SpongeCommandContextBuilder) {
             ((SpongeCommandContextBuilder) contextBuilder).setCurrentTargetCommand(this.subcommandIfApplicable);
         }
     }
+
+    @Override
+    public void forceExecutor(final com.mojang.brigadier.Command<CommandSourceStack> forcedExecutor) {
+        this.executor = forcedExecutor;
+    }
+
+    @Override
+    public boolean canForceRedirect() {
+        return this.getChildren() == null || this.getChildren().isEmpty();
+    }
+
+    @Override
+    public void forceRedirect(final CommandNode<CommandSourceStack> forcedRedirect) {
+        this.forcedRedirect = forcedRedirect;
+    }
+
+    @Override
+    public CommandNode<CommandSourceStack> getRedirect() {
+        final CommandNode<CommandSourceStack> redirect = super.getRedirect();
+        if (redirect != null) {
+            return redirect;
+        }
+        if (this.canForceRedirect()) {
+            return this.forcedRedirect;
+        }
+        return null;
+    }
+
+    @Override
+    public com.mojang.brigadier.Command<CommandSourceStack> getCommand() {
+        final com.mojang.brigadier.Command<CommandSourceStack> command = super.getCommand();
+        if (command != null) {
+            return command;
+        }
+        return this.executor;
+    }
+
 }

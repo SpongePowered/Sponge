@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.item.ArmorItem;
-import net.minecraft.item.IArmorMaterial;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ArmorItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ArmorMaterial;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
@@ -46,7 +45,7 @@ public final class ArmorItemStackData {
                         .get(h -> {
                             final Item item = h.getItem();
                             if (item instanceof ArmorItem) {
-                                final IArmorMaterial armor = ((ArmorItem) item).getArmorMaterial();
+                                final net.minecraft.world.item.ArmorMaterial armor = ((ArmorItem) item).getMaterial();
                                 if (armor instanceof org.spongepowered.api.data.type.ArmorMaterial) {
                                     return (ArmorMaterial) armor;
                                 }
@@ -57,7 +56,7 @@ public final class ArmorItemStackData {
                     .create(Keys.DAMAGE_ABSORPTION)
                         .get(h -> {
                             if (h.getItem() instanceof ArmorItem) {
-                                return (double) ((ArmorItem) h.getItem()).getDamageReduceAmount();
+                                return (double) ((ArmorItem) h.getItem()).getDefense();
                             }
                             return null;
                         })
@@ -65,7 +64,7 @@ public final class ArmorItemStackData {
                     .create(Keys.EQUIPMENT_TYPE)
                         .get(h -> {
                             if (h.getItem() instanceof ArmorItem) {
-                                switch (((ArmorItem) h.getItem()).getEquipmentSlot()) {
+                                switch (((ArmorItem) h.getItem()).getSlot()) {
                                     case FEET:
                                         return EquipmentTypes.FEET.get();
                                     case LEGS:

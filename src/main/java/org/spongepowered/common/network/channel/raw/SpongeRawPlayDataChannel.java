@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.channel.raw;
 
-import net.minecraft.network.IPacket;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -40,6 +39,7 @@ import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
+import net.minecraft.network.protocol.Packet;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class SpongeRawPlayDataChannel implements RawPlayDataChannel {
@@ -116,7 +116,7 @@ public class SpongeRawPlayDataChannel implements RawPlayDataChannel {
             return future;
         }
 
-        final IPacket<?> mcPacket = PacketUtil.createPlayPayload(this.parent.getKey(), payload, connection.getSide());
+        final Packet<?> mcPacket = PacketUtil.createPlayPayload(this.parent.getKey(), payload, connection.getSide());
         PacketSender.sendTo(connection, mcPacket, future);
         return future;
     }

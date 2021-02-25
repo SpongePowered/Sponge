@@ -25,50 +25,57 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
-import net.minecraft.block.BlockState;
-import net.minecraft.util.math.BlockPos;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.EventContextKey;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
-abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEvent> {
+abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEvent.All> {
 
-    public static final int EVENT_COUNT = BlockChange.values().length + 1;
-    // State definitions
     final BlockPos affectedPosition;
     final BlockState originalState;
 
-    BlockEventBasedTransaction(final BlockPos affectedPosition, final BlockState originalState) {
-        super(TransactionType.BLOCK);
-        this.affectedPosition = affectedPosition;
+    BlockEventBasedTransaction(final BlockPos affectedPosition, final BlockState originalState, final ResourceKey worldKey) {
+        super(TransactionTypes.BLOCK.get(), worldKey);
+        this.affectedPosition = affectedPosition.immutable();
         this.originalState = originalState;
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public final ChangeBlockEvent generateEvent(final PhaseContext<@NonNull ?> context,
+    public final Optional<ChangeBlockEvent.All> generateEvent(final PhaseContext<@NonNull ?> context,
         final @Nullable GameTransaction<@NonNull ?> parent,
-        final ImmutableList<GameTransaction<ChangeBlockEvent>> transactions,
-        final Cause currentCause
+        final ImmutableList<GameTransaction<ChangeBlockEvent.All>> transactions,
+        final Cause currentCause,
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
+        final Optional<ServerWorld> o = ((SpongeServer) SpongeCommon.getServer()).getWorldManager().world(this.worldKey);
+        if (!o.isPresent()) {
+            return Optional.empty();
+        }
         final ListMultimap<BlockPos, SpongeBlockSnapshot> positions = LinkedListMultimap.create();
         for (final GameTransaction<@NonNull ?> transaction : transactions) {
             final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) transaction;
@@ -78,26 +85,22 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
                     blockTransaction.getOriginalSnapshot()
                 );
             }
-            positions.put(
-                blockTransaction.affectedPosition,
-                blockTransaction.getResultingSnapshot()
-            );
+            if (blockTransaction.getResultingSnapshot() != null) {
+                positions.put(
+                        blockTransaction.affectedPosition,
+                        blockTransaction.getResultingSnapshot()
+                );
+            }
         }
 
-        final ImmutableList<Transaction<BlockSnapshot>>[] transactionArrays = new ImmutableList[BlockEventBasedTransaction.EVENT_COUNT];
-        final ImmutableList.Builder<Transaction<BlockSnapshot>>[] transactionBuilders = new ImmutableList.Builder[BlockEventBasedTransaction.EVENT_COUNT];
-        for (int i = 0; i < BlockEventBasedTransaction.EVENT_COUNT; i++) {
-            transactionBuilders[i] = new ImmutableList.Builder<>();
-        }
-
-        final ImmutableList<Transaction<BlockSnapshot>> eventTransactions = positions.asMap().values()
+        final ImmutableList<BlockTransaction> eventTransactions = positions.asMap().values()
             .stream()
             .map(spongeBlockSnapshots -> {
-                if (spongeBlockSnapshots.size() < 2) {
-                    // Error case
-                    return Optional.<Transaction<BlockSnapshot>>empty();
-                }
                 final List<SpongeBlockSnapshot> snapshots = new ArrayList<>(spongeBlockSnapshots);
+                if (snapshots.isEmpty() || snapshots.size() < 2) {
+                    // Error case
+                    return Optional.<BlockTransaction>empty();
+                }
                 final SpongeBlockSnapshot original = snapshots.get(0);
                 final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
                 final ImmutableList<BlockSnapshot> intermediary;
@@ -106,52 +109,19 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
                 } else {
                     intermediary = ImmutableList.of();
                 }
-                final Transaction<BlockSnapshot> eventTransaction = new Transaction<>(original, result, intermediary);
-                transactionBuilders[original.blockChange.ordinal()].add(eventTransaction);
+                final Operation operation = context.getBlockOperation(original, original.blockChange);
+                final BlockTransaction eventTransaction = new BlockTransaction(original, result, intermediary, operation);
                 return Optional.of(eventTransaction);
             })
             .filter(Optional::isPresent)
             .map(Optional::get)
             .collect(ImmutableList.toImmutableList());
-        for (int i = 0; i < BlockEventBasedTransaction.EVENT_COUNT; i++) {
-            transactionArrays[i] = transactionBuilders[i].build();
-        }
-        final @Nullable ChangeBlockEvent[] mainEvents = new ChangeBlockEvent[BlockChange.values().length];
-        for (final BlockChange blockChange : BlockChange.values()) {
-            if (blockChange == BlockChange.DECAY) { // Decay takes place after.
-                continue;
-            }
-            if (!transactionArrays[blockChange.ordinal()].isEmpty()) {
-                final ChangeBlockEvent event = blockChange.createEvent(currentCause, transactionArrays[blockChange.ordinal()]);
-                mainEvents[blockChange.ordinal()] = event;
-                Sponge.getEventManager().post(event);
-            }
-        }
-        if (!transactionArrays[BlockChange.DECAY.ordinal()].isEmpty()) { // Needs to be placed into iterateChangeBlockEvents
-            final ChangeBlockEvent event = BlockChange.DECAY.createEvent(currentCause, transactionArrays[BlockChange.DECAY.ordinal()]);
-            mainEvents[BlockChange.DECAY.ordinal()] = event;
-            Sponge.getEventManager().post(event);
-        }
-        final Cause causeToUse;
-        if (((IPhaseState) context.state).shouldProvideModifiers(context)) {
-            final Cause.Builder builder = Cause.builder().from(currentCause);
-            final EventContext.Builder modified = EventContext.builder();
-            modified.from(currentCause.getContext());
-            for (final BlockChange blockChange : BlockChange.values()) {
-                final @Nullable ChangeBlockEvent mainEvent = mainEvents[blockChange.ordinal()];
-                if (mainEvent != null) {
-                    builder.append(mainEvent);
-                    modified.add((EventContextKey<? super ChangeBlockEvent>) blockChange.getKey(), mainEvent);
-                }
-            }
-            causeToUse = builder.build(modified.build());
-        } else {
-            causeToUse = currentCause;
-        }
-        return SpongeEventFactory.createChangeBlockEventPost(
-            causeToUse,
-            eventTransactions
-        );
+
+        return Optional.of(SpongeEventFactory.createChangeBlockEventAll(
+            currentCause,
+            eventTransactions,
+            o.get()
+        ));
     }
 
     protected abstract SpongeBlockSnapshot getResultingSnapshot();
@@ -159,14 +129,14 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
     protected abstract SpongeBlockSnapshot getOriginalSnapshot();
 
     @Override
-    public final boolean markCancelledTransactions(final ChangeBlockEvent event,
-        final ImmutableList<? extends GameTransaction<ChangeBlockEvent>> blockTransactions
+    public final boolean markCancelledTransactions(final ChangeBlockEvent.All event,
+        final ImmutableList<? extends GameTransaction<ChangeBlockEvent.All>> blockTransactions
     ) {
         boolean cancelledAny = false;
         for (final Transaction<BlockSnapshot> transaction : event.getTransactions()) {
             if (!transaction.isValid()) {
                 cancelledAny = true;
-                for (final GameTransaction<ChangeBlockEvent> gameTransaction : blockTransactions) {
+                for (final GameTransaction<ChangeBlockEvent.All> gameTransaction : blockTransactions) {
                     final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) gameTransaction;
                     final Vector3i position = transaction.getOriginal().getPosition();
                     final BlockPos affectedPosition = blockTransaction.affectedPosition;

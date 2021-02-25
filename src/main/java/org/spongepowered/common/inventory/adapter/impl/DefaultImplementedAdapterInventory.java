@@ -33,12 +33,12 @@ import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.property.InventoryDataHolder;
-import org.spongepowered.common.registry.builtin.sponge.QueryTypeStreamGenerator;
+import org.spongepowered.common.inventory.query.SpongeQueryTypes;
 
 import java.util.List;
 import java.util.Optional;
@@ -168,17 +168,17 @@ public interface DefaultImplementedAdapterInventory extends InventoryDataHolder 
 
     @Override
     default Inventory intersect(Inventory inventory) {
-        return QueryTypeStreamGenerator.SLOT_LENS.of(ImmutableSet.of(inventory)).execute(this);
+        return SpongeQueryTypes.SLOT_LENS.get().of(ImmutableSet.of(inventory)).execute(this);
     }
 
     @Override
     default Inventory union(Inventory inventory) {
-        return this.query(QueryTypeStreamGenerator.UNION.of(inventory));
+        return this.query(SpongeQueryTypes.UNION.get().of(inventory));
     }
 
     @Override
     default boolean containsInventory(Inventory inventory) {
-        Inventory result = QueryTypeStreamGenerator.LENS.of(((InventoryBridge) inventory).bridge$getAdapter().inventoryAdapter$getRootLens()).execute(this);
+        Inventory result = SpongeQueryTypes.LENS.get().of(((InventoryBridge) inventory).bridge$getAdapter().inventoryAdapter$getRootLens()).execute(this);
         return result.capacity() == inventory.capacity() && ((InventoryAdapter) result).inventoryAdapter$getRootLens() == ((InventoryAdapter) inventory).inventoryAdapter$getRootLens();
     }
 

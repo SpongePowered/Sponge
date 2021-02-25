@@ -34,14 +34,13 @@ import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProvisionListener;
 
+import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.List;
-
-import javax.annotation.Nullable;
 
 /**
  * Allows injecting the {@link SpongeInjectionPoint} in {@link Provider}s.
@@ -64,7 +63,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
     @Override
     public <T> void onProvision(ProvisionInvocation<T> provision) {
         try {
-            this.injectionPoint = findInjectionPoint(provision.getDependencyChain());
+            this.injectionPoint = InjectionPointProvider.findInjectionPoint(provision.getDependencyChain());
             provision.provision();
         } finally {
             this.injectionPoint = null;

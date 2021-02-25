@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.event.cause.entity.damage.source.common;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,7 +49,7 @@ public abstract class AbstractIndirectEntityDamageSourceMixin_API implements Ind
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setUpBridges(final CallbackInfo callbackInfo) {
         final SpongeCommonIndirectEntityDamageSource commonIndirect = (SpongeCommonIndirectEntityDamageSource) (Object) this;
-        commonIndirect.setDamageType(this.getType().getKey().getFormatted());
+        commonIndirect.setDamageType(this.getType().getName());
         commonIndirect.setEntitySource((Entity) this.getSource());
         commonIndirect.setIndirectSource((Entity) this.getIndirectSource());
         if (this.isAbsolute()) {
@@ -62,13 +62,13 @@ public abstract class AbstractIndirectEntityDamageSourceMixin_API implements Ind
             commonIndirect.setExplosion();
         }
         if (this.isMagic()) {
-            commonIndirect.setMagicDamage();
+            commonIndirect.setMagic();
         }
         if (this.isScaledByDifficulty()) {
-            commonIndirect.setDifficultyScaled();
+            commonIndirect.setScalesWithDifficulty();
         }
         if (this.doesAffectCreative()) {
-            commonIndirect.canHarmInCreative();
+            commonIndirect.isBypassInvul();
         }
     }
 

@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.event.lifecycle;
 
+import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.GenericEvent;
 import org.spongepowered.api.event.lifecycle.LifecycleEvent;
 
 public abstract class AbstractLifecycleEvent implements LifecycleEvent {
@@ -46,5 +48,20 @@ public abstract class AbstractLifecycleEvent implements LifecycleEvent {
     @Override
     public final Game getGame() {
         return this.game;
+    }
+
+    public abstract static class GenericImpl<T> extends AbstractLifecycleEvent implements GenericEvent<T> {
+
+        protected final TypeToken<T> token;
+
+        public GenericImpl(final Cause cause, final Game game, final TypeToken<T> token) {
+            super(cause, game);
+            this.token = token;
+        }
+
+        @Override
+        public final TypeToken<T> getParamType() {
+            return this.token;
+        }
     }
 }

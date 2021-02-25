@@ -26,17 +26,15 @@ package org.spongepowered.common.data.persistence;
 
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
-import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.math.imaginary.Complexd;
 import org.spongepowered.math.imaginary.Complexf;
@@ -66,7 +64,6 @@ import java.time.ZonedDateTime;
 import java.time.temporal.ChronoField;
 import java.util.UUID;
 import java.util.function.Supplier;
-import java.util.stream.Stream;
 
 public final class DataSerializers {
 
@@ -95,15 +92,10 @@ public final class DataSerializers {
     public static final DataTranslator<ZonedDateTime> ZONED_DATE_TIME_DATA_SERIALIZER;
     public static final DataTranslator<Month> MONTH_DATA_SERIALIZER;
 
+
     static {
         COMPONENT_DATA_SERIALIZER = new DataTranslator<Component>() {
-            final ResourceKey key = ResourceKey.sponge("component");
             final TypeToken<Component> token = TypeToken.get(Component.class);
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
 
             @Override
             public TypeToken<Component> getToken() {
@@ -130,7 +122,6 @@ public final class DataSerializers {
         };
         UUID_DATA_SERIALIZER = new DataTranslator<UUID>() {
 
-            final ResourceKey key = ResourceKey.sponge("uuid");
             final TypeToken<UUID> token = TypeToken.get(UUID.class);
 
             @Override
@@ -140,8 +131,8 @@ public final class DataSerializers {
 
             @Override
             public UUID translate(DataView view) throws InvalidDataException {
-                final long most = view.getLong(Queries.UUID_MOST).orElseThrow(invalidDataQuery(Queries.UUID_MOST));
-                final long least = view.getLong(Queries.UUID_LEAST).orElseThrow(invalidDataQuery(Queries.UUID_LEAST));
+                final long most = view.getLong(Queries.UUID_MOST).orElseThrow(DataSerializers.invalidDataQuery(Queries.UUID_MOST));
+                final long least = view.getLong(Queries.UUID_LEAST).orElseThrow(DataSerializers.invalidDataQuery(Queries.UUID_LEAST));
                 return new UUID(most, least);
             }
 
@@ -158,15 +149,8 @@ public final class DataSerializers {
                     .set(Queries.UUID_LEAST, obj.getLeastSignificantBits())
                     .set(Queries.UUID_MOST, obj.getMostSignificantBits());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_2_D_DATA_SERIALIZER = new DataTranslator<Vector2d>() {
-
-            final ResourceKey key = ResourceKey.sponge("vector_2_d");
             final TypeToken<Vector2d> token = TypeToken.get(Vector2d.class);
 
             @Override
@@ -176,8 +160,8 @@ public final class DataSerializers {
 
             @Override
             public Vector2d translate(DataView view) throws InvalidDataException {
-                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
                 return new Vector2d(x, y);
             }
 
@@ -193,15 +177,8 @@ public final class DataSerializers {
                 return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
                     .set(Constants.DataSerializers.Y_POS, obj.getY());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_2_F_DATA_SERIALIZER = new DataTranslator<Vector2f>() {
-
-            final ResourceKey key = ResourceKey.sponge("vector_2_f");
             final TypeToken<Vector2f> token = TypeToken.get(Vector2f.class);
 
             @Override
@@ -211,8 +188,8 @@ public final class DataSerializers {
 
             @Override
             public Vector2f translate(DataView view) throws InvalidDataException {
-                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
                 return new Vector2f(x, y);
             }
 
@@ -228,15 +205,8 @@ public final class DataSerializers {
                 return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
                     .set(Constants.DataSerializers.Y_POS, obj.getY());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_2_I_DATA_SERIALIZER = new DataTranslator<Vector2i>() {
-
-            final ResourceKey key = ResourceKey.sponge("vector_2_i");
             final TypeToken<Vector2i> token = TypeToken.get(Vector2i.class);
 
             @Override
@@ -246,8 +216,8 @@ public final class DataSerializers {
 
             @Override
             public Vector2i translate(DataView view) throws InvalidDataException {
-                final int x = view.getInt(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final int y = view.getInt(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final int x = view.getInt(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final int y = view.getInt(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
                 return new Vector2i(x, y);
             }
 
@@ -264,14 +234,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Y_POS, obj.getY())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_2_L_DATA_SERIALIZER = new DataTranslator<Vector2l>() {
-            final ResourceKey key = ResourceKey.sponge("vector_2_l");
             final TypeToken<Vector2l> token = TypeToken.get(Vector2l.class);
 
             @Override
@@ -281,8 +245,8 @@ public final class DataSerializers {
 
             @Override
             public Vector2l translate(DataView view) throws InvalidDataException {
-                final long x = view.getLong(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final long y = view.getLong(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final long x = view.getLong(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final long y = view.getLong(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
                 return new Vector2l(x, y);
             }
 
@@ -298,14 +262,8 @@ public final class DataSerializers {
                 return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
                     .set(Constants.DataSerializers.Y_POS, obj.getY());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_3_D_DATA_SERIALIZER = new DataTranslator<Vector3d>() {
-            final ResourceKey key = ResourceKey.sponge("vector_3_d");
             final TypeToken<Vector3d> token = TypeToken.get(Vector3d.class);
 
             @Override
@@ -315,9 +273,9 @@ public final class DataSerializers {
 
             @Override
             public Vector3d translate(DataView view) throws InvalidDataException {
-                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
-                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Z_POS));
+                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Z_POS));
                 return new Vector3d(x, y, z);
             }
 
@@ -336,14 +294,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_3_F_DATA_SERIALIZER = new DataTranslator<Vector3f>() {
-            final ResourceKey key = ResourceKey.sponge("vector_3_f");
             final TypeToken<Vector3f> token = TypeToken.get(Vector3f.class);
 
             @Override
@@ -353,9 +305,9 @@ public final class DataSerializers {
 
             @Override
             public Vector3f translate(DataView view) throws InvalidDataException {
-                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
-                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Z_POS));
+                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Z_POS));
                 return new Vector3f(x, y, z);
             }
 
@@ -374,14 +326,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_3_I_DATA_SERIALIZER = new DataTranslator<Vector3i>() {
-            final ResourceKey key = ResourceKey.sponge("vector_3_i");
             final TypeToken<Vector3i> token = TypeToken.get(Vector3i.class);
 
             @Override
@@ -391,9 +337,9 @@ public final class DataSerializers {
 
             @Override
             public Vector3i translate(DataView view) throws InvalidDataException {
-                final int x = view.getInt(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final int y = view.getInt(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
-                final int z = view.getInt(Constants.DataSerializers.Z_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Z_POS));
+                final int x = view.getInt(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final int y = view.getInt(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final int z = view.getInt(Constants.DataSerializers.Z_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Z_POS));
                 return new Vector3i(x, y, z);
             }
 
@@ -412,14 +358,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_3_L_DATA_SERIALIZER = new DataTranslator<Vector3l>() {
-            final ResourceKey key = ResourceKey.sponge("vector_3_l");
             final TypeToken<Vector3l> token = TypeToken.get(Vector3l.class);
 
             @Override
@@ -429,9 +369,9 @@ public final class DataSerializers {
 
             @Override
             public Vector3l translate(DataView view) throws InvalidDataException {
-                final long x = view.getLong(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final long y = view.getLong(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
-                final long z = view.getLong(Constants.DataSerializers.Z_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Z_POS));
+                final long x = view.getLong(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final long y = view.getLong(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final long z = view.getLong(Constants.DataSerializers.Z_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Z_POS));
                 return new Vector3l(x, y, z);
             }
 
@@ -450,14 +390,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_4_F_DATA_SERIALIZER = new DataTranslator<Vector4f>() {
-            final ResourceKey key = ResourceKey.sponge("vector_4_f");
             final TypeToken<Vector4f> token = TypeToken.get(Vector4f.class);
 
             @Override
@@ -467,10 +401,10 @@ public final class DataSerializers {
 
             @Override
             public Vector4f translate(DataView view) throws InvalidDataException {
-                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
-                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Z_POS));
-                final double w = view.getDouble(Constants.DataSerializers.W_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.W_POS));
+                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Z_POS));
+                final double w = view.getDouble(Constants.DataSerializers.W_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.W_POS));
                 return new Vector4f(x, y, z, w);
             }
 
@@ -491,14 +425,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.W_POS, obj.getW())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_4_I_DATA_SERIALIZER = new DataTranslator<Vector4i>() {
-            final ResourceKey key = ResourceKey.sponge("vector_4_i");
             final TypeToken<Vector4i> token = TypeToken.get(Vector4i.class);
 
             @Override
@@ -508,10 +436,10 @@ public final class DataSerializers {
 
             @Override
             public Vector4i translate(DataView view) throws InvalidDataException {
-                final int x = view.getInt(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final int y = view.getInt(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
-                final int z = view.getInt(Constants.DataSerializers.Z_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Z_POS));
-                final int w = view.getInt(Constants.DataSerializers.W_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.W_POS));
+                final int x = view.getInt(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final int y = view.getInt(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final int z = view.getInt(Constants.DataSerializers.Z_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Z_POS));
+                final int w = view.getInt(Constants.DataSerializers.W_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.W_POS));
                 return new Vector4i(x, y, z, w);
             }
 
@@ -532,14 +460,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.W_POS, obj.getW())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_4_L_DATA_SERIALIZER = new DataTranslator<Vector4l>() {
-            final ResourceKey key = ResourceKey.sponge("vector_4_l");
             final TypeToken<Vector4l> token = TypeToken.get(Vector4l.class);
 
             @Override
@@ -549,10 +471,10 @@ public final class DataSerializers {
 
             @Override
             public Vector4l translate(DataView view) throws InvalidDataException {
-                final long x = view.getLong(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final long y = view.getLong(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
-                final long z = view.getLong(Constants.DataSerializers.Z_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Z_POS));
-                final long w = view.getLong(Constants.DataSerializers.W_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.W_POS));
+                final long x = view.getLong(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final long y = view.getLong(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final long z = view.getLong(Constants.DataSerializers.Z_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Z_POS));
+                final long w = view.getLong(Constants.DataSerializers.W_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.W_POS));
                 return new Vector4l(x, y, z, w);
             }
 
@@ -573,14 +495,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.W_POS, obj.getW())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         VECTOR_4_D_DATA_SERIALIZER = new DataTranslator<Vector4d>() {
-            final ResourceKey key = ResourceKey.sponge("vector_4_d");
             final TypeToken<Vector4d> token = TypeToken.get(Vector4d.class);
 
             @Override
@@ -590,10 +506,10 @@ public final class DataSerializers {
 
             @Override
             public Vector4d translate(DataView view) throws InvalidDataException {
-                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
-                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Z_POS));
-                final double w = view.getDouble(Constants.DataSerializers.W_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.W_POS));
+                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Z_POS));
+                final double w = view.getDouble(Constants.DataSerializers.W_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.W_POS));
                 return new Vector4d(x, y, z, w);
             }
 
@@ -614,14 +530,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.W_POS, obj.getW())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         COMPLEXD_DATA_SERIALIZER = new DataTranslator<Complexd>() {
-            final ResourceKey key = ResourceKey.sponge("complexd");
             final TypeToken<Complexd> token = TypeToken.get(Complexd.class);
 
             @Override
@@ -631,8 +541,8 @@ public final class DataSerializers {
 
             @Override
             public Complexd translate(DataView view) throws InvalidDataException {
-                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
                 return new Complexd(x, y);
             }
 
@@ -649,14 +559,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Y_POS, obj.getY())
                     ;
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         COMPLEXF_DATA_SERIALIZER = new DataTranslator<Complexf>() {
-            final ResourceKey key = ResourceKey.sponge("complexf");
             final TypeToken<Complexf> token = TypeToken.get(Complexf.class);
 
             @Override
@@ -666,8 +570,8 @@ public final class DataSerializers {
 
             @Override
             public Complexf translate(DataView view) throws InvalidDataException {
-                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
                 return new Complexf(x, y);
             }
 
@@ -683,14 +587,8 @@ public final class DataSerializers {
                 return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
                     .set(Constants.DataSerializers.Y_POS, obj.getY());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         QUATERNIOND_DATA_SERIALIZER = new DataTranslator<Quaterniond>() {
-            final ResourceKey key = ResourceKey.sponge("quaterniond");
             final TypeToken<Quaterniond> token = TypeToken.get(Quaterniond.class);
 
             @Override
@@ -700,10 +598,10 @@ public final class DataSerializers {
 
             @Override
             public Quaterniond translate(DataView view) throws InvalidDataException {
-                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
-                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Z_POS));
-                final double w = view.getDouble(Constants.DataSerializers.W_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.W_POS));
+                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Z_POS));
+                final double w = view.getDouble(Constants.DataSerializers.W_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.W_POS));
                 return new Quaterniond(x, y, z, w);
             }
 
@@ -723,14 +621,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     .set(Constants.DataSerializers.W_POS, obj.getW());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         QUATERNIONF_DATA_SERIALIZER = new DataTranslator<Quaternionf>() {
-            final ResourceKey key = ResourceKey.sponge("quaternionf");
             final TypeToken<Quaternionf> token = TypeToken.get(Quaternionf.class);
 
             @Override
@@ -740,10 +632,10 @@ public final class DataSerializers {
 
             @Override
             public Quaternionf translate(DataView view) throws InvalidDataException {
-                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.X_POS));
-                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Y_POS));
-                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.Z_POS));
-                final double w = view.getDouble(Constants.DataSerializers.W_POS).orElseThrow(invalidDataQuery(Constants.DataSerializers.W_POS));
+                final double x = view.getDouble(Constants.DataSerializers.X_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.X_POS));
+                final double y = view.getDouble(Constants.DataSerializers.Y_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Y_POS));
+                final double z = view.getDouble(Constants.DataSerializers.Z_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.Z_POS));
+                final double w = view.getDouble(Constants.DataSerializers.W_POS).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.W_POS));
                 return new Quaternionf(x, y, z, w);
             }
 
@@ -763,14 +655,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.Z_POS, obj.getZ())
                     .set(Constants.DataSerializers.W_POS, obj.getW());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         LOCAL_TIME_DATA_SERIALIZER = new DataTranslator<LocalTime>() {
-            final ResourceKey key = ResourceKey.sponge("local_time");
             final TypeToken<LocalTime> token = TypeToken.get(LocalTime.class);
 
             @Override
@@ -780,12 +666,12 @@ public final class DataSerializers {
 
             @Override
             public LocalTime translate(DataView view) throws InvalidDataException {
-                final int hour = view.getInt(Constants.DataSerializers.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_HOUR));
-                final int minute = view.getInt(Constants.DataSerializers.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(
+                final int hour = view.getInt(Constants.DataSerializers.LOCAL_TIME_HOUR).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_HOUR));
+                final int minute = view.getInt(Constants.DataSerializers.LOCAL_TIME_MINUTE).orElseThrow(DataSerializers.invalidDataQuery(
                     Constants.DataSerializers.LOCAL_TIME_MINUTE));
-                final int second = view.getInt(Constants.DataSerializers.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(
+                final int second = view.getInt(Constants.DataSerializers.LOCAL_TIME_SECOND).orElseThrow(DataSerializers.invalidDataQuery(
                     Constants.DataSerializers.LOCAL_TIME_SECOND));
-                final int nano = view.getInt(Constants.DataSerializers.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_NANO));
+                final int nano = view.getInt(Constants.DataSerializers.LOCAL_TIME_NANO).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_NANO));
                 if (!ChronoField.HOUR_OF_DAY.range().isValidValue(hour)) {
                     throw new InvalidDataException("Invalid hour of day: " + hour);
                 }
@@ -817,14 +703,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.LOCAL_TIME_SECOND, obj.getSecond())
                     .set(Constants.DataSerializers.LOCAL_TIME_NANO, obj.getNano());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         LOCAL_DATE_DATA_SERIALIZER = new DataTranslator<LocalDate>() {
-            final ResourceKey key = ResourceKey.sponge("local_date");
             final TypeToken<LocalDate> token = TypeToken.get(LocalDate.class);
 
             @Override
@@ -834,9 +714,9 @@ public final class DataSerializers {
 
             @Override
             public LocalDate translate(DataView view) throws InvalidDataException {
-                final int year = view.getInt(Constants.DataSerializers.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_YEAR));
-                final int month = view.getInt(Constants.DataSerializers.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_MONTH));
-                final int day = view.getInt(Constants.DataSerializers.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_DAY));
+                final int year = view.getInt(Constants.DataSerializers.LOCAL_DATE_YEAR).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_YEAR));
+                final int month = view.getInt(Constants.DataSerializers.LOCAL_DATE_MONTH).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_MONTH));
+                final int day = view.getInt(Constants.DataSerializers.LOCAL_DATE_DAY).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_DAY));
                 if (!ChronoField.YEAR.range().isValidValue(year)) {
                     throw new InvalidDataException("Invalid year: " + year);
                 }
@@ -863,14 +743,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.LOCAL_DATE_MONTH, obj.getMonthValue())
                     .set(Constants.DataSerializers.LOCAL_DATE_DAY, obj.getDayOfMonth());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         LOCAL_DATE_TIME_DATA_SERIALIZER = new DataTranslator<LocalDateTime>() {
-            final ResourceKey key = ResourceKey.sponge("local_date_time");
             final TypeToken<LocalDateTime> token = TypeToken.get(LocalDateTime.class);
 
             @Override
@@ -880,15 +754,15 @@ public final class DataSerializers {
 
             @Override
             public LocalDateTime translate(DataView view) throws InvalidDataException {
-                final int year = view.getInt(Constants.DataSerializers.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_YEAR));
-                final int month = view.getInt(Constants.DataSerializers.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_MONTH));
-                final int day = view.getInt(Constants.DataSerializers.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_DAY));
-                final int hour = view.getInt(Constants.DataSerializers.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_HOUR));
-                final int minute = view.getInt(Constants.DataSerializers.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(
+                final int year = view.getInt(Constants.DataSerializers.LOCAL_DATE_YEAR).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_YEAR));
+                final int month = view.getInt(Constants.DataSerializers.LOCAL_DATE_MONTH).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_MONTH));
+                final int day = view.getInt(Constants.DataSerializers.LOCAL_DATE_DAY).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_DAY));
+                final int hour = view.getInt(Constants.DataSerializers.LOCAL_TIME_HOUR).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_HOUR));
+                final int minute = view.getInt(Constants.DataSerializers.LOCAL_TIME_MINUTE).orElseThrow(DataSerializers.invalidDataQuery(
                     Constants.DataSerializers.LOCAL_TIME_MINUTE));
-                final int second = view.getInt(Constants.DataSerializers.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(
+                final int second = view.getInt(Constants.DataSerializers.LOCAL_TIME_SECOND).orElseThrow(DataSerializers.invalidDataQuery(
                     Constants.DataSerializers.LOCAL_TIME_SECOND));
-                final int nano = view.getInt(Constants.DataSerializers.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_NANO));
+                final int nano = view.getInt(Constants.DataSerializers.LOCAL_TIME_NANO).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_NANO));
                 if (!ChronoField.YEAR.range().isValidValue(year)) {
                     throw new InvalidDataException("Invalid year: " + year);
                 }
@@ -935,14 +809,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.LOCAL_TIME_SECOND, obj.getSecond())
                     .set(Constants.DataSerializers.LOCAL_TIME_NANO, obj.getNano());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         ZONED_DATE_TIME_DATA_SERIALIZER = new DataTranslator<ZonedDateTime>() {
-            final ResourceKey key = ResourceKey.sponge("zoned_date_time");
             final TypeToken<ZonedDateTime> token = TypeToken.get(ZonedDateTime.class);
 
             @Override
@@ -952,16 +820,16 @@ public final class DataSerializers {
 
             @Override
             public ZonedDateTime translate(DataView view) throws InvalidDataException {
-                final int year = view.getInt(Constants.DataSerializers.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_YEAR));
-                final int month = view.getInt(Constants.DataSerializers.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_MONTH));
-                final int day = view.getInt(Constants.DataSerializers.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_DAY));
-                final int hour = view.getInt(Constants.DataSerializers.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_HOUR));
-                final int minute = view.getInt(Constants.DataSerializers.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(
+                final int year = view.getInt(Constants.DataSerializers.LOCAL_DATE_YEAR).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_YEAR));
+                final int month = view.getInt(Constants.DataSerializers.LOCAL_DATE_MONTH).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_MONTH));
+                final int day = view.getInt(Constants.DataSerializers.LOCAL_DATE_DAY).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_DAY));
+                final int hour = view.getInt(Constants.DataSerializers.LOCAL_TIME_HOUR).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_HOUR));
+                final int minute = view.getInt(Constants.DataSerializers.LOCAL_TIME_MINUTE).orElseThrow(DataSerializers.invalidDataQuery(
                     Constants.DataSerializers.LOCAL_TIME_MINUTE));
-                final int second = view.getInt(Constants.DataSerializers.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(
+                final int second = view.getInt(Constants.DataSerializers.LOCAL_TIME_SECOND).orElseThrow(DataSerializers.invalidDataQuery(
                     Constants.DataSerializers.LOCAL_TIME_SECOND));
-                final int nano = view.getInt(Constants.DataSerializers.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_NANO));
-                final String zoneId = view.getString(Constants.DataSerializers.ZONE_TIME_ID).orElseThrow(invalidDataQuery(
+                final int nano = view.getInt(Constants.DataSerializers.LOCAL_TIME_NANO).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_NANO));
+                final String zoneId = view.getString(Constants.DataSerializers.ZONE_TIME_ID).orElseThrow(DataSerializers.invalidDataQuery(
                     Constants.DataSerializers.ZONE_TIME_ID));
                 if (!ChronoField.YEAR.range().isValidValue(year)) {
                     throw new InvalidDataException("Invalid year: " + year);
@@ -1014,14 +882,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.LOCAL_TIME_NANO, obj.getNano())
                     .set(Constants.DataSerializers.ZONE_TIME_ID, obj.getZone().getId());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         INSTANT_DATA_SERIALIZER = new DataTranslator<Instant>() {
-            final ResourceKey key = ResourceKey.sponge("instant");
             final TypeToken<Instant> token = TypeToken.get(Instant.class);
 
             @Override
@@ -1031,15 +893,15 @@ public final class DataSerializers {
 
             @Override
             public Instant translate(DataView view) throws InvalidDataException {
-                final int year = view.getInt(Constants.DataSerializers.LOCAL_DATE_YEAR).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_YEAR));
-                final int month = view.getInt(Constants.DataSerializers.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_MONTH));
-                final int day = view.getInt(Constants.DataSerializers.LOCAL_DATE_DAY).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_DAY));
-                final int hour = view.getInt(Constants.DataSerializers.LOCAL_TIME_HOUR).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_HOUR));
-                final int minute = view.getInt(Constants.DataSerializers.LOCAL_TIME_MINUTE).orElseThrow(invalidDataQuery(
+                final int year = view.getInt(Constants.DataSerializers.LOCAL_DATE_YEAR).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_YEAR));
+                final int month = view.getInt(Constants.DataSerializers.LOCAL_DATE_MONTH).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_MONTH));
+                final int day = view.getInt(Constants.DataSerializers.LOCAL_DATE_DAY).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_DAY));
+                final int hour = view.getInt(Constants.DataSerializers.LOCAL_TIME_HOUR).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_HOUR));
+                final int minute = view.getInt(Constants.DataSerializers.LOCAL_TIME_MINUTE).orElseThrow(DataSerializers.invalidDataQuery(
                     Constants.DataSerializers.LOCAL_TIME_MINUTE));
-                final int second = view.getInt(Constants.DataSerializers.LOCAL_TIME_SECOND).orElseThrow(invalidDataQuery(
+                final int second = view.getInt(Constants.DataSerializers.LOCAL_TIME_SECOND).orElseThrow(DataSerializers.invalidDataQuery(
                     Constants.DataSerializers.LOCAL_TIME_SECOND));
-                final int nano = view.getInt(Constants.DataSerializers.LOCAL_TIME_NANO).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_NANO));
+                final int nano = view.getInt(Constants.DataSerializers.LOCAL_TIME_NANO).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_TIME_NANO));
                 if (!ChronoField.YEAR.range().isValidValue(year)) {
                     throw new InvalidDataException("Invalid year: " + year);
                 }
@@ -1088,14 +950,8 @@ public final class DataSerializers {
                     .set(Constants.DataSerializers.LOCAL_TIME_SECOND, local.getSecond())
                     .set(Constants.DataSerializers.LOCAL_TIME_NANO, local.getNano());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
         MONTH_DATA_SERIALIZER = new DataTranslator<Month>() {
-            final ResourceKey key = ResourceKey.sponge("month");
             final TypeToken<Month> token = TypeToken.get(Month.class);
 
             @Override
@@ -1105,7 +961,7 @@ public final class DataSerializers {
 
             @Override
             public Month translate(DataView view) throws InvalidDataException {
-                final int month = view.getInt(Constants.DataSerializers.LOCAL_DATE_MONTH).orElseThrow(invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_MONTH));
+                final int month = view.getInt(Constants.DataSerializers.LOCAL_DATE_MONTH).orElseThrow(DataSerializers.invalidDataQuery(Constants.DataSerializers.LOCAL_DATE_MONTH));
                 if (!ChronoField.MONTH_OF_YEAR.range().isValidValue(month)) {
                     throw new InvalidDataException("Invalid month of year: " + month);
                 }
@@ -1121,46 +977,13 @@ public final class DataSerializers {
             public DataView addTo(Month obj, DataView dataView) {
                 return dataView.set(Constants.DataSerializers.LOCAL_DATE_MONTH, obj.getValue());
             }
-
-            @Override
-            public ResourceKey getKey() {
-                return this.key;
-            }
         };
 
     }
 
-    static Supplier<InvalidDataException> invalidDataQuery(DataQuery query) {
+    static Supplier<InvalidDataException> invalidDataQuery(final DataQuery query) {
         return () -> {
             throw new InvalidDataException("Invalid data located at: " + query.toString());
         };
-    }
-
-    public static Stream<Tuple<DataTranslator, Class>> stream() {
-        return Stream.of(
-            Tuple.of(COMPONENT_DATA_SERIALIZER, Component.class),
-            Tuple.of(UUID_DATA_SERIALIZER, UUID.class),
-            Tuple.of(VECTOR_2_D_DATA_SERIALIZER, Vector2d.class),
-            Tuple.of(VECTOR_2_F_DATA_SERIALIZER, Vector2f.class),
-            Tuple.of(VECTOR_2_I_DATA_SERIALIZER, Vector2i.class),
-            Tuple.of(VECTOR_2_L_DATA_SERIALIZER, Vector2l.class),
-            Tuple.of(VECTOR_3_D_DATA_SERIALIZER, Vector3d.class),
-            Tuple.of(VECTOR_3_F_DATA_SERIALIZER, Vector3f.class),
-            Tuple.of(VECTOR_3_I_DATA_SERIALIZER, Vector3i.class),
-            Tuple.of(VECTOR_3_L_DATA_SERIALIZER, Vector3l.class),
-            Tuple.of(VECTOR_4_D_DATA_SERIALIZER, Vector4d.class),
-            Tuple.of(VECTOR_4_F_DATA_SERIALIZER, Vector4f.class),
-            Tuple.of(VECTOR_4_I_DATA_SERIALIZER, Vector4i.class),
-            Tuple.of(VECTOR_4_L_DATA_SERIALIZER, Vector4l.class),
-            Tuple.of(COMPLEXD_DATA_SERIALIZER, Complexd.class),
-            Tuple.of(COMPLEXF_DATA_SERIALIZER, Complexf.class),
-            Tuple.of(QUATERNIOND_DATA_SERIALIZER, Quaterniond.class),
-            Tuple.of(QUATERNIONF_DATA_SERIALIZER, Quaternionf.class),
-            Tuple.of(MONTH_DATA_SERIALIZER, LocalTime.class),
-            Tuple.of(LOCAL_TIME_DATA_SERIALIZER, LocalDate.class),
-            Tuple.of(LOCAL_DATE_DATA_SERIALIZER, LocalDateTime.class),
-            Tuple.of(LOCAL_DATE_TIME_DATA_SERIALIZER, Instant.class),
-            Tuple.of(ZONED_DATE_TIME_DATA_SERIALIZER, ZonedDateTime.class),
-            Tuple.of(INSTANT_DATA_SERIALIZER, Month.class));
     }
 }

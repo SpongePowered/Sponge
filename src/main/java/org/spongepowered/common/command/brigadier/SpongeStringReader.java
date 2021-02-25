@@ -24,19 +24,21 @@
  */
 package org.spongepowered.common.command.brigadier;
 
-import com.google.gson.Gson;
-import com.google.gson.JsonObject;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.arguments.ResourceLocationArgument;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.network.chat.ComponentUtils;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 
 // ArgumentReader.Mutable specifies a non null getRead() method, StringReader suggests its
 // nullable - but it isn't. So we just need to suppress the warning.
@@ -134,7 +136,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     @NonNull
     public String parseString() throws ArgumentParseException {
         try {
-            if (this.canRead() && this.peek() == SYNTAX_QUOTE) {
+            if (this.canRead() && this.peek() == SpongeStringReader.SYNTAX_QUOTE) {
                 return this.readQuotedString();
             } else {
                 return this.readUnquotedString();
@@ -162,21 +164,29 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     }
 
     @Override
-    public String parseJson() throws ArgumentParseException {
+    public String parseNBTString() throws ArgumentParseException {
         final int startCursor = this.getCursor();
         try {
-            this.readStruct();
-        } catch (final ArgumentParseException e) {
+            new TagParser(this).readStruct();
+        } catch (final CommandSyntaxException ex) {
             this.setCursor(startCursor);
-            throw e;
+            throw new ArgumentParseException(
+                SpongeAdventure.asAdventure(ComponentUtils.fromMessage(ex.getRawMessage())),
+                ex.getInput(),
+                ex.getCursor()
+            );
         }
         final int endCursor = this.getCursor(); // this will be just after a }
         return this.getInput().substring(startCursor, endCursor);
     }
 
     @Override
-    public JsonObject parseJsonObject() throws ArgumentParseException {
-        return new Gson().fromJson(this.parseJson(), JsonObject.class);
+    public DataContainer parseDataContainer() throws ArgumentParseException {
+        try {
+            return NBTTranslator.INSTANCE.translate(new TagParser(this).readStruct());
+        } catch (final CommandSyntaxException e) {
+            throw this.createException(SpongeAdventure.asAdventure(ComponentUtils.fromMessage(e.getRawMessage())));
+        }
     }
 
     @Override
@@ -205,142 +215,10 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
         return new ArgumentParseException(errorMessage, inner, this.getInput(), this.getCursor());
     }
 
-    // JSON parsing. Mostly taken from JsonToNBT
-    protected String readKey() throws ArgumentParseException {
-        this.skipWhitespace();
-        if (!this.canRead()) {
-            throw this.createException(Component.text("Unable to read JSON key"));
-        } else {
-            return this.getString();
-        }
-    }
-
-    public void readValue() throws ArgumentParseException {
-        this.skipWhitespace();
-        if (!this.canRead()) {
-            throw this.createException(Component.text("Unable to read JSON value"));
-        } else {
-            final char c0 = this.peek();
-            if (c0 == '{') {
-                this.readStruct();
-            } else {
-                if (c0 == '[') {
-                    this.readList();
-                } else {
-                    this.readValue();
-                }
-            }
-        }
-    }
-
-    protected void readList() throws ArgumentParseException {
-        if (this.canRead(3) && !StringReader.isQuotedStringStart(this.peek(1)) && this.peek(2) == ';') {
-            this.readArrayTag();
-        } else {
-            this.readListTag();
-        }
-    }
-
-    public void readStruct() throws ArgumentParseException {
-        this.expectAfterWhitespace('{');
-        this.skipWhitespace();
-
-        while(this.canRead() && this.peek() != '}') {
-            final String s = this.readKey();
-            if (s.isEmpty()) {
-                throw this.createException(Component.text("Unable to read JSON key"));
-            }
-
-            try {
-                this.expect(':');
-            } catch (final CommandSyntaxException e) {
-                throw this.createException(Component.text(e.getMessage()));
-            }
-            if (!this.hasElementSeparator()) {
-                break;
-            }
-
-            if (!this.canRead()) {
-                throw this.createException(Component.text("Unable to read JSON key"));
-            }
-        }
-
-        this.expectAfterWhitespace('}');
-    }
-
-    private void readListTag() throws ArgumentParseException {
-        this.expectAfterWhitespace('[');
-        this.skipWhitespace();
-        if (!this.canRead()) {
-            throw this.createException(Component.text("Unable to read JSON list"));
-        } else {
-            while(this.peek() != ']') {
-                this.readValue();
-                if (!this.hasElementSeparator()) {
-                    break;
-                }
-
-                if (!this.canRead()) {
-                    throw this.createException(Component.text("Unable to read JSON value"));
-                }
-            }
-
-            this.expectAfterWhitespace(']');
-        }
-    }
-
-    private void readArrayTag() throws ArgumentParseException {
-        this.expectAfterWhitespace('[');
-        this.read();
-        this.read();
-        this.skipWhitespace();
-        if (!this.canRead()) {
-            throw this.createException(Component.text("Unable to read JSON array"));
-        }
-        this.readArray();
-    }
-
-    private void readArray() throws ArgumentParseException {
-        while(true) {
-            if (this.peek() != ']') {
-                this.readValue();
-                if (this.hasElementSeparator()) {
-                    if (!this.canRead()) {
-                        throw this.createException(Component.text("Unable to read JSON value"));
-                    }
-                    continue;
-                }
-            }
-
-            this.expectAfterWhitespace(']');
-            return;
-        }
-    }
-
-    private boolean hasElementSeparator() {
-        this.skipWhitespace();
-        if (this.canRead() && this.peek() == ',') {
-            this.skip();
-            this.skipWhitespace();
-            return true;
-        } else {
-            return false;
-        }
-    }
-
-    private void expectAfterWhitespace(final char expected) throws ArgumentParseException {
-        this.skipWhitespace();
-        try {
-            this.expect(expected);
-        } catch (final CommandSyntaxException e) {
-            throw this.createException(Component.text(e.getMessage()));
-        }
-    }
-
     private ResourceKey readResourceLocation(@Nullable final String defaultNamespace) throws ArgumentParseException {
         final int i = this.getCursor();
 
-        while (this.canRead() && ResourceLocation.isValidPathCharacter(this.peek())) {
+        while (this.canRead() && ResourceLocation.isAllowedInResourceLocation(this.peek())) {
             this.skip();
         }
 

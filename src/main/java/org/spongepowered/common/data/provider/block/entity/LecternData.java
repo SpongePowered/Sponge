@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.tileentity.LecternTileEntity;
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -37,7 +37,7 @@ public final class LecternData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(LecternTileEntity.class)
+                .asMutable(LecternBlockEntity.class)
                     .create(Keys.ITEM_STACK_SNAPSHOT)
                         .get(h -> ItemStackUtil.snapshotOf(h.getBook()))
                         .set((h, v) -> h.setBook(ItemStackUtil.fromSnapshotToNative(v)));

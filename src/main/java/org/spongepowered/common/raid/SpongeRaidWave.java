@@ -24,26 +24,21 @@
  */
 package org.spongepowered.common.raid;
 
-import java.util.Optional;
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.entity.monster.AbstractRaiderEntity;
 import org.spongepowered.api.entity.living.monster.raider.Raider;
 import org.spongepowered.api.raid.Raid;
 import org.spongepowered.api.raid.RaidWave;
-import org.spongepowered.common.accessor.world.raid.RaidAccessor;
+import org.spongepowered.common.accessor.world.entity.raid.RaidAccessor;
+import java.util.Optional;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+public final class SpongeRaidWave implements RaidWave {
 
-/*
- * Since Minecraft's Wave doesn't explicitly split the Raid into an actual Raid and Wave object, we make our own Wave object.
- */
-public class SpongeRaidWave implements RaidWave {
-
-    private final net.minecraft.world.raid.Raid raid;
+    private final net.minecraft.world.entity.raid.Raid raid;
     private final int waveId;
 
-    public SpongeRaidWave(net.minecraft.world.raid.Raid raid, int waveId) {
+    public SpongeRaidWave(final net.minecraft.world.entity.raid.Raid raid, final int waveId) {
         this.raid = raid;
         this.waveId = waveId;
     }
@@ -60,7 +55,7 @@ public class SpongeRaidWave implements RaidWave {
          * If the wave is not a final wave, the bonus waves occur after the final wave.
          * If our wave was before the final wave, the amount of normal raids (which is set by the difficulty) would be greater than our wave's id.
          */
-        if (this.isFinal() || this.waveId < ((RaidAccessor) this.raid).accessor$getNumGroups()) {
+        if (this.isFinal() || this.waveId < ((RaidAccessor) this.raid).accessor$numGroups()) {
             return false;
         }
 
@@ -71,7 +66,7 @@ public class SpongeRaidWave implements RaidWave {
     public boolean isFinal() {
         // The final wave is the last wave before any other extra waves caused by a level of Bad Omen which is higher than 1.
         // We can determine if our wave is the final wave if the amount of normal waves (discussed up in the detail comments for isBonus) is equal to our wave's id.
-        return this.waveId == ((RaidAccessor) this.raid).accessor$getNumGroups();
+        return this.waveId == ((RaidAccessor) this.raid).accessor$numGroups();
     }
 
     @Override
@@ -82,14 +77,14 @@ public class SpongeRaidWave implements RaidWave {
     @Override
     public boolean addRaider(Raider raider, boolean addToRaidHealth) {
         checkNotNull(raider, "Raider cannot be null.");
-        return this.raid.joinRaid(this.waveId, (AbstractRaiderEntity) raider, addToRaidHealth);
+        return this.raid.addWaveMob(this.waveId, (net.minecraft.world.entity.raid.Raider) raider, addToRaidHealth);
     }
 
     @Override
     public boolean removeRaider(Raider raider) {
         checkNotNull(raider, "Raider cannot be null.");
         if (raider.raidWave().isPresent() && this.equals(raider.raidWave().get().get())) {
-            this.raid.leaveRaid((AbstractRaiderEntity) raider, true);
+            this.raid.removeFromRaid((net.minecraft.world.entity.raid.Raider) raider, true);
             return true;
         }
 
@@ -102,7 +97,7 @@ public class SpongeRaidWave implements RaidWave {
             SpongeRaidWave other = (SpongeRaidWave) obj;
             // Minecraft Tracks it's raids via an ID which is handled by the RaidManager.
             // Each world has it's own raid manager so we have to verify that the world the raids are in is also equal.
-            if (this.waveId == other.waveId && this.raid.getWorld() == this.raid.getWorld() && this.raid.getId() == other.raid.getId()) {
+            if (this.waveId == other.waveId && this.raid.getLevel() == other.raid.getLevel() && this.raid.getId() == other.raid.getId()) {
                 return true;
             }
         }
@@ -113,8 +108,8 @@ public class SpongeRaidWave implements RaidWave {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("raid", raid)
-            .add("wave", waveId)
+            .add("raid", this.raid)
+            .add("wave", this.waveId)
         .toString();
     }
 }

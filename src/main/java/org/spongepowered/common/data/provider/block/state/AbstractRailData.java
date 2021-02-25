@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.AbstractRailBlock;
-import net.minecraft.block.BlockState;
-import net.minecraft.state.IProperty;
-import net.minecraft.state.properties.RailShape;
+import net.minecraft.world.level.block.BaseRailBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.Property;
+import net.minecraft.world.level.block.state.properties.RailShape;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.RailDirection;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -42,16 +42,16 @@ public final class AbstractRailData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.RAIL_DIRECTION)
-                        .get(h -> (RailDirection) (Object) h.get(((AbstractRailBlock) h.getBlock()).getShapeProperty()))
+                        .get(h -> (RailDirection) (Object) h.getValue(((BaseRailBlock) h.getBlock()).getShapeProperty()))
                         .set((h, v) -> {
                             final RailShape shape = (RailShape) (Object) v;
-                            final IProperty<RailShape> property = ((AbstractRailBlock) h.getBlock()).getShapeProperty();
-                            if (!property.getAllowedValues().contains(shape)) {
+                            final Property<RailShape> property = ((BaseRailBlock) h.getBlock()).getShapeProperty();
+                            if (!property.getPossibleValues().contains(shape)) {
                                 return h;
                             }
-                            return h.with(property, shape);
+                            return h.setValue(property, shape);
                         })
-                        .supports(h -> h.getBlock() instanceof AbstractRailBlock);
+                        .supports(h -> h.getBlock() instanceof BaseRailBlock);
     }
     // @formatter:on
 }

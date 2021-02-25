@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CakeBlock;
+import net.minecraft.world.level.block.CakeBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class CakeData {
 
@@ -40,9 +40,9 @@ public final class CakeData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.LAYER)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.LAYER, CakeBlock.BITES))
-                        .get(h -> h.get(CakeBlock.BITES))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, CakeBlock.BITES))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.LAYER, CakeBlock.BITES))
+                        .get(h -> h.getValue(CakeBlock.BITES))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, CakeBlock.BITES))
                         .supports(h -> h.getBlock() instanceof CakeBlock);
     }
     // @formatter:on

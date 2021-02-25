@@ -59,7 +59,7 @@ public abstract class AdapterLogic {
         int totalPolled = 0;
 
         for (SlotLens slot : lens.getSlots(fabric)) {
-            net.minecraft.item.ItemStack stack = slot.getStack(fabric);
+            net.minecraft.world.item.ItemStack stack = slot.getStack(fabric);
 
             // Only remove one type of item
             if (stack.isEmpty() || (removedType != null && !ItemStackUtil.compareIgnoreQuantity(removedType, stack))) {
@@ -69,7 +69,7 @@ public abstract class AdapterLogic {
             // Poll up to limit items OR entire stack when no limit is set
             int pollCount = limit != null ? Math.min(stack.getCount(), limit) : stack.getCount();
 
-            net.minecraft.item.ItemStack newStack = net.minecraft.item.ItemStack.EMPTY;
+            net.minecraft.world.item.ItemStack newStack = net.minecraft.world.item.ItemStack.EMPTY;
             if (pollCount < stack.getCount()) { // is stack not removed completely?
                 newStack = stack.copy();
                 newStack.setCount(newStack.getCount() - pollCount);
@@ -122,7 +122,7 @@ public abstract class AdapterLogic {
         }
 
         for (SlotLens slot : lens.getSlots(fabric)) {
-            net.minecraft.item.ItemStack stack = slot.getStack(fabric);
+            net.minecraft.world.item.ItemStack stack = slot.getStack(fabric);
             if (!stack.isEmpty()) {
                 return ItemStackUtil.cloneDefensiveOptional(stack);
             }
@@ -148,10 +148,10 @@ public abstract class AdapterLogic {
 
     private static InventoryTransactionResult insertStack(Fabric fabric, Lens lens, ItemStack stack) {
         InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
-        net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+        net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         if (stack.isEmpty() && lens.slotCount() == 1) {
-            final net.minecraft.item.ItemStack old = lens.getStack(fabric, 0);
+            final net.minecraft.world.item.ItemStack old = lens.getStack(fabric, 0);
             final ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
             lens.setStack(fabric, 0, nativeStack);
             final SlotTransaction trans = new SlotTransaction((Slot) lens.getAdapter(fabric, null), oldSnap,
@@ -164,10 +164,10 @@ public abstract class AdapterLogic {
         int remaining = stack.getQuantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
-            final net.minecraft.item.ItemStack old = lens.getStack(fabric, ord);
+            final net.minecraft.world.item.ItemStack old = lens.getStack(fabric, ord);
             final ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
             final int push = Math.min(remaining, maxStackSize);
-            final net.minecraft.item.ItemStack newStack = ItemStackUtil.cloneDefensiveNative(nativeStack, push);
+            final net.minecraft.world.item.ItemStack newStack = ItemStackUtil.cloneDefensiveNative(nativeStack, push);
             if (lens.setStack(fabric, ord, newStack)) {
                 remaining -= push;
                 final Slot slot = lens.getSlotLens(fabric, ord).getAdapter(fabric, null);
@@ -190,13 +190,13 @@ public abstract class AdapterLogic {
             return InventoryTransactionResult.builder().type(Type.FAILURE).reject(ItemStackUtil.cloneDefensive(stack)).build();
         }
         InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(Type.SUCCESS);
-        net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+        net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         int maxStackSize = Math.min(lens.getMaxStackSize(fabric), nativeStack.getMaxStackSize());
         int remaining = stack.getQuantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
-            net.minecraft.item.ItemStack old = lens.getStack(fabric, ord);
+            net.minecraft.world.item.ItemStack old = lens.getStack(fabric, ord);
             int push = Math.min(remaining, maxStackSize);
             if (old.isEmpty() && lens.setStack(fabric, ord, ItemStackUtil.cloneDefensiveNative(nativeStack, push))) {
                 remaining -= push;
@@ -233,7 +233,7 @@ public abstract class AdapterLogic {
         int items = 0;
 
         for (int ord = 0; ord < lens.slotCount(); ord++) {
-            net.minecraft.item.ItemStack stack = lens.getStack(fabric, ord);
+            net.minecraft.world.item.ItemStack stack = lens.getStack(fabric, ord);
             items += !stack.isEmpty() ? stack.getCount() : 0;
         }
 
@@ -262,10 +262,10 @@ public abstract class AdapterLogic {
      * @return true if at least <code>quantity</code> of given stack has been found in given inventory
      */
     public static boolean contains(Fabric fabric, Lens lens, ItemStack stack, int quantity) {
-        net.minecraft.item.ItemStack nonNullStack = ItemStackUtil.toNative(stack); // Handle null as empty
+        net.minecraft.world.item.ItemStack nonNullStack = ItemStackUtil.toNative(stack); // Handle null as empty
         int found = 0;
         for (int ord = 0; ord < lens.slotCount(); ord++) {
-            net.minecraft.item.ItemStack slotStack = lens.getStack(fabric, ord);
+            net.minecraft.world.item.ItemStack slotStack = lens.getStack(fabric, ord);
             if (slotStack.isEmpty()) {
                 if (nonNullStack.isEmpty()) {
                     found++; // Found an empty Slot
@@ -291,7 +291,7 @@ public abstract class AdapterLogic {
 
     public static boolean contains(Fabric fabric, Lens lens, ItemType type) {
         for (int ord = 0; ord < lens.slotCount(); ord++) {
-            net.minecraft.item.ItemStack slotStack = lens.getStack(fabric, ord);
+            net.minecraft.world.item.ItemStack slotStack = lens.getStack(fabric, ord);
             if (slotStack.isEmpty()) {
                 if (type == null || type == ItemTypes.AIR) {
                     return true; // Found an empty Slot
@@ -306,13 +306,13 @@ public abstract class AdapterLogic {
     }
 
     public static boolean canFit(Fabric fabric, Lens lens, ItemStack stack) {
-        net.minecraft.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+        net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         int maxStackSize = Math.min(lens.getMaxStackSize(fabric), nativeStack.getMaxStackSize());
         int remaining = stack.getQuantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
-            net.minecraft.item.ItemStack old = lens.getStack(fabric, ord);
+            net.minecraft.world.item.ItemStack old = lens.getStack(fabric, ord);
             int push = Math.min(remaining, maxStackSize);
             if (old.isEmpty()) {
                 remaining -= push;

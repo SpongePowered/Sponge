@@ -24,23 +24,25 @@
  */
 package org.spongepowered.common.mixin.tracker.server.dedicated;
 
-import net.minecraft.entity.player.PlayerEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.entity.living.player.Player;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 @Mixin(DedicatedServer.class)
 public abstract class DedicatedServerMixin_Tracker {
 
-    @Shadow public abstract int shadow$getSpawnProtectionSize();
+    @Shadow public abstract int shadow$getSpawnProtectionRadius();
 
     /**
      * @author zml - March 9th, 2016
@@ -51,18 +53,18 @@ public abstract class DedicatedServerMixin_Tracker {
      * will apply to any world. Additionally, fire a spawn protection event
      */
     @Overwrite
-    public boolean isBlockProtected(final net.minecraft.world.World worldIn, final BlockPos pos, final PlayerEntity playerIn) {
+    public boolean isUnderSpawnProtection(final ServerLevel worldIn, final BlockPos pos, final Player playerIn) {
         // Mods such as ComputerCraft and Thaumcraft check this method before attempting to set a blockstate.
-        final IPhaseState<?> phaseState = PhaseTracker.getInstance().getCurrentState();
-        if (!phaseState.isInteraction()) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
+        if (!context.isInteraction()) {
             // TODO BLOCK_PROTECTED flag
-            if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) worldIn, pos, playerIn).isCancelled()) {
+            if (ShouldFire.CHANGE_BLOCK_EVENT_PRE && SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) worldIn, pos, playerIn).isCancelled()) {
                 return true;
             }
         }
 
-        final BlockPos spawnPoint = worldIn.getSpawnPoint();
-        final int protectionRadius = this.shadow$getSpawnProtectionSize();
+        final BlockPos spawnPoint = worldIn.getSharedSpawnPos();
+        final int protectionRadius = this.shadow$getSpawnProtectionRadius();
 
         return protectionRadius > 0
                 && Math.max(Math.abs(pos.getX() - spawnPoint.getX()), Math.abs(pos.getZ() - spawnPoint.getZ())) <= protectionRadius

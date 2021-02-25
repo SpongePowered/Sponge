@@ -24,46 +24,18 @@
  */
 package org.spongepowered.common.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.network.play.server.SChangeGameStatePacket;
-import net.minecraft.network.play.server.SPlayEntityEffectPacket;
-import net.minecraft.network.play.server.SPlaySoundEventPacket;
-import net.minecraft.network.play.server.SPlayerAbilitiesPacket;
-import net.minecraft.network.play.server.SServerDifficultyPacket;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldInfo;
 import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.accessor.entity.LivingEntityAccessor;
-import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
+import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
+import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.hooks.PlatformHooks;
-import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.DimensionChangeResult;
-import org.spongepowered.common.world.portal.PortalHelper;
-import org.spongepowered.common.world.portal.WrappedITeleporterPortalType;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
@@ -71,6 +43,23 @@ import java.util.Random;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
+import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
+import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundUpdateMobEffectPacket;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.Mth;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.biome.BiomeManager;
+import net.minecraft.world.level.storage.LevelData;
 
 public final class EntityUtil {
 
@@ -88,165 +77,73 @@ public final class EntityUtil {
     private EntityUtil() {
     }
 
-    public static DimensionChangeResult<Entity> invokePortalTo(final Entity entity, final PortalType portal, final DimensionType dimensionType) {
-
-        ServerWorld originalToWorld = entity.getServer().getWorld(dimensionType);
-        ServerWorld toWorld = originalToWorld;
-
-        final ChangeEntityWorldEvent.Pre event = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre(entity, toWorld);
-        if (event == null || event.isCancelled() || ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
-            return new DimensionChangeResult<>(entity, false, false);
-        }
-
-        toWorld = (ServerWorld) event.getDestinationWorld();
-
-        final ServerLocation previousLocation = ((org.spongepowered.api.entity.Entity) entity).getServerLocation();
-        final ServerWorld fromWorld = (ServerWorld) entity.getEntityWorld();
-
-        Entity result = entity;
-        if (portal instanceof WrappedITeleporterPortalType) {
-            // Use platform teleporter hook
-            result = ((WrappedITeleporterPortalType) portal).getTeleporter().bridge$placeEntity(entity, fromWorld, toWorld, entity.rotationYaw,
-                    PortalHelper.createVanillaEntityPortalLogic(entity, entity.getPositionVec(), fromWorld, toWorld, portal));
-
-            if (result == null) {
-                return new DimensionChangeResult<>(entity, false, true);
-            }
-
-            final ServerLocation currentLocation = ((org.spongepowered.api.entity.Entity) entity).getServerLocation();
-            if (previousLocation.getWorld() == currentLocation.getWorld() && previousLocation.getBlockPosition().equals(currentLocation.getBlockPosition())) {
-                return new DimensionChangeResult<>(entity, false, false);
-            }
-        } else if (!portal.teleport((org.spongepowered.api.entity.Entity) entity, ServerLocation.of((org.spongepowered.api.world.server.ServerWorld)
-                fromWorld, VecHelper.toVector3d(entity.getPositionVector())), true)) {
-            return new DimensionChangeResult<>(entity, false, false);
-        }
-
-        // Sponge Start - Call platform event hook after changing dimensions
-        PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(result, fromWorld, originalToWorld);
-        // Sponge End
-
-        return new DimensionChangeResult<>(result, true, false);
-    }
-
-    public static DimensionChangeResult<ServerPlayerEntity> invokePortalTo(final ServerPlayerEntity player, final PortalType portal,
-        final DimensionType dimensionType) {
-
-        ServerWorld originalToWorld = player.getServer().getWorld(dimensionType);
-        ServerWorld toWorld = originalToWorld;
-
-        final ChangeEntityWorldEvent.Pre event = PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPre(player, toWorld);
-        if (event == null || event.isCancelled()) {
-            return new DimensionChangeResult<>(player, false, false);
-        }
-
-        toWorld = (ServerWorld) event.getDestinationWorld();
-
-        ((ServerPlayerEntityAccessor) player).accessor$setInvulnerableDimensionChange(true);
-
-        final ServerLocation previousLocation = ((ServerPlayer) player).getServerLocation();
-        final ServerWorld fromWorld = player.getServerWorld();
-        final DimensionType fromDimensionType = fromWorld.getDimension().getType();
-
-        if (portal instanceof WrappedITeleporterPortalType) {
-            // Use platform teleporter hook
-            ((WrappedITeleporterPortalType) portal).getTeleporter().bridge$placeEntity(player, fromWorld, toWorld, player.rotationYaw, PortalHelper
-                    .createVanillaPlayerPortalLogic(player, player.getPositionVec(), fromWorld, toWorld, portal));
-
-            final ServerLocation currentLocation = ((ServerPlayer) player).getServerLocation();
-            if (previousLocation.getWorld() == currentLocation.getWorld() && previousLocation.getBlockPosition().equals(currentLocation.getBlockPosition())) {
-                return new DimensionChangeResult<>(player, false, false);
-            }
-        } else if (!portal.teleport((org.spongepowered.api.entity.Entity) player, ServerLocation.of((org.spongepowered.api.world.server.ServerWorld)
-                fromWorld, VecHelper.toVector3d(player.getPositionVector())), true)) {
-            return new DimensionChangeResult<>(player, false, false);
-        }
-
-        final boolean isVanillaPortal = portal instanceof WrappedITeleporterPortalType && ((WrappedITeleporterPortalType) portal).getTeleporter()
-                .bridge$isVanilla();
-
-        // Only show the credits if coming from Vanilla's The End to the default dimension
-        if (fromDimensionType == DimensionType.THE_END && toWorld.getDimension().getType() == DimensionType.OVERWORLD && isVanillaPortal) {
-            player.detach();
-            player.getServerWorld().removePlayer(player);
-            if (!player.queuedEndExit) {
-                player.queuedEndExit = true;
-                player.connection.sendPacket(new SChangeGameStatePacket(4, ((ServerPlayerEntityAccessor) player).accessor$getSeenCredits() ?
-                        0.0F : 1.0F));
-                ((ServerPlayerEntityAccessor) player).accessor$setSeenCredits(true);
-            }
-
-            return new DimensionChangeResult<>(player, true, false);
-        }
-
-        EntityUtil.performPostChangePlayerWorldLogic(player, fromWorld, originalToWorld, toWorld, true);
-
-        return new DimensionChangeResult<>(player, true, false);
-    }
-
-    public static void performPostChangePlayerWorldLogic(final ServerPlayerEntity player, final ServerWorld fromWorld,
-            final ServerWorld originalToWorld, final ServerWorld toWorld, final boolean isPortal) {
+    public static void performPostChangePlayerWorldLogic(final ServerPlayer player, final ServerLevel fromWorld,
+            final ServerLevel originalToWorld, final ServerLevel toWorld, final boolean isPortal) {
         // Sponge Start - Send any platform dimension data
-        ((ServerPlayerEntityBridge) player).bridge$sendDimensionData(player.connection.netManager, toWorld.dimension.getType());
+        ((ServerPlayerBridge) player).bridge$sendDimensionData(player.connection.connection, toWorld.dimensionType(), toWorld.dimension());
         // Sponge End
-        WorldInfo worldinfo = toWorld.getWorldInfo();
+        LevelData worldinfo = toWorld.getLevelData();
         // We send dimension change for portals before loading chunks
         if (!isPortal) {
             // Sponge Start - Allow the platform to handle how dimension changes are sent down
-            ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(toWorld.dimension.getType(), WorldInfo.byHashing(worldinfo.getSeed()),
-                    worldinfo.getGenerator(), player.interactionManager.getGameType());
+            ((ServerPlayerBridge) player).bridge$sendChangeDimension(toWorld.dimensionType(), toWorld.dimension(), BiomeManager.obfuscateSeed(toWorld.getSeed()),
+                    player.gameMode.getGameModeForPlayer(), player.gameMode.getPreviousGameModeForPlayer(),
+                    toWorld.isDebug(), toWorld.isFlat(), true);
         }
-        player.dimension = toWorld.dimension.getType();
         // Sponge End
-        player.connection.sendPacket(new SServerDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
+        player.connection.send(new ClientboundChangeDifficultyPacket(worldinfo.getDifficulty(), worldinfo.isDifficultyLocked()));
         final PlayerList playerlist = player.getServer().getPlayerList();
-        playerlist.updatePermissionLevel(player);
+        playerlist.sendPlayerPermissionLevel(player);
 
         // Sponge Start - Have the platform handle removing the entity from the world. Move this to after the event call so
         //                that we do not remove the player from the world unless we really have teleported..
-        ((PlatformServerWorldBridge) fromWorld).bridge$removeEntity(player, true);
+        ((PlatformServerLevelBridge) fromWorld).bridge$removeEntity(player, true);
         ((PlatformEntityBridge) player).bridge$revive();
         // Sponge End
 
-        player.setWorld(toWorld);
-        toWorld.addRespawnedPlayer(player);
+        player.setLevel(toWorld);
+        toWorld.addDuringPortalTeleport(player);
         if (isPortal) {
-            ((ServerPlayerEntityAccessor) player).accessor$func_213846_b(toWorld);
+            ((ServerPlayerAccessor) player).invoker$triggerDimensionChangeTriggers(toWorld);
         }
-        player.interactionManager.setWorld(toWorld);
-        player.connection.sendPacket(new SPlayerAbilitiesPacket(player.abilities));
-        playerlist.sendWorldInfo(player, toWorld);
-        playerlist.sendInventory(player);
+        player.gameMode.setLevel(toWorld);
+        player.connection.send(new ClientboundPlayerAbilitiesPacket(player.abilities));
+        playerlist.sendLevelInfo(player, toWorld);
+        playerlist.sendAllPlayerInfo(player);
 
-        for (EffectInstance effectinstance : player.getActivePotionEffects()) {
-            player.connection.sendPacket(new SPlayEntityEffectPacket(player.getEntityId(), effectinstance));
+        for (final MobEffectInstance effectinstance : player.getActiveEffects()) {
+            player.connection.send(new ClientboundUpdateMobEffectPacket(player.getId(), effectinstance));
         }
 
         if (isPortal) {
-            player.connection.sendPacket(new SPlaySoundEventPacket(1032, BlockPos.ZERO, 0, false));
+            player.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
         }
 
-        ((ServerWorldBridge) fromWorld).bridge$getBossBarManager().onPlayerLogout(player);
-        ((ServerWorldBridge) toWorld).bridge$getBossBarManager().onPlayerLogin(player);
+        ((ServerLevelBridge) fromWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
+        ((ServerLevelBridge) toWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
 
-        ((ServerPlayerEntityAccessor) player).accessor$setLastExperience(-1);
-        ((ServerPlayerEntityAccessor) player).accessor$setLastHealth(-1.0f);
-        ((ServerPlayerEntityAccessor) player).accessor$setLastFoodLevel(-1);
+        ((ServerPlayerAccessor) player).accessor$lastSentExp(-1);
+        ((ServerPlayerAccessor) player).accessor$lastSentHealth(-1.0f);
+        ((ServerPlayerAccessor) player).accessor$lastSentFood(-1);
 
         if (!isPortal) {
-            player.connection.setPlayerLocation(player.getPosX(), player.getPosY(), player.getPosZ(), player.rotationYaw, player.rotationPitch);
-            player.connection.captureCurrentPosition();
+            player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot);
+            player.connection.resetPosition();
+        }
+
+        if (player.containerMenu != player.inventoryMenu) {
+            player.closeContainer();
         }
 
         // Sponge Start - Call platform event hook after changing dimensions
-        PlatformHooks.getInstance().getEventHooks().callChangeEntityWorldEventPost(player, fromWorld, originalToWorld);
+        PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost(player, fromWorld, originalToWorld);
         // Sponge End
     }
 
-    public static boolean isEntityDead(final net.minecraft.entity.Entity entity) {
+    public static boolean isEntityDead(final net.minecraft.world.entity.Entity entity) {
         if (entity instanceof LivingEntity) {
             final LivingEntity base = (LivingEntity) entity;
-            return base.getHealth() <= 0 || base.deathTime > 0 || ((LivingEntityAccessor) entity).accessor$getDead();
+            return base.getHealth() <= 0 || base.deathTime > 0 || ((LivingEntityAccessor) entity).accessor$dead();
         }
         return entity.removed;
     }
@@ -255,13 +152,13 @@ public final class EntityUtil {
         boolean spawnedAny = false;
         for (final org.spongepowered.api.entity.Entity entity : event.getEntities()) {
             // Here is where we need to handle the custom items potentially having custom entities
-            spawnedAny = processEntitySpawn(entity, entityCreatorSupplier);
+            spawnedAny = EntityUtil.processEntitySpawn(entity, entityCreatorSupplier);
         }
         return spawnedAny;
     }
 
     public static boolean processEntitySpawnsFromEvent(final PhaseContext<?> context, final SpawnEntityEvent destruct) {
-        return processEntitySpawnsFromEvent(destruct, ENTITY_CREATOR_FUNCTION.apply(context));
+        return EntityUtil.processEntitySpawnsFromEvent(destruct, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -270,7 +167,7 @@ public final class EntityUtil {
         if (minecraftEntity instanceof ItemEntity) {
             final ItemStack item = ((ItemEntity) minecraftEntity).getItem();
             if (!item.isEmpty()) {
-                final Optional<Entity> customEntityItem = Optional.ofNullable(SpongeImplHooks.getCustomEntityIfItem(minecraftEntity));
+                final Optional<Entity> customEntityItem = Optional.ofNullable(PlatformHooks.INSTANCE.getWorldHooks().getCustomEntityIfItem(minecraftEntity));
                 if (customEntityItem.isPresent()) {
                     // Bypass spawning the entity item, since it is established that the custom entity is spawned.
                     final Entity entityToSpawn = customEntityItem.get();
@@ -286,7 +183,7 @@ public final class EntityUtil {
                     // Since forge already has a new event thrown for the entity, we don't need to throw
                     // the event anymore as sponge plugins getting the event after forge mods will
                     // have the modified entity list for entities, so no need to re-capture the entities.
-                    entityToSpawn.world.addEntity(entityToSpawn);
+                    entityToSpawn.level.addFreshEntity(entityToSpawn);
                     return true;
                 }
             }
@@ -299,7 +196,7 @@ public final class EntityUtil {
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((net.minecraft.world.World) entity.getWorld()).addEntity((Entity) entity);
+        ((net.minecraft.world.level.Level) entity.getWorld()).addFreshEntity((Entity) entity);
         return true;
     }
 
@@ -314,21 +211,21 @@ public final class EntityUtil {
      * @return The motion vector
      */
     @SuppressWarnings("unused")
-    private static Vector3d createDropMotion(final boolean dropAround, final PlayerEntity player, final Random random) {
+    private static Vector3d createDropMotion(final boolean dropAround, final Player player, final Random random) {
         double x;
         double y;
         double z;
         if (dropAround) {
             final float f = random.nextFloat() * 0.5F;
             final float f1 = random.nextFloat() * ((float) Math.PI * 2F);
-            x = -MathHelper.sin(f1) * f;
-            z = MathHelper.cos(f1) * f;
+            x = -Mth.sin(f1) * f;
+            z = Mth.cos(f1) * f;
             y = 0.20000000298023224D;
         } else {
             float f2 = 0.3F;
-            x = -MathHelper.sin(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
-            z = MathHelper.cos(player.rotationYaw * 0.017453292F) * MathHelper.cos(player.rotationPitch * 0.017453292F) * f2;
-            y = - MathHelper.sin(player.rotationPitch * 0.017453292F) * f2 + 0.1F;
+            x = -Mth.sin(player.yRot * 0.017453292F) * Mth.cos(player.xRot * 0.017453292F) * f2;
+            z = Mth.cos(player.yRot * 0.017453292F) * Mth.cos(player.xRot * 0.017453292F) * f2;
+            y = - Mth.sin(player.xRot * 0.017453292F) * f2 + 0.1F;
             final float f3 = random.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * random.nextFloat();
             x += Math.cos(f3) * f2;
@@ -340,13 +237,10 @@ public final class EntityUtil {
 
 
     public static boolean isUntargetable(Entity from, Entity target) {
-        if (((VanishableBridge) target).bridge$isVanished() && ((VanishableBridge) target).bridge$isUntargetable()) {
+        if (((VanishableBridge) target).bridge$isVanished() && ((VanishableBridge) target).bridge$isVanishPreventsTargeting()) {
             return true;
         }
         // Temporary fix for https://bugs.mojang.com/browse/MC-149563
-        if (from.world != target.world) {
-            return true;
-        }
-        return false;
+        return from.level != target.level;
     }
 }

@@ -25,11 +25,6 @@
 package org.spongepowered.common.service.server.ban;
 
 import com.google.inject.Singleton;
-import net.minecraft.server.management.BanList;
-import net.minecraft.server.management.IPBanEntry;
-import net.minecraft.server.management.IPBanList;
-import net.minecraft.server.management.ProfileBanEntry;
-import net.minecraft.server.management.UserListEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -38,21 +33,28 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.server.management.UserListAccessor;
+import org.spongepowered.common.accessor.server.players.IpBanListAccessor;
+import org.spongepowered.common.accessor.server.players.StoredUserListAccessor;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.UserListUtils;
+import org.spongepowered.common.profile.SpongeGameProfile;
+import org.spongepowered.common.util.UserListUtil;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
+import net.minecraft.server.players.IpBanList;
+import net.minecraft.server.players.IpBanListEntry;
+import net.minecraft.server.players.StoredUserEntry;
+import net.minecraft.server.players.UserBanList;
+import net.minecraft.server.players.UserBanListEntry;
 
 /**
  * The default implementation of {@link BanService}.
  *
- * <p>Many of the methods here are copied from {@link UserListBans}
- * or {@link UserListIPBans}, while the original methods have been changed
+ * <p>Many of the methods here are copied from {@link UserBanList}
+ * or {@link IpBanList}, while the original methods have been changed
  * to delegate to the registered {@link BanService}. This allows bans to
  * function normally when the default {@link BanService} has not been replaced,
  * while allowing plugin-provided {@link BanService}s to be used for all aspects
@@ -72,73 +74,73 @@ public final class SpongeBanService implements BanService {
     @SuppressWarnings("unchecked")
     @Override
     public Collection<Ban.Profile> getProfileBans() {
-        final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor =
-            (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
-        accessor.accessor$removeExpired();
-        return new ArrayList<>((Collection<Ban.Profile>) (Object) accessor.accessor$getValues().values());
+        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
+            (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
+        accessor.invoker$removeExpired();
+        return new ArrayList<>((Collection<Ban.Profile>) (Object) accessor.accessor$map().values());
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<Ban.Ip> getIpBans() {
-        final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor = ((UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getIPBanList());
-        accessor.accessor$removeExpired();
-        return new ArrayList<>((Collection<Ban.Ip>) (Object) accessor.accessor$getValues().values());
+    public Collection<Ban.IP> getIpBans() {
+        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor = ((StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getIPBanList());
+        accessor.invoker$removeExpired();
+        return new ArrayList<>((Collection<Ban.IP>) (Object) accessor.accessor$map().values());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Optional<Ban.Profile> getBanFor(final GameProfile profile) {
-        final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor =
-            (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
-        accessor.accessor$removeExpired();
-        return Optional.ofNullable((Ban.Profile) accessor.accessor$getValues().get(accessor.accessor$getObjectKey((com.mojang.authlib.GameProfile) profile)));
+        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
+            (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
+        accessor.invoker$removeExpired();
+        return Optional.ofNullable((Ban.Profile) accessor.accessor$map().get(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile))));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<Ban.Ip> getBanFor(final InetAddress address) {
-        final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
+    public Optional<Ban.IP> getBanFor(final InetAddress address) {
+        final StoredUserListAccessor<String, IpBanListEntry> accessor = ((StoredUserListAccessor<String, IpBanListEntry>) this.getIPBanList());
 
-        accessor.accessor$removeExpired();
-        return Optional.ofNullable((Ban.Ip) accessor.accessor$getValues().get(accessor.accessor$getObjectKey(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0)))));
+        accessor.invoker$removeExpired();
+        return Optional.ofNullable((Ban.IP) accessor.accessor$map().get(accessor.invoker$getKeyForUser(((IpBanListAccessor) accessor).invoker$getIpFromAddress(new InetSocketAddress(address, 0)))));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean isBanned(final GameProfile profile) {
-        final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor =
-            (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
+        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
+            (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
 
-        accessor.accessor$removeExpired();
-        return accessor.accessor$getValues().containsKey(accessor.accessor$getObjectKey((com.mojang.authlib.GameProfile) profile));
+        accessor.invoker$removeExpired();
+        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile)));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean isBanned(final InetAddress address) {
-        final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
+        final StoredUserListAccessor<String, IpBanListEntry> accessor = ((StoredUserListAccessor<String, IpBanListEntry>) this.getIPBanList());
 
-        accessor.accessor$removeExpired();
-        return accessor.accessor$getValues().containsKey(accessor.accessor$getObjectKey(((IPBanList) accessor).addressToString(new InetSocketAddress(address, 0))));
+        accessor.invoker$removeExpired();
+        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(((IpBanListAccessor) accessor).invoker$getIpFromAddress(new InetSocketAddress(address, 0))));
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean pardon(final GameProfile profile) {
         final Optional<Ban.Profile> ban = this.getBanFor(profile);
-        final UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry> accessor =
-            (UserListAccessor<com.mojang.authlib.GameProfile, ProfileBanEntry>) this.getUserBanList();
-        accessor.accessor$removeExpired();
+        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
+            (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
+        accessor.invoker$removeExpired();
         return ban.isPresent() && this.removeBan(ban.get());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public boolean pardon(final InetAddress address) {
-        final Optional<Ban.Ip> ban = this.getBanFor(address);
-        final UserListAccessor<String, IPBanEntry> accessor = ((UserListAccessor<String, IPBanEntry>) this.getIPBanList());
-        accessor.accessor$removeExpired();
+        final Optional<Ban.IP> ban = this.getBanFor(address);
+        final StoredUserListAccessor<String, IpBanListEntry> accessor = ((StoredUserListAccessor<String, IpBanListEntry>) this.getIPBanList());
+        accessor.invoker$removeExpired();
         return ban.isPresent() && this.removeBan(ban.get());
     }
 
@@ -151,13 +153,13 @@ public final class SpongeBanService implements BanService {
             final User user = Sponge.getServer().getUserManager().getOrCreate(((Ban.Profile) ban).getProfile());
             Sponge.getEventManager().post(SpongeEventFactory.createPardonUserEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
 
-            UserListUtils.removeEntry(this.getUserBanList(), ((Ban.Profile) ban).getProfile());
+            UserListUtil.removeEntry(this.getUserBanList(), ((Ban.Profile) ban).getProfile());
             return true;
         } else if (ban.getType().equals(BanTypes.IP.get())) {
-            Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
+            Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.IP) ban));
 
-            final InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.Ip) ban).getAddress(), 0);
-            UserListUtils.removeEntry(this.getIPBanList(), this.getIPBanList().addressToString(inetSocketAddress));
+            final InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.IP) ban).getAddress(), 0);
+            UserListUtil.removeEntry(this.getIPBanList(), ((IpBanListAccessor) this.getIPBanList()).invoker$getIpFromAddress(inetSocketAddress));
             return true;
         }
         throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
@@ -173,13 +175,13 @@ public final class SpongeBanService implements BanService {
             final User user = Sponge.getServer().getUserManager().getOrCreate(((Ban.Profile) ban).getProfile());
             Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
 
-            UserListUtils.addEntry(this.getUserBanList(), (UserListEntry<?>) ban);
+            UserListUtil.addEntry(this.getUserBanList(), (StoredUserEntry<?>) ban);
         } else if (ban.getType().equals(BanTypes.IP.get())) {
-            prevBan = this.getBanFor(((Ban.Ip) ban).getAddress());
+            prevBan = this.getBanFor(((Ban.IP) ban).getAddress());
 
-            Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Ip) ban));
+            Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.IP) ban));
 
-            UserListUtils.addEntry(this.getIPBanList(), (UserListEntry<?>) ban);
+            UserListUtil.addEntry(this.getIPBanList(), (StoredUserEntry<?>) ban);
         } else {
             throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
         }
@@ -188,20 +190,20 @@ public final class SpongeBanService implements BanService {
 
     @Override
     public boolean hasBan(final Ban ban) {
-        if (ban.getType().equals(BanTypes.PROFILE)) {
+        if (ban.getType().equals(BanTypes.PROFILE.get())) {
             return this.isBanned(((Ban.Profile) ban).getProfile());
-        } else if (ban.getType().equals(BanTypes.IP)) {
-            return this.isBanned(((Ban.Ip) ban).getAddress());
+        } else if (ban.getType().equals(BanTypes.IP.get())) {
+            return this.isBanned(((Ban.IP) ban).getAddress());
         }
         throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
     }
 
-    private BanList getUserBanList() {
-        return SpongeCommon.getServer().getPlayerList().getBannedPlayers();
+    private UserBanList getUserBanList() {
+        return SpongeCommon.getServer().getPlayerList().getBans();
     }
 
-    private IPBanList getIPBanList() {
-        return SpongeCommon.getServer().getPlayerList().getBannedIPs();
+    private IpBanList getIPBanList() {
+        return SpongeCommon.getServer().getPlayerList().getIpBans();
     }
 
 }

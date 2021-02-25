@@ -1,0 +1,208 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
+package org.spongepowered.common.mixin.core.server.commands;
+
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
+import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.event.entity.RotateEntityEvent;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
+
+import java.util.Set;
+
+import javax.annotation.Nullable;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.game.ClientboundPlayerPositionPacket;
+import net.minecraft.server.commands.TeleportCommand;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.TicketType;
+import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.level.ChunkPos;
+
+@Mixin(TeleportCommand.class)
+public abstract class TeleportCommandMixin {
+
+    /**
+     * @author Zidane
+     * @reason Have the teleport command respect our events
+     */
+    @Overwrite
+    private static void performTeleport(CommandSourceStack source, Entity entityIn, ServerLevel worldIn, double x, double y, double z,
+            Set<ClientboundPlayerPositionPacket.RelativeArgument> relativeList, float yaw, float pitch, @Nullable TeleportCommand.LookAt facing) {
+
+        double actualX = x;
+        double actualY = y;
+        double actualZ = z;
+        double actualYaw = yaw;
+        double actualPitch = pitch;
+
+        if (!(entityIn instanceof ServerPlayer)) {
+            actualYaw = Mth.wrapDegrees(yaw);
+            actualPitch = Mth.wrapDegrees(pitch);
+            actualPitch = Mth.clamp(actualPitch, -90.0F, 90.0F);
+        }
+
+        if (worldIn == entityIn.level) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
+
+                // TODO Should honor the relative list before the event..
+
+                if (ShouldFire.MOVE_ENTITY_EVENT) {
+                    final MoveEntityEvent posEvent = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) entityIn, VecHelper.toVector3d(entityIn.position()),
+                            new Vector3d(x, y, z), new Vector3d(x, y, z));
+
+                    if (SpongeCommon.postEvent(posEvent)) {
+                        return;
+                    }
+
+                    actualX = posEvent.getDestinationPosition().getX();
+                    actualY = posEvent.getDestinationPosition().getY();
+                    actualZ = posEvent.getDestinationPosition().getZ();
+                }
+
+                if (ShouldFire.ROTATE_ENTITY_EVENT) {
+                    final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
+                            (org.spongepowered.api.entity.Entity) entityIn, new Vector3d(actualPitch, actualYaw, 0),
+                            new Vector3d(pitch, yaw, 0));
+
+                    SpongeCommon.postEvent(rotateEvent);
+                    actualYaw = rotateEvent.isCancelled() ? entityIn.yRot : rotateEvent.getToRotation().getY();
+                    actualPitch = rotateEvent.isCancelled() ? entityIn.xRot : rotateEvent.getToRotation().getX();
+                }
+
+                if (entityIn instanceof ServerPlayer) {
+
+                    ChunkPos chunkpos = new ChunkPos(new BlockPos(actualX, actualY, actualZ));
+                    worldIn.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, entityIn.getId());
+
+                    entityIn.stopRiding();
+
+                    if (((ServerPlayer)entityIn).isSleeping()) {
+                        ((ServerPlayer)entityIn).stopSleepInBed(true, true);
+                    }
+
+                    ((ServerPlayer)entityIn).connection.teleport(actualX, actualY, actualZ, (float) actualYaw, (float) actualPitch, relativeList);
+                } else {
+                    entityIn.moveTo(actualX, actualY, actualZ, (float) actualYaw, (float) actualPitch);
+                }
+
+                entityIn.setYHeadRot((float) actualYaw);
+            }
+        } else {
+            if (entityIn instanceof ServerPlayer) {
+                // To ensure mod code is caught, handling the world change for players happens in teleport
+                // Teleport will create a frame but we want to ensure it'll be the command movement type
+                // TODO check if this is still correct
+                PhaseTracker.getCauseStackManager().addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
+                ((ServerPlayer) entityIn).teleportTo(worldIn, x, y, z, yaw, pitch);
+                PhaseTracker.getCauseStackManager().removeContext(EventContextKeys.MOVEMENT_TYPE);
+            } else {
+                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+                    frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.COMMAND);
+
+                    final ServerLevel fromWorld = (ServerLevel) entityIn.getCommandSenderWorld();
+
+                    final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(entityIn,
+                            worldIn);
+                    if (SpongeCommon.postEvent(preEvent)) {
+                        return;
+                    }
+
+                    final ChangeEntityWorldEvent.Reposition posEvent =
+                            SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
+                                    (org.spongepowered.api.entity.Entity) entityIn,
+                                    (org.spongepowered.api.world.server.ServerWorld) entityIn.getCommandSenderWorld(),
+                                    VecHelper.toVector3d(entityIn.position()), new Vector3d(x, y, z), preEvent.getOriginalDestinationWorld(),
+                                    new Vector3d(x, y, z), preEvent.getDestinationWorld());
+
+                    if (SpongeCommon.postEvent(posEvent)) {
+                        return;
+                    }
+
+                    entityIn.unRide();
+                    final Entity result = entityIn.getType().create(worldIn);
+                    if (result == null) {
+                        return;
+                    }
+
+                    if (ShouldFire.ROTATE_ENTITY_EVENT) {
+                        final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.getCurrentCause(),
+                                (org.spongepowered.api.entity.Entity) entityIn, new Vector3d(entityIn.xRot, entityIn.yRot, 0),
+                                new Vector3d(actualPitch, actualYaw, 0));
+
+                        if (!SpongeCommon.postEvent(rotateEvent)) {
+                            actualYaw = Mth.wrapDegrees(rotateEvent.getToRotation().getY());
+                            actualPitch = Mth.wrapDegrees(rotateEvent.getToRotation().getX());
+                            actualPitch = Mth.clamp(actualPitch, -90.0F, 90.0F);
+                        } else {
+                            actualYaw = entityIn.yRot;
+                            actualPitch = entityIn.xRot;
+                        }
+                    }
+
+                    result.restoreFrom(entityIn);
+                    result.moveTo(posEvent.getDestinationPosition().getX(), posEvent.getDestinationPosition().getY(),
+                            posEvent.getDestinationPosition().getZ(), (float) actualYaw, (float) actualPitch);
+                    result.setYHeadRot((float) actualYaw);
+                    worldIn.addFromAnotherDimension(result);
+                    entityIn.removed = true;
+
+                    PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost(result, fromWorld,
+                            (ServerLevel) preEvent.getOriginalDestinationWorld());
+                }
+            }
+        }
+
+        if (facing != null) {
+            facing.perform(source, entityIn);
+        }
+
+        if (!(entityIn instanceof LivingEntity) || !((LivingEntity)entityIn).isFallFlying()) {
+            entityIn.setDeltaMovement(entityIn.getDeltaMovement().multiply(1.0D, 0.0D, 1.0D));
+            entityIn.setOnGround(true);
+        }
+
+        if (entityIn instanceof PathfinderMob) {
+            ((PathfinderMob)entityIn).getNavigation().stop();
+        }
+    }
+}

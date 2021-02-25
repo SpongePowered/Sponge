@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -40,7 +40,7 @@ public final class DropInventoryState extends BasicInventoryPacketState {
 
     @Override
     public void unwind(InventoryPacketContext context) {
-        final ServerPlayerEntity player = context.getPacketPlayer();
+        final ServerPlayer player = context.getPacketPlayer();
         final ItemStack usedStack = context.getItemUsed();
         final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = (Entity) player;
@@ -65,7 +65,7 @@ public final class DropInventoryState extends BasicInventoryPacketState {
 //                    }
 //                });
 
-            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
+            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.containerMenu;
             mixinContainer.bridge$setCaptureInventory(false);
             mixinContainer.bridge$getCapturedSlotTransactions().clear();
         }

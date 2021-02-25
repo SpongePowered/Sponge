@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.config.inheritable;
 
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 import java.util.HashMap;
 import java.util.Map;
@@ -34,36 +34,57 @@ import java.util.Map;
 @ConfigSerializable
 public final class EntityCollisionCategory {
 
+    @Setting
+    @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
+    public final Map<String, ModSubCategory> mods = new HashMap<>();
+
     @Setting("auto-populate")
     @Comment("If 'true', newly discovered entities/blocks will be added to this config with a default value.")
-    private boolean autoPopulate = false;
+    public boolean autoPopulate = false;
+
     @Setting("max-entities-within-aabb")
     @Comment("Maximum amount of entities any given entity or block can collide with. This improves \n"
-             + "performance when there are more than 8 entities on top of each other such as a 1x1 \n"
-             + "spawn pen. Set to 0 to disable.")
-    private int maxEntitiesWithinAABB = 8;
-    @Setting("mods")
-    @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
-    private Map<String, CollisionModCategory> modList = new HashMap<>();
+        + "performance when there are more than 8 entities on top of each other such as a 1x1 \n"
+        + "spawn pen. Set to 0 to disable.")
+    public int maxEntitiesWithinAABB = 8;
 
     public EntityCollisionCategory() {
-        this.modList.put("minecraft", new CollisionModCategory("minecraft"));
-        this.modList.put("botania", new CollisionModCategory("botania"));
+        this.mods.put("minecraft", new ModSubCategory("minecraft"));
     }
 
-    public boolean autoPopulateData() {
-        return this.autoPopulate;
-    }
+    @ConfigSerializable
+    public static final class ModSubCategory {
 
-    public Map<String, CollisionModCategory> getModList() {
-        return this.modList;
-    }
+        @Setting("entity-default")
+        public Integer entityDefault = 8;
 
-    public int getMaxEntitiesWithinAABB() {
-        return this.maxEntitiesWithinAABB;
-    }
+        @Setting("block-default")
+        public Integer blockDefault = 8;
 
-    public void setMaxEntitiesWithinAABB(final int maxEntities) {
-        this.maxEntitiesWithinAABB = maxEntities;
+        @Setting
+        public final Map<String, Integer> blocks = new HashMap<>();
+
+        @Setting
+        public final Map<String, Integer> entities = new HashMap<>();
+
+        @Setting
+        @Comment("If 'false', entity collision rules for this mod will be ignored.")
+        public boolean enabled = true;
+
+        public ModSubCategory() {
+        }
+
+        public ModSubCategory(final String namespace) {
+            if (namespace.equals("minecraft")) {
+                this.blocks.put("detector_rail", 1);
+                this.blocks.put("heavy_weighted_pressure_plate", 150);
+                this.blocks.put("light_weighted_pressure_plate", 15);
+                this.blocks.put("mob_spawner", -1);
+                this.blocks.put("stone_pressure_plate", 1);
+                this.blocks.put("wooden_button", 1);
+                this.blocks.put("wooden_pressure_plate", 1);
+                this.entities.put("thrownpotion", -1);
+            }
+        }
     }
 }

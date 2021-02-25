@@ -31,39 +31,44 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
-import java.util.Collections;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.Commands;
-import net.minecraft.scoreboard.ServerScoreboard;
+import net.minecraft.commands.Commands;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.util.concurrent.RecursiveEventLoop;
-import net.minecraft.util.concurrent.TickDelayedTask;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.ServerResources;
+import net.minecraft.server.ServerScoreboard;
+import net.minecraft.server.TickTask;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.util.Mth;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.api.profile.GameProfileManager;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.resourcepack.ResourcePack;
-import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.user.UserManager;
-import org.spongepowered.api.world.teleport.TeleportHelper;
+import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.storage.ChunkLayout;
+import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -74,42 +79,53 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ServerScheduler;
-import org.spongepowered.common.scheduler.SpongeScheduler;
-import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.UsernameCache;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 import org.spongepowered.common.world.teleport.SpongeTeleportHelper;
 
-import java.io.File;
 import java.net.InetSocketAddress;
 import java.net.Proxy;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 @Implements(value = @Interface(iface = Server.class, prefix = "server$"))
-public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDelayedTask> implements SpongeServer {
+public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLoop<TickTask> implements SpongeServer {
 
-    @Shadow @Final public long[] tickTimeArray;
+    // @formatter:off
+    @Shadow @Final public long[] tickTimes;
+    @Shadow @Final protected WorldData worldData;
     @Shadow public abstract PlayerList shadow$getPlayerList();
-    @Shadow public abstract boolean shadow$isServerInOnlineMode();
-    @Shadow public abstract String shadow$getMOTD();
-    @Shadow public abstract int shadow$getTickCounter();
-    @Shadow public abstract void shadow$initiateShutdown(boolean p_71263_1_);
-    @Shadow public abstract int shadow$getMaxPlayerIdleMinutes();
+    @Shadow public abstract boolean shadow$usesAuthentication();
+    @Shadow public abstract String shadow$getMotd();
+    @Shadow public abstract int shadow$getTickCount();
+    @Shadow public abstract void shadow$halt(boolean p_71263_1_);
+    @Shadow public abstract int shadow$getPlayerIdleTimeout();
     @Shadow public abstract void shadow$setPlayerIdleTimeout(int p_143006_1_);
+    @Shadow public abstract boolean shadow$isHardcore();
+    @Shadow public abstract boolean shadow$getForceGameType();
+    @Shadow public abstract boolean shadow$isPvpAllowed();
+    @Shadow public abstract boolean shadow$isCommandBlockEnabled();
+    @Shadow protected abstract boolean shadow$isSpawningMonsters();
+    @Shadow public abstract boolean shadow$isSpawningAnimals();
+    @Shadow public abstract boolean shadow$isNetherEnabled();
+    @Shadow public abstract Commands shadow$getCommands();
+    // @formatter:on
 
     private Iterable<? extends Audience> audiences;
     private ServerScheduler api$scheduler;
@@ -121,21 +137,25 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     private GameProfileManager api$profileManager;
     private SpongeUserManager api$userManager;
     private MapStorage api$mapStorage;
+    private RegistryHolder api$registryHolder;
 
     public MinecraftServerMixin_API(final String name) {
         super(name);
     }
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void api$initializeSpongeFields(final File p_i50590_1_, final Proxy p_i50590_2_, final DataFixer dataFixerIn, final Commands p_i50590_4_,
-        final YggdrasilAuthenticationService p_i50590_5_, final MinecraftSessionService p_i50590_6_, final GameProfileRepository p_i50590_7_,
-        final PlayerProfileCache p_i50590_8_, final IChunkStatusListenerFactory p_i50590_9_, final String p_i50590_10_, final CallbackInfo ci) {
+    public void api$initializeSpongeFields(final Thread p_i232576_1_, final RegistryAccess.RegistryHolder p_i232576_2_,
+            final LevelStorageSource.LevelStorageAccess p_i232576_3_, final WorldData p_i232576_4_, final PackRepository p_i232576_5_,
+            final Proxy p_i232576_6_, final DataFixer p_i232576_7_, final ServerResources p_i232576_8_, final MinecraftSessionService p_i232576_9_,
+            final GameProfileRepository p_i232576_10_, final GameProfileCache p_i232576_11_, final ChunkProgressListenerFactory p_i232576_12_,
+            final CallbackInfo ci) {
 
         this.api$scheduler = new ServerScheduler();
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
         this.api$userManager = new SpongeUserManager(this);
         this.api$mapStorage = new SpongeMapStorage();
+        this.api$registryHolder = new SpongeRegistryHolder(p_i232576_2_);
     }
 
     @Override
@@ -148,7 +168,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public ChunkLayout getChunkLayout() {
-        return SpongeChunkLayout.instance;
+        return SpongeChunkLayout.INSTANCE;
     }
 
     @Override
@@ -171,18 +191,63 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public boolean hasWhitelist() {
-        return this.shadow$getPlayerList().isWhiteListEnabled();
+    public boolean isWhitelistEnabled() {
+        return this.shadow$getPlayerList().isUsingWhitelist();
     }
 
     @Override
     public void setHasWhitelist(final boolean enabled) {
-        this.shadow$getPlayerList().setWhiteListEnabled(enabled);
+        this.shadow$getPlayerList().setUsingWhiteList(enabled);
     }
 
     @Override
-    public boolean getOnlineMode() {
-        return this.shadow$isServerInOnlineMode();
+    public boolean isOnlineModeEnabled() {
+        return this.shadow$usesAuthentication();
+    }
+
+    @Override
+    public boolean isHardcoreModeEnabled() {
+        return this.shadow$isHardcore();
+    }
+
+    @Override
+    public Difficulty getDifficulty() {
+        return (Difficulty) (Object) this.worldData.getDifficulty();
+    }
+
+    @Override
+    public GameMode getGameMode() {
+        return (GameMode) (Object) this.worldData.getGameType();
+    }
+
+    @Override
+    public boolean isGameModeEnforced() {
+        return this.shadow$getForceGameType();
+    }
+
+    @Override
+    public boolean isPVPEnabled() {
+        return this.shadow$isPvpAllowed();
+    }
+
+    @Override
+    public boolean areCommandBlocksEnabled() {
+        return this.shadow$isCommandBlockEnabled();
+    }
+
+    @Override
+    public boolean isMonsterSpawnsEnabled() {
+        return this.shadow$isSpawningMonsters();
+    }
+
+    @Override
+    public boolean isAnimalSpawnsEnabled() {
+        return this.shadow$isSpawningAnimals();
+    }
+
+    @Override
+    public boolean isMultiWorldEnabled() {
+        return this.shadow$isNetherEnabled();
     }
 
     @Override
@@ -209,7 +274,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((ServerPlayer) this.shadow$getPlayerList().getPlayerByUUID(uniqueId));
+        return Optional.ofNullable((ServerPlayer) this.shadow$getPlayerList().getPlayer(uniqueId));
     }
 
     @Override
@@ -217,12 +282,12 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
         }
-        return Optional.ofNullable((ServerPlayer) this.shadow$getPlayerList().getPlayerByUsername(name));
+        return Optional.ofNullable((ServerPlayer) this.shadow$getPlayerList().getPlayerByName(name));
     }
 
     @Override
-    public Component getMotd() {
-        return SpongeAdventure.legacySection(this.shadow$getMOTD());
+    public Component getMOTD() {
+        return SpongeAdventure.legacySection(this.shadow$getMotd());
     }
 
     @Override
@@ -235,14 +300,18 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public int getRunningTimeTicks() {
-        return this.shadow$getTickCounter();
+        return this.shadow$getTickCount();
     }
 
     @Override
     public double getTicksPerSecond() {
-        final double nanoSPerTick = MathHelper.average(this.tickTimeArray);
         // Cap at 20 TPS
-        return 1000 / Math.max(50, nanoSPerTick / 1000000);
+        return 1000 / Math.max(50, this.getAverageTickTime());
+    }
+
+    @Override
+    public double getAverageTickTime() {
+        return Mth.average(this.tickTimes) / 1000000;
     }
 
     @Override
@@ -252,7 +321,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public void shutdown() {
-        this.shadow$initiateShutdown(false);
+        this.shadow$halt(false);
     }
 
     @Override
@@ -262,7 +331,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
             player.kick(kickMessage);
         }
 
-        this.shadow$initiateShutdown(false);
+        this.shadow$halt(false);
     }
 
     @Override
@@ -275,14 +344,18 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
     }
 
     @Override
-    public Optional<ResourcePack> getDefaultResourcePack() {
+    public SpongeCommandManager getCommandManager() {
+        return ((CommandsBridge) this.shadow$getCommands()).bridge$commandManager();
+    }
+
+    public Optional<ResourcePack> server$getResourcePack() {
         return Optional.ofNullable(((MinecraftServerBridge) this).bridge$getResourcePack());
     }
 
     @Override
     public Optional<Scoreboard> getServerScoreboard() {
         if (this.api$scoreboard == null) {
-            final ServerWorld world = ((SpongeWorldManager) this.getWorldManager()).getDefaultWorld();
+            final ServerLevel world = SpongeCommon.getServer().overworld();
             if (world == null) {
                 return Optional.empty();
             }
@@ -292,9 +365,9 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         return Optional.of((Scoreboard) this.api$scoreboard);
     }
 
-    @Override
-    public int getPlayerIdleTimeout() {
-        return this.shadow$getMaxPlayerIdleMinutes();
+    @Intrinsic
+    public int server$getPlayerIdleTimeout() {
+        return this.shadow$getPlayerIdleTimeout();
     }
 
     @Intrinsic
@@ -319,7 +392,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public boolean onMainThread() {
-        return this.isOnExecutionThread();
+        return this.isSameThread();
     }
 
     @Override
@@ -343,7 +416,7 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
 
     @Override
     public void sendMessage(final Identity identity, final Component message, final MessageType type) {
-        this.shadow$getPlayerList().sendMessage(SpongeAdventure.asVanilla(message));
+        this.shadow$getPlayerList().broadcastMessage(SpongeAdventure.asVanilla(message), SpongeAdventure.asVanilla(type), identity.uuid());
     }
 
     @Override
@@ -351,6 +424,15 @@ public abstract class MinecraftServerMixin_API extends RecursiveEventLoop<TickDe
         return ((MinecraftServerBridge) this).bridge$getServiceProvider();
     }
 
+    @Override
+    public RegistryScope registryScope() {
+        return RegistryScope.ENGINE;
+    }
+
+    @Override
+    public RegistryHolder registries() {
+        return this.api$registryHolder;
+    }
     @Override
     public MapStorage getMapStorage() {
         return this.api$mapStorage;

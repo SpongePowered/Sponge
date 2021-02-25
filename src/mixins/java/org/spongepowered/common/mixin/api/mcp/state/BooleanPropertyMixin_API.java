@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.state;
 
-import net.minecraft.state.BooleanProperty;
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.spongepowered.api.state.BooleanStateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 

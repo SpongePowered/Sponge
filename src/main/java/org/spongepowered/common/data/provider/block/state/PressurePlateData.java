@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.PressurePlateBlock;
+import net.minecraft.world.level.block.PressurePlateBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,8 +39,8 @@ public final class PressurePlateData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(PressurePlateBlock.POWERED))
-                        .set((h, v) -> h.with(PressurePlateBlock.POWERED, v))
+                        .get(h -> h.getValue(PressurePlateBlock.POWERED))
+                        .set((h, v) -> h.setValue(PressurePlateBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof PressurePlateBlock);
     }
     // @formatter:on

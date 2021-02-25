@@ -37,7 +37,7 @@ import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import net.kyori.adventure.identity.Identified;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
@@ -46,30 +46,31 @@ import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-public final class SpongeCommandContext extends CommandContext<CommandSource> implements org.spongepowered.api.command.parameter.CommandContext {
+public final class SpongeCommandContext extends CommandContext<CommandSourceStack> implements org.spongepowered.api.command.parameter.CommandContext {
 
     private final Map<Parameter.Key<?>, Collection<?>> argumentMap;
     private final Object2IntOpenHashMap<String> flagMap;
-    private final Map<String, ParsedArgument<CommandSource, ?>> brigArguments;
+    private final Map<String, ParsedArgument<CommandSourceStack, ?>> brigArguments;
     private final org.spongepowered.api.command.Command.@Nullable Parameterized targetCommand;
 
     public SpongeCommandContext(
-            final CommandSource source,
+            final CommandSourceStack source,
             final String input,
-            final Map<String, ParsedArgument<CommandSource, ?>> brigArguments,
+            final Map<String, ParsedArgument<CommandSourceStack, ?>> brigArguments,
             final Map<Parameter.Key<?>, Collection<?>> arguments,
-            final CommandNode<CommandSource> rootNode,
+            final CommandNode<CommandSourceStack> rootNode,
             final Object2IntOpenHashMap<String> flags,
-            final Command<CommandSource> command,
-            final List<ParsedCommandNode<CommandSource>> nodes,
+            final Command<CommandSourceStack> command,
+            final List<ParsedCommandNode<CommandSourceStack>> nodes,
             final StringRange range,
-            @Nullable final CommandContext<CommandSource> child,
-            @Nullable final RedirectModifier<CommandSource> modifier,
+            @Nullable final CommandContext<CommandSourceStack> child,
+            @Nullable final RedirectModifier<CommandSourceStack> modifier,
             final boolean forks,
             final org.spongepowered.api.command.Command.@Nullable Parameterized currentTargetCommand) {
         super(source,
@@ -159,6 +160,26 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
     }
 
     @Override
+    public boolean hasAny(Parameter.Value<?> parameter) {
+        return this.hasAny(parameter.getKey());
+    }
+
+    @Override
+    public <T> Optional<T> getOne(Parameter.Value<T> parameter) throws IllegalArgumentException {
+        return this.getOne(parameter.getKey());
+    }
+
+    @Override
+    public <T> T requireOne(Parameter.Value<T> parameter) throws NoSuchElementException, IllegalArgumentException {
+        return this.requireOne(parameter.getKey());
+    }
+
+    @Override
+    public <T> Collection<? extends T> getAll(Parameter.Value<T> parameter) {
+        return this.getAll(parameter.getKey());
+    }
+
+    @Override
     public void sendMessage(@NonNull final Identified identity, @NonNull final Component message) {
         this.getCause().sendMessage(identity, message);
     }
@@ -169,7 +190,7 @@ public final class SpongeCommandContext extends CommandContext<CommandSource> im
     }
 
     @Override
-    public CommandContext<CommandSource> copyFor(final CommandSource source) {
+    public CommandContext<CommandSourceStack> copyFor(final CommandSourceStack source) {
         if (this.getSource() == source) {
             return this;
         }

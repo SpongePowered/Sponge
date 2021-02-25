@@ -29,28 +29,51 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.ISuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentCommandNode<ISuggestionProvider, T> implements ForcedRedirectNode {
+import java.util.Objects;
+import net.minecraft.commands.SharedSuggestionProvider;
 
-    @Nullable private CommandNode<ISuggestionProvider> forcedRedirect = null;
+public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentCommandNode<SharedSuggestionProvider, T> implements ForcedRedirectNode {
+
+    @Nullable private CommandNode<SharedSuggestionProvider> forcedRedirect = null;
 
     public ForcedRedirectArgumentSuggestionNode(final String name,
             final ArgumentType<T> type,
-            final Command<ISuggestionProvider> command,
-            final SuggestionProvider<ISuggestionProvider> customSuggestions) {
+            final Command<SharedSuggestionProvider> command,
+            final SuggestionProvider<SharedSuggestionProvider> customSuggestions) {
         super(name, type, command, isp -> true, null, null, false, customSuggestions);
     }
 
     @Override
-    public void setForcedRedirect(@Nullable final CommandNode<ISuggestionProvider> redirect) {
+    public void setForcedRedirect(@Nullable final CommandNode<SharedSuggestionProvider> redirect) {
         this.forcedRedirect = redirect;
     }
 
     @Override
-    public CommandNode<ISuggestionProvider> getRedirect() {
+    public CommandNode<SharedSuggestionProvider> getRedirect() {
         return this.forcedRedirect;
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(super.hashCode(), this.forcedRedirect, this.getCustomSuggestions());
+    }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        if (!super.equals(o)) {
+            return false;
+        }
+        final ForcedRedirectArgumentSuggestionNode<?> that = (ForcedRedirectArgumentSuggestionNode<?>) o;
+        return Objects.equals(this.forcedRedirect, that.forcedRedirect)
+                && Objects.equals(this.getCustomSuggestions(), that.getCustomSuggestions());
     }
 
 }

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DispenserBlock;
+import net.minecraft.world.level.block.DispenserBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class DispenserData {
 
@@ -40,8 +40,8 @@ public final class DispenserData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(DispenserBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, DispenserBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.getValue(DispenserBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, DispenserBlock.FACING))
                         .supports(h -> h.getBlock() instanceof DispenserBlock);
     }
     // @formatter:on

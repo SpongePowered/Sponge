@@ -24,34 +24,57 @@
  */
 package org.spongepowered.common.accessor.server;
 
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.datafixers.DataFixer;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import net.minecraft.world.storage.CommandStorage;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.CommandStorage;
+import net.minecraft.world.level.storage.DimensionDataStorage;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.ServerLevelData;
+import net.minecraft.world.level.storage.WorldData;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedAccessorError;
+import org.spongepowered.common.UntransformedInvokerError;
+
+import java.util.Map;
+import java.util.concurrent.Executor;
 
 @Mixin(MinecraftServer.class)
 public interface MinecraftServerAccessor {
 
-    @Accessor("field_229733_al_") void accessor$setfield_229733_al(CommandStorage storage);
+    @Accessor("LOGGER") static Logger accessor$LOGGER() {
+        throw new UntransformedAccessorError();
+    }
 
-    @Accessor("sessionService") MinecraftSessionService accessor$getSessionService();
+    @Invoker("setInitialSpawn") static void invoker$setInitialSpawn(final ServerLevel serverWorld, final ServerLevelData levelData, final boolean generateBonusChest,
+            final boolean isDebugGeneration, final boolean nonDebugSpawn) {
+        throw new UntransformedInvokerError();
+    }
 
-    @Accessor("profileRepo") GameProfileRepository accessor$getProfileRepo();
+    @Accessor("commandStorage") void accessor$commandStorage(final CommandStorage commandStorage);
 
-    @Accessor("profileCache") PlayerProfileCache accessor$getProfileCache();
+    @Accessor("storageSource") LevelStorageSource.LevelStorageAccess accessor$storageSource();
 
-    @Mutable @Accessor("profileCache") void accessor$setProfileCache(PlayerProfileCache profileCache);
+    @Accessor("levels") Map<ResourceKey<Level>, ServerLevel> accessor$levels();
 
-    @Accessor("dataFixer") DataFixer accessor$getDataFixer();
+    @Accessor("executor") Executor accessor$executor();
 
-    @Accessor("chunkStatusListenerFactory") IChunkStatusListenerFactory accessor$getChunkStatusListenerFactory();
+    @Accessor("progressListenerFactory") ChunkProgressListenerFactory accessor$getProgressListenerFactory();
 
-    @Invoker("allowSpawnMonsters") boolean accessor$allowSpawnMonsters();
+    @Accessor("nextTickTime") void accessor$setNextTickTime(long nextTickTime);
+
+    @Invoker("isSpawningMonsters") boolean invoker$isSpawningMonsters();
+
+    @Invoker("setupDebugLevel") void invoker$setDebugLevel(WorldData serverConfiguration);
+
+    @Invoker("forceDifficulty") void invoker$forceDifficulty();
+
+    @Invoker("readScoreboard") void accessor$readScoreboard(DimensionDataStorage manager);
+
+    @Invoker("waitUntilNextTick") void accessor$waitUntilNextTick();
 }

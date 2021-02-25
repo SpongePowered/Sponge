@@ -25,14 +25,14 @@
 package org.spongepowered.common.data.provider.entity;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.item.FireworkRocketEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.EntityAccessor;
-import org.spongepowered.common.accessor.entity.item.FireworkRocketEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.entity.projectile.FireworkRocketEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.FireworkUtils;
+import org.spongepowered.common.util.FireworkUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -46,13 +46,13 @@ public final class FireworkRocketData {
         registrator
                 .asMutable(FireworkRocketEntity.class)
                     .create(Keys.FIREWORK_EFFECTS)
-                        .get(h -> FireworkUtils.getFireworkEffects(h).orElse(null))
-                        .set(FireworkUtils::setFireworkEffects)
+                        .get(h -> FireworkUtil.getFireworkEffects(h).orElse(null))
+                        .set(FireworkUtil::setFireworkEffects)
                         .resetOnDelete(ImmutableList.of())
                     .create(Keys.FIREWORK_FLIGHT_MODIFIER)
                         .get(h -> {
-                            final ItemStack item = FireworkUtils.getItem(h);
-                            final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
+                            final ItemStack item = FireworkUtil.getItem(h);
+                            final CompoundTag fireworks = item.getOrCreateTagElement(Constants.Item.Fireworks.FIREWORKS);
                             if (fireworks.contains(Constants.Item.Fireworks.FLIGHT)) {
                                 return new SpongeTicks(fireworks.getByte(Constants.Item.Fireworks.FLIGHT));
                             }
@@ -63,10 +63,10 @@ public final class FireworkRocketData {
                             if (ticks < 0 || ticks > Byte.MAX_VALUE) {
                                 return false;
                             }
-                            final ItemStack item = FireworkUtils.getItem(h);
-                            final CompoundNBT fireworks = item.getOrCreateChildTag(Constants.Item.Fireworks.FIREWORKS);
+                            final ItemStack item = FireworkUtil.getItem(h);
+                            final CompoundTag fireworks = item.getOrCreateTagElement(Constants.Item.Fireworks.FIREWORKS);
                             fireworks.putByte(Constants.Item.Fireworks.FLIGHT, (byte) ticks);
-                            ((FireworkRocketEntityAccessor) h).accessor$setLifeTime(10 * ticks + ((EntityAccessor) h).accessor$getRand().nextInt(6) + ((EntityAccessor) h).accessor$getRand().nextInt(7));
+                            ((FireworkRocketEntityAccessor) h).accessor$lifetime(10 * ticks + ((EntityAccessor) h).accessor$random().nextInt(6) + ((EntityAccessor) h).accessor$random().nextInt(7));
                             return true;
                         });
     }

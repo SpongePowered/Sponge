@@ -24,23 +24,32 @@
  */
 package org.spongepowered.common.registry;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.SimpleRegistry;
-
+import com.mojang.serialization.Lifecycle;
 import java.util.function.BiConsumer;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceKey;
 
-public final class CallbackRegistry<T> extends SimpleRegistry<T> {
+public final class CallbackRegistry<T> extends MappedRegistry<T> {
 
-    private final BiConsumer<ResourceLocation, T> callback;
+    private final BiConsumer<ResourceKey<T>, T> callback;
+    private boolean callbackEnabled;
 
-    public CallbackRegistry(BiConsumer<ResourceLocation, T> callback) {
+    public CallbackRegistry(final ResourceKey<? extends Registry<T>> key, final Lifecycle lifecycle, final BiConsumer<ResourceKey<T>, T> callback) {
+        super(key, lifecycle);
         this.callback = callback;
     }
 
     @Override
-    public <V extends T> V register(int id, ResourceLocation name, V instance) {
-        V value = super.register(id, name, instance);
-        this.callback.accept(name, instance);
+    public <V extends T> V register(final ResourceKey<T> key, final V instance, final Lifecycle lifecycle) {
+        V value = super.register(key, instance, lifecycle);
+        if (this.callbackEnabled) {
+            this.callback.accept(key, instance);
+        }
         return value;
+    }
+
+    public void setCallbackEnabled(boolean callbackEnabled) {
+        this.callbackEnabled = callbackEnabled;
     }
 }

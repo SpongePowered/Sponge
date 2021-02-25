@@ -30,14 +30,12 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.StringDataFormat;
-import org.spongepowered.common.SpongeCatalogType;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
@@ -57,11 +55,7 @@ import java.util.Map;
 
 import javax.annotation.Nullable;
 
-public final class JsonDataFormat extends SpongeCatalogType implements StringDataFormat {
-
-    public JsonDataFormat(ResourceKey key) {
-        super(key);
-    }
+public final class JsonDataFormat implements StringDataFormat {
 
     public static DataContainer serialize(Gson gson, Object o) throws IOException {
         DataViewJsonWriter writer = new DataViewJsonWriter();
@@ -77,24 +71,24 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
     @Override
     public DataContainer readFrom(Reader input) throws InvalidDataException, IOException {
         try (JsonReader reader = new JsonReader(input)) {
-            return readFrom(reader);
+            return JsonDataFormat.readFrom(reader);
         }
     }
 
     @Override
     public DataContainer readFrom(InputStream input) throws IOException {
         try (JsonReader reader = new JsonReader(new BufferedReader(new InputStreamReader(input, StandardCharsets.UTF_8)))) {
-            return readFrom(reader);
+            return JsonDataFormat.readFrom(reader);
         }
     }
 
     private static DataContainer readFrom(JsonReader reader) throws IOException {
-        return createContainer(reader);
+        return JsonDataFormat.createContainer(reader);
     }
 
     private static DataContainer createContainer(JsonReader reader) throws IOException {
         DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-        readView(reader, container);
+        JsonDataFormat.readView(reader, container);
         return container;
     }
 
@@ -106,9 +100,9 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
 
             if (reader.peek() == JsonToken.BEGIN_OBJECT) {
                 // Check this early so we don't need to copy the view
-                readView(reader, view.createView(key));
+                JsonDataFormat.readView(reader, view.createView(key));
             } else {
-                view.set(key, read(reader));
+                view.set(key, JsonDataFormat.read(reader));
             }
         }
 
@@ -120,9 +114,9 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
         JsonToken token = reader.peek();
         switch (token) {
             case BEGIN_OBJECT:
-                return createContainer(reader);
+                return JsonDataFormat.createContainer(reader);
             case BEGIN_ARRAY:
-                return readArray(reader);
+                return JsonDataFormat.readArray(reader);
             case BOOLEAN:
                 return reader.nextBoolean();
             case NULL:
@@ -131,7 +125,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
             case STRING:
                 return reader.nextString();
             case NUMBER:
-                return readNumber(reader);
+                return JsonDataFormat.readNumber(reader);
             default:
                 throw new IOException("Unexpected token: " + token);
         }
@@ -158,7 +152,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
 
         List<Object> result = new ArrayList<>();
         while (reader.hasNext()) {
-            result.add(read(reader));
+            result.add(JsonDataFormat.read(reader));
         }
 
         reader.endArray();
@@ -168,7 +162,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
     @Override
     public void writeTo(OutputStream output, DataView data) throws IOException {
         try (JsonWriter writer = new JsonWriter(new BufferedWriter(new OutputStreamWriter(output, StandardCharsets.UTF_8)))) {
-            writeView(writer, data);
+            JsonDataFormat.writeView(writer, data);
         }
     }
 
@@ -182,7 +176,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
     @Override
     public void writeTo(Writer output, DataView data) throws IOException {
         try (JsonWriter writer = new JsonWriter(output)) {
-            writeView(writer, data);
+            JsonDataFormat.writeView(writer, data);
         }
     }
 
@@ -191,7 +185,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
 
         for (Map.Entry<DataQuery, Object> entry : view.getValues(false).entrySet()) {
             writer.name(entry.getKey().asString('.'));
-            write(writer, entry.getValue());
+            JsonDataFormat.write(writer, entry.getValue());
         }
 
         writer.endObject();
@@ -207,13 +201,13 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
         } else if (value instanceof String) {
             writer.value((String) value);
         } else if (value instanceof Iterable) {
-            writeArray(writer, (Iterable<?>) value);
+            JsonDataFormat.writeArray(writer, (Iterable<?>) value);
         } else if (value instanceof Map) {
-            writeMap(writer, (Map<?, ?>) value);
+            JsonDataFormat.writeMap(writer, (Map<?, ?>) value);
         } else if (value instanceof DataSerializable) {
-            writeView(writer, ((DataSerializable) value).toContainer());
+            JsonDataFormat.writeView(writer, ((DataSerializable) value).toContainer());
         } else if (value instanceof DataView) {
-            writeView(writer, (DataView) value);
+            JsonDataFormat.writeView(writer, (DataView) value);
         } else {
             throw new IllegalArgumentException("Unable to translate object to JSON: " + value);
         }
@@ -222,7 +216,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
     private static void writeArray(JsonWriter writer, Iterable<?> iterable) throws IOException {
         writer.beginArray();
         for (Object value : iterable) {
-            write(writer, value);
+            JsonDataFormat.write(writer, value);
         }
         writer.endArray();
     }
@@ -237,7 +231,7 @@ public final class JsonDataFormat extends SpongeCatalogType implements StringDat
             }
 
             writer.name(key.toString());
-            write(writer, entry.getValue());
+            JsonDataFormat.write(writer, entry.getValue());
         }
 
         writer.endObject();

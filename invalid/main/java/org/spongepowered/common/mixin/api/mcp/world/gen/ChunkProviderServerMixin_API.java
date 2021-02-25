@@ -34,7 +34,7 @@ import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.chunk.storage.AnvilChunkLoaderBridge;
+import org.spongepowered.common.bridge.world.level.chunk.storage.AnvilChunkLoaderBridge;
 import org.spongepowered.common.world.storage.SpongeChunkDataStream;
 import org.spongepowered.common.world.storage.WorldStorageUtil;
 import org.spongepowered.math.vector.Vector3i;

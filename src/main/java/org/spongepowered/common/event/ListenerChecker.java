@@ -65,8 +65,8 @@ public final class ListenerChecker {
                 FieldData data = new FieldData(field);
                 this.fieldClassMap.put(this.getClassForField(field), data);
                 this.fields.put(field.getName(), data);
-                if (ALL_TRUE) {
-                    if (DEBUG) {
+                if (ListenerChecker.ALL_TRUE) {
+                    if (ListenerChecker.DEBUG) {
                         System.err.println(String.format("Forcing field %s to true!", field.getName()));
                     }
                     try {
@@ -101,7 +101,7 @@ public final class ListenerChecker {
             final Class<?> possibleType = Types.allSuperTypesAndInterfaces(eventMethod.getGenericReturnType())
                     .map(GenericTypeReflector::erase)
                     .filter(eventType -> {
-                        final String eventMethodName = getName(eventType);
+                        final String eventMethodName = ListenerChecker.getName(eventType);
                         return name.equals(eventMethodName);
                     })
                     .findFirst().orElse(null);
@@ -114,7 +114,7 @@ public final class ListenerChecker {
     }
 
     public <T> void updateFields(Class<? super T> eventClass, boolean registering) {
-        if (ALL_TRUE) {
+        if (ListenerChecker.ALL_TRUE) {
             return;
         }
 
@@ -192,7 +192,7 @@ public final class ListenerChecker {
             }
             boolean val = this.listenerCount > 0;
 
-            if (DEBUG) {
+            if (ListenerChecker.DEBUG) {
                 System.err.println(String.format("Updating field %s with value %s", this.field, val));
             }
 

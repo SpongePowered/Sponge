@@ -38,14 +38,13 @@ import io.netty.buffer.Unpooled;
 import io.netty.handler.codec.base64.Base64;
 import org.spongepowered.api.network.status.Favicon;
 
+import javax.imageio.ImageIO;
 import java.awt.image.BufferedImage;
 import java.io.IOException;
 import java.io.InputStream;
 import java.net.URL;
 import java.nio.file.Files;
 import java.nio.file.Path;
-
-import javax.imageio.ImageIO;
 
 public class SpongeFavicon implements Favicon {
 
@@ -54,12 +53,12 @@ public class SpongeFavicon implements Favicon {
 
     public SpongeFavicon(BufferedImage decoded) throws IOException {
         this.decoded = checkNotNull(decoded, "decoded");
-        this.encoded = encode(decoded);
+        this.encoded = SpongeFavicon.encode(decoded);
     }
 
     public SpongeFavicon(String encoded) throws IOException {
         this.encoded = checkNotNull(encoded, "encoded");
-        this.decoded = decode(encoded);
+        this.decoded = SpongeFavicon.decode(encoded);
     }
 
     public String getEncoded() {
@@ -103,16 +102,16 @@ public class SpongeFavicon implements Favicon {
 
     public static Favicon load(Path path) throws IOException {
         try (InputStream in = Files.newInputStream(path)) {
-            return load(in);
+            return SpongeFavicon.load(in);
         }
     }
 
     public static Favicon load(URL url) throws IOException {
-        return load(ImageIO.read(url));
+        return SpongeFavicon.load(ImageIO.read(url));
     }
 
     public static Favicon load(InputStream in) throws IOException {
-        return load(ImageIO.read(in));
+        return SpongeFavicon.load(ImageIO.read(in));
     }
 
     public static Favicon load(BufferedImage image) throws IOException {
@@ -130,7 +129,7 @@ public class SpongeFavicon implements Favicon {
             ImageIO.write(favicon, "PNG", new ByteBufOutputStream(buf));
             ByteBuf base64 = Base64.encode(buf);
             try {
-                return FAVICON_PREFIX + base64.toString(Charsets.UTF_8);
+                return SpongeFavicon.FAVICON_PREFIX + base64.toString(Charsets.UTF_8);
             } finally {
                 base64.release();
             }
@@ -140,8 +139,8 @@ public class SpongeFavicon implements Favicon {
     }
 
     private static BufferedImage decode(String encoded) throws IOException {
-        checkArgument(encoded.startsWith(FAVICON_PREFIX), "Unknown favicon format");
-        ByteBuf base64 = Unpooled.copiedBuffer(encoded.substring(FAVICON_PREFIX.length()), Charsets.UTF_8);
+        checkArgument(encoded.startsWith(SpongeFavicon.FAVICON_PREFIX), "Unknown favicon format");
+        ByteBuf base64 = Unpooled.copiedBuffer(encoded.substring(SpongeFavicon.FAVICON_PREFIX.length()), Charsets.UTF_8);
         try {
             ByteBuf buf = Base64.decode(base64);
             try {

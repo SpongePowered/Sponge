@@ -27,25 +27,27 @@ package org.spongepowered.common;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
-import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
-import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.command.manager.CommandManager;
-import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.channel.ChannelRegistry;
 import org.spongepowered.api.plugin.PluginManager;
+import org.spongepowered.api.registry.BuilderProvider;
+import org.spongepowered.api.registry.FactoryProvider;
 import org.spongepowered.api.registry.GameRegistry;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
 import org.spongepowered.common.config.PluginConfigManager;
+import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.server.ServerConsoleSystemSubject;
 import org.spongepowered.common.util.LocaleCache;
@@ -58,6 +60,8 @@ public final class SpongeGame implements Game {
 
     private final Platform platform;
     private final GameRegistry registry;
+    private final BuilderProvider builderProvider;
+    private final FactoryProvider factoryProvider;
     private final DataManager dataManager;
     private final PluginManager pluginManager;
     private final EventManager eventManager;
@@ -65,10 +69,11 @@ public final class SpongeGame implements Game {
     private final PluginConfigManager configManager;
     private final ChannelRegistry channelRegistry;
     private final MetricsConfigManager metricsConfigManager;
-    private final CommandManager commandManager;
     private final SqlManager sqlManager;
     private final ServiceProvider.GameScoped serviceProvider;
-    private final AsyncScheduler asyncScheduler = new AsyncScheduler();
+
+    private final AsyncScheduler asyncScheduler;
+    private RegistryHolder registryHolder;
 
     private Client client;
     private Server server;
@@ -76,13 +81,16 @@ public final class SpongeGame implements Game {
     private ServerConsoleSystemSubject systemSubject;
 
     @Inject
-    public SpongeGame(final Platform platform, final GameRegistry registry, final DataManager dataManager, final PluginManager pluginManager,
-        final EventManager eventManager, final AssetManager assetManager, final PluginConfigManager configManager,
-            final ChannelRegistry channelRegistry, final MetricsConfigManager metricsConfigManager, final CommandManager commandManager,
+    public SpongeGame(final Platform platform, final GameRegistry registry, final BuilderProvider builderProvider,
+            final FactoryProvider factoryProvider, final DataManager dataManager, final PluginManager pluginManager,
+            final EventManager eventManager, final AssetManager assetManager, final PluginConfigManager configManager,
+            final ChannelRegistry channelRegistry, final MetricsConfigManager metricsConfigManager,
             final SqlManager sqlManager, final ServiceProvider.GameScoped serviceProvider) {
 
         this.platform = platform;
         this.registry = registry;
+        this.builderProvider = builderProvider;
+        this.factoryProvider = factoryProvider;
         this.dataManager = dataManager;
         this.pluginManager = pluginManager;
         this.eventManager = eventManager;
@@ -90,9 +98,11 @@ public final class SpongeGame implements Game {
         this.configManager = configManager;
         this.channelRegistry = channelRegistry;
         this.metricsConfigManager = metricsConfigManager;
-        this.commandManager = commandManager;
         this.sqlManager = sqlManager;
         this.serviceProvider = serviceProvider;
+
+        this.asyncScheduler = new AsyncScheduler();
+        //this.registryHolder = new SpongeRegistryHolder();
     }
 
     @Override
@@ -116,6 +126,16 @@ public final class SpongeGame implements Game {
     @Override
     public GameRegistry getRegistry() {
         return this.registry;
+    }
+
+    @Override
+    public BuilderProvider getBuilderProvider() {
+        return this.builderProvider;
+    }
+
+    @Override
+    public FactoryProvider getFactoryProvider() {
+        return this.factoryProvider;
     }
 
     @Override
@@ -151,11 +171,6 @@ public final class SpongeGame implements Game {
     @Override
     public MetricsConfigManager getMetricsConfigManager() {
         return this.metricsConfigManager;
-    }
-
-    @Override
-    public CommandManager getCommandManager() {
-        return this.commandManager;
     }
 
     @Override
@@ -214,6 +229,20 @@ public final class SpongeGame implements Game {
 
     public void setClient(final Client client) {
         this.client = client;
+    }
+
+    @Override
+    public RegistryScope registryScope() {
+        return RegistryScope.GAME;
+    }
+
+    @Override
+    public RegistryHolder registries() {
+        if (this.registryHolder == null) {
+            this.registryHolder = new SpongeRegistryHolder();
+        }
+
+        return this.registryHolder;
     }
 
     @Override

@@ -50,6 +50,8 @@ public final class GenerationPhase {
 
         public static final IPhaseState<ChunkLoadContext> CHUNK_LOADING = new ChunkLoadPhaseState().bake();
 
+        public static final IPhaseState<DeferredScheduledUpdatePhaseState.Context> DEFERRED_SCHEDULED_UPDATE = new DeferredScheduledUpdatePhaseState();
+
         public static final IPhaseState<GenericGenerationContext> CHUNK_REGENERATING_LOAD_EXISTING = new ChunkRegeneratingLoadExistingPhaseState();
 
         public static final IPhaseState<ChunkRegenerateContext> CHUNK_REGENERATING = new ChunkRegeneratePhaseState();
@@ -58,44 +60,58 @@ public final class GenerationPhase {
 
         public static final IPhaseState<PopulatorPhaseContext> POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
 
+        public static final IPhaseState<FeaturePhaseContext> FEATURE_PLACEMENT = new FeatureGenerationPhaseState("FEATURE_PLACEMENT");
+
         public static final IPhaseState<GenericGenerationContext> TERRAIN_GENERATION = new TerrainGenerationState();
 
         public static final IPhaseState<GenerationCompatibileContext> GENERATION_COMPATIBILITY = new GenerationCompatibilityState();
 
         static {
-            ((GeneralGenerationPhaseState<?>) POPULATOR_RUNNING)
+            ((GeneralGenerationPhaseState<?>) GenerationPhase.State.POPULATOR_RUNNING)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
                     .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
                     .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
                     .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
-                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
                     .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
                     .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
+                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
                     .bake();
-            ((GeneralGenerationPhaseState<?>) GENERATION_COMPATIBILITY)
+            ((GeneralGenerationPhaseState<?>) GenerationPhase.State.FEATURE_PLACEMENT)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
                     .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
                     .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
                     .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
-                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
-                    .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
+                    .addCompatibleState(GenerationPhase.State.FEATURE_PLACEMENT)
                     .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
+                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
                     .bake();
-            ((GeneralGenerationPhaseState<?>) TERRAIN_GENERATION)
+            ((GeneralGenerationPhaseState<?>) GenerationPhase.State.GENERATION_COMPATIBILITY)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
                     .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
                     .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
-                    .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
                     .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
-                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
+                    .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
+                    .addCompatibleState(GenerationPhase.State.FEATURE_PLACEMENT)
                     .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
+                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
                     .bake();
-            ((GeneralGenerationPhaseState<?>) CHUNK_REGENERATING)
+            ((GeneralGenerationPhaseState<?>) GenerationPhase.State.TERRAIN_GENERATION)
                     .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
                     .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
                     .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
-                    .addCompatibleState(State.WORLD_SPAWNER_SPAWNING)
-                    .addCompatibleState(State.POPULATOR_RUNNING)
+                    .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
+                    .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
+                    .addCompatibleState(GenerationPhase.State.FEATURE_PLACEMENT)
+                    .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
+                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
+                    .bake();
+            ((GeneralGenerationPhaseState<?>) GenerationPhase.State.CHUNK_REGENERATING)
+                    .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
+                    .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
+                    .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
+                    .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
+                    .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
+                    .addCompatibleState(GenerationPhase.State.FEATURE_PLACEMENT)
                     .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
                     .addCompatibleState(GeneralPhase.Post.UNWINDING)
                     .bake();
@@ -104,6 +120,4 @@ public final class GenerationPhase {
 
     private GenerationPhase() {
     }
-
-
 }

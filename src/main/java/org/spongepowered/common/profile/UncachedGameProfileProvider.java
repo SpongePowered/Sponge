@@ -89,7 +89,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
 
     private CompletableFuture<@Nullable CachedProfile> requestProfile(final UUID uniqueId) {
         return this.submit(() -> {
-            final com.mojang.authlib.GameProfile mcProfile = SpongeCommon.getServer().getMinecraftSessionService().fillProfileProperties(
+            final com.mojang.authlib.GameProfile mcProfile = SpongeCommon.getServer().getSessionService().fillProfileProperties(
                     new com.mojang.authlib.GameProfile(uniqueId, ""), true);
             if (mcProfile == null) {
                 return null;
@@ -175,7 +175,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
             });
         }
         final CompletableFuture<GameProfile> result = new CompletableFuture<>();
-        this.submit(() -> SpongeCommon.getServer().getGameProfileRepository().findProfilesByNames(new String[] { name }, Agent.MINECRAFT,
+        this.submit(() -> SpongeCommon.getServer().getProfileRepository().findProfilesByNames(new String[] { name }, Agent.MINECRAFT,
                 new SingleProfileLookupCallback(result)));
         return result;
     }
@@ -203,7 +203,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         }
         final List<String> nameList = Lists.newArrayList(names);
         final String[] namesArray = nameList.toArray(new String[0]);
-        this.submit(() -> SpongeCommon.getServer().getGameProfileRepository().findProfilesByNames(namesArray, Agent.MINECRAFT,
+        this.submit(() -> SpongeCommon.getServer().getProfileRepository().findProfilesByNames(namesArray, Agent.MINECRAFT,
                 new MapProfileLookupCallback(result, nameList)));
         return result;
     }
@@ -217,7 +217,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         try {
             final int code = connection.getResponseCode();
             if (code == 200) {
-                final JsonObject json = GSON.fromJson(new InputStreamReader(connection.getInputStream()), JsonObject.class);
+                final JsonObject json = UncachedGameProfileProvider.GSON.fromJson(new InputStreamReader(connection.getInputStream()), JsonObject.class);
                 return this.parseGameProfile(json);
             } else if (code == 204) {
                 return null;
@@ -237,7 +237,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         }
         final InputStream is = connection.getInputStream();
         if (is.available() > 0) {
-            final JsonObject json = GSON.fromJson(new InputStreamReader(is), JsonObject.class);
+            final JsonObject json = UncachedGameProfileProvider.GSON.fromJson(new InputStreamReader(is), JsonObject.class);
             final String error = json.has("error") ? json.get("error").getAsString() : null;
             final String errorMessage = json.has("errorMessage") ? json.get("errorMessage").getAsString() : null;
             if (error != null) {

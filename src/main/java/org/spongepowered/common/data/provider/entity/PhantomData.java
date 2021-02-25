@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.PhantomEntity;
+import net.minecraft.world.entity.monster.Phantom;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PhantomPhase;
-import org.spongepowered.common.accessor.entity.monster.PhantomEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.PhantomAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class PhantomData {
@@ -38,16 +38,16 @@ public final class PhantomData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PhantomEntity.class)
+                .asMutable(Phantom.class)
                     .create(Keys.SCALE)
-                        .get(h -> (double) (h.getWidth() + (0.2F * (float) h.getPhantomSize())) / h.getWidth())
+                        .get(h -> (double) (h.getBbWidth() + (0.2F * (float) h.getPhantomSize())) / h.getBbWidth())
                     .create(Keys.SIZE)
-                        .get(PhantomEntity::getPhantomSize)
-                        .set(PhantomEntity::setPhantomSize)
-                .asMutable(PhantomEntityAccessor.class)
+                        .get(Phantom::getPhantomSize)
+                        .set(Phantom::setPhantomSize)
+                .asMutable(PhantomAccessor.class)
                     .create(Keys.PHANTOM_PHASE)
-                        .get(h -> (PhantomPhase) (Object) h.accessor$getAttackPhase())
-                        .set((h, v) -> h.accessor$setAttackPhase((PhantomEntity.AttackPhase) (Object) v));
+                        .get(h -> (PhantomPhase) (Object) h.accessor$attackPhase())
+                        .set((h, v) -> h.accessor$attackPhase((Phantom.AttackPhase) (Object) v));
     }
     // @formatter:on
 }

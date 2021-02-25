@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.ZombieEntity;
+import net.minecraft.world.entity.monster.Zombie;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -36,10 +36,10 @@ public final class ZombieData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ZombieEntity.class)
+                .asMutable(Zombie.class)
                     .create(Keys.IS_ADULT)
-                        .get(h -> !h.isChild())
-                        .set((h, v) -> h.setChild(!v));
+                        .get(h -> !h.isBaby())
+                        .set((h, v) -> h.setBaby(!v));
     }
     // @formatter:on
 }

@@ -24,21 +24,20 @@
  */
 package org.spongepowered.common.data.datasync.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.accessor.entity.EntityAccessor;
-
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.world.entity.Entity;
 
-public class EntityNoGravityConverter extends DataParameterConverter<Boolean> {
+public final class EntityNoGravityConverter extends DataParameterConverter<Boolean> {
 
     public EntityNoGravityConverter() {
-        super(EntityAccessor.accessor$getNoGravity());
+        super(EntityAccessor.accessor$DATA_NO_GRAVITY());
     }
 
     @Override
@@ -53,7 +52,7 @@ public class EntityNoGravityConverter extends DataParameterConverter<Boolean> {
     @Override
     public Boolean getValueFromEvent(final Boolean originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.IS_GRAVITY_AFFECTED.get()) {
+            if (immutableValue.getKey() == Keys.IS_GRAVITY_AFFECTED) {
                 return !(Boolean) immutableValue.get();
             }
         }

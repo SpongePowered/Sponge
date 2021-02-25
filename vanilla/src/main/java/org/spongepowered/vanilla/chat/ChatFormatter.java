@@ -24,17 +24,17 @@
  */
 package org.spongepowered.vanilla.chat;
 
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
-import net.minecraft.util.text.event.ClickEvent;
-
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.chat.TranslatableComponent;
 
 public final class ChatFormatter {
 
@@ -47,75 +47,74 @@ public final class ChatFormatter {
     private static final String PATH = ".*?";
 
     private static final Pattern URL_PATTERN = Pattern.compile(
-            "(?:" + SCHEME + ")?(?:" + IP_ADDRESS + '|' + DOMAIN + ")(?::" + PORT + ")?" + PATH + "(?=[!?,;:\"']?(?:[§\\s]|$))",
+            "(?:" + ChatFormatter.SCHEME + ")?(?:" + ChatFormatter.IP_ADDRESS + '|' + ChatFormatter.DOMAIN + ")(?::" + ChatFormatter.PORT + ")?" + ChatFormatter.PATH + "(?=[!?,;:\"']?(?:[§\\s]|$))",
             Pattern.CASE_INSENSITIVE);
 
     private ChatFormatter() {
     }
 
-    public static void formatChatComponent(TranslationTextComponent component) {
-        String message = (String) component.getFormatArgs()[1];
-        ITextComponent formatted = format(message);
+    public static void formatChatComponent(final TranslatableComponent component) {
+        final String message = (String) component.getArgs()[1];
+        final Component formatted = ChatFormatter.format(message);
         if (formatted == null) {
             return;
         }
 
-        formatted.getStyle().setParentStyle(component.getStyle());
-        component.getFormatArgs()[1] = formatted;
+        component.getArgs()[1] = formatted;
     }
 
     @Nullable
-    public static ITextComponent format(String s) {
-        Matcher matcher = URL_PATTERN.matcher(s);
+    public static Component format(final String s) {
+        final Matcher matcher = ChatFormatter.URL_PATTERN.matcher(s);
         if (!matcher.find()) {
             return null;
         }
 
-        ITextComponent result = null;
+        MutableComponent result = null;
 
         int pos = 0;
         do {
-            int start = matcher.start();
-            int end = matcher.end();
+            final int start = matcher.start();
+            final int end = matcher.end();
 
-            String displayUrl = s.substring(start, end);
+            final String displayUrl = s.substring(start, end);
             String url = displayUrl;
 
             try {
                 if (new URI(url).getScheme() == null) {
-                    url = DEFAULT_SCHEME + url;
+                    url = ChatFormatter.DEFAULT_SCHEME + url;
                 }
-            } catch (URISyntaxException e) {
+            } catch (final URISyntaxException e) {
                 continue; // Invalid URL so just ignore it
             }
 
             if (pos < start) {
                 if (result == null) {
-                    result = new StringTextComponent(s.substring(pos, start));
+                    result = new TextComponent(s.substring(pos, start));
                 } else {
-                    result.appendText(s.substring(pos, start));
+                    result.append(s.substring(pos, start));
                 }
             }
 
             pos = end;
 
-            ITextComponent link = new StringTextComponent(displayUrl);
-            link.getStyle().setClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url));
+            final MutableComponent link = new TextComponent(displayUrl);
+            link.setStyle(link.getStyle().withClickEvent(new ClickEvent(ClickEvent.Action.OPEN_URL, url)));
 
             if (result == null) {
-                result = new StringTextComponent("");
+                result = new TextComponent("");
             }
 
-            result.appendSibling(link);
+            result.append(link);
 
         } while (matcher.find());
 
         // If there is something left, append the rest
         if (pos < s.length()) {
             if (result == null) {
-                result = new StringTextComponent(s.substring(pos));
+                result = new TextComponent(s.substring(pos));
             } else {
-                result.appendText(s.substring(pos));
+                result.append(s.substring(pos));
             }
         }
 

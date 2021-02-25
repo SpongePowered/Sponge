@@ -24,19 +24,22 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.world.World;
-import org.spongepowered.api.world.dimension.DimensionType;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.math.vector.Vector3d;
 
 public interface WorldBridge {
 
     /**
      * Gets whether this world is a usable world in the context of using
-     * as {@link ServerWorldBridge} and an active server world. This
-     * lazy loads the flag if {@link World#isRemote} is {@code true},
-     * {@link World#getWorldInfo()} returns {@code null},
-     * {@link World#getWorldInfo()} has a null name, or
-     * if this world is not an instance of {@link ServerWorldBridge}.
+     * as {@link ServerLevelBridge} and an active server world. This
+     * lazy loads the flag if {@link Level#isClientSide} is {@code true},
+     * {@link Level#getWorldInfo()} returns {@code null},
+     * {@link Level#getWorldInfo()} has a null name, or
+     * if this world is not an instance of {@link ServerLevelBridge}.
      * By that point, if all those checks succeed, this world is usable,
      * and can be passed through to create snapshots and perform other
      * internal tasks that Sponge needs to operate on said world.
@@ -45,7 +48,7 @@ public interface WorldBridge {
      */
     boolean bridge$isFake();
 
-    void bridge$clearFakeCheck();
+    void bridge$adjustDimensionLogic(DimensionType dimensionType);
 
-    void bridge$adjustDimensionLogic(SpongeDimensionType dimensionType);
+    <E extends Entity> E bridge$createEntity(EntityType<E> type, Vector3d position, boolean naturally);
 }

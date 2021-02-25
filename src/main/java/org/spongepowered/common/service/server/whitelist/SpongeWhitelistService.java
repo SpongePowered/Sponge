@@ -28,16 +28,16 @@ import com.google.inject.Singleton;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
-import org.spongepowered.common.accessor.server.management.UserListAccessor;
+import org.spongepowered.common.accessor.server.players.StoredUserEntryAccessor;
+import org.spongepowered.common.accessor.server.players.StoredUserListAccessor;
 import org.spongepowered.common.profile.SpongeGameProfile;
-import org.spongepowered.common.util.UserListUtils;
+import org.spongepowered.common.util.UserListUtil;
 
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import net.minecraft.server.management.WhiteList;
-import net.minecraft.server.management.WhitelistEntry;
+import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.server.players.UserWhiteListEntry;
 
 @Singleton
 public final class SpongeWhitelistService implements WhitelistService {
@@ -47,9 +47,9 @@ public final class SpongeWhitelistService implements WhitelistService {
     public Collection<GameProfile> getWhitelistedProfiles() {
         final List<GameProfile> profiles = new ArrayList<>();
 
-        final WhiteList list = SpongeCommon.getServer().getPlayerList().getWhitelistedPlayers();
-        for (final WhitelistEntry entry: ((UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry>) list).accessor$getValues().values()) {
-            profiles.add(SpongeGameProfile.of(((UserListEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$getValue()));
+        final UserWhiteList list = SpongeCommon.getServer().getPlayerList().getWhiteList();
+        for (final UserWhiteListEntry entry: ((StoredUserListAccessor<com.mojang.authlib.GameProfile, UserWhiteListEntry>) list).accessor$map().values()) {
+            profiles.add(SpongeGameProfile.of(((StoredUserEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user()));
         }
 
         return profiles;
@@ -58,27 +58,28 @@ public final class SpongeWhitelistService implements WhitelistService {
     @SuppressWarnings("unchecked")
     @Override
     public boolean isWhitelisted(final GameProfile profile) {
-        final UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry> whitelist = (UserListAccessor<com.mojang.authlib.GameProfile, WhitelistEntry>) getWhitelist();
+        final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserWhiteListEntry> whitelist = (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserWhiteListEntry>) SpongeWhitelistService
+            .getWhitelist();
 
-        whitelist.accessor$removeExpired();
-        return whitelist.accessor$getValues().containsKey(whitelist.accessor$getObjectKey((com.mojang.authlib.GameProfile) profile));
+        whitelist.invoker$removeExpired();
+        return whitelist.accessor$map().containsKey(whitelist.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile)));
     }
 
     @Override
     public boolean addProfile(final GameProfile profile) {
         final boolean wasWhitelisted = this.isWhitelisted(profile);
-        UserListUtils.addEntry(getWhitelist(), new WhitelistEntry((com.mojang.authlib.GameProfile) profile));
+        UserListUtil.addEntry(SpongeWhitelistService.getWhitelist(), new UserWhiteListEntry(SpongeGameProfile.toMcProfile(profile)));
         return wasWhitelisted;
     }
 
     @Override
     public boolean removeProfile(final GameProfile profile) {
         final boolean wasWhitelisted = this.isWhitelisted(profile);
-        UserListUtils.removeEntry(getWhitelist(), profile);
+        UserListUtil.removeEntry(SpongeWhitelistService.getWhitelist(), profile);
         return wasWhitelisted;
     }
 
-    private static WhiteList getWhitelist() {
-        return SpongeCommon.getServer().getPlayerList().getWhitelistedPlayers();
+    private static UserWhiteList getWhitelist() {
+        return SpongeCommon.getServer().getPlayerList().getWhiteList();
     }
 }

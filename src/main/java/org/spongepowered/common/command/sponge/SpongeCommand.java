@@ -32,34 +32,37 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
-import net.minecraft.util.math.MathHelper;
+import net.minecraft.util.Mth;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
-import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
-import org.spongepowered.common.util.SpongeHooks;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginContributor;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.io.File;
+import java.lang.management.ManagementFactory;
+import java.lang.reflect.Method;
 import java.net.URL;
 import java.text.DecimalFormat;
+import java.text.MessageFormat;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -67,6 +70,8 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
+
+import javax.management.MBeanServer;
 
 public class SpongeCommand {
 
@@ -78,7 +83,7 @@ public class SpongeCommand {
 
     private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", PluginContainer.class);
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", CommandMapping.class);
-    private final Parameter.Key<WorldProperties> worldPropertiesKey = Parameter.key("world", WorldProperties.class);
+    private final Parameter.Key<ServerWorld> worldKey = Parameter.key("world", ServerWorld.class);
 
     @Nullable private Component versionText = null;
 
@@ -154,6 +159,26 @@ public class SpongeCommand {
                 .setExecutor(this::whichExecutor)
                 .build();
 
+        // /sponge reload global|world [id]
+        final Command.Parameterized reloadGlobalCommand = Command.builder()
+            .setPermission("sponge.command.reload.global")
+            .setShortDescription(Component.text("Reload Sponge's common configuration"))
+            .setExecutor(this::reloadGlobalExecutor)
+            .build();
+
+        final Command.Parameterized reloadWorldCommand = Command.builder()
+            .setPermission("sponge.command.reload.world")
+            .parameter(Parameter.world().setKey(this.worldKey).build())
+            .setShortDescription(Component.text("Reload Sponge's configuration for a single world"))
+            .setExecutor(this::reloadWorldExecutor)
+            .build();
+
+        final Command.Parameterized reloadCommand = Command.builder()
+            .child(reloadGlobalCommand, "global")
+            .child(reloadWorldCommand, "world")
+            .build();
+
+
         // /sponge
         final Command.Builder commandBuilder = Command.builder()
                 .setPermission("sponge.command.root")
@@ -165,7 +190,8 @@ public class SpongeCommand {
                 .child(timingsCommand, "timings")
                 .child(tpsCommand, "tps")
                 .child(versionCommand, "version")
-                .child(whichCommand, "which");
+                .child(whichCommand, "which")
+                .child(reloadCommand, "reload");
 
         this.additionalActions(commandBuilder);
         return commandBuilder.build();
@@ -222,7 +248,7 @@ public class SpongeCommand {
     private Command.Parameterized chunksSubcommand() {
         final Command.Parameterized globalCommand = Command.builder()
                 .setExecutor(context -> {
-                    for (final ServerWorld world : SpongeCommon.getGame().getServer().getWorldManager().getWorlds()) {
+                    for (final ServerWorld world : SpongeCommon.getGame().getServer().getWorldManager().worlds()) {
                         context.sendMessage(Identity.nil(), Component.text().content("World ")
                                         .append(Component.text(world.getKey().toString(), Style.style(TextDecoration.BOLD)))
                                         .append(this.getChunksInfo(world))
@@ -232,11 +258,9 @@ public class SpongeCommand {
                 })
                 .build();
         final Command.Parameterized worldCommand = Command.builder()
-                .parameter(Parameter.worldProperties().setKey(this.worldPropertiesKey).build())
+                .parameter(CommonParameters.WORLD)
                 .setExecutor(context -> {
-                    final WorldProperties properties = context.requireOne(this.worldPropertiesKey);
-                    final ServerWorld world = properties.getWorld()
-                            .orElseThrow(() -> new CommandException(Component.text("The world " + properties.getKey().toString() + " is not loaded!")));
+                    final ServerWorld world = context.requireOne(CommonParameters.WORLD);
                     context.sendMessage(Identity.nil(), Component.text().content("World ")
                             .append(Component.text(world.getKey().toString(), Style.style(TextDecoration.BOLD)))
                             .append(this.getChunksInfo(world))
@@ -270,7 +294,19 @@ public class SpongeCommand {
                 "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.hprof");
         // src.sendMessage(Text.of("Writing JVM heap data to: ", file));
         SpongeCommon.getLogger().info("Writing JVM heap data to: {}", file.getAbsolutePath());
-        SpongeHooks.dumpHeap(file, true);
+        try {
+            if (file.getParentFile() != null) {
+                file.getParentFile().mkdirs();
+            }
+
+            final Class clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
+            final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
+            final Object hotspotMBean = ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", clazz);
+            final Method m = clazz.getMethod("dumpHeap", String.class, boolean.class);
+            m.invoke(hotspotMBean, file.getPath(), true);
+        } catch (final Throwable t) {
+            SpongeCommon.getLogger().fatal(MessageFormat.format("Could not write heap to {0}", file));
+        }
         // src.sendMessage(Text.of("Heap dump complete"));
         SpongeCommon.getLogger().info("Heap dump complete");
         return CommandResult.success();
@@ -283,7 +319,7 @@ public class SpongeCommand {
         for (final PluginContainer specificContainer : plugins) {
             final PluginMetadata metadata = specificContainer.getMetadata();
             final TextComponent.Builder builder = Component.text();
-            this.createShortContainerMeta(builder.append(INDENT_COMPONENT), metadata);
+            this.createShortContainerMeta(builder.append(SpongeCommand.INDENT_COMPONENT), metadata);
             // builder.clickEvent(SpongeComponents.executeCallback(cause ->
             //         cause.sendMessage(this.createContainerMeta(metadata))));
             context.sendMessage(Identity.nil(), builder.build());
@@ -405,7 +441,7 @@ public class SpongeCommand {
 //            tps.add(this.appendTickTime(((MinecraftServerBridge) SpongeCommon.getServer()).bridge$getWorldTickTimes()));
 //        }
 
-        tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimeArray, Component.text().content("Overall TPS: ")).build());
+        tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimes, Component.text().content("Overall TPS: ")).build());
 
         SpongeCommon.getGame().getServiceProvider()
                 .paginationService()
@@ -419,10 +455,10 @@ public class SpongeCommand {
     }
 
     private TextComponent.Builder appendTickTime(final long[] tickTimes, final TextComponent.Builder builder) {
-        final double averageTickTime = MathHelper.average(tickTimes) * 1.0E-6D;
-        builder.append(Component.text(THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (averageTickTime), 20)), NamedTextColor.LIGHT_PURPLE))
+        final double averageTickTime = Mth.average(tickTimes) * 1.0E-6D;
+        builder.append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (averageTickTime), 20)), NamedTextColor.LIGHT_PURPLE))
                 .append(Component.text(", Mean: "))
-                .append(Component.text(THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime) + "ms", NamedTextColor.RED));
+                .append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime) + "ms", NamedTextColor.RED));
         return builder;
     }
 
@@ -487,6 +523,40 @@ public class SpongeCommand {
                 this.title("Owned by: "),
                 this.hl(mapping.getPlugin().getMetadata().getName().orElseGet(() -> mapping.getPlugin().getMetadata().getId())))
                 .build());
+        return CommandResult.success();
+    }
+
+    private @NonNull CommandResult reloadGlobalExecutor(final CommandContext context) {
+        SpongeConfigs.getCommon().reload()
+            .whenComplete(($, error) -> {
+                if (error != null) {
+                    context.sendMessage(Identity.nil(), Component.text("Failed to reload global configuration. See the console for details.", NamedTextColor.RED));
+                    SpongeCommon.getLogger().error("Failed to reload global configuration", error);
+                } else {
+                    context.sendMessage(Identity.nil(), Component.text("Successfully reloaded global configuration!", NamedTextColor.GREEN));
+                }
+            });
+        return CommandResult.success();
+    }
+
+    private @NonNull CommandResult reloadWorldExecutor(final CommandContext context) {
+        final ServerWorld target = context.requireOne(this.worldKey);
+        final ResourceKey worldId = target.getKey();
+        SpongeGameConfigs.getForWorld(target).reload()
+            .whenComplete(($, error) -> {
+            if (error != null) {
+                context.sendMessage(Identity.nil(), Component.text(b ->
+                    b.content("Failed to reload configuration for world ")
+                        .append(Component.text(worldId.toString(), Style.style(TextDecoration.BOLD)))
+                        .append(Component.text(". See the console for details."))
+                        .color(NamedTextColor.RED)));
+                SpongeCommon.getLogger().error("Failed to reload configuration of world '{}'", worldId, error);
+            } else {
+                context.sendMessage(Identity.nil(), Component.text("Successfully reloaded configuration for world ", NamedTextColor.GREEN)
+                    .append(Component.text(worldId.toString(), Style.style(TextDecoration.BOLD)))
+                    .append(Component.text("!")));
+            }
+        });
         return CommandResult.success();
     }
 

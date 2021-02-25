@@ -24,21 +24,21 @@
  */
 package org.spongepowered.common.inventory.custom;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.ContainerType;
 
-public class CustomContainer extends Container {
+public class CustomContainer extends AbstractContainerMenu {
 
     public CustomInventory inv;
 
-    public CustomContainer(int id, final PlayerEntity player, final CustomInventory inventory, ContainerType type) {
-        super((net.minecraft.inventory.container.ContainerType<?>) type, id);
+    public CustomContainer(int id, final Player player, final CustomInventory inventory, ContainerType type) {
+        super((net.minecraft.world.inventory.MenuType<?>) type, id);
         this.inv = inventory;
 
-        for (int slot = 0; slot < inventory.getSizeInventory(); slot++) {
+        for (int slot = 0; slot < inventory.getContainerSize(); slot++) {
             this.addSlot(new Slot(inventory, slot, 0, 0));
         }
 
@@ -53,38 +53,38 @@ public class CustomContainer extends Container {
     }
 
     @Override
-    public boolean canInteractWith(final PlayerEntity playerIn) {
+    public boolean stillValid(final Player playerIn) {
         return true;
     }
 
     @Override
-    public void onContainerClosed(final PlayerEntity playerIn) {
-        super.onContainerClosed(playerIn);
-        this.inv.closeInventory(playerIn);
+    public void removed(final Player playerIn) {
+        super.removed(playerIn);
+        this.inv.stopOpen(playerIn);
     }
 
     @Override
-    public ItemStack transferStackInSlot(final PlayerEntity playerIn, final int index) {
+    public ItemStack quickMoveStack(final Player playerIn, final int index) {
         // Almost 1:1 copy of ChestContainer#transferStackInSlot
         ItemStack itemstack = ItemStack.EMPTY;
-        final Slot slot = this.inventorySlots.get(index);
+        final Slot slot = this.slots.get(index);
 
-        if (slot != null && slot.getHasStack()) {
-            final ItemStack itemstack1 = slot.getStack();
+        if (slot != null && slot.hasItem()) {
+            final ItemStack itemstack1 = slot.getItem();
             itemstack = itemstack1.copy();
 
-            if (index < this.inv.getSizeInventory()) {
-                if (!this.mergeItemStack(itemstack1, this.inv.getSizeInventory(), this.inventorySlots.size(), true)) {
+            if (index < this.inv.getContainerSize()) {
+                if (!this.moveItemStackTo(itemstack1, this.inv.getContainerSize(), this.slots.size(), true)) {
                     return ItemStack.EMPTY;
                 }
-            } else if (!this.mergeItemStack(itemstack1, 0, this.inv.getSizeInventory(), false)) {
+            } else if (!this.moveItemStackTo(itemstack1, 0, this.inv.getContainerSize(), false)) {
                 return ItemStack.EMPTY;
             }
 
             if (itemstack1.isEmpty()) {
-                slot.putStack(ItemStack.EMPTY);
+                slot.set(ItemStack.EMPTY);
             } else {
-                slot.onSlotChanged();
+                slot.setChanged();
             }
         }
 

@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.util;
 
+import com.google.common.collect.Lists;
 import net.kyori.adventure.inventory.Book;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.ServerPlayNetHandler;
-import net.minecraft.network.play.server.SOpenBookWindowPacket;
-import net.minecraft.network.play.server.SSetSlotPacket;
-import net.minecraft.util.Hand;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
+import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.player.Inventory;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.ItemTypes;
@@ -38,34 +40,44 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collection;
+import java.util.Locale;
+import java.util.Objects;
 
 public final class BookUtil {
 
     public static final int WINDOW_PLAYER_INVENTORY = 0;
+    private static final Locale STARTER_LOCALE = new Locale("placeholder", "LANG");
 
-    public static void fakeBookView(Book book, Collection<? extends Player> players) {
+    public static void fakeBookView(final Book book, final Collection<? extends Player> players) {
 
         // First we need to send a fake a Book ItemStack with the BookView's
         // contents to the player's hand
-        ItemStack item = ItemStack.of(ItemTypes.WRITTEN_BOOK, 1);
-        item.offer(Keys.DISPLAY_NAME, book.title());
-        item.offer(Keys.AUTHOR, book.author());
-        item.offer(Keys.PAGES, book.pages());
+        // These values are localized since sending item NBT doesn't trigger translation
+        final ItemStack item = ItemStack.of(ItemTypes.WRITTEN_BOOK, 1);
+        Locale lastLocale = BookUtil.STARTER_LOCALE;
 
-        for (Player player : players) {
-            ServerPlayerEntity mcPlayer = (ServerPlayerEntity) player;
-            ServerPlayNetHandler receiver = mcPlayer.connection;
+        for (final Player player : players) {
+            if (!Objects.equals(player.getLocale(), lastLocale)) {
+                lastLocale = player.getLocale();
+                item.offer(Keys.DISPLAY_NAME, GlobalTranslator.render(book.title(), lastLocale));
+                item.offer(Keys.AUTHOR, GlobalTranslator.render(book.author(), lastLocale));
+                final Locale finalLastLocale = lastLocale;
+                item.offer(Keys.PAGES, Lists.transform(book.pages(), page -> GlobalTranslator.render(page, finalLastLocale)));
+            }
 
-            PlayerInventory inventory = mcPlayer.inventory;
-            int bookSlot = inventory.mainInventory.size() + inventory.currentItem;
-            receiver.sendPacket(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
+            final ServerPlayer mcPlayer = (ServerPlayer) player;
+            final ServerGamePacketListenerImpl receiver = mcPlayer.connection;
+
+            final Inventory inventory = mcPlayer.inventory;
+            final int bookSlot = inventory.items.size() + inventory.selected;
+            receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
 
             // Next we tell the client to open the Book GUI
-            receiver.sendPacket(new SOpenBookWindowPacket(Hand.MAIN_HAND));
+            receiver.send(new ClientboundOpenBookPacket(InteractionHand.MAIN_HAND));
 
             // Now we can remove the fake Book since it's contents will have already
             // been transferred to the GUI
-            receiver.sendPacket(new SSetSlotPacket(WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getCurrentItem()));
+            receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getSelected()));
         }
     }
 

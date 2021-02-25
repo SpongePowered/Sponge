@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.DolphinEntity;
+import net.minecraft.world.entity.animal.Dolphin;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -36,13 +36,13 @@ public final class DolphinData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(DolphinEntity.class)
+                .asMutable(Dolphin.class)
                     .create(Keys.HAS_FISH)
-                        .get(DolphinEntity::hasGotFish)
-                        .set(DolphinEntity::setGotFish)
+                        .get(Dolphin::gotFish)
+                        .set(Dolphin::setGotFish)
                     .create(Keys.SKIN_MOISTURE)
-                        .get(DolphinEntity::getMoistness)
-                        .set(DolphinEntity::setMoistness);
+                        .get(Dolphin::getMoistnessLevel)
+                        .set(Dolphin::setMoisntessLevel);
     }
     // @formatter:on
 }

@@ -48,7 +48,7 @@ public class EntityActivationRangePlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeConfigs.getCommon().get().getModules().usePluginEntityActivation();
+        return SpongeConfigs.getCommon().get().modules.entityActivationRange;
     }
 
     @Override

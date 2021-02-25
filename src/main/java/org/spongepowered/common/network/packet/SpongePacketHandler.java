@@ -25,29 +25,21 @@
 package org.spongepowered.common.network.packet;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.world.ClientWorld;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.biome.ColumnFuzzedBiomeMagnifier;
-import net.minecraft.world.biome.FuzzedBiomeMagnifier;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.network.EngineConnectionTypes;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
-import org.spongepowered.api.world.dimension.DimensionTypes;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -58,35 +50,35 @@ public final class SpongePacketHandler {
     private static PacketChannel channel;
 
     public static void init(final SpongeChannelRegistry registry) {
-        channel = registry.createChannel(ResourceKey.sponge("default"), PacketChannel.class);
-        channel.registerTransactional(RequestBlockTrackerDataPacket.class, TrackerDataResponsePacket.class, 0)
+        SpongePacketHandler.channel = registry.createChannel(ResourceKey.sponge("default"), PacketChannel.class);
+        SpongePacketHandler.channel.registerTransactional(RequestBlockTrackerDataPacket.class, TrackerDataResponsePacket.class, 0)
                 .setRequestHandler(EngineConnectionTypes.SERVER_PLAYER, (requestPacket, connection, response) -> {
                     final ServerPlayer player = connection.getPlayer();
                     if (!player.hasPermission("sponge.debug.block-tracking")) {
                         return;
                     }
 
-                    final ServerPlayerEntity sender = (ServerPlayerEntity) player;
+                    final net.minecraft.server.level.ServerPlayer sender = (net.minecraft.server.level.ServerPlayer) player;
                     final BlockPos pos = new BlockPos(requestPacket.x, requestPacket.y, requestPacket.z);
-                    if (!sender.world.isBlockLoaded(pos)) {
+                    if (!sender.level.hasChunkAt(pos)) {
                         return;
                     }
 
-                    final ChunkBridge chunkBridge = (ChunkBridge) sender.world.getChunkAt(pos);
-                    final Optional<User> owner = chunkBridge.bridge$getBlockCreator(pos);
-                    final Optional<User> notifier = chunkBridge.bridge$getBlockNotifier(pos);
+                    final LevelChunkBridge levelChunkBridge = (LevelChunkBridge) sender.level.getChunkAt(pos);
+                    final Optional<User> owner = levelChunkBridge.bridge$getBlockCreator(pos);
+                    final Optional<User> notifier = levelChunkBridge.bridge$getBlockNotifier(pos);
 
-                    response.success(createTrackerDataResponse(owner, notifier));
+                    response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });
-        channel.registerTransactional(RequestEntityTrackerDataPacket.class, TrackerDataResponsePacket.class, 1)
+        SpongePacketHandler.channel.registerTransactional(RequestEntityTrackerDataPacket.class, TrackerDataResponsePacket.class, 1)
                 .setRequestHandler(EngineConnectionTypes.SERVER_PLAYER, (requestPacket, connection, response) -> {
                     final ServerPlayer player = connection.getPlayer();
                     if (!player.hasPermission("sponge.debug.entity-tracking")) {
                         return;
                     }
 
-                    final ServerPlayerEntity sender = (ServerPlayerEntity) player;
-                    final Entity entity = sender.world.getEntityByID(requestPacket.entityId);
+                    final net.minecraft.server.level.ServerPlayer sender = (net.minecraft.server.level.ServerPlayer) player;
+                    final Entity entity = sender.level.getEntity(requestPacket.entityId);
                     if (!(entity instanceof CreatorTrackedBridge)) {
                         return;
                     }
@@ -95,37 +87,16 @@ public final class SpongePacketHandler {
                     final Optional<User> owner = creatorTrackedBridge.tracked$getCreatorReference();
                     final Optional<User> notifier = creatorTrackedBridge.tracked$getNotifierReference();
 
-                    response.success(createTrackerDataResponse(owner, notifier));
+                    response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });
-        channel.register(RegisterDimensionTypePacket.class, 2).addHandler(ClientSideConnection.class,
+        SpongePacketHandler.channel.register(ChangeViewerEnvironmentPacket.class, 3).addHandler(ClientSideConnection.class,
                 (packet, connection) -> {
-
-                    if (Registry.DIMENSION_TYPE.containsKey(packet.actualDimension)) {
-                        return;
-                    }
-
-                    final SpongeDimensionType logicType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.
-                                    spongepowered.api.world.dimension.DimensionType.class, (ResourceKey) (Object) packet.dimensionLogic)
-                            .orElse(null);
-
-                    final DimensionType registeredType = DimensionTypeAccessor.accessor$construct(packet.dimensionId, "", packet.actualDimension.getPath(),
-                            logicType.getDimensionFactory(),
-                            logicType.hasSkylight(), logicType == DimensionTypes.OVERWORLD.get() ? ColumnFuzzedBiomeMagnifier.INSTANCE :
-                                    FuzzedBiomeMagnifier.INSTANCE);
-                    DimensionTypeAccessor.accessor$register(packet.actualDimension.toString(), registeredType);
-
-                    ((DimensionTypeBridge) registeredType).bridge$setSpongeDimensionType(logicType);
-                }
-        );
-        channel.register(ChangeViewerEnvironmentPacket.class, 3).addHandler(ClientSideConnection.class,
-                (packet, connection) -> {
-                    final ClientWorld world = Minecraft.getInstance().world;
+                    final ClientLevel world = Minecraft.getInstance().level;
                     if (world == null) {
                         return;
                     }
 
-                    final SpongeDimensionType dimensionType = (SpongeDimensionType) SpongeCommon.getRegistry().getCatalogRegistry().get(org.
-                            spongepowered.api.world.dimension.DimensionType.class, (ResourceKey) (Object) packet.dimensionLogic).orElse(null);
+                    final DimensionType dimensionType = SpongeCommon.getServer().registryAccess().dimensionTypes().get(packet.dimensionLogic);
                     ((WorldBridge) world).bridge$adjustDimensionLogic(dimensionType);
                 }
         );

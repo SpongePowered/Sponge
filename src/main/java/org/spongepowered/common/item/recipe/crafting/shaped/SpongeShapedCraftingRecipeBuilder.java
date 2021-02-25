@@ -29,10 +29,6 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -43,11 +39,10 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
 import java.util.IdentityHashMap;
 import java.util.Iterator;
 import java.util.List;
@@ -56,18 +51,21 @@ import java.util.function.Function;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
-public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilder<RecipeRegistration, ShapedCraftingRecipe.Builder> implements
+public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, ShapedCraftingRecipe.Builder> implements
         ShapedCraftingRecipe.Builder, ShapedCraftingRecipe.Builder.AisleStep.ResultStep,
         ShapedCraftingRecipe.Builder.RowsStep.ResultStep, ShapedCraftingRecipe.Builder.EndStep {
 
     private List<String> aisle = Lists.newArrayList();
-    private Map<Character, Ingredient> ingredientMap = new Char2ObjectArrayMap<>();
-    private Map<Ingredient, Character> reverseIngredientMap = new IdentityHashMap<>();
+    private final Map<Character, Ingredient> ingredientMap = new Char2ObjectArrayMap<>();
+    private final Map<Ingredient, Character> reverseIngredientMap = new IdentityHashMap<>();
 
     private ItemStack result = ItemStack.empty();
-    private Function<net.minecraft.inventory.CraftingInventory, NonNullList<net.minecraft.item.ItemStack>> remainingItemsFunction;
-    private Function<net.minecraft.inventory.CraftingInventory, net.minecraft.item.ItemStack> resultFunction;
+    private Function<net.minecraft.world.inventory.CraftingContainer, NonNullList<net.minecraft.world.item.ItemStack>> remainingItemsFunction;
+    private Function<net.minecraft.world.inventory.CraftingContainer, net.minecraft.world.item.ItemStack> resultFunction;
 
     private String group;
 
@@ -117,7 +115,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
             row.append(" ");
         }
 
-        int key = 'A' + (columns * aisle.size());
+        int key = 'A' + (columns * this.aisle.size());
         for (final Ingredient ingredient : ingredients) {
             Character usedKey = this.reverseIngredientMap.get(ingredient);
             if (usedKey == null) {
@@ -139,7 +137,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     @Override
     public ShapedCraftingRecipe.Builder.ResultStep remainingItems(Function<CraftingGridInventory, List<ItemStack>> remainingItemsFunction) {
         this.remainingItemsFunction = grid -> {
-            final NonNullList<net.minecraft.item.ItemStack> mcList = NonNullList.create();
+            final NonNullList<net.minecraft.world.item.ItemStack> mcList = NonNullList.create();
             remainingItemsFunction.apply(InventoryUtil.toSpongeInventory(grid)).forEach(stack -> mcList.add(ItemStackUtil.toNative(stack)));
             return mcList;
         };
@@ -174,13 +172,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     }
 
     @Override
-    public ShapedCraftingRecipe.Builder.EndStep key(ResourceKey key) {
-        super.key(key);
-        return this;
-    }
-
-    @Override
-    protected RecipeRegistration build(ResourceKey key) {
+    public RecipeRegistration build0() {
         checkState(!this.aisle.isEmpty(), "aisle has not been set");
         checkState(!this.ingredientMap.isEmpty(), "no ingredients set");
         checkState(!this.result.isEmpty(), "no result set");
@@ -196,14 +188,14 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
             checkState(aisleRow.length() == width, "The aisle has an inconsistent width.");
         }
 
-        final Map<Character, net.minecraft.item.crafting.Ingredient> ingredientsMap = this.ingredientMap.entrySet().stream().collect(
+        final Map<Character, net.minecraft.world.item.crafting.Ingredient> ingredientsMap = this.ingredientMap.entrySet().stream().collect(
                 Collectors.toMap(Map.Entry::getKey, e -> IngredientUtil.toNative(e.getValue())));
 
         // Default space to Empty Ingredient
 //        ingredientsMap.putIfAbsent(' ', net.minecraft.item.crafting.Ingredient.EMPTY);
-        final net.minecraft.item.ItemStack resultStack = ItemStackUtil.toNative(this.result);
-        final IRecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction, ingredientsMap,
-                IRecipeSerializer.CRAFTING_SHAPED, SpongeShapedCraftingRecipeSerializer.SPONGE_CRAFTING_SHAPED);
+        final net.minecraft.world.item.ItemStack resultStack = ItemStackUtil.toNative(this.result);
+        final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(resultStack, this.resultFunction, this.remainingItemsFunction, ingredientsMap,
+                RecipeSerializer.SHAPED_RECIPE, SpongeShapedCraftingRecipeSerializer.SPONGE_CRAFTING_SHAPED);
         return new SpongeShapedCraftingRecipeRegistration((ResourceLocation)(Object) key, serializer, this.group, this.aisle, ingredientsMap, resultStack, this.resultFunction, this.remainingItemsFunction);
     }
 
@@ -211,7 +203,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends SpongeCatalogBuilde
     public ShapedCraftingRecipe.Builder reset() {
         super.reset();
         this.aisle = new ArrayList<>();
-        this.ingredientMap = new HashMap<>();
+        this.ingredientMap.clear();
         this.result = ItemStack.empty();
         this.resultFunction = null;
         this.group = null;

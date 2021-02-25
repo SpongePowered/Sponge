@@ -24,30 +24,33 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.gen.Heightmap;
-import net.minecraft.world.gen.IWorldGenerationBaseReader;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.HeightType;
-import org.spongepowered.api.world.volume.game.ReadableGenerationVolume;
+import org.spongepowered.api.world.volume.game.GenerationVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.function.Predicate;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelSimulatedReader;
+import net.minecraft.world.level.levelgen.Heightmap;
 
-@Mixin(IWorldGenerationBaseReader.class)
-public interface IWorldGenerationBaseReaderMixin_API extends ReadableGenerationVolume {
+@Mixin(LevelSimulatedReader.class)
+public interface IWorldGenerationBaseReaderMixin_API extends GenerationVolume {
 
-    @Shadow boolean shadow$hasBlockState(BlockPos p_217375_1_, Predicate<net.minecraft.block.BlockState> p_217375_2_);
-    @Shadow BlockPos shadow$getHeight(Heightmap.Type p_205770_1_, BlockPos p_205770_2_);
+    //@formatter:off
+    @Shadow boolean shadow$isStateAtPosition(BlockPos p_217375_1_, Predicate<net.minecraft.world.level.block.state.BlockState> p_217375_2_);
+    @Shadow BlockPos shadow$getHeightmapPos(Heightmap.Types p_205770_1_, BlockPos p_205770_2_);
+    //@formatter:on
 
     @Override
     default boolean hasBlockState(final int x, final int y, final int z, final Predicate<? super BlockState> predicate) {
-        return this.shadow$hasBlockState(new BlockPos(x, y, z), state -> predicate.test((BlockState) state));
+        return this.shadow$isStateAtPosition(new BlockPos(x, y, z), state -> predicate.test((BlockState) state));
     }
 
-    @Override
-    default int getHeight(final HeightType type, final int x, final int z) {
-        return this.shadow$getHeight((Heightmap.Type) (Object) type, new BlockPos(x, 0, z)).getY();
-    }
+// TODO this conflicts with IWorldReaderMixin_API#getHeight
+//    @Override
+//    default int getHeight(final HeightType type, final int x, final int z) {
+//        return this.shadow$getHeightmapPos((Heightmap.Type) (Object) type, new BlockPos(x, 0, z)).getY();
+//    }
 }

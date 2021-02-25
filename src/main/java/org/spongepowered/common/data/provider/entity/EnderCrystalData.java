@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.EnderCrystalEntity;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.registry.builtin.sponge.DamageTypeStreamGenerator;
+import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
 import org.spongepowered.common.util.VecHelper;
 
 public final class EnderCrystalData {
@@ -40,23 +41,23 @@ public final class EnderCrystalData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(EnderCrystalEntity.class)
+                .asMutable(EndCrystal.class)
                     .create(Keys.HEALTH)
-                        .get(h -> h.removed ? 0.0 : ALIVE_HEALTH)
+                        .get(h -> h.removed ? 0.0 : EnderCrystalData.ALIVE_HEALTH)
                         .setAnd((h, v) -> {
-                            if (v < 0 || v > ALIVE_HEALTH) {
+                            if (v < 0 || v > EnderCrystalData.ALIVE_HEALTH) {
                                 return false;
                             }
                             if (v == 0) {
-                                h.attackEntityFrom(DamageTypeStreamGenerator.IGNORED_DAMAGE_SOURCE, 1000F);
+                                h.hurt((DamageSource) SpongeDamageSources.IGNORED, 1000F);
                             } else {
                                 h.removed = false;
                             }
                             return true;
                         })
                     .create(Keys.SHOW_BOTTOM)
-                        .get(EnderCrystalEntity::shouldShowBottom)
-                        .set(EnderCrystalEntity::setShowBottom)
+                        .get(EndCrystal::showsBottom)
+                        .set(EndCrystal::setShowBottom)
                     .create(Keys.TARGET_POSITION)
                         .get(h -> VecHelper.toVector3i(h.getBeamTarget()))
                         .set((h, v) -> h.setBeamTarget(VecHelper.toBlockPos(v)));

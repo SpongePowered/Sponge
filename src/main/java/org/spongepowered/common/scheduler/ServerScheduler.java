@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.scheduler;
 
-import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.common.bridge.entity.player.PlayerInventoryBridge;
+import org.spongepowered.common.bridge.world.entity.player.InventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
@@ -45,15 +44,15 @@ public final class ServerScheduler extends SyncScheduler {
         super.tick();
 
         for (final Player player : Sponge.getServer().getOnlinePlayers()) {
-            if (player instanceof PlayerEntity) {
+            if (player instanceof net.minecraft.world.entity.player.Player) {
                 // Detect Changes on PlayerInventories marked as dirty.
-                ((PlayerInventoryBridge) ((PlayerEntity) player).inventory).bridge$cleanupDirty();
+                ((InventoryBridge) ((net.minecraft.world.entity.player.Player) player).inventory).bridge$cleanupDirty();
             }
         }
     }
 
     @Override
-    protected void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable) {
+    protected void executeTaskRunnable(final SpongeScheduledTask task, final Runnable runnable) {
         try (final BasicPluginContext context = PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
                 .source(task)) {
             context.buildAndSwitch();
@@ -62,7 +61,7 @@ public final class ServerScheduler extends SyncScheduler {
     }
 
     @Override
-    protected PhaseContext<?> createContext(SpongeScheduledTask task, PluginContainer container) {
+    protected PhaseContext<?> createContext(final SpongeScheduledTask task, final PluginContainer container) {
         return PluginPhase.State.SCHEDULED_TASK.createPhaseContext(PhaseTracker.SERVER)
                 .source(task)
                 .container(container);

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -32,6 +32,8 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 @FunctionalInterface
 public interface ProcessingSideEffect {
 
-    EffectResult processSideEffect(BlockPipeline pipeline, PipelineCursor oldState, BlockState newState, SpongeBlockChangeFlag flag);
+    EffectResult processSideEffect(BlockPipeline pipeline, PipelineCursor oldState, BlockState newState, SpongeBlockChangeFlag flag,
+        int limit
+    );
 
 }

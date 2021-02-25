@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FenceGateBlock;
+import net.minecraft.world.level.block.FenceGateBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,16 +39,16 @@ public final class FenceGateData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_OPEN)
-                        .get(h -> h.get(FenceGateBlock.OPEN))
-                        .set((h, v) -> h.with(FenceGateBlock.OPEN, v))
+                        .get(h -> h.getValue(FenceGateBlock.OPEN))
+                        .set((h, v) -> h.setValue(FenceGateBlock.OPEN, v))
                         .supports(h -> h.getBlock() instanceof FenceGateBlock)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(FenceGateBlock.POWERED))
-                        .set((h, v) -> h.with(FenceGateBlock.POWERED, v))
+                        .get(h -> h.getValue(FenceGateBlock.POWERED))
+                        .set((h, v) -> h.setValue(FenceGateBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof FenceGateBlock)
                     .create(Keys.IN_WALL)
-                        .get(h -> h.get(FenceGateBlock.IN_WALL))
-                        .set((h, v) -> h.with(FenceGateBlock.IN_WALL, v))
+                        .get(h -> h.getValue(FenceGateBlock.IN_WALL))
+                        .set((h, v) -> h.setValue(FenceGateBlock.IN_WALL, v))
                         .supports(h -> h.getBlock() instanceof FenceGateBlock);
     }
     // @formatter:on

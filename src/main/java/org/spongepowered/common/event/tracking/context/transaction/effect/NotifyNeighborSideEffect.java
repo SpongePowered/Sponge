@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -45,17 +45,18 @@ public final class NotifyNeighborSideEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
-        final ServerWorld world = pipeline.getServerWorld();
+        final SpongeBlockChangeFlag flag, final int limit
+    ) {
+        final ServerLevel world = pipeline.getServerWorld();
 
-        // Vanilla isremote is redundant
-        // if (!this.isRemote && (flags & 1) != 0) {
+        // Vanilla isClientSide is redundant
+        // if (!this.isClientSide && (flags & 1) != 0) {
         if (flag.updateNeighbors()) {
             // this.notifyNeighbors(pos, originalState.getBlock());
-            world.notifyNeighbors(oldState.pos, oldState.state.getBlock());
-            if (newState.hasComparatorInputOverride()) {
+            world.blockUpdated(oldState.pos, oldState.state.getBlock());
+            if (newState.hasAnalogOutputSignal()) {
                 // this.updateComparatorOutputLevel(pos, block);
-                world.updateComparatorOutputLevel(oldState.pos, newState.getBlock());
+                world.updateNeighbourForOutputSignal(oldState.pos, newState.getBlock());
             }
         }
         return EffectResult.NULL_PASS;

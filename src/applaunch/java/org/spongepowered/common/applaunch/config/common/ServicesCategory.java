@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
+import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
-import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
 public final class ServicesCategory {
 
     public static final String UNSPECIFIED = "?";
 
-    @Setting("service-plugin")
+    @Setting("plugins")
     @Comment("Services specified here can be implemented by plugins. To ensure that a"
              + "specific plugin implements a given service, set the relevant option to its"
              + "plugin ID. If you wish to use Sponge's default for a given service, use"
@@ -44,54 +44,30 @@ public final class ServicesCategory {
              + "If no plugins attempt to register a service, the Sponge default will be used"
              + "if one exists.\n\n"
              + "No Sponge default service exists for the Economy service.")
-    private ServicePluginSubCategory servicePlugin = new ServicePluginSubCategory();
-
-    public ServicePluginSubCategory getServicePlugin() {
-        return this.servicePlugin;
-    }
+    public final ServicePluginSubCategory plugins = new ServicePluginSubCategory();
 
     @ConfigSerializable
     public static final class ServicePluginSubCategory {
 
         @Setting("ban-service")
         @Comment("Specifies the plugin that will provide the ban service")
-        private String banService = UNSPECIFIED;
+        public String banService = ServicesCategory.UNSPECIFIED;
 
         @Setting("economy-service")
         @Comment("Specifies the plugin that will provide the economy service")
-        private String economyService = UNSPECIFIED;
+        public String economyService = ServicesCategory.UNSPECIFIED;
 
         @Setting("pagination-service")
         @Comment("Specifies the plugin that will provide the pagination service")
-        private String paginationService = UNSPECIFIED;
+        public String paginationService = ServicesCategory.UNSPECIFIED;
 
         @Setting("permission-service")
         @Comment("Specifies the plugin that will provide the permission service")
-        private String permissionService = UNSPECIFIED;
+        public String permissionService = ServicesCategory.UNSPECIFIED;
 
         @Setting("whitelist-service")
         @Comment("Specifies the plugin that will provide the whitelist service")
-        private String whitelistService = UNSPECIFIED;
-
-        public String getBanService() {
-            return this.banService;
-        }
-
-        public String getEconomyService() {
-            return this.economyService;
-        }
-
-        public String getPaginationService() {
-            return this.paginationService;
-        }
-
-        public String getPermissionService() {
-            return this.permissionService;
-        }
-
-        public String getWhitelistService() {
-            return this.whitelistService;
-        }
+        public String whitelistService = ServicesCategory.UNSPECIFIED;
     }
 
 }

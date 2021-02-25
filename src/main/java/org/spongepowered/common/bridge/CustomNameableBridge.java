@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.bridge;
 
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.network.chat.Component;
 
 public interface CustomNameableBridge {
 
-    void bridge$setCustomDisplayName(ITextComponent component);
+    void bridge$setCustomDisplayName(final Component customName);
 }

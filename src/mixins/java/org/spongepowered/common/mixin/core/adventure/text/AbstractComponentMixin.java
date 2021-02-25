@@ -35,13 +35,8 @@ import net.kyori.adventure.text.SelectorComponent;
 import net.kyori.adventure.text.StorageNBTComponent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.KeybindTextComponent;
-import net.minecraft.util.text.NBTTextComponent;
-import net.minecraft.util.text.ScoreTextComponent;
-import net.minecraft.util.text.SelectorTextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.NbtComponent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
@@ -52,53 +47,53 @@ import java.util.List;
 
 @Mixin(AbstractComponent.class)
 public abstract class AbstractComponentMixin implements ComponentBridge {
-    private ITextComponent bridge$vanillaComponent;
+    private MutableComponent bridge$vanillaComponent;
 
     @Override
     @SuppressWarnings("ConstantConditions")
-    public ITextComponent bridge$asVanillaComponent() {
+    public net.minecraft.network.chat.Component bridge$asVanillaComponent() {
         // TODO(adventure): in 1.16 evaluate using an ITextComponent wrapper as a first stage for conversion
         if (this.bridge$vanillaComponent == null) {
             if (this instanceof TextComponent) {
-                this.bridge$vanillaComponent = new StringTextComponent(((TextComponent) this).content());
+                this.bridge$vanillaComponent = new net.minecraft.network.chat.TextComponent(((TextComponent) this).content());
             } else if (this instanceof TranslatableComponent) {
                 final TranslatableComponent $this = (TranslatableComponent) this;
-                final List<ITextComponent> with = new ArrayList<>($this.args().size());
+                final List<net.minecraft.network.chat.Component> with = new ArrayList<>($this.args().size());
                 for (final Component arg : $this.args()) {
                     with.add(SpongeAdventure.asVanilla(arg));
                 }
-                this.bridge$vanillaComponent = new TranslationTextComponent($this.key(), with.toArray(new Object[0]));
+                this.bridge$vanillaComponent = new net.minecraft.network.chat.TranslatableComponent($this.key(), with.toArray(new Object[0]));
             } else if (this instanceof KeybindComponent) {
-                this.bridge$vanillaComponent = new KeybindTextComponent(((KeybindComponent) this).keybind());
+                this.bridge$vanillaComponent = new net.minecraft.network.chat.KeybindComponent(((KeybindComponent) this).keybind());
             } else if (this instanceof ScoreComponent) {
                 final ScoreComponent $this = (ScoreComponent) this;
-                this.bridge$vanillaComponent = new ScoreTextComponent($this.name(), $this.objective());
-                ((ScoreTextComponent) this.bridge$vanillaComponent).setValue($this.value());
+                this.bridge$vanillaComponent = new net.minecraft.network.chat.ScoreComponent($this.name(), $this.objective());
+                // ((ScoreTextComponent) this.bridge$vanillaComponent).($this.value()); // value removed
             } else if (this instanceof SelectorComponent) {
-                this.bridge$vanillaComponent = new SelectorTextComponent(((SelectorComponent) this).pattern());
+                this.bridge$vanillaComponent = new net.minecraft.network.chat.SelectorComponent(((SelectorComponent) this).pattern());
             } else if (this instanceof NBTComponent<?, ?>) {
                 if (this instanceof BlockNBTComponent) {
                     final BlockNBTComponent $this = (BlockNBTComponent) this;
-                    this.bridge$vanillaComponent = new NBTTextComponent.Block(
+                    this.bridge$vanillaComponent = new NbtComponent.BlockNbtComponent(
                       $this.pos().asString(),
                       $this.interpret(),
                       $this.nbtPath()
                     );
                 } else if (this instanceof EntityNBTComponent) {
                     final EntityNBTComponent $this = (EntityNBTComponent) this;
-                    this.bridge$vanillaComponent = new NBTTextComponent.Entity($this.selector(), $this.interpret(), $this.nbtPath());
+                    this.bridge$vanillaComponent = new NbtComponent.EntityNbtComponent($this.selector(), $this.interpret(), $this.nbtPath());
                 } else if (this instanceof StorageNBTComponent) {
                     // TODO(adventure) 1.16
                 }
             }
             for (final Component child : ((Component) this).children()) {
-                this.bridge$vanillaComponent.appendSibling(SpongeAdventure.asVanilla(child));
+                this.bridge$vanillaComponent.append(SpongeAdventure.asVanilla(child));
             }
             this.bridge$vanillaComponent.setStyle(((StyleBridge) (Object) ((Component) this).style()).bridge$asVanilla());
         }
         // To prevent potential issues with using this mutable component as part of another text component,
         // of if Minecraft or a mod decides to change this text component, we make a deep copy so that this
         // cache and its siblings are not affected (particularly important for TextComponent#setStyle).
-        return this.bridge$vanillaComponent.deepCopy();
+        return this.bridge$vanillaComponent.copy();
     }
 }

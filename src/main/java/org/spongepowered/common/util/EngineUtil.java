@@ -30,9 +30,6 @@ import org.spongepowered.api.Sponge;
 
 public final class EngineUtil {
 
-    private EngineUtil() {
-    }
-
     @Nullable
     public static Engine determineEngine() {
         if (Sponge.isServerAvailable()) {
@@ -48,5 +45,8 @@ public final class EngineUtil {
         }
 
         return null;
+    }
+
+    private EngineUtil() {
     }
 }

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DetectorRailBlock;
+import net.minecraft.world.level.block.DetectorRailBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,8 +39,8 @@ public final class DetectorRailData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(DetectorRailBlock.POWERED))
-                        .set((h, v) -> h.with(DetectorRailBlock.POWERED, v))
+                        .get(h -> h.getValue(DetectorRailBlock.POWERED))
+                        .set((h, v) -> h.setValue(DetectorRailBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof DetectorRailBlock);
     }
     // @formatter:on

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CactusBlock;
+import net.minecraft.world.level.block.CactusBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class CactusData {
 
@@ -40,9 +40,9 @@ public final class CactusData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, CactusBlock.AGE))
-                        .get(h -> h.get(CactusBlock.AGE))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, CactusBlock.AGE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, CactusBlock.AGE))
+                        .get(h -> h.getValue(CactusBlock.AGE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, CactusBlock.AGE))
                         .supports(h -> h.getBlock() instanceof CactusBlock);
     }
     // @formatter:on

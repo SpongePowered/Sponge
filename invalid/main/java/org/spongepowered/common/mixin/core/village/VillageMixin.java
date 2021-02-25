@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.AbstractChunkProviderBridge;
+import org.spongepowered.common.bridge.world.level.chunk.AbstractChunkProviderBridge;
 
 @Mixin(Village.class)
 public abstract class VillageMixin {

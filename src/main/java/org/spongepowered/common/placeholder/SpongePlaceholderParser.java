@@ -25,30 +25,22 @@
 package org.spongepowered.common.placeholder;
 
 import net.kyori.adventure.text.Component;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 
 import java.util.function.Function;
 
-public class SpongePlaceholderParser implements PlaceholderParser {
+public final class SpongePlaceholderParser implements PlaceholderParser {
 
-    private final ResourceKey key;
     private final Function<PlaceholderContext, Component> function;
 
-    public SpongePlaceholderParser(final ResourceKey key, final Function<PlaceholderContext, Component> function) {
-        this.key = key;
+    public SpongePlaceholderParser(final Function<PlaceholderContext, Component> function) {
         this.function = function;
     }
 
     @Override
     public Component parse(final PlaceholderContext placeholderContext) {
         return this.function.apply(placeholderContext);
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
     }
 
 }

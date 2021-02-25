@@ -26,25 +26,25 @@ package org.spongepowered.common.command.brigadier.tree;
 
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.command.ISuggestionProvider;
+import net.minecraft.commands.SharedSuggestionProvider;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.command.registrar.tree.builder.AbstractCommandTreeNode;
 
-public final class ForcedRedirectLiteralCommandNode extends LiteralCommandNode<ISuggestionProvider> implements ForcedRedirectNode {
+public final class ForcedRedirectLiteralCommandNode extends LiteralCommandNode<SharedSuggestionProvider> implements ForcedRedirectNode {
 
-    @Nullable private CommandNode<ISuggestionProvider> forcedRedirect = null;
+    @Nullable private CommandNode<SharedSuggestionProvider> forcedRedirect = null;
 
     public ForcedRedirectLiteralCommandNode(final String literal, final boolean executable) {
         super(literal, executable ? AbstractCommandTreeNode.EXECUTABLE : null, c -> true, null, null, false);
     }
 
     @Override
-    public void setForcedRedirect(final CommandNode<ISuggestionProvider> node) {
+    public void setForcedRedirect(final CommandNode<SharedSuggestionProvider> node) {
         this.forcedRedirect = node;
     }
 
     @Override
-    public CommandNode<ISuggestionProvider> getRedirect() {
+    public CommandNode<SharedSuggestionProvider> getRedirect() {
         return this.forcedRedirect;
     }
 

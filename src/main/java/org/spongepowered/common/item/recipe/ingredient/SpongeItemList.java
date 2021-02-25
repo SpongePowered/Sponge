@@ -26,13 +26,12 @@ package org.spongepowered.common.item.recipe.ingredient;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.Ingredient;
-
 import java.util.Arrays;
 import java.util.Collection;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
 
-public abstract class SpongeItemList implements Ingredient.IItemList {
+public abstract class SpongeItemList implements Ingredient.Value {
 
     public static final String INGREDIENT_TYPE = "sponge:type";
     public static final String INGREDIENT_ITEM = "sponge:item";
@@ -44,8 +43,8 @@ public abstract class SpongeItemList implements Ingredient.IItemList {
     }
 
     @Override
-    public Collection<ItemStack> getStacks() {
-        return Arrays.asList(stacks);
+    public Collection<ItemStack> getItems() {
+        return Arrays.asList(this.stacks);
     }
 
     @Override

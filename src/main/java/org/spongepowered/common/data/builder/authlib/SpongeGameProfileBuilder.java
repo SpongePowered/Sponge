@@ -33,7 +33,7 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 import java.util.UUID;
 
-public class SpongeGameProfileBuilder extends AbstractDataBuilder<GameProfile> {
+public final class SpongeGameProfileBuilder extends AbstractDataBuilder<GameProfile> {
 
     public SpongeGameProfileBuilder() {
         super(GameProfile.class, 0);

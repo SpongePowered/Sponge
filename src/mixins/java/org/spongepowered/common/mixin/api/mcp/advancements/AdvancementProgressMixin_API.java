@@ -37,6 +37,7 @@ import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 
 import java.time.Instant;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 
 @Mixin(AdvancementProgress.class)
@@ -76,5 +77,21 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
         final Map<String, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
         Preconditions.checkState(map != null, "progressMap isn't initialized");
         return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion.getName()));
+    }
+
+    @Override
+    public CriterionProgress require(final AdvancementCriterion criterion) {
+        Objects.requireNonNull(criterion, "criterion");
+
+        return this.get(criterion).orElseThrow(() -> new IllegalStateException("The criterion " + criterion.getName()
+                + " isn't present on the advancement '" + this.getAdvancement() + "'."));
+    }
+
+    @Override
+    public ScoreCriterionProgress require(final ScoreAdvancementCriterion criterion) {
+        Objects.requireNonNull(criterion, "criterion");
+
+        return this.get(criterion).orElseThrow(() -> new IllegalStateException("The score criterion " + criterion.getName()
+                + " isn't present on the advancement '" + this.getAdvancement().getKey().toString() + "'."));
     }
 }

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.AttachedStemBlock;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.AttachedStemBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class AttachedStemData {
 
@@ -40,8 +40,8 @@ public final class AttachedStemData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(AttachedStemBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, AttachedStemBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.getValue(AttachedStemBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, AttachedStemBlock.FACING))
                         .supports(h -> h.getBlock() instanceof AttachedStemBlock);
     }
     // @formatter:on

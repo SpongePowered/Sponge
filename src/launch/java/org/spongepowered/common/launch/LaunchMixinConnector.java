@@ -41,11 +41,15 @@ public abstract class LaunchMixinConnector implements IMixinConnector {
 
     public List<String> getMixinConfigs() {
         return Lists.newArrayList(
-            "mixins.common.accessors.json",
-            "mixins.common.api.json",
-            "mixins.common.core.json",
-            "mixins.common.inventory.json",
-            "mixins.common.tracker.json"
+            "mixins.sponge.accessors.json",
+            "mixins.sponge.api.json",
+            "mixins.sponge.concurrent.json",
+            "mixins.sponge.core.json",
+            "mixins.sponge.exploit.json",
+            "mixins.sponge.inventory.json",
+            "mixins.sponge.movementcheck.json",
+            "mixins.sponge.tracker.json",
+            "mixins.sponge.ipforward.json"
         );
     }
 }

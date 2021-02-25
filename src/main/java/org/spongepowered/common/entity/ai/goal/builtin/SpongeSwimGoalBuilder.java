@@ -26,7 +26,7 @@ package org.spongepowered.common.entity.ai.goal.builtin;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.entity.MobEntity;
+import net.minecraft.world.entity.Mob;
 import org.spongepowered.api.entity.ai.goal.builtin.SwimGoal;
 import org.spongepowered.api.entity.living.Agent;
 
@@ -59,7 +59,7 @@ public final class SpongeSwimGoalBuilder implements SwimGoal.Builder {
     @Override
     public SwimGoal build(Agent owner) {
         checkNotNull(owner);
-        final SwimGoal task = (SwimGoal) new net.minecraft.entity.ai.goal.SwimGoal((MobEntity) owner);
+        final SwimGoal task = (SwimGoal) new net.minecraft.world.entity.ai.goal.FloatGoal((Mob) owner);
         task.setSwimChance(this.chance);
         return task;
     }

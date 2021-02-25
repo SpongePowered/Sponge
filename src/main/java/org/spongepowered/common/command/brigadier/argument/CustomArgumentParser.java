@@ -31,12 +31,11 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParser;
-import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
+import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
@@ -46,18 +45,16 @@ import org.spongepowered.common.util.Constants;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
-import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
+import net.minecraft.commands.CommandSourceStack;
 
 /**
  * For use with other argument types
  */
-public final class CustomArgumentParser<T> implements ArgumentParser<T>, SuggestionProvider<CommandSource> {
-
-    public static final ClientCompletionType NONE_CLIENT_COMPLETION_TYPE = new SpongeClientCompletionType("none", null);
+public final class CustomArgumentParser<T> implements ArgumentParser<T>, SuggestionProvider<CommandSourceStack> {
 
     private static final Pattern INTEGER_PATTERN = Pattern.compile("\\d+");
 
@@ -71,7 +68,7 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
         this.parsers = parsers;
         this.completer = completer;
         this.doesNotRead =
-                doesNotRead || parsers.stream().allMatch(x -> x.getClientCompletionType().contains(CustomArgumentParser.NONE_CLIENT_COMPLETION_TYPE));
+                doesNotRead || parsers.stream().allMatch(x -> x.getClientCompletionType().contains(ClientCompletionTypes.NONE.get()));
         // indicates that we should try to parse this even if there is nothing else to parse.
         if (this.parsers.size() == 1) {
             final ValueParser<? extends T> parser = this.parsers.iterator().next();
@@ -160,7 +157,7 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
     }
 
     @Override
-    public CompletableFuture<Suggestions> getSuggestions(final CommandContext<CommandSource> context, final SuggestionsBuilder builder)
+    public CompletableFuture<Suggestions> getSuggestions(final CommandContext<CommandSourceStack> context, final SuggestionsBuilder builder)
             throws CommandSyntaxException {
         return this.listSuggestions(context, builder);
     }

@@ -30,8 +30,8 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.arguments.GameProfileArgument;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.arguments.GameProfileArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -39,7 +39,7 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.profile.GameProfile;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.Collection;
@@ -48,14 +48,12 @@ import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public final class SpongeGameProfileValueParameter extends CatalogedArgumentParser<GameProfile> {
+public final class SpongeGameProfileValueParameter extends ResourceKeyedArgumentValueParser<GameProfile> {
 
-    private final ResourceKey resourceKey = ResourceKey.sponge("game_profile");
     private final GameProfileArgument argument = GameProfileArgument.gameProfile();
 
-    @Override
-    public ResourceKey getKey() {
-        return this.resourceKey;
+    public SpongeGameProfileValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override
@@ -81,7 +79,7 @@ public final class SpongeGameProfileValueParameter extends CatalogedArgumentPars
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         try {
             final Collection<com.mojang.authlib.GameProfile> profileCollection =
-                    this.argument.parse((StringReader) reader).getNames((CommandSource) context.getCause());
+                    this.argument.parse((StringReader) reader).getNames((CommandSourceStack) context.getCause());
             if (profileCollection.size() == 1) {
                 return Optional.of(SpongeGameProfile.of(profileCollection.iterator().next()));
             } else if (profileCollection.isEmpty()) {

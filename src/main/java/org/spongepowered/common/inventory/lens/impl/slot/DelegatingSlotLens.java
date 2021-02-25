@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
@@ -33,6 +32,7 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.item.ItemStack;
 
 public abstract class DelegatingSlotLens extends AbstractLens implements SlotLens {
 

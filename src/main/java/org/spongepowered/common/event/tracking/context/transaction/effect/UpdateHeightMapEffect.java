@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.world.gen.Heightmap;
-import org.spongepowered.common.accessor.world.chunk.ChunkAccessor;
+import org.spongepowered.common.accessor.world.level.chunk.LevelChunkAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Map;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.Heightmap;
 
 public final class UpdateHeightMapEffect implements ProcessingSideEffect {
 
@@ -47,18 +47,19 @@ public final class UpdateHeightMapEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
-        final Map<Heightmap.Type, Heightmap> heightMap = ((ChunkAccessor) pipeline.getAffectedChunk()).accessor$getHeightMap();
+        final SpongeBlockChangeFlag flag, final int limit
+    ) {
+        final Map<Heightmap.Types, Heightmap> heightMap = ((LevelChunkAccessor) pipeline.getAffectedChunk()).accessor$heightmaps();
         if (heightMap == null) {
             throw new IllegalStateException("Heightmap dereferenced!");
         }
         final int x = oldState.pos.getX() & 15;
         final int y = oldState.pos.getY();
         final int z = oldState.pos.getZ() & 15;
-        heightMap.get(Heightmap.Type.MOTION_BLOCKING).update(x, y, z, newState);
-        heightMap.get(Heightmap.Type.MOTION_BLOCKING_NO_LEAVES).update(x, y, z, newState);
-        heightMap.get(Heightmap.Type.OCEAN_FLOOR).update(x, y, z, newState);
-        heightMap.get(Heightmap.Type.WORLD_SURFACE).update(x, y, z, newState);
+        heightMap.get(Heightmap.Types.MOTION_BLOCKING).update(x, y, z, newState);
+        heightMap.get(Heightmap.Types.MOTION_BLOCKING_NO_LEAVES).update(x, y, z, newState);
+        heightMap.get(Heightmap.Types.OCEAN_FLOOR).update(x, y, z, newState);
+        heightMap.get(Heightmap.Types.WORLD_SURFACE).update(x, y, z, newState);
         return EffectResult.NULL_PASS;
     }
 }

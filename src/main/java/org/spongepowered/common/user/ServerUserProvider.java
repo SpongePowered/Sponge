@@ -27,15 +27,15 @@ package org.spongepowered.common.user;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.storage.SaveHandler;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.server.management.PlayerListAccessor;
-import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.accessor.server.players.PlayerListAccessor;
+import org.spongepowered.common.accessor.world.level.storage.PlayerDataStorageAccessor;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
@@ -126,7 +126,7 @@ public final class ServerUserProvider {
         this.userCache.invalidateAll();
 
         // Add all known profiles from the data files
-        final String[] uuids = this.getSaveHandler().func_215771_d();
+        final String[] uuids = this.getSaveHandler().getSeenPlayers();
         for (final String playerUuid : uuids) {
 
             // If the filename contains a period, we can fail fast. Vanilla code fixes the Strings that have ".dat" to strip that out
@@ -149,7 +149,7 @@ public final class ServerUserProvider {
     }
 
     Optional<User> getUser(final String lastKnownName) {
-        final com.mojang.authlib.GameProfile gameProfile = this.server.getPlayerProfileCache().getGameProfileForUsername(lastKnownName);
+        final com.mojang.authlib.GameProfile gameProfile = this.server.getProfileCache().get(lastKnownName);
         if (gameProfile == null) {
             return Optional.empty();
         }
@@ -157,7 +157,7 @@ public final class ServerUserProvider {
     }
 
     Optional<User> getUser(final UUID uuid) {
-        final com.mojang.authlib.GameProfile gameProfile = this.server.getPlayerProfileCache().getProfileByUUID(uuid);
+        final com.mojang.authlib.GameProfile gameProfile = this.server.getProfileCache().get(uuid);
         return this.getUser(gameProfile == null ? null : SpongeGameProfile.of(gameProfile));
     }
 
@@ -179,10 +179,17 @@ public final class ServerUserProvider {
                 return currentUser;
             }
             // ensure the profile is what we expect it to be
-            final com.mojang.authlib.GameProfile p = this.server.getPlayerProfileCache().getProfileByUUID(userID);
+            final com.mojang.authlib.GameProfile p = this.server.getProfileCache().get(userID);
             resolvedProfile = p == null ? SpongeGameProfile.toMcProfile(profile) : p;
         } else {
             resolvedProfile = SpongeGameProfile.toMcProfile(profile);
+            final User currentUser = this.userCache.getIfPresent(profile.getUniqueId());
+            if (currentUser != null) {
+                if (SpongeUser.dirtyUsers.contains(currentUser)) {
+                    ((SpongeUser) currentUser).save();
+                    ((SpongeUser) currentUser).invalidate();
+                }
+            }
         }
 
         this.pollFilesystemWatcher();
@@ -286,12 +293,12 @@ public final class ServerUserProvider {
         }
     }
 
-    private SaveHandler getSaveHandler() {
-        return (SaveHandler) ((PlayerListAccessor) this.server.getPlayerList()).accessor$getPlayerDataManager();
+    private PlayerDataStorage getSaveHandler() {
+        return (PlayerDataStorage) ((PlayerListAccessor) this.server.getPlayerList()).accessor$playerIo();
     }
 
     private Path getSaveHandlerDirectory() {
-        return ((SaveHandlerAccessor) this.getSaveHandler()).accessor$getPlayersDirectory().toPath();
+        return ((PlayerDataStorageAccessor) this.getSaveHandler()).accessor$playerDir().toPath();
     }
 
     // Used to reduce the number of calls to maps.

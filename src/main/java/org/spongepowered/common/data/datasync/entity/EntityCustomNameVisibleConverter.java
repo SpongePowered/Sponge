@@ -24,21 +24,20 @@
  */
 package org.spongepowered.common.data.datasync.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.accessor.entity.EntityAccessor;
-
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.world.entity.Entity;
 
-public class EntityCustomNameVisibleConverter extends DataParameterConverter<Boolean> {
+public final class EntityCustomNameVisibleConverter extends DataParameterConverter<Boolean> {
 
     public EntityCustomNameVisibleConverter() {
-        super(EntityAccessor.accessor$getCustomNameVisible());
+        super(EntityAccessor.accessor$DATA_CUSTOM_NAME_VISIBLE());
     }
 
     @Override
@@ -53,7 +52,7 @@ public class EntityCustomNameVisibleConverter extends DataParameterConverter<Boo
     @Override
     public Boolean getValueFromEvent(final Boolean originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.IS_CUSTOM_NAME_VISIBLE.get()) {
+            if (immutableValue.getKey() == Keys.IS_CUSTOM_NAME_VISIBLE) {
                 return (Boolean) immutableValue.get();
             }
         }

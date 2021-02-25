@@ -28,7 +28,7 @@ import io.leangen.geantyref.GenericTypeReflector;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.util.TypeTokenHelper;
+import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
 import java.util.Optional;
@@ -47,7 +47,7 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
     GenericImmutableDataProviderBase(final Key<V> key) {
         super(key);
         this.holderType = (Class<H>) GenericTypeReflector.erase(
-                TypeTokenHelper.typeArgumentFromSupertype(this.getClass(), GenericImmutableDataProviderBase.class, 0));
+                TypeTokenUtil.typeArgumentFromSupertype(this.getClass(), GenericImmutableDataProviderBase.class, 0));
     }
 
     private boolean isTypeAllowed(final DataHolder dataHolder) {

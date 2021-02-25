@@ -26,55 +26,61 @@ package org.spongepowered.common.mixin.api.mcp.util;
 
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.DamageSourceBridge;
+import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 
-@Mixin(value = net.minecraft.util.DamageSource.class)
+@Mixin(value = net.minecraft.world.damagesource.DamageSource.class)
+@Implements(@Interface(iface = DamageSource.class, prefix = "damageSource$"))
 public abstract class DamageSourceMixin_API implements DamageSource {
 
-    @Shadow public abstract boolean shadow$isUnblockable();
-    @Shadow public abstract boolean shadow$canHarmInCreative();
-    @Shadow public abstract boolean shadow$isDamageAbsolute();
-    @Shadow public abstract boolean shadow$isMagicDamage();
-    @Shadow public abstract float shadow$getHungerDamage();
-    @Shadow public abstract boolean shadow$isDifficultyScaled();
+    // @formatter:off
+    @Shadow public abstract boolean shadow$isBypassArmor();
+    @Shadow public abstract boolean shadow$isBypassInvul();
+    @Shadow public abstract boolean shadow$isBypassMagic();
+    @Shadow public abstract boolean shadow$isMagic();
+    @Shadow public abstract float shadow$getFoodExhaustion();
+    @Shadow public abstract boolean shadow$scalesWithDifficulty();
     @Shadow public abstract boolean shadow$isExplosion();
-    @Shadow public abstract String shadow$getDamageType();
+    @Shadow public abstract String shadow$getMsgId();
+    // @formatter:on
 
     @Override
     public boolean isExplosive() {
         return this.shadow$isExplosion();
     }
 
-    @Override
-    public boolean isMagic() {
-        return this.shadow$isMagicDamage();
+    @Intrinsic
+    public boolean damageSource$isMagic() {
+        return this.shadow$isMagic();
     }
 
     @Override
     public boolean doesAffectCreative() {
-        return this.shadow$canHarmInCreative();
+        return this.shadow$isBypassInvul();
     }
 
     @Override
     public boolean isAbsolute() {
-        return this.shadow$isDamageAbsolute();
+        return this.shadow$isBypassMagic();
     }
 
     @Override
     public boolean isBypassingArmor() {
-        return this.shadow$isUnblockable();
+        return this.shadow$isBypassArmor();
     }
 
     @Override
     public boolean isScaledByDifficulty() {
-        return this.shadow$isDifficultyScaled();
+        return this.shadow$scalesWithDifficulty();
     }
 
     @Override
     public double getExhaustion() {
-        return this.shadow$getHungerDamage();
+        return this.shadow$getFoodExhaustion();
     }
 
     @Override

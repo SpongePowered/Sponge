@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -35,12 +33,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.protocol.Packet;
 
 @SuppressWarnings("unchecked")
 public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
-    @SuppressWarnings("NullableProblems") protected ServerPlayerEntity packetPlayer; // Set by packetPlayer(EntityPlayerMP)
-    @Nullable IPacket<?> packet;
+    @SuppressWarnings("NullableProblems") protected net.minecraft.server.level.ServerPlayer packetPlayer; // Set by packetPlayer(EntityPlayerMP)
+    @Nullable Packet<?> packet;
     private ItemStackSnapshot cursor = ItemStackSnapshot.empty();
     private ItemStack itemUsed = ItemStack.empty();
     private ItemStackSnapshot itemUsedSnapshot = ItemStackSnapshot.empty();
@@ -48,16 +47,16 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     private boolean ignoreCreative;
     private boolean interactItemChanged;
 
-    protected PacketContext(final PacketState<? extends P> state, final PhaseTracker tracker) {
+    protected PacketContext(final PacketState<P> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 
-    public P packet(final IPacket<?> packet) {
+    public P packet(final Packet<?> packet) {
         this.packet = packet;
         return (P) this;
     }
 
-    public P packetPlayer(final ServerPlayerEntity playerMP) {
+    public P packetPlayer(final net.minecraft.server.level.ServerPlayer playerMP) {
         this.packetPlayer = playerMP;
         return (P) this;
     }
@@ -72,7 +71,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return (P) this;
     }
 
-    public ServerPlayerEntity getPacketPlayer() {
+    public net.minecraft.server.level.ServerPlayer getPacketPlayer() {
         return this.packetPlayer;
     }
 
@@ -81,7 +80,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return (ServerPlayer) this.packetPlayer;
     }
 
-    public <K extends IPacket<?>> K getPacket() {
+    public <K extends Packet<?>> K getPacket() {
         return (K) this.packet;
     }
 

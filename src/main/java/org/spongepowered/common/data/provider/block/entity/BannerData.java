@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.tileentity.BannerTileEntity;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.BannerBlockEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class BannerData {
@@ -38,23 +38,23 @@ public final class BannerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(BannerTileEntity.class)
+                .asMutable(BannerBlockEntity.class)
                     .create(Keys.BANNER_PATTERN_LAYERS)
-                        .get(h -> ((BannerTileEntityBridge) h).bridge$getLayers())
+                        .get(h -> ((BannerBlockEntityBridge) h).bridge$getLayers())
                         .setAnd((h, v) -> {
-                            final World world = h.getWorld();
-                            if (world != null && !world.isRemote) { // This avoids a client crash because clientside.
-                                ((BannerTileEntityBridge) h).bridge$setLayers(v);
+                            final Level world = h.getLevel();
+                            if (world != null && !world.isClientSide) { // This avoids a client crash because clientside.
+                                ((BannerBlockEntityBridge) h).bridge$setLayers(v);
                                 return true;
                             }
                             return false;
                         })
                     .create(Keys.DYE_COLOR)
-                        .get(h -> ((BannerTileEntityBridge) h).bridge$getBaseColor())
+                        .get(h -> ((BannerBlockEntityBridge) h).bridge$getBaseColor())
                         .setAnd((h, v) -> {
-                            final World world = h.getWorld();
-                            if (world != null && !world.isRemote) {
-                                ((BannerTileEntityBridge) h).bridge$setBaseColor(v);
+                            final Level world = h.getLevel();
+                            if (world != null && !world.isClientSide) {
+                                ((BannerBlockEntityBridge) h).bridge$setBaseColor(v);
                                 return true;
                             }
                             return false;

@@ -24,19 +24,18 @@
  */
 package org.spongepowered.common.entity.player;
 
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.ItemStackHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.NonNullList;
-
 import java.util.Arrays;
 import java.util.List;
+import net.minecraft.core.NonNullList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.Container;
+import net.minecraft.world.ContainerHelper;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 
-public class SpongeUserInventory implements IInventory {
+public class SpongeUserInventory implements Container {
 
     // sourced from InventoryPlayer
 
@@ -52,24 +51,24 @@ public class SpongeUserInventory implements IInventory {
     public SpongeUser user;
     private boolean dirty = false;
 
-    public SpongeUserInventory(SpongeUser playerIn) {
+    public SpongeUserInventory(final SpongeUser user) {
         this.allInventories = Arrays.asList(this.mainInventory, this.armorInventory, this.offHandInventory);
-        this.user = playerIn;
+        this.user = user;
     }
 
     public ItemStack getCurrentItem() {
-        return PlayerInventory.isHotbar(this.currentItem) ? this.mainInventory.get(this.currentItem) : ItemStack.EMPTY;
+        return Inventory.isHotbarSlot(this.currentItem) ? this.mainInventory.get(this.currentItem) : ItemStack.EMPTY;
     }
 
     /**
      * Removes up to a specified number of items from an inventory slot and returns them in a new stack.
      */
     @Override
-    public ItemStack decrStackSize(int index, int count) {
-        this.markDirty();
+    public ItemStack removeItem(int index, final int count) {
+        this.setChanged();
         List<ItemStack> list = null;
 
-        for (NonNullList<ItemStack> nonnulllist : this.allInventories) {
+        for (final NonNullList<ItemStack> nonnulllist : this.allInventories) {
             if (index < nonnulllist.size()) {
                 list = nonnulllist;
                 break;
@@ -78,18 +77,18 @@ public class SpongeUserInventory implements IInventory {
             index -= nonnulllist.size();
         }
 
-        return list != null && !list.get(index).isEmpty() ? ItemStackHelper.getAndSplit(list, index, count) : ItemStack.EMPTY;
+        return list != null && !list.get(index).isEmpty() ? ContainerHelper.removeItem(list, index, count) : ItemStack.EMPTY;
     }
 
     /**
      * Removes a stack from the given slot and returns it.
      */
     @Override
-    public ItemStack removeStackFromSlot(int index) {
-        this.markDirty();
+    public ItemStack removeItemNoUpdate(int index) {
+        this.setChanged();
         NonNullList<ItemStack> nonnulllist = null;
 
-        for (NonNullList<ItemStack> nonnulllist1 : this.allInventories) {
+        for (final NonNullList<ItemStack> nonnulllist1 : this.allInventories) {
             if (index < nonnulllist1.size()) {
                 nonnulllist = nonnulllist1;
                 break;
@@ -99,7 +98,7 @@ public class SpongeUserInventory implements IInventory {
         }
 
         if (nonnulllist != null && !nonnulllist.get(index).isEmpty()) {
-            ItemStack itemstack = nonnulllist.get(index);
+            final ItemStack itemstack = nonnulllist.get(index);
             nonnulllist.set(index, ItemStack.EMPTY);
             return itemstack;
         } else {
@@ -111,11 +110,11 @@ public class SpongeUserInventory implements IInventory {
      * Sets the given item stack to the specified slot in the inventory (can be crafting or armor sections).
      */
     @Override
-    public void setInventorySlotContents(int index, ItemStack stack) {
-        this.markDirty();
+    public void setItem(int index, final ItemStack stack) {
+        this.setChanged();
         NonNullList<ItemStack> nonnulllist = null;
 
-        for (NonNullList<ItemStack> nonnulllist1 : this.allInventories) {
+        for (final NonNullList<ItemStack> nonnulllist1 : this.allInventories) {
             if (index < nonnulllist1.size()) {
                 nonnulllist = nonnulllist1;
                 break;
@@ -133,30 +132,30 @@ public class SpongeUserInventory implements IInventory {
      * Writes the inventory out as a list of compound tags. This is where the slot indices are used (+100 for armor, +80
      * for crafting).
      */
-    public ListNBT writeToNBT(ListNBT nbtTagListIn) {
+    public ListTag writeList(final ListTag nbtTagListIn) {
         for (int i = 0; i < this.mainInventory.size(); ++i) {
             if (!this.mainInventory.get(i).isEmpty()) {
-                CompoundNBT nbttagcompound = new CompoundNBT();
+                final CompoundTag nbttagcompound = new CompoundTag();
                 nbttagcompound.putByte("Slot", (byte) i);
-                this.mainInventory.get(i).write(nbttagcompound);
+                this.mainInventory.get(i).save(nbttagcompound);
                 nbtTagListIn.add(nbttagcompound);
             }
         }
 
         for (int j = 0; j < this.armorInventory.size(); ++j) {
             if (!this.armorInventory.get(j).isEmpty()) {
-                CompoundNBT nbttagcompound1 = new CompoundNBT();
+                final CompoundTag nbttagcompound1 = new CompoundTag();
                 nbttagcompound1.putByte("Slot", (byte) (j + 100));
-                this.armorInventory.get(j).write(nbttagcompound1);
+                this.armorInventory.get(j).save(nbttagcompound1);
                 nbtTagListIn.add(nbttagcompound1);
             }
         }
 
         for (int k = 0; k < this.offHandInventory.size(); ++k) {
             if (!this.offHandInventory.get(k).isEmpty()) {
-                CompoundNBT nbttagcompound2 = new CompoundNBT();
+                final CompoundTag nbttagcompound2 = new CompoundTag();
                 nbttagcompound2.putByte("Slot", (byte) (k + 150));
-                this.offHandInventory.get(k).write(nbttagcompound2);
+                this.offHandInventory.get(k).save(nbttagcompound2);
                 nbtTagListIn.add(nbttagcompound2);
             }
         }
@@ -169,15 +168,15 @@ public class SpongeUserInventory implements IInventory {
     /**
      * Reads from the given tag list and fills the slots in the inventory with the correct items.
      */
-    public void readFromNBT(ListNBT nbtTagListIn) {
+    public void readList(final ListTag nbtTagListIn) {
         this.mainInventory.clear();
         this.armorInventory.clear();
         this.offHandInventory.clear();
 
         for (int i = 0; i < nbtTagListIn.size(); ++i) {
-            CompoundNBT nbttagcompound = nbtTagListIn.getCompound(i);
-            int j = nbttagcompound.getByte("Slot") & 255;
-            ItemStack itemstack = ItemStack.read(nbttagcompound);
+            final CompoundTag nbttagcompound = nbtTagListIn.getCompound(i);
+            final int j = nbttagcompound.getByte("Slot") & 255;
+            final ItemStack itemstack = ItemStack.of(nbttagcompound);
 
             if (!itemstack.isEmpty()) {
                 if (j >= 0 && j < this.mainInventory.size()) {
@@ -195,25 +194,25 @@ public class SpongeUserInventory implements IInventory {
      * Returns the number of slots in the inventory.
      */
     @Override
-    public int getSizeInventory() {
+    public int getContainerSize() {
         return this.mainInventory.size() + this.armorInventory.size() + this.offHandInventory.size();
     }
 
     @Override
     public boolean isEmpty() {
-        for (ItemStack itemstack : this.mainInventory) {
+        for (final ItemStack itemstack : this.mainInventory) {
             if (!itemstack.isEmpty()) {
                 return false;
             }
         }
 
-        for (ItemStack itemstack1 : this.armorInventory) {
+        for (final ItemStack itemstack1 : this.armorInventory) {
             if (!itemstack1.isEmpty()) {
                 return false;
             }
         }
 
-        for (ItemStack itemstack2 : this.offHandInventory) {
+        for (final ItemStack itemstack2 : this.offHandInventory) {
             if (!itemstack2.isEmpty()) {
                 return false;
             }
@@ -226,10 +225,10 @@ public class SpongeUserInventory implements IInventory {
      * Returns the stack in the given slot.
      */
     @Override
-    public ItemStack getStackInSlot(int index) {
+    public ItemStack getItem(int index) {
         List<ItemStack> list = null;
 
-        for (NonNullList<ItemStack> nonnulllist : this.allInventories) {
+        for (final NonNullList<ItemStack> nonnulllist : this.allInventories) {
             if (index < nonnulllist.size()) {
                 list = nonnulllist;
                 break;
@@ -246,7 +245,7 @@ public class SpongeUserInventory implements IInventory {
      * hasn't changed and skip it.
      */
     @Override
-    public void markDirty() {
+    public void setChanged() {
         this.dirty = true;
         this.user.markDirty();
     }
@@ -255,13 +254,13 @@ public class SpongeUserInventory implements IInventory {
      * Don't rename this method to canInteractWith due to conflicts with Container
      */
     @Override
-    public boolean isUsableByPlayer(PlayerEntity player) {
+    public boolean stillValid(final Player player) {
         return true;
     }
 
     @Override
-    public void clear() {
-        for (List<ItemStack> list : this.allInventories) {
+    public void clearContent() {
+        for (final List<ItemStack> list : this.allInventories) {
             list.clear();
         }
     }

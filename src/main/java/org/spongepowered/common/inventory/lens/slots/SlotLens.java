@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.slots;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.common.inventory.fabric.Fabric;

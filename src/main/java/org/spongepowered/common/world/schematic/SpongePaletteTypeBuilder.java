@@ -25,45 +25,46 @@
 package org.spongepowered.common.world.schematic;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.world.schematic.PaletteType;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.util.Objects;
 import java.util.Optional;
-import java.util.function.Function;
+import java.util.function.BiFunction;
 
-public class SpongePaletteTypeBuilder<T> extends SpongeCatalogBuilder<PaletteType<T>, PaletteType.Builder<T>> implements PaletteType.Builder<T> {
-    private @MonotonicNonNull Function<T, String> encoder;
-    private @MonotonicNonNull Function<String, Optional<T>> decoder;
+public class SpongePaletteTypeBuilder<T, R> implements PaletteType.Builder<T, R> {
 
+    private @MonotonicNonNull BiFunction<String, Registry<R>, Optional<T>> resolver;
+    private @MonotonicNonNull BiFunction<Registry<R>, T, String> stringifier;
+
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public PaletteType.Builder<T> encoder(final Function<T, String> encoder) {
-        this.encoder = Objects.requireNonNull(encoder, "Encoder cannot be null");
+    public PaletteType.Builder<T, R> reset() {
+        this.resolver = null;
+        this.stringifier = null;
         return this;
     }
 
     @Override
-    public PaletteType.Builder<T> decoder(final Function<String, Optional<T>> decoder) {
-        this.decoder = Objects.requireNonNull(decoder, "Decoder cannot be null");
+    public PaletteType.Builder<T, R> resolver(final BiFunction<String, Registry<R>, Optional<T>> resolver) {
+        this.resolver = Objects.requireNonNull(resolver, "Resolver cannot be null");
         return this;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    protected PaletteType<T> build(final ResourceKey key) {
-        Objects.requireNonNull(key, "ResourceKey cannot be null");
-        Objects.requireNonNull(this.encoder, "Encoder cannot be null");
-        Objects.requireNonNull(this.decoder, "Decoder cannot be null");
-        return new SpongePaletteType<>(key, () -> {
-            final PaletteType paletteType = Sponge.getRegistry()
-                .getCatalogRegistry()
-                .get(PaletteType.class, key)
-                .orElseThrow(() -> new IllegalStateException(
-                    "PaletteType no longer registered, cannot create a Palette off an unregistered Palette Type"
-                ));
-            return new MutableBimapPalette<>(paletteType);
-        }, this.encoder, this.decoder);
+    public PaletteType.Builder<T, R> stringifier(final BiFunction<Registry<R>, T, String> stringifier) {
+        this.stringifier = Objects.requireNonNull(stringifier, "Stringifier cannot be null");
+        return this;
     }
+
+    @Override
+    public PaletteType<T, R> build() throws IllegalStateException {
+        Objects.requireNonNull(this.resolver, "Encoder cannot be null");
+        Objects.requireNonNull(this.stringifier, "Decoder cannot be null");
+        return new SpongePaletteType<>(
+            this.resolver,
+            this.stringifier
+        );
+    }
+
 }

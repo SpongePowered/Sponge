@@ -52,7 +52,13 @@ public final class SpongeCommandSyntaxException extends CommandSyntaxException {
     }
 
     @Override
-    public synchronized Throwable getCause() {
+    public synchronized Throwable fillInStackTrace() {
+        // Don't gather stacktrace, we are just wrapping the existing exception
+        return this;
+    }
+
+    @Override
+    public synchronized CommandException getCause() {
         return this.innerException;
     }
 
@@ -62,7 +68,7 @@ public final class SpongeCommandSyntaxException extends CommandSyntaxException {
 
     public Component getComponentMessage() {
         final Component message = this.innerException.componentMessage();
-        return ERROR_MESSAGE.append(message == null ? Component.text("unknown") : message);
+        return SpongeCommandSyntaxException.ERROR_MESSAGE.append(message == null ? Component.text("unknown") : message);
     }
 
     @Override

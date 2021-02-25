@@ -38,7 +38,7 @@ import org.spongepowered.api.data.type.BannerPatternShapes;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.lifecycle.RegisterCatalogEvent;
+import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -46,14 +46,16 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.item.recipe.RecipeTypes;
+import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.Ingredient;
 import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
-import org.spongepowered.api.item.recipe.cooking.CookingRecipe;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
@@ -79,7 +81,7 @@ public final class RecipeTest implements LoadableModule {
     public void enable(CommandContext ctx) {
         this.enabled = true;
         try {
-            Sponge.getCommandManager().process("reload");
+            Sponge.getServer().getCommandManager().process("reload");
         } catch (CommandException e) {
             e.printStackTrace();
         }
@@ -89,7 +91,7 @@ public final class RecipeTest implements LoadableModule {
     public void disable(CommandContext ctx) {
         this.enabled = false;
         try {
-            Sponge.getCommandManager().process("reload");
+            Sponge.getServer().getCommandManager().process("reload");
         } catch (CommandException e) {
             e.printStackTrace();
         }
@@ -97,9 +99,9 @@ public final class RecipeTest implements LoadableModule {
 
     @Listener
     @SuppressWarnings("unchecked")
-    public void onRecipeRegistry(RegisterCatalogEvent<RecipeRegistration> event) {
+    public void onRecipeRegistry(RegisterDataPackValueEvent<RecipeRegistration> event) {
 
-        if (!enabled) {
+        if (!this.enabled) {
             return;
         }
         // Standard recipes and ItemStack(with nbt) ingredient and results
@@ -113,7 +115,7 @@ public final class RecipeTest implements LoadableModule {
                 .row(whiteRock, whiteBed, whiteRock)
                 .row(whiteRock, whiteRock, whiteRock)
                 .result(bedrock.copy())
-                .key(ResourceKey.of(plugin, "white_bedrock"))
+                .key(ResourceKey.of(this.plugin, "white_bedrock"))
                 .build();
 
         event.register(whiteBedrockRecipe);
@@ -121,14 +123,14 @@ public final class RecipeTest implements LoadableModule {
         final Ingredient redRock = Ingredient.of(ItemTypes.POLISHED_GRANITE);
         final Ingredient redBed = Ingredient.of(ItemTypes.RED_BED);
         final ItemStack redBedRock = bedrock.copy();
-        redBedRock.offer(Keys.DISPLAY_NAME, Component.text("Bedrock", NamedTextColor.RED));
+        redBedRock.offer(Keys.CUSTOM_NAME, Component.text("Bedrock", NamedTextColor.RED));
 
         final RecipeRegistration redBedrockRecipe = CraftingRecipe.shapedBuilder().rows()
                 .aisle("ggg", "gbg", "ggg")
                 .where('g', redRock)
                 .where('b', redBed)
                 .result(redBedRock)
-                .key(ResourceKey.of(plugin, "red_bedrock"))
+                .key(ResourceKey.of(this.plugin, "red_bedrock"))
                 .build();
 
         event.register(redBedrockRecipe);
@@ -140,7 +142,7 @@ public final class RecipeTest implements LoadableModule {
                 .where('g', redRock)
                 .where('b', Ingredient.of(bedrock.copy()))
                 .result(moreBedrock)
-                .key(ResourceKey.of(plugin, "more_red_bedrock"))
+                .key(ResourceKey.of(this.plugin, "more_red_bedrock"))
                 .build();
 
         event.register(moreBedrockRecipe);
@@ -148,7 +150,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration cheapGoldenAppleRecipe = CraftingRecipe.shapelessBuilder()
                 .addIngredients(ItemTypes.YELLOW_WOOL, ItemTypes.APPLE)
                 .result(ItemStack.of(ItemTypes.GOLDEN_APPLE))
-                .key(ResourceKey.of(plugin, "cheap_golden_apple"))
+                .key(ResourceKey.of(this.plugin, "cheap_golden_apple"))
                 .build();
 
         event.register(cheapGoldenAppleRecipe);
@@ -156,7 +158,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration expensiveGoldenAppleRecipe = CraftingRecipe.shapelessBuilder()
                 .addIngredients(ItemTypes.YELLOW_WOOL, ItemTypes.ENCHANTED_GOLDEN_APPLE)
                 .result(ItemStack.of(ItemTypes.GOLDEN_APPLE))
-                .key(ResourceKey.of(plugin, "expensive_golden_apple"))
+                .key(ResourceKey.of(this.plugin, "expensive_golden_apple"))
                 .build();
 
         event.register(expensiveGoldenAppleRecipe);
@@ -165,7 +167,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration bedrocksToGranite = CraftingRecipe.shapelessBuilder()
                 .addIngredients(bedrocks, bedrocks)
                 .result(ItemStack.of(ItemTypes.GRANITE, 13))
-                .key(ResourceKey.of(plugin, "bedrocks_to_granite"))
+                .key(ResourceKey.of(this.plugin, "bedrocks_to_granite"))
                 .build();
 
         event.register(bedrocksToGranite);
@@ -174,7 +176,7 @@ public final class RecipeTest implements LoadableModule {
                 .ingredient(Ingredient.of(ItemTypes.DIAMOND))
                 .result(ItemTypes.COAL)
                 .experience(0)
-                .key(ResourceKey.of(plugin, "diamond_to_coal"))
+                .key(ResourceKey.of(this.plugin, "diamond_to_coal"))
                 .build();
 
         event.register(diamondToCoalRecipe);
@@ -184,7 +186,7 @@ public final class RecipeTest implements LoadableModule {
                 .result(ItemTypes.GUNPOWDER)
                 .experience(1)
                 .cookingTime(1)
-                .key(ResourceKey.of(plugin, "burn_paper_and_sticks"))
+                .key(ResourceKey.of(this.plugin, "burn_paper_and_sticks"))
                 .build();
 
         event.register(burnPaperAndSticksRecipe);
@@ -192,20 +194,20 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration charcoalToCoalRecipe = CookingRecipe.builder().type(RecipeTypes.BLASTING)
                 .ingredient(Ingredient.of(ItemTypes.CHARCOAL))
                 .result(ItemTypes.COAL)
-                .key(ResourceKey.of(plugin, "charcoal_to_coal"))
+                .key(ResourceKey.of(this.plugin, "charcoal_to_coal"))
                 .build();
 
         event.register(charcoalToCoalRecipe);
 
         final ItemStack redderBedrock = bedrock.copy();
-        redderBedrock.offer(Keys.DISPLAY_NAME, Component.text("Bedrock", NamedTextColor.DARK_RED));
+        redderBedrock.offer(Keys.CUSTOM_NAME, Component.text("Bedrock", NamedTextColor.DARK_RED));
 
         final RecipeRegistration removeRedOnBedrock = CookingRecipe.builder().type(RecipeTypes.BLASTING)
                 .ingredient(Ingredient.of(redBedRock))
                 .result(redderBedrock)
                 .cookingTime(20)
                 .experience(100)
-                .key(ResourceKey.of(plugin, "redder_bedrock"))
+                .key(ResourceKey.of(this.plugin, "redder_bedrock"))
                 .build();
 
         event.register(removeRedOnBedrock);
@@ -213,7 +215,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration overcookedPorkchopRecipe = CookingRecipe.builder().type(RecipeTypes.SMOKING)
                 .ingredient(Ingredient.of(ItemTypes.COOKED_PORKCHOP))
                 .result(ItemTypes.COAL)
-                .key(ResourceKey.of(plugin, "overcooked_porkchop"))
+                .key(ResourceKey.of(this.plugin, "overcooked_porkchop"))
                 .build();
 
         event.register(overcookedPorkchopRecipe);
@@ -222,7 +224,7 @@ public final class RecipeTest implements LoadableModule {
                 .ingredient(Ingredient.of(ItemTypes.STICK))
                 .result(ItemTypes.TORCH)
                 .cookingTime(20)
-                .key(ResourceKey.of(plugin, "stick_to_torch"))
+                .key(ResourceKey.of(this.plugin, "stick_to_torch"))
                 .build();
 
         event.register(sticksToTorches);
@@ -230,19 +232,19 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration stonecutter1 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
                 .result(ItemStack.of(ItemTypes.BLACK_CONCRETE, 64))
-                .key(ResourceKey.of(plugin, "cut_bedrock_to_concrete"))
+                .key(ResourceKey.of(this.plugin, "cut_bedrock_to_concrete"))
                 .build();
 
         final RecipeRegistration stonecutter2 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
                 .result(ItemStack.of(ItemTypes.BLACK_GLAZED_TERRACOTTA, 64))
-                .key(ResourceKey.of(plugin, "cut_bedrock_to_terracotta"))
+                .key(ResourceKey.of(this.plugin, "cut_bedrock_to_terracotta"))
                 .build();
 
         final RecipeRegistration stonecutter3 = StoneCutterRecipe.builder()
                 .ingredient(ItemTypes.BEDROCK)
                 .result(ItemStack.of(ItemTypes.BLACK_WOOL, 64))
-                .key(ResourceKey.of(plugin, "cut_bedrock_wool"))
+                .key(ResourceKey.of(this.plugin, "cut_bedrock_wool"))
                 .build();
 
         event.register(stonecutter1);
@@ -251,7 +253,7 @@ public final class RecipeTest implements LoadableModule {
 
         // Predicate Ingredients
 
-        final Predicate<ItemStack> hardnessPredicate = stack -> stack.getType().getBlock().map(b -> b.getDefaultState().get(Keys.HARDNESS).orElse(0d) > 20).orElse(false); // e.g. obsidian
+        final Predicate<ItemStack> hardnessPredicate = stack -> stack.getType().getBlock().map(b -> b.getDefaultState().get(Keys.DESTROY_SPEED).orElse(0d) > 20).orElse(false); // e.g. obsidian
         final Ingredient hardBlock = Ingredient.of(ResourceKey.of(this.plugin, "hardblock"), hardnessPredicate, ItemStack.of(ItemTypes.BEDROCK));
         final RecipeRegistration hardblockToWool =
                 ShapelessCraftingRecipe.builder().addIngredients(hardBlock).result(ItemStack.of(ItemTypes.WHITE_WOOL))
@@ -270,7 +272,7 @@ public final class RecipeTest implements LoadableModule {
                 .result(grid -> {
                     final Optional<ServerPlayer> player = Sponge.getServer().getCauseStackManager().getCurrentCause().first(ServerPlayer.class);
                     final String name = player.map(ServerPlayer::getName).orElse("Steve");
-                    villagerEgg.offer(Keys.DISPLAY_NAME, Component.text(name));
+                    villagerEgg.offer(Keys.CUSTOM_NAME, Component.text(name));
                     return villagerEgg.copy();
                 }, villagerEgg.copy())
                 .key(ResourceKey.of(this.plugin, "villager_spawn_egg"))
@@ -287,10 +289,10 @@ public final class RecipeTest implements LoadableModule {
                 .where('b', Ingredient.of(ItemTypes.BOOK))
                 .result(grid -> {
                     final Optional<ServerPlayer> player = Sponge.getServer().getCauseStackManager().getCurrentCause().first(ServerPlayer.class);
-                    final Optional<BiomeType> biome = player.map(p -> p.getWorld().getBiome(p.getBlockPosition()));
-                    final String name = biome.map(BiomeType::getKey).map(ResourceKey::toString).orElse("Unknown");
-                    final Integer biomeTemperature = biome.map(BiomeType::getTemperature).map(d -> (int) (d*10)).orElse(0);
-                    final Integer biomeHumidity = biome.map(BiomeType::getHumidity).map(d -> (int) (d*10)).orElse(0);
+                    final Optional<Biome> biome = player.map(p -> p.getWorld().getBiome(p.getBlockPosition()));
+                    final String name = biome.map(present -> RegistryTypes.BIOME.keyFor(player.get().getWorld().registries(), present)).map(ResourceKey::toString).orElse("Unknown");
+                    final Integer biomeTemperature = biome.map(Biome::getTemperature).map(d -> (int) (d*10)).orElse(0);
+                    final Integer biomeHumidity = biome.map(Biome::getHumidity).map(d -> (int) (d*10)).orElse(0);
                     final TextComponent temperature = Component.text("Temperature: ").append(Component.text(biomeTemperature));
                     final TextComponent humidity = Component.text("Humidity: ").append(Component.text(biomeHumidity));
                     writtenBook.offer(Keys.DISPLAY_NAME, Component.text("Biome Data: " + name));
@@ -344,20 +346,20 @@ public final class RecipeTest implements LoadableModule {
                     if (inv.capacity() != 9) {
                         return false;
                     }
-                    final ItemType stick = inv.peek(2,1).get().getType();
+                    final ItemType stick = inv.asGrid().peek(2,1).get().getType();
                     if (!stick.isAnyOf(ItemTypes.STICK)) {
                         return false;
                     }
 
                     final ItemStack middleItem = inv.peekAt(1).get();
 
-                    final ItemType type00 = inv.peek(0,0).get().getType();
-                    final ItemType type10 = inv.peek(0,1).get().getType();
-                    final ItemType type20 = inv.peek(0,2).get().getType();
+                    final ItemType type00 = inv.asGrid().peek(0,0).get().getType();
+                    final ItemType type10 = inv.asGrid().peek(0,1).get().getType();
+                    final ItemType type20 = inv.asGrid().peek(0,2).get().getType();
 
-                    final ItemType type01 = inv.peek(1,0).get().getType();
-                    final ItemType type11 = inv.peek(1,1).get().getType();
-                    final ItemType type21 = inv.peek(1,2).get().getType();
+                    final ItemType type01 = inv.asGrid().peek(1,0).get().getType();
+                    final ItemType type11 = inv.asGrid().peek(1,1).get().getType();
+                    final ItemType type21 = inv.asGrid().peek(1,2).get().getType();
 
                     if (type00 == type01 && type01 == type20 && type20 == type21 && type10 == type11) {
                         if (type00.isAnyOf(ItemTypes.WHITE_WOOL)) {
@@ -391,6 +393,30 @@ public final class RecipeTest implements LoadableModule {
                 .build();
 
         event.register(squeezeSpongeRecipe);
+
+        // Smithing recipes
+
+        final RecipeRegistration ironToGoldIngot = SmithingRecipe.builder()
+                .base(ItemTypes.IRON_INGOT)
+                .addition(ItemTypes.NETHERITE_INGOT)
+                .result(ItemStack.of(ItemTypes.GOLD_INGOT))
+                .key(ResourceKey.of(this.plugin, "iron_to_gold_ingot"))
+                .build();
+
+        event.register(ironToGoldIngot);
+
+        final ItemStack chainMail = ItemStack.of(ItemTypes.CHAINMAIL_CHESTPLATE);
+        chainMail.offer(Keys.CUSTOM_NAME, Component.text("Heavy Chainmail", NamedTextColor.DARK_GRAY));
+        chainMail.offer(Keys.LORE, Arrays.asList(Component.text("Smithing occured", NamedTextColor.DARK_GRAY)));
+        final RecipeRegistration smithChainmail = SmithingRecipe.builder()
+                .base(ItemTypes.IRON_CHESTPLATE)
+                .addition(ItemTypes.FIRE_CHARGE)
+                .result(chainMail)
+                .key(ResourceKey.of(this.plugin, "smith_chainmail"))
+                .build();
+
+        event.register(smithChainmail);
+
 
     }
 }

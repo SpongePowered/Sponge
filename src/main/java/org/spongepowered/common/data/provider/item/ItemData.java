@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.item;
 
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -40,7 +40,7 @@ public final class ItemData {
         registrator
                 .asMutable(Item.class)
                     .create(Keys.DISPLAY_NAME)
-                        .get(h -> SpongeAdventure.asAdventure(h.getDisplayName(new ItemStack(h))))
+                        .get(h -> SpongeAdventure.asAdventure(h.getName(new ItemStack(h))))
                         .setAnd((h, v) -> false);
     }
     // @formatter:on

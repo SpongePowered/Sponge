@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.NoteBlock;
-import net.minecraft.state.properties.NoteBlockInstrument;
-import net.minecraft.util.registry.SimpleRegistry;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.world.level.block.NoteBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.NotePitch;
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class NoteBlockData {
@@ -44,19 +45,17 @@ public final class NoteBlockData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.INSTRUMENT_TYPE)
-                        .get(h -> (InstrumentType) (Object) h.get(NoteBlock.INSTRUMENT))
-                        .set((h, v) -> h.with(NoteBlock.INSTRUMENT, (NoteBlockInstrument) (Object) v))
+                        .get(h -> (InstrumentType) (Object) h.getValue(NoteBlock.INSTRUMENT))
+                        .set((h, v) -> h.setValue(NoteBlock.INSTRUMENT, (NoteBlockInstrument) (Object) v))
                         .supports(h -> h.getBlock() instanceof NoteBlock)
                     .create(Keys.NOTE_PITCH)
                         .get(h -> {
-                            final SimpleRegistry<NotePitch> registry =
-                                    SpongeCommon.getRegistry().getCatalogRegistry().requireRegistry(NotePitch.class);
-                            return registry.getByValue(h.get(NoteBlock.NOTE));
+                            final MappedRegistry<NotePitch> registry = (MappedRegistry<NotePitch>) (Object) Sponge.getGame().registries().registry(RegistryTypes.NOTE_PITCH);
+                            return registry.byId(h.getValue(NoteBlock.NOTE));
                         })
                         .set((h, v) -> {
-                            final SimpleRegistry<NotePitch> registry =
-                                    SpongeCommon.getRegistry().getCatalogRegistry().requireRegistry(NotePitch.class);
-                            return h.with(NoteBlock.NOTE, registry.getId(v));
+                            final MappedRegistry<NotePitch> registry = (MappedRegistry<NotePitch>) (Object) Sponge.getGame().registries().registry(RegistryTypes.NOTE_PITCH);
+                            return h.setValue(NoteBlock.NOTE, registry.getId(v));
                         })
                         .supports(h -> h.getBlock() instanceof NoteBlock);
     }

@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.bridge.adventure;
 
-import net.minecraft.world.server.ServerBossInfo;
+import net.minecraft.server.level.ServerBossEvent;
 
 public interface BossBarBridge {
-    ServerBossInfo bridge$asVanillaServerBar();
+
+    ServerBossEvent bridge$asVanillaServerBar();
 }

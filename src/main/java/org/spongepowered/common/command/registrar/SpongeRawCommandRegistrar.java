@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.command.registrar;
 
-import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.exception.CommandPermissionException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
+import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.api.command.registrar.CommandRegistrarType;
+import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Collections;
@@ -49,16 +49,19 @@ import java.util.Optional;
  */
 public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command.Raw> {
 
-    private static final TypeToken<Command.Raw> COMMAND_TYPE = TypeToken.get(Command.Raw.class);
-    private static final ResourceKey CATALOG_KEY = ResourceKey.sponge("raw");
-    public static final SpongeRawCommandRegistrar INSTANCE = new SpongeRawCommandRegistrar();
+    public static final CommandRegistrarType<Command.Raw> TYPE = new SpongeCommandRegistrarType<Command.Raw>(Command.Raw.class,
+            SpongeRawCommandRegistrar::new);
 
     private final HashMap<CommandMapping, Command.Raw> commands = new HashMap<>();
+    private final CommandManager.Mutable manager;
+
+    SpongeRawCommandRegistrar(final CommandManager.Mutable manager) {
+        this.manager = manager;
+    }
 
     @Override
-    @NonNull
-    public TypeToken<Command.@NonNull Raw> handledType() {
-        return SpongeRawCommandRegistrar.COMMAND_TYPE;
+    public @NonNull CommandRegistrarType<Command.Raw> type() {
+        return SpongeRawCommandRegistrar.TYPE;
     }
 
     @Override
@@ -68,7 +71,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
             @NonNull final String primaryAlias,
             @NonNull final String @NonNull... secondaryAliases)
             throws CommandFailedRegistrationException {
-        final CommandMapping mapping = Sponge.getCommandManager().registerAlias(
+        final CommandMapping mapping = this.manager.registerAlias(
                 this,
                 container,
                 command.commandTree(),
@@ -83,7 +86,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
     public CommandResult process(final CommandCause cause, final CommandMapping mapping, final String command, final String arguments) throws CommandException {
         final Command.Raw commandToExecute = this.commands.get(mapping);
         if (commandToExecute.canExecute(cause)) {
-            return commandToExecute.process(cause, arguments);
+            return commandToExecute.process(cause, new SpongeStringReader(arguments));
         }
         throw new CommandPermissionException(Component.text("You do not have permission to run /" + command));
     }
@@ -92,7 +95,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
     public List<String> suggestions(final CommandCause cause, final CommandMapping mapping, final String command, final String arguments) throws CommandException {
         final Command.Raw commandToExecute = this.commands.get(mapping);
         if (commandToExecute.canExecute(cause)) {
-            return commandToExecute.getSuggestions(cause, arguments);
+            return commandToExecute.getSuggestions(cause, new SpongeStringReader(arguments));
         }
         return Collections.emptyList();
     }
@@ -110,17 +113,4 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
     public boolean canExecute(final CommandCause cause, final CommandMapping mapping) {
         return this.commands.get(mapping).canExecute(cause);
     }
-
-    @Override
-    public void reset() {
-        if (Sponge.getCommandManager().isResetting()) {
-            this.commands.clear();
-        }
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return SpongeRawCommandRegistrar.CATALOG_KEY;
-    }
-
 }

@@ -1,0 +1,20 @@
+{
+    "minVersion": "0.8",
+    "package": "org.spongepowered.common.mixin.ipforward",
+    "plugin": "org.spongepowered.common.mixin.plugin.IpForwardPlugin",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+        "network.ConnectionMixin_IpForward",
+        "network.protocol.handshake.ClientIntentionPacketMixin_IpForward",
+        "server.MinecraftServerMixin_IpForward",
+        "server.network.ServerHandshakePacketListenerImplMixin_IpForward",
+        "server.network.ServerLoginPacketListenerImplMixin_IpForward"
+    ],
+    "server": [
+        "server.dedicated.DedicatedServerMixin_IpForward"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

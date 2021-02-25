@@ -24,23 +24,23 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.command.CommandSource;
-
 import java.util.Collection;
+import net.minecraft.commands.CommandSourceStack;
 
 public interface SpongeNode {
 
     // Handles hidden nodes
-    Collection<CommandNode<CommandSource>> getChildrenForSuggestions();
+    Collection<CommandNode<CommandSourceStack>> getChildrenForSuggestions();
 
     // will be implemented by the class
-    Collection<? extends CommandNode<CommandSource>> getRelevantNodes(final StringReader input);
+    Collection<? extends CommandNode<CommandSourceStack>> getRelevantNodes(final StringReader input);
 
-    default Collection<? extends CommandNode<CommandSource>> getRelevantNodesForSuggestions(final StringReader input) {
-        final Collection<? extends CommandNode<CommandSource>> result = this.getRelevantNodes(input);
+    default Collection<? extends CommandNode<CommandSourceStack>> getRelevantNodesForSuggestions(final StringReader input) {
+        final Collection<? extends CommandNode<CommandSourceStack>> result = this.getRelevantNodes(input);
         if (result.isEmpty()) {
             return result;
         }
@@ -51,4 +51,9 @@ public interface SpongeNode {
         return this.getChildrenForSuggestions();
     }
 
+    void forceExecutor(Command<CommandSourceStack> forcedExecutor);
+
+    boolean canForceRedirect();
+
+    void forceRedirect(CommandNode<CommandSourceStack> forcedRedirect);
 }

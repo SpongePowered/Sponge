@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.util.raytrace;
 
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.World;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -38,9 +35,10 @@ import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.util.raytrace.AbstractSpongeRayTrace.TData;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -48,6 +46,8 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
 
 public abstract class AbstractSpongeRayTrace<T extends Locatable> implements RayTrace<@NonNull T> {
 
@@ -77,13 +77,6 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
     @Override
     @NonNull
-    public final RayTrace<@NonNull T> sourcePosition(@NonNull final Vector3d sourcePosition) {
-        this.start = sourcePosition;
-        return this;
-    }
-
-    @Override
-    @NonNull
     public RayTrace<@NonNull T> sourceEyePosition(@NonNull final Living entity) {
         this.sourcePosition(entity.get(Keys.EYE_POSITION)
                 .orElseThrow(() -> new IllegalArgumentException("Entity does not have an eye position key")));
@@ -92,34 +85,8 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
     @Override
     @NonNull
-    public RayTrace<@NonNull T> continueWhileBlock(@NonNull final Predicate<LocatableBlock> continueWhileBlock) {
-        if (this.continueWhileBlock == null) {
-            this.continueWhileBlock = continueWhileBlock;
-        } else {
-            this.continueWhileBlock = this.continueWhileBlock.and(continueWhileBlock);
-        }
-        return this;
-    }
-
-    @Override
-    @NonNull
-    public RayTrace<@NonNull T> continueWhileEntity(@NonNull final Predicate<Entity> continueWhileEntity) {
-        if (this.continueWhileEntity == null) {
-            this.continueWhileEntity = continueWhileEntity;
-        } else {
-            this.continueWhileEntity = this.continueWhileEntity.and(continueWhileEntity);
-        }
-        return this;
-    }
-
-    @Override
-    @NonNull
-    public RayTrace<@NonNull T> continueWhileLocation(@NonNull final Predicate<ServerLocation> continueWhileLocation) {
-        if (this.continueWhileLocation == null) {
-            this.continueWhileLocation = continueWhileLocation;
-        } else {
-            this.continueWhileLocation = this.continueWhileLocation.and(continueWhileLocation);
-        }
+    public final RayTrace<@NonNull T> sourcePosition(@NonNull final Vector3d sourcePosition) {
+        this.start = sourcePosition;
         return this;
     }
 
@@ -149,41 +116,45 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
     @Override
     @NonNull
-    public final RayTrace<@NonNull T> select(@NonNull final Predicate<T> filter) {
-        if (this.select == null) {
-            this.select = filter;
+    public RayTrace<@NonNull T> continueWhileLocation(@NonNull final Predicate<ServerLocation> continueWhileLocation) {
+        if (this.continueWhileLocation == null) {
+            this.continueWhileLocation = continueWhileLocation;
         } else {
-            this.select = this.select.or(filter);
+            this.continueWhileLocation = this.continueWhileLocation.and(continueWhileLocation);
         }
         return this;
     }
 
-    final Vector3i getNextBlock(final Vector3i current, final TData data, final Vector3i steps) {
-        return current.add(
-                data.nextStepWillAdvanceX() ? steps.getX() : 0,
-                data.nextStepWillAdvanceY() ? steps.getY() : 0,
-                data.nextStepWillAdvanceZ() ? steps.getX() : 0
-        );
-    }
-
-    final Vector3i createSteps(final Vector3d direction) {
-        return new Vector3i(
-                Math.signum(direction.getX()),
-                Math.signum(direction.getY()),
-                Math.signum(direction.getZ())
-        );
+    @Override
+    @NonNull
+    public RayTrace<@NonNull T> continueWhileBlock(@NonNull final Predicate<LocatableBlock> continueWhileBlock) {
+        if (this.continueWhileBlock == null) {
+            this.continueWhileBlock = continueWhileBlock;
+        } else {
+            this.continueWhileBlock = this.continueWhileBlock.and(continueWhileBlock);
+        }
+        return this;
     }
 
     @Override
     @NonNull
-    public RayTrace<@NonNull T> reset() {
-        this.select = this.defaultFilter;
-        this.world = null;
-        this.start = null;
-        this.end = null;
-        this.continueWhileBlock = null;
-        this.continueWhileEntity = null;
-        this.continueWhileLocation = null;
+    public RayTrace<@NonNull T> continueWhileEntity(@NonNull final Predicate<Entity> continueWhileEntity) {
+        if (this.continueWhileEntity == null) {
+            this.continueWhileEntity = continueWhileEntity;
+        } else {
+            this.continueWhileEntity = this.continueWhileEntity.and(continueWhileEntity);
+        }
+        return this;
+    }
+
+    @Override
+    @NonNull
+    public final RayTrace<@NonNull T> select(@NonNull final Predicate<T> filter) {
+        if (this.select == this.defaultFilter) {
+            this.select = filter;
+        } else {
+            this.select = this.select.or(filter);
+        }
         return this;
     }
 
@@ -199,7 +170,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
             throw new IllegalStateException("The start and end must be two different vectors");
         }
 
-        final ServerWorld serverWorld = Sponge.getServer().getWorldManager().getWorld(this.world)
+        final ServerWorld serverWorld = Sponge.getServer().getWorldManager().world(this.world)
                 .orElseThrow(() -> new IllegalStateException("World with key " + this.world.getFormatted() + " is not loaded!"));
 
         Vector3i currentBlock = this.initialBlock(direction);
@@ -213,25 +184,25 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
         boolean requireAdvancement = true;
         while (requireAdvancement) {
-            final Vec3d vec3dstart = VecHelper.toVec3d(currentLocation);
+            final net.minecraft.world.phys.Vec3 vec3dstart = VecHelper.toVanillaVector3d(currentLocation);
             // As this iteration is for the CURRENT block location, we need to check where we are with the filter.
             if (this.continueWhileLocation != null && !this.continueWhileLocation.test(ServerLocation.of(serverWorld, currentBlock))) {
                 return Optional.empty();
             }
             final Vector3d nextLocation;
-            final Vec3d vec3dend;
+            final net.minecraft.world.phys.Vec3 vec3dend;
             if (tData.getTotalTWithNextStep() > length) {
                 // This is the last step, we break out of the loop after this set of checks.
                 requireAdvancement = false;
                 nextLocation = this.end;
-                vec3dend = VecHelper.toVec3d(this.end);
+                vec3dend = VecHelper.toVanillaVector3d(this.end);
             } else {
                 nextLocation = currentLocation.add(
                         direction.getX() * tData.getNextStep(),
                         direction.getY() * tData.getNextStep(),
                         direction.getZ() * tData.getNextStep()
                 );
-                vec3dend = VecHelper.toVec3d(nextLocation);
+                vec3dend = VecHelper.toVanillaVector3d(nextLocation);
             }
 
             // Get the selection result.
@@ -256,12 +227,12 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
                 } else {
                     resultDistance = Double.MAX_VALUE;
                 }
-                final AxisAlignedBB targetAABB = this.getBlockAABB(currentBlock);
-                for (final net.minecraft.entity.Entity entity : this.getFailingEntities(serverWorld, targetAABB)) {
-                    final Optional<Vec3d> vec3d = entity.getBoundingBox().rayTrace(vec3dstart, vec3dend);
+                final AABB targetAABB = this.getBlockAABB(currentBlock);
+                for (final net.minecraft.world.entity.Entity entity : this.getFailingEntities(serverWorld, targetAABB)) {
+                    final Optional<net.minecraft.world.phys.Vec3> vec3d = entity.getBoundingBox().clip(vec3dstart, vec3dend);
                     if (vec3d.isPresent()) {
-                        final Vec3d hitPosition = vec3d.get();
-                        final double sqdist = hitPosition.squareDistanceTo(vec3dstart);
+                        final net.minecraft.world.phys.Vec3 hitPosition = vec3d.get();
+                        final double sqdist = hitPosition.distanceToSqr(vec3dstart);
                         if (sqdist < resultDistance) {
                             // We have a failure, so at this point we just bail out and end the trace.
                             return Optional.empty();
@@ -285,28 +256,57 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
         return Optional.empty();
     }
 
-    final AxisAlignedBB getBlockAABB(final Vector3i currentBlock) {
-        return new AxisAlignedBB(currentBlock.getX(),
+    @Override
+    @NonNull
+    public RayTrace<@NonNull T> reset() {
+        this.select = this.defaultFilter;
+        this.world = null;
+        this.start = null;
+        this.end = null;
+        this.continueWhileBlock = null;
+        this.continueWhileEntity = null;
+        this.continueWhileLocation = null;
+        return this;
+    }
+
+    final Vector3i getNextBlock(final Vector3i current, final TData data, final Vector3i steps) {
+        return current.add(
+                data.nextStepWillAdvanceX() ? steps.getX() : 0,
+                data.nextStepWillAdvanceY() ? steps.getY() : 0,
+                data.nextStepWillAdvanceZ() ? steps.getX() : 0
+        );
+    }
+
+    final Vector3i createSteps(final Vector3d direction) {
+        return new Vector3i(
+                Math.signum(direction.getX()),
+                Math.signum(direction.getY()),
+                Math.signum(direction.getZ())
+        );
+    }
+
+    final AABB getBlockAABB(final Vector3i currentBlock) {
+        return new AABB(currentBlock.getX(),
                 currentBlock.getY(), currentBlock.getZ(), currentBlock.getX() + 1, currentBlock.getY() + 1, currentBlock.getZ() + 1);
     }
 
-    private List<net.minecraft.entity.Entity> getFailingEntities(final ServerWorld serverWorld, final AxisAlignedBB targetAABB) {
-        return ((World) serverWorld).getEntitiesInAABBexcluding(null, targetAABB, (Predicate) this.continueWhileEntity.negate());
+    private List<net.minecraft.world.entity.Entity> getFailingEntities(final ServerWorld serverWorld, final AABB targetAABB) {
+        return ((Level) serverWorld).getEntities((net.minecraft.world.entity.Entity) null, targetAABB, (Predicate) this.continueWhileEntity.negate());
     }
 
     boolean requiresEntityTracking() {
         return this.continueWhileEntity != null;
     }
 
-    List<net.minecraft.entity.Entity> selectEntities(final ServerWorld serverWorld, final AxisAlignedBB targetAABB) {
+    List<net.minecraft.world.entity.Entity> selectEntities(final ServerWorld serverWorld, final AABB targetAABB) {
         return Collections.emptyList();
     }
 
     abstract Optional<RayTraceResult<@NonNull T>> testSelectLocation(final ServerWorld serverWorld,
-            final Vec3d location,
-            final Vec3d exitLocation);
+            final net.minecraft.world.phys.Vec3 location,
+            final net.minecraft.world.phys.Vec3 exitLocation);
 
-    final LocatableBlock getBlock(final ServerWorld world, final Vec3d in, final Vec3d out) {
+    final LocatableBlock getBlock(final ServerWorld world, final net.minecraft.world.phys.Vec3 in, final net.minecraft.world.phys.Vec3 out) {
         final Vector3i coord = new Vector3i(
                 Math.min(in.x, out.x),
                 Math.min(in.y, out.y),
@@ -316,8 +316,8 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     private boolean shouldAdvanceThroughBlock(final ServerWorld serverWorld,
-            final Vec3d location,
-            final Vec3d exitLocation) {
+            final net.minecraft.world.phys.Vec3 location,
+            final net.minecraft.world.phys.Vec3 exitLocation) {
         if (this.continueWhileBlock == null) {
             return true;
         }
@@ -358,10 +358,10 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
     final TData createInitialTData(final Vector3d direction) {
         return new TData(
-            0,
-            this.getT(this.start.getX(), direction.getX(), this.end.getX()),
-            this.getT(this.start.getY(), direction.getY(), this.end.getY()),
-            this.getT(this.start.getZ(), direction.getZ(), this.end.getZ())
+                0,
+                this.getT(this.start.getX(), direction.getX(), this.end.getX()),
+                this.getT(this.start.getY(), direction.getY(), this.end.getY()),
+                this.getT(this.start.getZ(), direction.getZ(), this.end.getZ())
         );
     }
 

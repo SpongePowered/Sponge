@@ -25,8 +25,6 @@
 package org.spongepowered.common.util;
 
 import io.netty.channel.local.LocalAddress;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.world.dimension.Dimension;
 
 import java.net.InetSocketAddress;
 import java.net.SocketAddress;
@@ -34,9 +32,6 @@ import java.net.SocketAddress;
 public final class NetworkUtil {
 
     public static final String LOCAL_ADDRESS = "local";
-
-    private NetworkUtil() {
-    }
 
     /**
      * Returns a string representation of the host of a given {@link SocketAddress}.
@@ -55,7 +50,7 @@ public final class NetworkUtil {
         if (address instanceof InetSocketAddress) {
             return ((InetSocketAddress) address).getHostString();
         } else if (address instanceof LocalAddress) {
-            return LOCAL_ADDRESS;
+            return NetworkUtil.LOCAL_ADDRESS;
         }
 
         return address.toString();
@@ -69,7 +64,7 @@ public final class NetworkUtil {
      */
     public static String cleanVirtualHost(String host) {
         // FML appends a marker to the host to recognize FML clients (\0FML\0)
-        host = substringBefore(host, '\0');
+        host = NetworkUtil.substringBefore(host, '\0');
 
         // When clients connect with a SRV record, their host contains a trailing '.'
         if (host.endsWith(".")) {
@@ -84,7 +79,6 @@ public final class NetworkUtil {
         return pos >= 0 ? s.substring(0, pos) : s;
     }
 
-    public static void sendDimensionRegistration(ServerPlayerEntity player, Dimension dimension) {
-
+    private NetworkUtil() {
     }
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.config.inheritable;
 
-
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
@@ -35,35 +34,39 @@ import java.util.Map;
 @ConfigSerializable
 public final class BlockEntityActivationCategory {
 
-    @Setting
+    @Setting("auto-populate")
     @Comment("If 'true', newly discovered block entities will be added to this config with default settings.")
-    private boolean autoPopulate = false;
-    @Setting
+    public boolean autoPopulate = false;
+
+    @Setting("default-range")
     @Comment("Default activation block range used for all block entities unless overridden.")
-    private int defaultBlockRange = 64;
-    @Setting
+    public int defaultRange = 64;
+
+    @Setting("default-tick-rate")
     @Comment("Default tick rate used for all block entities unless overridden.")
-    private int defaultTickRate = 1;
-    @Setting("mods")
+    public int defaultTickRate = 1;
+
+    @Setting
     @Comment("Per-mod overrides. Refer to the minecraft default mod for example.")
-    private Map<String, BlockEntityActivationModCategory> modList = new HashMap<>();
+    public final Map<String, MobSubCategory> mods = new HashMap<>();
 
-    public BlockEntityActivationCategory() {
-    }
+    @ConfigSerializable
+    public static final class MobSubCategory {
 
-    public boolean autoPopulateData() {
-        return this.autoPopulate;
-    }
+        @Setting
+        @Comment("If 'false', block entity activation rules for this mod will be ignored and always tick.")
+        public boolean enabled = true;
 
-    public int getDefaultBlockRange() {
-        return this.defaultBlockRange;
-    }
+        @Setting("default-range")
+        public Integer defaultRange;
 
-    public int getDefaultTickRate() {
-        return this.defaultTickRate;
-    }
+        @Setting("default-tick-rate")
+        public Integer defaultTickRate;
 
-    public Map<String, BlockEntityActivationModCategory> getModList() {
-        return this.modList;
+        @Setting
+        public final Map<String, Integer> ranges = new HashMap<>();
+
+        @Setting("tick-rates")
+        public final Map<String, Integer> tickRates = new HashMap<>();
     }
 }

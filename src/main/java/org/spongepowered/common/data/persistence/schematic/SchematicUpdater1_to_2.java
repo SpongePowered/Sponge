@@ -30,7 +30,7 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.common.util.Constants;
 
 // TODO - Migrate this to DataFixer DSL in 1.14.
-public class SchematicUpdater1_to_2 implements DataContentUpdater {
+public final class SchematicUpdater1_to_2 implements DataContentUpdater {
 
     @Override
     public int getInputVersion() {

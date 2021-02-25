@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.StandingSignBlock;
+import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.RotationUtils;
+import org.spongepowered.common.util.RotationUtils;
 
 public final class StandingSignData {
 
@@ -40,7 +40,7 @@ public final class StandingSignData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> RotationUtils.getFor(h.get(StandingSignBlock.ROTATION)))
+                        .get(h -> RotationUtils.getFor(h.getValue(StandingSignBlock.ROTATION)))
                         .set((h, v) -> RotationUtils.set(h, v, StandingSignBlock.ROTATION))
                         .supports(h -> h.getBlock() instanceof StandingSignBlock);
     }

@@ -33,7 +33,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.Location;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.biome.BiomeType;
+import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
@@ -42,30 +42,36 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
+import net.minecraft.core.BlockPos;
 
-public class SpongeLocation<W extends World<W>> implements Location<W> {
+public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> implements Location<W, L> {
 
-    final WeakReference<W> worldRef;
+    protected final WeakReference<W> worldRef;
     private final Vector3d position;
     private final Vector3i blockPosition;
     private final Vector3i chunkPosition;
     private final Vector3i biomePosition;
 
-    SpongeLocation(final W world, final ChunkLayout chunkLayout, final Vector3d position) {
+    private final BlockPos pos;
+
+    protected SpongeLocation(final W world, final ChunkLayout chunkLayout, final Vector3d position) {
         this.worldRef = new WeakReference<>(world);
         this.position = position;
         this.blockPosition = position.toInt();
         this.chunkPosition = chunkLayout.forceToChunk(this.blockPosition);
         this.biomePosition = position.toInt().mul(1, 0, 1);
+
+        this.pos = new BlockPos(position.getX(), position.getY(), position.getZ());
     }
 
-    SpongeLocation(final W worldRef, final Vector3d position,
-        final Vector3i chunkPosition, final Vector3i biomePosition) {
+    protected SpongeLocation(final W worldRef, final Vector3d position, final Vector3i chunkPosition, final Vector3i biomePosition) {
         this.worldRef = new WeakReference<>(worldRef);
         this.position = position;
         this.blockPosition = position.toInt();
         this.chunkPosition = chunkPosition;
         this.biomePosition = biomePosition;
+
+        this.pos = new BlockPos(position.getX(), position.getY(), position.getZ());
     }
 
     @Override
@@ -148,74 +154,77 @@ public class SpongeLocation<W extends World<W>> implements Location<W> {
     }
 
     @Override
-    public Location<W> withWorld(final W world) {
-        return new SpongeLocation<W>(world, this.position, this.chunkPosition, this.biomePosition);
+    @SuppressWarnings("unchecked")
+    public L withWorld(final W world) {
+        return (L) new SpongeLocation<W, L>(world, this.position, this.chunkPosition, this.biomePosition);
     }
 
     @Override
-    public Location<W> withPosition(final Vector3d position) {
+    @SuppressWarnings("unchecked")
+    public L withPosition(final Vector3d position) {
         final W world = this.worldRef.get();
         if (world == null) {
             throw new IllegalStateException("World Reference is null!");
         }
         // TODO - for now, we make the assumption we always have a server object if we're creating locations
         final ChunkLayout chunkLayout = Sponge.getServer().getChunkLayout();
-        return new SpongeLocation<>(world, chunkLayout, position);
+        return (L) new SpongeLocation<>(world, chunkLayout, position);
     }
 
     @Override
-    public Location<W> withBlockPosition(final Vector3i position) {
+    @SuppressWarnings("unchecked")
+    public L withBlockPosition(final Vector3i position) {
         final W world = this.worldRef.get();
         if (world == null) {
             throw new IllegalStateException("World Reference is null!");
         }
         // TODO - for now, we make the assumption we always have a server object if we're creating locations
         final ChunkLayout chunkLayout = Sponge.getServer().getChunkLayout();
-        return new SpongeLocation<>(world, chunkLayout, position.toDouble());
+        return (L) new SpongeLocation<>(world, chunkLayout, position.toDouble());
     }
 
     @Override
-    public Location<W> sub(final Vector3d v) {
+    public L sub(final Vector3d v) {
         return this.withPosition(this.position.sub(v));
     }
 
     @Override
-    public Location<W> sub(final Vector3i v) {
+    public L sub(final Vector3i v) {
         return this.withBlockPosition(this.blockPosition.sub(v));
     }
 
     @Override
-    public Location<W> sub(final double x, final double y, final double z) {
+    public L sub(final double x, final double y, final double z) {
         return this.withPosition(this.position.sub(x, y, z));
     }
 
     @Override
-    public Location<W> add(final Vector3d v) {
+    public L add(final Vector3d v) {
         return this.withPosition(this.position.add(v));
     }
 
     @Override
-    public Location<W> add(final Vector3i v) {
+    public L add(final Vector3i v) {
         return this.withBlockPosition(this.blockPosition.add(v));
     }
 
     @Override
-    public Location<W> add(final double x, final double y, final double z) {
+    public L add(final double x, final double y, final double z) {
         return this.withPosition(this.position.add(x, y, z));
     }
 
     @Override
-    public Location<W> relativeTo(final Direction direction) {
+    public L relativeTo(final Direction direction) {
         return null;
     }
 
     @Override
-    public Location<W> relativeToBlock(final Direction direction) {
+    public L relativeToBlock(final Direction direction) {
         return null;
     }
 
     @Override
-    public BiomeType getBiome() {
+    public Biome getBiome() {
         return this.getWorld().getBiome(this.blockPosition);
     }
 
@@ -264,6 +273,10 @@ public class SpongeLocation<W extends World<W>> implements Location<W> {
         return this.getWorld().setBlock(this.blockPosition, type.getDefaultState(), flag);
     }
 
+    public BlockPos asBlockPos() {
+        return this.pos;
+    }
+
     @Override
     public boolean equals(final Object o) {
         if (this == o) {
@@ -272,15 +285,15 @@ public class SpongeLocation<W extends World<W>> implements Location<W> {
         if (o == null || this.getClass() != o.getClass()) {
             return false;
         }
-        final SpongeLocation<?> that = (SpongeLocation<?>) o;
-        return this.worldRef.equals(that.worldRef) &&
+        final SpongeLocation<?, ?> that = (SpongeLocation<?, ?>) o;
+        return this.worldRef.get().equals(that.worldRef.get()) &&
                    this.position.equals(that.position) &&
                    this.blockPosition.equals(that.blockPosition);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.worldRef, this.position, this.blockPosition);
+        return Objects.hash(this.worldRef.get(), this.position, this.blockPosition);
     }
 
     @Override

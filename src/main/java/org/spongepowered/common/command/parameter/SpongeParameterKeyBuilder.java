@@ -28,7 +28,7 @@ import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.parameter.Parameter;
 
-public class SpongeParameterKeyBuilder implements Parameter.Key.Builder {
+public final class SpongeParameterKeyBuilder implements Parameter.Key.Builder {
 
     @Override
     public <T> Parameter.@NonNull Key<T> build(@NonNull final String key, @NonNull final TypeToken<T> typeToken) {

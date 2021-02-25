@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.kyori.adventure.text.Component;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
@@ -38,7 +39,6 @@ import org.spongepowered.api.profile.GameProfile;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
-import net.minecraft.network.play.server.SPlayerListItemPacket;
 
 /*
  * This is intentionally not a mixin of SPacketPlayerListItem.AddPlayerData.
@@ -79,7 +79,7 @@ public final class SpongeTabListEntry implements TabListEntry {
     @Override
     public TabListEntry setDisplayName(@Nullable Component displayName) {
         this.displayName = displayName;
-        this.sendUpdate(SPlayerListItemPacket.Action.UPDATE_DISPLAY_NAME);
+        this.sendUpdate(ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME);
         return this;
     }
 
@@ -91,7 +91,7 @@ public final class SpongeTabListEntry implements TabListEntry {
     @Override
     public TabListEntry setLatency(int latency) {
         this.latency = latency;
-        this.sendUpdate(SPlayerListItemPacket.Action.UPDATE_LATENCY);
+        this.sendUpdate(ClientboundPlayerInfoPacket.Action.UPDATE_LATENCY);
         return this;
     }
 
@@ -103,11 +103,11 @@ public final class SpongeTabListEntry implements TabListEntry {
     @Override
     public TabListEntry setGameMode(GameMode gameMode) {
         this.gameMode = checkNotNull(gameMode, "game mode");
-        this.sendUpdate(SPlayerListItemPacket.Action.UPDATE_GAME_MODE);
+        this.sendUpdate(ClientboundPlayerInfoPacket.Action.UPDATE_GAME_MODE);
         return this;
     }
 
-    private void sendUpdate(SPlayerListItemPacket.Action action) {
+    private void sendUpdate(ClientboundPlayerInfoPacket.Action action) {
         // We may be updating our values, so we don't want to send any updates
         // since that will result in a continuous loop.
         if (this.updateWithoutSend) {

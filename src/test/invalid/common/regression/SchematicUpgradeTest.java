@@ -30,7 +30,6 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.spongepowered.api.data.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.data.persistence.DataTranslators;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.lwts.runner.LaunchWrapperTestRunner;
 

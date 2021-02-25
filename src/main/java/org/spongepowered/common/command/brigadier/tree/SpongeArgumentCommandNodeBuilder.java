@@ -26,30 +26,23 @@ package org.spongepowered.common.command.brigadier.tree;
 
 import com.mojang.brigadier.builder.ArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
+import org.spongepowered.common.command.parameter.SpongeDefaultValueParser;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 
 // We use the ArgumentBuilder primarily for setting redirects properly.
-public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<CommandSource, SpongeArgumentCommandNodeBuilder<T>> {
+public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<CommandSourceStack, SpongeArgumentCommandNodeBuilder<T>> {
 
     private final SpongeParameterKey<? super T> key;
     private final ArgumentParser<? extends T> type;
     @Nullable private final ValueCompleter completer;
     @Nullable private final String suffix;
     @Nullable private final ValueUsage usage;
-
-    public SpongeArgumentCommandNodeBuilder(
-            final SpongeParameterKey<? super T> key,
-            final ArgumentParser<? extends T> type,
-            final ValueCompleter completer,
-            @Nullable final ValueUsage usage) {
-        this(key, type, completer, usage, null);
-    }
 
     public SpongeArgumentCommandNodeBuilder(
             final SpongeParameterKey<? super T> key,
@@ -83,7 +76,7 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
                 this.isFork(),
                 this.suffix == null ? this.key.key() : this.key.key() + "_" + this.suffix
         );
-        for (final CommandNode<CommandSource> child : this.getArguments()) {
+        for (final CommandNode<CommandSourceStack> child : this.getArguments()) {
             node.addChild(child);
         }
         return node;

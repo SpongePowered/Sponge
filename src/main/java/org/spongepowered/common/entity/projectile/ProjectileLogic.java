@@ -27,7 +27,7 @@ package org.spongepowered.common.entity.projectile;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Optional;
 

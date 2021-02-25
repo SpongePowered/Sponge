@@ -31,24 +31,25 @@ import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.ILocationArgument;
-import net.minecraft.command.arguments.Vec3Argument;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.Vec3d;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.arguments.coordinates.Coordinates;
+import net.minecraft.commands.arguments.coordinates.Vec3Argument;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -57,22 +58,13 @@ import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public final class SpongeServerLocationValueParameter extends CatalogedArgumentParser<ServerLocation> implements ComplexSuggestionNodeProvider {
+public final class SpongeServerLocationValueParameter extends ResourceKeyedArgumentValueParser<ServerLocation> implements ComplexSuggestionNodeProvider {
 
     private static final Vec3Argument VEC_3_ARGUMENT = Vec3Argument.vec3(false);
     private static final Pattern STARTS_WITH_NUMBER = Pattern.compile("^\\s*((-)?[0-9]|~|\\^)");
-    private final ResourceKey resourceKey;
-    private final boolean selectAllWorlds;
 
-    public SpongeServerLocationValueParameter(final boolean selectAllWorlds) {
-        this.selectAllWorlds = selectAllWorlds;
-        this.resourceKey = selectAllWorlds ?  ResourceKey.sponge("location_all") : ResourceKey.sponge("location_online_only");
-    }
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.resourceKey;
+    public SpongeServerLocationValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override
@@ -82,10 +74,9 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
     }
 
     private List<String> complete(final String currentInput) {
-        return SpongeCommon.getGame().getServer().getWorldManager().getAllProperties()
+        return SpongeCommon.getGame().getServer().getWorldManager().worlds()
                 .stream()
-                .filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
-                .map(WorldProperties::getKey)
+                .map(ServerWorld::getKey)
                 .map(ResourceKey::getFormatted)
                 .filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
@@ -98,11 +89,11 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         final ArgumentReader.Immutable state = reader.getImmutable();
-        WorldProperties worldProperties;
+        ServerWorld serverWorld;
         try {
             final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-            worldProperties = SpongeCommon.getGame().getServer().getWorldManager()
-                    .getProperties(resourceLocation).filter(x -> this.selectAllWorlds || x.getWorld().isPresent())
+            serverWorld = SpongeCommon.getGame().getServer().getWorldManager()
+                    .world(resourceLocation)
                     .orElseThrow(() -> reader.createException(
                             Component.text("Could not get world with key \"" + resourceLocation.toString() + "\"")));
         } catch (final ArgumentParseException e) {
@@ -112,7 +103,7 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
                 if (!SpongeServerLocationValueParameter.STARTS_WITH_NUMBER.matcher(state.getRemaining()).find()) {
                     throw e;
                 }
-                worldProperties = location.get().getWorld().getProperties();
+                serverWorld = location.get().getWorld();
             } else {
                 throw e;
             }
@@ -121,12 +112,8 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
 
         try {
             reader.skipWhitespace();
-            final Vec3d vec3d = VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSource) context.getCause());
-            final ResourceKey key = worldProperties.getKey();
-            return Optional.of(
-                    worldProperties.getWorld()
-                            .map(x -> x.getLocation(vec3d.x, vec3d.y, vec3d.z))
-                            .orElseGet(() -> ServerLocation.of(key, vec3d.x, vec3d.y, vec3d.z)));
+            final Vec3 vec3d = SpongeServerLocationValueParameter.VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSourceStack) context.getCause());
+            return Optional.of(serverWorld.getLocation(VecHelper.toVector3d(vec3d)));
         } catch (final CommandSyntaxException e) {
             throw reader.createException(Component.text(e.getMessage()));
         }
@@ -138,13 +125,13 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
     }
 
     @Override
-    public CommandNode<ISuggestionProvider> createSuggestions(final CommandNode<ISuggestionProvider> rootNode, final String key,
+    public CommandNode<SharedSuggestionProvider> createSuggestions(final CommandNode<SharedSuggestionProvider> rootNode, final String key,
             final boolean isTerminal,
-            final Consumer<List<CommandNode<ISuggestionProvider>>> firstNodes,
-            final Consumer<CommandNode<ISuggestionProvider>> redirectionNodes,
+            final Consumer<List<CommandNode<SharedSuggestionProvider>>> firstNodes,
+            final Consumer<CommandNode<SharedSuggestionProvider>> redirectionNodes,
             final boolean allowCustomSuggestionsOnTheFirstElement) {
 
-        final RequiredArgumentBuilder<ISuggestionProvider, ResourceLocation> firstNode =
+        final RequiredArgumentBuilder<SharedSuggestionProvider, ResourceLocation> firstNode =
                 RequiredArgumentBuilder.argument(key, Constants.Command.RESOURCE_LOCATION_TYPE);
         if (allowCustomSuggestionsOnTheFirstElement) {
             firstNode.suggests((context, builder) -> {
@@ -152,18 +139,18 @@ public final class SpongeServerLocationValueParameter extends CatalogedArgumentP
                 return builder.buildFuture();
             });
         }
-        final RequiredArgumentBuilder<ISuggestionProvider, ILocationArgument> secondNode =
+        final RequiredArgumentBuilder<SharedSuggestionProvider, Coordinates> secondNode =
                 RequiredArgumentBuilder.argument(key + "_pos", Vec3Argument.vec3());
         if (isTerminal) {
             secondNode.executes(x -> 1);
         }
-        final CommandNode<ISuggestionProvider> second = secondNode.build();
+        final CommandNode<SharedSuggestionProvider> second = secondNode.build();
         firstNode.then(second);
-        final CommandNode<ISuggestionProvider> first = firstNode.build();
+        final CommandNode<SharedSuggestionProvider> first = firstNode.build();
         redirectionNodes.accept(second);
         rootNode.addChild(first);
         rootNode.addChild(second);
-        final List<CommandNode<ISuggestionProvider>> nodesToAttach = new ArrayList<>();
+        final List<CommandNode<SharedSuggestionProvider>> nodesToAttach = new ArrayList<>();
         nodesToAttach.add(first);
         nodesToAttach.add(second);
         firstNodes.accept(nodesToAttach);

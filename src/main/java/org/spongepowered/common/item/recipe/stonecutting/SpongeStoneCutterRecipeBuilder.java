@@ -27,40 +27,38 @@ package org.spongepowered.common.item.recipe.stonecutting;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
-import org.spongepowered.api.item.recipe.crafting.ShapedCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.util.Collections;
 import java.util.function.Function;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
-public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<RecipeRegistration, StoneCutterRecipe.Builder> implements
+public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, StoneCutterRecipe.Builder> implements
         StoneCutterRecipe.Builder, StoneCutterRecipe.Builder.ResultStep, StoneCutterRecipe.Builder.EndStep {
 
     private ItemStack result;
     private Ingredient ingredient;
-    private Function<IInventory, net.minecraft.item.ItemStack> resultFunction;
+    private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
     @Nullable private String group;
 
     @Override
     public ResultStep ingredient(ItemType ingredient) {
-        this.ingredient = Ingredient.fromItems(() -> ((Item) ingredient));
+        this.ingredient = Ingredient.of(() -> ((Item) ingredient));
         return this;
     }
 
@@ -102,18 +100,12 @@ public final class SpongeStoneCutterRecipeBuilder extends SpongeCatalogBuilder<R
     }
 
     @Override
-    protected RecipeRegistration build(ResourceKey key) {
-        final net.minecraft.item.ItemStack result = ItemStackUtil.toNative(this.result);
-        final IRecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Collections.singleton(this.ingredient),
-                IRecipeSerializer.STONECUTTING, SpongeStonecuttingRecipeSerializer.SPONGE_STONECUTTING);
+    public RecipeRegistration build0() {
+        final net.minecraft.world.item.ItemStack result = ItemStackUtil.toNative(this.result);
+        final RecipeSerializer<?> serializer = SpongeRecipeRegistration.determineSerializer(result, this.resultFunction, null, Collections.singleton(this.ingredient),
+                RecipeSerializer.STONECUTTER, SpongeStonecuttingRecipeSerializer.SPONGE_STONECUTTING);
 
         return new SpongeStonecuttingRecipeRegistration((ResourceLocation) (Object) key, serializer, this.group, this.ingredient, result, this.resultFunction);
-    }
-
-    @Override
-    public StoneCutterRecipe.Builder.EndStep key(ResourceKey key) {
-        super.key(key);
-        return this;
     }
 
     @Override

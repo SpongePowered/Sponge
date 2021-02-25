@@ -24,16 +24,10 @@
  */
 package org.spongepowered.common.economy;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeAccountDeletionResultType extends SpongeCatalogType implements AccountDeletionResultType {
-
-    public SpongeAccountDeletionResultType(final ResourceKey key) {
-        super(key);
-    }
+public final class SpongeAccountDeletionResultType implements AccountDeletionResultType {
 
     @Override
     public boolean isSuccess() {

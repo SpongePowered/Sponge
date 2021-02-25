@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.query.Query;
@@ -34,16 +33,8 @@ import java.util.Arrays;
 
 public final class PlayerPrimaryHotbarFirstQuery extends AppendQuery implements QueryType.NoParam {
 
-    private final ResourceKey key;
-
-    public PlayerPrimaryHotbarFirstQuery(final ResourceKey key) {
+    public PlayerPrimaryHotbarFirstQuery() {
         super(Arrays.asList(new InventoryTypeQuery(Hotbar.class), new InventoryTypeQuery(PrimaryPlayerInventory.class)));
-        this.key = key;
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
     }
 
     @Override

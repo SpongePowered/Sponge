@@ -48,7 +48,7 @@ public class TileEntityActivationPlugin implements IMixinConfigPlugin {
 
     @Override
     public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
-        return SpongeConfigs.getCommon().get().getModules().usePluginTileEntityActivation();
+        return SpongeConfigs.getCommon().get().modules.blockEntityActivationRange;
     }
 
     @Override

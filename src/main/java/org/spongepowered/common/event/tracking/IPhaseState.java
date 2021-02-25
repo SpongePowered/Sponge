@@ -25,29 +25,16 @@
 package org.spongepowered.common.event.tracking;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ListMultimap;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockEventData;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.loot.LootContext;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
@@ -57,9 +44,11 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.server.TickTaskBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
@@ -67,7 +56,7 @@ import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTr
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.event.tracking.phase.tick.BlockTickContext;
+import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.world.BlockChange;
 
@@ -78,6 +67,17 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.loot.LootContext;
 
 /**
  * A literal phase state of which the {@link World} is currently running
@@ -89,7 +89,7 @@ import java.util.stream.Collectors;
 @DefaultQualifier(NonNull.class)
 public interface IPhaseState<C extends PhaseContext<C>> {
 
-    BiConsumer<CauseStackManager.StackFrame, ? extends PhaseContext<?>> DEFAULT_OWNER_NOTIFIER = (frame, ctx) -> {
+    BiConsumer<CauseStackManager.StackFrame, ? extends PhaseContext<@NonNull ?>> DEFAULT_OWNER_NOTIFIER = (frame, ctx) -> {
         if (ctx.usedFrame == null) {
             ctx.usedFrame = new ArrayDeque<>();
         }
@@ -151,7 +151,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Gets whether this state is considered a "ticking" state. Specifically such that when
-     * {@link Chunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)} is used,
+     * {@link LevelChunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)} is used,
      * we are not filtering any of the lists, whereas if this state is a ticking state, it will
      * filter the proposed list of entities to supply any potentially captured entities.
      *
@@ -205,27 +205,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * </p>
      *
      * <p>Note that the {@link PhaseTracker} is only provided for easy access
-     * to the {@link ServerWorld}, {@link ServerWorldBridge}, and
+     * to the {@link ServerLevel}, {@link ServerLevelBridge}, and
      * {@link World} instances.</p>
      *
      * @param phaseContext The context of the current state being unwound
      */
     void unwind(C phaseContext);
-
-    /**
-     * Used to create any extra specialized events for {@link ChangeBlockEvent.Post} as necessary.
-     * An example of this being used specially is for explosions needing to create a child classed
-     * post event.
-     *
-     * @param context
-     * @param transactions
-     * @param cause
-     * @return
-     */
-    default ChangeBlockEvent.Post createChangeBlockPostEvent(final C context, final ImmutableList<Transaction<BlockSnapshot>> transactions,
-        final Cause cause) {
-        return SpongeEventFactory.createChangeBlockEventPost(cause, transactions);
-    }
 
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
@@ -241,7 +226,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Specifically gets whether this state ignores any attempts at storing
      * or retrieving an owner/notifier from a particular {@link BlockPos}
-     * within a {@link net.minecraft.world.World} or {@link Chunk}.
+     * within a {@link net.minecraft.world.level.Level} or {@link LevelChunk}.
      *
      * <p>Specifically used in
      * {@code ChunkMixin_OwnershipTracked#bridge$addTrackedBlockPosition(Block, BlockPos, User, PlayerTracker.Type)}
@@ -293,7 +278,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state will ignore {@link net.minecraft.world.World#addBlockEvent(BlockPos, Block, int, int)}
+     * Gets whether this state will ignore {@link net.minecraft.world.level.Level#addBlockEvent(BlockPos, Block, int, int)}
      * additions when potentially performing notification updates etc. Usually true for world generation.
      *
      * @return False if block events are to be processed in some way by the state
@@ -304,7 +289,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Gets whether this state will already consider any captures or extra processing for a
-     * {@link Block#tick(BlockState, net.minecraft.world.World, BlockPos, Random)}. Again usually
+     * {@link Block#tick(BlockState, ServerLevel, BlockPos, Random)}. Again usually
      * considered for world generation or post states or block restorations.
      *
      * @param context The phase data currently present
@@ -405,7 +390,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param notifier The tracker type (owner or notifier)
      */
     default void associateNeighborStateNotifier(final C unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-        final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
+        final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
 
     }
 
@@ -425,15 +410,14 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * Appends additional information from the block's position in the world to provide notifier/owner
      * information. Overridden in world generation states to reduce chunk lookup costs and since
      * world generation does not track owners/notifiers.
-     *
-     * @param world The world reference
+     *  @param world The world reference
      * @param pos The position being updated
      * @param context The context
      * @param phaseContext the block tick context being entered
      */
-    default void appendNotifierPreBlockTick(final ServerWorld world, final BlockPos pos, final C context, final BlockTickContext phaseContext) {
-        final Chunk chunk = world.getChunkAt(pos);
-        final ChunkBridge mixinChunk = (ChunkBridge) chunk;
+    default void appendNotifierPreBlockTick(final ServerLevel world, final BlockPos pos, final C context, final LocationBasedTickContext<@NonNull ?> phaseContext) {
+        final LevelChunk chunk = world.getChunkAt(pos);
+        final LevelChunkBridge mixinChunk = (LevelChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
             mixinChunk.bridge$getBlockCreator(pos).ifPresent(phaseContext::creator);
             mixinChunk.bridge$getBlockNotifier(pos).ifPresent(phaseContext::notifier);
@@ -442,14 +426,10 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     /**
      * Appends any additional information to the block tick context from this context.
-     *  @param context
-     * @param currentContext
-     * @param mixinWorldServer
-     * @param pos
-     * @param blockEvent
      */
-    default void appendNotifierToBlockEvent(final C context, final PhaseContext<?> currentContext,
-        final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
+    default void appendNotifierToBlockEvent(final C context,
+        final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
+    ) {
 
     }
 
@@ -461,7 +441,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param playerIn
      * @param context
      */
-    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final @Nullable ServerPlayerEntity playerIn, final C context) {
+    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final @Nullable ServerPlayer playerIn, final C context) {
 
     }
 
@@ -483,11 +463,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default boolean isRegeneration() {
-        return false;
-    }
-
-    default boolean getShouldCancelAllTransactions(final C context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
-        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
         return false;
     }
 
@@ -582,16 +557,27 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     ) {
         return SpongeEventFactory.createSpawnEntityEvent(currentCause,
             collect.stream()
-                .map(Tuple::getFirst)
+                .map(t -> (org.spongepowered.api.entity.Entity) t.getFirst())
                 .collect(Collectors.toList())
         );
     }
 
-    default boolean recordsEntitySpawns(C context) {
+    default boolean recordsEntitySpawns(final C context) {
         return true;
     }
 
-    default void populateLootContext(C phaseContext, LootContext.Builder lootBuilder) {
+    default void populateLootContext(final C phaseContext, final LootContext.Builder lootBuilder) {
+
+    }
+
+    default Operation getBlockOperation(final SpongeBlockSnapshot original, final BlockChange blockChange) {
+        return blockChange.toOperation();
+    }
+
+    default void foldContextForThread(final C context, final TickTaskBridge returnValue) {
+    }
+
+    default void associateScheduledTickUpdate(C asContext, TickNextTickData<?> entry) {
 
     }
 }

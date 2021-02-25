@@ -24,26 +24,54 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import net.minecraft.command.CommandSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.CommandExecutor;
 
 import java.util.Collection;
+import net.minecraft.commands.CommandSourceStack;
 
-public final class SpongeRootCommandNode extends RootCommandNode<CommandSource> implements SpongeNode {
+public final class SpongeRootCommandNode extends RootCommandNode<CommandSourceStack> implements SpongeNode {
 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
+    @Nullable private Command<CommandSourceStack> executor;
 
     @Override
-    public void addChild(final CommandNode<CommandSource> node) {
+    public void addChild(final CommandNode<CommandSourceStack> node) {
         super.addChild(node);
         this.nodeHolder.add(node);
     }
 
     @Override
-    public Collection<CommandNode<CommandSource>> getChildrenForSuggestions() {
+    public Collection<CommandNode<CommandSourceStack>> getChildrenForSuggestions() {
         return this.nodeHolder.getChildrenForSuggestions();
+    }
+
+    @Override
+    public void forceExecutor(final Command<CommandSourceStack> forcedExecutor) {
+        this.executor = forcedExecutor;
+    }
+
+    @Override
+    public boolean canForceRedirect() {
+        return false;
+    }
+
+    @Override
+    public void forceRedirect(final CommandNode<CommandSourceStack> forcedRedirect) {
+        // no-op
+    }
+
+    @Override
+    public Command<CommandSourceStack> getCommand() {
+        final Command<CommandSourceStack> command = super.getCommand();
+        if (command != null) {
+            return command;
+        }
+        return this.executor;
     }
 
 }

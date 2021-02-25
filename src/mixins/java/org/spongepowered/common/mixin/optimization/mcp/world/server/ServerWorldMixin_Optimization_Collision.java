@@ -24,46 +24,36 @@
  */
 package org.spongepowered.common.mixin.optimization.mcp.world.server;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.AxisAlignedBB;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.mixin.optimization.mcp.world.WorldMixin_Optimization_Collision;
+import org.spongepowered.common.mixin.optimization.mcp.world.level.LevelReaderMixin_Optimization_Collision;
 
 import java.util.Optional;
+import java.util.stream.Stream;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.phys.AABB;
 
-@Mixin(value = ServerWorld.class, priority = 1500)
-public abstract class ServerWorldMixin_Optimization_Collision extends WorldMixin_Optimization_Collision {
+@Mixin(value = ServerLevel.class, priority = 1500)
+public abstract class ServerWorldMixin_Optimization_Collision implements LevelReaderMixin_Optimization_Collision {
 
-    @SuppressWarnings("deprecation")
     @Override
-    public boolean isFlammableWithin(final AxisAlignedBB bb) {
+    public Stream<BlockState> getBlockStatesIfLoaded(final AABB aabb) {
         if (((WorldBridge) this).bridge$isFake()) {
-            return super.isFlammableWithin(bb);
+            return LevelReaderMixin_Optimization_Collision.super.getBlockStatesIfLoaded(aabb);
         }
         final Optional<ActiveChunkReferantBridge> source = PhaseTracker.getInstance().getPhaseContext().getSource(Entity.class)
             .map(entity -> (ActiveChunkReferantBridge) entity);
         if (source.isPresent()) {
-            final ChunkBridge activeChunk = source.get().bridge$getActiveChunk();
+            final LevelChunkBridge activeChunk = source.get().bridge$getActiveChunk();
             if (activeChunk == null || activeChunk.bridge$isQueuedForUnload() || !activeChunk.bridge$areNeighborsLoaded()) {
-                return false;
-            }
-        } else {
-            final int xStart = MathHelper.floor(bb.minX);
-            final int xEnd = MathHelper.ceil(bb.maxX);
-            final int yStart = MathHelper.floor(bb.minY);
-            final int yEnd = MathHelper.ceil(bb.maxY);
-            final int zStart = MathHelper.floor(bb.minZ);
-            final int zEnd = MathHelper.ceil(bb.maxZ);
-            if (!((ServerWorld) (Object) this).isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd)) {
-                return false;
+                return Stream.empty();
             }
         }
-        return super.isFlammableWithin(bb);
+        return LevelReaderMixin_Optimization_Collision.super.getBlockStatesIfLoaded(aabb);
     }
 }

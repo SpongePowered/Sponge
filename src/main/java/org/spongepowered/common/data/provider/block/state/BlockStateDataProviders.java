@@ -25,14 +25,8 @@
 package org.spongepowered.common.data.provider.block.state;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.util.Constants;
 
-
-public class BlockStateDataProviders extends DataProviderRegistratorBuilder {
-
-    public BlockStateDataProviders() {
-        super(Constants.Sponge.Entity.DataRegistration.BLOCKSTATE);
-    }
+public final class BlockStateDataProviders extends DataProviderRegistratorBuilder {
 
     @Override
     public void registerProviders() {

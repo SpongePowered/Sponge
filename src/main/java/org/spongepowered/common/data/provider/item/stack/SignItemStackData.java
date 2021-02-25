@@ -26,8 +26,8 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.Lists;
 import net.kyori.adventure.text.Component;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -46,7 +46,7 @@ public final class SignItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.SIGN_LINES)
                         .get(h -> {
-                            final CompoundNBT tag = h.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+                            final CompoundTag tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             if (tag == null) {
                                 return null;
                             }
@@ -61,7 +61,7 @@ public final class SignItemStackData {
                             return texts;
                         })
                         .set((h, v) -> {
-                            final CompoundNBT tag = h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+                            final CompoundTag tag = h.getOrCreateTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             tag.putString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
                             for (int i = 0; i < 4; i++) {
                                 final Component line = v.size() > i ? v.get(i) : Component.empty();
@@ -71,7 +71,7 @@ public final class SignItemStackData {
                                 tag.putString("Text" + (i + 1), SpongeAdventure.json(line));
                             }
                         })
-                        .delete(h -> h.removeChildTag(Constants.Item.BLOCK_ENTITY_TAG));
+                        .delete(h -> h.removeTagKey(Constants.Item.BLOCK_ENTITY_TAG));
     }
     // @formatter:on
 }

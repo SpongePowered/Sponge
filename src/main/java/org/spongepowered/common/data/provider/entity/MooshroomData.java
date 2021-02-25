@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.MooshroomEntity;
+import net.minecraft.world.entity.animal.MushroomCow;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.MooshroomType;
-import org.spongepowered.common.accessor.entity.passive.MooshroomEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.MushroomCowAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class MooshroomData {
@@ -38,10 +38,10 @@ public final class MooshroomData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(MooshroomEntity.class)
+                .asMutable(MushroomCow.class)
                     .create(Keys.MOOSHROOM_TYPE)
-                        .get(h -> (MooshroomType) (Object) h.getMooshroomType())
-                        .set((h, v) -> ((MooshroomEntityAccessor) h).accessor$setMooshroomType((MooshroomEntity.Type) (Object) v));
+                        .get(h -> (MooshroomType) (Object) h.getMushroomType())
+                        .set((h, v) -> ((MushroomCowAccessor) h).invoker$setMushroomType((MushroomCow.MushroomType) (Object) v));
     }
     // @formatter:on
 }

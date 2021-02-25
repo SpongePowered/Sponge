@@ -26,7 +26,6 @@ package org.spongepowered.common.placeholder;
 
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 
@@ -34,16 +33,9 @@ import java.util.function.Function;
 
 import javax.annotation.Nullable;
 
-public class SpongePlaceholderParserBuilder implements PlaceholderParser.Builder {
+public final class SpongePlaceholderParserBuilder implements PlaceholderParser.Builder {
 
-    @Nullable private ResourceKey key;
     @Nullable private Function<PlaceholderContext, Component> parser;
-
-    @Override
-    public PlaceholderParser.Builder key(final ResourceKey resourceKey) {
-        this.key = resourceKey;
-        return this;
-    }
 
     @Override
     public PlaceholderParser.Builder parser(final Function<PlaceholderContext, Component> parser) {
@@ -53,14 +45,12 @@ public class SpongePlaceholderParserBuilder implements PlaceholderParser.Builder
 
     @Override
     public PlaceholderParser build() throws IllegalStateException {
-        Preconditions.checkState(this.key != null, "Key must be set");
         Preconditions.checkState(this.parser != null, "Parser must be set");
-        return new SpongePlaceholderParser(this.key, this.parser);
+        return new SpongePlaceholderParser(this.parser);
     }
 
     @Override
     public PlaceholderParser.Builder reset() {
-        this.key = null;
         this.parser = null;
         return this;
     }

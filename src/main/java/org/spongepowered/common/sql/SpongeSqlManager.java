@@ -38,8 +38,6 @@ import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
-import javax.sql.DataSource;
 import java.io.Closeable;
 import java.io.IOException;
 import java.io.UnsupportedEncodingException;
@@ -56,6 +54,9 @@ import java.util.concurrent.CompletionException;
 import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
+
+import javax.annotation.Nullable;
+import javax.sql.DataSource;
 
 /**
  * Implementation of a SQL-using service.
@@ -124,7 +125,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
                     // https://github.com/brettwooldridge/HikariCP/wiki/About-Pool-Sizing for info on pool sizing
                     config.setMaximumPoolSize((Runtime.getRuntime().availableProcessors() * 2) + 1);
                     config.setLeakDetectionThreshold(60 * 1000);
-                    final Properties driverSpecificProperties = PROTOCOL_SPECIFIC_PROPS.get(key.getDriverClassName());
+                    final Properties driverSpecificProperties = SpongeSqlManager.PROTOCOL_SPECIFIC_PROPS.get(key.getDriverClassName());
                     if (driverSpecificProperties != null) {
                         config.setDataSourceProperties(driverSpecificProperties);
                     }
@@ -237,17 +238,17 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
          * @throws SQLException If the driver for the given URL is not present
          */
         public static ConnectionInfo fromUrl(@Nullable final PluginContainer container, final String fullUrl) throws SQLException {
-            final Matcher match = URL_REGEX.matcher(fullUrl);
+            final Matcher match = ConnectionInfo.URL_REGEX.matcher(fullUrl);
             if (!match.matches()) {
                 throw new IllegalArgumentException("URL " + fullUrl + " is not a valid JDBC URL");
             }
 
             final String protocol = match.group(1);
             final boolean hasSlashes = match.group(2) != null;
-            final String user = urlDecode(match.group(3));
-            final String pass = urlDecode(match.group(4));
+            final String user = ConnectionInfo.urlDecode(match.group(3));
+            final String pass = ConnectionInfo.urlDecode(match.group(4));
             String serverDatabaseSpecifier = match.group(5);
-            final BiFunction<PluginContainer, String, String> derelativizer = PATH_CANONICALIZERS.get(protocol);
+            final BiFunction<PluginContainer, String, String> derelativizer = SpongeSqlManager.PATH_CANONICALIZERS.get(protocol);
             if (container != null && derelativizer != null) {
                 serverDatabaseSpecifier = derelativizer.apply(container, serverDatabaseSpecifier);
             }
@@ -258,7 +259,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
 
         private static String urlDecode(final String str) {
             try {
-                return str == null ? null : URLDecoder.decode(str, UTF_8);
+                return str == null ? null : URLDecoder.decode(str, ConnectionInfo.UTF_8);
             } catch (final UnsupportedEncodingException e) {
                 // If UTF-8 is not supported, we have bigger problems...
                 throw new RuntimeException("UTF-8 is not supported on this system", e);
@@ -268,7 +269,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
 
     @Override
     public Optional<String> getConnectionUrlFromAlias(final String alias) {
-        return Optional.ofNullable(SpongeConfigs.getCommon().get().getSql().getAliases().get(alias));
+        return Optional.ofNullable(SpongeConfigs.getCommon().get().sql.aliases.get(alias));
     }
 
 }

@@ -26,9 +26,7 @@ package org.spongepowered.common.data;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import io.leangen.geantyref.TypeToken;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DuplicateDataStoreException;
@@ -36,7 +34,6 @@ import org.spongepowered.api.data.DuplicateProviderException;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -46,7 +43,7 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 
-public final class SpongeDataRegistrationBuilder extends SpongeCatalogBuilder<DataRegistration, DataRegistration.Builder> implements DataRegistration.Builder{
+public final class SpongeDataRegistrationBuilder implements DataRegistration.Builder {
 
     Multimap<Key, DataProvider> dataProviderMap = HashMultimap.create();
     Map<Type, DataStore> dataStoreMap = new HashMap<>();
@@ -61,38 +58,37 @@ public final class SpongeDataRegistrationBuilder extends SpongeCatalogBuilder<Da
     }
 
     @Override
-    public DataRegistration.Builder provider(DataProvider<?, ?> provider) throws DuplicateProviderException {
+    public DataRegistration.Builder provider(final DataProvider<?, ?> provider) throws DuplicateProviderException {
         this.dataProviderMap.put(provider.getKey(), provider);
         return this;
     }
 
     @Override
-    public DataRegistration.Builder dataKey(Key<?> key) {
+    public DataRegistration.Builder dataKey(final Key<?> key) {
         this.keys.add(key);
         return this;
     }
 
     @Override
-    public DataRegistration.Builder dataKey(Key<?> key, Key<?>... others) {
+    public DataRegistration.Builder dataKey(final Key<?> key, final Key<?>... others) {
         this.keys.add(key);
         Collections.addAll(this.keys, others);
         return this;
     }
 
     @Override
-    public DataRegistration.Builder dataKey(Iterable<Key<?>> keys) {
+    public DataRegistration.Builder dataKey(final Iterable<Key<?>> keys) {
         keys.forEach(this.keys::add);
         return this;
     }
 
     @Override
-    protected DataRegistration build(ResourceKey key) {
-        return new SpongeDataRegistration(key, SpongeCommon.getActivePlugin(), this);
+    public DataRegistration build() {
+        return new SpongeDataRegistration(this);
     }
 
     @Override
     public SpongeDataRegistrationBuilder reset() {
-        super.reset();
         this.dataProviderMap = HashMultimap.create();
         this.dataStoreMap = new IdentityHashMap<>();
         this.keys = new ArrayList<>();

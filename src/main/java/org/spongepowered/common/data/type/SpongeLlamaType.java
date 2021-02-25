@@ -24,12 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.LlamaType;
 
-public final class SpongeLlamaType extends SpongeEntityMetadataType<Integer> implements LlamaType {
-
-    public SpongeLlamaType(ResourceKey key, int metadata) {
-        super(key, metadata);
-    }
+public final class SpongeLlamaType implements LlamaType {
 }

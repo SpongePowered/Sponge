@@ -24,40 +24,38 @@
  */
 package org.spongepowered.common.item.recipe.cooking;
 
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.FurnaceRecipe;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.item.crafting.SmokingRecipe;
-import net.minecraft.util.ResourceLocation;
-
 import java.util.function.Function;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.SmeltingRecipe;
 
-public class SpongeFurnaceRecipe extends FurnaceRecipe {
+public class SpongeFurnaceRecipe extends SmeltingRecipe {
 
-    private final Function<IInventory, ItemStack> resultFunction;
+    private final Function<Container, ItemStack> resultFunction;
 
-    public SpongeFurnaceRecipe(ResourceLocation p_i50030_1_, String p_i50030_2_, Ingredient p_i50030_3_, ItemStack p_i50030_4_, float p_i50030_5_, int p_i50030_6_, Function<IInventory, ItemStack> resultFunction) {
-        super(p_i50030_1_, p_i50030_2_, p_i50030_3_, p_i50030_4_, p_i50030_5_, p_i50030_6_);
+    public SpongeFurnaceRecipe(final ResourceLocation id, final String group, final Ingredient ingredient, final ItemStack result, final float experience, final int cookingTime, final Function<Container, ItemStack> resultFunction) {
+        super(id, group, ingredient, result, experience, cookingTime);
         this.resultFunction = resultFunction;
     }
 
     @Override
-    public ItemStack getCraftingResult(IInventory p_77572_1_) {
+    public ItemStack assemble(final Container container) {
         if (this.resultFunction != null) {
-            final ItemStack result = this.resultFunction.apply(p_77572_1_);
+            final ItemStack result = this.resultFunction.apply(container);
             result.setCount(1);
             return result;
         }
-        return super.getCraftingResult(p_77572_1_);
+        return super.assemble(container);
     }
 
     @Override
-    public ItemStack getRecipeOutput() {
+    public ItemStack getResultItem() {
         if (this.resultFunction != null) {
             return ItemStack.EMPTY;
         }
-        return super.getRecipeOutput();
+        return super.getResultItem();
     }
 
 }

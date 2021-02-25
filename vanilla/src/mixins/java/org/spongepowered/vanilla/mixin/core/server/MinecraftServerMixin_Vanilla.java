@@ -26,43 +26,64 @@ package org.spongepowered.vanilla.mixin.core.server;
 
 import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
 import com.mojang.datafixers.DataFixer;
-import net.minecraft.command.Commands;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.ServerResources;
+import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
+import net.minecraft.server.packs.repository.PackRepository;
+import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
 import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.vanilla.VanillaServer;
 import org.spongepowered.vanilla.hooks.VanillaPacketHooks;
 
-import java.io.File;
 import java.net.Proxy;
+import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
 
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void vanilla$setPacketHooks(File p_i50590_1_, Proxy p_i50590_2_, DataFixer dataFixerIn, Commands p_i50590_4_,
-            YggdrasilAuthenticationService p_i50590_5_, MinecraftSessionService p_i50590_6_, GameProfileRepository p_i50590_7_,
-            PlayerProfileCache p_i50590_8_, IChunkStatusListenerFactory p_i50590_9_, String p_i50590_10_, CallbackInfo ci) {
-        PlatformHooks.getInstance().setPacketHooks(new VanillaPacketHooks());
+    // @formatter:off
+    @Shadow @Final private static Logger LOGGER;
+
+    @Shadow protected abstract void shadow$detectBundledResources();
+    @Shadow protected abstract void loadLevel();
+    @Shadow public abstract boolean shadow$isRunning();
+    // @formatter:on
+
+
+    /**
+     * Render localized/formatted chat components
+     *
+     * @param input original component
+     */
+    @Inject(method = "sendMessage", at = @At("HEAD"), cancellable = true)
+    private void impl$useTranslatingLogger(final Component input, final UUID sender, final CallbackInfo ci) {
+        MinecraftServerMixin_Vanilla.LOGGER.info(input);
+        ci.cancel();
     }
-    @Redirect(method = "loadWorlds",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/management/PlayerList;func_212504_a(Lnet/minecraft/world/server/ServerWorld;)V"))
-    private void vanilla$onSaveHandlerBeingSetToPlayerList(final PlayerList playerList, final ServerWorld p_212504_1_) {
-        playerList.func_212504_a(p_212504_1_);
-        ((SpongeUserManager) this.getUserManager()).init();
+
+
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void vanilla$setPacketHooks(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_, LevelStorageSource.LevelStorageAccess p_i232576_3_,
+            WorldData p_i232576_4_, PackRepository p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
+            ServerResources p_i232576_8_, MinecraftSessionService p_i232576_9_, GameProfileRepository p_i232576_10_,
+            GameProfileCache p_i232576_11_, ChunkProgressListenerFactory p_i232576_12_, CallbackInfo ci) {
+        PlatformHooks.INSTANCE.setPacketHooks(new VanillaPacketHooks());
     }
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)

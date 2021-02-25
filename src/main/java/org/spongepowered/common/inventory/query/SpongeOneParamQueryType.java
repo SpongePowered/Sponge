@@ -26,19 +26,16 @@ package org.spongepowered.common.inventory.query;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryType;
-import org.spongepowered.common.SpongeCatalogType;
 
 import java.util.function.Function;
 
-public final class SpongeOneParamQueryType<T> extends SpongeCatalogType implements QueryType.OneParam<T> {
+public final class SpongeOneParamQueryType<T> implements QueryType.OneParam<T> {
 
     private final Function<T, Query> newInstance;
 
-    public SpongeOneParamQueryType(final ResourceKey key, final Function<T, Query> newInstance) {
-        super(key);
+    public SpongeOneParamQueryType(final Function<T, Query> newInstance) {
         this.newInstance = newInstance;
     }
 

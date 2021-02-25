@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.chunk.Chunk;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -47,11 +47,12 @@ public final class RefreshOldTileEntityOnChunkChangeEffect implements Processing
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
-        final @Nullable TileEntity existing = pipeline.getAffectedChunk().getTileEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
+        final SpongeBlockChangeFlag flag, final int limit
+    ) {
+        final @Nullable BlockEntity existing = pipeline.getAffectedChunk().getBlockEntity(oldState.pos, LevelChunk.EntityCreationType.CHECK);
         if (((BlockStateBridge) oldState.state).bridge$hasTileEntity()) {
             if (existing != null) {
-                existing.updateContainingBlockInfo();
+                existing.clearCache();
             }
         }
         return EffectResult.NULL_PASS;

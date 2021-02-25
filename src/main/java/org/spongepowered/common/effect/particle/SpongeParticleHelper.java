@@ -24,18 +24,6 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import net.minecraft.block.Block;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.server.SPlaySoundEventPacket;
-import net.minecraft.network.play.server.SSpawnParticlePacket;
-import net.minecraft.particles.BasicParticleType;
-import net.minecraft.particles.BlockParticleData;
-import net.minecraft.particles.IParticleData;
-import net.minecraft.particles.ItemParticleData;
-import net.minecraft.particles.RedstoneParticleData;
-import net.minecraft.server.management.PlayerList;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.dimension.DimensionType;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.effect.particle.ParticleEffect;
@@ -51,24 +39,37 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.particles.BlockParticleOption;
+import net.minecraft.core.particles.DustParticleOptions;
+import net.minecraft.core.particles.ItemParticleOption;
+import net.minecraft.core.particles.SimpleParticleType;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
+import net.minecraft.network.protocol.game.ClientboundLevelParticlesPacket;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 
-public class SpongeParticleHelper {
+public final class SpongeParticleHelper {
 
-    public static void sendPackets(ParticleEffect particleEffect, Vector3d position, int radius, DimensionType type, PlayerList playerList) {
-        final List<IPacket<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
+    public static void sendPackets(final ParticleEffect particleEffect, final Vector3d position, final int radius, final ResourceKey<Level> type,
+                                   final PlayerList playerList) {
+        final List<Packet<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
 
         if (!packets.isEmpty()) {
             final double x = position.getX();
             final double y = position.getY();
             final double z = position.getZ();
 
-            for (final IPacket<?> packet : packets) {
-                playerList.sendToAllNearExcept(null, x, y, z, radius, type, packet);
+            for (final Packet<?> packet : packets) {
+                playerList.broadcast(null, x, y, z, radius, type, packet);
             }
         }
     }
 
-    public static List<IPacket<?>> toPackets(final ParticleEffect effect, final Vector3d position) {
+    public static List<Packet<?>> toPackets(final ParticleEffect effect, final Vector3d position) {
         SpongeParticleEffect spongeEffect = (SpongeParticleEffect) effect;
 
         CachedParticlePacket cachedPacket = spongeEffect.cachedPacket;
@@ -77,7 +78,7 @@ public class SpongeParticleHelper {
             cachedPacket = spongeEffect.cachedPacket = SpongeParticleHelper.getCachedPacket(spongeEffect);
         }
 
-        final List<IPacket<?>> packets = new ArrayList<>();
+        final List<Packet<?>> packets = new ArrayList<>();
         cachedPacket.process(position, packets);
         return packets;
     }
@@ -90,7 +91,7 @@ public class SpongeParticleHelper {
             return SpongeParticleHelper.getNumericalPacket(effect, (NumericalParticleType) type);
         } else {
             // Normal named particle type.
-            return SpongeParticleHelper.getNamedPacket(effect, (net.minecraft.particles.ParticleType<?>) type);
+            return SpongeParticleHelper.getNamedPacket(effect, (net.minecraft.core.particles.ParticleType<?>) type);
         }
     }
 
@@ -101,38 +102,38 @@ public class SpongeParticleHelper {
     }
 
     @SuppressWarnings({"unchecked", "ConstantConditions"})
-    private static CachedParticlePacket getNamedPacket(final ParticleEffect effect, final net.minecraft.particles.ParticleType<?> internalType) {
+    private static CachedParticlePacket getNamedPacket(final ParticleEffect effect, final net.minecraft.core.particles.ParticleType<?> internalType) {
         // Named particles always support OFFSET and QUANTITY.
         final Vector3f offset = effect.getOptionOrDefault(ParticleOptions.OFFSET).get().toFloat();
         final int quantity = effect.getOptionOrDefault(ParticleOptions.QUANTITY).get();
         final Vector3f velocity = effect.getOptionOrDefault(ParticleOptions.VELOCITY).orElse(Vector3d.ZERO).toFloat();
 
-        if (internalType instanceof BasicParticleType) {
+        if (internalType instanceof SimpleParticleType) {
             // Simple named particle without any additional supported options.
-            return new NamedCachedPacket((IParticleData) internalType, offset, quantity, velocity);
+            return new NamedCachedPacket((net.minecraft.core.particles.ParticleOptions) internalType, offset, quantity, velocity);
         }
 
         // The only way we can see what options are supported for a particular named particle
         // is to compare the internal type's deserializer to some static deserializer fields.
         // If only mojang had some type akin to our ParticleEffect...
-        if (internalType.getDeserializer() == BlockParticleData.DESERIALIZER) {
+        if (internalType.getDeserializer() == BlockParticleOption.DESERIALIZER) {
             // This particle type supports a block state option.
             final BlockState state = effect.getOptionOrDefault(ParticleOptions.BLOCK_STATE).get();
-            final BlockParticleData particleData = new BlockParticleData(
-                    (net.minecraft.particles.ParticleType<BlockParticleData>) internalType,
-                    (net.minecraft.block.BlockState) state);
+            final BlockParticleOption particleData = new BlockParticleOption(
+                    (net.minecraft.core.particles.ParticleType<BlockParticleOption>) internalType,
+                    (net.minecraft.world.level.block.state.BlockState) state);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
-        } else if (internalType.getDeserializer() == ItemParticleData.DESERIALIZER) {
+        } else if (internalType.getDeserializer() == ItemParticleOption.DESERIALIZER) {
             // This particle type supports an item option.
             final ItemStackSnapshot snapshot = effect.getOptionOrDefault(ParticleOptions.ITEM_STACK_SNAPSHOT).get();
-            final ItemParticleData particleData = new ItemParticleData(
-                    (net.minecraft.particles.ParticleType<ItemParticleData>) internalType,
-                    (net.minecraft.item.ItemStack) (Object) snapshot.createStack());
+            final ItemParticleOption particleData = new ItemParticleOption(
+                    (net.minecraft.core.particles.ParticleType<ItemParticleOption>) internalType,
+                    (net.minecraft.world.item.ItemStack) (Object) snapshot.createStack());
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
-        } else if (internalType.getDeserializer() == RedstoneParticleData.DESERIALIZER) {
+        } else if (internalType.getDeserializer() == DustParticleOptions.DESERIALIZER) {
             // This particle type supports a color option.
             final Color color = effect.getOptionOrDefault(ParticleOptions.COLOR).get();
-            final RedstoneParticleData particleData = new RedstoneParticleData(
+            final DustParticleOptions particleData = new DustParticleOptions(
                     (float) color.getRed() / 255,
                     (float) color.getGreen() / 255,
                     (float) color.getBlue() / 255,
@@ -174,7 +175,7 @@ public class SpongeParticleHelper {
         final Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
         if (blockState.isPresent()) {
             // Use the provided block state option.
-            return Block.getStateId((net.minecraft.block.BlockState) blockState.get());
+            return Block.getId((net.minecraft.world.level.block.state.BlockState) blockState.get());
         }
 
         final Optional<ItemStackSnapshot> itemSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
@@ -182,12 +183,12 @@ public class SpongeParticleHelper {
             // Try to convert the item into a usable block state.
             final Optional<BlockType> blockType = itemSnapshot.get().getType().getBlock();
             // TODO: correct behavior?
-            return blockType.map(type -> Block.getStateId((net.minecraft.block.BlockState) type.getDefaultState()))
+            return blockType.map(type -> Block.getId((net.minecraft.world.level.block.state.BlockState) type.getDefaultState()))
                     .orElse(0);
         }
 
         // Otherwise, use the default block state option if available.
-        return defaultBlockState.map(state -> Block.getStateId((net.minecraft.block.BlockState) state))
+        return defaultBlockState.map(state -> Block.getId((net.minecraft.world.level.block.state.BlockState) state))
                 .orElse(0);
     }
 
@@ -196,18 +197,18 @@ public class SpongeParticleHelper {
         public static final EmptyCachedPacket INSTANCE = new EmptyCachedPacket();
 
         @Override
-        public void process(final Vector3d position, final List<IPacket<?>> output) {
+        public void process(final Vector3d position, final List<Packet<?>> output) {
         }
     }
 
     private static final class NamedCachedPacket implements CachedParticlePacket {
 
-        private final IParticleData particleData;
+        private final net.minecraft.core.particles.ParticleOptions particleData;
         private final Vector3f offset;
         private final int quantity;
         private final Vector3f velocity;
 
-        public NamedCachedPacket(final IParticleData particleData, final Vector3f offset, final int quantity, Vector3f velocity) {
+        public NamedCachedPacket(final net.minecraft.core.particles.ParticleOptions particleData, final Vector3f offset, final int quantity, Vector3f velocity) {
             this.particleData = particleData;
             this.offset = offset;
             this.quantity = quantity;
@@ -215,17 +216,17 @@ public class SpongeParticleHelper {
         }
 
         @Override
-        public void process(final Vector3d position, final List<IPacket<?>> output) {
+        public void process(final Vector3d position, final List<Packet<?>> output) {
             final float posX = (float) position.getX();
             final float posY = (float) position.getY();
             final float posZ = (float) position.getZ();
 
-            final float offX = offset.getX();
-            final float offY = offset.getY();
-            final float offZ = offset.getZ();
+            final float offX = this.offset.getX();
+            final float offY = this.offset.getY();
+            final float offZ = this.offset.getZ();
 
             if (this.velocity.equals(Vector3f.ZERO)) {
-                final SSpawnParticlePacket packet = new SSpawnParticlePacket(
+                final ClientboundLevelParticlesPacket packet = new ClientboundLevelParticlesPacket(
                         this.particleData,
                         true,
                         posX, posY, posZ,
@@ -236,16 +237,16 @@ public class SpongeParticleHelper {
 
                 output.add(packet);
             } else {
-                final float velocityX = velocity.getX();
-                final float velocityY = velocity.getY();
-                final float velocityZ = velocity.getZ();
+                final float velocityX = this.velocity.getX();
+                final float velocityY = this.velocity.getY();
+                final float velocityZ = this.velocity.getZ();
                 final Random random = new Random();
                 for (int i = 0; i < this.quantity; i++) {
                     final float px0 = posX + (random.nextFloat() * 2f - 1f) * offX;
                     final float py0 = posY + (random.nextFloat() * 2f - 1f) * offY;
                     final float pz0 = posZ + (random.nextFloat() * 2f - 1f) * offZ;
 
-                    final SSpawnParticlePacket message = new SSpawnParticlePacket(
+                    final ClientboundLevelParticlesPacket message = new ClientboundLevelParticlesPacket(
                             this.particleData,
                             true,
                             px0, py0, pz0,
@@ -271,9 +272,9 @@ public class SpongeParticleHelper {
         }
 
         @Override
-        public void process(final Vector3d position, final List<IPacket<?>> output) {
+        public void process(final Vector3d position, final List<Packet<?>> output) {
             final BlockPos blockPos = new BlockPos(position.getFloorX(), position.getFloorY(), position.getFloorZ());
-            final SPlaySoundEventPacket packet = new SPlaySoundEventPacket(this.type, blockPos, this.data, this.broadcast);
+            final ClientboundLevelEventPacket packet = new ClientboundLevelEventPacket(this.type, blockPos, this.data, this.broadcast);
             output.add(packet);
         }
     }

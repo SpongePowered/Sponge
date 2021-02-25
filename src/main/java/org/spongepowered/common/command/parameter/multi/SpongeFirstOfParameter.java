@@ -24,18 +24,9 @@
  */
 package org.spongepowered.common.command.parameter.multi;
 
-import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.tree.CommandNode;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.command.CommandSource;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
-import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public final class SpongeFirstOfParameter extends SpongeMultiParameter {
 
@@ -43,91 +34,4 @@ public final class SpongeFirstOfParameter extends SpongeMultiParameter {
         super(parameterCandidates, isOptional, isTerminal);
     }
 
-    @Override
-    public boolean createNode(
-            final SpongeCommandExecutorWrapper executorWrapper,
-            final Consumer<CommandNode<CommandSource>> builtNodeConsumer,
-            final Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback,
-            final List<CommandNode<CommandSource>> potentialOptionalRedirects,
-            final boolean isTermination,
-            final boolean previousWasOptional,
-            @Nullable final String suffix) {
-        final boolean hasExecutor = isTermination || this.isTerminal();
-
-        // If we have a termination, this is easy!
-        // If not, it's a little more complicated. But it's all handled by `nodeCallback` anyway.
-        boolean first = true;
-
-        // This will grab the first built node, that is, the last in a tree list.
-        final Grabber grabber = new Grabber(builtNodeConsumer);
-
-        // The redirector redirects to the grabbed node - which will continue execution to the node after this.
-        final Consumer<ArgumentBuilder<CommandSource, ?>> redirector = node -> node.redirect(grabber.grabbed);
-
-        final Object2IntOpenHashMap<String> counter = new Object2IntOpenHashMap<>();
-        for (final Parameter parameter : this.getParameterCandidates()) {
-            final int original;
-            if (parameter instanceof Parameter.Value<?>) {
-                original = counter.addTo(((Value<?>) parameter).getKey().key(), 1);
-            } else if (parameter instanceof Parameter.Subcommand) {
-                ((Subcommand) parameter).getAliases().forEach(x -> counter.addTo(x, 1));
-                original = 0;
-            } else {
-                original = 0;
-            }
-            if (parameter instanceof SpongeSequenceParameter) {
-                final SpongeSequenceParameter sequenceParameter = ((SpongeSequenceParameter) parameter);
-                final boolean grab = first && !sequenceParameter.endsWithSubcommand();
-                ((SpongeSequenceParameter) parameter).createNode(
-                        executorWrapper,
-                        grab ? grabber : builtNodeConsumer,
-                        first ? nodeCallback : redirector, // latter is used for merging command paths back together.
-                        potentialOptionalRedirects,
-                        hasExecutor,
-                        previousWasOptional,
-                        suffix);
-            } else {
-                final List<Parameter> parameters = new ArrayList<>();
-                parameters.add(parameter);
-                SpongeParameterTranslator.createNode(
-                    parameters.listIterator(),
-                    executorWrapper,
-                    first && !(parameter instanceof Parameter.Subcommand) ? grabber : builtNodeConsumer,
-                    grabber.grabbed == null ? nodeCallback : redirector, // latter is used for merging command paths back together.
-
-                    // we don't want to redirect to secondary branches, so we hand a copy of the list, BUT we will want there to be
-                    // redirects within the branch, and to later nodes.
-                    first ? potentialOptionalRedirects : new ArrayList<>(potentialOptionalRedirects),
-                    hasExecutor,
-                    previousWasOptional,
-                    original == 0 ? null : String.valueOf(original));
-            }
-
-            if (first && grabber.isValid()) {
-                first = false;
-            }
-        }
-
-        return this.getParameterCandidates().stream().anyMatch(Parameter::isOptional);
-    }
-
-    private static class Grabber implements Consumer<CommandNode<CommandSource>> {
-
-        private final Consumer<CommandNode<CommandSource>> original;
-        private CommandNode<CommandSource> grabbed;
-
-        public Grabber(final Consumer<CommandNode<CommandSource>> original) {
-            this.original = original;
-        }
-
-        @Override
-        public void accept(final CommandNode<CommandSource> commandSourceCommandNode) {
-            this.grabbed = commandSourceCommandNode;
-            this.original.accept(commandSourceCommandNode);
-        }
-
-        public boolean isValid() {
-            return this.original != null;
-        }
-    }
 }

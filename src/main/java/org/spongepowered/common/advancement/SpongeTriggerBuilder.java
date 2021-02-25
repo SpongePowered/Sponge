@@ -31,13 +31,6 @@ import static java.util.Objects.requireNonNull;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.leangen.geantyref.TypeToken;
-import net.minecraft.util.ResourceLocation;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.configurate.ConfigurateException;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
-import org.spongepowered.configurate.gson.GsonConfigurationLoader;
-import org.apache.commons.lang3.StringUtils;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
@@ -45,32 +38,39 @@ import org.spongepowered.api.data.persistence.DataBuilder;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.event.advancement.CriterionEvent;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.data.persistence.JsonDataFormat;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.configurate.ConfigurateException;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.gson.GsonConfigurationLoader;
 
-import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
 import java.lang.reflect.Type;
+import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
+import javax.annotation.Nullable;
+import net.minecraft.resources.ResourceLocation;
+
 @SuppressWarnings("unchecked")
-public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implements Trigger.Builder<C> {
+public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> extends AbstractResourceKeyedBuilder<Trigger<C>,
+        Trigger.Builder<C>> implements Trigger.Builder<C> {
 
     private static final Gson GSON = new Gson();
 
     private final static FilteredTriggerConfiguration.Empty EMPTY_TRIGGER_CONFIGURATION = new FilteredTriggerConfiguration.Empty();
     private final static Function<JsonObject, FilteredTriggerConfiguration.Empty> EMPTY_TRIGGER_CONFIGURATION_CONSTRUCTOR =
-            jsonObject -> EMPTY_TRIGGER_CONFIGURATION;
+            jsonObject -> SpongeTriggerBuilder.EMPTY_TRIGGER_CONFIGURATION;
 
     @Nullable private Type configType;
     @Nullable private Function<JsonObject, C> constructor;
     @Nullable private Consumer<CriterionEvent.Trigger<C>> eventHandler;
-    @Nullable private String id;
     @Nullable private String name;
 
     @Override
@@ -80,26 +80,6 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
         this.configType = dataConfigClass;
         this.constructor = new DataSerializableConstructor(dataConfigClass);
         return (Trigger.Builder<T>) this;
-    }
-
-    private static class DataSerializableConstructor<C extends FilteredTriggerConfiguration & DataSerializable> implements Function<JsonObject, C> {
-
-        private final Class<C> dataConfigClass;
-
-        private DataSerializableConstructor(final Class<C> dataConfigClass) {
-            this.dataConfigClass = dataConfigClass;
-        }
-
-        @Override
-        public C apply(final JsonObject jsonObject) {
-            final DataBuilder<C> builder = Sponge.getDataManager().getBuilder(this.dataConfigClass).get();
-            try {
-                final DataView dataView = JsonDataFormat.serialize(GSON, jsonObject);
-                return builder.build(dataView).get();
-            } catch (final IOException e) {
-                throw new IllegalStateException(e);
-            }
-        }
     }
 
     // TODO: do these need to be hooked up for saving as well? currently they just load
@@ -150,32 +130,7 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> typeSerializableConfig(final Class<T> configClass,
             final UnaryOperator<ConfigurationOptions> transformer) {
         requireNonNull(transformer, "transformer");
-        return typeSerializableConfig(configClass, transformer.apply(SpongeTriggerBuilder.defaultOptions()));
-    }
-
-    private static class ConfigurateConstructor<C extends FilteredTriggerConfiguration> implements Function<JsonObject, C> {
-
-        private final Type typeToken;
-        private final ConfigurationOptions options;
-
-        private ConfigurateConstructor(final Type typeToken, final ConfigurationOptions options) {
-            this.typeToken = typeToken;
-            this.options = options;
-        }
-
-        @Override
-        public C apply(final JsonObject jsonObject) {
-            final GsonConfigurationLoader loader = GsonConfigurationLoader.builder()
-                    .defaultOptions(this.options)
-                    .source(() -> new BufferedReader(new StringReader(GSON.toJson(jsonObject))))
-                    .build();
-            try {
-                final ConfigurationNode node = loader.load();
-                return (C) node.get(this.typeToken);
-            } catch (final ConfigurateException e) {
-                throw new IllegalStateException(e);
-            }
-        }
+        return this.typeSerializableConfig(configClass, transformer.apply(SpongeTriggerBuilder.defaultOptions()));
     }
 
     @SuppressWarnings("rawtypes")
@@ -189,7 +144,57 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
 
     @Override
     public <T extends FilteredTriggerConfiguration> Trigger.Builder<T> jsonSerializableConfig(final Class<T> configClass) {
-        return this.jsonSerializableConfig(configClass, GSON);
+        return this.jsonSerializableConfig(configClass, SpongeTriggerBuilder.GSON);
+    }
+
+    @Override
+    public Trigger.Builder<FilteredTriggerConfiguration.Empty> emptyConfig() {
+        this.configType = FilteredTriggerConfiguration.Empty.class;
+        this.constructor = (Function<JsonObject, C>) SpongeTriggerBuilder.EMPTY_TRIGGER_CONFIGURATION_CONSTRUCTOR;
+        return (Trigger.Builder<FilteredTriggerConfiguration.Empty>) this;
+    }
+
+    @Override
+    public Trigger.Builder<C> listener(final Consumer<CriterionEvent.Trigger<C>> eventListener) {
+        this.eventHandler = eventListener;
+        return this;
+    }
+
+    @Override
+    public Trigger.Builder<C> name(final String name) {
+        checkNotNull(name, "name");
+        this.name = name;
+        return this;
+    }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public Trigger<C> build0() {
+        Objects.requireNonNull(this.name, "name");
+        checkState(!this.name.isEmpty(), "The name cannot be empty!");
+        checkState(this.configType != null, "The configType must be set");
+        return (Trigger<C>) new SpongeCriterionTrigger(this.configType, (Function) this.constructor, (ResourceLocation) (Object) this.key, (Consumer) this.eventHandler, this.name);
+    }
+
+    @Override
+    public Trigger.Builder<C> from(final Trigger<C> value) {
+        this.configType = value.getConfigurationType();
+        if (value instanceof SpongeCriterionTrigger) {
+            this.constructor = (Function<JsonObject, C>) ((SpongeCriterionTrigger) value).constructor;
+            this.eventHandler = (Consumer) ((SpongeCriterionTrigger) value).getEventHandler();
+            this.name = ((SpongeCriterionTrigger) value).getName();
+        }
+        return this;
+    }
+
+    @Override
+    public Trigger.Builder<C> reset() {
+        this.key = null;
+        this.configType = null;
+        this.constructor = null;
+        this.eventHandler = null;
+        this.name = null;
+        return this;
     }
 
     private static class JsonConstructor<C extends FilteredTriggerConfiguration> implements Function<JsonObject, C> {
@@ -208,63 +213,48 @@ public class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> implem
         }
     }
 
-    @Override
-    public Trigger.Builder<FilteredTriggerConfiguration.Empty> emptyConfig() {
-        this.configType = FilteredTriggerConfiguration.Empty.class;
-        this.constructor = (Function<JsonObject, C>) EMPTY_TRIGGER_CONFIGURATION_CONSTRUCTOR;
-        return (Trigger.Builder<FilteredTriggerConfiguration.Empty>) this;
-    }
+    private static class DataSerializableConstructor<C extends FilteredTriggerConfiguration & DataSerializable> implements Function<JsonObject, C> {
 
-    @Override
-    public Trigger.Builder<C> listener(final Consumer<CriterionEvent.Trigger<C>> eventListener) {
-        this.eventHandler = eventListener;
-        return this;
-    }
+        private final Class<C> dataConfigClass;
 
-    @Override
-    public Trigger.Builder<C> id(final String id) {
-        checkNotNull(id, "id");
-        this.id = id;
-        return this;
-    }
-
-    @Override
-    public Trigger.Builder<C> name(final String name) {
-        checkNotNull(name, "name");
-        this.name = name;
-        return this;
-    }
-
-    @SuppressWarnings("rawtypes")
-    @Override
-    public Trigger<C> build() {
-        checkState(this.id != null, "The id must be set");
-        checkState(this.configType != null, "The configType must be set");
-        final PluginContainer plugin = PhaseTracker.getCauseStackManager().getCurrentCause().first(PluginContainer.class).get();
-        final String name = StringUtils.isNotEmpty(this.name) ? this.name : this.id;
-        return (Trigger<C>) new SpongeTrigger(this.configType, (Function) this.constructor,
-                new ResourceLocation(plugin.getMetadata().getId(), this.id), (Consumer) this.eventHandler, name);
-    }
-
-    @Override
-    public Trigger.Builder<C> from(final Trigger<C> value) {
-        this.id = value.getKey().getValue();
-        this.configType = value.getConfigurationType();
-        if (value instanceof SpongeTrigger) {
-            this.constructor = (Function<JsonObject, C>) ((SpongeTrigger) value).constructor;
-            this.eventHandler = (Consumer) ((SpongeTrigger) value).getEventHandler();
-            this.name = ((SpongeTrigger) value).getName();
+        private DataSerializableConstructor(final Class<C> dataConfigClass) {
+            this.dataConfigClass = dataConfigClass;
         }
-        return this;
+
+        @Override
+        public C apply(final JsonObject jsonObject) {
+            final DataBuilder<C> builder = Sponge.getDataManager().getBuilder(this.dataConfigClass).get();
+            try {
+                final DataView dataView = JsonDataFormat.serialize(SpongeTriggerBuilder.GSON, jsonObject);
+                return builder.build(dataView).get();
+            } catch (final IOException e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 
-    @Override
-    public Trigger.Builder<C> reset() {
-        this.configType = null;
-        this.constructor = null;
-        this.eventHandler = null;
-        this.id = null;
-        this.name = null;
-        return this;
+    private static class ConfigurateConstructor<C extends FilteredTriggerConfiguration> implements Function<JsonObject, C> {
+
+        private final Type typeToken;
+        private final ConfigurationOptions options;
+
+        private ConfigurateConstructor(final Type typeToken, final ConfigurationOptions options) {
+            this.typeToken = typeToken;
+            this.options = options;
+        }
+
+        @Override
+        public C apply(final JsonObject jsonObject) {
+            final GsonConfigurationLoader loader = GsonConfigurationLoader.builder()
+                    .defaultOptions(this.options)
+                    .source(() -> new BufferedReader(new StringReader(SpongeTriggerBuilder.GSON.toJson(jsonObject))))
+                    .build();
+            try {
+                final ConfigurationNode node = loader.load();
+                return (C) node.get(this.typeToken);
+            } catch (final ConfigurateException e) {
+                throw new IllegalStateException(e);
+            }
+        }
     }
 }

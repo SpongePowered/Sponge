@@ -32,9 +32,9 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.serializer.gson.LegacyHoverEventSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.kyori.adventure.util.Codec;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.INBT;
-import net.minecraft.nbt.JsonToNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
+import net.minecraft.nbt.TagParser;
 import org.checkerframework.checker.nullness.qual.NonNull;
 
 import java.io.IOException;
@@ -42,7 +42,7 @@ import java.util.UUID;
 
 public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSerializer {
     public static final NbtLegacyHoverEventSerializer INSTANCE = new NbtLegacyHoverEventSerializer();
-    private static final Codec<CompoundNBT, String, CommandSyntaxException, RuntimeException> SNBT_CODEC = Codec.of(JsonToNBT::getTagFromJson, INBT::toString);
+    private static final Codec<CompoundTag, String, CommandSyntaxException, RuntimeException> SNBT_CODEC = Codec.of(TagParser::parseTag, Tag::toString);
 
     static final String ITEM_TYPE = "id";
     static final String ITEM_COUNT = "Count";
@@ -59,12 +59,12 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
     public HoverEvent.ShowItem deserializeShowItem(final Component input) throws IOException {
         final String rawContent = PlainComponentSerializer.plain().serialize(input);
         try {
-            final CompoundNBT contents = SNBT_CODEC.decode(rawContent);
-            final CompoundNBT tag = contents.getCompound(ITEM_TAG);
+            final CompoundTag contents = NbtLegacyHoverEventSerializer.SNBT_CODEC.decode(rawContent);
+            final CompoundTag tag = contents.getCompound(NbtLegacyHoverEventSerializer.ITEM_TAG);
             return HoverEvent.ShowItem.of(
-                Key.key(contents.getString(ITEM_TYPE)),
-                contents.contains(ITEM_COUNT) ? contents.getByte(ITEM_COUNT) : 1,
-                tag.isEmpty() ? null : BinaryTagHolder.encode(tag, SNBT_CODEC)
+                Key.key(contents.getString(NbtLegacyHoverEventSerializer.ITEM_TYPE)),
+                contents.contains(NbtLegacyHoverEventSerializer.ITEM_COUNT) ? contents.getByte(NbtLegacyHoverEventSerializer.ITEM_COUNT) : 1,
+                tag.isEmpty() ? null : BinaryTagHolder.encode(tag, NbtLegacyHoverEventSerializer.SNBT_CODEC)
             );
         } catch (final CommandSyntaxException ex) {
             throw new IOException(ex);
@@ -75,11 +75,11 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
     public HoverEvent.@NonNull ShowEntity deserializeShowEntity(final Component input, final Codec.Decoder<Component, String, ? extends RuntimeException> componentCodec) throws IOException {
         final String raw = PlainComponentSerializer.plain().serialize(input);
         try {
-            final CompoundNBT contents = SNBT_CODEC.decode(raw);
+            final CompoundTag contents = NbtLegacyHoverEventSerializer.SNBT_CODEC.decode(raw);
             return HoverEvent.ShowEntity.of(
-                Key.key(contents.getString(ENTITY_TYPE)),
-                UUID.fromString(contents.getString(ENTITY_ID)),
-                componentCodec.decode(contents.getString(ENTITY_NAME))
+                Key.key(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_TYPE)),
+                UUID.fromString(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_ID)),
+                componentCodec.decode(contents.getString(NbtLegacyHoverEventSerializer.ENTITY_NAME))
             );
         } catch (final CommandSyntaxException ex) {
             throw new IOException(ex);
@@ -88,28 +88,28 @@ public final class NbtLegacyHoverEventSerializer implements LegacyHoverEventSeri
 
     @Override
     public @NonNull Component serializeShowItem(final HoverEvent.@NonNull ShowItem input) throws IOException {
-        final CompoundNBT tag = new CompoundNBT();
-        tag.putString(ITEM_TYPE, input.item().asString());
-        tag.putByte(ITEM_COUNT, (byte) input.count());
+        final CompoundTag tag = new CompoundTag();
+        tag.putString(NbtLegacyHoverEventSerializer.ITEM_TYPE, input.item().asString());
+        tag.putByte(NbtLegacyHoverEventSerializer.ITEM_COUNT, (byte) input.count());
         if (input.nbt() != null) {
             try {
-                tag.put(ITEM_TAG, input.nbt().get(SNBT_CODEC));
+                tag.put(NbtLegacyHoverEventSerializer.ITEM_TAG, input.nbt().get(NbtLegacyHoverEventSerializer.SNBT_CODEC));
             } catch (final CommandSyntaxException ex) {
                 throw new IOException(ex);
             }
         }
 
-        return Component.text(SNBT_CODEC.encode(tag));
+        return Component.text(NbtLegacyHoverEventSerializer.SNBT_CODEC.encode(tag));
     }
 
     @Override
     public @NonNull Component serializeShowEntity(final HoverEvent.ShowEntity input, final Codec.Encoder<Component, String, ? extends RuntimeException> componentCodec) {
-        final CompoundNBT tag = new CompoundNBT();
-        tag.putString(ENTITY_ID, input.id().toString());
-        tag.putString(ENTITY_TYPE, input.type().asString());
+        final CompoundTag tag = new CompoundTag();
+        tag.putString(NbtLegacyHoverEventSerializer.ENTITY_ID, input.id().toString());
+        tag.putString(NbtLegacyHoverEventSerializer.ENTITY_TYPE, input.type().asString());
         if (input.name() != null) {
-            tag.putString(ENTITY_NAME, componentCodec.encode(input.name()));
+            tag.putString(NbtLegacyHoverEventSerializer.ENTITY_NAME, componentCodec.encode(input.name()));
         }
-        return Component.text(SNBT_CODEC.encode(tag));
+        return Component.text(NbtLegacyHoverEventSerializer.SNBT_CODEC.encode(tag));
     }
 }

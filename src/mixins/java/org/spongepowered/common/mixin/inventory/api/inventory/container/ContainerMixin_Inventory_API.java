@@ -24,20 +24,13 @@
  */
 package org.spongepowered.common.mixin.inventory.api.inventory.container;
 
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
+import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -50,18 +43,23 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 
-@Mixin(value = Container.class, priority = 998)
+@Mixin(value = AbstractContainerMenu.class, priority = 998)
 public abstract class ContainerMixin_Inventory_API implements org.spongepowered.api.item.inventory.Container,
         DefaultImplementedAdapterInventory.WithClear {
 
-    @Final @Shadow private List<IContainerListener> listeners;
-    @Shadow @Final @Nullable private net.minecraft.inventory.container.ContainerType<?> containerType;
+    @Shadow @Final private List<ContainerListener> containerListeners;
+    @Shadow @Final @Nullable private net.minecraft.world.inventory.MenuType<?> menuType;
 
     @Override
     public boolean isViewedSlot(final org.spongepowered.api.item.inventory.Slot slot) {
         if (slot instanceof Slot) {
-            final Set<Slot> set = ((ContainerBridge) this).bridge$getInventories().get(((Slot) slot).inventory);
+            final Set<Slot> set = ((ContainerBridge) this).bridge$getInventories().get(((Slot) slot).container);
             if (set != null) {
                 if (set.contains(slot)) {
                     if (((ContainerBridge) this).bridge$getInventories().size() == 1) {
@@ -69,7 +67,7 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
                     }
                     // TODO better detection of viewer inventory - needs tracking of who views a container
                     // For now assume that a player inventory is always the viewers inventory
-                    if (((Slot) slot).inventory.getClass() != PlayerInventory.class) {
+                    if (((Slot) slot).container.getClass() != net.minecraft.world.entity.player.Inventory.class) {
                         return true;
                     }
                 }
@@ -81,7 +79,7 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
     @Override
     public List<Inventory> getViewed() {
         List<Inventory> list = new ArrayList<>();
-        for (IInventory inv : ((ContainerBridge) this).bridge$getInventories().keySet()) {
+        for (Container inv : ((ContainerBridge) this).bridge$getInventories().keySet()) {
             Inventory inventory = InventoryUtil.toInventory(inv, null);
             list.add(inventory);
         }
@@ -95,14 +93,14 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
         }
         ItemStack nativeStack = ItemStackUtil.toNative(item);
         this.listeners().stream().findFirst()
-                .ifPresent(p -> p.inventory.setItemStack(nativeStack));
+                .ifPresent(p -> p.inventory.setCarried(nativeStack));
         return true;
     }
 
     @Override
     public Optional<org.spongepowered.api.item.inventory.ItemStack> getCursor() {
         return this.listeners().stream().findFirst()
-                .map(p -> p.inventory.getItemStack())
+                .map(p -> p.inventory.getCarried())
                 .map(ItemStackUtil::fromNative);
     }
 
@@ -124,13 +122,13 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
 
     @Override
     public ContainerType getType() {
-        return ((ContainerType) this.containerType);
+        return ((ContainerType) this.menuType);
     }
 
-    private List<ServerPlayerEntity> listeners() {
-        return this.listeners.stream()
-                .filter(ServerPlayerEntity.class::isInstance)
-                .map(ServerPlayerEntity.class::cast)
+    private List<net.minecraft.server.level.ServerPlayer> listeners() {
+        return this.containerListeners.stream()
+                .filter(net.minecraft.server.level.ServerPlayer.class::isInstance)
+                .map(net.minecraft.server.level.ServerPlayer.class::cast)
                 .collect(Collectors.toList());
     }
 

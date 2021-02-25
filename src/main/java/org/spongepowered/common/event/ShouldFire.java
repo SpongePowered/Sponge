@@ -45,18 +45,16 @@ public final class ShouldFire {
     // since SpawnEntityEvent.CUSTOM is not in the hierarchy of DropItemEvent.DISPENSE
 
     public static boolean ANIMATE_HAND_EVENT = false;
+    public static boolean INTERACT_ITEM_EVENT_PRIMARY = false;
 
     public static boolean SPAWN_ENTITY_EVENT = false;
     public static boolean SPAWN_ENTITY_EVENT_CHUNK_LOAD = false;
     public static boolean SPAWN_ENTITY_EVENT_CUSTOM = false;
 
     public static boolean CHANGE_BLOCK_EVENT = false;
+    public static boolean CHANGE_BLOCK_EVENT_ALL = false;
     public static boolean CHANGE_BLOCK_EVENT_PRE = false;
-    public static boolean CHANGE_BLOCK_EVENT_MODIFY = false;
-    public static boolean CHANGE_BLOCK_EVENT_BREAK = false;
-    public static boolean CHANGE_BLOCK_EVENT_PLACE = false;
     public static boolean CHANGE_BLOCK_EVENT_POST = false;
-    public static boolean CHANGE_BLOCK_EVENT_GROW = false;
 
     public static boolean CLICK_CONTAINER_EVENT = false;
     public static boolean CLICK_CONTAINER_EVENT_DOUBLE = false;
@@ -68,9 +66,6 @@ public final class ShouldFire {
     public static boolean DROP_ITEM_EVENT = false;
     public static boolean DROP_ITEM_EVENT_DESTRUCT = false;
     public static boolean DROP_ITEM_EVENT_DISPENSE = false;
-
-    public static boolean EXECUTE_COMMAND_EVENT_PRE = false;
-    public static boolean EXECUTE_COMMAND_EVENT_POST = false;
 
     public static boolean GOAL_EVENT_ADD = false;
     public static boolean GOAL_EVENT_REMOVE = false;

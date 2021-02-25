@@ -25,15 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.block;
 
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
-import net.minecraft.block.Block;
-import net.minecraft.block.SoundType;
-import net.minecraft.item.Item;
-import net.minecraft.item.Items;
-import net.minecraft.state.StateContainer;
-import net.minecraft.util.registry.Registry;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.block.BlockSoundGroup;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.StateDefinition;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
@@ -48,28 +43,18 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @Mixin(value = Block.class, priority = 999)
-public abstract class BlockMixin_API implements BlockType {
+public abstract class BlockMixin_API extends AbstractBlockMixin_API {
 
-    @Shadow @Final @org.spongepowered.asm.mixin.Mutable protected boolean ticksRandomly;
-    @Shadow @Final protected SoundType soundType;
-    @Shadow @Final protected StateContainer<Block, net.minecraft.block.BlockState> stateContainer;
+    // @formatter:off
+    @Shadow @Final protected StateDefinition<Block, net.minecraft.world.level.block.state.BlockState> stateDefinition;
     @Shadow public abstract Item shadow$asItem();
-    @Shadow public abstract String shadow$getTranslationKey();
-    @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
-
-    private ResourceKey api$key;
-
-    @Override
-    public final ResourceKey getKey() {
-        if (this.api$key == null) {
-            this.api$key = (ResourceKey) (Object) Registry.BLOCK.getKey((Block) (Object) this);
-        }
-        return this.api$key;
-    }
+    @Shadow public abstract String shadow$getDescriptionId();
+    @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$defaultBlockState();
+    // @formatter:on
 
     @Override
     public BlockState getDefaultState() {
-        return (BlockState) this.shadow$getDefaultState();
+        return (BlockState) this.shadow$defaultBlockState();
     }
 
     @Override
@@ -82,43 +67,28 @@ public abstract class BlockMixin_API implements BlockType {
     }
 
     @Override
-    public boolean doesUpdateRandomly() {
-        return this.ticksRandomly;
-    }
-
-    @Override
-    public void setUpdateRandomly(boolean updateRandomly) {
-        this.ticksRandomly = updateRandomly;
-    }
-
-    @Override
-    public BlockSoundGroup getSoundGroup() {
-        return (BlockSoundGroup) (Object) this.soundType;
-    }
-
-    @Override
     public Component asComponent() {
-        return Component.translatable(this.shadow$getTranslationKey());
+        return Component.translatable(this.shadow$getDescriptionId());
     }
 
     @SuppressWarnings("unchecked")
     @Override
     public Collection<StateProperty<?>> getStateProperties() {
-        return (Collection<StateProperty<?>>) (Object) stateContainer.getProperties();
+        return (Collection<StateProperty<?>>) (Object) this.stateDefinition.getProperties();
     }
 
     @Override
-    public Optional<StateProperty<?>> getStatePropertyByName(String name) {
-        return Optional.ofNullable((StateProperty<?>) stateContainer.getProperty(name));
+    public Optional<StateProperty<?>> getStatePropertyByName(final String name) {
+        return Optional.ofNullable((StateProperty<?>) this.stateDefinition.getProperty(name));
     }
 
     @Override
-    public boolean isAnyOf(Supplier<BlockType>... types) {
+    public boolean isAnyOf(final Supplier<? extends BlockType>... types) {
         return Arrays.stream(types).map(Supplier::get).anyMatch(type -> type == this);
     }
 
     @Override
-    public boolean isAnyOf(BlockType... types) {
+    public boolean isAnyOf(final BlockType... types) {
         return Arrays.stream(types).anyMatch(type -> type == this);
     }
 }

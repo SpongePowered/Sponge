@@ -25,10 +25,13 @@
 package org.spongepowered.common.item.enchantment;
 
 import com.google.common.base.Objects;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
+import org.spongepowered.api.registry.RegistryTypes;
 
 public final class SpongeEnchantment implements Enchantment {
 
@@ -57,9 +60,11 @@ public final class SpongeEnchantment implements Enchantment {
 
     @Override
     public DataContainer toContainer() {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ENCHANTMENT_TYPE).valueKey(this.enchantmentType);
+
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Queries.ENCHANTMENT_ID, this.enchantmentType.getKey())
+                .set(Queries.ENCHANTMENT_ID, resourceKey)
                 .set(Queries.LEVEL, this.level);
     }
 

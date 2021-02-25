@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.adventure;
 
 import net.kyori.adventure.key.Key;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;

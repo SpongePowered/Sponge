@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.core.block;
 
 import co.aikar.timings.Timing;
-import net.minecraft.block.Block;
-import net.minecraft.block.material.Material;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -39,6 +38,7 @@ import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.level.block.Block;
 
 @Mixin(value = Block.class)
 public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge {
@@ -54,10 +54,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     private boolean impl$allowsEntityBulkCapture = true;
     private boolean impl$allowsBlockEventCreation = true;
     private boolean impl$allowsEntityEventCreation = true;
-
-    @Shadow public abstract String getTranslationKey();
-    @Shadow public abstract Material getMaterial(net.minecraft.block.BlockState state);
-    @Shadow public abstract net.minecraft.block.BlockState shadow$getDefaultState();
 
     /**
      * We captured the dye color when creating the Block.Properties.
@@ -116,7 +112,7 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     @Override
     public Timing bridge$getTimingsHandler() {
         if (this.impl$timing == null) {
-            this.impl$timing = SpongeTimings.getBlockTiming((net.minecraft.block.Block) (Object) this);
+            this.impl$timing = SpongeTimings.getBlockTiming((BlockType) this);
         }
         return this.impl$timing;
     }

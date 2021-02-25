@@ -25,7 +25,8 @@
 package org.spongepowered.common.bridge.server;
 
 import com.google.inject.Injector;
-import net.minecraft.world.dimension.DimensionType;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Difficulty;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -37,14 +38,10 @@ public interface MinecraftServerBridge {
 
     SpongeServerScopedServiceProvider bridge$getServiceProvider();
 
-    long[] bridge$getWorldTickTimes(DimensionType dimensionType);
-
-    void bridge$putWorldTickTimes(DimensionType dimensionType, long[] tickTimes);
-
-    void bridge$removeWorldTickTimes(DimensionType dimensionType);
-
-    void bridge$setSaveEnabled(boolean enabled);
-
     @Nullable
     ResourcePack bridge$getResourcePack();
+
+    void bridge$setDifficulty(ServerLevel world, Difficulty newDifficulty, boolean forceDifficulty);
+
+    boolean bridge$performAutosaveChecks();
 }

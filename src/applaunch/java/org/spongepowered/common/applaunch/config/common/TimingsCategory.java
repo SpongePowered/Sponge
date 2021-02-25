@@ -24,71 +24,30 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import com.google.common.collect.Lists;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
+import java.util.Collections;
 import java.util.List;
 
 @ConfigSerializable
 public final class TimingsCategory {
 
     @Setting
-    private boolean verbose = false;
+    public boolean verbose = false;
 
     @Setting
-    private boolean enabled = true;
+    public boolean enabled = true;
 
     @Setting("server-name-privacy")
-    private boolean serverNamePrivacy = false;
+    public boolean serverNamePrivacy = false;
 
     @Setting("hidden-config-entries")
-    private List<String> hiddenConfigEntries = Lists.newArrayList("sponge.sql");
+    public final List<String> hiddenConfigEntries = Collections.singletonList("sponge.sql");
 
     @Setting("history-interval")
-    private int historyInterval = 300;
+    public int historyInterval = 300;
 
     @Setting("history-length")
-    private int historyLength = 3600;
-
-    public boolean isVerbose() {
-        return this.verbose;
-    }
-
-    public void setVerbose(final boolean verbose) {
-        this.verbose = verbose;
-    }
-
-    public boolean isEnabled() {
-        return this.enabled;
-    }
-
-    public void setEnabled(final boolean enabled) {
-        this.enabled = enabled;
-    }
-
-    public boolean isServerNamePrivate() {
-        return this.serverNamePrivacy;
-    }
-
-    public List<String> getHiddenConfigEntries() {
-        return this.hiddenConfigEntries;
-    }
-
-    public int getHistoryInterval() {
-        return this.historyInterval;
-    }
-
-    public void setHistoryInterval(final int historyInterval) {
-        this.historyInterval = historyInterval;
-    }
-
-    public int getHistoryLength() {
-        return this.historyLength;
-    }
-
-    public void setHistoryLength(final int historyLength) {
-        this.historyLength = historyLength;
-    }
-
+    public int historyLength = 3600;
 }

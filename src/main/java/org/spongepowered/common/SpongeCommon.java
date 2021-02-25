@@ -107,7 +107,7 @@ public final class SpongeCommon {
     }
 
     public static AsyncScheduler getAsyncScheduler() {
-        return getGame().getAsyncScheduler();
+        return SpongeCommon.getGame().getAsyncScheduler();
     }
 
     public static Path getGameDirectory() {
@@ -116,7 +116,7 @@ public final class SpongeCommon {
     }
 
     public static Path getPluginConfigDirectory() {
-        return Paths.get(SpongeConfigs.getCommon().get().getGeneral().configDir());
+        return Paths.get(SpongeConfigs.getCommon().get().general.configDir.getParsed());
     }
 
     public static Path getSpongeConfigDirectory() {

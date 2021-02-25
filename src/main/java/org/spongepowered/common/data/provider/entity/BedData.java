@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.player.BedLocationHolderBridge;
+import org.spongepowered.common.bridge.world.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class BedData {
@@ -39,7 +39,9 @@ public final class BedData {
                 .asMutable(BedLocationHolderBridge.class)
                     .create(Keys.RESPAWN_LOCATIONS)
                         .get(BedLocationHolderBridge::bridge$getBedlocations)
-                        .set(BedLocationHolderBridge::bridge$setBedLocations);
+                        .set(BedLocationHolderBridge::bridge$setBedLocations)
+                        .delete(BedLocationHolderBridge::bridge$removeAllBeds);
+        registrator.spongeDataStore(Keys.RESPAWN_LOCATIONS.getKey(), BedLocationHolderBridge.class, Keys.RESPAWN_LOCATIONS);
     }
     // @formatter:on
 }

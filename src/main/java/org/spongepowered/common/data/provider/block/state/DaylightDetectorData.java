@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DaylightDetectorBlock;
+import net.minecraft.world.level.block.DaylightDetectorBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class DaylightDetectorData {
 
@@ -40,13 +40,13 @@ public final class DaylightDetectorData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.INVERTED)
-                        .get(h -> h.get(DaylightDetectorBlock.INVERTED))
-                        .set((h, v) -> h.with(DaylightDetectorBlock.INVERTED, v))
+                        .get(h -> h.getValue(DaylightDetectorBlock.INVERTED))
+                        .set((h, v) -> h.setValue(DaylightDetectorBlock.INVERTED, v))
                         .supports(h -> h.getBlock() instanceof DaylightDetectorBlock)
                     .create(Keys.POWER)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.POWER, DaylightDetectorBlock.POWER))
-                        .get(h -> h.get(DaylightDetectorBlock.POWER))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, DaylightDetectorBlock.POWER))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.POWER, DaylightDetectorBlock.POWER))
+                        .get(h -> h.getValue(DaylightDetectorBlock.POWER))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, DaylightDetectorBlock.POWER))
                         .supports(h -> h.getBlock() instanceof DaylightDetectorBlock);
     }
     // @formatter:on

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.item.IItemTier;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.TieredItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Tier;
+import net.minecraft.world.item.TieredItem;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.ToolType;
+import org.spongepowered.api.data.type.ItemTier;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class TieredItemStackData {
@@ -45,9 +45,9 @@ public final class TieredItemStackData {
                         .get(h -> {
                             final Item item = h.getItem();
                             if (item instanceof TieredItem) {
-                                final IItemTier tier = ((TieredItem) item).getTier();
-                                if (tier instanceof ToolType) {
-                                    return (ToolType) tier;
+                                final Tier tier = ((TieredItem) item).getTier();
+                                if (tier instanceof ItemTier) {
+                                    return (ItemTier) tier;
                                 }
                             }
                             return null;

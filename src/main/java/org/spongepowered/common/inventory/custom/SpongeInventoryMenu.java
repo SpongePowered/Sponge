@@ -25,11 +25,11 @@
 package org.spongepowered.common.inventory.custom;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.container.ClickType;
-import net.minecraft.inventory.container.IContainerListener;
-import net.minecraft.inventory.container.Slot;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.ContainerListener;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Cause;
@@ -44,8 +44,8 @@ import org.spongepowered.api.item.inventory.menu.handler.KeySwapHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotChangeHandler;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.common.accessor.inventory.container.ContainerAccessor;
-import org.spongepowered.common.bridge.inventory.container.MenuBridge;
+import org.spongepowered.common.accessor.world.inventory.AbstractContainerMenuAccessor;
+import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -69,8 +69,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     @Nullable private SlotChangeHandler changeHandler;
     @Nullable private CloseHandler closeHandler;
 
-    private boolean readonly;
-    private ItemStack oldCursorStack;
+    private boolean readonly; // TODO make with wrapper slot
 
     public SpongeInventoryMenu(ViewableInventory inventory) {
         this.inventory = inventory;
@@ -86,20 +85,20 @@ public class SpongeInventoryMenu implements InventoryMenu {
         if (inventory.getClass().equals(this.inventory.getClass()) && inventory instanceof ViewableCustomInventory && inventory.capacity() == this.inventory.capacity()) {
             this.inventory = inventory;
             for (Map.Entry<Container, ServerPlayer> entry : this.tracked.entrySet()) {
-                final net.minecraft.inventory.container.Container container = (net.minecraft.inventory.container.Container) entry.getKey();
+                final net.minecraft.world.inventory.AbstractContainerMenu container = (net.minecraft.world.inventory.AbstractContainerMenu) entry.getKey();
                 final ServerPlayer player = entry.getValue();
                 // create a new container for the viewable inventory
-                final net.minecraft.inventory.container.Container newContainer = ((ViewableCustomInventory) inventory).createMenu(-1, ((PlayerEntity)player).inventory, (PlayerEntity) player);
+                final net.minecraft.world.inventory.AbstractContainerMenu newContainer = ((ViewableCustomInventory) inventory).createMenu(-1, ((Player)player).inventory, (Player) player);
                 for (int i = 0; i < inventory.capacity(); i++) {
                     // And put its slots into the old container
-                    final Slot slot = newContainer.inventorySlots.get(i);
-                    container.inventorySlots.set(i, slot);
+                    final Slot slot = newContainer.slots.get(i);
+                    container.slots.set(i, slot);
                     // Update Container items
-                    ((ContainerAccessor)container).accessor$getInventoryItemStacks().set(i, slot.getStack());
+                    ((AbstractContainerMenuAccessor)container).accessor$lastSlots().set(i, slot.getItem());
                 }
                 // send update to Client
-                for (IContainerListener listener : ((ContainerAccessor) container).accessor$getListeners()) {
-                    listener.sendAllContents(container, ((ContainerAccessor) container).accessor$getInventoryItemStacks());
+                for (ContainerListener listener : ((AbstractContainerMenuAccessor) container).accessor$containerListeners()) {
+                    listener.refreshContainer(container, ((AbstractContainerMenuAccessor) container).accessor$lastSlots());
                 }
             }
         } else {
@@ -114,6 +113,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         new ArrayList<>(this.tracked.values()).stream().distinct().forEach(this::open);
     }
 
+    @Override
     public void setTitle(Component title) {
         this.title = title;
         this.reopen();
@@ -153,9 +153,11 @@ public class SpongeInventoryMenu implements InventoryMenu {
         this.closeHandler = handler;
     }
 
+    @Override
     public void registerClick(ClickHandler handler) {
         this.clickHandler = handler;
     }
+
     @Override
     public void registerSlotClick(SlotClickHandler handler) {
         this.slotClickHandler = handler;
@@ -166,6 +168,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         this.keySwapHandler = handler;
     }
 
+    @Override
     public void registerChange(SlotChangeHandler handler) {
         this.changeHandler = handler;
     }
@@ -189,7 +192,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         return container;
     }
 
-    public void onClose(PlayerEntity player, Container container) {
+    public void onClose(Player player, Container container) {
 
         if (this.closeHandler != null) {
             try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -201,7 +204,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         this.tracked.remove(container);
     }
 
-    public boolean onClick(int slotId, int dragType, ClickType clickTypeIn, PlayerEntity player, Container container) {
+    public boolean onClick(int slotId, int dragType, ClickType clickTypeIn, Player player, Container container) {
         try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             Cause cause = frame.getCurrentCause();
@@ -337,7 +340,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     public boolean onChange(ItemStack newStack, ItemStack oldStack, Container container, int slotIndex, Slot slot) {
 
         // readonly by default cancels top inventory changes . but can be overridden by change callbacks
-        if (this.readonly && !(slot.inventory instanceof PlayerInventory)) {
+        if (this.readonly && !(slot.container instanceof PlayerInventory)) {
             return false;
         }
 
@@ -349,11 +352,4 @@ public class SpongeInventoryMenu implements InventoryMenu {
         return true;
     }
 
-    public void setOldCursor(ItemStack itemStack) {
-        this.oldCursorStack = itemStack;
-    }
-
-    public ItemStack getOldCursor() {
-        return this.oldCursorStack;
-    }
 }

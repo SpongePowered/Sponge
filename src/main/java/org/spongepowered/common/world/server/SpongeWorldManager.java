@@ -24,56 +24,64 @@
  */
 package org.spongepowered.common.world.server;
 
-import com.google.gson.JsonElement;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.server.ServerWorld;
-import net.minecraft.world.storage.WorldInfo;
+import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.WorldArchetype;
+import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.WorldManager;
-import org.spongepowered.api.world.storage.WorldProperties;
+import org.spongepowered.common.SpongeCommon;
 
+import java.io.IOException;
 import java.nio.file.Path;
-import java.util.UUID;
+import java.util.Objects;
 
 public interface SpongeWorldManager extends WorldManager {
 
-    ResourceKey VANILLA_OVERWORLD = ResourceKey.minecraft("overworld");
-    ResourceKey VANILLA_THE_NETHER = ResourceKey.minecraft("the_nether");
-    ResourceKey VANILLA_THE_END = ResourceKey.minecraft("the_end");
+    Path getDefaultWorldDirectory();
 
-    Path getSavesDirectory();
+    Path getDimensionDataPackDirectory();
 
-    boolean registerPendingWorld(ResourceKey key, WorldArchetype archetype);
+    static net.minecraft.resources.ResourceKey<Level> createRegistryKey(final ResourceKey key) {
+        return net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_REGISTRY, (ResourceLocation) (Object) key);
+    }
 
-    @Nullable
-    ServerWorld getWorld(final DimensionType dimensionType);
+    void unloadWorld0(final ServerLevel world) throws IOException;
 
-    @Nullable
-    ServerWorld getWorld0(final ResourceKey key);
-
-    @Nullable
-    ServerWorld getDefaultWorld();
-
-    void adjustWorldForDifficulty(ServerWorld world, Difficulty newDifficulty, boolean forceDifficulty);
-
-    void loadAllWorlds(String directoryName, String levelName, long seed, WorldType type, JsonElement generatorOptions, boolean isSinglePlayer,
-            @Nullable WorldSettings defaultSettings, Difficulty defaultDifficulty);
+    void loadLevel();
 
     default String getDirectoryName(final ResourceKey key) {
-        if (SpongeWorldManager.VANILLA_OVERWORLD.equals(key)) {
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
+        if (Level.OVERWORLD.equals(registryKey)) {
             return "";
         }
-        if (SpongeWorldManager.VANILLA_THE_NETHER.equals(key)) {
+        if (Level.NETHER.equals(registryKey)) {
             return "DIM-1";
         }
-        if (SpongeWorldManager.VANILLA_THE_END.equals(key)) {
+        if (Level.END.equals(registryKey)) {
             return "DIM1";
         }
         return key.getValue();
+    }
+
+    default boolean isVanillaWorld(final ResourceKey key) {
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
+        return Level.OVERWORLD.equals(registryKey) || Level.NETHER.equals(registryKey) || Level.END.equals(registryKey);
+    }
+
+    default boolean isVanillaSubWorld(final String directoryName) {
+        return "DIM-1".equals(directoryName) || "DIM1".equals(directoryName);
+    }
+
+    default boolean isDefaultWorld(final ResourceKey key) {
+        final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(key);
+        return Level.OVERWORLD.equals(registryKey);
+    }
+
+    default Path getDataPackFile(final ResourceKey key) {
+        return this.getDimensionDataPackDirectory().resolve(key.getNamespace()).resolve("dimension").resolve(key.getValue() + ".json");
     }
 }

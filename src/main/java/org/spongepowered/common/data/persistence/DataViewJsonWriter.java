@@ -27,15 +27,15 @@ package org.spongepowered.common.data.persistence;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.gson.stream.JsonWriter;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
+import org.spongepowered.api.data.persistence.DataView;
+
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.annotation.Nullable;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.data.persistence.DataView;
 
 /**
  * A {@link JsonWriter} that serializes to a {@link DataContainer}
@@ -49,10 +49,12 @@ public final class DataViewJsonWriter extends JsonWriter {
         @Override public void write(char[] buffer, int offset, int counter) {
             throw new AssertionError();
         }
-        @Override public void flush() throws IOException {
+
+        @Override public void flush() {
             throw new AssertionError();
         }
-        @Override public void close() throws IOException {
+
+        @Override public void close() {
             throw new AssertionError();
         }
     };
@@ -62,7 +64,7 @@ public final class DataViewJsonWriter extends JsonWriter {
     private DataContainer result = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
 
     public DataViewJsonWriter() {
-        super(UNWRITABLE_WRITER);
+        super(DataViewJsonWriter.UNWRITABLE_WRITER);
     }
 
     public DataContainer getResult() throws IOException {

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.accessor.entity.passive.SheepEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DyeColorUtil;
+import org.spongepowered.common.util.DyeColorUtil;
 
 public final class WoolData {
 
@@ -42,7 +42,7 @@ public final class WoolData {
                 .asImmutable(BlockState.class)
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_WOOL.get(h.getBlock()))
-                        .supports(h -> SheepEntityAccessor.accessor$getWoolByColor().containsValue(h.getBlock()));
+                        .supports(h -> SheepAccessor.accessor$ITEM_BY_DYE().containsValue(h.getBlock()));
     }
     // @formatter:on
 }

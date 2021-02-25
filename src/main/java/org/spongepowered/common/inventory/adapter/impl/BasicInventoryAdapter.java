@@ -25,10 +25,9 @@
 package org.spongepowered.common.inventory.adapter.impl;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -40,6 +39,7 @@ import java.util.List;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.item.ItemStack;
 
 /**
  * Base Adapter implementation for {@link ItemStack} based Inventories.

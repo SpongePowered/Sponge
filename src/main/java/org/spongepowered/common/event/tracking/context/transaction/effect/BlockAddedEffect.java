@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -43,9 +43,10 @@ public final class BlockAddedEffect implements ProcessingSideEffect {
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
+        final SpongeBlockChangeFlag flag, final int limit
+    ) {
         if (flag.performBlockPhysics()) {
-            newState.onBlockAdded(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
+            newState.onPlace(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
         }
         return EffectResult.NULL_PASS;
     }

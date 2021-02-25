@@ -24,29 +24,23 @@
  */
 package org.spongepowered.common.inventory.query;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryType;
-import org.spongepowered.common.SpongeCatalogType;
 
+import java.util.Objects;
 import java.util.function.BiFunction;
 
-public final class SpongeTwoParamQueryType<T1, T2> extends SpongeCatalogType implements QueryType.TwoParam<T1, T2> {
+public final class SpongeTwoParamQueryType<T1, T2> implements QueryType.TwoParam<T1, T2> {
 
     private final BiFunction<T1, T2, Query> newInstance;
 
-    public SpongeTwoParamQueryType(final ResourceKey key, final BiFunction<T1, T2, Query> newInstance) {
-        super(key);
+    public SpongeTwoParamQueryType(final BiFunction<T1, T2, Query> newInstance) {
         this.newInstance = newInstance;
     }
 
     @Override
     public Query of(final T1 arg1, final T2 arg2) {
-        checkNotNull(arg1);
-        checkNotNull(arg2);
-        return this.newInstance.apply(arg1, arg2);
+        return this.newInstance.apply(Objects.requireNonNull(arg1, "arg1"), Objects.requireNonNull(arg2, "arg2"));
     }
 
 }

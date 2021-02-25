@@ -31,14 +31,6 @@ public final class CustomDataConfig implements Config {
 
     public static final String FILE_NAME = "custom_data.conf";
 
-    @Setting
-    private CustomDataRegistrationCategory dataRegistration = new CustomDataRegistrationCategory();
-
-    public CustomDataConfig() {
-    }
-
-    public CustomDataRegistrationCategory getDataRegistrationConfig() {
-        return this.dataRegistration;
-    }
-
+    @Setting("data-registration")
+    public final CustomDataRegistrationCategory dataRegistration = new CustomDataRegistrationCategory();
 }

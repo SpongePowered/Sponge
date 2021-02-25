@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.inventory.lens.impl;
 
-import net.minecraft.inventory.container.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
 import org.spongepowered.common.inventory.adapter.impl.BasicInventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
-import org.spongepowered.common.accessor.inventory.container.SlotAccessor;
-
 import java.util.ArrayList;
 import java.util.List;
+import net.minecraft.world.inventory.Slot;
 
 /**
  * A delegating Lens used in Containers. Provides ordered inventory access.
@@ -62,7 +61,7 @@ public class DelegatingLens extends AbstractLens {
         final CustomSlotProvider slotProvider = new CustomSlotProvider();
         for (final Slot slot : containerSlots) {
             // Get slots from original slot provider and add them to custom slot provider in order of actual containerSlots.
-            slotProvider.add(slots.getSlotLens(((SlotAccessor) slot).accessor$getSlotNumber()));
+            slotProvider.add(slots.getSlotLens(((SlotAccessor) slot).accessor$index()));
         }
         // Provide indexed access over the Container to the slots in the base inventory
         this.addSpanningChild(new DefaultIndexedLens(0, containerSlots.size(), slotProvider));

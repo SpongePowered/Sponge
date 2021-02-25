@@ -31,8 +31,10 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.minecraft.item.Item;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.Item;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
@@ -45,9 +47,10 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
@@ -62,7 +65,7 @@ import javax.annotation.Nullable;
 @SuppressWarnings("unchecked")
 public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
-    public static final ItemStackSnapshot EMPTY = new SpongeItemStackSnapshot(ItemStackUtil.fromNative(net.minecraft.item.ItemStack.EMPTY));
+    public static final ItemStackSnapshot EMPTY = new SpongeItemStackSnapshot(ItemStackUtil.fromNative(net.minecraft.world.item.ItemStack.EMPTY));
 
     private final ItemType itemType;
     private final int quantity;
@@ -71,13 +74,13 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> values;
-    @Nullable private final CompoundNBT compound;
+    @Nullable private final CompoundTag compound;
     @Nullable private UUID creatorUniqueId;
 
     @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "ConstantConditions"})
     public SpongeItemStackSnapshot(final ItemStack itemStack) {
         checkNotNull(itemStack);
-        if (ItemStackUtil.toNative(itemStack) == net.minecraft.item.ItemStack.EMPTY) {
+        if (ItemStackUtil.toNative(itemStack) == net.minecraft.world.item.ItemStack.EMPTY) {
             this.itemType = itemStack.getType();
             this.quantity = 0;
             this.damageValue = 0;
@@ -93,25 +96,25 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         final ImmutableList.Builder<DataManipulator.Immutable> builder = ImmutableList.builder();
         final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
-        final DataManipulator.Mutable customData = ((CustomDataHolderBridge) itemStack).bridge$getManipulator();
+        final DataManipulator.Mutable customData = ((SpongeDataHolderBridge) itemStack).bridge$getManipulator();
         builder.add(customData.asImmutable());
         keyBuilder.addAll(customData.getKeys());
         valueBuilder.addAll(customData.getValues());
-        this.damageValue = ItemStackUtil.toNative(itemStack).getDamage();
+        this.damageValue = ItemStackUtil.toNative(itemStack).getDamageValue();
         this.manipulators = builder.build();
         this.privateStack = itemStack.copy();
         this.keys = keyBuilder.build();
         this.values = valueBuilder.build();
 
-        @Nullable CompoundNBT compound = ItemStackUtil.toNative(this.privateStack).getTag();
+        @Nullable CompoundTag compound = ItemStackUtil.toNative(this.privateStack).getTag();
         if (compound != null) {
             compound = compound.copy();
         }
         if (compound != null) {
-            if (compound.contains(Constants.Sponge.SPONGE_DATA)) {
-                final CompoundNBT spongeCompound = compound.getCompound(Constants.Sponge.SPONGE_DATA);
-                if (spongeCompound.contains(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST)) {
-                    spongeCompound.remove(Constants.Sponge.CUSTOM_MANIPULATOR_TAG_LIST);
+            if (compound.contains(Constants.Sponge.Data.V2.SPONGE_DATA)) {
+                final CompoundTag spongeCompound = compound.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
+                if (spongeCompound.contains(Constants.Sponge.Data.V2.CUSTOM_MANIPULATOR_TAG_LIST)) {
+                    spongeCompound.remove(Constants.Sponge.Data.V2.CUSTOM_MANIPULATOR_TAG_LIST);
                 }
             }
             Constants.NBT.filterSpongeCustomData(compound);
@@ -128,11 +131,11 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public SpongeItemStackSnapshot(final ItemType itemType,
                                    final int quantity,
                                    final ImmutableList<DataManipulator.Immutable> manipulators,
-                                   @Nullable final CompoundNBT compound) {
+                                   @Nullable final CompoundTag compound) {
         this.itemType = checkNotNull(itemType);
         this.quantity = quantity;
         this.manipulators = checkNotNull(manipulators);
-        this.privateStack = ItemStackUtil.fromNative(new net.minecraft.item.ItemStack((Item) this.itemType, this.quantity));
+        this.privateStack = ItemStackUtil.fromNative(new net.minecraft.world.item.ItemStack((Item) this.itemType, this.quantity));
         final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
         for (final DataManipulator.Immutable manipulator : this.manipulators) {
@@ -148,7 +151,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public ItemType getType() {
-        return this.itemType == null ? (ItemType) net.minecraft.item.ItemStack.EMPTY.getItem() : this.itemType;
+        return this.itemType == null ? (ItemType) net.minecraft.world.item.ItemStack.EMPTY.getItem() : this.itemType;
     }
 
     @Override
@@ -167,7 +170,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public ItemStack createStack() {
-        final net.minecraft.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
+        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.cloneDefensiveNative(ItemStackUtil.toNative(this.privateStack.copy()));
         if(this.compound != null) {
             nativeStack.setTag(this.compound.copy());
         }
@@ -184,16 +187,17 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public DataContainer toContainer() {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.ItemStack.TYPE, this.itemType.getKey())
+            .set(Constants.ItemStack.TYPE, resourceKey)
             .set(Constants.ItemStack.COUNT, this.quantity)
             .set(Constants.ItemStack.DAMAGE_VALUE, this.damageValue);
         if (!this.manipulators.isEmpty()) {
 //     TODO       container.set(Constants.Sponge.DATA_MANIPULATORS, DataUtil.getSerializedImmutableManipulatorList(this.manipulators));
         }
         if (this.compound != null) {
-            container.set(Constants.Sponge.UNSAFE_NBT, NbtTranslator.getInstance().translateFrom(this.compound));
+            container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.INSTANCE.translateFrom(this.compound));
         }
         return container;
     }
@@ -220,7 +224,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public Optional<ItemStackSnapshot> with(final Value<?> value) {
-        return with((Key<Value<Object>>) value.getKey(), (Object) value.get());
+        return this.with((Key<Value<Object>>) value.getKey(), (Object) value.get());
     }
 
 
@@ -256,8 +260,10 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public String toString() {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
+
         return MoreObjects.toStringHelper(this)
-                .add("itemType", this.itemType.getKey())
+                .add("itemType", resourceKey)
                 .add("quantity", this.quantity)
                 .toString();
     }
@@ -266,7 +272,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return this.damageValue;
     }
 
-    public Optional<CompoundNBT> getCompound() {
+    public Optional<CompoundTag> getCompound() {
         if (this.compound != null) {
             return Optional.of(this.compound.copy());
         }
@@ -337,7 +343,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public HoverEvent<HoverEvent.ShowItem> asHoverEvent(final UnaryOperator<HoverEvent.ShowItem> op) {
-        final CompoundNBT tag = this.getCompound().orElse(null);
-        return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.of(this.getType().getKey(), this.getQuantity(), SpongeAdventure.asBinaryTagHolder(tag))));
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
+        final CompoundTag tag = this.getCompound().orElse(null);
+        return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.of(resourceKey, this.getQuantity(), SpongeAdventure.asBinaryTagHolder(tag))));
     }
 }

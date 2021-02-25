@@ -30,6 +30,7 @@ import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.api.world.volume.stream.VolumeCollector;
 import org.spongepowered.api.world.volume.stream.VolumeConsumer;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
+import org.spongepowered.api.world.volume.stream.VolumeFlatMapper;
 import org.spongepowered.api.world.volume.stream.VolumeMapper;
 import org.spongepowered.api.world.volume.stream.VolumePredicate;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -82,7 +83,7 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     }
 
     @Override
-    public VolumeStream<V, T> map(final VolumeMapper<V, T> mapper) {
+    public <Out> VolumeStream<V, Out> map(final VolumeMapper<V, T, Out> mapper) {
         return new SpongeVolumeStream<>(this.stream.map(element ->
             VolumeElement.of(this.volumeSupplier.get(), mapper.map(
                 this.volumeSupplier.get(),
@@ -95,7 +96,27 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     }
 
     @Override
-    public VolumeStream<V, T> map(final Function<VolumeElement<V, T>, ? extends T> mapper) {
+    public VolumeStream<V, Optional<? extends T>> flatMap(final VolumeFlatMapper<V, T> mapper) {
+        return new SpongeVolumeStream<>(
+            this.stream.map(element ->
+                VolumeElement.of(
+                    this.volumeSupplier.get(),
+                    mapper.map(
+                        this.volumeSupplier.get(),
+                        element::getType,
+                        element.getPosition().getX(),
+                        element.getPosition().getY(),
+                        element.getPosition().getZ()
+                    ),
+                    element.getPosition()
+                )
+            ),
+            this.volumeSupplier
+        );
+    }
+
+    @Override
+    public <Out> VolumeStream<V, Out> map(final Function<VolumeElement<V, T>, ? extends Out> mapper) {
         return new SpongeVolumeStream<>(this.stream.map(element -> VolumeElement.of(
             this.getVolume(),
             mapper.apply(element),

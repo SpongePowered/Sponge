@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.arguments.EntityArgument;
+import net.minecraft.commands.arguments.EntityArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -43,7 +42,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.user.UserManager;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
 import java.util.List;
@@ -52,15 +51,12 @@ import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-public final class SpongeUserValueParameter extends CatalogedArgumentParser<User> {
+public final class SpongeUserValueParameter extends ResourceKeyedArgumentValueParser<User> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("user");
     private final EntityArgument selectorArgumentType = EntityArgument.player();
 
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeUserValueParameter.RESOURCE_KEY;
+    public SpongeUserValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override
@@ -89,7 +85,7 @@ public final class SpongeUserValueParameter extends CatalogedArgumentParser<User
             try {
                 final ServerPlayer entity =
                         (ServerPlayer) (this.selectorArgumentType.parse((StringReader) reader)
-                                .selectOnePlayer(((SpongeCommandContextBuilder) context).getSource()));
+                                .findSingleEntity(((SpongeCommandContextBuilder) context).getSource()));
                 return Optional.of(entity.getUser());
             } catch (final CommandSyntaxException e) {
                 throw reader.createException(Component.text(e.getContext()));

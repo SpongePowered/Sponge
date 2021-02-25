@@ -30,8 +30,8 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.arguments.ColorArgument;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.ChatFormatting;
+import net.minecraft.commands.arguments.ColorArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -39,8 +39,8 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.util.Color;
-import org.spongepowered.common.accessor.util.text.TextFormattingAccessor;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.accessor.ChatFormattingAccessor;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
 import java.util.List;
 import java.util.Optional;
@@ -48,16 +48,13 @@ import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public final class SpongeColorValueParameter extends CatalogedArgumentParser<Color> {
+public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueParser<Color> {
 
-    private final static ResourceKey RESOURCE_KEY = ResourceKey.sponge("color");
     private final static Pattern HEX_CODE = Pattern.compile("#[0-9A-Fa-f]{6}");
     private final ColorArgument colorArgumentType = ColorArgument.color();
 
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeColorValueParameter.RESOURCE_KEY;
+    public SpongeColorValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override
@@ -86,8 +83,8 @@ public final class SpongeColorValueParameter extends CatalogedArgumentParser<Col
         final ArgumentReader.Immutable state = reader.getImmutable();
         // First, is the argument type giving the correct return type?
         try {
-            final TextFormatting formatting = this.colorArgumentType.parse((StringReader) reader);
-            final Integer colorCode = ((TextFormattingAccessor) (Object) formatting).accessor$getColor();
+            final ChatFormatting formatting = this.colorArgumentType.parse((StringReader) reader);
+            final Integer colorCode = ((ChatFormattingAccessor) (Object) formatting).accessor$color();
             if (colorCode != null) {
                 return Optional.of(Color.ofRgb(colorCode));
             }
@@ -98,8 +95,12 @@ public final class SpongeColorValueParameter extends CatalogedArgumentParser<Col
         final String string = reader.parseUnquotedString();
 
         // Hex code?
-        if (HEX_CODE.matcher(string).matches()) {
-            // Hex code
+        if (SpongeColorValueParameter.HEX_CODE.matcher(string).matches()) {
+            try {
+                return Optional.of(Color.ofRgb(Integer.parseInt(string.substring(1), 16)));
+            } catch (final NumberFormatException ex) {
+                // handled below
+            }
         }
 
         final String[] rgb = string.split(",", 3);

@@ -25,6 +25,8 @@
 package org.spongepowered.common.fluid;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -33,6 +35,7 @@ import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.fluid.FluidTypes;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 import org.spongepowered.common.util.Constants;
 
@@ -86,9 +89,10 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     @Override
     @NonNull
     public DataContainer toContainer() {
+        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).valueKey(this.fluidType);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.Fluids.FLUID_TYPE, this.fluidType.getKey().toString())
+            .set(Constants.Fluids.FLUID_TYPE, resourceKey)
             .set(Constants.Fluids.FLUID_VOLUME, this.volume);
         if (this.extraData != null) {
             container.set(Constants.Sponge.UNSAFE_NBT, this.extraData);

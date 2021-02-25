@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.effect.particle;
 
-import net.minecraft.network.IPacket;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.List;
+import net.minecraft.network.protocol.Packet;
 
 interface CachedParticlePacket {
 
-    void process(Vector3d position, List<IPacket<?>> output);
+    void process(Vector3d position, List<Packet<?>> output);
 }

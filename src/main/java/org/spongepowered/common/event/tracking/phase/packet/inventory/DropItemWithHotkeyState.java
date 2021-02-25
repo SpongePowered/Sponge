@@ -25,11 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.item.ItemEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.client.CClickWindowPacket;
-import net.minecraft.network.play.client.CPlayerDiggingPacket;
-import net.minecraft.util.Hand;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -48,17 +43,22 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.item.ItemEntity;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -72,7 +72,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
     @Override
     public void unwind(final InventoryPacketContext context) {
-        final ServerPlayerEntity player = context.getPacketPlayer();
+        final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
         //final ItemStack usedStack = context.getItemUsed();
         //final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = (Entity) player;
@@ -91,36 +91,36 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
                 final int usedButton;
                 final Slot slot;
-                if (context.getPacket() instanceof CPlayerDiggingPacket) {
-                    final CPlayerDiggingPacket packetIn = context.getPacket();
-                    usedButton = packetIn.getAction() == CPlayerDiggingPacket.Action.DROP_ITEM
+                if (context.getPacket() instanceof ServerboundPlayerActionPacket) {
+                    final ServerboundPlayerActionPacket packetIn = context.getPacket();
+                    usedButton = packetIn.getAction() == ServerboundPlayerActionPacket.Action.DROP_ITEM
                         ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID
                         : 1;
                     slot = ((PlayerInventory) player.inventory).getEquipment().getSlot(
                         EquipmentTypes.MAIN_HAND).orElse(null);
                 } else {
-                    final CClickWindowPacket packetIn = context.getPacket();
-                    usedButton = packetIn.getUsedButton();
+                    final ServerboundContainerClickPacket packetIn = context.getPacket();
+                    usedButton = packetIn.getButtonNum();
                     slot = ((InventoryAdapter) player.inventory).inventoryAdapter$getSlot(
-                        packetIn.getSlotId()).orElse(null);
+                        packetIn.getSlotNum()).orElse(null);
                 }
 
                 final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.empty(),
                     ItemStackSnapshot.empty());
-                final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
+                final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.containerMenu;
                 final List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
                 final ClickContainerEvent.Drop dropItemEvent = this.createInventoryEvent(player,
-                    ContainerUtil.fromNative(player.openContainer),
+                    ContainerUtil.fromNative(player.containerMenu),
                     cursorTrans, Lists.newArrayList(slotTrans), entities, usedButton, slot);
 
                 SpongeCommon.postEvent(dropItemEvent);
                 if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
                     dropItemEvent.getTransactions())) {
-                    ((ServerPlayerEntityBridge) player).bridge$restorePacketItem(Hand.MAIN_HAND);
-                    PacketPhaseUtil.handleSlotRestore(player, player.openContainer, dropItemEvent.getTransactions(),
+                    ((ServerPlayerBridge) player).bridge$restorePacketItem(InteractionHand.MAIN_HAND);
+                    PacketPhaseUtil.handleSlotRestore(player, player.containerMenu, dropItemEvent.getTransactions(),
                         true);
                 } else {
-                    processSpawnedEntities(player, dropItemEvent);
+                    PacketState.processSpawnedEntities(player, dropItemEvent);
                 }
                 for (Entity entity : entities) {
                     if (((EntityBridge) entity).bridge$isConstructing()) {
@@ -131,14 +131,14 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                 mixinContainer.bridge$setCaptureInventory(false);
             }
 
-            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.openContainer;
+            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.containerMenu;
             mixinContainer.bridge$setCaptureInventory(false);
             mixinContainer.bridge$getCapturedSlotTransactions().clear();
         }
     }
 
     @Override
-    public ClickContainerEvent.Drop createInventoryEvent(final ServerPlayerEntity serverPlayer,
+    public ClickContainerEvent.Drop createInventoryEvent(final net.minecraft.server.level.ServerPlayer serverPlayer,
         final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {
@@ -148,7 +148,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                 if (currentEntity instanceof CreatorTrackedBridge) {
                     ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((ServerPlayer) serverPlayer).getUser());
                 } else {
-                    currentEntity.offer(Keys.CREATOR, serverPlayer.getUniqueID());
+                    currentEntity.offer(Keys.CREATOR, serverPlayer.getUUID());
                 }
             }
 

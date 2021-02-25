@@ -30,13 +30,10 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
-import org.spongepowered.api.CatalogType;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 
 import java.lang.reflect.Type;
-import java.util.function.Predicate;
 
 import javax.inject.Inject;
 
@@ -48,8 +45,7 @@ public final class DataSerializableTypeSerializer implements TypeSerializer<Data
     private static final Class<DataSerializable> TYPE = DataSerializable.class;
 
     public static boolean accepts(final Type x) {
-        return GenericTypeReflector.isSuperType(DataSerializableTypeSerializer.TYPE, x)
-                && !GenericTypeReflector.isSuperType(CatalogTypeTypeSerializer.TYPE, x);
+        return GenericTypeReflector.isSuperType(DataSerializableTypeSerializer.TYPE, x);
     }
 
     private final DataManager dataManager;

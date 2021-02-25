@@ -25,10 +25,10 @@
 package org.spongepowered.common.data.nbt.validation;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundNBT;
+import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.data.persistence.DataView;
 
-public class DelegateDataValidator implements RawDataValidator {
+public final class DelegateDataValidator implements RawDataValidator {
 
     private final ImmutableList<RawDataValidator> validators;
     private final ValidationType type;
@@ -44,7 +44,7 @@ public class DelegateDataValidator implements RawDataValidator {
     }
 
     @Override
-    public boolean validate(CompoundNBT view) {
+    public boolean validate(CompoundTag view) {
         for (RawDataValidator validator : this.validators) {
             if (!validator.validate(view)) {
                 return false;

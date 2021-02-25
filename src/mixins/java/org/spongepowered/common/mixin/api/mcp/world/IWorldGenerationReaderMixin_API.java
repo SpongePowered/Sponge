@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import net.minecraft.world.gen.IWorldGenerationReader;
+import net.minecraft.world.level.LevelSimulatedRW;
 import org.spongepowered.api.world.volume.game.GenerationVolume;
 import org.spongepowered.asm.mixin.Mixin;
 
-@Mixin(IWorldGenerationReader.class)
-public interface IWorldGenerationReaderMixin_API extends GenerationVolume {
+@Mixin(LevelSimulatedRW.class)
+public interface IWorldGenerationReaderMixin_API extends GenerationVolume.Mutable {
 
 }

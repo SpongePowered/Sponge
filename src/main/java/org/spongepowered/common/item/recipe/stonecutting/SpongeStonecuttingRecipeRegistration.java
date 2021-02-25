@@ -25,18 +25,18 @@
 package org.spongepowered.common.item.recipe.stonecutting;
 
 import com.google.gson.JsonObject;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.function.Function;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
 public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistration {
 
@@ -47,10 +47,10 @@ public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistrati
 
     // Sponge Recipe
     private final ItemStack spongeResult;
-    private Function<IInventory, ItemStack> resultFunction;
+    private Function<Container, ItemStack> resultFunction;
 
-    public SpongeStonecuttingRecipeRegistration(ResourceLocation key, IRecipeSerializer<?> serializer, String group, Ingredient ingredient,
-            ItemStack spongeResult, Function<IInventory, ItemStack> resultFunction) {
+    public SpongeStonecuttingRecipeRegistration(ResourceLocation key, RecipeSerializer<?> serializer, String group, Ingredient ingredient,
+            ItemStack spongeResult, Function<Container, ItemStack> resultFunction) {
         super(key, serializer, spongeResult.getItem(), group);
         this.ingredient = ingredient;
         this.result = spongeResult.getItem();
@@ -61,7 +61,7 @@ public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistrati
 
     @Override
     public void serializeShape(JsonObject json) {
-        json.add(Constants.Recipe.STONECUTTING_INGREDIENT, this.ingredient.serialize());
+        json.add(Constants.Recipe.STONECUTTING_INGREDIENT, this.ingredient.toJson());
     }
 
     @Override
@@ -69,11 +69,11 @@ public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistrati
         json.addProperty(Constants.Recipe.RESULT, Registry.ITEM.getKey(this.result).toString());
         json.addProperty(Constants.Recipe.COUNT, this.count);
 
-        if (spongeResult != null) {
-            json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(spongeResult));
+        if (this.spongeResult != null) {
+            json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getID(), this.resultFunction));
+            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
         }
     }
 }

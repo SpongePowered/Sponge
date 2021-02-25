@@ -24,62 +24,76 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.minecart.AbstractMinecartEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.common.bridge.world.entity.vehicle.AbstractMinecartBridge;
+import org.spongepowered.common.data.ByteToBooleanContentUpdater;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
 
 public final class AbstractMinecartData {
 
     private AbstractMinecartData() {
     }
 
+    private static final DataContentUpdater MINECART_UPDATER_BYTE_TO_BOOL_FIX = new ByteToBooleanContentUpdater(1, 2, Keys.SLOWS_UNOCCUPIED);
+
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(AbstractMinecartEntity.class)
+                .asMutable(AbstractMinecart.class)
                     .create(Keys.BLOCK_STATE)
-                        .get(h -> h.hasDisplayTile() ? (BlockState) h.getDisplayTile() : null)
-                        .set((h, v) -> h.setDisplayTile((net.minecraft.block.BlockState) v))
-                        .delete(h -> h.setHasDisplayTile(false))
+                        .get(h -> h.hasCustomDisplay() ? (BlockState) h.getDisplayBlockState() : null)
+                        .set((h, v) -> h.setDisplayBlockState((net.minecraft.world.level.block.state.BlockState) v))
+                        .delete(h -> h.setCustomDisplay(false))
                     .create(Keys.IS_ON_RAIL)
                         .get(h -> {
-                            final BlockPos pos = h.getPosition();
-                            if (h.getEntityWorld().getBlockState(pos).isIn(BlockTags.RAILS)) {
+                            final BlockPos pos = h.blockPosition();
+                            if (h.level.getBlockState(pos).is(BlockTags.RAILS)) {
                                 return true;
                             }
-                            final BlockPos posBelow = pos.add(0, -1, 0);
-                            return h.getEntityWorld().getBlockState(posBelow).isIn(BlockTags.RAILS);
+                            final BlockPos posBelow = pos.offset(0, -1, 0);
+                            return h.level.getBlockState(posBelow).is(BlockTags.RAILS);
                         })
                     .create(Keys.MINECART_BLOCK_OFFSET)
-                        .get(AbstractMinecartEntity::getDisplayTileOffset)
+                        .get(AbstractMinecart::getDisplayOffset)
                         .setAnd(AbstractMinecartData::setBlockOffset)
-                        .deleteAnd(h -> setBlockOffset(h, h.getDefaultDisplayTileOffset()))
-                .asMutable(MinecartEntityBridge.class)
+                        .deleteAnd(h -> AbstractMinecartData.setBlockOffset(h, h.getDefaultDisplayOffset()))
+                .asMutable(AbstractMinecartBridge.class)
                     .create(Keys.AIRBORNE_VELOCITY_MODIFIER)
-                        .get(MinecartEntityBridge::bridge$getAirborneMod)
-                        .set(MinecartEntityBridge::bridge$setAirborneMod)
+                        .get(AbstractMinecartBridge::bridge$getAirborneMod)
+                        .set(AbstractMinecartBridge::bridge$setAirborneMod)
                     .create(Keys.SLOWS_UNOCCUPIED)
-                        .get(MinecartEntityBridge::bridge$getSlowWhenEmpty)
-                        .set(MinecartEntityBridge::bridge$setSlowWhenEmpty)
+                        .get(AbstractMinecartBridge::bridge$getSlowWhenEmpty)
+                        .set(AbstractMinecartBridge::bridge$setSlowWhenEmpty)
                     .create(Keys.DERAILED_VELOCITY_MODIFIER)
-                        .get(MinecartEntityBridge::bridge$getDerailedMod)
-                        .set(MinecartEntityBridge::bridge$setDerailedMod)
+                        .get(AbstractMinecartBridge::bridge$getDerailedMod)
+                        .set(AbstractMinecartBridge::bridge$setDerailedMod)
                     .create(Keys.POTENTIAL_MAX_SPEED)
-                        .get(MinecartEntityBridge::bridge$getMaxSpeed)
-                        .set(MinecartEntityBridge::bridge$setMaxSpeed)
+                        .get(AbstractMinecartBridge::bridge$getMaxSpeed)
+                        .set(AbstractMinecartBridge::bridge$setMaxSpeed)
                     ;
+        final ResourceKey minecartDataStoreKey = ResourceKey.sponge("minecart");
+        registrator.spongeDataStore(minecartDataStoreKey, 2, new DataContentUpdater[]{AbstractMinecartData.MINECART_UPDATER_BYTE_TO_BOOL_FIX}, AbstractMinecartBridge.class,
+                Keys.POTENTIAL_MAX_SPEED, Keys.SLOWS_UNOCCUPIED, Keys.AIRBORNE_VELOCITY_MODIFIER, Keys.DERAILED_VELOCITY_MODIFIER);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Minecart.MAX_SPEED, minecartDataStoreKey, Keys.POTENTIAL_MAX_SPEED);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Minecart.SLOW_WHEN_EMPTY, minecartDataStoreKey, Keys.SLOWS_UNOCCUPIED);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Minecart.AIRBORNE_MODIFIER, minecartDataStoreKey, Keys.AIRBORNE_VELOCITY_MODIFIER);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Entity.Minecart.DERAILED_MODIFIER, minecartDataStoreKey, Keys.DERAILED_VELOCITY_MODIFIER);
     }
     // @formatter:on
 
-    private static boolean setBlockOffset(final AbstractMinecartEntity holder, final Integer value) {
-        if (!holder.hasDisplayTile()) {
+    private static boolean setBlockOffset(final AbstractMinecart holder, final Integer value) {
+        if (!holder.hasCustomDisplay()) {
             return false;
         }
-        holder.setDisplayTileOffset(value);
+        holder.setDisplayOffset(value);
         return true;
     }
 }

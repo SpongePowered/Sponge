@@ -32,21 +32,37 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public class BlockEntityTrackerCategory {
+public final class BlockEntityTrackerCategory {
 
-    @Comment("If 'true', newly discovered tileentities will be added to this config with default settings.")
-    private boolean autoPopulate = false;
+    @Setting("auto-populate")
+    @Comment("If 'true', newly discovered block entities will be added to this config with default settings.")
+    public boolean autoPopulate = false;
 
-    @Setting("mods")
-    @Comment("Per-mod tileentity id mappings for controlling tracking behavior")
-    private Map<String, BlockEntityTrackerModCategory> modMapping = new HashMap<>();
+    @Setting
+    @Comment("Per-mod block entity id mappings for controlling tracking behavior")
+    public final Map<String, ModSubCategory> mods = new HashMap<>();
 
-    public Map<String, BlockEntityTrackerModCategory> getModMappings() {
-        return this.modMapping;
+    @ConfigSerializable
+    public static final class ModSubCategory {
+
+        @Setting
+        @Comment("If 'false', all tracking for this mod will be disabled.")
+        public boolean enabled = true;
+
+        @Setting(TrackerConfig.BLOCK_BULK_CAPTURE)
+        @Comment("Set to true to perform block bulk capturing during block entity ticks. (Default: true)")
+        public Map<String, Boolean> blockBulkCapture = new HashMap<>();
+
+        @Setting(TrackerConfig.BLOCK_EVENT_CREATION)
+        @Comment("Set to true to create and fire block events during block entity ticks. (Default: true)")
+        public Map<String, Boolean> blockEventCreation = new HashMap<>();
+
+        @Setting(TrackerConfig.ENTITY_BULK_CAPTURE)
+        @Comment("Set to true to perform entity bulk capturing during block entity ticks. (Default: true)")
+        public Map<String, Boolean> entityBulkCapture = new HashMap<>();
+
+        @Setting(TrackerConfig.ENTITY_EVENT_CREATION)
+        @Comment("Set to true to create and fire entity events during block entity ticks. (Default: true)")
+        public Map<String, Boolean> entityEventCreation = new HashMap<>();
     }
-
-    public boolean autoPopulateData() {
-        return this.autoPopulate;
-    }
-
 }

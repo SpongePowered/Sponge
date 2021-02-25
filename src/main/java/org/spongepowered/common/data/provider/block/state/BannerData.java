@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BannerBlock;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.BannerBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.RotationUtils;
+import org.spongepowered.common.util.RotationUtils;
 
 public final class BannerData {
 
@@ -40,7 +40,7 @@ public final class BannerData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> RotationUtils.getFor(h.get(BannerBlock.ROTATION)))
+                        .get(h -> RotationUtils.getFor(h.getValue(BannerBlock.ROTATION)))
                         .set((h, v) -> RotationUtils.set(h, v, BannerBlock.ROTATION))
                         .supports(h -> h.getBlock() instanceof BannerBlock);
     }

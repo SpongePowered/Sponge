@@ -49,7 +49,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
 
     private final Type type;
 
-    InventoryTransactionResultImpl(Builder builder) {
+    InventoryTransactionResultImpl(org.spongepowered.common.inventory.InventoryTransactionResultImpl.Builder builder) {
         this.type = checkNotNull(builder.resultType, "Result type");
         this.rejected = builder.rejected != null ? ImmutableList.copyOf(builder.rejected) : Collections.emptyList();
         this.slotTransactions = builder.slotTransactions != null ? ImmutableList.copyOf(builder.slotTransactions) : Collections.emptyList();

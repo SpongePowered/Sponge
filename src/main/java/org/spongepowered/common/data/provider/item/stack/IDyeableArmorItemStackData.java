@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.item.IDyeableArmorItem;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.DyeableLeatherItem;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -41,19 +41,19 @@ public final class IDyeableArmorItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.COLOR)
                         .get(h -> {
-                            final int color = ((IDyeableArmorItem) h.getItem()).getColor(h);
+                            final int color = ((DyeableLeatherItem) h.getItem()).getColor(h);
                             return color == -1 ? null : Color.ofRgb(color);
                         })
                         .set((h, v) -> {
-                            final IDyeableArmorItem item = (IDyeableArmorItem) h.getItem();
+                            final DyeableLeatherItem item = (DyeableLeatherItem) h.getItem();
                             if (v == null) {
-                                item.removeColor(h);
+                                item.clearColor(h);
                             } else {
                                 item.setColor(h, (((v.getRed() << 8) + v.getGreen()) << 8) + v.getBlue());
                             }
                         })
-                        .delete(h -> ((IDyeableArmorItem) h.getItem()).removeColor(h))
-                        .supports(h -> h.getItem() instanceof IDyeableArmorItem);
+                        .delete(h -> ((DyeableLeatherItem) h.getItem()).clearColor(h))
+                        .supports(h -> h.getItem() instanceof DyeableLeatherItem);
     }
     // @formatter:on
 }

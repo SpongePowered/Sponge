@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.mixin.optimization.mcp.entity;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.fluid.Fluid;
+import net.minecraft.core.BlockPos;
 import net.minecraft.tags.Tag;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.IWorldReader;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.material.Fluid;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -37,46 +36,49 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 
 @Mixin(value = Entity.class, priority = 1500)
 public abstract class EntityMixin_Optimization_Collision {
 
-    @Inject(method = "doBlockCollisions", at = @At("HEAD"), cancellable = true)
+    // Use active chunk cache to replace the call to hasChunksAt
+    @Inject(method = "checkInsideBlocks", at = @At("HEAD"), cancellable = true)
     private void activeCollision$checkForNeighboringChunkIfAvailable(final CallbackInfo ci) {
-        final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
+        final LevelChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
         if (activeChunk == null || !activeChunk.bridge$areNeighborsLoaded() || activeChunk.bridge$isQueuedForUnload()) {
             ci.cancel();
         }
     }
 
-    @Redirect(method = "doBlockCollisions",
+    @Redirect(method = "checkInsideBlocks",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/world/World;isAreaLoaded(Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/util/math/BlockPos;)Z"))
-    private boolean activeCollision$ignoreWorldIsAreaLoaded(final World world, final BlockPos from, final BlockPos to) {
+            target = "Lnet/minecraft/world/level/Level;hasChunksAt(Lnet/minecraft/core/BlockPos;Lnet/minecraft/core/BlockPos;)Z"))
+    private boolean activeCollision$ignoreWorldIsAreaLoaded(final Level world, final BlockPos from, final BlockPos to) {
         return true;
     }
 
-    @Inject(method = "handleFluidAcceleration", at = @At("HEAD"), cancellable = true)
-    private void activeCollision$BailIfNeighborsAreInactive(final Tag<Fluid> p_210500_1_, final CallbackInfoReturnable<Boolean> cir) {
-        final ChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
+    // Replace area loaded call in fluid pushing handler with cached value
+
+    @Inject(method = "updateFluidHeightAndDoFluidPushing", at = @At("HEAD"), cancellable = true)
+    private void activeCollision$BailIfNeighborsAreInactive(final Tag<Fluid> p_210500_1_,
+            final double p_201500_2_, final CallbackInfoReturnable<Boolean> cir) {
+        final LevelChunkBridge activeChunk = ((ActiveChunkReferantBridge) this).bridge$getActiveChunk();
         if (activeChunk == null || activeChunk.bridge$isQueuedForUnload() || !activeChunk.bridge$areNeighborsLoaded()) {
             cir.setReturnValue(false);
         }
     }
 
     @SuppressWarnings("deprecation")
-    @Redirect(method = "handleFluidAcceleration",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;isAreaLoaded(IIIIII)Z"))
-    private boolean activeCollision$IgnoreAreaIsLoaded(final World world, final int xStart, final int yStart, final int zStart,
+    @Redirect(method = "updateFluidHeightAndDoFluidPushing",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;hasChunksAt(IIIIII)Z"))
+    private boolean activeCollision$IgnoreAreaIsLoaded(final Level world, final int xStart, final int yStart, final int zStart,
             final int xEnd, final int yEnd, final int zEnd) {
         if (((WorldBridge) world).bridge$isFake()) {
-            return world.isAreaLoaded(xStart, yStart, zStart, xEnd, yEnd, zEnd);
+            return world.hasChunksAt(xStart, yStart, zStart, xEnd, yEnd, zEnd);
         }
         return true;
     }
-
 
 }

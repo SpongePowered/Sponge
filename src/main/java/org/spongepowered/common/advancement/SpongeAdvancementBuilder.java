@@ -29,22 +29,21 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.advancement.criterion.SpongeCriterionHelper;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.SpongeCriterionUtil;
 
 import java.util.Map;
 
-public final class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advancement, Advancement.Builder> implements Advancement.Builder.RootStep {
+public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder<Advancement, Advancement.Builder> implements Advancement.Builder.RootStep {
 
     @Nullable private Advancement parent;
     private AdvancementCriterion criterion;
@@ -88,8 +87,17 @@ public final class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advance
     }
 
     @Override
-    protected Advancement build(ResourceKey key) {
-        final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionHelper.toVanillaCriteriaData(this.criterion);
+    public Advancement.Builder reset() {
+        this.criterion = AdvancementCriterion.empty();
+        this.displayInfo = null;
+        this.parent = null;
+        this.backgroundPath = null;
+        return this;
+    }
+
+    @Override
+    public Advancement build0() {
+        final Tuple<Map<String, Criterion>, String[][]> result = SpongeCriterionUtil.toVanillaCriteriaData(this.criterion);
         final AdvancementRewards rewards = AdvancementRewards.EMPTY;
         final ResourceLocation resourceLocation = (ResourceLocation) (Object) key;
 
@@ -107,15 +115,5 @@ public final class SpongeAdvancementBuilder extends SpongeCatalogBuilder<Advance
                 resourceLocation, parent, displayInfo, rewards, result.getFirst(), result.getSecond());
         ((AdvancementBridge) advancement).bridge$setCriterion(this.criterion);
         return advancement;
-    }
-
-    @Override
-    public Advancement.Builder reset() {
-        this.criterion = AdvancementCriterion.empty();
-        this.displayInfo = null;
-        this.parent = null;
-        this.key = null;
-        this.backgroundPath = null;
-        return this;
     }
 }

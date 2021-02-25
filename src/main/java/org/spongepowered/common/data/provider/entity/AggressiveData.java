@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.AggressiveEntityBridge;
+import org.spongepowered.common.bridge.world.entity.AggressiveEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class AggressiveData {

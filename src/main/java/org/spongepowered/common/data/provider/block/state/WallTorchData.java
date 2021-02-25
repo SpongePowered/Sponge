@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WallTorchBlock;
+import net.minecraft.world.level.block.WallTorchBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class WallTorchData {
 
@@ -40,8 +40,8 @@ public final class WallTorchData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(WallTorchBlock.HORIZONTAL_FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, WallTorchBlock.HORIZONTAL_FACING))
+                        .get(h -> DirectionUtil.getFor(h.getValue(WallTorchBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, WallTorchBlock.FACING))
                         .supports(h -> h.getBlock() instanceof WallTorchBlock);
     }
     // @formatter:on

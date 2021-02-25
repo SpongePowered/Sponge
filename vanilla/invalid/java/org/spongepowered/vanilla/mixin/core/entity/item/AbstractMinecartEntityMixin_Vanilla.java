@@ -31,7 +31,7 @@ import net.minecraft.world.World;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
+import org.spongepowered.common.bridge.world.entity.item.minecart.MinecartEntityBridge;
 import org.spongepowered.common.util.Constants;
 
 @Mixin(AbstractMinecartEntity.class)

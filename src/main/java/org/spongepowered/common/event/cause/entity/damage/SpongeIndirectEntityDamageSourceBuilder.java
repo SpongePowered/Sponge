@@ -29,8 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
-import org.spongepowered.common.accessor.util.DamageSourceAccessor;
-
+import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 import java.lang.ref.WeakReference;
 
 public final class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamageSourceBuilder<IndirectEntityDamageSource, IndirectEntityDamageSource.Builder> implements IndirectEntityDamageSource.Builder {
@@ -55,31 +54,32 @@ public final class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamag
         checkState(this.reference.get() != null);
         checkState(this.proxy.get() != null);
         checkState(this.damageType != null);
-        final net.minecraft.util.IndirectEntityDamageSource damageSource =
-            new net.minecraft.util.IndirectEntityDamageSource(this.damageType.getKey().getFormatted(),
-                (net.minecraft.entity.Entity) this.reference.get(),
-                (net.minecraft.entity.Entity) this.proxy.get());
+
+        final net.minecraft.world.damagesource.IndirectEntityDamageSource damageSource =
+            new net.minecraft.world.damagesource.IndirectEntityDamageSource(this.damageType.getName(),
+                (net.minecraft.world.entity.Entity) this.reference.get(),
+                (net.minecraft.world.entity.Entity) this.proxy.get());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
         if (this.creative) {
-            accessor.accessor$setDamageAllowedInCreativeMode();
+            accessor.invoker$bypassInvul();
         }
         if (this.scales) {
-            damageSource.setDifficultyScaled();
+            damageSource.setScalesWithDifficulty();
         }
         if (this.magical) {
-            damageSource.setMagicDamage();
+            damageSource.setMagic();
         }
         if (this.bypasses) {
-            accessor.accessor$setDamageBypassesArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.absolute) {
-            accessor.accessor$setDamageIsAbsolute();
+            accessor.invoker$bypassMagic();
         }
         if (this.explosion) {
             damageSource.setExplosion();
         }
         if (this.exhaustion != null) {
-            accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         return (IndirectEntityDamageSource) damageSource;
     }

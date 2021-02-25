@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.RepeaterBlock;
+import net.minecraft.world.level.block.RepeaterBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class RepeaterData {
 
@@ -40,9 +40,9 @@ public final class RepeaterData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.REDSTONE_DELAY)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.REDSTONE_DELAY, RepeaterBlock.DELAY))
-                        .get(h -> h.get(RepeaterBlock.DELAY))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, RepeaterBlock.DELAY))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.REDSTONE_DELAY, RepeaterBlock.DELAY))
+                        .get(h -> h.getValue(RepeaterBlock.DELAY))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, RepeaterBlock.DELAY))
                         .supports(h -> h.getBlock() instanceof RepeaterBlock);
     }
     // @formatter:on

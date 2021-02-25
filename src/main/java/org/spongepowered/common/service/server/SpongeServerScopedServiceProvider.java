@@ -38,9 +38,7 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
-import org.spongepowered.common.applaunch.config.common.ServicesCategory;
-import org.spongepowered.common.event.lifecycle.ProvideEngineServiceEventImpl;
-import org.spongepowered.common.event.lifecycle.ProvideServiceEventImpl;
+import org.spongepowered.common.event.lifecycle.AbstractProvideServiceEventImpl;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.server.ban.SpongeBanService;
 import org.spongepowered.common.service.server.permission.SpongePermissionService;
@@ -65,30 +63,27 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
         return ImmutableList.<Service<?>>builder()
                 .add(new Service<>(
                         BanService.class,
-                        ServicesCategory.ServicePluginSubCategory::getBanService,
+                        servicePluginSubCategory -> servicePluginSubCategory.banService,
                         SpongeBanService.class))
                 .add(new Service<>(
                         EconomyService.class,
-                        ServicesCategory.ServicePluginSubCategory::getEconomyService,
+                        servicePluginSubCategory -> servicePluginSubCategory.economyService,
                         null))
                 .add(new Service<>(
                         PermissionService.class,
-                        ServicesCategory.ServicePluginSubCategory::getPermissionService,
+                        servicePluginSubCategory -> servicePluginSubCategory.permissionService,
                         SpongePermissionService.class))
                 .add(new Service<>(
                         WhitelistService.class,
-                        ServicesCategory.ServicePluginSubCategory::getWhitelistService,
+                        servicePluginSubCategory -> servicePluginSubCategory.whitelistService,
                         SpongeWhitelistService.class))
                 .build();
     }
 
     @Override
-    protected <T> ProvideServiceEventImpl<T> createEvent(PluginContainer container, Service<T> service) {
-        return new ProvideEngineServiceEventImpl<>(Cause.of(EventContext.empty(), this.getGame()),
-                this.getGame(),
-                TypeToken.get(service.getServiceClass()),
-                this.server
-        );
+    protected <T> AbstractProvideServiceEventImpl<T> createEvent(PluginContainer container, Service<T> service) {
+        return new AbstractProvideServiceEventImpl.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.getGame()),
+                this.getGame(), TypeToken.get(service.getServiceClass()), this.server);
     }
 
     @Override

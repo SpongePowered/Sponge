@@ -24,113 +24,68 @@
  */
 package org.spongepowered.common.mixin.core.client;
 
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import net.minecraft.client.GameConfiguration;
+import com.mojang.datafixers.util.Function4;
+import com.mojang.serialization.DynamicOps;
+import io.netty.util.internal.shaded.org.jctools.queues.atomic.LinkedQueueAtomicNode;
 import net.minecraft.client.Minecraft;
-import net.minecraft.server.integrated.IntegratedServer;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.world.WorldSettings;
-import net.minecraft.world.chunk.listener.ChainedChunkStatusListener;
-import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
-import net.minecraft.world.chunk.listener.TrackingChunkStatusListener;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.client.main.GameConfig;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.nbt.Tag;
+import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.server.packs.resources.ResourceManager;
+import net.minecraft.world.level.DataPackConfig;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
+import org.checkerframework.checker.units.qual.Area;
+import org.checkerframework.common.value.qual.IntRangeFromGTENegativeOne;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.server.BootstrapProperties;
 
-import java.net.Proxy;
-import java.util.Queue;
-import java.util.concurrent.atomic.AtomicReference;
-
-import javax.annotation.Nullable;
+import java.nio.file.Path;
+import java.util.concurrent.ExecutionException;
+import java.util.function.Function;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
-    @Shadow private Thread thread;
-    @Shadow @Nullable private IntegratedServer integratedServer;
-    @Shadow @Final private AtomicReference<TrackingChunkStatusListener> refChunkStatusListener;
-    @Shadow @Final private Queue<Runnable> queueChunkTracking;
-    
+    // @formatter:off
+    @Shadow private Thread gameThread;
+    // @formatter:on
+
     private IntegratedServer impl$temporaryIntegratedServer;
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void impl$setClientOnGame(final GameConfiguration gameConfig, final CallbackInfo ci) {
+    private void impl$setClientOnGame(final GameConfig gameConfig, final CallbackInfo ci) {
         SpongeCommon.getGame().setClient(this);
     }
 
     @Inject(method = "run", at = @At("HEAD"))
     private void impl$setThreadOnClientPhaseTracker(final CallbackInfo ci) {
         try {
-            PhaseTracker.CLIENT.setThread(this.thread);
+            PhaseTracker.CLIENT.setThread(this.gameThread);
         } catch (final IllegalAccessException e) {
             throw new RuntimeException("Could not initialize the client PhaseTracker!");
         }
     }
 
-    @Inject(method = "runGameLoop", at = @At("TAIL"))
-    private void impl$tickClientScheduler(boolean renderWorldIn, CallbackInfo ci) {
+    @Inject(method = "runTick", at = @At("TAIL"))
+    private void impl$tickClientScheduler(final boolean renderWorldIn, final CallbackInfo ci) {
         this.getScheduler().tick();
-    }
-
-    // Note: worldSettingsIn is never null here, it is null checked and assigned before this point in the method.
-    @Redirect(method = "launchIntegratedServer",
-        at = @At(value = "NEW",
-            target = "com/mojang/authlib/yggdrasil/YggdrasilAuthenticationService",
-            remap = false
-        )
-    )
-    private YggdrasilAuthenticationService impl$createServerBeforeCache(final Proxy proxy, final String clientToken, final String folderName,
-            final String worldName, final WorldSettings worldSettingsIn) {
-
-        final YggdrasilAuthenticationService service = new YggdrasilAuthenticationService(proxy, clientToken);
-        this.integratedServer = new IntegratedServer((Minecraft) (Object) this, folderName, worldName, worldSettingsIn,
-                service, service.createMinecraftSessionService(), service.createProfileRepository(), null, (p_213246_1_) -> {
-            final TrackingChunkStatusListener trackingchunkstatuslistener = new TrackingChunkStatusListener(p_213246_1_ + 0);
-            trackingchunkstatuslistener.startTracking();
-            this.refChunkStatusListener.set(trackingchunkstatuslistener);
-            return new ChainedChunkStatusListener(trackingchunkstatuslistener, this.queueChunkTracking::add);
-        });
-        return service;
-    }
-
-    @Redirect(method = "launchIntegratedServer",
-        at = @At(value = "INVOKE",
-            target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createMinecraftSessionService()Lcom/mojang/authlib/minecraft/MinecraftSessionService;",
-            remap = false
-        )
-    )
-    private MinecraftSessionService impl$useServerMinecraftSessionService(final YggdrasilAuthenticationService yggdrasilAuthenticationService) {
-        return ((MinecraftServerAccessor) this.integratedServer).accessor$getSessionService();
-    }
-
-    @Redirect(method = "launchIntegratedServer",
-        at = @At(value = "INVOKE",
-            target = "Lcom/mojang/authlib/yggdrasil/YggdrasilAuthenticationService;createProfileRepository()Lcom/mojang/authlib/GameProfileRepository;",
-            remap = false
-        )
-    )
-    private GameProfileRepository impl$useServerGameProfileRepository(final YggdrasilAuthenticationService yggdrasilAuthenticationService) {
-        return ((MinecraftServerAccessor) this.integratedServer).accessor$getProfileRepo();
-    }
-
-    @Redirect(method = "launchIntegratedServer", at = @At(value = "NEW", target = "net/minecraft/server/integrated/IntegratedServer"))
-    private IntegratedServer impl$setCacheOnServer(final Minecraft mcIn, final String worldName, final String p_i50895_3_,
-            final WorldSettings worldSettingsIn, final YggdrasilAuthenticationService p_i50895_5_, final MinecraftSessionService p_i50895_6_,
-            final GameProfileRepository p_i50895_7_, final PlayerProfileCache p_i50895_8_, final IChunkStatusListenerFactory p_i50895_9_) {
-        ((MinecraftServerAccessor) this.integratedServer).accessor$setProfileCache(p_i50895_8_);
-        return this.integratedServer;
     }
 
     @Override
@@ -146,5 +101,40 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     @Override
     public ClientType bridge$getClientType() {
         return ClientType.SPONGE_VANILLA;
+    }
+
+    @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
+    private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
+        SpongeCommon.getGame().getAsyncScheduler().close();
+    }
+
+    @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$RegistryHolder;)Lnet/minecraft/resources/RegistryReadOps;"))
+    private static RegistryReadOps impl$setWorldSettingsAdapter(final DynamicOps p_244335_0_, final ResourceManager p_244335_1_, final RegistryAccess.RegistryHolder p_244335_2_) {
+        final RegistryReadOps worldSettingsAdapter = RegistryReadOps.create(p_244335_0_, p_244335_1_, p_244335_2_);
+        BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
+        return worldSettingsAdapter;
+    }
+
+    @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getDataTag(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/world/level/DataPackConfig;)Lnet/minecraft/world/level/storage/WorldData;"))
+    private static WorldData impl$setBootstrapProperties(final LevelStorageSource.LevelStorageAccess levelSave, final DynamicOps<Tag> p_237284_1_, final DataPackConfig p_237284_2_, final LevelStorageSource.LevelStorageAccess p_238181_0_, final RegistryAccess.RegistryHolder p_238181_1_) {
+        final WorldData saveData = levelSave.getDataTag(p_237284_1_, p_237284_2_);
+        BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(), saveData.getDifficulty(), true, saveData.isHardcore(),
+            saveData.getAllowCommands(), 10, p_238181_1_);
+        return saveData;
+    }
+
+    @Inject(method = "createLevel", at = @At("HEAD"))
+    private void impl$setBootstrapProperties(String levelName, LevelSettings settings, RegistryAccess.RegistryHolder registries,
+            WorldGenSettings dimensionGeneratorSettings, CallbackInfo ci) {
+        BootstrapProperties.init(dimensionGeneratorSettings, settings.gameType(), settings.difficulty(), true, settings.hardcore(),
+            settings.allowCommands(), 10, registries);
+        BootstrapProperties.setIsNewLevel(true);
+    }
+
+    @Redirect(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
+    private Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
+        final Path datapackDir = levelSave.getLevelPath(folderName);
+        SpongeBootstrap.getLifecycle().callRegisterDataPackValueEvent(datapackDir);
+        return datapackDir;
     }
 }

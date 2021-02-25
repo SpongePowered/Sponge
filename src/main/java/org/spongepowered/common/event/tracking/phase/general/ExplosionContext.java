@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.world.Explosion;
-import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.common.event.tracking.IPhaseState;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.accessor.world.ExplosionAccessor;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Explosion;
 
 public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext> {
 
@@ -43,14 +43,13 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         super(GeneralPhase.State.EXPLOSION, tracker);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     ExplosionContext populateFromCurrentState() {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
-        ((IPhaseState) context.state).appendContextPreExplosion(this, context);
+        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
+        context.appendContextPreExplosion(this);
         return this;
     }
 
-    public ExplosionContext potentialExplosionSource(final ServerWorld worldServer, @Nullable final Entity entityIn) {
+    public ExplosionContext potentialExplosionSource(final ServerLevel worldServer, @Nullable final Entity entityIn) {
         if (entityIn != null) {
             this.source(entityIn);
         } else {
@@ -93,9 +92,9 @@ public final class ExplosionContext extends GeneralPhaseContext<ExplosionContext
         final ExplosionAccessor otherExplosion = (ExplosionAccessor) ((ExplosionContext) phaseContext).explosion;
         final ExplosionAccessor thisExplosion = (ExplosionAccessor) this.explosion;
 
-        return otherExplosion.accessor$getWorld() == thisExplosion.accessor$getWorld()
-               && otherExplosion.accessor$getX() == thisExplosion.accessor$getX()
-               && otherExplosion.accessor$getY() == thisExplosion.accessor$getY()
-               && otherExplosion.accessor$getZ() == thisExplosion.accessor$getZ();
+        return otherExplosion.accessor$level() == thisExplosion.accessor$level()
+               && otherExplosion.accessor$x() == thisExplosion.accessor$x()
+               && otherExplosion.accessor$y() == thisExplosion.accessor$y()
+               && otherExplosion.accessor$z() == thisExplosion.accessor$z();
     }
 }

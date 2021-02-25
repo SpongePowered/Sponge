@@ -26,20 +26,20 @@ package org.spongepowered.common.item.recipe.crafting.shapeless;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.crafting.IRecipeSerializer;
-import net.minecraft.item.crafting.Ingredient;
-import net.minecraft.util.NonNullList;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.registry.Registry;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
 import java.util.function.Function;
+import net.minecraft.core.NonNullList;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.RecipeSerializer;
 
 public class SpongeShapelessCraftingRecipeRegistration extends SpongeRecipeRegistration {
     // Vanilla Recipe
@@ -49,12 +49,12 @@ public class SpongeShapelessCraftingRecipeRegistration extends SpongeRecipeRegis
 
     // Sponge Recipe
     private final ItemStack spongeResult;
-    private final Function<CraftingInventory, ItemStack> resultFunction;
-    private final Function<CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction;
+    private final Function<CraftingContainer, ItemStack> resultFunction;
+    private final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction;
 
-    public SpongeShapelessCraftingRecipeRegistration(ResourceLocation key, IRecipeSerializer<?> serializer, String group,
-            List<Ingredient> ingredients, ItemStack spongeResult, Function<CraftingInventory, ItemStack> resultFunction,
-            Function<CraftingInventory, NonNullList<ItemStack>> remainingItemsFunction) {
+    public SpongeShapelessCraftingRecipeRegistration(ResourceLocation key, RecipeSerializer<?> serializer, String group,
+            List<Ingredient> ingredients, ItemStack spongeResult, Function<CraftingContainer, ItemStack> resultFunction,
+            Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction) {
         super(key, serializer, spongeResult.getItem(), group);
         this.ingredients = ingredients;
 
@@ -68,7 +68,7 @@ public class SpongeShapelessCraftingRecipeRegistration extends SpongeRecipeRegis
     @Override
     public void serializeShape(JsonObject json) {
         final JsonArray jsonarray = new JsonArray();
-        this.ingredients.stream().map(Ingredient::serialize).forEach(jsonarray::add);
+        this.ingredients.stream().map(Ingredient::toJson).forEach(jsonarray::add);
         json.add(Constants.Recipe.SHAPELESS_INGREDIENTS, jsonarray);
     }
 
@@ -86,10 +86,10 @@ public class SpongeShapelessCraftingRecipeRegistration extends SpongeRecipeRegis
             json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getID(), this.resultFunction));
+            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
         }
         if (this.remainingItemsFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_REMAINING_ITEMS, ResultUtil.cacheRemainingItemsFunction(this.getID(), this.remainingItemsFunction));
+            json.addProperty(Constants.Recipe.SPONGE_REMAINING_ITEMS, ResultUtil.cacheRemainingItemsFunction(this.getId(), this.remainingItemsFunction));
         }
     }
 }

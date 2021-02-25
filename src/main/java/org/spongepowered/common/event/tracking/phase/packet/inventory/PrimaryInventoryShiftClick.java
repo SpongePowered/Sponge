@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -37,6 +36,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Optional;
 
@@ -48,7 +48,7 @@ public final class PrimaryInventoryShiftClick extends BasicInventoryPacketState 
     }
 
     @Override
-    public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer,
+    public ClickContainerEvent createInventoryEvent(final ServerPlayer playerMP, final Container openContainer,
         final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {

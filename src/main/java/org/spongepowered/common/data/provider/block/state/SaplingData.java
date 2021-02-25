@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.SaplingBlock;
+import net.minecraft.world.level.block.SaplingBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class SaplingData {
 
@@ -40,9 +40,9 @@ public final class SaplingData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, SaplingBlock.STAGE))
-                        .get(h -> h.get(SaplingBlock.STAGE))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, SaplingBlock.STAGE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, SaplingBlock.STAGE))
+                        .get(h -> h.getValue(SaplingBlock.STAGE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, SaplingBlock.STAGE))
                         .supports(h -> h.getBlock() instanceof SaplingBlock);
     }
     // @formatter:on

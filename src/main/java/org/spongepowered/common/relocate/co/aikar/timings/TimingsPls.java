@@ -26,40 +26,30 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import org.spongepowered.api.CatalogTypes;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
 
 final class TimingsPls {
     private static final Object2IntMap<EntityType<?>> ENTITY_IDS = new Object2IntOpenHashMap<>();
-    private static final Object2IntMap<BlockEntityType> TILE_ENTITY_IDS = new Object2IntOpenHashMap<>();
+    private static final Object2IntMap<BlockEntityType> BLOCK_ENTITY_IDS = new Object2IntOpenHashMap<>();
     private static final int NOT_FOUND = Integer.MIN_VALUE;
     private static int nextEntityId = 56991891; // Some random number
-    private static int nextTileEntityId = 13221456; // Some random number
-
-    static {
-        ENTITY_IDS.defaultReturnValue(NOT_FOUND);
-        int count = -1;
-        for (BlockEntityType tileEntityType : Sponge.getGame().getRegistry().getCatalogRegistry().getAllOf(CatalogTypes.BLOCK_ENTITY_TYPE)) {
-            TILE_ENTITY_IDS.put(tileEntityType, count++);
-        }
-    }
+    private static int nextBlockEntityId = 13221456; // Some random number
 
     public static int getEntityId(final EntityType<?> type) {
         int fake;
-        if ((fake = ENTITY_IDS.getInt(type)) == NOT_FOUND) {
-            fake = nextEntityId++;
-            ENTITY_IDS.put(type, fake);
+        if ((fake = TimingsPls.ENTITY_IDS.getInt(type)) == TimingsPls.NOT_FOUND) {
+            fake = TimingsPls.nextEntityId++;
+            TimingsPls.ENTITY_IDS.put(type, fake);
         }
         return fake;
     }
 
-    public static int getTileEntityId(final BlockEntityType type) {
+    public static int getBlockEntityId(final BlockEntityType type) {
         int fake;
-        if ((fake = TILE_ENTITY_IDS.getInt(type)) == NOT_FOUND) {
-            fake = nextTileEntityId++;
-            TILE_ENTITY_IDS.put(type, fake);
+        if ((fake = TimingsPls.BLOCK_ENTITY_IDS.getInt(type)) == TimingsPls.NOT_FOUND) {
+            fake = TimingsPls.nextBlockEntityId++;
+            TimingsPls.BLOCK_ENTITY_IDS.put(type, fake);
         }
         return fake;
     }

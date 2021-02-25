@@ -40,20 +40,20 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
-import net.minecraft.server.management.IPBanEntry;
-import net.minecraft.server.management.IPBanList;
+import net.minecraft.server.players.IpBanList;
+import net.minecraft.server.players.IpBanListEntry;
 
 /**
  * Redirects all calls to the {@link BanService}.
  */
-public final class SpongeIPBanList extends IPBanList {
+public final class SpongeIPBanList extends IpBanList {
 
-    public SpongeIPBanList(final File bansFile) {
-        super(bansFile);
+    public SpongeIPBanList(final File file) {
+        super(file);
     }
 
     @Override
-    protected boolean hasEntry(final String entry) {
+    protected boolean contains(final String entry) {
         if (entry.equals(LOCAL_ADDRESS)) { // Check for single player
             return false;
         }
@@ -66,21 +66,20 @@ public final class SpongeIPBanList extends IPBanList {
     }
 
     @Override
-    @Nullable
-    public IPBanEntry getEntry(final String obj) {
+    public @Nullable IpBanListEntry get(final String obj) {
         if (obj.equals(LOCAL_ADDRESS)) { // Check for single player
             return null;
         }
 
         try {
-            return (IPBanEntry) Sponge.getServer().getServiceProvider().banService().getBanFor(InetAddress.getByName(obj)).orElse(null);
+            return (IpBanListEntry) Sponge.getServer().getServiceProvider().banService().getBanFor(InetAddress.getByName(obj)).orElse(null);
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
     }
 
     @Override
-    public void removeEntry(final String entry) {
+    public void remove(final String entry) {
         if (entry.equals(LOCAL_ADDRESS)) { // Check for single player
             return;
         }
@@ -93,16 +92,16 @@ public final class SpongeIPBanList extends IPBanList {
     }
 
     @Override
-    public String[] getKeys() {
+    public String[] getUserList() {
         final List<String> ips = new ArrayList<>();
-        for (final Ban.Ip ban : Sponge.getServer().getServiceProvider().banService().getIpBans()) {
-            ips.add(this.addressToString(new InetSocketAddress(ban.getAddress(), 0)));
+        for (final Ban.IP ban : Sponge.getServer().getServiceProvider().banService().getIpBans()) {
+            ips.add(this.getIpFromAddress(new InetSocketAddress(ban.getAddress(), 0)));
         }
         return ips.toArray(new String[0]);
     }
 
     @Override
-    public void addEntry(final IPBanEntry entry) {
+    public void add(final IpBanListEntry entry) {
         Sponge.getServer().getServiceProvider().banService().addBan((Ban) entry);
     }
 
@@ -117,7 +116,7 @@ public final class SpongeIPBanList extends IPBanList {
      *     inspecting SocketAddress#toString()) to support IPv6 addresses
      */
     @Override
-    public String addressToString(final SocketAddress address) {
+    public String getIpFromAddress(final SocketAddress address) {
         return NetworkUtil.getHostString(address);
     }
 }

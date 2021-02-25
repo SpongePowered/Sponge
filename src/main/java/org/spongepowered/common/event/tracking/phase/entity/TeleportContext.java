@@ -32,7 +32,7 @@ public final class TeleportContext extends EntityContext<TeleportContext> {
     private boolean isPlayer;
     private boolean isWorldChange;
 
-    public TeleportContext(final IPhaseState<? extends TeleportContext> state, PhaseTracker tracker) {
+    public TeleportContext(final IPhaseState<TeleportContext> state, PhaseTracker tracker) {
         super(state, tracker);
     }
 

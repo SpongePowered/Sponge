@@ -30,10 +30,6 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
 import com.google.common.collect.Lists;
-import org.spongepowered.configurate.BasicConfigurationNode;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
-import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.junit.jupiter.api.Disabled;
 import org.junit.jupiter.api.Test;
 import org.spongepowered.api.ResourceKey;
@@ -44,6 +40,10 @@ import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
+import org.spongepowered.configurate.BasicConfigurationNode;
+import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.io.IOException;
@@ -56,7 +56,7 @@ import java.util.Map;
 
 @Disabled("Can't run these tests without access to a ResourceKey implementation")
 public class ConfigurateDataViewTest {
-    private static final HoconDataFormat HOCON = new HoconDataFormat(null);
+    private static final HoconDataFormat HOCON = new HoconDataFormat();
 
     @Test
     void testNodeToData() {
@@ -119,8 +119,8 @@ public class ConfigurateDataViewTest {
         final Color color = Color.ofRgb(0x66, 0xCC, 0xFF);
         final DataContainer original = color.toContainer();
 
-        final String serialized = HOCON.write(original);
-        final DataContainer ret = HOCON.read(serialized);
+        final String serialized = ConfigurateDataViewTest.HOCON.write(original);
+        final DataContainer ret = ConfigurateDataViewTest.HOCON.read(serialized);
 
         assertEquals(original, ret);
     }
@@ -134,8 +134,8 @@ public class ConfigurateDataViewTest {
                 .build();
         final DataContainer container = fe.toContainer();
 
-        final String s = HOCON.write(container);
-        final DataContainer dc = HOCON.read(s);
+        final String s = ConfigurateDataViewTest.HOCON.write(container);
+        final DataContainer dc = ConfigurateDataViewTest.HOCON.read(s);
 
         assertEquals(container, dc);
     }
@@ -172,7 +172,7 @@ public class ConfigurateDataViewTest {
 
     @Test
     void testMapInsideList() throws IOException {
-        final JsonDataFormat json = new JsonDataFormat(ResourceKey.sponge("json"));
+        final JsonDataFormat json = new JsonDataFormat();
 
         final ConfigurationNode node = CommentedConfigurationNode.root();
         final Map<String, String> map = Collections.singletonMap("mkey", "mvalue");

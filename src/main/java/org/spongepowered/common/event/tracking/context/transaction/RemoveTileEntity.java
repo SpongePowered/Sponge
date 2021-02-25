@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -34,22 +31,25 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 @DefaultQualifier(NonNull.class)
 public final class RemoveTileEntity extends BlockEventBasedTransaction {
 
-    final TileEntity removed;
+    final BlockEntity removed;
     final SpongeBlockSnapshot tileSnapshot;
 
-    RemoveTileEntity(final TileEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
-        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState());
+    RemoveTileEntity(final BlockEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
+        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState(), attachedSnapshot.getWorld());
         this.removed = removed;
         this.tileSnapshot = attachedSnapshot;
     }
@@ -64,7 +64,7 @@ public final class RemoveTileEntity extends BlockEventBasedTransaction {
     @Override
     public void addToPrinter(final PrettyPrinter printer) {
         printer.add("RemoveTileEntity")
-            .add(" %s : %s", this.affectedPosition, ((TileEntityBridge) this.removed).bridge$getPrettyPrinterString())
+            .add(" %s : %s", this.affectedPosition, ((BlockEntityBridge) this.removed).bridge$getPrettyPrinterString())
             .add(" %s : %s", this.affectedPosition, this.originalState)
         ;
     }
@@ -77,7 +77,7 @@ public final class RemoveTileEntity extends BlockEventBasedTransaction {
     @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
         return SpongeBlockSnapshotBuilder.pooled()
-            .world((ServerWorld) this.removed.getWorld())
+            .world((ServerLevel) this.removed.getLevel())
             .position(new Vector3i(this.affectedPosition.getX(), this.affectedPosition.getY(), this.affectedPosition.getZ()))
             .blockState(this.originalState)
             .build()

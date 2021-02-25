@@ -24,17 +24,21 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
-import net.minecraft.world.GameType;
+import net.minecraft.world.level.GameType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.chat.ChatVisibilities;
+import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.common.accessor.entity.player.ServerPlayerEntityAccessor;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
+import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerEntityHealthScaleBridge;
+import org.spongepowered.common.bridge.stats.StatsCounterBridge;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
@@ -48,27 +52,40 @@ public final class ServerPlayerData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ServerPlayerEntity.class)
+                .asMutable(ServerPlayer.class)
                     .create(Keys.GAME_MODE)
-                        .get(h -> (GameMode) (Object) h.interactionManager.getGameType())
-                        .set((h, v) -> h.setGameType((GameType) (Object) v))
+                        .get(h -> (GameMode) (Object) h.gameMode.getGameModeForPlayer())
+                        .set((h, v) -> h.setGameMode((GameType) (Object) v))
                     .create(Keys.SKIN_PROFILE_PROPERTY)
                         .get(h -> (ProfileProperty) h.getGameProfile().getProperties().get(ProfileProperty.TEXTURES).iterator().next())
                     .create(Keys.SPECTATOR_TARGET)
-                        .get(h -> (Entity) h.getSpectatingEntity())
-                        .set((h, v) -> h.setSpectatingEntity((net.minecraft.entity.Entity) v))
-                        .delete(h -> h.setSpectatingEntity(null))
+                        .get(h -> (Entity) h.getCamera())
+                        .set((h, v) -> h.setCamera((net.minecraft.world.entity.Entity) v))
+                        .delete(h -> h.setCamera(null))
                     .create(Keys.STATISTICS)
-                        .get(h -> ((StatisticsManagerBridge) h.getStats()).bridge$getStatsData().entrySet().stream()
+                        .get(h -> ((StatsCounterBridge) h.getStats()).bridge$getStatsData().entrySet().stream()
                                 .collect(Collectors.toMap(e -> (Statistic)e.getKey(), e -> e.getValue().longValue())))
                         .set((h, v) -> v.forEach((ik, iv) -> h.getStats().setValue(h, (Stat<?>) ik, iv.intValue())))
-                .asMutable(ServerPlayerEntityAccessor.class)
+                    .create(Keys.CHAT_VISIBILITY)
+                        .get(h -> {
+                            final ChatVisibility visibility = (ChatVisibility) (Object) h.getChatVisibility();
+                            if (visibility == null) {
+                                return ChatVisibilities.FULL.get();
+                            }
+                            return visibility;
+                        })
+                .asMutable(ServerPlayerAccessor.class)
                     .create(Keys.HAS_VIEWED_CREDITS)
-                        .get(ServerPlayerEntityAccessor::accessor$getSeenCredits)
-                        .set(ServerPlayerEntityAccessor::accessor$setSeenCredits)
-                .asMutable(ServerPlayerEntityBridge.class)
+                        .get(ServerPlayerAccessor::accessor$seenCredits)
+                        .set(ServerPlayerAccessor::accessor$seenCredits)
+
+                   .create(Keys.CHAT_COLORS_ENABLED)
+                        .get(ServerPlayerAccessor::accessor$canChatColor)
+                .asMutable(ServerPlayerBridge.class)
+                    .create(Keys.LOCALE)
+                        .get(ServerPlayerBridge::bridge$getLanguage)
                     .create(Keys.HEALTH_SCALE)
-                        .get(h -> h.bridge$isHealthScaled() ? h.bridge$getHealthScale() : null)
+                        .get(ServerPlayerEntityHealthScaleBridge::bridge$getHealthScale)
                         .setAnd((h, v) -> {
                             if (v < 1f || v > Float.MAX_VALUE) {
                                 return false;
@@ -76,7 +93,14 @@ public final class ServerPlayerData {
                             h.bridge$setHealthScale(v);
                             return true;
                         })
-                        .resetOnDelete(Constants.Entity.Player.DEFAULT_HEALTH_SCALE);
+                        .delete(b -> b.bridge$setHealthScale(null))
+                    .create(Keys.VIEW_DISTANCE)
+                        .get(ServerPlayerBridge::bridge$getViewDistance)
+                    .create(Keys.SKIN_PARTS)
+                        .get(ServerPlayerBridge::bridge$getSkinParts);
+
+        registrator.spongeDataStore(Keys.HEALTH_SCALE.getKey(), ServerPlayerEntityHealthScaleBridge.class, Keys.HEALTH_SCALE);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Player.HEALTH_SCALE, Keys.HEALTH_SCALE.getKey(), Keys.HEALTH_SCALE);
     }
     // @formatter:on
 }

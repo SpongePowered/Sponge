@@ -27,15 +27,15 @@ package org.spongepowered.common.event.cause.entity.damage;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.entity.item.FallingBlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
-import org.spongepowered.common.accessor.util.DamageSourceAccessor;
+import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
 import java.lang.ref.WeakReference;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 
 public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder> implements FallingBlockDamageSource.Builder {
 
@@ -59,29 +59,28 @@ public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSo
         checkState(this.reference.get() != null);
         checkState(this.damageType != null);
         final MinecraftFallingBlockDamageSource damageSource =
-            new MinecraftFallingBlockDamageSource(this.damageType.getKey().getFormatted(),
-                (FallingBlockEntity) this.reference.get());
+            new MinecraftFallingBlockDamageSource(this.damageType.getName(), (FallingBlockEntity) this.reference.get());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) (Object) damageSource;
         if (this.creative) {
-            accessor.accessor$setDamageAllowedInCreativeMode();
+            accessor.invoker$bypassInvul();
         }
         if (this.scales) {
-            damageSource.setDifficultyScaled();
+            damageSource.setScalesWithDifficulty();
         }
         if (this.magical) {
-            damageSource.setMagicDamage();
+            damageSource.setMagic();
         }
         if (this.bypasses) {
-            accessor.accessor$setDamageBypassesArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.absolute) {
-            accessor.accessor$setDamageIsAbsolute();
+            accessor.invoker$bypassMagic();
         }
         if (this.explosion) {
             damageSource.setExplosion();
         }
         if (this.exhaustion != null) {
-            accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         return (FallingBlockDamageSource) (Object) damageSource;
     }

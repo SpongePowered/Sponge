@@ -29,15 +29,13 @@ import org.spongepowered.api.advancement.criteria.AndCriterion;
 
 import java.util.Set;
 
-public class SpongeAndCriterion extends SpongeOperatorCriterion implements AndCriterion {
-
-    public static final AndCriterion.Factory FACTORY_INSTANCE = new SpongeAndCriterion.SpongeAndCriterionFactory();
+public final class SpongeAndCriterion extends SpongeOperatorCriterion implements AndCriterion {
 
     SpongeAndCriterion(final Set<AdvancementCriterion> criteria) {
         super("and", criteria);
     }
 
-    private static class SpongeAndCriterionFactory implements AndCriterion.Factory {
+    public static class Factory implements AndCriterion.Factory {
 
         @Override
         public AdvancementCriterion of(AdvancementCriterion... criteria) {

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.world.chunk.ChunkSection;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunkSection;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -44,13 +44,14 @@ public final class UpdateChunkLightManagerEffect implements ProcessingSideEffect
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag
+        final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
-        final ChunkSection chunkSection = pipeline.getAffectedSection();
+        final LevelChunkSection chunkSection = pipeline.getAffectedSection();
         final boolean wasEmpty = pipeline.wasEmpty();
         final boolean isStillEmpty = chunkSection.isEmpty();
         if (wasEmpty != isStillEmpty) {
-            pipeline.getServerWorld().getChunkProvider().getLightManager().func_215567_a(oldState.pos, isStillEmpty);
+            pipeline.getServerWorld().getChunkSource().getLightEngine().updateSectionStatus(oldState.pos, isStillEmpty);
         }
         return EffectResult.NULL_PASS;
     }

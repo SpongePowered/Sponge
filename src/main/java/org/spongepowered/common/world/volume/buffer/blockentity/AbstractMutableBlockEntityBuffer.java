@@ -25,13 +25,14 @@
 package org.spongepowered.common.world.volume.buffer.blockentity;
 
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.volume.block.entity.MutableBlockEntityVolume;
+import org.spongepowered.api.world.volume.block.entity.BlockEntityVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.block.AbstractBlockBuffer;
@@ -42,7 +43,7 @@ import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class AbstractMutableBlockEntityBuffer<M extends AbstractMutableBlockEntityBuffer<M>> extends AbstractBlockBuffer implements MutableBlockEntityVolume<M> {
+public abstract class AbstractMutableBlockEntityBuffer<M extends AbstractMutableBlockEntityBuffer<M>> extends AbstractBlockBuffer implements BlockEntityVolume.Mutable<M> {
 
     // This is our backing block buffer
     private final ArrayMutableBlockBuffer blockBuffer;
@@ -72,7 +73,7 @@ public abstract class AbstractMutableBlockEntityBuffer<M extends AbstractMutable
 
 
     @Override
-    public Palette<BlockState> getPalette() {
+    public Palette<BlockState, BlockType> getPalette() {
         return this.blockBuffer.getPalette();
     }
 

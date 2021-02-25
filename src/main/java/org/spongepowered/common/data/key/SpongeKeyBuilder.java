@@ -29,14 +29,14 @@ import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeFactory;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
+import org.spongepowered.common.registry.provider.KeyProvider;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
 import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
@@ -48,7 +48,8 @@ import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
-public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalogBuilder<Key<V>, Key.Builder<E, V>> implements Key.Builder<E, V> {
+public final class SpongeKeyBuilder<E, V extends Value<E>> extends AbstractResourceKeyedBuilder<Key<V>, Key.Builder<E, V>> implements Key.Builder<E,
+        V> {
 
     private @Nullable Type valueType;
     private @Nullable Type elementType;
@@ -61,7 +62,7 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
         this.valueType = token.getType();
         final Type valueTypeAsSuper = GenericTypeReflector.getExactSuperType(this.valueType, Value.class);
         if (!(valueTypeAsSuper instanceof ParameterizedType)) {
-            throw new IllegalArgumentException("Raw type " + this.valueType + " provided when registering Key " + key);
+            throw new IllegalArgumentException("Raw type " + this.valueType + " provided when registering Key " + this.key);
         }
         this.elementType = ((ParameterizedType) valueTypeAsSuper).getActualTypeArguments()[0];
         return (SpongeKeyBuilder<T, B>) this;
@@ -89,16 +90,9 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
     }
 
     @Override
-    public SpongeKeyBuilder<E, V> key(final ResourceKey key) {
-        super.key(key);
-        return this;
-    }
-
-    @Override
-    protected Key<V> build(final ResourceKey key) {
+    public Key<V> build0() {
         Objects.requireNonNull(this.valueType, "The value type must be set");
         Objects.requireNonNull(this.elementType, "The element type must be set");
-
 
         BiPredicate<? super E, ? super E> includesTester = this.includesTester;
         if (includesTester == null) {
@@ -131,8 +125,9 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
         } else if (WeightedCollectionValue.class.isAssignableFrom(rawType)) {
             defaultValueSupplier = () -> (E) new WeightedTable();
         }
-
-        return new SpongeKey<>(key, this.valueType, this.elementType, comparator, includesTester, defaultValueSupplier);
+        final SpongeKey<Value<E>, E> key = new SpongeKey<>(this.key, this.valueType, this.elementType, comparator, includesTester, defaultValueSupplier);
+        KeyProvider.INSTANCE.register(this.key, (Key<Value<?>>) (Object) key);
+        return (Key<V>) key;
     }
 
     @Override
@@ -140,6 +135,6 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends SpongeCatalog
         this.valueType = null;
         this.includesTester = null;
         this.comparator = null;
-        return super.reset();
+        return this;
     }
 }

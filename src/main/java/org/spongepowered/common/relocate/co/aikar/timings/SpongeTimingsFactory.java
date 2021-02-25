@@ -24,15 +24,13 @@
  */
 package org.spongepowered.common.relocate.co.aikar.timings;
 
-import static com.google.common.base.Preconditions.checkArgument;
-
 import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
 import net.kyori.adventure.audience.Audience;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.config.common.TimingsCategory;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
@@ -40,8 +38,6 @@ import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 
 public final class SpongeTimingsFactory implements TimingsFactory {
-
-    public static final SpongeTimingsFactory INSTANCE = new SpongeTimingsFactory();
 
     private final int MAX_HISTORY_FRAMES = 12;
     public final Timing NULL_HANDLER = new NullTimingHandler();
@@ -52,22 +48,22 @@ public final class SpongeTimingsFactory implements TimingsFactory {
     private final boolean moduleEnabled;
 
     public SpongeTimingsFactory() {
-        this.moduleEnabled = SpongeConfigs.getCommon().get().getModules().usePluginTimings();
+        this.moduleEnabled = SpongeConfigs.getCommon().get().modules.timings;
     }
 
     public TimingsFactory init() {
-        final TimingsCategory category = SpongeConfigs.getCommon().get().getTimings();
-        TimingsManager.privacy = category.isServerNamePrivate();
-        TimingsManager.hiddenConfigs.addAll(category.getHiddenConfigEntries());
-        this.setVerboseTimingsEnabled(category.isVerbose());
-        this.setTimingsEnabled(this.moduleEnabled && category.isEnabled());
-        this.setHistoryInterval(category.getHistoryInterval());
-        this.setHistoryLength(category.getHistoryLength());
+        final TimingsCategory category = SpongeConfigs.getCommon().get().timings;
+        TimingsManager.privacy = category.serverNamePrivacy;
+        TimingsManager.hiddenConfigs.addAll(category.hiddenConfigEntries);
+        this.setVerboseTimingsEnabled(category.verbose);
+        this.setTimingsEnabled(this.moduleEnabled && category.enabled);
+        this.setHistoryInterval(category.historyInterval);
+        this.setHistoryLength(category.historyLength);
 
         SpongeCommon.getLogger().debug("Sponge Timings: " + this.timingsEnabled +
                                     " - Verbose: " + this.verboseEnabled +
-                                    " - Interval: " + timeSummary(this.historyInterval / 20) +
-                                    " - Length: " + timeSummary(this.historyLength / 20));
+                                    " - Interval: " + SpongeTimingsFactory.timeSummary(this.historyInterval / 20) +
+                                    " - Length: " + SpongeTimingsFactory.timeSummary(this.historyLength / 20));
         return this;
     }
 
@@ -175,15 +171,15 @@ public final class SpongeTimingsFactory implements TimingsFactory {
     }
 
     public static TimingHandler ofSafe(String name) {
-        return ofSafe(null, name, null);
+        return SpongeTimingsFactory.ofSafe(null, name, null);
     }
 
     public static Timing ofSafe(PluginContainer plugin, String name) {
-        return ofSafe(plugin != null ? plugin.getMetadata().getName().orElse(plugin.getMetadata().getId()) : "Minecraft - Invalid Plugin", name);
+        return SpongeTimingsFactory.ofSafe(plugin != null ? plugin.getMetadata().getName().orElse(plugin.getMetadata().getId()) : "Minecraft - Invalid Plugin", name);
     }
 
     public static TimingHandler ofSafe(String name, Timing groupHandler) {
-        return ofSafe(null, name, groupHandler);
+        return SpongeTimingsFactory.ofSafe(null, name, groupHandler);
     }
 
     public static TimingHandler ofSafe(String groupName, String name) {

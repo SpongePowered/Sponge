@@ -24,12 +24,7 @@
  */
 package org.spongepowered.common.data.type;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.type.RabbitType;
 
-public final class SpongeRabbitType extends SpongeEntityMetadataType<Integer> implements RabbitType {
-
-    public SpongeRabbitType(ResourceKey key, int metadata) {
-        super(key, metadata);
-    }
+public final class SpongeRabbitType implements RabbitType {
 }

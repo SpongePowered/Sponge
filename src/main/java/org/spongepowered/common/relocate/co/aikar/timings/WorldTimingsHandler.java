@@ -25,7 +25,7 @@
 package org.spongepowered.common.relocate.co.aikar.timings;
 
 import co.aikar.timings.Timing;
-import net.minecraft.world.World;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.world.server.ServerWorld;
 
 /**
@@ -77,7 +77,7 @@ public class WorldTimingsHandler {
     // Chunk population
     public final Timing chunkPopulate;
 
-    public WorldTimingsHandler(World world) {
+    public WorldTimingsHandler(Level world) {
         String name = ((ServerWorld) world).getKey() + " - ";
 
         this.mobSpawn = SpongeTimingsFactory.ofSafe(name + "mobSpawn");

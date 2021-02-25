@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.decoration.HangingEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Direction;
-import org.spongepowered.common.accessor.entity.item.HangingEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.decoration.HangingEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
@@ -38,11 +39,11 @@ public final class HangingData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(HangingEntityAccessor.class)
+                .asMutable(HangingEntity.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> h.accessor$facingDirection() == null ? Direction.NONE :
-                                Constants.DirectionFunctions.getFor(h.accessor$facingDirection()))
-                        .set((h, v) -> h.accessor$updateFacingWithBoundingBox(Constants.DirectionFunctions.getFor(v)));
+                        .get(h -> h.getDirection() == null ? Direction.NONE :
+                                Constants.DirectionFunctions.getFor(h.getDirection()))
+                        .set((h, v) -> ((HangingEntityAccessor) h).invoker$setDirection(Constants.DirectionFunctions.getFor(v)));
     }
     // @formatter:on
 }

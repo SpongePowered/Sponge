@@ -25,18 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.CombatEntry;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
+import com.google.common.collect.ImmutableMultimap;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -47,17 +36,19 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.accessor.util.CombatEntryAccessor;
-import org.spongepowered.common.accessor.util.CombatTrackerAccessor;
+import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
+import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
@@ -67,6 +58,18 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.CombatEntry;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 @SuppressWarnings("rawtypes")
 public final class TransactionalCaptureSupplier implements ICaptureSupplier {
@@ -150,8 +153,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return changeBlock;
     }
 
-    public boolean logTileAddition(final TileEntity tileEntity,
-        final Supplier<ServerWorld> worldSupplier, final Chunk chunk
+    public boolean logTileAddition(final BlockEntity tileEntity,
+        final Supplier<ServerLevel> worldSupplier, final LevelChunk chunk
         ) {
         if (this.tail != null) {
             final boolean newRecorded = this.tail.acceptTileAddition(tileEntity);
@@ -164,7 +167,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return true;
     }
 
-    public boolean logTileRemoval(@Nullable final TileEntity tileentity, final Supplier<ServerWorld> worldSupplier) {
+    public boolean logTileRemoval(@Nullable final BlockEntity tileentity, final Supplier<ServerLevel> worldSupplier) {
         if (tileentity == null) {
             return false;
         }
@@ -178,7 +181,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return true;
     }
 
-    public boolean logTileReplacement(final BlockPos pos, final @Nullable TileEntity existing, final @Nullable TileEntity proposed, final Supplier<ServerWorld> worldSupplier) {
+    public boolean logTileReplacement(final BlockPos pos, final @Nullable BlockEntity existing, final @Nullable BlockEntity proposed, final Supplier<ServerLevel> worldSupplier) {
         if (proposed == null) {
             return false;
         }
@@ -192,9 +195,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return true;
     }
 
-    public void logNeighborNotification(final Supplier<ServerWorld> serverWorldSupplier, final BlockPos immutableFrom, final Block blockIn,
+    public void logNeighborNotification(final Supplier<ServerLevel> serverWorldSupplier, final BlockPos immutableFrom, final Block blockIn,
         final BlockPos immutableTarget, final BlockState targetBlockState,
-        @Nullable final TileEntity existingTile
+        @Nullable final BlockEntity existingTile
     ) {
         final NeighborNotification notificationTransaction = new NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom);
         this.logTransaction(notificationTransaction);
@@ -203,20 +206,21 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     public void logEntitySpawn(final PhaseContext<@NonNull ?> current, final TrackedWorldBridge serverWorld,
         final Entity entityIn) {
-        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) serverWorld);
-        final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final Supplier<SpawnType> contextualType = ((IPhaseState) current.state).getSpawnTypeForTransaction(current, entityIn);
+        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
+        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final Supplier<SpawnType> contextualType = current.getSpawnTypeForTransaction(entityIn);
         final SpawnEntityTransaction transaction = new SpawnEntityTransaction(worldSupplier, entityIn, contextualType);
         this.logTransaction(transaction);
     }
-    private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable TileEntity existing,
-        final TileEntity proposed, final Supplier<ServerWorld> worldSupplier
+    private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable BlockEntity existing,
+        final BlockEntity proposed, final Supplier<ServerLevel> worldSupplier
     ) {
         final BlockState currentState = worldSupplier.get().getBlockState(pos);
         final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
             currentState,
             pos,
             BlockChangeFlags.NONE,
+            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
             existing,
             worldSupplier,
             Optional::empty, Optional::empty
@@ -228,14 +232,15 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
 
     @SuppressWarnings("ConstantConditions")
     public EffectTransactor logBlockDrops(
-        final PhaseContext<@NonNull ?> context, final World serverWorld, final BlockPos pos, final BlockState state,
-        final @Nullable TileEntity tileEntity) {
-        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) serverWorld);
-        final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final PhaseContext<@NonNull ?> context, final Level serverWorld, final BlockPos pos, final BlockState state,
+        final @Nullable BlockEntity tileEntity) {
+        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
+        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
         final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
             state,
             pos,
             BlockChangeFlags.NONE,
+            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
             tileEntity,
             worldSupplier,
             Optional::empty, Optional::empty
@@ -246,6 +251,25 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
     }
 
+    public void logBlockEvent(final BlockState state, final TrackedWorldBridge serverWorld, final BlockPos pos,
+        final TrackerBlockEventDataBridge blockEvent
+    ) {
+        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
+        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final @Nullable BlockEntity tileEntity = ((ServerLevel) serverWorld).getBlockEntity(pos);
+        final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
+            state,
+            pos,
+            BlockChangeFlags.NONE,
+            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
+            tileEntity,
+            worldSupplier,
+            Optional::empty, Optional::empty
+        );
+        original.blockChange = BlockChange.MODIFY;
+        final AddBlockEventTransaction transaction = new AddBlockEventTransaction(original, blockEvent);
+        this.logTransaction(transaction);
+    }
     @SuppressWarnings({"ConstantConditions"})
     @Nullable
     public EffectTransactor ensureEntityDropTransactionEffect(final Entity entity) {
@@ -254,15 +278,15 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 return null;
             }
         }
-        final WeakReference<ServerWorld> worldRef = new WeakReference<>((ServerWorld) entity.world);
-        final Supplier<ServerWorld> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final CompoundNBT tag = new CompoundNBT();
-        entity.writeWithoutTypeId(tag);
+        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) entity.level);
+        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final CompoundTag tag = new CompoundTag();
+        entity.saveWithoutId(tag);
         final @Nullable DamageSource lastAttacker;
         if (entity instanceof LivingEntity) {
-            final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).accessor$getBestCombatEntry();
+            final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) entity).getCombatTracker()).invoker$getMostSignificantFall();
             if (entry != null) {
-                lastAttacker = ((CombatEntryAccessor) entry).accessor$getDamageSrc();
+                lastAttacker = ((CombatEntryAccessor) entry).accessor$source();
             } else {
                 lastAttacker = null;
             }
@@ -293,14 +317,15 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    private RemoveTileEntity createTileRemovalTransaction(final TileEntity tileentity,
-        final Supplier<ServerWorld> worldSupplier
+    private RemoveTileEntity createTileRemovalTransaction(final BlockEntity tileentity,
+        final Supplier<ServerLevel> worldSupplier
     ) {
         final BlockState currentState = tileentity.getBlockState();
         final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
             currentState,
-            tileentity.getPos(),
+            tileentity.getBlockPos().immutable(),
             BlockChangeFlags.NONE,
+            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
             tileentity,
             worldSupplier,
             Optional::empty, Optional::empty
@@ -310,17 +335,18 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return new RemoveTileEntity(tileentity, snapshot);
     }
 
-    private AddTileEntity createTileAdditionTransaction(final TileEntity tileentity,
-        final Supplier<ServerWorld> worldSupplier, final Chunk chunk
+    private AddTileEntity createTileAdditionTransaction(final BlockEntity tileentity,
+        final Supplier<ServerLevel> worldSupplier, final LevelChunk chunk
     ) {
-        final BlockPos pos = tileentity.getPos().toImmutable();
+        final BlockPos pos = tileentity.getBlockPos().immutable();
         final BlockState currentBlock = chunk.getBlockState(pos);
-        final @Nullable TileEntity existingTile = chunk.getTileEntity(pos, Chunk.CreateEntityType.CHECK);
+        final @Nullable BlockEntity existingTile = chunk.getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
 
         final SpongeBlockSnapshot added = TrackingUtil.createPooledSnapshot(
             currentBlock,
             pos,
             BlockChangeFlags.NONE,
+            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
             tileentity,
             worldSupplier,
             Optional::empty, Optional::empty
@@ -329,6 +355,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             currentBlock,
             pos,
             BlockChangeFlags.NONE,
+            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
             existingTile,
             worldSupplier,
             Optional::empty,
@@ -350,8 +377,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if ((GameTransaction<@NonNull ?>) this.head == null) {
             return false;
         }
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> builder = ImmutableMultimap.builder();
         final ImmutableList<EventByTransaction<@NonNull ?>> batched = TransactionalCaptureSupplier.batchTransactions(
-            this.head, this.head, context
+            this.head, this.head, context, builder
         );
         boolean cancelledAny = false;
         for (final EventByTransaction<@NonNull ?> eventWithTransactions : batched) {
@@ -384,6 +412,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 }
             }
         }
+        builder.build().asMap()
+            .forEach(TransactionType::createAndProcessPostEvents);
         return !cancelledAny;
     }
 
@@ -391,7 +421,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     static ImmutableList<EventByTransaction<@NonNull ?>> batchTransactions(
         final GameTransaction head,
         final GameTransaction parent,
-        final PhaseContext<@NonNull ?> context
+        final PhaseContext<@NonNull ?> context,
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
         final ImmutableList.Builder<EventByTransaction<@NonNull ?>> builder = ImmutableList.builder();
         @Nullable GameTransaction pointer = head;
@@ -401,11 +432,17 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             if (batchDecider == null) {
                 batchDecider = pointer;
             }
-            // First - check if the side effects are empty
-            if (batchDecider.getTransactionType() != pointer.getTransactionType()) {
+            if (batchDecider.getTransactionType() != pointer.getTransactionType() || !batchDecider.worldKey.equals(pointer.worldKey)) {
                 final ImmutableList<GameTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
-                TransactionalCaptureSupplier.generateEventForTransaction(batchDecider, parent, context, builder, (ImmutableList) transactions);
+                TransactionalCaptureSupplier.generateEventForTransaction(
+                    batchDecider,
+                    parent,
+                    context,
+                    builder,
+                    (ImmutableList) transactions,
+                    transactionPostEventBuilder
+                );
                 accumilator.add(pointer);
                 batchDecider = pointer;
                 continue;
@@ -414,7 +451,14 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 final ImmutableList<GameTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
                 batchDecider = pointer.next;
-                TransactionalCaptureSupplier.generateEventForTransaction(pointer, parent, context, builder, (ImmutableList) transactions);
+                TransactionalCaptureSupplier.generateEventForTransaction(
+                    pointer,
+                    parent,
+                    context,
+                    builder,
+                    (ImmutableList) transactions,
+                    transactionPostEventBuilder
+                );
             } else {
                 accumilator.add(pointer);
             }
@@ -427,18 +471,21 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 parent,
                 context,
                 builder,
-                (ImmutableList) remaining
+                (ImmutableList) remaining,
+                transactionPostEventBuilder
             );
         }
         return builder.build();
     }
 
+    @SuppressWarnings("unchecked")
     private static <E extends Event & Cancellable> void generateEventForTransaction(
         @NonNull final GameTransaction<E> pointer,
         @Nullable final GameTransaction<@NonNull ?> parent,
         final PhaseContext<@NonNull ?> context,
         final ImmutableList.Builder<EventByTransaction<@NonNull ?>> builder,
-        final ImmutableList<GameTransaction<E>> transactions
+        final ImmutableList<GameTransaction<E>> transactions,
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
         final Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> frameMutator = pointer.getFrameMutator(parent);
         final PhaseTracker instance = PhaseTracker.getInstance();
@@ -451,13 +498,16 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 })
                 .orElse(null)
         ) {
-            final E event = pointer.generateEvent(context, parent, transactions, instance.getCurrentCause());
-
-            final EventByTransaction<E> element = new EventByTransaction<>(event, transactions, parent, pointer);
+            final Optional<E> event = pointer.generateEvent(context, parent, transactions, instance.getCurrentCause(), transactionPostEventBuilder);
+            if (!event.isPresent()) {
+                transactions.forEach(GameTransaction::markCancelled);
+                return;
+            }
+            final EventByTransaction<E> element = new EventByTransaction<>(event.get(), transactions, parent, pointer);
             builder.add(element);
-
+            ((ImmutableMultimap.Builder) transactionPostEventBuilder).put(pointer.getTransactionType(), event.get());
             if (frame != null) {
-                frame.pushCause(event);
+                frame.pushCause(event.get());
             }
             for (final GameTransaction<E> transaction : transactions) {
                 if (transaction.sideEffects == null) {
@@ -467,7 +517,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                     if (sideEffect.head == null) {
                         continue;
                     }
-                    builder.addAll(TransactionalCaptureSupplier.batchTransactions(sideEffect.head, pointer, context));
+                    builder.addAll(TransactionalCaptureSupplier.batchTransactions(sideEffect.head, pointer, context, transactionPostEventBuilder));
                 }
             }
         }

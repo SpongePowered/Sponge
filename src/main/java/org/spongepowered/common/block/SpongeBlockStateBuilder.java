@@ -33,7 +33,7 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
@@ -41,7 +41,7 @@ import java.util.Optional;
 
 public class SpongeBlockStateBuilder extends AbstractDataBuilder<@NonNull BlockState> implements BlockState.Builder {
 
-    private BlockState blockState = BlockTypes.STONE.get().getDefaultState();
+    private BlockState blockState;
 
     public SpongeBlockStateBuilder() {
         super(BlockState.class, 1);
@@ -71,7 +71,7 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<@NonNull BlockS
     @Override
     @NonNull
     public SpongeBlockStateBuilder reset() {
-        this.blockState = BlockTypes.STONE.get().getDefaultState();
+        this.blockState = null;
         return this;
     }
 

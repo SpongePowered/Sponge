@@ -35,6 +35,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.property.KeyValuePair;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -42,8 +43,6 @@ import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
-
-import javax.annotation.Nullable;
 
 public abstract class AbstractLens implements Lens {
 
@@ -240,7 +239,7 @@ public abstract class AbstractLens implements Lens {
 
     public String toString(int deep) {
         String result = this.ident(deep) + this.getClass().getSimpleName() + ": (" + this.size + ") base:" + this.base + "\n";
-        if (!this.children.isEmpty() && deep < LIMIT) {
+        if (!this.children.isEmpty() && deep < AbstractLens.LIMIT) {
             result += this.ident(deep) + "Children: ";
             for (Lens child : this.children) {
                 if (this.spanningChildren.contains(child)) {

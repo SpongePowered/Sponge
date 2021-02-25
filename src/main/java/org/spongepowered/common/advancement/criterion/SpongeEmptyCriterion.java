@@ -30,11 +30,6 @@ import java.util.Optional;
 
 public final class SpongeEmptyCriterion implements DefaultedAdvancementCriterion {
 
-    public static final SpongeEmptyCriterion INSTANCE = new SpongeEmptyCriterion();
-
-    private SpongeEmptyCriterion() {
-    }
-
     @Override
     public String getName() {
         return "empty";

@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.bridge.adventure;
 
-import net.minecraft.util.text.Style;
+import net.minecraft.network.chat.Style;
 
 public interface StyleBridge {
     Style bridge$asVanilla();

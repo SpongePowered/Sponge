@@ -24,33 +24,34 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.tileentity.TileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 @DefaultQualifier(NonNull.class)
 public final class AddTileEntity extends BlockEventBasedTransaction {
 
-    final TileEntity added;
+    final BlockEntity added;
     final SpongeBlockSnapshot oldSnapshot;
     final SpongeBlockSnapshot addedSnapshot;
 
-    AddTileEntity(final TileEntity added,
+    AddTileEntity(final BlockEntity added,
         final SpongeBlockSnapshot attachedSnapshot,
         final SpongeBlockSnapshot existing
     ) {
-        super(existing.getBlockPos(), (BlockState) existing.getState());
+        super(existing.getBlockPos(), (BlockState) existing.getState(), ((ServerWorld) added.getLevel()).getKey());
         this.added = added;
         this.addedSnapshot = attachedSnapshot;
         this.oldSnapshot = existing;
@@ -66,7 +67,7 @@ public final class AddTileEntity extends BlockEventBasedTransaction {
     @Override
     public void addToPrinter(final PrettyPrinter printer) {
         printer.add("AddTileEntity")
-            .addWrapped(120, " %s : %s", this.affectedPosition, ((TileEntityBridge) this.added).bridge$getPrettyPrinterString());
+            .addWrapped(120, " %s : %s", this.affectedPosition, ((BlockEntityBridge) this.added).bridge$getPrettyPrinterString());
     }
 
     @Override
@@ -81,6 +82,6 @@ public final class AddTileEntity extends BlockEventBasedTransaction {
 
     @Override
     protected SpongeBlockSnapshot getOriginalSnapshot() {
-        return this.addedSnapshot;
+        return this.oldSnapshot;
     }
 }

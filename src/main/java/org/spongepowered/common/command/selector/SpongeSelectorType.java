@@ -26,24 +26,19 @@ package org.spongepowered.common.command.selector;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.command.arguments.EntitySelectorParser;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorType;
-import org.spongepowered.common.accessor.command.arguments.EntitySelectorParserAccessor;
+import org.spongepowered.common.accessor.commands.arguments.selector.EntitySelectorParserAccessor;
 
 public final class SpongeSelectorType implements SelectorType {
 
     private final String selectorToken;
-    private final ResourceKey resourceKey;
     private final Selector selector;
 
-    public SpongeSelectorType(
-            final String selectorToken,
-            final ResourceKey resourceKey) {
+    public SpongeSelectorType(final String selectorToken) {
         this.selectorToken = selectorToken;
-        this.resourceKey = resourceKey;
         try {
             this.selector = (Selector) new EntitySelectorParser(new StringReader(this.selectorToken)).parse();
         } catch (final CommandSyntaxException exception) {
@@ -68,14 +63,7 @@ public final class SpongeSelectorType implements SelectorType {
     @Override
     public final Selector.@NonNull Builder toBuilder() {
         final EntitySelectorParser parser = new EntitySelectorParser(new StringReader(this.selectorToken));
-        ((EntitySelectorParserAccessor) parser).accessor$parseSelector();
+        ((EntitySelectorParserAccessor) parser).invoker$parseSelector();
         return (Selector.Builder) parser;
     }
-
-    @Override
-    @NonNull
-    public final ResourceKey getKey() {
-        return this.resourceKey;
-    }
-
 }

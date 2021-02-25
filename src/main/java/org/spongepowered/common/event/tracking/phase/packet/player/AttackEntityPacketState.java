@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.client.CUseEntityPacket;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
@@ -34,13 +31,16 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.server.level.ServerPlayer;
 import java.util.function.BiConsumer;
 
 public final class AttackEntityPacketState extends BasicPacketState {
@@ -57,37 +57,37 @@ public final class AttackEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean isPacketIgnored(IPacket<?> packetIn, ServerPlayerEntity packetPlayer) {
-        final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packetIn;
+    public boolean isPacketIgnored(Packet<?> packetIn, ServerPlayer packetPlayer) {
+        final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that
         // doesn't exist on the server.
         @Nullable
-        net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.world);
+        net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(packetPlayer.level);
         return entity == null;
     }
 
     @Override
-    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
-        context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.getHeldItemMainhand()))
+    public void populateContext(ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+        context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.getMainHandItem()))
             .handUsed(HandTypes.MAIN_HAND.get());
     }
 
 
     @Override
     public void unwind(BasicPacketContext context) {
-        final ServerPlayerEntity player = context.getPacketPlayer();
-        final CUseEntityPacket useEntityPacket = context.getPacket();
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
+        final ServerPlayer player = context.getPacketPlayer();
+        final ServerboundInteractPacket useEntityPacket = context.getPacket();
+        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(player.level);
         if (entity == null) {
             // Something happened?
             return;
         }
-        final World spongeWorld = (World) player.world;
+        final World spongeWorld = (World) player.level;
         if (entity instanceof CreatorTrackedBridge) {
             // TODO Minecraft 1.14 - How can attacking an Entity mean you created it??
-            ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerEntityBridge) player).bridge$getUser());
+            ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerBridge) player).bridge$getUser());
         } else {
-            ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
+            ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
         }
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized

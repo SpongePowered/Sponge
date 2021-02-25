@@ -24,21 +24,22 @@
  */
 package org.spongepowered.common.advancement.criterion;
 
-import com.google.gson.JsonDeserializationContext;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import net.minecraft.advancements.criterion.AbstractCriterionTrigger;
-import net.minecraft.advancements.criterion.CriterionInstance;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
+import net.minecraft.advancements.critereon.EntityPredicate;
+import net.minecraft.advancements.critereon.SerializationContext;
+import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 
-public class SpongeDummyTrigger extends AbstractCriterionTrigger<SpongeDummyTrigger.Instance> {
+public final class SpongeDummyTrigger extends SimpleCriterionTrigger<SpongeDummyTrigger.Instance> {
 
-    public static final SpongeDummyTrigger DUMMY_TRIGGER = CriteriaTriggersAccessor.accessor$register(new SpongeDummyTrigger(new ResourceLocation("sponge:dummy")));
+    public static final SpongeDummyTrigger DUMMY_TRIGGER = CriteriaTriggersAccessor.invoker$register(new SpongeDummyTrigger(new ResourceLocation("sponge:dummy")));
 
-    private ResourceLocation resourceLocation;
+    private final ResourceLocation resourceLocation;
 
-    private SpongeDummyTrigger(ResourceLocation resourceLocation) {
+    private SpongeDummyTrigger(final ResourceLocation resourceLocation) {
         this.resourceLocation = resourceLocation;
     }
 
@@ -48,22 +49,23 @@ public class SpongeDummyTrigger extends AbstractCriterionTrigger<SpongeDummyTrig
     }
 
     @Override
-    public SpongeDummyTrigger.Instance deserializeInstance(JsonObject json, JsonDeserializationContext context) {
-        return new SpongeDummyTrigger.Instance(this.resourceLocation);
+    protected Instance createInstance(final JsonObject jsonObject, final EntityPredicate.Composite andPredicate, final DeserializationContext
+            conditionArrayParser) {
+        return new SpongeDummyTrigger.Instance(this.resourceLocation, andPredicate);
     }
 
-    public static class Instance extends CriterionInstance {
+    public static class Instance extends AbstractCriterionTriggerInstance {
 
-        public Instance(ResourceLocation criterionIn) {
-            super(criterionIn);
+        public Instance(final ResourceLocation resourceLocation, final EntityPredicate.Composite andPredicate) {
+            super(resourceLocation, andPredicate);
         }
 
         public static Instance dummy() {
-            return new Instance(SpongeDummyTrigger.DUMMY_TRIGGER.getId());
+            return new Instance(SpongeDummyTrigger.DUMMY_TRIGGER.getId(), EntityPredicate.Composite.ANY);
         }
 
         @Override
-        public JsonElement serialize() {
+        public JsonObject serializeToJson(final SerializationContext arraySerializer) {
             return new JsonObject();
         }
     }

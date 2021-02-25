@@ -32,10 +32,12 @@ import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKeys;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
@@ -45,23 +47,28 @@ public class RawCommandTest implements Command.Raw {
 
     @Override
     @NonNull
-    public CommandResult process(@NonNull final CommandCause cause, @NonNull final String arguments) throws CommandException {
-        if (arguments.isEmpty()) {
+    public CommandResult process(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) throws CommandException {
+        if (!arguments.canRead()) {
             cause.sendMessage(Identity.nil(), Component.text("No arguments"));
         }
-        cause.sendMessage(Identity.nil(), Component.text(arguments));
+        cause.sendMessage(Identity.nil(), Component.text(arguments.getRemaining()));
         return CommandResult.success();
     }
 
     @Override
     @NonNull
-    public List<String> getSuggestions(@NonNull final CommandCause cause, @NonNull final String arguments) throws CommandException {
-        if (arguments.endsWith(" ")) {
+    public List<String> getSuggestions(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) throws CommandException {
+        if (arguments.getRemaining().endsWith(" ")) {
             return this.suggestions;
         }
 
-        final String[] args = arguments.split(" ");
-        return this.suggestions.stream().filter(x -> x.startsWith(args[args.length - 1].toLowerCase())).collect(Collectors.toList());
+        String word = "";
+        while (arguments.canRead()) {
+            word = arguments.parseString();
+            arguments.skipWhitespace();
+        }
+        final String finalWord = word;
+        return this.suggestions.stream().filter(x -> x.startsWith(finalWord.toLowerCase(Locale.ROOT))).collect(Collectors.toList());
     }
 
     @Override

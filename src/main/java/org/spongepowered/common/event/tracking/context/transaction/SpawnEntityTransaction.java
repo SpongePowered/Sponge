@@ -25,43 +25,47 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.Entity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.world.server.ServerWorld;
+import com.google.common.collect.ImmutableMultimap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 
 @DefaultQualifier(NonNull.class)
 public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEvent> {
 
-    final Supplier<ServerWorld> worldSupplier;
-    final CompoundNBT entityTag;
+    final Supplier<ServerLevel> worldSupplier;
+    final CompoundTag entityTag;
     final Entity entityToSpawn;
     final Vector3d originalPosition;
     final Supplier<SpawnType> deducedSpawnType;
 
     public static final class DummySnapshot {
         final Vector3d originalPosition;
-        final CompoundNBT entityTag;
-        final Supplier<ServerWorld> worldSupplier;
+        final CompoundTag entityTag;
+        final Supplier<ServerLevel> worldSupplier;
 
-        public DummySnapshot(final Vector3d originalPosition, final CompoundNBT entityTag,
-            final Supplier<ServerWorld> worldSupplier
+        public DummySnapshot(final Vector3d originalPosition, final CompoundTag entityTag,
+            final Supplier<ServerLevel> worldSupplier
         ) {
             this.originalPosition = originalPosition;
             this.entityTag = entityTag;
@@ -69,14 +73,14 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
         }
     }
 
-    SpawnEntityTransaction(final Supplier<ServerWorld> worldSupplier, final Entity entityToSpawn,
+    SpawnEntityTransaction(final Supplier<ServerLevel> worldSupplier, final Entity entityToSpawn,
         final Supplier<SpawnType> deducedSpawnType
     ) {
-        super(TransactionType.SPAWN_ENTITY);
+        super(TransactionTypes.SPAWN_ENTITY.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).getKey());
         this.worldSupplier = worldSupplier;
         this.entityToSpawn = entityToSpawn;
-        this.entityTag = entityToSpawn.writeWithoutTypeId(new CompoundNBT());
-        this.originalPosition = new Vector3d(entityToSpawn.getPosX(), entityToSpawn.getPosY(), entityToSpawn.getPosZ());
+        this.entityTag = entityToSpawn.saveWithoutId(new CompoundTag());
+        this.originalPosition = new Vector3d(entityToSpawn.getX(), entityToSpawn.getY(), entityToSpawn.getZ());
         this.deducedSpawnType = deducedSpawnType;
     }
 
@@ -100,9 +104,10 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public SpawnEntityEvent generateEvent(final PhaseContext<@NonNull ?> context,
+    public Optional<SpawnEntityEvent> generateEvent(final PhaseContext<@NonNull ?> context,
         final @Nullable GameTransaction<@NonNull ?> parent,
-        final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause
+        final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause,
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
         final ImmutableList<Tuple<Entity, DummySnapshot>> collect = gameTransactions.stream()
             .map(transaction -> (SpawnEntityTransaction) transaction)
@@ -112,12 +117,20 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
                     new DummySnapshot(spawnRequest.originalPosition, spawnRequest.entityTag, spawnRequest.worldSupplier)
                 );
             }).collect(ImmutableList.toImmutableList());
-        return ((IPhaseState) context.state).createSpawnEvent(context, parent, collect, currentCause);
+        return Optional.of(context.createSpawnEvent(parent, collect, currentCause));
     }
 
     @Override
     public void restore() {
-        this.worldSupplier.get().removeEntity(this.entityToSpawn);
+        final ServerLevel serverWorld = this.worldSupplier.get();
+        if (((ServerLevelAccessor) serverWorld).accessor$tickingEntities()) {
+            // More than likely we could also be needing to remove the entity from both the entities to add
+            // and the chunk.
+            ((ServerLevelAccessor) serverWorld).accessor$toAddAfterTick().remove(this.entityToSpawn);
+            ((ServerLevelAccessor) serverWorld).invoker$removeFromChunk(this.entityToSpawn);
+        } else {
+            serverWorld.despawn(this.entityToSpawn);
+        }
     }
 
     @Override

@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.block;
 
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -39,45 +38,47 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
-import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.MergeFunction;
-import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.DataContainerHolder;
+import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
+import org.spongepowered.common.data.persistence.NBTTranslator;
+import org.spongepowered.common.data.provider.nbt.NBTDataType;
+import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
-import org.spongepowered.common.world.SpongeServerLocationFactory;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.StringJoiner;
 import java.util.UUID;
-import java.util.function.Function;
 
 @DefaultQualifier(NonNull.class)
-public final class SpongeBlockSnapshot implements BlockSnapshot {
+public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutableDataHolder<BlockSnapshot>, DataContainerHolder.Immutable<BlockSnapshot>, DataCompoundHolder {
 
     private final BlockState blockState;
     private final ResourceKey worldKey;
     private final Vector3i pos;
-    @Nullable final CompoundNBT compound;
+    @Nullable final CompoundTag compound;
     // Internal use only
     private final BlockPos blockPos;
     private final SpongeBlockChangeFlag changeFlag;
-    @Nullable WeakReference<ServerWorld> world;
+    @Nullable WeakReference<ServerLevel> world;
     @MonotonicNonNull public BlockChange blockChange; // used for post event
 
     SpongeBlockSnapshot(final SpongeBlockSnapshotBuilder builder) {
@@ -119,34 +120,34 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     @Override
     public Optional<ServerLocation> getLocation() {
         return this.getServerWorld()
-                .map(world -> SpongeServerLocationFactory.INSTANCE.create((org.spongepowered.api.world.server.ServerWorld) world, this.pos));
+                .map(world -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, this.pos));
     }
 
     @Override
     public BlockSnapshot withLocation(final ServerLocation location) {
-        return null;
+        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
     }
 
     @Override
     public boolean restore(final boolean force, final BlockChangeFlag flag) {
         // TODO - rewrite with the PhaseTracker being the hook or use SpongeImplHooks to do the restore.
 
-        final Optional<ServerWorld> optionalWorld = Optional.ofNullable(this.world.get());
+        final Optional<ServerLevel> optionalWorld = Optional.ofNullable(this.world.get());
         if (!optionalWorld.isPresent()) {
             return false;
         }
 
-        final ServerWorld world = optionalWorld.get();
+        final ServerLevel world = optionalWorld.get();
         // We need to deterministically define the context as nullable if we don't need to enter.
         // this way we guarantee an exit.
         try (final PhaseContext<?> context = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER)) {
             context.buildAndSwitch();
             final BlockPos pos = VecHelper.toBlockPos(this.pos);
-            if (!World.isValid(pos)) { // Invalid position. Inline this check
+            if (!net.minecraft.world.level.Level.isInWorldBounds(pos)) { // Invalid position. Inline this check
                 return false;
             }
-            final net.minecraft.block.BlockState current = world.getBlockState(pos);
-            final net.minecraft.block.BlockState replaced = (net.minecraft.block.BlockState) this.blockState;
+            final net.minecraft.world.level.block.state.BlockState current = world.getBlockState(pos);
+            final net.minecraft.world.level.block.state.BlockState replaced = (net.minecraft.world.level.block.state.BlockState) this.blockState;
             if (!force && (current.getBlock() != replaced.getBlock() || current != replaced)) {
                 return false;
             }
@@ -155,19 +156,19 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
 //            if (current.getBlock().getClass() == BlockShulkerBox.class) {
 //                world.bridge$removeTileEntity(pos);
 //            }
-            world.removeTileEntity(pos);
-            world.setBlockState(pos, replaced, BlockChangeFlagManager.andNotifyClients(flag).getRawFlag());
+            world.removeBlockEntity(pos);
+            world.setBlock(pos, replaced, BlockChangeFlagManager.andNotifyClients(flag).getRawFlag());
             if (this.compound != null) {
-                @Nullable TileEntity te = world.getTileEntity(pos);
+                @Nullable BlockEntity te = world.getBlockEntity(pos);
                 if (te != null) {
-                    te.read(this.compound);
+                    te.load((net.minecraft.world.level.block.state.BlockState) this.blockState, this.compound);
                 } else {
                     // Because, some mods will "unintentionally" only obey some of the rules but not all.
                     // In cases like this, we need to directly just say "fuck it" and deserialize from the compound directly.
                     try {
-                        te = TileEntity.create(this.compound);
+                        te = BlockEntity.loadStatic((net.minecraft.world.level.block.state.BlockState) this.blockState, this.compound);
                         if (te != null) {
-                            world.getChunk(pos).addTileEntity(pos, te);
+                            world.getChunk(pos).setBlockEntity(pos, te);
                         }
                     } catch (Exception e) {
                         // Seriously? The mod should be broken then.
@@ -199,12 +200,12 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
                 }
 
                 if (te != null) {
-                    te.markDirty();
+                    te.setChanged();
                 }
 
             }
             // Finally, mark the location as being updated.
-            world.getChunkProvider().markBlockChanged(pos);
+            world.getChunkSource().blockChanged(pos);
             return true;
         }
     }
@@ -226,12 +227,12 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
 
     @Override
     public BlockSnapshot withRawData(final DataView container) throws InvalidDataException {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+        return SpongeBlockSnapshotBuilder.pooled().buildContent(container).orElseThrow(InvalidDataException::new);
     }
 
     @Override
     public boolean validateRawData(final DataView container) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+        return SpongeBlockSnapshotBuilder.pooled().buildContent(container).isPresent();
     }
 
     @Override
@@ -240,69 +241,31 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
     }
 
     @Override
-    public <E> Optional<BlockSnapshot> transform(final Key<? extends Value<E>> key, final Function<E, E> function) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public <E> Optional<BlockSnapshot> with(final Key<? extends Value<E>> key, final E value) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public Optional<BlockSnapshot> with(final Value<?> value) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public Optional<BlockSnapshot> without(final Key<?> key) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public BlockSnapshot mergeWith(final BlockSnapshot that, final MergeFunction function) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
     public int getContentVersion() {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+        return 1;
     }
 
     @Override
     public DataContainer toContainer() {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+        final DataContainer container = DataContainer.createNew()
+                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.WORLD_KEY, this.worldKey.asString())
+                .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
+                .set(Queries.POSITION_X, this.pos.getX())
+                .set(Queries.POSITION_Y, this.pos.getY())
+                .set(Queries.POSITION_Z, this.pos.getZ())
+                .getContainer()
+                .set(Constants.Block.BLOCK_STATE, this.blockState);
+        if (this.compound != null) {
+            container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.INSTANCE.translateFrom(this.compound));
+        }
+        return container;
     }
 
-    @Override
-    public <E> Optional<E> get(final Key<? extends Value<E>> key) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public boolean supports(final Key<?> key) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public Set<Key<?>> getKeys() {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-
-    @Override
-    public Set<Value.Immutable<?>> getValues() {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
-    }
-  
-    public Optional<ServerWorld> getServerWorld() {
-        @Nullable ServerWorld world = this.world != null ? this.world.get() : null;
+    public Optional<ServerLevel> getServerWorld() {
+        @Nullable ServerLevel world = this.world != null ? this.world.get() : null;
         if (world == null) {
-            world = (ServerWorld) Sponge.getServer().getWorldManager().getWorld(this.worldKey).orElse(null);
+            world = (ServerLevel) Sponge.getServer().getWorldManager().world(this.worldKey).orElse(null);
             if (world != null) {
                 this.world = new WeakReference<>(world);
             }
@@ -310,8 +273,8 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
         return Optional.ofNullable(world);
     }
 
-    public Optional<CompoundNBT> getCompound() {
-        return this.compound == null ? Optional.<CompoundNBT>empty() : Optional.of(this.compound.copy());
+    public Optional<CompoundTag> getCompound() {
+        return this.compound == null ? Optional.empty() : Optional.of(this.compound.copy());
     }
 
     public SpongeBlockSnapshotBuilder createBuilder() {
@@ -324,9 +287,39 @@ public final class SpongeBlockSnapshot implements BlockSnapshot {
             builder.world(this.worldKey);
         }
         if (this.compound != null) {
-            builder.unsafeNbt(this.compound);
+            builder.addUnsafeCompound(this.compound);
         }
         return builder;
+    }
+
+    @Override
+    public DataContainer data$getDataContainer() {
+        if (this.compound == null) {
+            return DataContainer.createNew();
+        }
+        return NBTTranslator.INSTANCE.translate(this.compound);
+    }
+
+    @Override
+    public BlockSnapshot data$withDataContainer(DataContainer container) {
+        final SpongeBlockSnapshotBuilder builder = this.createBuilder();
+        builder.compound = NBTTranslator.INSTANCE.translate(container);;
+        return builder.build();
+    }
+
+    @Override
+    public CompoundTag data$getCompound() {
+        return this.compound == null ? new CompoundTag() : this.compound.copy();
+    }
+
+    @Override
+    public void data$setCompound(CompoundTag nbt) {
+        // do nothing this is immutable
+    }
+
+    @Override
+    public NBTDataType data$getNBTDataType() {
+        return NBTDataTypes.BLOCK_ENTITY;
     }
 
     // Used internally for restores

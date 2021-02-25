@@ -27,7 +27,10 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.launch.Launch;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
@@ -35,6 +38,10 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * A handy utility for doing some neat things with generics and reflection.
@@ -47,18 +54,52 @@ import java.util.List;
  */
 public final class ReflectionUtil {
 
-    private ReflectionUtil() {}
+    public static final Marker STUPID_REFLECTION = MarkerManager.getMarker("REFLECTION_BULLSHIT");
+    private static final Class<?>[] NEIGHBOR_CHANGED_METHOD_ARGS = {
+        BlockState.class,
+        Level.class,
+        BlockPos.class,
+        Block.class,
+        BlockPos.class,
+        boolean.class
+    };
+
+    public static boolean isNeighborChangedDeclared(final Class<?> targetClass) {
+        return ReflectionUtil.doesMethodExist(
+            targetClass,
+            Block.class,
+            "neighborChanged",
+            ReflectionUtil.NEIGHBOR_CHANGED_METHOD_ARGS
+        );
+    }
+
+    public static boolean doesMethodExist(
+        final Class<?> targetClass,
+        final Class<?> ignoredClass,
+        final String methodName,
+        final Class<?>[] methodParameters
+    ) {
+        final String targetMethodForEnvironment = Launch.getInstance().isDeveloperEnvironment() ? methodName : methodName;
+        try {
+            final Class<?> declaringClass = targetClass.getMethod(targetMethodForEnvironment, methodParameters).getDeclaringClass();
+            return !ignoredClass.equals(declaringClass);
+        } catch (final NoSuchMethodException e) {
+            SpongeCommon.getLogger().fatal(ReflectionUtil.STUPID_REFLECTION, "Could not find desired method {} under environment method name {}", methodName, targetMethodForEnvironment);
+            return true;
+        }
+
+    }
 
     public static <T> T createUnsafeInstance(final Class<T> objectClass, Object... args)
             throws IllegalAccessException, InvocationTargetException, InstantiationException {
         if (args == null) {
             args = new Object[] {null};
         }
-        final Constructor<T>tConstructor = findConstructor(objectClass, args);
+        final Constructor<T>tConstructor = ReflectionUtil.findConstructor(objectClass, args);
         try {
             return tConstructor.newInstance(args);
-        } catch (Exception e) {
-            final Object[] deconstructedArgs = deconstructArray(args).toArray();
+        } catch (final Exception e) {
+            final Object[] deconstructedArgs = ReflectionUtil.deconstructArray(args).toArray();
             return tConstructor.newInstance(deconstructedArgs);
         }
     }
@@ -69,10 +110,10 @@ public final class ReflectionUtil {
         if (args == null) {
             args = new Object[] {null};
         }
-        final Constructor<T> ctor = findConstructor(objectClass, args);
+        final Constructor<T> ctor = ReflectionUtil.findConstructor(objectClass, args);
         try {
             return ctor.newInstance(args);
-        } catch (InstantiationException | IllegalAccessException | InvocationTargetException e) {
+        } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
             SpongeCommon.getLogger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
                                          + "with the args: " + Arrays.toString(args), e);
         }
@@ -91,11 +132,11 @@ public final class ReflectionUtil {
         for (final Constructor<?> ctor : ctors) {
             final Class<?>[] paramTypes = ctor.getParameterTypes();
             if (paramTypes.length != args.length) {
-                for (Object object : args) {
+                for (final Object object : args) {
                     if (object != null) { // hahahah
                         if (object.getClass().isArray()) {
-                            final Object[] objects = deconstructArray(args).toArray();
-                            return findConstructor(objectClass, objects);
+                            final Object[] objects = ReflectionUtil.deconstructArray(args).toArray();
+                            return ReflectionUtil.findConstructor(objectClass, objects);
                         }
                     }
                 }
@@ -113,15 +154,15 @@ public final class ReflectionUtil {
         throw new IllegalArgumentException("Applicable constructor not found for class: " + objectClass.getCanonicalName() + " with args: " + Arrays.toString(args));
     }
 
-    private static List<Object> deconstructArray(Object[] objects) {
+    private static List<Object> deconstructArray(final Object[] objects) {
         final List<Object> list = new ArrayList<>();
-        for (Object object : objects) {
+        for (final Object object : objects) {
             if (object == null) {
                 list.add(null);
                 continue;
             }
             if (object.getClass().isArray()) {
-                list.addAll(deconstructArray((Object[]) object));
+                list.addAll(ReflectionUtil.deconstructArray((Object[]) object));
             } else {
                 list.add(object);
             }
@@ -129,4 +170,5 @@ public final class ReflectionUtil {
         return list;
     }
 
+    private ReflectionUtil() {}
 }

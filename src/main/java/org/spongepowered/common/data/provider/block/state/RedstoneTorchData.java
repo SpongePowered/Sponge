@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.RedstoneTorchBlock;
+import net.minecraft.world.level.block.RedstoneTorchBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,8 +39,8 @@ public final class RedstoneTorchData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_LIT)
-                        .get(h -> h.get(RedstoneTorchBlock.LIT))
-                        .set((h, v) -> h.with(RedstoneTorchBlock.LIT, v))
+                        .get(h -> h.getValue(RedstoneTorchBlock.LIT))
+                        .set((h, v) -> h.setValue(RedstoneTorchBlock.LIT, v))
                         .supports(h -> h.getBlock() instanceof RedstoneTorchBlock);
     }
     // @formatter:on

@@ -25,12 +25,6 @@
 package org.spongepowered.common.network.channel;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.login.ServerLoginNetHandler;
-import net.minecraft.network.login.client.CCustomPayloadLoginPacket;
-import net.minecraft.network.login.server.SCustomPayloadLoginPacket;
-import net.minecraft.network.play.client.CCustomPayloadPacket;
-import net.minecraft.network.play.server.SCustomPayloadPlayPacket;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
@@ -49,12 +43,12 @@ import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.network.login.client.CCustomPayloadLoginPacketAccessor;
-import org.spongepowered.common.accessor.network.login.server.SCustomPayloadLoginPacketAccessor;
-import org.spongepowered.common.accessor.network.play.client.CCustomPayloadPacketAccessor;
-import org.spongepowered.common.accessor.network.play.server.SCustomPayloadPlayPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.game.ClientboundCustomPayloadPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.game.ServerboundCustomPayloadPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.login.ClientboundCustomQueryPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.login.ServerboundCustomQueryPacketAccessor;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.network.channel.packet.SpongeBasicPacketChannel;
 import org.spongepowered.common.network.channel.packet.SpongePacketChannel;
@@ -70,6 +64,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
 @SuppressWarnings("unchecked")
 public class SpongeChannelRegistry implements ChannelRegistry {
@@ -166,7 +166,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
 
             @Override
             public <C extends Channel> C register(ResourceKey channelKey, Class<C> channelType) throws DuplicateRegistrationException {
-                return createChannel(channelKey, channelType);
+                return SpongeChannelRegistry.this.createChannel(channelKey, channelType);
             }
 
             @Override
@@ -191,7 +191,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         store.put(transactionId, null, new ClientTypeSyncFuture(future));
 
         final ChannelBuf payload = this.bufferAllocator.buffer();
-        final IPacket<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.SPONGE_CLIENT_TYPE, payload, transactionId);
+        final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.SPONGE_CLIENT_TYPE, payload, transactionId);
         PacketSender.sendTo(connection, mcPacket, sendFuture -> {
             if (!sendFuture.isSuccess()) {
                 future.completeExceptionally(sendFuture.cause());
@@ -208,7 +208,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
             return;
         }
 
-        ((NetworkManagerBridge) ((ServerLoginNetHandler) connection).networkManager).bridge$setClientType(clientType);
+        ((ConnectionBridge) ((ServerLoginPacketListenerImpl) connection).connection).bridge$setClientType(clientType);
     }
 
     /**
@@ -226,7 +226,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         store.put(transactionId, null, new ChannelRegistrySyncFuture(future));
 
         final ChannelBuf payload = this.encodeChannelRegistry();
-        final IPacket<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.SPONGE_CHANNEL_REGISTRY, payload, transactionId);
+        final Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(Constants.Channels.SPONGE_CHANNEL_REGISTRY, payload, transactionId);
         PacketSender.sendTo(connection, mcPacket, sendFuture -> {
             if (!sendFuture.isSuccess()) {
                 future.completeExceptionally(sendFuture.cause());
@@ -238,7 +238,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
 
     public void sendChannelRegistrations(final EngineConnection connection) {
         final ChannelBuf payload = RegisterChannelUtil.encodePayload(this.channels.keySet());
-        final IPacket<?> mcPacket = PacketUtil.createPlayPayload(Constants.Channels.REGISTER_KEY, payload, connection.getSide());
+        final Packet<?> mcPacket = PacketUtil.createPlayPayload(Constants.Channels.REGISTER_KEY, payload, connection.getSide());
         PacketSender.sendTo(connection, mcPacket);
     }
 
@@ -277,20 +277,20 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         }
     }
 
-    public boolean handlePlayPayload(final EngineConnection connection, final CCustomPayloadPacket packet) {
-        final CCustomPayloadPacketAccessor accessor = (CCustomPayloadPacketAccessor) packet;
+    public boolean handlePlayPayload(final EngineConnection connection, final ServerboundCustomPayloadPacket packet) {
+        final ServerboundCustomPayloadPacketAccessor accessor = (ServerboundCustomPayloadPacketAccessor) packet;
 
-        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$getChannel();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$getPayload();
+        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$identifier();
+        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
 
         return this.handlePlayPayload(connection, channel, payload);
     }
 
-    public boolean handlePlayPayload(final EngineConnection connection, final SCustomPayloadPlayPacket packet) {
-        final SCustomPayloadPlayPacketAccessor accessor = (SCustomPayloadPlayPacketAccessor) packet;
+    public boolean handlePlayPayload(final EngineConnection connection, final ClientboundCustomPayloadPacket packet) {
+        final ClientboundCustomPayloadPacketAccessor accessor = (ClientboundCustomPayloadPacketAccessor) packet;
 
-        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$getChannel();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$getPayload();
+        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$identifier();
+        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
 
         return this.handlePlayPayload(connection, channel, payload);
     }
@@ -334,13 +334,13 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         }
     }
 
-    public boolean handleLoginRequestPayload(final EngineConnection connection, final SCustomPayloadLoginPacket packet) {
+    public boolean handleLoginRequestPayload(final EngineConnection connection, final ClientboundCustomQueryPacket packet) {
         // Server -> Client request
 
-        final SCustomPayloadLoginPacketAccessor accessor = (SCustomPayloadLoginPacketAccessor) packet;
-        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$getChannel();
-        final int transactionId = accessor.accessor$getTransactionId();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$getPayload();
+        final ClientboundCustomQueryPacketAccessor accessor = (ClientboundCustomQueryPacketAccessor) packet;
+        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$identifier();
+        final int transactionId = accessor.accessor$transactionId();
+        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
 
         try {
             return this.handleLoginRequestPayload(connection, channel, transactionId, payload);
@@ -355,7 +355,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
             final ClientType clientType = ((MinecraftBridge) Sponge.getClient()).bridge$getClientType();
             final ChannelBuf responsePayload = this.bufferAllocator.buffer();
             responsePayload.writeString(clientType.getName());
-            final IPacket<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
+            final Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
             PacketSender.sendTo(connection, mcPacket);
             return true;
         }
@@ -363,7 +363,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
             this.handleChannelRegistry(connection, payload);
             // Respond with registered channels
             final ChannelBuf responsePayload = this.encodeChannelRegistry();
-            final IPacket<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
+            final Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
             PacketSender.sendTo(connection, mcPacket);
             return true;
         }
@@ -382,12 +382,12 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         return false;
     }
 
-    public void handleLoginResponsePayload(final EngineConnection connection, final CCustomPayloadLoginPacket packet) {
+    public void handleLoginResponsePayload(final EngineConnection connection, final ServerboundCustomQueryPacket packet) {
         // Client -> Server response
 
-        final CCustomPayloadLoginPacketAccessor accessor = (CCustomPayloadLoginPacketAccessor) packet;
-        final int transactionId = accessor.accessor$getTransactionId();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$getPayload();
+        final ServerboundCustomQueryPacketAccessor accessor = (ServerboundCustomQueryPacketAccessor) packet;
+        final int transactionId = accessor.accessor$transactionId();
+        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
 
         try {
             this.handleLoginResponsePayload(connection, transactionId, payload);

@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.item.BannerItem;
-import net.minecraft.item.BlockItem;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.tileentity.LockableTileEntity;
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.LockCode;
+import net.minecraft.world.item.BannerItem;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -55,7 +55,7 @@ public final class BlockItemStackData {
                         .supports(h -> h.getItem() instanceof BlockItem && !(h.getItem() instanceof BannerItem))
                     .create(Keys.LOCK_TOKEN)
                         .get(h -> {
-                            final CompoundNBT tag = h.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+                            final CompoundTag tag = h.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             if (tag != null) {
                                 final String lock = tag.getString(Constants.Item.LOCK);
                                 if (!lock.isEmpty()) {
@@ -66,10 +66,10 @@ public final class BlockItemStackData {
                         })
                         .set((h, v) -> {
                             if (v.isEmpty()) {
-                                deleteLockToken(h);
+                                BlockItemStackData.deleteLockToken(h);
                                 return;
                             }
-                            new LockCode(v).write(h.getOrCreateChildTag(Constants.Item.BLOCK_ENTITY_TAG));
+                            new LockCode(v).addToTag(h.getOrCreateTagElement(Constants.Item.BLOCK_ENTITY_TAG));
                         })
                         .delete(BlockItemStackData::deleteLockToken)
                         .supports(h -> {
@@ -77,12 +77,12 @@ public final class BlockItemStackData {
                                 return false;
                             }
                             final Block block = ((BlockItem) h.getItem()).getBlock();
-                            if (!(block instanceof ITileEntityProvider)) {
+                            if (!(block instanceof EntityBlock)) {
                                 return false;
                             }
                             try {
-                                final TileEntity tile = ((ITileEntityProvider) block).createNewTileEntity(null);
-                                return tile instanceof LockableTileEntity;
+                                final BlockEntity tile = ((EntityBlock) block).newBlockEntity(null);
+                                return tile instanceof BaseContainerBlockEntity;
                             } catch (final NullPointerException ex) {
                                 return false;
                             }
@@ -91,7 +91,7 @@ public final class BlockItemStackData {
     // @formatter:on
 
     private static void deleteLockToken(final ItemStack stack) {
-        final CompoundNBT tag = stack.getChildTag(Constants.Item.BLOCK_ENTITY_TAG);
+        final CompoundTag tag = stack.getTagElement(Constants.Item.BLOCK_ENTITY_TAG);
         if (tag != null) {
             tag.remove(Constants.Item.LOCK);
         }

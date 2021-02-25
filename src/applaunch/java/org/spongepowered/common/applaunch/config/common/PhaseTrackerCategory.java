@@ -33,21 +33,21 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public class PhaseTrackerCategory {
+public final class PhaseTrackerCategory {
 
-    @Setting("verbose")
+    @Setting
     @Comment("If 'true', the phase tracker will print out when there are too many phases \n"
                                         + "being entered, usually considered as an issue of phase re-entrance and \n"
                                         + "indicates an unexpected issue of tracking phases not to complete. \n"
                                         + "If this is not reported yet, please report to Sponge. If it has been \n"
                                         + "reported, you may disable this.")
-    private boolean isVerbose = true;
+    public boolean verbose = true;
 
     @Setting("verbose-errors")
     @Comment("If 'true', the phase tracker will dump extra information about the current phases \n"
                                                + "when certain non-PhaseTracker related exceptions occur. This is usually not necessary, as the information \n"
                                                + "in the exception itself can normally be used to determine the cause of the issue")
-    private boolean verboseErrors = false;
+    public boolean verboseErrors = false;
 
     @Setting("capture-async-spawning-entities")
     @Comment("If set to 'true', when a mod or plugin attempts to spawn an entity \n"
@@ -59,9 +59,9 @@ public class PhaseTrackerCategory {
                                                                 + "conditions they may cause. If this is set to false, \n"
                                                                 + "Sponge will politely ignore the entity being spawned, \n"
                                                                 + "and emit a warning about said spawn anyways.")
-    private boolean captureAndSpawnEntitiesSync = true;
+    public boolean captureAsyncSpawningEntities = true;
 
-    @Setting("resync-commands-from-async")
+    @Setting("capture-async-commands")
     @Comment("If set to 'true', when a mod or plugin attempts to submit a command\n"
                                                              + "asynchronously, Sponge will automatically capture said command\n"
                                                              + "and submit it for processing on the server thread. The catch to\n"
@@ -71,16 +71,16 @@ public class PhaseTrackerCategory {
                                                              + "block edits, entity spawns, etc. If this is set to false, Sponge\n"
                                                              + "will politely ignore the command being executed, and emit a warning\n"
                                                              + "about said command anyways.")
-    private boolean resyncAsyncCommands = true;
+    public boolean captureAsyncCommands = true;
 
-    @Setting("generate-stacktrace-per-phase")
+    @Setting("generate-stack-trace-per-phase")
     @Comment("If 'true', more thorough debugging for PhaseStates \n"
                                                               + "such that a StackTrace is created every time a PhaseState \n"
                                                               + "switches, allowing for more fine grained troubleshooting \n"
                                                               + "in the cases of runaway phase states. Note that this is \n"
                                                               + "not extremely performant and may have some associated costs \n"
                                                               + "with generating the stack traces constantly.")
-    private boolean generateStackTracePerStateEntry = false;
+    public boolean generateStackTracePerPhase = false;
 
     @Setting("maximum-printed-runaway-counts")
     @Comment("If verbose is not enabled, this restricts the amount of \n"
@@ -89,11 +89,7 @@ public class PhaseTrackerCategory {
                                                                + "never happen, but when it does, sometimes it can continuously print \n"
                                                                + "more and more. This attempts to placate that while a fix can be worked on \n"
                                                                + "to resolve the runaway. If verbose is enabled, they will always print.")
-    private int maxRunawayCount = 3;
-
-    public boolean isVerbose() {
-        return this.isVerbose;
-    }
+    public int maximumPrintedRunawayCounts = 3;
 
     @Setting("max-block-processing-depth")
     @Comment("The maximum number of times to recursively process transactions in a single phase.\n"
@@ -104,7 +100,7 @@ public class PhaseTrackerCategory {
                                                             + "To prevent a stack overflow, Sponge tracks the current processing depth, and aborts processing when it exceeds\n"
                                                             + "this threshold.\n"
                                                             + "The default value should almost always work properly -  it's unlikely you'll ever have to change it.")
-    private int maxBlockProcessingDepth = 1000;
+    public int maxBlockProcessingDepth = 1000;
 
     @Setting("report-null-source-blocks-on-neighbor-notifications")
     @Comment("If true, when a mod attempts to perform a neighbor notification\n"
@@ -122,9 +118,9 @@ public class PhaseTrackerCategory {
              + " https://gist.github.com/gabizou/ad570dc09dfed259cac9d74284e78e8b\n"
              + " https://github.com/SpongePowered/SpongeForge/issues/2787\n"
     )
-    private boolean reportNullSourceBlocks = this.isVanilla();
+    public boolean reportNullSourceBlocksOnNeighborNotifications = this.isVanilla();
 
-    @Setting("auto-fix-null-source-block-providing-tile-entities")
+    @Setting("auto-fix-null-source-block-providing-block-entities")
     @Comment("A mapping that is semi-auto-populating for TileEntities whose types\n"
              + "are found to be providing \"null\" Block sources as neighbor notifications\n"
              + "that end up causing crashes or spam reports. If the value is set to \n"
@@ -143,53 +139,9 @@ public class PhaseTrackerCategory {
              + "fix the issue itself, as the fix is very simple:\n"
              + "https://github.com/TehNut/Soul-Shards-Respawn/pull/24\n"
              + "https://github.com/Epoxide-Software/Enchanting-Plus/pull/135\n")
-    private Map<String, Boolean> autoFixedTiles = new HashMap<>();
-
-    public int getMaxBlockProcessingDepth() {
-        return this.maxBlockProcessingDepth;
-    }
-
-    public void resetMaxDepthTo1000() {
-        this.maxBlockProcessingDepth = 1000;
-    }
-
-    public boolean verboseErrors() {
-        return this.verboseErrors;
-    }
-
-    public boolean captureEntitiesAsync() {
-        return this.captureAndSpawnEntitiesSync;
-    }
-
-    public boolean resyncCommandsAsync() {
-        return this.resyncAsyncCommands;
-    }
-
-    public boolean generateStackTracePerStateEntry() {
-        return this.generateStackTracePerStateEntry;
-    }
-
-    public int getMaximumRunawayCount() {
-        return this.maxRunawayCount;
-    }
-
-    public boolean isReportNullSourceBlocks() {
-        return this.reportNullSourceBlocks;
-    }
-
-    public void setReportNullSourceBlocks(final boolean reportNullSourceBlocks) {
-        this.reportNullSourceBlocks = reportNullSourceBlocks;
-    }
-
-    public Map<String, Boolean> getAutoFixedTiles() {
-        return this.autoFixedTiles;
-    }
+    public final Map<String, Boolean> autoFixNullSourceBlockProvidingBlockEntities = new HashMap<>();
 
     private boolean isVanilla() {
         return SpongeConfigs.getPluginEnvironment().getBlackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
-    }
-
-    public void setAutoFixedTiles(final Map<String, Boolean> autoFixedTiles) {
-        this.autoFixedTiles = autoFixedTiles;
     }
 }

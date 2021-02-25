@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.generic;
 
-import net.minecraft.util.INameable;
+import net.minecraft.world.Nameable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.CustomNameableBridge;
@@ -38,7 +38,7 @@ public final class INameableData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(INameable.class)
+                .asMutable(Nameable.class)
                     .create(Keys.DISPLAY_NAME)
                         .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.CUSTOM_NAME)

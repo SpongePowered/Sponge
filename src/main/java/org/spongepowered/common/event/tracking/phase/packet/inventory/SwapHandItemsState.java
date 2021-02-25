@@ -31,13 +31,13 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
 import java.util.List;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
 
 public final class SwapHandItemsState extends BasicInventoryPacketState {
 
@@ -46,13 +46,13 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
     }
 
     @Override
-    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final InventoryPacketContext context) {
+    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final InventoryPacketContext context) {
         ((TrackedInventoryBridge) playerMP.inventory).bridge$setCaptureInventory(true);
     }
 
     @Override
     public void unwind(final InventoryPacketContext context) {
-        final ServerPlayerEntity player = context.getPacketPlayer();
+        final ServerPlayer player = context.getPacketPlayer();
         final Entity spongePlayer = (Entity) player;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(spongePlayer);

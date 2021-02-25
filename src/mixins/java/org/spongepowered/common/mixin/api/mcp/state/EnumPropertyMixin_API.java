@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.state;
 
-import net.minecraft.state.EnumProperty;
+import net.minecraft.world.level.block.state.properties.EnumProperty;
 import org.spongepowered.api.state.EnumStateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 

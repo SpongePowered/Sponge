@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.accessor.server.dedicated;
 
-import net.minecraft.network.rcon.MainThread;
 import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.rcon.thread.RconThread;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(DedicatedServer.class)
 public interface DedicatedServerAccessor {
 
-    @Accessor("rconThread") MainThread accessor$getRConThread();
+    @Accessor("rconThread") RconThread accessor$rconThread();
+
 }

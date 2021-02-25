@@ -24,24 +24,25 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
+import net.minecraft.commands.CommandSourceStack;
 
 public final class UnsortedNodeHolder {
 
     // used so we can have insertion order.
-    private final List<CommandNode<CommandSource>> standardChildren = new LinkedList<>();
-    private final List<CommandNode<CommandSource>> redirectingChildren = new LinkedList<>();
+    private final List<CommandNode<CommandSourceStack>> standardChildren = new LinkedList<>();
+    private final List<CommandNode<CommandSourceStack>> redirectingChildren = new LinkedList<>();
 
-    @Nullable private ImmutableList<CommandNode<CommandSource>> cachedResult;
+    @Nullable private List<CommandNode<CommandSourceStack>> cachedResult;
 
-    public void add(final CommandNode<CommandSource> node) {
+    public void add(final CommandNode<CommandSourceStack> node) {
         this.cachedResult = null;
         if (node.getRedirect() == null) {
             this.standardChildren.add(node);
@@ -50,38 +51,55 @@ public final class UnsortedNodeHolder {
         }
     }
 
-    public Collection<CommandNode<CommandSource>> getChildren() {
+    public Collection<CommandNode<CommandSourceStack>> getChildren() {
         if (this.cachedResult == null) {
-            this.cachedResult = ImmutableList.<CommandNode<CommandSource>>builder()
-                    .addAll(this.standardChildren)
-                    .addAll(this.redirectingChildren)
-                    .build();
+            final LinkedList<CommandNode<CommandSourceStack>> result = new LinkedList<>();
+            result.addAll(this.standardChildren);
+            result.addAll(this.redirectingChildren);
+            this.cachedResult = Collections.unmodifiableList(result);
         }
 
         return this.cachedResult;
     }
 
     // Handles hidden nodes
-    public Collection<CommandNode<CommandSource>> getChildrenForSuggestions() {
-        final ImmutableList.Builder<CommandNode<CommandSource>> nodes = ImmutableList.builder();
-        for (final CommandNode<CommandSource> childNode : this.getChildren()) {
-            if (childNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<CommandSource>) childNode).getParser().doesNotRead()) {
-                final CommandNode<CommandSource> redirected = childNode.getRedirect();
+    public Collection<CommandNode<CommandSourceStack>> getChildrenForSuggestions() {
+        final ArrayList<CommandNode<CommandSourceStack>> nodes = new ArrayList<>();
+        for (final CommandNode<CommandSourceStack> childNode : this.getChildren()) {
+            if (childNode instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<CommandSourceStack>) childNode).getParser().doesNotRead()) {
+                final CommandNode<CommandSourceStack> redirected = childNode.getRedirect();
                 if (redirected != null) {
                     // get the nodes from the redirect
                     if (redirected instanceof SpongeArgumentCommandNode) {
-                        nodes.addAll(((SpongeArgumentCommandNode<CommandSource>) redirected).getChildrenForSuggestions());
+                        nodes.addAll(((SpongeArgumentCommandNode<CommandSourceStack>) redirected).getChildrenForSuggestions());
                     } else {
                         nodes.addAll(redirected.getChildren());
                     }
                 } else {
-                    nodes.addAll(((SpongeArgumentCommandNode<CommandSource>) childNode).getChildrenForSuggestions());
+                    nodes.addAll(((SpongeArgumentCommandNode<CommandSourceStack>) childNode).getChildrenForSuggestions());
                 }
             } else {
                 nodes.add(childNode);
             }
         }
-        return nodes.build();
+        nodes.sort((first, second) -> {
+            if (first.getRedirect() == null) {
+                return second.getRedirect() == null ? 0 : -1;
+            } else if (second.getRedirect() == null) {
+                return 1;
+            }
+
+            // if both are redirects...
+            if (first.getRedirect() == second) {
+                // second goes first.
+                return 1;
+            } else if (second.getRedirect() == first) {
+                // first goes first
+                return -1;
+            }
+            return 0; // don't care.
+        });
+        return nodes;
     }
 
 }

@@ -25,15 +25,17 @@
 package org.spongepowered.vanilla.client.gui.widget.list;
 
 import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.vertex.BufferBuilder;
+import com.mojang.blaze3d.vertex.DefaultVertexFormat;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.gui.screen.Screen;
-import net.minecraft.client.gui.widget.list.AbstractList;
-import net.minecraft.client.renderer.BufferBuilder;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.client.renderer.vertex.DefaultVertexFormats;
-import net.minecraft.util.text.TextFormatting;
+import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.screens.Screen;
+import org.spongepowered.common.accessor.client.gui.components.AbstractSelectionListAccessor;
 import org.spongepowered.vanilla.util.Bounds;
 
 import java.util.Arrays;
@@ -45,12 +47,12 @@ import java.util.function.Supplier;
 import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
-public class FilterableList<P extends FilterableList<P, E>, E extends FilterableList.Entry<P, E>> extends AbstractList<E> {
+public class FilterableList<P extends FilterableList<P, E>, E extends FilterableList.Entry<P, E>> extends AbstractSelectionList<E> {
 
     private final Screen screen;
     private Supplier<List<E>> filterSupplier;
     private Consumer<E> selectConsumer;
-    protected final FontRenderer fontRenderer;
+    protected final Font fontRenderer;
     protected E currentHoveredEntry;
 
     public FilterableList(final Screen screen, final int x, final int y, final int width, final int height, final int entryHeight) {
@@ -58,7 +60,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
         this.screen = screen;
         this.x0 = x;
         this.x1 = x + width;
-        this.fontRenderer = Minecraft.getInstance().fontRenderer;
+        this.fontRenderer = Minecraft.getInstance().font;
     }
 
     public Screen getScreen() {
@@ -182,7 +184,7 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    protected int getRowLeft() {
+    public int getRowLeft() {
         return this.x0 + 4;
     }
 
@@ -201,8 +203,8 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    public void render(final int p_render_1_, final int p_render_2_, final float p_render_3_) {
-        super.render(p_render_1_, p_render_2_, p_render_3_);
+    public void render(final PoseStack stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
+        super.render(stack, p_render_1_, p_render_2_, p_render_3_);
     }
 
     @Override
@@ -229,19 +231,20 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
     }
 
     @Override
-    protected void renderList(final int renderX, final int renderY, final int p_renderList_3_, final int p_renderList_4_, final float p_renderList_5_) {
+    protected void renderList(final PoseStack stack, final int renderX, final int renderY, final int p_renderList_3_, final int p_renderList_4_,
+            final float p_renderList_5_) {
         // Most of this is based on AbstractList::renderList logic
         final List<E> filteredList = this.filterSupplier == null ? new ObjectArrayList<>(this.children()) : this.filterSupplier.get();
         final int itemCount = filteredList.size();
-        final Tessellator tessellator = Tessellator.getInstance();
-        final BufferBuilder bufferbuilder = tessellator.getBuffer();
+        final Tesselator tessellator = Tesselator.getInstance();
+        final BufferBuilder bufferbuilder = tessellator.getBuilder();
 
         if (filteredList.isEmpty()) {
-            final FontRenderer font = this.minecraft.fontRenderer;
+            final Font font = this.minecraft.font;
             final String noResults = "No results...";
-            final int noResultsWidth = font.getStringWidth(noResults);
+            final int noResultsWidth = font.width(noResults);
 
-            font.drawString(noResults, (this.width / 2) + this.x0 - (noResultsWidth / 2), this.y0 + 10, TextFormatting.GRAY.getColor());
+            font.draw(stack, noResults, (this.width / 2) + this.x0 - (noResultsWidth / 2), this.y0 + 10, ChatFormatting.GRAY.getColor());
 
             return;
         }
@@ -255,35 +258,35 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
 
                 final int rowWidth = this.getRowWidth();
 
-                if (this.renderSelection && Objects.equals(this.getSelected(), filteredList.get(i))) {
+                if (((AbstractSelectionListAccessor) this).accessor$renderSelection() && Objects.equals(this.getSelected(), filteredList.get(i))) {
                     final int xSelectStart = this.x0 + this.width / 2 - rowWidth / 2 - 2;
                     final int xSelectEnd = this.x0 + this.width / 2 + rowWidth / 2 - 4;
-                    GlStateManager.disableTexture();
+                    GlStateManager._disableTexture();
                     final float f = this.isFocused() ? 1.0F : 0.5F;
-                    GlStateManager.color4f(f, f, f, 1.0F);
-                    bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
-                    bufferbuilder.pos(xSelectStart, yStart + yEnd + 2, 0.0D).endVertex();
-                    bufferbuilder.pos(xSelectEnd, yStart + yEnd + 2, 0.0D).endVertex();
-                    bufferbuilder.pos(xSelectEnd, yStart - 2, 0.0D).endVertex();
-                    bufferbuilder.pos(xSelectStart, yStart - 2, 0.0D).endVertex();
-                    tessellator.draw();
-                    GlStateManager.color4f(0.0F, 0.0F, 0.0F, 1.0F);
-                    bufferbuilder.begin(7, DefaultVertexFormats.POSITION);
-                    bufferbuilder.pos(xSelectStart + 1, yStart + yEnd + 1, 0.0D).endVertex();
-                    bufferbuilder.pos(xSelectEnd - 1, yStart + yEnd + 1, 0.0D).endVertex();
-                    bufferbuilder.pos(xSelectEnd - 1, yStart - 1, 0.0D).endVertex();
-                    bufferbuilder.pos(xSelectStart + 1, yStart - 1, 0.0D).endVertex();
-                    tessellator.draw();
-                    GlStateManager.enableTexture();
+                    GlStateManager._color4f(f, f, f, 1.0F);
+                    bufferbuilder.begin(7, DefaultVertexFormat.POSITION);
+                    bufferbuilder.vertex(xSelectStart, yStart + yEnd + 2, 0.0D).endVertex();
+                    bufferbuilder.vertex(xSelectEnd, yStart + yEnd + 2, 0.0D).endVertex();
+                    bufferbuilder.vertex(xSelectEnd, yStart - 2, 0.0D).endVertex();
+                    bufferbuilder.vertex(xSelectStart, yStart - 2, 0.0D).endVertex();
+                    tessellator.end();
+                    GlStateManager._color4f(0.0F, 0.0F, 0.0F, 1.0F);
+                    bufferbuilder.begin(7, DefaultVertexFormat.POSITION);
+                    bufferbuilder.vertex(xSelectStart + 1, yStart + yEnd + 1, 0.0D).endVertex();
+                    bufferbuilder.vertex(xSelectEnd - 1, yStart + yEnd + 1, 0.0D).endVertex();
+                    bufferbuilder.vertex(xSelectEnd - 1, yStart - 1, 0.0D).endVertex();
+                    bufferbuilder.vertex(xSelectStart + 1, yStart - 1, 0.0D).endVertex();
+                    tessellator.end();
+                    GlStateManager._enableTexture();
                 }
 
                 final E entry = filteredList.get(i);
-                entry.render(i, rowTop, this.getRowLeft(), rowWidth, yEnd, p_renderList_3_, p_renderList_4_, false, p_renderList_5_);
+                entry.render(stack, i, rowTop, this.getRowLeft(), rowWidth, yEnd, p_renderList_3_, p_renderList_4_, false, p_renderList_5_);
             }
         }
     }
 
-    public static abstract class Entry<P extends FilterableList<P, E>, E extends Entry<P, E>> extends AbstractListEntry<E> {
+    public static abstract class Entry<P extends FilterableList<P, E>, E extends org.spongepowered.vanilla.client.gui.widget.list.FilterableList.Entry<P, E>> extends net.minecraft.client.gui.components.AbstractSelectionList.Entry<E> {
 
         private final P parentList;
 
@@ -299,7 +302,8 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
 
         @SuppressWarnings("unchecked")
         @Override
-        public void render(final int p_render_1_, final int renderY, final int renderX, final int p_render_4_, final int p_render_5_, final int mouseX, final int mouseY, final boolean p_render_8_,
+        public void render(final PoseStack stack, final int p_render_1_, final int renderY, final int renderX, final int p_render_4_,
+                final int p_render_5_, final int mouseX, final int mouseY, final boolean p_render_8_,
             final float p_render_9_) {
             if (this.getInteractBounds().isInBounds(mouseX, mouseY, renderX, renderY)) {
                 this.parentList.currentHoveredEntry = (E) this;

@@ -25,19 +25,13 @@
 package org.spongepowered.common.mixin.inventory.api;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.LivingEntity;
-import net.minecraft.entity.MobEntity;
-import net.minecraft.entity.item.ArmorStandEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.util.Hand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
@@ -47,9 +41,15 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.decoration.ArmorStand;
+import net.minecraft.world.entity.player.Player;
 
 // All living implementors of ArmorEquipable
-@Mixin({ArmorStandEntity.class, MobEntity.class, PlayerEntity.class})
+@Mixin({ArmorStand.class, Mob.class, Player.class})
 public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEquipable {
 
     // TODO can we implement canEquip?
@@ -78,27 +78,27 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
         } else {
             throw new IllegalStateException("Unexpected lens for Equipable Inventory " + rootLens.getClass().getName());
         }
-        return Optional.of(ItemStackUtil.fromNative(lens.getStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getIndex())));
+        return Optional.of(ItemStackUtil.fromNative(lens.getStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlot) (Object) type).getIndex())));
     }
 
     @Override
     public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
         final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
         final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
-        return lens.setStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlotType) (Object) type).getSlotIndex(), ItemStackUtil.toNative(equipment));
+        return lens.setStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlot) (Object) type).getIndex(), ItemStackUtil.toNative(equipment));
     }
 
     @Override
     public ItemStack getItemInHand(HandType handType) {
         Preconditions.checkNotNull(handType);
-        final net.minecraft.item.ItemStack nmsItem = ((LivingEntity) (Object)this).getHeldItem((Hand) (Object) handType);
+        final net.minecraft.world.item.ItemStack nmsItem = ((LivingEntity) (Object)this).getItemInHand((InteractionHand) (Object) handType);
         return ItemStackUtil.fromNative(nmsItem);
     }
 
     @Override
     public void setItemInHand(HandType handType, @Nullable ItemStack itemInHand) {
         Preconditions.checkNotNull(handType);
-        ((LivingEntity) (Object)this).setHeldItem((Hand) (Object) handType, ItemStackUtil.toNative(itemInHand).copy());
+        ((LivingEntity) (Object)this).setItemInHand((InteractionHand) (Object) handType, ItemStackUtil.toNative(itemInHand).copy());
     }
 
     @Override

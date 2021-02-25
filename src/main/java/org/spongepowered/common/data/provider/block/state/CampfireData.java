@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.CampfireBlock;
+import net.minecraft.world.level.block.CampfireBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,12 +39,12 @@ public final class CampfireData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_LIT)
-                        .get(h -> h.get(CampfireBlock.LIT))
-                        .set((h, v) -> h.with(CampfireBlock.LIT, v))
+                        .get(h -> h.getValue(CampfireBlock.LIT))
+                        .set((h, v) -> h.setValue(CampfireBlock.LIT, v))
                         .supports(h -> h.getBlock() instanceof CampfireBlock)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(CampfireBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(CampfireBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(CampfireBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(CampfireBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof CampfireBlock);
     }
     // @formatter:on

@@ -35,88 +35,93 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import net.minecraft.command.CommandSource;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
+import net.minecraft.commands.CommandSourceStack;
 
-public final class DelegatingCommandDispatcher extends CommandDispatcher<CommandSource> {
+public final class DelegatingCommandDispatcher extends CommandDispatcher<CommandSourceStack> {
+    private final BrigadierCommandRegistrar brigadier;
+
+    public DelegatingCommandDispatcher(final BrigadierCommandRegistrar brigadier) {
+        this.brigadier = brigadier;
+    }
 
     @Override
-    public LiteralCommandNode<CommandSource> register(final LiteralArgumentBuilder<CommandSource> command) {
+    public LiteralCommandNode<CommandSourceStack> register(final LiteralArgumentBuilder<CommandSourceStack> command) {
         // might as well do this directly
-        return BrigadierCommandRegistrar.INSTANCE.register(command);
+        return this.brigadier.register(command);
     }
 
     @Override
-    public void setConsumer(final ResultConsumer<CommandSource> consumer) {
-        BrigadierCommandRegistrar.INSTANCE.getDispatcher().setConsumer(consumer);
+    public void setConsumer(final ResultConsumer<CommandSourceStack> consumer) {
+        this.brigadier.getDispatcher().setConsumer(consumer);
     }
 
     @Override
-    public int execute(final String input, final CommandSource source) throws CommandSyntaxException {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().execute(input, source);
+    public int execute(final String input, final CommandSourceStack source) throws CommandSyntaxException {
+        return this.brigadier.getDispatcher().execute(input, source);
     }
 
     @Override
-    public int execute(final StringReader input, final CommandSource source) throws CommandSyntaxException {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().execute(input, source);
+    public int execute(final StringReader input, final CommandSourceStack source) throws CommandSyntaxException {
+        return this.brigadier.getDispatcher().execute(input, source);
     }
 
     @Override
-    public int execute(final ParseResults<CommandSource> parse) throws CommandSyntaxException {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().execute(parse);
+    public int execute(final ParseResults<CommandSourceStack> parse) throws CommandSyntaxException {
+        return this.brigadier.getDispatcher().execute(parse);
     }
 
     @Override
-    public ParseResults<CommandSource> parse(final String command, final CommandSource source) {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().parse(command, source);
+    public ParseResults<CommandSourceStack> parse(final String command, final CommandSourceStack source) {
+        return this.brigadier.getDispatcher().parse(command, source);
     }
 
     @Override
-    public ParseResults<CommandSource> parse(final StringReader command, final CommandSource source) {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().parse(command, source);
+    public ParseResults<CommandSourceStack> parse(final StringReader command, final CommandSourceStack source) {
+        return this.brigadier.getDispatcher().parse(command, source);
     }
 
     @Override
-    public String[] getAllUsage(final CommandNode<CommandSource> node, final CommandSource source, final boolean restricted) {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().getAllUsage(node, source, restricted);
+    public String[] getAllUsage(final CommandNode<CommandSourceStack> node, final CommandSourceStack source, final boolean restricted) {
+        return this.brigadier.getDispatcher().getAllUsage(node, source, restricted);
     }
 
     @Override
-    public Map<CommandNode<CommandSource>, String> getSmartUsage(final CommandNode<CommandSource> node, final CommandSource source) {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().getSmartUsage(node, source);
+    public Map<CommandNode<CommandSourceStack>, String> getSmartUsage(final CommandNode<CommandSourceStack> node, final CommandSourceStack source) {
+        return this.brigadier.getDispatcher().getSmartUsage(node, source);
     }
 
     @Override
-    public CompletableFuture<Suggestions> getCompletionSuggestions(final ParseResults<CommandSource> parse) {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().getCompletionSuggestions(parse);
+    public CompletableFuture<Suggestions> getCompletionSuggestions(final ParseResults<CommandSourceStack> parse) {
+        return this.brigadier.getDispatcher().getCompletionSuggestions(parse);
     }
 
     @Override
-    public CompletableFuture<Suggestions> getCompletionSuggestions(final ParseResults<CommandSource> parse, final int cursor) {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().getCompletionSuggestions(parse, cursor);
+    public CompletableFuture<Suggestions> getCompletionSuggestions(final ParseResults<CommandSourceStack> parse, final int cursor) {
+        return this.brigadier.getDispatcher().getCompletionSuggestions(parse, cursor);
     }
 
     @Override
-    public RootCommandNode<CommandSource> getRoot() {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().getRoot();
+    public RootCommandNode<CommandSourceStack> getRoot() {
+        return this.brigadier.getDispatcher().getRoot();
     }
 
     @Override
-    public Collection<String> getPath(final CommandNode<CommandSource> target) {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().getPath(target);
+    public Collection<String> getPath(final CommandNode<CommandSourceStack> target) {
+        return this.brigadier.getDispatcher().getPath(target);
     }
 
     @Override
-    public CommandNode<CommandSource> findNode(final Collection<String> path) {
-        return BrigadierCommandRegistrar.INSTANCE.getDispatcher().findNode(path);
+    public CommandNode<CommandSourceStack> findNode(final Collection<String> path) {
+        return this.brigadier.getDispatcher().findNode(path);
     }
 
     @Override
-    public void findAmbiguities(final AmbiguityConsumer<CommandSource> consumer) {
-        BrigadierCommandRegistrar.INSTANCE.getDispatcher().findAmbiguities(consumer);
+    public void findAmbiguities(final AmbiguityConsumer<CommandSourceStack> consumer) {
+        this.brigadier.getDispatcher().findAmbiguities(consumer);
     }
 }

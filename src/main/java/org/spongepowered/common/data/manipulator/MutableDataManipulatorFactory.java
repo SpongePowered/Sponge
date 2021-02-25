@@ -24,20 +24,17 @@
  */
 package org.spongepowered.common.data.manipulator;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.ValueContainer;
-import org.spongepowered.common.data.copy.CopyHelper;
+import org.spongepowered.common.util.CopyHelper;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Objects;
 
 public final class MutableDataManipulatorFactory implements DataManipulator.Mutable.Factory {
-
-    public static final DataManipulator.Mutable.Factory INSTANCE = new MutableDataManipulatorFactory();
 
     @Override
     public DataManipulator.Mutable of() {
@@ -46,11 +43,12 @@ public final class MutableDataManipulatorFactory implements DataManipulator.Muta
 
     @Override
     public DataManipulator.Mutable of(final Iterable<? extends Value<?>> values) {
-        return new MutableDataManipulator(mapValues(values));
+        return new MutableDataManipulator(MutableDataManipulatorFactory.mapValues(values));
     }
 
     static Map<Key<?>, Object> mapValues(final Iterable<? extends Value<?>> values) {
-        checkNotNull(values, "values");
+        Objects.requireNonNull(values);
+
         final Map<Key<?>, Object> mappedValues = new HashMap<>();
         for (final Value<?> value : values) {
             mappedValues.put(value.getKey(), CopyHelper.copy(value.get()));
@@ -60,7 +58,8 @@ public final class MutableDataManipulatorFactory implements DataManipulator.Muta
 
     @Override
     public DataManipulator.Mutable of(final ValueContainer valueContainer) {
-        checkNotNull(valueContainer, "valueContainer");
+        Objects.requireNonNull(valueContainer);
+
         final MutableDataManipulator manipulator = new MutableDataManipulator();
         manipulator.copyFrom(valueContainer);
         return manipulator;

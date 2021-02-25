@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import org.spongepowered.vanilla.installer.model.sponge.Libraries;
 import org.spongepowered.vanilla.installer.model.sponge.SonatypeResponse;
+import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.io.InputStreamReader;
@@ -38,28 +39,37 @@ import java.nio.file.Path;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.HashMap;
+import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.concurrent.Callable;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
-import java.util.concurrent.Executor;
 import java.util.concurrent.ExecutorService;
-import java.util.concurrent.Executors;
+import java.util.concurrent.ThreadPoolExecutor;
+import java.util.concurrent.TimeUnit;
 
 public final class LibraryManager {
 
     private final Installer installer;
     private final Path rootDirectory;
     private final Map<String, Library> libraries;
+    private final ExecutorService preparationWorker;
 
     public LibraryManager(final Installer installer, final Path rootDirectory) {
         this.installer = installer;
         this.rootDirectory = rootDirectory;
 
-        this.libraries = new HashMap<>();
+        this.libraries = new LinkedHashMap<>();
+        final int availableCpus = Runtime.getRuntime().availableProcessors();
+        // We'll be performing mostly IO-blocking operations, so more threads will help us for now
+        // It might make sense to make this overridable eventually
+        this.preparationWorker = new ThreadPoolExecutor(
+            Math.max(4, availableCpus), Integer.MAX_VALUE,
+            60L, TimeUnit.SECONDS,
+            new ArrayBlockingQueue<>(256) // this is the number of tasks allowed to be waiting before the pool will spawn off a new thread
+        );
     }
 
     public Path getRootDirectory() {
@@ -75,12 +85,12 @@ public final class LibraryManager {
     }
 
     public void validate() throws Exception {
-        this.installer.getLogger().info("Scanning and verifying libraries in '{}'. Please wait, this may take a moment...",
+        Logger.info("Scanning and verifying libraries in '{}'. Please wait, this may take a moment...",
             LauncherCommandLine.librariesDirectory.toAbsolutePath());
 
         final Gson gson = new Gson();
 
-        Libraries dependencies;
+        final Libraries dependencies;
         try (final JsonReader reader = new JsonReader(new InputStreamReader(this.getClass().getResourceAsStream("/libraries.json")))) {
             dependencies = gson.fromJson(reader, Libraries.class);
         }
@@ -88,10 +98,9 @@ public final class LibraryManager {
         final Set<Library> downloadedDeps = ConcurrentHashMap.newKeySet();
         final List<CompletableFuture<?>> operations = new ArrayList<>(dependencies.dependencies.size());
         final Set<String> failures = ConcurrentHashMap.newKeySet();
-        final ExecutorService workerPool = Executors.newFixedThreadPool(4);
 
         for (final Libraries.Dependency dependency : dependencies.dependencies) {
-            operations.add(asyncFailableFuture(() -> {
+            operations.add(AsyncUtils.asyncFailableFuture(() -> {
                 final String groupPath = dependency.group.replace(".", "/");
                 final Path depDirectory =
                     this.rootDirectory.resolve(groupPath).resolve(dependency.module).resolve(dependency.version);
@@ -103,7 +112,8 @@ public final class LibraryManager {
 
                 if (Files.exists(depFile)) {
                     if (!checkHashes) {
-                        this.installer.getLogger().info("Detected existing '{}', skipping hash checks...", depFile);
+                        Logger.info("Detected existing '{}', skipping hash checks...", depFile);
+                        downloadedDeps.add(new Library(dependency.group + "-" + dependency.module, depFile));
                         return null;
                     }
 
@@ -112,9 +122,9 @@ public final class LibraryManager {
                     final String fileMd5 = InstallerUtils.toHexString(md5.digest(bytes));
 
                     if (dependency.md5.equals(fileMd5)) {
-                        this.installer.getLogger().info("'{}' verified!", depFile);
+                        Logger.debug("'{}' verified!", depFile);
                     } else {
-                        this.installer.getLogger().error("Checksum verification failed: Expected {}, {}. Deleting cached '{}'...",
+                        Logger.error("Checksum verification failed: Expected {}, {}. Deleting cached '{}'...",
                             dependency.md5, fileMd5, depFile);
                         Files.delete(depFile);
 
@@ -129,7 +139,7 @@ public final class LibraryManager {
                         final SonatypeResponse.Item item = response.items.get(0);
                         final URL url = item.downloadUrl;
 
-                        InstallerUtils.downloadCheckHash(this.installer.getLogger(), url, depFile, md5, item.checksum.md5, true);
+                        InstallerUtils.downloadCheckHash(url, depFile, md5, item.checksum.md5, true);
                     }
                 } else {
                     final SonatypeResponse response = this.getResponseFor(gson, dependency);
@@ -145,23 +155,22 @@ public final class LibraryManager {
                     final URL url = item.downloadUrl;
 
                     if (checkHashes) {
-                        InstallerUtils.downloadCheckHash(this.installer.getLogger(), url, depFile, md5, item.checksum.md5, true);
+                        InstallerUtils.downloadCheckHash(url, depFile, md5, item.checksum.md5, true);
                     } else {
-                        InstallerUtils.download(this.installer.getLogger(), url, depFile, true);
+                        InstallerUtils.download(url, depFile, true);
                     }
                 }
 
                 downloadedDeps.add(new Library(dependency.group + "-" + dependency.module, depFile));
                 return null;
-            }, workerPool));
+            }, this.preparationWorker));
         }
 
         CompletableFuture.allOf(operations.toArray(new CompletableFuture<?>[0])).join();
-        workerPool.shutdown();
         if (!failures.isEmpty()) {
-            this.installer.getLogger().error("Failed to download some libraries:");
+            Logger.error("Failed to download some libraries:");
             for (final String message : failures) {
-                this.installer.getLogger().error(message);
+                Logger.error(message);
             }
             System.exit(-1);
         }
@@ -187,16 +196,23 @@ public final class LibraryManager {
         }
     }
 
-    private <T> CompletableFuture<T> asyncFailableFuture(final Callable<T> action, final Executor executor) {
-        final CompletableFuture<T> future = new CompletableFuture<>();
-        executor.execute(() -> {
-            try {
-                future.complete(action.call());
-            } catch (Exception ex) {
-                future.completeExceptionally(ex);
-            }
-        });
-        return future;
+    public ExecutorService preparationWorker() {
+        return this.preparationWorker;
+    }
+
+    public void finishedProcessing() {
+        this.preparationWorker.shutdown();
+        boolean successful;
+        try {
+            successful = this.preparationWorker.awaitTermination(10L, TimeUnit.SECONDS);
+        } catch (final InterruptedException e) {
+            successful = false;
+        }
+
+        if (!successful) {
+            Logger.warn("Failed to shut down library preparation pool in 10 seconds, forcing shutdown now.");
+            this.preparationWorker.shutdownNow();
+        }
     }
 
     public static class Library {

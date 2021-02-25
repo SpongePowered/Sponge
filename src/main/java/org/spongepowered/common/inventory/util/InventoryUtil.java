@@ -24,95 +24,87 @@
  */
 package org.spongepowered.common.inventory.util;
 
-import net.minecraft.block.ChestBlock;
-import net.minecraft.inventory.CraftingInventory;
-import net.minecraft.inventory.DoubleSidedInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.state.properties.ChestType;
-import net.minecraft.tileentity.ChestTileEntity;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.carrier.chest.Chest;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.comp.CraftingGridInventoryAdapter;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
 import org.spongepowered.common.inventory.custom.CustomInventory;
-import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
-import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.level.block.ChestBlock;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
+import net.minecraft.world.level.block.state.properties.ChestType;
 
 public final class InventoryUtil {
 
     private InventoryUtil() {}
 
-    public static CraftingGridInventory toSpongeInventory(CraftingInventory inv) {
-        CraftingGridInventoryLens lens = new CraftingGridInventoryLens(0, inv.getWidth(), inv.getHeight(), BasicSlotLens::new);
-
-        return new CraftingGridInventoryAdapter((Fabric) inv, lens);
+    public static CraftingGridInventory toSpongeInventory(final CraftingContainer inv) {
+        return (CraftingGridInventory) inv;
     }
 
     @SuppressWarnings("unchecked")
-    public static <C extends IInventory> C toNativeInventory(Inventory inv) {
-        Fabric fabric = ((CraftingGridInventoryAdapter) inv).inventoryAdapter$getFabric();
-        for (Object inventory : fabric.fabric$allInventories()) {
-            if (inventory instanceof CraftingInventory) {
-                return (C) inventory;
+    public static <C extends net.minecraft.world.Container> C toNativeInventory(final Inventory inv) {
+        if (inv instanceof CraftingContainer) {
+            return (C) inv;
+        }
+        if (inv instanceof Container) {
+            for (final Object inventory : ((InventoryAdapter) inv).inventoryAdapter$getFabric().fabric$allInventories()) {
+                if (inventory instanceof CraftingContainer) {
+                    return (C) inventory;
+                }
             }
         }
 
         // Gather Debug Info...
-        StringBuilder sb = new StringBuilder();
-        sb.append("Invalid CraftingGridInventory. Could not find InventoryCrafting.\n")
-          .append("Fabric was: ")
-          .append(fabric.getClass().getSimpleName()).append(" Name: ")
-          .append("Viewed:");
-        for (Object iInventory : fabric.fabric$allInventories()) {
-            sb.append("\n").append(iInventory.getClass().getName());
-        }
-
-        throw new IllegalStateException(sb.toString());
+        throw new IllegalStateException("Invalid CraftingGridInventory. Could not find CraftingInventory.\nInventory was: " + inv.getClass().getSimpleName());
     }
 
-    public static Optional<Inventory> getDoubleChestInventory(ChestTileEntity chest) {
-        Optional<Chest> connectedChestOptional = ((Chest) chest).getConnectedChest();
+    public static Optional<Inventory> getDoubleChestInventory(final ChestBlockEntity chest) {
+        final Optional<Chest> connectedChestOptional = ((Chest) chest).getConnectedChest();
         if (!connectedChestOptional.isPresent()) {
             return Optional.empty();
         }
 
-        ChestType chestType = chest.getBlockState().get(ChestBlock.TYPE);
-        ChestTileEntity connectedChest = (ChestTileEntity) connectedChestOptional.get();
+        final ChestType chestType = chest.getBlockState().getValue(ChestBlock.TYPE);
+        final ChestBlockEntity connectedChest = (ChestBlockEntity) connectedChestOptional.get();
         // Logic in the instanceof check of ChestBlock.getChestInventory but with exploded ternary operators.
         if (chestType == ChestType.RIGHT) {
-            return Optional.of((Inventory) new DoubleSidedInventory(chest, connectedChest));
+            return Optional.of((Inventory) new CompoundContainer(chest, connectedChest));
         } else {
-            return Optional.of((Inventory) new DoubleSidedInventory(connectedChest, chest));
+            return Optional.of((Inventory) new CompoundContainer(connectedChest, chest));
         }
     }
 
     // Utility
-    public static Inventory toInventory(IInventory inventory) {
-        return toInventory(inventory, null);
+    public static Inventory toInventory(final net.minecraft.world.Container inventory) {
+        return InventoryUtil.toInventory(inventory, null);
     }
 
-    public static Inventory toInventory(Object inventory, @Nullable Object forgeItemHandler) {
+    public static Inventory toInventory(Object inventory, @Nullable final Object forgeItemHandler) {
         if (forgeItemHandler == null) {
-            if (inventory instanceof ChestTileEntity) {
-                inventory = getDoubleChestInventory(((ChestTileEntity) inventory)).orElse(((Inventory) inventory));
+            if (inventory instanceof ChestBlockEntity) {
+                inventory = InventoryUtil.getDoubleChestInventory(((ChestBlockEntity) inventory)).orElse(((Inventory) inventory));
             }
             if (inventory instanceof Inventory) {
                 return ((Inventory) inventory);
@@ -121,17 +113,17 @@ public final class InventoryUtil {
         if (forgeItemHandler instanceof Inventory) {
             return ((Inventory) forgeItemHandler);
         }
-        return SpongeImplHooks.toInventory(inventory, forgeItemHandler);
+        return PlatformHooks.INSTANCE.getInventoryHooks().toInventory(inventory, forgeItemHandler);
     }
 
-    public static InventoryAdapter findAdapter(Object inventory) {
+    public static InventoryAdapter findAdapter(final Object inventory) {
         if (inventory instanceof InventoryAdapter) {
             return ((InventoryAdapter) inventory);
         }
-        return SpongeImplHooks.findInventoryAdapter(inventory);
+        return PlatformHooks.INSTANCE.getInventoryHooks().findInventoryAdapter(inventory);
     }
 
-    public static TrackedInventoryBridge forCapture(Object toCapture) {
+    public static TrackedInventoryBridge forCapture(final Object toCapture) {
         if (toCapture instanceof TrackedInventoryBridge) {
             return ((TrackedInventoryBridge) toCapture);
         }
@@ -140,7 +132,7 @@ public final class InventoryUtil {
 
     public static PluginContainer getPluginContainer(Object inventory) {
         // TODO maybe caching?
-        PluginContainer container;
+        final PluginContainer container;
 
         if (inventory instanceof CustomInventory) {
             return ((CustomInventory)inventory).getPlugin();
@@ -156,12 +148,12 @@ public final class InventoryUtil {
         final Object base = inventory;
 
         if (base instanceof BlockEntity) {
-            ResourceKey key = ((BlockEntity) base).getBlock().getType().getKey();
+            final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(((BlockEntity) base).getType());
             final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId)
                     .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + key.getNamespace() + ":" + key.getValue()));
         } else if (base instanceof Entity) {
-            ResourceKey key = ((Entity) base).getType().getKey();
+            final ResourceKey key = (ResourceKey) (Object) EntityType.getKey((EntityType<?>) ((Entity) base).getType());
             final String pluginId = key.getNamespace();
             container = Sponge.getPluginManager().getPlugin(pluginId).orElseGet(() -> {
                 SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
@@ -170,16 +162,20 @@ public final class InventoryUtil {
         } else if (base instanceof SpongeUser) {
             container = Launch.getInstance().getMinecraftPlugin();
         } else {
-            container = Sponge.getPluginManager().getPlugin(SpongeImplHooks.getModIdFromClass(base.getClass())).orElseGet(() -> {
-                SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
-                return Launch.getInstance().getMinecraftPlugin();
-            });
+            container = Sponge.getPluginManager().getPlugin(PlatformHooks.INSTANCE
+                .getInventoryHooks()
+                .getModIdFromInventory(base.getClass()))
+                .orElseGet(() -> {
+                    SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
+                    return Launch.getInstance().getMinecraftPlugin();
+                });
         }
         return container;
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends Carrier> CarriedInventory<T> carriedWrapperInventory(net.minecraft.inventory.IInventory inventory, T carrier) {
+    public static <T extends Carrier> CarriedInventory<T> carriedWrapperInventory(
+        final net.minecraft.world.Container inventory, final T carrier) {
         return (CarriedInventory<T>) new CarriedWrapperInventory(inventory, carrier);
     }
 }

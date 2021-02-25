@@ -29,13 +29,12 @@ import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.living.human.HumanEntity;
-import org.spongepowered.common.mixin.api.mcp.entity.CreatureEntityMixin_API;
-
+import org.spongepowered.common.mixin.api.mcp.world.entity.PathfinderMobMixin_API;
 import java.util.Objects;
 import java.util.UUID;
 
 @Mixin(value = HumanEntity.class, remap = false)
-public abstract class HumanEntityMixin_API extends CreatureEntityMixin_API implements Human {
+public abstract class HumanEntityMixin_API extends PathfinderMobMixin_API implements Human {
 
     @Shadow private GameProfile fakeProfile;
 

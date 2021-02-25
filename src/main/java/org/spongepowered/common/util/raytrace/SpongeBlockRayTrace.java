@@ -24,19 +24,17 @@
  */
 package org.spongepowered.common.util.raytrace;
 
-import net.minecraft.util.math.Vec3d;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.math.vector.Vector3d;
-import org.spongepowered.math.vector.Vector3i;
+import org.spongepowered.common.util.VecHelper;
 
 import java.util.Optional;
 import java.util.function.Predicate;
+import net.minecraft.world.phys.Vec3;
 
 public final class SpongeBlockRayTrace extends AbstractSpongeRayTrace<@NonNull LocatableBlock> {
 
@@ -51,14 +49,13 @@ public final class SpongeBlockRayTrace extends AbstractSpongeRayTrace<@NonNull L
 
     @Override
     final Optional<RayTraceResult<@NonNull LocatableBlock>> testSelectLocation(final ServerWorld serverWorld,
-            final Vec3d location,
-            final Vec3d exitLocation) {
+            final Vec3 location,
+            final Vec3 exitLocation) {
 
         final LocatableBlock initialBlock = this.getBlock(serverWorld, location, exitLocation);
         if (this.select.test(initialBlock)) {
-            return Optional.of(new SpongeRayTraceResult<>(initialBlock, this.start));
+            return Optional.of(new SpongeRayTraceResult<>(initialBlock, VecHelper.toVector3d(location)));
         }
         return Optional.empty();
     }
-
 }

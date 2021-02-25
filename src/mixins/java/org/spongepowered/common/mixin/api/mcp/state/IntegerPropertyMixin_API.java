@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.state;
 
-import net.minecraft.state.IntegerProperty;
+import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import org.spongepowered.api.state.IntegerStateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 

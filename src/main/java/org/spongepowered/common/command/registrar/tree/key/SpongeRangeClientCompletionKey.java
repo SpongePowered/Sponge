@@ -29,31 +29,32 @@ import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
-import net.minecraft.command.arguments.IArgumentSerializer;
-import net.minecraft.command.arguments.serializers.DoubleArgumentSerializer;
-import net.minecraft.command.arguments.serializers.FloatArgumentSerializer;
-import net.minecraft.command.arguments.serializers.IntArgumentSerializer;
-import net.minecraft.command.arguments.serializers.LongArgumentSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.command.registrar.tree.builder.RangeCommandTreeNode;
 
 import java.util.function.BiFunction;
+import net.minecraft.commands.synchronization.ArgumentSerializer;
+import net.minecraft.commands.synchronization.brigadier.DoubleArgumentSerializer;
+import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
+import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
+import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
 
-public final class SpongeRangeClientCompletionKey<N extends Number> implements ClientCompletionKey<CommandTreeNode.@NonNull Range<@NonNull N>> {
+public final class SpongeRangeClientCompletionKey<N extends Number> extends AbstractResourceKeyed implements ClientCompletionKey<CommandTreeNode.@NonNull Range<@NonNull N>> {
 
     @Nullable
-    public static SpongeRangeClientCompletionKey<?> createFrom(final ResourceKey key, final IArgumentSerializer<?> serializer) {
+    public static SpongeRangeClientCompletionKey<?> createFrom(final ResourceKey key, final ArgumentSerializer<?> serializer) {
         if (serializer instanceof FloatArgumentSerializer) {
             return new SpongeRangeClientCompletionKey<>(key, FloatArgumentType::floatArg, Float.MIN_VALUE, Float.MAX_VALUE);
         }
         if (serializer instanceof DoubleArgumentSerializer) {
             return new SpongeRangeClientCompletionKey<>(key, DoubleArgumentType::doubleArg, Double.MIN_VALUE, Double.MAX_VALUE);
         }
-        if (serializer instanceof IntArgumentSerializer) {
+        if (serializer instanceof IntegerArgumentSerializer) {
             return new SpongeRangeClientCompletionKey<>(key, IntegerArgumentType::integer, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
         if (serializer instanceof LongArgumentSerializer) {
@@ -62,22 +63,16 @@ public final class SpongeRangeClientCompletionKey<N extends Number> implements C
         return null;
     }
 
-    private final ResourceKey key;
     private final BiFunction<N, N, ArgumentType<?>> typeCreator;
     private final N min;
     private final N max;
 
     private SpongeRangeClientCompletionKey(final ResourceKey key, final BiFunction<N, N, ArgumentType<?>> typeCreator, final N min, final N max) {
-        this.key = key;
+        super(key);
+
         this.typeCreator = typeCreator;
         this.min = min;
         this.max = max;
-    }
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return this.key;
     }
 
     @Override

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.DoublePlantBlock;
+import net.minecraft.world.level.block.DoublePlantBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.PortionTypeUtils;
+import org.spongepowered.common.util.PortionTypeUtil;
 
 public final class DoublePlantData {
 
@@ -40,8 +40,8 @@ public final class DoublePlantData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.PORTION_TYPE)
-                        .get(h -> PortionTypeUtils.getFromDoubleBlock(h, DoublePlantBlock.HALF))
-                        .set((h, v) -> PortionTypeUtils.setForDoubleBlock(h, v, DoublePlantBlock.HALF))
+                        .get(h -> PortionTypeUtil.getFromDoubleBlock(h, DoublePlantBlock.HALF))
+                        .set((h, v) -> PortionTypeUtil.setForDoubleBlock(h, v, DoublePlantBlock.HALF))
                         .supports(h -> h.getBlock() instanceof DoublePlantBlock);
     }
     // @formatter:on

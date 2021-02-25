@@ -24,26 +24,20 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import com.google.common.collect.ListMultimap;
-import net.minecraft.block.BlockEventData;
-import net.minecraft.util.math.BlockPos;
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.SpongeImplHooks;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
-import java.util.List;
 import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
     private final BiConsumer<CauseStackManager.StackFrame, TileEntityTickContext> TILE_ENTITY_MODIFIER =
@@ -86,39 +80,23 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
+    public void appendNotifierToBlockEvent(final TileEntityTickContext context, final TrackedWorldBridge mixinWorldServer,
+        final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
+    ) {
+        final BlockEntity tickingTile = context.getSource(BlockEntity.class)
+            .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
+
+        blockEvent.bridge$setTickingLocatable(tickingTile.getLocatableBlock());
+        blockEvent.bridge$setTileEntity(tickingTile);
+    }
+
+    @Override
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final TileEntityTickContext context) {
         context.applyNotifierIfAvailable(explosionContext::notifier);
         context.applyOwnerIfAvailable(explosionContext::creator);
         final BlockEntity tickingTile = context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
         explosionContext.source(tickingTile);
-    }
-
-    @Override
-    public boolean getShouldCancelAllTransactions(
-        final TileEntityTickContext context, final List<ChangeBlockEvent> blockEvents, final ChangeBlockEvent.Post postEvent,
-        final ListMultimap<BlockPos, BlockEventData> scheduledEvents, final boolean noCancelledTransactions) {
-        if (!postEvent.getTransactions().isEmpty()) {
-            return postEvent.getTransactions().stream().anyMatch(transaction -> {
-                final BlockState state = transaction.getOriginal().getState();
-                final BlockType type = state.getType();
-                final boolean hasTile = SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) state);
-                final BlockPos pos = context.getSource(net.minecraft.tileentity.TileEntity.class).get().getPos();
-                final BlockPos blockPos = ((SpongeBlockSnapshot) transaction.getOriginal()).getBlockPos();
-                if (pos.equals(blockPos) && !transaction.isValid()) {
-                    return true;
-                }
-                if (!hasTile && !transaction.getIntermediary().isEmpty()) { // Check intermediary
-                    return transaction.getIntermediary().stream().anyMatch(inter -> {
-                        final BlockState iterState = inter.getState();
-                        final BlockType interType = state.getType();
-                        return SpongeImplHooks.hasBlockTileEntity((net.minecraft.block.BlockState) iterState);
-                    });
-                }
-                return hasTile;
-            });
-        }
-        return false;
     }
 
     @Override

@@ -70,7 +70,7 @@ public class Inventory2DLens extends SlotBasedLens {
         for (int y = 0, slot = this.base; y < this.height; y++) {
             for (int x = 0; x < this.width; x++, slot += this.stride) {
                 SlotLens slotLens = slots.getSlotLens(slot);
-                this.addChild(slotLens, KeyValuePair.of(Keys.SLOT_POSITION.get(), new Vector2i(this.xBase + x, this.yBase + y)));
+                this.addChild(slotLens, KeyValuePair.of(Keys.SLOT_POSITION, new Vector2i(this.xBase + x, this.yBase + y)));
             }
         }
     }

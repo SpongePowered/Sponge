@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.TNTBlock;
+import net.minecraft.world.level.block.TntBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,9 +39,9 @@ public final class TNTData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.UNSTABLE)
-                        .get(h -> h.get(TNTBlock.UNSTABLE))
-                        .set((h, v) -> h.with(TNTBlock.UNSTABLE, v))
-                        .supports(h -> h.getBlock() instanceof TNTBlock);
+                        .get(h -> h.getValue(TntBlock.UNSTABLE))
+                        .set((h, v) -> h.setValue(TntBlock.UNSTABLE, v))
+                        .supports(h -> h.getBlock() instanceof TntBlock);
     }
     // @formatter:on
 }

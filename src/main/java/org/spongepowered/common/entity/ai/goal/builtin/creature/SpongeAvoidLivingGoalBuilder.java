@@ -30,7 +30,7 @@ import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidLivingGoal;
 import org.spongepowered.api.entity.living.Creature;
 
 import java.util.function.Predicate;
-import net.minecraft.entity.CreatureEntity;
+import net.minecraft.world.entity.PathfinderMob;
 import org.spongepowered.api.entity.living.Living;
 
 public final class SpongeAvoidLivingGoalBuilder implements AvoidLivingGoal.Builder {
@@ -89,7 +89,7 @@ public final class SpongeAvoidLivingGoalBuilder implements AvoidLivingGoal.Build
     public AvoidLivingGoal build(Creature owner) {
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetSelector);
-        return (AvoidLivingGoal) new net.minecraft.entity.ai.goal.AvoidEntityGoal((CreatureEntity) owner, Entity.class, this.searchDistance,
+        return (AvoidLivingGoal) new net.minecraft.world.entity.ai.goal.AvoidEntityGoal((PathfinderMob) owner, Entity.class, this.searchDistance,
             this.closeRangeSpeed, this.farRangeSpeed, this.targetSelector);
     }
 }

@@ -33,21 +33,21 @@ class UnsafeTimingHandler extends TimingHandler {
     }
 
     private static void checkThread() {
-        if (!SpongeCommon.getServer().isOnExecutionThread()) {
+        if (!SpongeCommon.getServer().isSameThread()) {
             throw new IllegalStateException("Calling Timings from Async Operation");
         }
     }
 
     @Override
     public TimingHandler startTiming() {
-        checkThread();
+        UnsafeTimingHandler.checkThread();
         super.startTiming();
         return this;
     }
 
     @Override
     public void stopTiming() {
-        checkThread();
+        UnsafeTimingHandler.checkThread();
         super.stopTiming();
     }
 }

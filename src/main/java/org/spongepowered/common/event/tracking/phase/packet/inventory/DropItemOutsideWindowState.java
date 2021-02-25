@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -44,6 +42,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.protocol.Packet;
 import java.util.List;
 import java.util.Optional;
 
@@ -54,13 +53,13 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
     }
 
     @Override
-    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet,
+    public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet,
         final InventoryPacketContext context) {
         super.populateContext(playerMP, packet, context);
     }
 
     @Override
-    public ClickContainerEvent createInventoryEvent(final ServerPlayerEntity playerMP, final Container openContainer,
+    public ClickContainerEvent createInventoryEvent(final net.minecraft.server.level.ServerPlayer playerMP, final Container openContainer,
         final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {
@@ -71,7 +70,7 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
                 if (currentEntity instanceof CreatorTrackedBridge) {
                     ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((ServerPlayer) playerMP).getUser());
                 } else {
-                    currentEntity.offer(Keys.CREATOR, playerMP.getUniqueID());
+                    currentEntity.offer(Keys.CREATOR, playerMP.getUUID());
                 }
             }
             if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {

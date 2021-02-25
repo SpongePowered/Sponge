@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FlowingFluidBlock;
-import net.minecraft.fluid.FlowingFluid;
-import net.minecraft.fluid.IFluidState;
+import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class FlowingFluidData {
 
@@ -42,9 +41,9 @@ public final class FlowingFluidData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.FLUID_LEVEL)
-                        .get(h -> ((FlowingFluidBlock) h.getBlock()).getFluidState(h).getLevel())
-                        .set((h, v) -> BoundedUtils.setInteger(((FlowingFluidBlock) h.getBlock()).getFluidState(h), v, FlowingFluid.LEVEL_1_8).getBlockState())
-                        .supports(h -> h.getBlock() instanceof FlowingFluidBlock);
+                        .get(h -> ((LiquidBlock) h.getBlock()).getFluidState(h).getAmount())
+                        .set((h, v) -> BoundedUtil.setInteger(((LiquidBlock) h.getBlock()).getFluidState(h), v, FlowingFluid.LEVEL).createLegacyBlock())
+                        .supports(h -> h.getBlock() instanceof LiquidBlock);
     }
     // @formatter:on
 }

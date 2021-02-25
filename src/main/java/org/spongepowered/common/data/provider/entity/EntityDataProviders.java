@@ -25,13 +25,8 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
-import org.spongepowered.common.util.Constants;
 
 public final class EntityDataProviders extends DataProviderRegistratorBuilder {
-
-    public EntityDataProviders() {
-        super(Constants.Sponge.Entity.DataRegistration.ENTITY);
-    }
 
     @Override
     public void registerProviders() {
@@ -53,7 +48,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         BoatData.register(this.registrator);
         CatData.register(this.registrator);
         ChickenData.register(this.registrator);
-        MinecartCommandBlockData.register(this.registrator);
+        CommandBlockMinecartData.register(this.registrator);
         CreeperData.register(this.registrator);
         DamagingProjectileData.register(this.registrator);
         DolphinData.register(this.registrator);
@@ -99,6 +94,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         PlayerData.register(this.registrator);
         PolarBearData.register(this.registrator);
         PotionData.register(this.registrator);
+        ProjectileData.register(this.registrator);
         PufferfishData.register(this.registrator);
         RabbitData.register(this.registrator);
         RavagerData.register(this.registrator);
@@ -121,7 +117,7 @@ public final class EntityDataProviders extends DataProviderRegistratorBuilder {
         WitherData.register(this.registrator);
         WolfData.register(this.registrator);
         ZombieData.register(this.registrator);
-        ZombiePigmanData.register(this.registrator);
+        ZombifiedPiglinData.register(this.registrator);
         ZombieVillagerData.register(this.registrator);
     }
 }

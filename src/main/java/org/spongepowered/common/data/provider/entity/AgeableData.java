@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.AgeableEntity;
+import net.minecraft.world.entity.AgableMob;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
@@ -38,39 +38,39 @@ public final class AgeableData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(AgeableEntity.class)
+                .asMutable(AgableMob.class)
                     .create(Keys.BABY_TICKS)
-                        .get(h -> h.getGrowingAge() < 0 ? new SpongeTicks(-h.getGrowingAge()) : null)
+                        .get(h -> h.getAge() < 0 ? new SpongeTicks(-h.getAge()) : null)
                         .setAnd((h, v) -> {
                             final int ticks = (int) v.getTicks();
                             if (ticks < 0) {
                                 return false;
                             }
-                            h.setGrowingAge(-ticks);
+                            h.setAge(-ticks);
                             return true;
                         })
                     .create(Keys.BREEDING_COOLDOWN)
-                        .get(h -> h.getGrowingAge() >= 0 ? new SpongeTicks(h.getGrowingAge()) : null)
+                        .get(h -> h.getAge() >= 0 ? new SpongeTicks(h.getAge()) : null)
                         .setAnd((h, v) -> {
                             final int ticks = (int) v.getTicks();
                             if (ticks < 0) {
                                 return false;
                             }
-                            h.setGrowingAge(ticks);
+                            h.setAge(ticks);
                             return true;
                         })
                     .create(Keys.CAN_BREED)
-                        .get(h -> h.getGrowingAge() == 0)
+                        .get(h -> h.getAge() == 0)
                         .setAnd((h, v) -> {
-                            if (h.getGrowingAge() < 0) {
+                            if (h.getAge() < 0) {
                                 return false;
                             }
-                            h.setGrowingAge(v ? 0 : 6000);
+                            h.setAge(v ? 0 : 6000);
                             return true;
                         })
                     .create(Keys.IS_ADULT)
-                        .get(h -> !h.isChild())
-                        .set((h, v) -> h.setGrowingAge(v ? Constants.Entity.Ageable.ADULT : Constants.Entity.Ageable.CHILD));
+                        .get(h -> !h.isBaby())
+                        .set((h, v) -> h.setAge(v ? Constants.Entity.Ageable.ADULT : Constants.Entity.Ageable.CHILD));
     }
     // @formatter:on
 }

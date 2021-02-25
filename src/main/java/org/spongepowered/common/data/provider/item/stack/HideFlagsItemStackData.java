@@ -24,21 +24,13 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.CompoundNBT;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
 public final class HideFlagsItemStackData {
-
-    private static final int NBTKeyHideAttributesFlag = Constants.Item.HIDE_ATTRIBUTES_FLAG;
-    private static final int NBTKeyHideCanDestroyFlag = Constants.Item.HIDE_CAN_DESTROY_FLAG;
-    private static final int NBTKeyHideCanPlaceFlag = Constants.Item.HIDE_CAN_PLACE_FLAG;
-    private static final int NBTKeyHideEnchantmentsFlag = Constants.Item.HIDE_ENCHANTMENTS_FLAG;
-    private static final int NBTKeyHideMiscellaneousFlag = Constants.Item.HIDE_MISCELLANEOUS_FLAG;
-    private static final int NBTKeyHideUnbreakableFlag = Constants.Item.HIDE_UNBREAKABLE_FLAG;
 
     private HideFlagsItemStackData() {
     }
@@ -48,52 +40,46 @@ public final class HideFlagsItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.HIDE_ATTRIBUTES)
-                        .get(h -> get(h, NBTKeyHideAttributesFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideAttributesFlag))
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.MODIFIERS))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.MODIFIERS, v))
                     .create(Keys.HIDE_CAN_DESTROY)
-                        .get(h -> get(h, NBTKeyHideCanDestroyFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideCanDestroyFlag))
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.CAN_DESTROY))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.CAN_DESTROY, v))
                     .create(Keys.HIDE_CAN_PLACE)
-                        .get(h -> get(h, NBTKeyHideCanPlaceFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideCanPlaceFlag))
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.CAN_PLACE))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.CAN_PLACE, v))
                     .create(Keys.HIDE_ENCHANTMENTS)
-                        .get(h -> get(h, NBTKeyHideEnchantmentsFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideEnchantmentsFlag))
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.ENCHANTMENTS))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.ENCHANTMENTS, v))
                     .create(Keys.HIDE_MISCELLANEOUS)
-                        .get(h -> get(h, NBTKeyHideMiscellaneousFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideMiscellaneousFlag))
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.ADDITIONAL))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.ADDITIONAL, v))
                     .create(Keys.HIDE_UNBREAKABLE)
-                        .get(h -> get(h, NBTKeyHideUnbreakableFlag))
-                        .set((h, v) -> set(h, v, NBTKeyHideUnbreakableFlag));
+                        .get(h -> HideFlagsItemStackData.get(h, ItemStack.TooltipPart.UNBREAKABLE))
+                        .set((h, v) -> HideFlagsItemStackData.set(h, ItemStack.TooltipPart.UNBREAKABLE, v));
     }
     // @formatter:on
 
-    private static boolean get(final ItemStack holder, final int flag) {
-        @Nullable final CompoundNBT tag = holder.getTag();
-        if (tag != null && tag.contains(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
-            final int tagFlag = tag.getInt(Constants.Item.ITEM_HIDE_FLAGS);
-            return (tagFlag & flag) != 0;
+    private static boolean get(final ItemStack stack, final ItemStack.TooltipPart flag) {
+        final CompoundTag tag = stack.getTag();
+        if (tag == null || !tag.contains(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_ANY_NUMERIC)) {
+            return false;
         }
-        return false;
+        return (tag.getInt(Constants.Item.ITEM_HIDE_FLAGS) & flag.getMask()) == 0;
     }
 
-    private static boolean set(final ItemStack holder, final Boolean value, final int flag) {
-        final CompoundNBT tag = holder.getOrCreateTag();
-        if (tag.contains(Constants.Item.ITEM_HIDE_FLAGS, Constants.NBT.TAG_INT)) {
-            final int tagFlag = tag.getInt(Constants.Item.ITEM_HIDE_FLAGS);
-            if (value) {
-                tag.putInt(Constants.Item.ITEM_HIDE_FLAGS, tagFlag | flag);
+    public static void set(final ItemStack stack, final ItemStack.TooltipPart flag, final boolean value) {
+        final CompoundTag tag = stack.getOrCreateTag();
+        int flags = tag.getInt(Constants.Item.ITEM_HIDE_FLAGS);
+        if (value) {
+            tag.putInt(Constants.Item.ITEM_HIDE_FLAGS, flags | flag.getMask());
+        } else {
+            flags = flags & ~flag.getMask();
+            if (flags == 0) {
+                tag.remove(Constants.Item.ITEM_HIDE_FLAGS);
             } else {
-                final int flags = tagFlag & ~flag;
-                if (flags == 0) {
-                    tag.remove(Constants.Item.ITEM_HIDE_FLAGS);
-                } else {
-                    tag.putInt(Constants.Item.ITEM_HIDE_FLAGS, flags);
-                }
+                tag.putInt(Constants.Item.ITEM_HIDE_FLAGS, flags);
             }
-        } else if (value) {
-            tag.putInt(Constants.Item.ITEM_HIDE_FLAGS, flag);
         }
-        return true;
     }
 }

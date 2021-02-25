@@ -1,19 +1,25 @@
-rootProject.name = "SpongeCommon"
+rootProject.name = "Sponge"
 
 include("SpongeAPI")
 include(":SpongeVanilla")
 project(":SpongeVanilla").projectDir = file("vanilla")
 pluginManagement {
     repositories {
-        mavenLocal()
-        mavenCentral()
-        maven("https://files.minecraftforge.net/maven")
-        maven("https://repo-new.spongepowered.org/repository/maven-public")
-        maven("https://repo.spongepowered.org/maven")
-        gradlePluginPortal()
+        maven("https://repo.spongepowered.org/repository/maven-public/") {
+            name = "sponge"
+        }
     }
-
 }
+
+dependencyResolutionManagement {
+    // repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS) // TODO: Apply this once SpongeAPI is properly isolated
+    repositories {
+        maven("https://repo.spongepowered.org/repository/maven-public/") {
+            name = "sponge"
+        }
+    }
+}
+
 val testPlugins = file("testplugins.settings.gradle.kts")
 if (testPlugins.exists()) {
     apply(from = testPlugins)
@@ -30,7 +36,7 @@ if (spongeForge.exists()) {
     apply(from = spongeForge)
 } else {
     spongeForge.writeText("// Uncomment to enable SpongeForge module.\n" +
-            "// By default only SpongeCommon and SpongeVanilla are made available\n" +
+            "// By default only Sponge and SpongeVanilla are made available\n" +
             "//include(\":SpongeForge\")\n" +
             "//project(\":SpongeForge\").projectDir = file(\"forge\")\n")
 }

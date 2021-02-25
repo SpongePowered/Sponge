@@ -25,18 +25,21 @@
 package org.spongepowered.vanilla.client.gui.widget;
 
 import com.google.common.collect.Lists;
+import com.mojang.blaze3d.vertex.PoseStack;
+import com.mojang.blaze3d.vertex.Tesselator;
 import it.unimi.dsi.fastutil.objects.ObjectArrayList;
+import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.FontRenderer;
-import net.minecraft.client.renderer.Tessellator;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TextFormatting;
-import net.minecraft.util.text.event.ClickEvent;
+import net.minecraft.client.gui.Font;
+import net.minecraft.network.chat.ClickEvent;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.TextComponent;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.client.gui.screen.PluginScreen;
 import org.spongepowered.vanilla.util.Bounds;
 
+import javax.annotation.Nullable;
 import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
@@ -48,9 +51,10 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
-
 public final class MetadataPanel extends ScrollPanel {
+
+    private static final Component NO_RESULTS = new TextComponent("No data...")
+            .withStyle(ChatFormatting.GRAY);
 
     static final Pattern URL_PATTERN = Pattern.compile(
         //         schema                          ipv4            OR        namespace                 port     path         ends
@@ -69,7 +73,7 @@ public final class MetadataPanel extends ScrollPanel {
         super(minecraft, width, height, top, left);
         this.minecraft = minecraft;
         this.screen = screen;
-        this.lineHeight = this.minecraft.fontRenderer.FONT_HEIGHT + 1;
+        this.lineHeight = this.minecraft.font.lineHeight + 1;
     }
 
     public void setMetadata(@Nullable final PluginMetadata metadata) {
@@ -113,7 +117,7 @@ public final class MetadataPanel extends ScrollPanel {
             metadata.getExtraMetadata().entrySet().stream().map(e -> new Entry(e.getKey(), e.getValue().toString())).collect(Collectors.toList())));
 
         this.categories.stream().flatMap(c -> c.getEntries().stream()).forEach(e -> {
-            final int width = e.key == null ? 0 : this.minecraft.fontRenderer.getStringWidth(e.key.getFormattedText());
+            final int width = e.key == null ? 0 : this.minecraft.font.width(e.key);
             this.maxKeyWidth = Math.max(this.maxKeyWidth, width + (e.level * MetadataPanel.INDENT_SIZE));
         });
 
@@ -135,10 +139,10 @@ public final class MetadataPanel extends ScrollPanel {
                 final int baseX = 4;
                 final int keyX = baseX + MetadataPanel.INDENT_SIZE + levelOffset;
                 final int separatorX = keyX + this.maxKeyWidth + 4 - levelOffset;
-                final int valueX = separatorX + this.minecraft.fontRenderer.getStringWidth(":") + 4;
+                final int valueX = separatorX + this.minecraft.font.width(":") + 4;
                 final int maxWidth = this.width - valueX - 8;
                 if (maxWidth >= 0) {
-                    final List<String> lines = Arrays.asList(efficientWrapper(entry.rawValue, maxWidth).split("\n"));
+                    final List<String> lines = Arrays.asList(this.efficientWrapper(entry.rawValue, maxWidth).split("\n"));
                     newEntries.add(new Entry(entry.rawKey, lines.get(0), entry.level, entry.rawValue));
                     newEntries.addAll(lines.stream().skip(1).map(l -> new Entry(null, l, entry.level, entry.rawValue)).collect(Collectors.toList()));
                 }
@@ -172,7 +176,7 @@ public final class MetadataPanel extends ScrollPanel {
             final char c = value.charAt(i);
 
             final String lineCandidate = builder.toString() + c;
-            if (this.minecraft.fontRenderer.getStringWidth(lineCandidate) > width) {
+            if (this.minecraft.font.width(lineCandidate) > width) {
                 // Add the line with a trailing new line
                 lines.add(builder.append("\n").toString());
                 // Clear the builder for a new line
@@ -204,16 +208,20 @@ public final class MetadataPanel extends ScrollPanel {
     }
 
     @Override
-    protected void drawPanel(final int entryRight, int relativeY, final Tessellator tess, final int mouseX, final int mouseY) {
+    protected void drawPanel(final PoseStack stack, final int entryRight, int relativeY, final Tesselator tess, final int mouseX,
+            final int mouseY) {
         final int baseX = this.left + 4;
 
         if (this.resizedCategories.isEmpty()) {
-            final FontRenderer font = this.minecraft.fontRenderer;
-            final String noResults = "No data...";
-            final int noResultsWidth = font.getStringWidth(noResults);
+            final Font font = this.minecraft.font;
+            final int noResultsWidth = font.width(NO_RESULTS);
 
-            font.drawString(noResults, ((float) this.width / 2) + this.left - ((float) noResultsWidth / 2), this.top + 10,
-                    TextFormatting.GRAY.getColor());
+            font.draw(
+                    stack,
+                    NO_RESULTS,
+                    ((float) this.width / 2) + this.left - ((float) noResultsWidth / 2),
+                    this.top + 10,
+                    0xFFFFFF);
 
             return;
         }
@@ -226,7 +234,7 @@ public final class MetadataPanel extends ScrollPanel {
             }
 
             // Draw category name
-            this.minecraft.fontRenderer.drawString(category.name.getFormattedText(), baseX, relativeY, 0xFFFFFF);
+            this.minecraft.font.draw(stack, category.name, baseX, relativeY, 0xFFFFFF);
             relativeY += this.lineHeight;
 
             // Iterate and draw entries
@@ -238,22 +246,22 @@ public final class MetadataPanel extends ScrollPanel {
                 final int levelOffset = entry.level * MetadataPanel.INDENT_SIZE;
                 final int keyX = baseX + MetadataPanel.INDENT_SIZE + levelOffset;
                 final int separatorX = keyX + this.maxKeyWidth + 4 - levelOffset;
-                final int valueX = separatorX + this.minecraft.fontRenderer.getStringWidth(":") + 4;
+                final int valueX = separatorX + this.minecraft.font.width(":") + 4;
 
                 // Only draw key and separator if there is any key present
                 if (entry.key != null) {
-                    this.minecraft.fontRenderer.drawString(entry.key.getFormattedText(), keyX, relativeY, 0xFFFFFF);
+                    this.minecraft.font.draw(stack, entry.key, keyX, relativeY, 0xFFFFFF);
 
                     if (entry.rawValue != null && !entry.rawValue.isEmpty()) {
-                        this.minecraft.fontRenderer.drawString(":", separatorX, relativeY, 0xFFFFFF);
+                        this.minecraft.font.draw(stack, ":", separatorX, relativeY, 0xFFFFFF);
                     }
                 }
 
                 // Draw the value, and update the value bounds if needed
-                this.minecraft.fontRenderer.drawString(entry.value.getFormattedText(), valueX, relativeY, 0xFFFFFF);
+                this.minecraft.font.draw(stack, entry.value, valueX, relativeY, 0xFFFFFF);
                 if (entry.value.getStyle().getClickEvent() != null) {
                     entry.valueBounds =
-                        new Bounds(valueX, relativeY + 1, valueX + this.minecraft.fontRenderer.getStringWidth(entry.value.getFormattedText()),
+                        new Bounds(valueX, relativeY + 1, valueX + this.minecraft.font.width(entry.value),
                             relativeY + this.lineHeight);
                 }
                 relativeY += this.lineHeight;
@@ -275,9 +283,9 @@ public final class MetadataPanel extends ScrollPanel {
             return false;
         }
 
-        final ITextComponent component = entry.value;
+        final Component component = entry.value;
         if (component != null) {
-            this.screen.handleComponentClicked(component);
+            this.screen.handleComponentClicked(component.getStyle());
             return true;
         }
         return super.mouseClicked(mouseX, mouseY, button);
@@ -291,12 +299,12 @@ public final class MetadataPanel extends ScrollPanel {
      * Credit: MinecraftForge
      * Changes: Set ichat to link if ichat is null
      */
-    public static ITextComponent newChatWithLinks(final String string, final boolean allowMissingHeader) {
+    public static Component newChatWithLinks(final String string, final boolean allowMissingHeader) {
         // Includes ipv4 and domain pattern
         // Matches an ip (xx.xxx.xx.xxx) or a domain (something.com) with or
         // without a protocol or path.
-        ITextComponent ichat = null;
-        final Matcher matcher = URL_PATTERN.matcher(string);
+        MutableComponent ichat = null;
+        final Matcher matcher = MetadataPanel.URL_PATTERN.matcher(string);
         int lastEnd = 0;
 
         // Find all urls
@@ -308,23 +316,23 @@ public final class MetadataPanel extends ScrollPanel {
             final String part = string.substring(lastEnd, start);
             if (part.length() > 0) {
                 if (ichat == null) {
-                    ichat = new StringTextComponent(part);
+                    ichat = new TextComponent(part);
                 } else {
-                    ichat.appendText(part);
+                    ichat.append(part);
                 }
             }
             lastEnd = end;
             String url = string.substring(start, end);
-            final ITextComponent link = new StringTextComponent(url);
+            final MutableComponent link = new TextComponent(url);
 
             try {
                 // Add schema so client doesn't crash.
                 if ((new URI(url)).getScheme() == null) {
                     if (!allowMissingHeader) {
                         if (ichat == null) {
-                            ichat = new StringTextComponent(url);
+                            ichat = new TextComponent(url);
                         } else {
-                            ichat.appendText(url);
+                            ichat.append(url);
                         }
                         continue;
                     }
@@ -333,41 +341,40 @@ public final class MetadataPanel extends ScrollPanel {
             } catch (final URISyntaxException e) {
                 // Bad syntax bail out!
                 if (ichat == null) {
-                    ichat = new StringTextComponent(url);
+                    ichat = new TextComponent(url);
                 } else {
-                    ichat.appendText(url);
+                    ichat.append(url);
                 }
                 continue;
             }
 
             // Set the click event and append the link.
             final ClickEvent click = new ClickEvent(ClickEvent.Action.OPEN_URL, url);
-            link.getStyle().setClickEvent(click);
-            link.getStyle().setUnderlined(true);
-            link.getStyle().setColor(TextFormatting.BLUE);
-            ichat = ichat == null ? link : ichat.appendSibling(link);
+            link.withStyle(style -> style.withClickEvent(click)
+                        .withUnderlined(true)
+                        .withColor(ChatFormatting.BLUE));
+            ichat = ichat == null ? link : ichat.append(link);
         }
 
         // Append the rest of the message.
         final String end = string.substring(lastEnd);
         if (ichat == null) {
-            ichat = new StringTextComponent(end);
+            ichat = new TextComponent(end);
         } else if (end.length() > 0) {
-            ichat.appendText(string.substring(lastEnd));
+            ichat.append(string.substring(lastEnd));
         }
         return ichat;
     }
 
     private static final class Category {
 
-        protected final ITextComponent name;
+        protected final Component name;
         protected final String rawName;
         private final List<Entry> entries = new ArrayList<>();
 
         public Category(final String name) {
-            this.name = new StringTextComponent(name)
-                .applyTextStyle(TextFormatting.BOLD)
-                .applyTextStyle(TextFormatting.UNDERLINE);
+            this.name = new TextComponent(name)
+                    .withStyle(s -> s.withBold(true).withUnderlined(true));
             this.rawName = name;
         }
 
@@ -402,8 +409,8 @@ public final class MetadataPanel extends ScrollPanel {
         protected final int level;
         @Nullable protected final String rawKey;
         @Nullable protected final String rawValue;
-        @Nullable protected ITextComponent key;
-        @Nullable protected ITextComponent value;
+        @Nullable protected Component key;
+        @Nullable protected Component value;
         @Nullable protected Bounds valueBounds;
 
         public Entry(@Nullable final String key, @Nullable final String value) {
@@ -416,20 +423,21 @@ public final class MetadataPanel extends ScrollPanel {
 
         public Entry(@Nullable final String key, @Nullable final String value, final int level, @Nullable final String originalValue) {
             if (key != null) {
-                this.key = new StringTextComponent(key);
+                this.key = new TextComponent(key);
             }
             this.rawKey = key;
 
             if (value != null) {
-                this.value = new StringTextComponent(value).applyTextStyle(TextFormatting.GRAY);
+                final MutableComponent newValue = new TextComponent(value).withStyle(ChatFormatting.GRAY);
 
                 // Account for text components that were split to new lines
                 if (originalValue != null) {
-                    final ITextComponent linkComponent = newChatWithLinks(originalValue, false);
+                    final Component linkComponent = MetadataPanel.newChatWithLinks(originalValue, false);
                     if (linkComponent.getStyle().getClickEvent() != null) {
-                        this.value.setStyle(linkComponent.getStyle());
+                        newValue.withStyle(s -> linkComponent.getStyle().applyTo(s));
                     }
                 }
+                this.value = newValue;
             }
             this.rawValue = value;
 

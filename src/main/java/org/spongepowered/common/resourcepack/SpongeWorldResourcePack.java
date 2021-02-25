@@ -24,32 +24,31 @@
  */
 package org.spongepowered.common.resourcepack;
 
+import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
 
-import javax.annotation.Nullable;
-
-public class SpongeWorldResourcePack extends SpongeResourcePack {
+public final class SpongeWorldResourcePack extends SpongeResourcePack {
 
     private final String path;
     private final URI uri;
     public static final String LEVEL_PACK_PROTOCOL = "level://";
 
-    public SpongeWorldResourcePack(String levelUri, @Nullable String hash) {
+    public SpongeWorldResourcePack(final String levelUri, @Nullable final String hash) {
         super(hash);
-        this.path = levelUri.substring(LEVEL_PACK_PROTOCOL.length());
+        this.path = levelUri.substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length());
         try {
-            this.uri = URI.create(LEVEL_PACK_PROTOCOL + URLEncoder.encode(this.path, "UTF-8"));
+            this.uri = URI.create(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL + URLEncoder.encode(this.path, "UTF-8"));
         } catch (UnsupportedEncodingException e) {
             throw new AssertionError(e);
         }
     }
 
-    public SpongeWorldResourcePack(URI levelUri, @Nullable String hash) {
+    public SpongeWorldResourcePack(final URI levelUri, @Nullable final String hash) {
         super(hash);
-        String path = levelUri.toString().substring(LEVEL_PACK_PROTOCOL.length());
+        String path = levelUri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length());
         try {
             this.path = URLDecoder.decode(path, "UTF-8");
         } catch (UnsupportedEncodingException e) {
@@ -65,7 +64,7 @@ public class SpongeWorldResourcePack extends SpongeResourcePack {
 
     @Override
     public String getUrlString() {
-        return LEVEL_PACK_PROTOCOL + this.path;
+        return SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL + this.path;
     }
 
     @Override

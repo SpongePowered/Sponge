@@ -24,30 +24,54 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.world.server.ServerWorld;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.lang.ref.WeakReference;
+import java.util.function.BiConsumer;
+import net.minecraft.server.level.ServerLevel;
 
 final class WorldTickState extends TickPhaseState<WorldTickState.WorldTickContext> {
+
+    private final BiConsumer<CauseStackManager.StackFrame, WorldTickContext> WORLD_MODIFIER = super.getFrameModifier()
+        .andThen((frame, context) -> {
+            context.getSource(Object.class).ifPresent(frame::pushCause);
+            final @Nullable ServerLevel serverWorld = context.serverWorld.get();
+            if (serverWorld != null) {
+                frame.pushCause(serverWorld);
+            }
+        });
 
     @Override
     protected WorldTickContext createNewContext(final PhaseTracker tracker) {
         return new WorldTickContext(this, tracker);
     }
 
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, WorldTickContext> getFrameModifier() {
+        return this.WORLD_MODIFIER;
+    }
+
+    @Override
+    public void unwind(final WorldTickContext phaseContext) {
+        TrackingUtil.processBlockCaptures(phaseContext);
+    }
+
     public static class WorldTickContext extends TickContext<WorldTickContext> {
 
-        WeakReference<ServerWorld> serverWorld;
+        @MonotonicNonNull WeakReference<ServerLevel> serverWorld;
 
-        public WorldTickContext server(final ServerWorld server) {
+        public WorldTickContext world(final ServerLevel server) {
             this.serverWorld = new WeakReference<>(server);
             return this;
         }
 
 
-        WorldTickContext(final IPhaseState<? extends WorldTickContext> phaseState, final PhaseTracker tracker) {
+        WorldTickContext(final IPhaseState<WorldTickContext> phaseState, final PhaseTracker tracker) {
             super(phaseState, tracker);
         }
     }

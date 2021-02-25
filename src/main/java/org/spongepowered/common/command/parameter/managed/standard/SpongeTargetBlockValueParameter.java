@@ -24,34 +24,25 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
-import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.common.command.brigadier.argument.CatalogedZeroAdvanceValueParameter;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedZeroAdvanceValueParameter;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
-public final class SpongeTargetBlockValueParameter extends CatalogedZeroAdvanceValueParameter<ServerLocation> {
+public final class SpongeTargetBlockValueParameter extends ResourceKeyedZeroAdvanceValueParameter<ServerLocation> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("target_block");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeTargetBlockValueParameter.RESOURCE_KEY;
+    public SpongeTargetBlockValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

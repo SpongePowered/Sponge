@@ -24,50 +24,14 @@
  */
 package org.spongepowered.common.command.parameter.multi;
 
-import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandSource;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.command.brigadier.SpongeParameterTranslator;
-import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
 
-import java.util.ArrayList;
 import java.util.List;
-import java.util.function.Consumer;
 
 public final class SpongeSequenceParameter extends SpongeMultiParameter {
 
     protected SpongeSequenceParameter(final List<Parameter> parameterCandidates, final boolean isOptional, final boolean isTerminal) {
         super(parameterCandidates, isOptional, isTerminal);
     }
-
-    public boolean endsWithSubcommand() {
-        final int size = this.getParameterCandidates().size();
-        return this.getParameterCandidates().get(size - 1) instanceof Parameter.Subcommand;
-    }
-
-    @Override
-    public boolean createNode(
-            final SpongeCommandExecutorWrapper executorWrapper,
-            final Consumer<CommandNode<CommandSource>> parentNode,
-            final Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback,
-            final List<CommandNode<CommandSource>> potentialOptionalRedirects,
-            final boolean isTermination,
-            final boolean previousWasOptional,
-            @Nullable final String suffix) {
-
-        final boolean isTerminal = SpongeParameterTranslator.createNode(
-                this.getParameterCandidates().listIterator(),
-                executorWrapper,
-                parentNode,
-                nodeCallback,
-                potentialOptionalRedirects,
-                isTermination || this.isTerminal(),
-                previousWasOptional,
-                suffix);
-        return this.isOptional() || isTerminal;
-    }
-
 
 }

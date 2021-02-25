@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.projectile.ArrowEntity;
-import net.minecraft.potion.EffectInstance;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
-import org.spongepowered.common.accessor.entity.projectile.ArrowEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.projectile.ArrowAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.Set;
 import java.util.stream.Collectors;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.entity.projectile.Arrow;
 
 public final class ArrowData {
 
@@ -42,22 +42,22 @@ public final class ArrowData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(ArrowEntity.class)
+                .asMutable(Arrow.class)
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
-                            final Set<EffectInstance> effects = ((ArrowEntityAccessor) h).accessor$getCustomPotionEffects();
+                            final Set<MobEffectInstance> effects = ((ArrowAccessor) h).accessor$effects();
                             if (effects.isEmpty()) {
                                 return null;
                             }
                             return effects.stream()
-                                    .map(effect -> (PotionEffect) new EffectInstance(effect.getPotion(), effect.getDuration(),
-                                            effect.getAmplifier(), effect.isAmbient(), effect.doesShowParticles()))
+                                    .map(effect -> (PotionEffect) new MobEffectInstance(effect.getEffect(), effect.getDuration(),
+                                            effect.getAmplifier(), effect.isAmbient(), effect.isVisible()))
                                     .collect(Collectors.toList());
                         })
                         .set((h, v) -> {
-                            ((ArrowEntityAccessor) h).accessor$getCustomPotionEffects().clear();
+                            ((ArrowAccessor) h).accessor$effects().clear();
                             for (final PotionEffect effect : v) {
-                                final EffectInstance mcEffect = new EffectInstance(((EffectInstance) effect).getPotion(), effect.getDuration(),
+                                final MobEffectInstance mcEffect = new MobEffectInstance(((MobEffectInstance) effect).getEffect(), effect.getDuration(),
                                         effect.getAmplifier(), effect.isAmbient(), effect.showsParticles());
                                 h.addEffect(mcEffect);
                             }

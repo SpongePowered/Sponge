@@ -24,32 +24,27 @@
  */
 package org.spongepowered.common.entity.ai;
 
-import net.minecraft.entity.ai.goal.Goal;
+import net.minecraft.world.entity.ai.goal.Goal;
 
 public abstract class SpongeGoalSuperclass extends Goal {
 
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         return this.shouldUpdate();
     }
 
     @Override
-    public boolean shouldContinueExecuting() {
+    public boolean canContinueToUse() {
         return this.continueUpdating();
     }
 
     @Override
-    public boolean isPreemptible() {
+    public boolean isInterruptable() {
         return this.canBeInterrupted();
     }
 
     @Override
-    public void startExecuting() {
-        this.start();
-    }
-
-    @Override
-    public void resetTask() {
+    public void stop() {
         this.reset();
     }
 

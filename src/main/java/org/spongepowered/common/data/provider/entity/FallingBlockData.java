@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.FallingBlockEntity;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.item.FallingBlockEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.item.FallingBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -41,38 +41,38 @@ public final class FallingBlockData {
         registrator
                 .asMutable(FallingBlockEntity.class)
                     .create(Keys.CAN_DROP_AS_ITEM)
-                        .get(h -> h.shouldDropItem)
-                        .set((h, v) -> h.shouldDropItem = v)
+                        .get(h -> h.dropItem)
+                        .set((h, v) -> h.dropItem = v)
                 .asMutable(FallingBlockEntityAccessor.class)
                     .create(Keys.BLOCK_STATE)
-                        .get(h -> (BlockState) h.accessor$getFallTile())
-                        .set((h, v) -> h.accessor$setFallTile((net.minecraft.block.BlockState) v))
+                        .get(h -> (BlockState) h.accessor$blockState())
+                        .set((h, v) -> h.accessor$blockState((net.minecraft.world.level.block.state.BlockState) v))
                     .create(Keys.CAN_PLACE_AS_BLOCK)
-                        .get(h -> !h.accessor$getDontSetBlock())
-                        .set((h, v) -> h.accessor$setDontSetAsBlock(!v))
+                        .get(h -> !h.accessor$cancelDrop())
+                        .set((h, v) -> h.accessor$cancelDrop(!v))
                     .create(Keys.CAN_HURT_ENTITIES)
-                        .get(FallingBlockEntityAccessor::accessor$getHurtEntities)
-                        .set(FallingBlockEntityAccessor::accessor$setHurtEntities)
+                        .get(FallingBlockEntityAccessor::accessor$hurtEntities)
+                        .set(FallingBlockEntityAccessor::accessor$hurtEntities)
                     .create(Keys.DAMAGE_PER_BLOCK)
-                        .get(h -> (double) h.accessor$getFallHurtAmount())
-                        .set((h, v) -> h.accessor$setFallHurtAmount(v.floatValue()))
+                        .get(h -> (double) h.accessor$fallDamageAmount())
+                        .set((h, v) -> h.accessor$fallDamageAmount(v.floatValue()))
                     .create(Keys.FALL_TIME)
-                        .get(x -> new SpongeTicks(x.accessor$getFallTime()))
+                        .get(x -> new SpongeTicks(x.accessor$time()))
                         .setAnd((h, v) -> {
                             final int ticks = (int) v.getTicks();
                             if (ticks < 0) {
                                 return false;
                             }
-                            h.accessor$setFallTime(ticks);
+                            h.accessor$time(ticks);
                             return true;
                         })
                     .create(Keys.MAX_FALL_DAMAGE)
-                        .get(h -> (double) h.accessor$getFallHurtMax())
+                        .get(h -> (double) h.accessor$fallDamageMax())
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.accessor$setFallHurtMax(v.intValue());
+                            h.accessor$fallDamageMax(v.intValue());
                             return true;
                         });
     }

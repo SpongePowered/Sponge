@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.tileentity.EndGatewayTileEntityAccessor;
+import org.spongepowered.common.accessor.world.level.block.entity.TheEndGatewayBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.VecHelper;
@@ -38,33 +38,33 @@ public final class EndGatewayData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(EndGatewayTileEntityAccessor.class)
+                .asMutable(TheEndGatewayBlockEntityAccessor.class)
                     .create(Keys.COOLDOWN)
-                        .get(x -> new SpongeTicks(x.accessor$getTeleportCooldown()))
+                        .get(x -> new SpongeTicks(x.accessor$teleportCooldown()))
                         .setAnd((h, v) -> {
                             final int ticks = (int) v.getTicks();
                             if (ticks < 0) {
                                 return false;
                             }
-                            h.accessor$setTeleportCooldown(ticks);
+                            h.accessor$teleportCooldown(ticks);
                             return true;
                         })
                     .create(Keys.DO_EXACT_TELEPORT)
-                        .get(EndGatewayTileEntityAccessor::accessor$getExactTeleport)
-                        .set(EndGatewayTileEntityAccessor::accessor$setExactTeleport)
+                        .get(TheEndGatewayBlockEntityAccessor::accessor$exactTeleport)
+                        .set(TheEndGatewayBlockEntityAccessor::accessor$exactTeleport)
                     .create(Keys.END_GATEWAY_AGE)
-                        .get(x -> new SpongeTicks(x.accessor$getAge()))
+                        .get(x -> new SpongeTicks(x.accessor$age()))
                         .setAnd((h, v) -> {
                             final long ticks = v.getTicks();
                             if (ticks < 0) {
                                 return false;
                             }
-                            h.accessor$setAge(ticks);
+                            h.accessor$age(ticks);
                             return true;
                         })
                     .create(Keys.TARGET_POSITION)
-                        .get(h -> VecHelper.toVector3i(h.accessor$getExitPortal()))
-                        .set((h, v) -> h.accessor$setExitPortal(VecHelper.toBlockPos(v)));
+                        .get(h -> VecHelper.toVector3i(h.accessor$exitPortal()))
+                        .set((h, v) -> h.accessor$exitPortal(VecHelper.toBlockPos(v)));
     }
     // @formatter:on
 }

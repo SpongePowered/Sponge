@@ -85,11 +85,11 @@ public class CorePlugin implements IMixinConfigPlugin {
 
     @Override
     public void preApply(final String targetClassName, final ClassNode targetClass, final String mixinClassName, final IMixinInfo mixinInfo) {
-        final Consumer<ClassNode> classNodeConsumer = INCOMPATIBILITY_DETECTION_ERRORS.get(mixinClassName);
+        final Consumer<ClassNode> classNodeConsumer = CorePlugin.INCOMPATIBILITY_DETECTION_ERRORS.get(mixinClassName);
         if (classNodeConsumer != null) {
             classNodeConsumer.accept(targetClass);
         }
-        final BiConsumer<ClassNode, IMixinInfo> superTransformer = SUPERCLASS_TRANSFORMATIONS.get(targetClassName);
+        final BiConsumer<ClassNode, IMixinInfo> superTransformer = CorePlugin.SUPERCLASS_TRANSFORMATIONS.get(targetClassName);
         if (superTransformer != null) {
             superTransformer.accept(targetClass, mixinInfo);
         }

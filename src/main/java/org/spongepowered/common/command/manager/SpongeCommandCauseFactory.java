@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.command.manager;
 
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
@@ -45,68 +45,63 @@ import org.spongepowered.api.util.Nameable;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
 
 public final class SpongeCommandCauseFactory implements CommandCause.Factory {
-
-    public static final SpongeCommandCauseFactory INSTANCE = new SpongeCommandCauseFactory();
-
-    private SpongeCommandCauseFactory() { }
 
     @Override
     @NonNull
     public CommandCause create() {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final Cause cause = frame.getCurrentCause();
-            final ICommandSource iCommandSource =
-                    cause.first(ICommandSource.class).orElseGet(() -> SpongeCommon.getGame().getSystemSubject());
-            final CommandSource commandSource;
+            final CommandSource iCommandSource =
+                    cause.first(CommandSource.class).orElseGet(() -> SpongeCommon.getGame().getSystemSubject());
+            final CommandSourceStack commandSource;
             if (iCommandSource instanceof CommandSourceProviderBridge) {
                 // We know about this one so we can create it using the factory method on the source.
                 commandSource = ((CommandSourceProviderBridge) iCommandSource).bridge$getCommandSource(cause);
-                ((CommandSourceProviderBridge) iCommandSource).bridge$addToCauseStack(frame);
             } else {
                 // try to create a command cause from the given ICommandSource, but as Mojang did not see fit to
                 // put any identifying characteristics on the object, we have to go it alone...
                 final EventContext context = cause.getContext();
                 final @Nullable Locatable locatable = iCommandSource instanceof Locatable ? (Locatable) iCommandSource : null;
-                final ITextComponent displayName;
+                final Component displayName;
                 if (iCommandSource instanceof Entity) {
                     displayName = ((Entity) iCommandSource).get(Keys.DISPLAY_NAME).map(SpongeAdventure::asVanilla)
-                            .orElseGet(() -> new StringTextComponent(
+                            .orElseGet(() -> new TextComponent(
                                     iCommandSource instanceof Nameable ? ((Nameable) iCommandSource).getName() :
                                             iCommandSource.getClass().getSimpleName()));
                 } else {
-                    displayName = new StringTextComponent(
+                    displayName = new TextComponent(
                             iCommandSource instanceof Nameable ? ((Nameable) iCommandSource).getName() :
                                     iCommandSource.getClass().getSimpleName());
                 }
                 final String name = displayName.getString();
-                commandSource = new CommandSource(
+                commandSource = new CommandSourceStack(
                         iCommandSource,
-                        context.get(EventContextKeys.LOCATION).map(x -> VecHelper.toVec3d(x.getPosition()))
-                                .orElseGet(() -> locatable == null ? Vec3d.ZERO : VecHelper.toVec3d(locatable.getLocation().getPosition())),
+                        context.get(EventContextKeys.LOCATION).map(x -> VecHelper.toVanillaVector3d(x.getPosition()))
+                                .orElseGet(() -> locatable == null ? Vec3.ZERO : VecHelper.toVanillaVector3d(locatable.getLocation().getPosition())),
                         context.get(EventContextKeys.ROTATION)
-                                .map(x -> new Vec2f((float) x.getX(), (float) x.getY()))
-                                .orElse(Vec2f.ZERO),
-                        context.get(EventContextKeys.LOCATION).map(x -> (ServerWorld) x.getWorld())
-                                .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD) :
-                                        (ServerWorld) locatable.getServerLocation().getWorld()),
+                                .map(x -> new Vec2((float) x.getX(), (float) x.getY()))
+                                .orElse(Vec2.ZERO),
+                        context.get(EventContextKeys.LOCATION).map(x -> (ServerLevel) x.getWorld())
+                                .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getLevel(Level.OVERWORLD) :
+                                        (ServerLevel) locatable.getServerLocation().getWorld()),
                         4,
                         name,
                         displayName,
                         SpongeCommon.getServer(),
-                        iCommandSource instanceof Entity ? (net.minecraft.entity.Entity) iCommandSource : null
+                        iCommandSource instanceof Entity ? (net.minecraft.world.entity.Entity) iCommandSource : null
                 );
             }
 
             // We don't want the command source to have altered the cause here (unless there is the special case of the
             // server), so we reset it back to what it was (in the ctor of CommandSource, it will add the current source
             // to the cause - that's for if the source is created elsewhere, not here)
-            ((CommandSourceBridge) commandSource).bridge$setCause(frame.getCurrentCause());
+            ((CommandSourceStackBridge) commandSource).bridge$setCause(frame.getCurrentCause());
             return (CommandCause) commandSource;
         }
     }

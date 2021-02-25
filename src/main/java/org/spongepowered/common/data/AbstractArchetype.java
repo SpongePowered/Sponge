@@ -28,8 +28,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundNBT;
-import org.spongepowered.api.CatalogType;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
@@ -37,24 +35,24 @@ import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.Archetype;
 import org.spongepowered.api.world.LocatableSnapshot;
-import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.RawDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationType;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 
 import java.util.Collection;
 import java.util.Objects;
+import net.minecraft.nbt.CompoundTag;
 
-public abstract class AbstractArchetype<C extends CatalogType, S extends LocatableSnapshot<S>, E> implements Archetype<S, E>,
+public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> implements Archetype<S, E>,
         SpongeMutableDataHolder {
 
-    protected final C type;
-    protected CompoundNBT data;
+    protected final T type;
+    protected CompoundTag data;
 
-    protected AbstractArchetype(final C type, final CompoundNBT data) {
+    protected AbstractArchetype(final T type, final CompoundTag data) {
         this.type = type;
         this.data = data;
     }
@@ -89,12 +87,12 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
     @Override
     public void setRawData(final DataView container) throws InvalidDataException {
         checkNotNull(container, "Raw data cannot be null!");
-        final CompoundNBT copy = NbtTranslator.getInstance().translate(container);
+        final CompoundTag copy = NBTTranslator.INSTANCE.translate(container);
         final boolean valid = this.getValidator().validate(copy);
         if (valid) {
             this.data = copy;
         } else {
-            throw new InvalidDataException("Invalid data for " + this.getValidationType().getKey());
+            throw new InvalidDataException("Invalid data for " + this.getValidationType());
         }
     }
 
@@ -119,7 +117,7 @@ public abstract class AbstractArchetype<C extends CatalogType, S extends Locatab
         return MoreObjects.toStringHelper(this).add("type", this.type).add("data", this.data).toString();
     }
 
-    public CompoundNBT getCompound() {
+    public CompoundTag getCompound() {
         return this.data;
     }
 }

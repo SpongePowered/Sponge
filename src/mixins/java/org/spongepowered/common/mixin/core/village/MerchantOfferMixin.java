@@ -24,23 +24,23 @@
  */
 package org.spongepowered.common.mixin.core.village;
 
-import net.minecraft.item.MerchantOffer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 import javax.annotation.Nullable;
+import net.minecraft.world.item.trading.MerchantOffer;
 
 @Mixin(MerchantOffer.class)
 public abstract class MerchantOfferMixin {
 
-    @Shadow public abstract net.minecraft.item.ItemStack shadow$getBuyingStackFirst();
-    @Shadow @Nullable public abstract net.minecraft.item.ItemStack shadow$getBuyingStackSecond();
-    @Shadow public abstract net.minecraft.item.ItemStack shadow$getSellingStack();
+    @Shadow public abstract net.minecraft.world.item.ItemStack shadow$getBaseCostA();
+    @Shadow @Nullable public abstract net.minecraft.world.item.ItemStack shadow$getCostB();
+    @Shadow public abstract net.minecraft.world.item.ItemStack shadow$getResult();
     @Shadow public abstract int shadow$getUses();
-    @Shadow public abstract int shadow$func_222214_i();
-    @Shadow public abstract int shadow$getGivenExp();
+    @Shadow public abstract int shadow$getMaxUses();
+    @Shadow public abstract int shadow$getXp();
 
     // This is a little questionable, since we're mixing into a Minecraft class.
     // However, Vanilla doesn't override equals(), so no one except plugins
@@ -54,11 +54,11 @@ public abstract class MerchantOfferMixin {
             return false;
         }
         MerchantOffer other = (MerchantOffer) o;
-        return ItemStackComparators.ALL.get().compare((ItemStack) (Object) this.shadow$getBuyingStackFirst(), (ItemStack) (Object) other.getBuyingStackFirst()) == 0
-            && ItemStackComparators.ALL.get().compare((ItemStack) (Object) this.shadow$getBuyingStackSecond(), (ItemStack) (Object) other.getBuyingStackSecond()) == 0
-            && ItemStackComparators.ALL.get().compare((ItemStack) (Object) this.shadow$getSellingStack(), (ItemStack) (Object) other.getSellingStack()) == 0
+        return ItemStackComparators.ALL.get().compare((ItemStack) (Object) this.shadow$getBaseCostA(), (ItemStack) (Object) other.getBaseCostA()) == 0
+            && ItemStackComparators.ALL.get().compare((ItemStack) (Object) this.shadow$getCostB(), (ItemStack) (Object) other.getCostB()) == 0
+            && ItemStackComparators.ALL.get().compare((ItemStack) (Object) this.shadow$getResult(), (ItemStack) (Object) other.getResult()) == 0
             && this.shadow$getUses() == other.getUses()
-            && this.shadow$func_222214_i() == other.func_222214_i()
-            && this.shadow$getGivenExp() == other.getGivenExp();
+            && this.shadow$getMaxUses() == other.getMaxUses()
+            && this.shadow$getXp() == other.getXp();
     }
 }

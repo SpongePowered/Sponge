@@ -24,10 +24,13 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.Entity;
+import net.minecraft.world.entity.Entity;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.data.VanishableBridge;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
 
 public final class VanishableData {
 
@@ -44,36 +47,43 @@ public final class VanishableData {
                     .create(Keys.VANISH)
                         .get(VanishableBridge::bridge$isVanished)
                         .setAnd((h, v) -> {
-                            if (h instanceof Entity && ((Entity) h).world.isRemote) {
+                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
                                 return false;
                             }
                             h.bridge$setVanished(v);
                             return true;
                         })
                     .create(Keys.VANISH_IGNORES_COLLISION)
-                        .get(VanishableBridge::bridge$isUncollideable)
+                        .get(VanishableBridge::bridge$isVanishIgnoresCollision)
                         .setAnd((h, v) -> {
-                            if (h instanceof Entity && ((Entity) h).world.isRemote) {
+                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
                                 return false;
                             }
                             if (!h.bridge$isVanished()) {
                                 return false;
                             }
-                            h.bridge$setUncollideable(v);
+                            h.bridge$setVanishIgnoresCollision(v);
                             return true;
                         })
                     .create(Keys.VANISH_PREVENTS_TARGETING)
-                        .get(VanishableBridge::bridge$isUntargetable)
+                        .get(VanishableBridge::bridge$isVanishPreventsTargeting)
                         .setAnd((h, v) -> {
-                            if (h instanceof Entity && ((Entity) h).world.isRemote) {
+                            if (h instanceof Entity && ((Entity) h).level.isClientSide) {
                                 return false;
                             }
                             if (!h.bridge$isVanished()) {
                                 return false;
                             }
-                            h.bridge$setUntargetable(v);
+                            h.bridge$setVanishPreventsTargeting(v);
                             return true;
                         });
+        final ResourceKey dataStoreKey = ResourceKey.sponge("invisibility");
+        registrator.spongeDataStore(dataStoreKey, VanishableBridge.class,
+                Keys.IS_INVISIBLE, Keys.VANISH, Keys.VANISH_IGNORES_COLLISION, Keys.VANISH_PREVENTS_TARGETING);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.IS_INVISIBLE, dataStoreKey, Keys.IS_INVISIBLE);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.IS_VANISHED, dataStoreKey, Keys.VANISH);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, dataStoreKey, Keys.VANISH_IGNORES_COLLISION);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.VANISH_UNTARGETABLE, dataStoreKey, Keys.VANISH_PREVENTS_TARGETING);
     }
     // @formatter:on
 }

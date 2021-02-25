@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.util;
 
-
 import java.util.Objects;
 import java.util.function.Supplier;
 
-public class MemoizedSupplier<T> implements Supplier<T> {
+public final class MemoizedSupplier<T> implements Supplier<T> {
 
     public static <V> Supplier<V> memoize(final Supplier<V> supplier) {
         return new MemoizedSupplier<>(supplier);

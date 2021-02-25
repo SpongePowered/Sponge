@@ -32,22 +32,22 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
+import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.data.type.MatterStates;
+import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.event.entity.HarvestEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
@@ -183,7 +183,7 @@ public final class ChangeBlockTest implements LoadableModule {
 
     public class ChangeBlockListener {
         @Listener
-        public void onChangeBlock(final ChangeBlockEvent.Post post) {
+        public void onChangeBlock(final ChangeBlockEvent.All post) {
             final Logger pluginLogger = ChangeBlockTest.this.plugin.getLogger();
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/*************");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* ChangeBlockEvent");
@@ -193,13 +193,25 @@ public final class ChangeBlockTest implements LoadableModule {
                 pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/ - " + o);
             }
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
-            if (ChangeBlockTest.this.cancelAll && post.getCause().containsType(BlockSnapshot.class)) {
+            if (post.getCause().root() instanceof LocatableBlock) {
+                // Leaves are the bane of all existence... they just spam so many events....
+                final BlockType type = ((LocatableBlock) post.getCause().root()).getBlockState().getType();
+                if (type == BlockTypes.ACACIA_LEAVES.get()
+                   || type == BlockTypes.BIRCH_LEAVES.get()
+                   || type == BlockTypes.OAK_LEAVES.get()
+                   || type == BlockTypes.DARK_OAK_LEAVES.get()
+                   || type == BlockTypes.JUNGLE_LEAVES.get()
+                   || type == BlockTypes.SPRUCE_LEAVES.get()) {
+                    return;
+                }
+            }
+            if (ChangeBlockTest.this.cancelAll) {
                 post.setCancelled(true);
             }
             if (ChangeBlockTest.this.waterProofRedstone) {
-                for (final Transaction<@NonNull BlockSnapshot> transaction : post.getTransactions()) {
+                for (final BlockTransaction transaction : post.getTransactions()) {
                     final boolean wasRedstone = transaction.getOriginal().getState().getType() == BlockTypes.REDSTONE_WIRE.get();
-                    final boolean becomesLiquid = transaction.getFinal().getState().get(Keys.MATTER_STATE).get() == MatterStates.LIQUID.get();
+                    final boolean becomesLiquid = transaction.getFinal().getState().get(Keys.MATTER_TYPE).get() == MatterTypes.LIQUID.get();
                     if (wasRedstone && becomesLiquid) {
                         post.setCancelled(true);
                         return;

@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.VexEntity;
+import net.minecraft.world.entity.monster.Vex;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.common.accessor.entity.monster.VexEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.VexAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class VexData {
@@ -38,9 +38,9 @@ public final class VexData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(VexEntity.class)
+                .asMutable(Vex.class)
                     .create(Keys.LIFE_TICKS)
-                        .get(h -> Ticks.of(((VexEntityAccessor) h).accessor$getLimitedLifeTicks()))
+                        .get(h -> Ticks.of(((VexAccessor) h).accessor$limitedLifeTicks()))
                         .set((h, v) -> h.setLimitedLife((int) v.getTicks()));
     }
     // @formatter:on

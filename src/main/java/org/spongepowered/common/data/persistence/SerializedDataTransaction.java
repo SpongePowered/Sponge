@@ -28,7 +28,7 @@ import com.google.common.collect.ImmutableList;
 import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.persistence.DataView;
 
-public class SerializedDataTransaction {
+public final class SerializedDataTransaction {
 
     public static Builder builder() {
         return new Builder();

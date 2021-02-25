@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.WeightedPressurePlateBlock;
+import net.minecraft.world.level.block.WeightedPressurePlateBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class WeightedPressurePlateData {
 
@@ -40,9 +40,9 @@ public final class WeightedPressurePlateData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.POWER)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.POWER, WeightedPressurePlateBlock.POWER))
-                        .get(h -> h.get(WeightedPressurePlateBlock.POWER))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, WeightedPressurePlateBlock.POWER))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.POWER, WeightedPressurePlateBlock.POWER))
+                        .get(h -> h.getValue(WeightedPressurePlateBlock.POWER))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, WeightedPressurePlateBlock.POWER))
                         .supports(h -> h.getBlock() instanceof WeightedPressurePlateBlock);
     }
     // @formatter:on

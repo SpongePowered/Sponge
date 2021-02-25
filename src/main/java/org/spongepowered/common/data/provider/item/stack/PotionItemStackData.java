@@ -25,23 +25,23 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.potion.EffectInstance;
-import net.minecraft.potion.Potion;
-import net.minecraft.potion.PotionUtils;
-import net.minecraft.potion.Potions;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.item.potion.PotionType;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.util.NbtCollectors;
+import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.effect.MobEffectInstance;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.alchemy.Potion;
+import net.minecraft.world.item.alchemy.PotionUtils;
+import net.minecraft.world.item.alchemy.Potions;
 
 @SuppressWarnings("unchecked")
 public final class PotionItemStackData {
@@ -56,39 +56,39 @@ public final class PotionItemStackData {
                     .create(Keys.COLOR)
                         .get(h -> Color.ofRgb(PotionUtils.getColor(h)))
                         .set((h, v) -> {
-                            final CompoundNBT tag = h.getOrCreateTag();
+                            final CompoundTag tag = h.getOrCreateTag();
                             tag.putInt(Constants.Item.CUSTOM_POTION_COLOR, v.getRgb());
                         })
-                        .delete(h -> h.removeChildTag(Constants.Item.CUSTOM_POTION_COLOR))
+                        .delete(h -> h.removeTagKey(Constants.Item.CUSTOM_POTION_COLOR))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION)
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> {
-                            final List<EffectInstance> effects = PotionUtils.getEffectsFromStack(h);
+                            final List<MobEffectInstance> effects = PotionUtils.getMobEffects(h);
                             return effects.isEmpty() ? null : ImmutableList.copyOf((List<PotionEffect>) (Object) effects);
                         })
                         .set((h, v) -> {
-                            final CompoundNBT tag = h.getOrCreateTag();
-                            final ListNBT list = v.stream()
+                            final CompoundTag tag = h.getOrCreateTag();
+                            final ListTag list = v.stream()
                                     .map(effect -> {
-                                        final CompoundNBT potionTag = new CompoundNBT();
-                                        ((EffectInstance) effect).write(potionTag);
+                                        final CompoundTag potionTag = new CompoundTag();
+                                        ((MobEffectInstance) effect).save(potionTag);
                                         return potionTag;
                                     })
-                                    .collect(NbtCollectors.toTagList());
+                                    .collect(NBTCollectors.toTagList());
                             tag.put(Constants.Item.CUSTOM_POTION_EFFECTS, list);
                         })
-                        .delete(h -> h.removeChildTag(Constants.Item.CUSTOM_POTION_EFFECTS))
+                        .delete(h -> h.removeTagKey(Constants.Item.CUSTOM_POTION_EFFECTS))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION ||
                                 h.getItem() == Items.LINGERING_POTION || h.getItem() == Items.TIPPED_ARROW)
                     .create(Keys.POTION_TYPE)
-                        .get(h -> (PotionType) PotionUtils.getPotionFromItem(h))
+                        .get(h -> (PotionType) PotionUtils.getPotion(h))
                         .set((h, v) -> {
                             h.getOrCreateTag();
-                            PotionUtils.addPotionToItemStack(h, (Potion) v);
+                            PotionUtils.setPotion(h, (Potion) v);
                         })
                         .delete(h -> {
                             if (h.hasTag()) {
-                                PotionUtils.addPotionToItemStack(h, Potions.EMPTY);
+                                PotionUtils.setPotion(h, Potions.EMPTY);
                             }
                         })
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION ||

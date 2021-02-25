@@ -24,33 +24,6 @@
  */
 package org.spongepowered.common.inventory.custom;
 
-import net.minecraft.entity.merchant.IMerchant;
-import net.minecraft.entity.passive.horse.AbstractHorseEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.PlayerInventory;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.BeaconContainer;
-import net.minecraft.inventory.container.BlastFurnaceContainer;
-import net.minecraft.inventory.container.BrewingStandContainer;
-import net.minecraft.inventory.container.CartographyContainer;
-import net.minecraft.inventory.container.ChestContainer;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.inventory.container.DispenserContainer;
-import net.minecraft.inventory.container.EnchantmentContainer;
-import net.minecraft.inventory.container.FurnaceContainer;
-import net.minecraft.inventory.container.GrindstoneContainer;
-import net.minecraft.inventory.container.HopperContainer;
-import net.minecraft.inventory.container.HorseInventoryContainer;
-import net.minecraft.inventory.container.LecternContainer;
-import net.minecraft.inventory.container.LoomContainer;
-import net.minecraft.inventory.container.MerchantContainer;
-import net.minecraft.inventory.container.RepairContainer;
-import net.minecraft.inventory.container.ShulkerBoxContainer;
-import net.minecraft.inventory.container.SmokerContainer;
-import net.minecraft.inventory.container.StonecutterContainer;
-import net.minecraft.inventory.container.WorkbenchContainer;
-import net.minecraft.util.IWorldPosCallable;
-import net.minecraft.util.IntArray;
 import org.apache.commons.lang3.Validate;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
@@ -70,6 +43,33 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.math.vector.Vector2i;
 
+import javax.annotation.Nullable;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.inventory.BeaconMenu;
+import net.minecraft.world.inventory.BlastFurnaceMenu;
+import net.minecraft.world.inventory.BrewingStandMenu;
+import net.minecraft.world.inventory.CartographyTableMenu;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.DispenserMenu;
+import net.minecraft.world.inventory.EnchantmentMenu;
+import net.minecraft.world.inventory.FurnaceMenu;
+import net.minecraft.world.inventory.GrindstoneMenu;
+import net.minecraft.world.inventory.HopperMenu;
+import net.minecraft.world.inventory.HorseInventoryMenu;
+import net.minecraft.world.inventory.LecternMenu;
+import net.minecraft.world.inventory.LoomMenu;
+import net.minecraft.world.inventory.MerchantMenu;
+import net.minecraft.world.inventory.ShulkerBoxMenu;
+import net.minecraft.world.inventory.SimpleContainerData;
+import net.minecraft.world.inventory.SmokerMenu;
+import net.minecraft.world.inventory.StonecutterMenu;
+import net.minecraft.world.item.trading.Merchant;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -80,8 +80,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder,
                                                        ViewableInventory.Builder.DummyStep,
@@ -102,7 +100,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @Override
     public BuildingStep type(ContainerType type) {
-        Validate.isTrue(containerTypeInfo.containsKey(type), "Container Type cannot be used for this: " + type);
+        Validate.isTrue(SpongeViewableInventoryBuilder.containerTypeInfo.containsKey(type), "Container Type cannot be used for this: " + type);
         this.type = type;
         this.slotDefinitions = new HashMap<>();
         this.info = SpongeViewableInventoryBuilder.containerTypeInfo.get(type);
@@ -129,7 +127,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     }
 
     private Slot newDummySlot() {
-        IInventory dummyInv = new net.minecraft.inventory.Inventory(1);
+        Container dummyInv = new net.minecraft.world.SimpleContainer(1);
         return ((Inventory) dummyInv).getSlot(0).get();
     }
 
@@ -252,13 +250,14 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         }
 
         this.finalProvider = new LensRegistrar.BasicSlotLensProvider(this.info.size);
-        this.finalLens = containerTypeInfo.get(this.type).lensCreator.createLens(this.finalProvider);
+        this.finalLens = SpongeViewableInventoryBuilder.containerTypeInfo.get(this.type).lensCreator.createLens(this.finalProvider);
         return this;
     }
 
     @Override
     public ViewableInventory build() {
-        ViewableCustomInventory inventory = new ViewableCustomInventory(this.type, containerTypeInfo.get(this.type), this.info.size, this.finalLens, this.finalProvider, this.finalInventories, this.identity, this.carrier);
+        ViewableCustomInventory inventory = new ViewableCustomInventory(this.type,
+            SpongeViewableInventoryBuilder.containerTypeInfo.get(this.type), this.info.size, this.finalLens, this.finalProvider, this.finalInventories, this.identity, this.carrier);
         if (this.slotDefinitions.isEmpty()) {
             inventory.vanilla();
         }
@@ -298,77 +297,77 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     static
     {
-        containerTypeInfo.put(ContainerTypes.GENERIC_3x3.get(),
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_3X3.get(),
                 ContainerTypeInfo.ofGrid(3, 3,
-                        (id, i, p, vi) -> new DispenserContainer(id, i, vi)));
-        containerTypeInfo.put(ContainerTypes.GENERIC_9x1.get(),
+                        (id, i, p, vi) -> new DispenserMenu(id, i, vi)));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X1.get(),
                 ContainerTypeInfo.ofGrid(9, 1,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X1, id, i, vi, 1)));
-        containerTypeInfo.put(ContainerTypes.GENERIC_9x2.get(),
+                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x1, id, i, vi, 1)));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X2.get(),
                 ContainerTypeInfo.ofGrid(9, 2,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X2, id, i, vi, 2)));
-        containerTypeInfo.put(ContainerTypes.GENERIC_9x3.get(),
+                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x2, id, i, vi, 2)));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X3.get(),
                 ContainerTypeInfo.ofGrid(9, 3,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X3, id, i, vi, 3)));
-        containerTypeInfo.put(ContainerTypes.GENERIC_9x4.get(),
+                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x3, id, i, vi, 3)));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X4.get(),
                 ContainerTypeInfo.ofGrid(9, 4,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X4, id, i, vi, 4)));
-        containerTypeInfo.put(ContainerTypes.GENERIC_9x5.get(),
+                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x4, id, i, vi, 4)));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X5.get(),
                 ContainerTypeInfo.ofGrid(9, 5,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X5, id, i, vi, 5)));
-        containerTypeInfo.put(ContainerTypes.GENERIC_9x6.get(),
+                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x5, id, i, vi, 5)));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GENERIC_9X6.get(),
                 ContainerTypeInfo.ofGrid(9, 6,
-                        (id, i, p, vi) -> new ChestContainer(net.minecraft.inventory.container.ContainerType.GENERIC_9X6, id, i, vi, 6)));
-        containerTypeInfo.put(ContainerTypes.HOPPER.get(),
+                        (id, i, p, vi) -> new ChestMenu(net.minecraft.world.inventory.MenuType.GENERIC_9x6, id, i, vi, 6)));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.HOPPER.get(),
                 ContainerTypeInfo.ofGrid(5, 1,
-                        (id, i, p, vi) -> new HopperContainer(id, i, vi)));
-        containerTypeInfo.put(ContainerTypes.SHULKER_BOX.get(), // Container prevents ShulkerBoxes in Shulkerboxes
+                        (id, i, p, vi) -> new HopperMenu(id, i, vi)));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.SHULKER_BOX.get(), // Container prevents ShulkerBoxes in Shulkerboxes
                 ContainerTypeInfo.ofGrid(9, 3,
-                        (id, i, p, vi) -> new ShulkerBoxContainer(id, i, vi)));
+                        (id, i, p, vi) -> new ShulkerBoxMenu(id, i, vi)));
 
         // With IntArray data - data is synced with Container - but not ticked as the TileEntity do that normally
-        containerTypeInfo.put(ContainerTypes.BLAST_FURNACE.get(),
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.BLAST_FURNACE.get(),
                 ContainerTypeInfo.of(FurnaceInventoryLens::new, 3,4,
-                        (id, i, p, vi) -> new BlastFurnaceContainer(id, i, vi, vi.getData())));
-        containerTypeInfo.put(ContainerTypes.BREWING_STAND.get(),
+                        (id, i, p, vi) -> new BlastFurnaceMenu(id, i, vi, vi.getData())));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.BREWING_STAND.get(),
                 ContainerTypeInfo.of(BrewingStandInventoryLens::new, 5,2,
-                        (id, i, p, vi) -> new BrewingStandContainer(id, i, vi, vi.getData())));
-        containerTypeInfo.put(ContainerTypes.FURNACE.get(),
+                        (id, i, p, vi) -> new BrewingStandMenu(id, i, vi, vi.getData())));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.FURNACE.get(),
                 ContainerTypeInfo.of(FurnaceInventoryLens::new, 3,4,
-                        (id, i, p, vi) -> new FurnaceContainer(id, i, vi, vi.getData())));
-        containerTypeInfo.put(ContainerTypes.LECTERN.get(),
+                        (id, i, p, vi) -> new FurnaceMenu(id, i, vi, vi.getData())));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.LECTERN.get(),
                 ContainerTypeInfo.of(1, 1,
-                        (id, i, p, vi) -> new LecternContainer(id, vi, vi.getData())));
-        containerTypeInfo.put(ContainerTypes.SMOKER.get(),
+                        (id, i, p, vi) -> new LecternMenu(id, vi, vi.getData())));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.SMOKER.get(),
                 ContainerTypeInfo.of(3, 4,
-                        (id, i, p, vi) -> new SmokerContainer(id, i, vi, vi.getData())));
+                        (id, i, p, vi) -> new SmokerMenu(id, i, vi, vi.getData())));
 
         // Containers with internal Inventory
         // TODO how to handle internal Container inventories?
-        containerTypeInfo.put(ContainerTypes.ANVIL.get(), // 3 internal slots
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.ANVIL.get(), // 3 internal slots
                 ContainerTypeInfo.of(0, 0,
-                        (id, i, p, vi) -> new RepairContainer(id, i, toPos(p))));
-        containerTypeInfo.put(ContainerTypes.BEACON.get(), // 1 internal slot
+                        (id, i, p, vi) -> new AnvilMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.BEACON.get(), // 1 internal slot
                 ContainerTypeInfo.of(0, 3,
-                        (id, i, p, vi) -> new BeaconContainer(id, i, vi.getData(), toPos(p))));
-        containerTypeInfo.put(ContainerTypes.CARTOGRAPHY_TABLE.get(),  // 2 internal slots
+                        (id, i, p, vi) -> new BeaconMenu(id, i, vi.getData(), SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.CARTOGRAPHY_TABLE.get(),  // 2 internal slots
                 ContainerTypeInfo.of(0, 0,
-                        (id, i, p, vi) -> new CartographyContainer(id, i, toPos(p))));
-        containerTypeInfo.put(ContainerTypes.CRAFTING.get(), // 3x3+1 10 internal slots
+                        (id, i, p, vi) -> new CartographyTableMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.CRAFTING.get(), // 3x3+1 10 internal slots
                 ContainerTypeInfo.of(0, 0,
-                        (id, i, p, vi) -> new WorkbenchContainer(id, i, toPos(p))));
-        containerTypeInfo.put(ContainerTypes.ENCHANTMENT.get(), // 3 internal slot
+                        (id, i, p, vi) -> new CraftingMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.ENCHANTMENT.get(), // 3 internal slot
                 ContainerTypeInfo.of(0, 0,
-                        (id, i, p, vi) -> new EnchantmentContainer(id, i, toPos(p))));
-        containerTypeInfo.put(ContainerTypes.GRINDSTONE.get(), // 2 internal slot
+                        (id, i, p, vi) -> new EnchantmentMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GRINDSTONE.get(), // 2 internal slot
                 ContainerTypeInfo.of(0, 0,
-                        (id, i, p, vi) -> new GrindstoneContainer(id, i, toPos(p))));
-        containerTypeInfo.put(ContainerTypes.LOOM.get(), // 3 internal slot
+                        (id, i, p, vi) -> new GrindstoneMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.LOOM.get(), // 3 internal slot
                 ContainerTypeInfo.of(0, 0,
-                        (id, i, p, vi) -> new LoomContainer(id, i, toPos(p))));
-        containerTypeInfo.put(ContainerTypes.STONECUTTER.get(), // 1 internal slot
+                        (id, i, p, vi) -> new LoomMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
+        SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.STONECUTTER.get(), // 1 internal slot
                 ContainerTypeInfo.of(0, 0,
-                        (id, i, p, vi) -> new StonecutterContainer(id, i, toPos(p))));
+                        (id, i, p, vi) -> new StonecutterMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
 
         // Containers that need additional Info to construct
 
@@ -376,44 +375,44 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         // horse is used for distance to player
         // checking HorseArmor Item in Slot
         // chested State and capacity (hasChest/getInventoryColumns) to add more Slots
-        AbstractHorseEntity horse = null;
+        AbstractHorse horse = null;
         ContainerTypeInfo.of(0, 0,
-                (id, i, p, vi) -> new HorseInventoryContainer(id, i, vi, horse));
+                (id, i, p, vi) -> new HorseInventoryMenu(id, i, vi, horse));
 
         // TODO ContainerTypes.MERCHANT
         // IMerchant is used to
         // create the internal MerchantInventory (3 slots)
         // create the MerchantResultSlot
         // used to check if player is customer
-        // trigger sound (casted to Entity when !getWorld().isRemote) !!!
+        // trigger sound (casted to Entity when !getWorld().isClientSide) !!!
         // reset customer on close
-        // when closing and !getWorld().isRemote drop items back into world !!!
+        // when closing and !getWorld().isClientSide drop items back into world !!!
         // getOffers
-        IMerchant merchant = null;
+        Merchant merchant = null;
         ContainerTypeInfo.of(0, 0,
-                (id, i, p, vi) -> new MerchantContainer(id, i, merchant));
+                (id, i, p, vi) -> new MerchantMenu(id, i, merchant));
     }
     
-    private static IWorldPosCallable toPos(PlayerEntity p) {
-        return IWorldPosCallable.of(p.world, p.getPosition());
+    private static ContainerLevelAccess toPos(Player p) {
+        return ContainerLevelAccess.create(p.level, p.blockPosition());
     }
 
     @FunctionalInterface
     public interface CustomInventoryContainerProvider {
         @Nullable
-        Container createMenu(int id, PlayerInventory inv, PlayerEntity player, ViewableCustomInventory customInv);
+        AbstractContainerMenu createMenu(int id, net.minecraft.world.entity.player.Inventory inv, Player player, ViewableCustomInventory customInv);
     }
 
     public static class ContainerTypeInfo {
         public final LensCreator lensCreator;
-        public final Supplier<IntArray> dataProvider;
+        public final Supplier<SimpleContainerData> dataProvider;
         public final CustomInventoryContainerProvider containerProvider;
 
         public final int width;
         public final int height;
         public final int size;
 
-        public ContainerTypeInfo(LensCreator lensCreator, Supplier<IntArray> dataProvider,
+        public ContainerTypeInfo(LensCreator lensCreator, Supplier<SimpleContainerData> dataProvider,
                 CustomInventoryContainerProvider containerProvider, int width, int height, int size) {
             this.lensCreator = lensCreator;
             this.dataProvider = dataProvider;
@@ -424,11 +423,11 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         }
 
         public static ContainerTypeInfo of(LensCreator lensCreator, int size, int dataSize, CustomInventoryContainerProvider provider) {
-            return new ContainerTypeInfo(lensCreator, () -> new IntArray(dataSize), provider, 0, 0, size);
+            return new ContainerTypeInfo(lensCreator, () -> new SimpleContainerData(dataSize), provider, 0, 0, size);
         }
 
         public static ContainerTypeInfo of(int size, int dataSize, CustomInventoryContainerProvider provider) {
-            return new ContainerTypeInfo(sp -> new DefaultIndexedLens(0, size, sp), () -> new IntArray(dataSize), provider, 0, 0, size);
+            return new ContainerTypeInfo(sp -> new DefaultIndexedLens(0, size, sp), () -> new SimpleContainerData(dataSize), provider, 0, 0, size);
         }
 
         public static ContainerTypeInfo ofGrid(int width, int height, CustomInventoryContainerProvider provider) {

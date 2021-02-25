@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.hooks;
 
-import org.spongepowered.common.SpongeImplHooks;
-
 import java.util.Objects;
 
 /**
@@ -48,16 +46,17 @@ import java.util.Objects;
  */
 public final class PlatformHooks {
 
-    private static final PlatformHooks instance = new PlatformHooks();
+    public static final PlatformHooks INSTANCE = new PlatformHooks();
 
     private DimensionHooks dimensionHooks = new DimensionHooks() {};
     private EventHooks eventHooks = new EventHooks() {};
     private GeneralHooks generalHooks = new GeneralHooks() {};
     private PacketHooks packetHooks = new PacketHooks() {};
-
-    public static PlatformHooks getInstance() {
-        return PlatformHooks.instance;
-    }
+    private WorldGenerationHooks worldGenerationHooks = new WorldGenerationHooks() {};
+    private InventoryHooks inventoryHooks = new InventoryHooks() {};
+    private WorldHooks worldHooks = new WorldHooks() {};
+    private ItemHooks itemHooks = new ItemHooks() {};
+    private EntityHooks entityHooks = new EntityHooks() {};
 
     public DimensionHooks getDimensionHooks() {
         return this.dimensionHooks;
@@ -89,5 +88,45 @@ public final class PlatformHooks {
 
     public void setGeneralHooks(final GeneralHooks generalHooks) {
         this.generalHooks = Objects.requireNonNull(generalHooks);
+    }
+
+    public WorldGenerationHooks getWorldGenerationHooks() {
+        return this.worldGenerationHooks;
+    }
+
+    public void setWorldGenerationHooks(final WorldGenerationHooks worldGenerationHooks) {
+        this.worldGenerationHooks = Objects.requireNonNull(worldGenerationHooks);
+    }
+
+    public InventoryHooks getInventoryHooks() {
+        return this.inventoryHooks;
+    }
+
+    public void setInventoryHooks(final InventoryHooks inventoryHooks) {
+        this.inventoryHooks = inventoryHooks;
+    }
+
+    public WorldHooks getWorldHooks() {
+        return this.worldHooks;
+    }
+
+    public void setWorldHooks(final WorldHooks worldHooks) {
+        this.worldHooks = worldHooks;
+    }
+
+    public ItemHooks getItemHooks() {
+        return this.itemHooks;
+    }
+
+    public void setItemHooks(final ItemHooks itemHooks) {
+        this.itemHooks = itemHooks;
+    }
+
+    public EntityHooks getEntityHooks() {
+        return this.entityHooks;
+    }
+
+    public void setEntityHooks(final EntityHooks entityHooks) {
+        this.entityHooks = entityHooks;
     }
 }

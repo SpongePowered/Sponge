@@ -24,14 +24,27 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.item.ItemEntityBridge;
+import org.spongepowered.api.data.persistence.DataContentUpdater;
+import org.spongepowered.api.data.value.Value;
+import org.spongepowered.api.util.TypeTokens;
+import org.spongepowered.common.bridge.world.entity.item.ItemEntityBridge;
+import org.spongepowered.common.data.ByteToBooleanContentUpdater;
+import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
 public final class ItemData {
+
+    public static final Key<Value<Integer>> PREVIOUS_PICKUP_DELAY = Key.builder().key(ResourceKey.sponge("power")).type(TypeTokens.INTEGER_VALUE_TOKEN).build();
+    public static final Key<Value<Integer>> PREVIOUS_DESPAWN_DELAY = Key.builder().key(ResourceKey.sponge("power")).type(TypeTokens.INTEGER_VALUE_TOKEN).build();
+
+    private static final DataContentUpdater INFINITE_DELAYS_UPDATER_BYTE_TO_BOOL_FIX = new ByteToBooleanContentUpdater(1, 2, Keys.INFINITE_PICKUP_DELAY, Keys.INFINITE_DESPAWN_DELAY);
 
     private ItemData() {
     }
@@ -62,7 +75,23 @@ public final class ItemData {
                         .set((h, v) -> h.bridge$setPickupDelay(h.bridge$getPickupDelay(), v))
                     .create(Keys.PICKUP_DELAY)
                         .get(h -> new SpongeTicks(h.bridge$getPickupDelay()))
-                        .set((h, v) -> h.bridge$setPickupDelay((int) v.getTicks(), false));
+                        .set((h, v) -> h.bridge$setPickupDelay((int) v.getTicks(), false))
+                    // Only for internal use
+                    .create(ItemData.PREVIOUS_PICKUP_DELAY)
+                        .get(v -> -1)
+                        .set(ItemEntityBridge::bridge$setPrevPickupDelay)
+                    .create(ItemData.PREVIOUS_DESPAWN_DELAY)
+                        .get(v -> -1)
+                        .set(ItemEntityBridge::bridge$setPrevDespawnDelay)
+        ;
+        final ResourceKey item = ResourceKey.sponge("item");
+        registrator.spongeDataStore(item, 2, new DataContentUpdater[]{ItemData.INFINITE_DELAYS_UPDATER_BYTE_TO_BOOL_FIX}, ItemEntityBridge.class,
+                Keys.INFINITE_PICKUP_DELAY, ItemData.PREVIOUS_PICKUP_DELAY,
+                Keys.INFINITE_DESPAWN_DELAY, ItemData.PREVIOUS_DESPAWN_DELAY);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Item.INFINITE_PICKUP_DELAY, item, Keys.INFINITE_PICKUP_DELAY);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Item.PREVIOUS_PICKUP_DELAY, item, ItemData.PREVIOUS_PICKUP_DELAY);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY, item, Keys.INFINITE_DESPAWN_DELAY);
+        SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, item, ItemData.PREVIOUS_DESPAWN_DELAY);
     }
     // @formatter:on
 }

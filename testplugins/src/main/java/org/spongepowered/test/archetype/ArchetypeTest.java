@@ -81,7 +81,7 @@ public final class ArchetypeTest implements LoadableModule {
         @Listener
         public void onRightClickEntity(InteractEntityEvent.Secondary event) {
             final Entity entity = event.getEntity();
-            testEntityArchetype(entity);
+            ArchetypeTest.this.testEntityArchetype(entity);
         }
     }
 

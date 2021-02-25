@@ -193,6 +193,6 @@ public final class ChannelTest {
     }
 
     private void logReceived(final Channel channel, final Object packet, final EngineConnection connection) {
-        this.plugin.getLogger().info("Received {} through {} on the {} side.", packet, channel.getKey(), getName(connection.getSide()));
+        this.plugin.getLogger().info("Received {} through {} on the {} side.", packet, channel.getKey(), ChannelTest.getName(connection.getSide()));
     }
 }

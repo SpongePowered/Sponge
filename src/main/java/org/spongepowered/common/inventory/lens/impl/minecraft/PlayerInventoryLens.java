@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
-import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -45,6 +44,7 @@ import org.spongepowered.common.inventory.property.KeyValuePair;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class PlayerInventoryLens extends AbstractLens {
 
@@ -90,12 +90,12 @@ public class PlayerInventoryLens extends AbstractLens {
             equipmentLenses.put(EquipmentTypes.CHEST.get(), slots.getSlotLens(base + 1));
             equipmentLenses.put(EquipmentTypes.LEGS.get(), slots.getSlotLens(base + 2));
             equipmentLenses.put(EquipmentTypes.FEET.get(), slots.getSlotLens(base + 3));
-            base += ARMOR; // 4
+            base += PlayerInventoryLens.ARMOR; // 4
             this.primary = new PrimaryPlayerInventoryLens(base, slots, true);
             base += this.primary.slotCount();
             this.offhand = slots.getSlotLens(base);
 
-            base += OFFHAND;
+            base += PlayerInventoryLens.OFFHAND;
             equipmentLenses.put(EquipmentTypes.OFF_HAND.get(), this.offhand);
         } else {
             this.primary = new PrimaryPlayerInventoryLens(base, slots, false);
@@ -107,10 +107,10 @@ public class PlayerInventoryLens extends AbstractLens {
             equipmentLenses.put(EquipmentTypes.CHEST.get(), slots.getSlotLens(base + 2));
             equipmentLenses.put(EquipmentTypes.HEAD.get(), slots.getSlotLens(base + 3));
 
-            base += ARMOR;
+            base += PlayerInventoryLens.ARMOR;
             this.offhand = slots.getSlotLens(base);
 
-            base += OFFHAND;
+            base += PlayerInventoryLens.OFFHAND;
             equipmentLenses.put(EquipmentTypes.OFF_HAND.get(), this.offhand);
         }
 
@@ -122,7 +122,7 @@ public class PlayerInventoryLens extends AbstractLens {
         this.addSpanningChild(this.offhand);
 
         for (Map.Entry<EquipmentType, SlotLens> entry : equipmentLenses.entrySet()) {
-            this.addChild(entry.getValue(), KeyValuePair.of(Keys.EQUIPMENT_TYPE.get(), entry.getKey()));
+            this.addChild(entry.getValue(), KeyValuePair.of(Keys.EQUIPMENT_TYPE, entry.getKey()));
         }
         this.addChild(this.equipment);
         this.addMissingSpanningSlots(base, slots);
@@ -131,9 +131,9 @@ public class PlayerInventoryLens extends AbstractLens {
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
     public Inventory getAdapter(Fabric fabric, Inventory parent) {
-        if (this.isContainer && fabric instanceof Container) {
+        if (this.isContainer && fabric instanceof AbstractContainerMenu) {
             // If Lens is for Container extract the PlayerInventory
-            Container container = (Container) fabric;
+            AbstractContainerMenu container = (AbstractContainerMenu) fabric;
             Optional carrier = ((CarriedInventory) container).getCarrier();
             if (carrier.isPresent() && carrier.get() instanceof Player) {
                 return ((Player) carrier.get()).getInventory();

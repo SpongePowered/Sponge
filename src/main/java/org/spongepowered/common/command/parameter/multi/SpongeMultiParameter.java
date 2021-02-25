@@ -25,17 +25,12 @@
 package org.spongepowered.common.command.parameter.multi;
 
 import com.google.common.collect.ImmutableList;
-import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.command.brigadier.tree.SpongeCommandExecutorWrapper;
 
 import java.util.List;
-import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public abstract class SpongeMultiParameter implements Parameter {
+public abstract class SpongeMultiParameter implements Parameter.Multi {
 
     private final List<Parameter> parameterCandidates;
     private final boolean isOptional;
@@ -47,7 +42,8 @@ public abstract class SpongeMultiParameter implements Parameter {
         this.isTerminal = isTerminal;
     }
 
-    public List<Parameter> getParameterCandidates() {
+    @Override
+    public List<Parameter> getChildParameters() {
         // put subcommands first.
         return this.parameterCandidates.stream().sorted((x1, x2) -> {
             final boolean firstIs = x1 instanceof Parameter.Subcommand;
@@ -72,11 +68,4 @@ public abstract class SpongeMultiParameter implements Parameter {
         return this.isTerminal;
     }
 
-    public abstract boolean createNode(SpongeCommandExecutorWrapper executorWrapper,
-            Consumer<CommandNode<CommandSource>> parentNode,
-            Consumer<ArgumentBuilder<CommandSource, ?>> nodeCallback,
-            List<CommandNode<CommandSource>> potentialOptionalRedirects,
-            boolean isTermination,
-            boolean previousWasOptional,
-            String suffix);
 }

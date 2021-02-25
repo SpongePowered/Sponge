@@ -24,28 +24,29 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ITileEntityProvider;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
 
 import java.util.Optional;
 import java.util.function.Function;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.EntityBlock;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 /**
- * A specialized {@link WorldBridge} or {@link ServerWorldBridge}
+ * A specialized {@link WorldBridge} or {@link ServerLevelBridge}
  * that has extra {@link org.spongepowered.common.event.tracking.PhaseTracker} related
  * methods that otherwise bear no other changes to the game.
  */
@@ -53,17 +54,17 @@ public interface TrackedWorldBridge {
 
     boolean bridge$forceSpawnEntity(Entity entity);
 
-    net.minecraft.world.Explosion tracker$triggerInternalExplosion(Explosion explosion, Function<? super net.minecraft.world.Explosion,
+    net.minecraft.world.level.Explosion tracker$triggerInternalExplosion(Explosion explosion, Function<? super net.minecraft.world.level.Explosion,
         ? extends PhaseContext<?>> contextCreator);
 
     Optional<WorldPipeline.Builder> bridge$startBlockChange(BlockPos pos, BlockState state, int rawFlags);
 
     /**
-     * Delegates to the {@link ServerWorld} to perform the lookup for a {@link Chunk}
+     * Delegates to the {@link ServerLevel} to perform the lookup for a {@link LevelChunk}
      * such that if the target {@link BlockPos} results in a {@code false} for
-     * {@link ServerWorld#isBlockLoaded(BlockPos)}, {@link BlockSnapshot#empty()}
+     * {@link ServerLevel#isBlockLoaded(BlockPos)}, {@link BlockSnapshot#empty()}
      * will be returned. Likewise, optimizes the creation of the snapshot by performing
-     * the {@link Chunk#getBlockState(BlockPos)} and {@link Chunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
+     * the {@link LevelChunk#getBlockState(BlockPos)} and {@link LevelChunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
      * lookup on the same chunk, avoiding an additional chunk lookup.
      *
      * <p>This should be used when the "known" {@link BlockState} for the target
@@ -74,19 +75,19 @@ public interface TrackedWorldBridge {
      * @return The snapshot, or none if not loaded
      */
     default SpongeBlockSnapshot bridge$createSnapshot(final BlockPos pos, final BlockChangeFlag flag) {
-        return this.bridge$createSnapshot(((ServerWorld) (Object) this).getBlockState(pos), pos, flag);
+        return this.bridge$createSnapshot(((ServerLevel) (Object) this).getBlockState(pos), pos, flag);
     }
 
     /**
-     * Creates a {@link BlockSnapshot} but performs an additional {@link Chunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
+     * Creates a {@link BlockSnapshot} but performs an additional {@link LevelChunk#getTileEntity(BlockPos, Chunk.CreateEntityType)}
      * lookup if the providing {@link BlockState#getBlock()} {@code instanceof} is
-     * {@code true} for being an {@link ITileEntityProvider} or
-     * {@link SpongeImplHooks#hasBlockTileEntity(BlockState)}, and associates
+     * {@code true} for being an {@link EntityBlock} or
+     * {@link BlockStateBridge#bridge$hasTileEntity()}, and associates
      * the resulting snapshot of said Tile with the snapshot. This is useful for in-progress
      * snapshot creation during transaction building for {@link TransactionalCaptureSupplier}.
      *
-     * <p>If the {@link TileEntity} is already known, and no lookups are needed, use
-     * {@link #bridge$createSnapshotWithEntity(BlockState, BlockPos, BlockChangeFlag, TileEntity)} as it avoids
+     * <p>If the {@link BlockEntity} is already known, and no lookups are needed, use
+     * {@link #bridge$createSnapshotWithEntity(BlockState, BlockPos, BlockChangeFlag, BlockEntity)} as it avoids
      * any further chunk lookups.</p>
      *
      * @param state The block state
@@ -98,7 +99,7 @@ public interface TrackedWorldBridge {
 
     /**
      * Similar to {@link #bridge$createSnapshot(BlockState, BlockPos, BlockChangeFlag)},
-     * but with the added avoidance of a {@link TileEntity} lookup during the creation of the resulting
+     * but with the added avoidance of a {@link BlockEntity} lookup during the creation of the resulting
      * {@link SpongeBlockSnapshot}.
      *
      * @param state The state
@@ -107,6 +108,6 @@ public interface TrackedWorldBridge {
      * @param tileEntity The tile entity to serialize, if available
      * @return The snapshot, never NONE
      */
-    SpongeBlockSnapshot bridge$createSnapshotWithEntity(BlockState state, BlockPos pos, BlockChangeFlag updateFlag, @Nullable TileEntity tileEntity);
+    SpongeBlockSnapshot bridge$createSnapshotWithEntity(BlockState state, BlockPos pos, BlockChangeFlag updateFlag, @Nullable BlockEntity tileEntity);
 
 }

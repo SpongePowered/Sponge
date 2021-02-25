@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.RedstoneDiodeBlock;
+import net.minecraft.world.level.block.DiodeBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,9 +39,9 @@ public final class RedstoneDiodeData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(RedstoneDiodeBlock.POWERED))
-                        .set((h, v) -> h.with(RedstoneDiodeBlock.POWERED, v))
-                        .supports(h -> h.getBlock() instanceof RedstoneDiodeBlock);
+                        .get(h -> h.getValue(DiodeBlock.POWERED))
+                        .set((h, v) -> h.setValue(DiodeBlock.POWERED, v))
+                        .supports(h -> h.getBlock() instanceof DiodeBlock);
     }
     // @formatter:on
 }

@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.FireworkUtils;
+import org.spongepowered.common.util.FireworkUtil;
 
 public final class FireworkItemStackData {
 
@@ -40,9 +40,9 @@ public final class FireworkItemStackData {
         registrator
                 .asMutable(ItemStack.class)
                     .create(Keys.FIREWORK_EFFECTS)
-                        .get(h -> FireworkUtils.getFireworkEffects(h).orElse(null))
-                        .set(FireworkUtils::setFireworkEffects)
-                        .delete(FireworkUtils::removeFireworkEffects)
+                        .get(h -> FireworkUtil.getFireworkEffects(h).orElse(null))
+                        .set(FireworkUtil::setFireworkEffects)
+                        .delete(FireworkUtil::removeFireworkEffects)
                         .supports(h -> h.getItem() == Items.FIREWORK_ROCKET || h.getItem() == Items.FIREWORK_STAR);
     }
     // @formatter:on

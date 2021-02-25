@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -48,18 +48,19 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag) {
-        final ServerWorld serverWorld = pipeline.getServerWorld();
-        final Chunk chunk = pipeline.getAffectedChunk();
-        final @Nullable TileEntity maybeNewTileEntity = chunk.getTileEntity(oldState.pos, Chunk.CreateEntityType.CHECK);
+        final SpongeBlockChangeFlag flag, final int limit
+    ) {
+        final ServerLevel serverWorld = pipeline.getServerWorld();
+        final LevelChunk chunk = pipeline.getAffectedChunk();
+        final @Nullable BlockEntity maybeNewTileEntity = chunk.getBlockEntity(oldState.pos, LevelChunk.EntityCreationType.CHECK);
         if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
             if (maybeNewTileEntity == null) {
                 // tileentity1 = ((ITileEntityProvider)block).createNewTileEntity(this.world); // Vanilla
                 // tileentity1 = state.createTileEntity(this.world); // Forge
                 // We cast to our bridge for easy access
-                serverWorld.setTileEntity(oldState.pos, ((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld));
+                serverWorld.setBlockEntity(oldState.pos, ((BlockStateBridge) newState).bridge$createNewTileEntity(serverWorld));
             } else {
-                maybeNewTileEntity.updateContainingBlockInfo();
+                maybeNewTileEntity.clearCache();
             }
         }
         return EffectResult.NULL_PASS;

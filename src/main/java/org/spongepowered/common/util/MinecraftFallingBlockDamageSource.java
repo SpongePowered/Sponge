@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.entity.item.FallingBlockEntity;
-import net.minecraft.util.EntityDamageSource;
+import net.minecraft.world.damagesource.EntityDamageSource;
+import net.minecraft.world.entity.item.FallingBlockEntity;
 
 public final class MinecraftFallingBlockDamageSource extends EntityDamageSource {
 
@@ -34,8 +34,8 @@ public final class MinecraftFallingBlockDamageSource extends EntityDamageSource 
     }
 
     @Override
-    public FallingBlockEntity getTrueSource() {
-        return (FallingBlockEntity) super.getTrueSource();
+    public FallingBlockEntity getEntity() {
+        return (FallingBlockEntity) super.getEntity();
     }
 
 }

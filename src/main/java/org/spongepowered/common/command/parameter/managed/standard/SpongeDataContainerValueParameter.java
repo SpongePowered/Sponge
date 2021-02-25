@@ -35,21 +35,17 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.util.Constants;
 
 import java.io.IOException;
 import java.util.List;
 import java.util.Optional;
 
-public final class SpongeDataContainerValueParameter extends CatalogedArgumentParser<DataContainer> {
+public final class SpongeDataContainerValueParameter extends ResourceKeyedArgumentValueParser<DataContainer> {
 
-    private static final ResourceKey KEY = ResourceKey.sponge("data_container");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeDataContainerValueParameter.KEY;
+    public SpongeDataContainerValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override
@@ -68,10 +64,6 @@ public final class SpongeDataContainerValueParameter extends CatalogedArgumentPa
     public Optional<? extends DataContainer> getValue(final Parameter.@NonNull Key<? super DataContainer> parameterKey,
                                                       final ArgumentReader.@NonNull Mutable reader,
                                                       final CommandContext.@NonNull Builder context) throws ArgumentParseException {
-        try {
-            return Optional.of(DataFormats.JSON.get().read(reader.parseJson()));
-        } catch (final IOException e) {
-            throw reader.createException(Component.text(e.getMessage()));
-        }
+        return Optional.of(reader.parseDataContainer());
     }
 }

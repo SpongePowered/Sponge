@@ -25,35 +25,35 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.common.event.tracking.EmptyContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.function.BiConsumer;
 
-final class CompletePhase extends GeneralState<GeneralizedContext> {
+final class CompletePhase extends GeneralState<EmptyContext> {
 
-    public static final BiConsumer<CauseStackManager.StackFrame, GeneralizedContext>
+    public static final BiConsumer<CauseStackManager.StackFrame, EmptyContext>
         EMPTY_MODIFIER =
         (stackFrame, generalizedContext) -> {
         };
 
     @Override
-    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
-        return new GeneralizedContext(this, tracker);
+    public EmptyContext createNewContext(final PhaseTracker tracker) {
+        throw new UnsupportedOperationException("Cannot create a new Complete Context!");
     }
 
     @Override
-    public void unwind(final GeneralizedContext context) {
-
+    public void unwind(final EmptyContext context) {
+        throw new UnsupportedOperationException("Cannot unwind a new Complete Context!");
     }
 
     @Override
-    public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
+    public BiConsumer<CauseStackManager.StackFrame, EmptyContext> getFrameModifier() {
         return CompletePhase.EMPTY_MODIFIER;
     }
 
     @Override
-    public boolean doesBlockEventTracking(final GeneralizedContext context) {
+    public boolean doesBlockEventTracking(final EmptyContext context) {
         return false;
     }
 

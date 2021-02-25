@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.common.accessor.world.WorldAccessor;
-import org.spongepowered.common.accessor.world.server.ServerWorldAccessor;
+import net.minecraft.core.Registry;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
+import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -48,20 +48,21 @@ public final class AddTileEntityToWorldWhileProcessingEffect implements Processi
     
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag
+        final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
-        final ServerWorld serverWorld = pipeline.getServerWorld();
-        final TileEntity tileEntity = oldState.tileEntity;
+        final ServerLevel serverWorld = pipeline.getServerWorld();
+        final BlockEntity tileEntity = oldState.tileEntity;
         if (tileEntity == null) {
             return EffectResult.NULL_RETURN;
         }
-        if (((WorldAccessor) serverWorld).accessor$getProcessingLoadedTiles()) {
-            ServerWorldAccessor.accessor$LOGGER().error(
+        if (((LevelAccessor) serverWorld).accessor$updatingBlockEntities()) {
+            ServerLevelAccessor.accessor$LOGGER().error(
                 "Adding block entity while ticking: {} @ {}",
                 () -> Registry.BLOCK_ENTITY_TYPE.getKey(tileEntity.getType()),
-                tileEntity::getPos
+                tileEntity::getBlockPos
             );
-            final boolean add = ((WorldAccessor) serverWorld).accessor$getAddedTileEntityList().add(tileEntity);
+            final boolean add = ((LevelAccessor) serverWorld).accessor$pendingBlockEntities().add(tileEntity);
             if (add) {
                 return new EffectResult(oldState.state, true);
             } else {

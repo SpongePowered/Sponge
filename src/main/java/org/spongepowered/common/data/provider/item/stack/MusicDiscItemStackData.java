@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;

@@ -24,39 +24,66 @@
  */
 package org.spongepowered.common.event.lifecycle;
 
-import io.leangen.geantyref.TypeToken;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
+import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl.ResultImpl;
 import org.spongepowered.plugin.PluginContainer;
 
-public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> extends AbstractLifecycleEvent implements RegisterCommandEvent<C> {
+import java.util.Objects;
 
-    private final TypeToken<C> token;
+public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> extends AbstractLifecycleEvent.GenericImpl<C> implements RegisterCommandEvent<C> {
+
     private final R registrar;
 
     public RegisterCommandEventImpl(final Cause cause, final Game game, final R registrar) {
-        super(cause, game);
-        this.token = registrar.handledType();
+        super(cause, game, registrar.type().handledType());
         this.registrar = registrar;
     }
 
     @Override
-    public CommandMapping register(final PluginContainer container, final C command, final String alias, final String... aliases)
-            throws CommandFailedRegistrationException {
-        return this.registrar.register(container, command, alias, aliases);
-    }
-
-    @Override
-    public TypeToken<C> getGenericType() {
-        return this.token;
+    @NonNull
+    public Result<C> register(@NonNull final PluginContainer container, @NonNull final C command, @NonNull final String alias,
+            final String @NonNull... aliases) throws CommandFailedRegistrationException {
+        return new ResultImpl<>(
+                this,
+                this.registrar.register(Objects.requireNonNull(container, "container"), Objects.requireNonNull(command, "command"),
+                        Objects.requireNonNull(alias, "alias"), Objects.requireNonNull(aliases, "aliases"))
+        );
     }
 
     @Override
     public String toString() {
         return "RegisterCommandEvent{cause=" + this.cause + ", token=" + this.token + "}";
     }
+
+    static final class ResultImpl<C, R extends CommandRegistrar<C>> implements Result<C> {
+
+        private final RegisterCommandEventImpl<C, R> parentEvent;
+        private final CommandMapping mapping;
+
+        ResultImpl(final RegisterCommandEventImpl<C, R> parentEvent, final CommandMapping mapping) {
+            this.parentEvent = parentEvent;
+            this.mapping = mapping;
+        }
+
+        @Override
+        @NonNull
+        public Result<C> register(@NonNull final PluginContainer container, @NonNull final C command, @NonNull final String alias,
+                final String @NonNull... aliases) throws CommandFailedRegistrationException {
+            return this.parentEvent.register(container, command, alias, aliases);
+        }
+
+        @Override
+        @NonNull
+        public CommandMapping mapping() {
+            return this.mapping;
+        }
+
+    }
+
 }

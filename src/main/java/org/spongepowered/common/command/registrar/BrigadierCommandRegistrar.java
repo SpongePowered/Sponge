@@ -24,35 +24,32 @@
  */
 package org.spongepowered.common.command.registrar;
 
-import io.leangen.geantyref.TypeToken;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
+import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
-import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongePermissionWrappedLiteralCommandNode;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
@@ -67,32 +64,28 @@ import java.util.stream.Collectors;
  * {@link #register(PluginContainer, LiteralArgumentBuilder, String...)}
  * method.</p>
  */
-public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSource>> {
+public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSourceStack>> {
 
-    private static final TypeToken<LiteralArgumentBuilder<CommandSource>> COMMAND_TYPE = new TypeToken<LiteralArgumentBuilder<CommandSource>>() {};
+    public static final CommandRegistrarType<LiteralArgumentBuilder<CommandSourceStack>> TYPE =
+            new SpongeCommandRegistrarType<>(
+                    new TypeToken<LiteralArgumentBuilder<CommandSourceStack>>() {},
+                    BrigadierCommandRegistrar::new
+            );
 
-    public static final BrigadierCommandRegistrar INSTANCE = new BrigadierCommandRegistrar();
-    public static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("brigadier");
+    private final SpongeCommandManager manager;
+    private SpongeCommandDispatcher dispatcher;
 
-    private boolean hasVanillaRegistered;
-    private final List<LiteralCommandNode<CommandSource>> vanilla = new ArrayList<>();
-
-    private SpongeCommandDispatcher dispatcher = new SpongeCommandDispatcher();
-
-    private BrigadierCommandRegistrar() {}
+    public BrigadierCommandRegistrar(final CommandManager.Mutable manager) {
+        this.manager = (SpongeCommandManager) manager;
+        this.dispatcher = new SpongeCommandDispatcher(this.manager);
+    }
 
     // For mods and others that use this. We get the plugin container from the CauseStack
     // TODO: Make sure this is valid. For Forge, I suspect we'll have done this in a context of some sort.
-    public LiteralCommandNode<CommandSource> register(final LiteralArgumentBuilder<CommandSource> command) {
+    public LiteralCommandNode<CommandSourceStack> register(final LiteralArgumentBuilder<CommandSourceStack> command) {
         // Get the plugin container
         final PluginContainer container = PhaseTracker.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
                 .orElseThrow(() -> new IllegalStateException("Cannot register command without knowing its origin."));
-
-        if (!this.hasVanillaRegistered && Launch.getInstance().getMinecraftPlugin() == container) {
-            final LiteralCommandNode<CommandSource> vanillaCommand = this.applyNamespace(container, command, false);
-            this.vanilla.add(vanillaCommand);
-            return vanillaCommand;
-        }
 
         return this.registerInternal(this,
                 container,
@@ -101,30 +94,16 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
                 true).getSecond();
     }
 
-    public void completeVanillaRegistration() {
-        // At this point, let vanilla through anyway, if they haven't come through yet
-        // then they can register anyway.
-        this.hasVanillaRegistered = true;
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final PluginContainer container = Launch.getInstance().getMinecraftPlugin();
-            frame.pushCause(container);
-            for (final LiteralCommandNode<CommandSource> node : this.vanilla) {
-                this.registerInternal(this, container, node, new String[0], true);
-            }
-        }
-        this.vanilla.clear();
-    }
-
     @Override
-    public TypeToken<LiteralArgumentBuilder<CommandSource>> handledType() {
-        return BrigadierCommandRegistrar.COMMAND_TYPE;
+    public @NonNull CommandRegistrarType<LiteralArgumentBuilder<CommandSourceStack>> type() {
+        return BrigadierCommandRegistrar.TYPE;
     }
 
     @Override
     @NonNull
     public CommandMapping register(
             @NonNull final PluginContainer container,
-            @NonNull final LiteralArgumentBuilder<CommandSource> command,
+            @NonNull final LiteralArgumentBuilder<CommandSourceStack> command,
             @NonNull final String primaryAlias,
             final String @NonNull... secondaryAliases) throws CommandFailedRegistrationException {
 
@@ -140,28 +119,24 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
      * @param secondaryAliases Any aliases should be registered (they will be registered as a redirection)
      * @return The built {@link LiteralCommandNode}.
      */
-    public Tuple<CommandMapping, LiteralCommandNode<CommandSource>> register(
+    public Tuple<CommandMapping, LiteralCommandNode<CommandSourceStack>> register(
             final PluginContainer container,
-            final LiteralArgumentBuilder<CommandSource> command,
+            final LiteralArgumentBuilder<CommandSourceStack> command,
             final String... secondaryAliases) {
 
         return this.registerInternal(this, container, this.applyNamespace(container, command, true), secondaryAliases, false);
     }
 
-    void registerFromSpongeRegistrar(final LiteralCommandNode<CommandSource> command) {
-        this.dispatcher.register(command);
-    }
-
-    private Tuple<CommandMapping, LiteralCommandNode<CommandSource>> registerInternal(
+    private Tuple<CommandMapping, LiteralCommandNode<CommandSourceStack>> registerInternal(
             final CommandRegistrar<?> registrar,
             final PluginContainer container,
-            final LiteralCommandNode<CommandSource> namespacedCommand,
+            final LiteralCommandNode<CommandSourceStack> namespacedCommand,
             final String[] secondaryAliases,
             final boolean allowDuplicates) { // Brig technically allows them...
 
         // Get the builder and the first literal.
         final String requestedAlias = namespacedCommand.getLiteral();
-        final Optional<CommandMapping> existingMapping = SpongeCommon.getGame().getCommandManager().getCommandMapping(requestedAlias);
+        final Optional<CommandMapping> existingMapping = this.manager.getCommandMapping(requestedAlias);
         if (allowDuplicates && existingMapping.isPresent()) {
             // then we just let it go, the requirements will be of the old node.
             this.dispatcher.register(namespacedCommand);
@@ -169,7 +144,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         }
 
         // This will throw an error if there is an issue.
-        final CommandMapping mapping = ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).registerNamespacedAlias(
+        final CommandMapping mapping = this.manager.registerNamespacedAlias(
                         registrar,
                         container,
                         namespacedCommand,
@@ -182,7 +157,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         // Redirect aliases
         for (final String alias : mapping.getAllAliases()) {
             if (!alias.equals(namespacedCommand.getLiteral())) {
-                final LiteralArgumentBuilder<CommandSource> redirecting = LiteralArgumentBuilder.<CommandSource>literal(alias)
+                final LiteralArgumentBuilder<CommandSourceStack> redirecting = LiteralArgumentBuilder.<CommandSourceStack>literal(alias)
                         .executes(namespacedCommand.getCommand())
                         .requires(namespacedCommand.getRequirement());
                 if (namespacedCommand.getRedirect() == null) {
@@ -206,7 +181,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             @NonNull final String command,
             @NonNull final String arguments) throws CommandException {
         try {
-            final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause));
+            final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause));
             return CommandResult.builder().setResult(result).build();
         } catch (final CommandSyntaxException e) {
             throw new CommandException(Component.text(e.getMessage()), e);
@@ -222,7 +197,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             @NonNull final String arguments) {
         final CompletableFuture<Suggestions> suggestionsCompletableFuture =
                 this.dispatcher.getCompletionSuggestions(
-                        this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSource) cause, true));
+                        this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause, true));
         // TODO: Fix so that we keep suggestions in the Mojang format?
         return suggestionsCompletableFuture.join().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
     }
@@ -230,9 +205,9 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     @Override
     @NonNull
     public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final CommandMapping mapping) {
-        final CommandNode<CommandSource> node = this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias()));
+        final CommandNode<CommandSourceStack> node = this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias()));
         if (node != null) {
-            return Optional.of(Component.text(this.dispatcher.getSmartUsage(node, (CommandSource) cause).toString()));
+            return Optional.of(Component.text(this.dispatcher.getSmartUsage(node, (CommandSourceStack) cause).toString()));
         }
 
         return Optional.empty();
@@ -240,25 +215,11 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
 
     @Override
     public boolean canExecute(final CommandCause cause, final CommandMapping mapping) {
-        return this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias())).getRequirement().test((CommandSource) cause);
+        return this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias())).getRequirement().test((CommandSourceStack) cause);
     }
 
     public SpongeCommandDispatcher getDispatcher() {
         return this.dispatcher;
-    }
-
-    @Override
-    public void reset() {
-        if (SpongeCommon.getGame().getCommandManager().isResetting()) {
-            this.dispatcher = new SpongeCommandDispatcher();
-            this.hasVanillaRegistered = false;
-        }
-    }
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return RESOURCE_KEY;
     }
 
     private String createCommandString(final String command, final String argument) {
@@ -269,19 +230,19 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         return command + " " + argument;
     }
 
-    private LiteralCommandNode<CommandSource> applyNamespace(final PluginContainer pluginContainer,
-            final LiteralArgumentBuilder<CommandSource> builder, final boolean isSpongeAware) {
+    private LiteralCommandNode<CommandSourceStack> applyNamespace(final PluginContainer pluginContainer,
+            final LiteralArgumentBuilder<CommandSourceStack> builder, final boolean isSpongeAware) {
         if (builder.getLiteral().contains(":") || builder.getLiteral().contains(" ")) {
             // nope
             throw new IllegalArgumentException("The literal must not contain a colon or a space.");
         }
 
-        final LiteralArgumentBuilder<CommandSource> replacementBuilder =
-                LiteralArgumentBuilder.<CommandSource>literal(pluginContainer.getMetadata().getId() + ":" + builder.getLiteral())
+        final LiteralArgumentBuilder<CommandSourceStack> replacementBuilder =
+                LiteralArgumentBuilder.<CommandSourceStack>literal(pluginContainer.getMetadata().getId() + ":" + builder.getLiteral())
                         .forward(builder.getRedirect(), builder.getRedirectModifier(), builder.isFork())
                         .executes(builder.getCommand())
                         .requires(builder.getRequirement());
-        for (final CommandNode<CommandSource> node : builder.getArguments()) {
+        for (final CommandNode<CommandSourceStack> node : builder.getArguments()) {
             replacementBuilder.then(node);
         }
 

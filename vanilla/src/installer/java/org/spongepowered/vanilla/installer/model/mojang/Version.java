@@ -69,7 +69,7 @@ public final class Version {
 
     public static class Library {
 
-        public Downloads downloads;
+        public org.spongepowered.vanilla.installer.model.mojang.Version.Library.Downloads downloads;
         public String name;
 
         public static class Downloads {

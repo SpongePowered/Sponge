@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory;
 
-import net.minecraft.inventory.ISidedInventory;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -38,12 +37,13 @@ import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.Arrays;
+import net.minecraft.world.WorldlyContainer;
 
 public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
 
     @Override
     default Inventory getInventory(Direction from) {
-        return getInventory(from, this);
+        return DefaultSingleBlockCarrier.getInventory(from, this);
     }
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
@@ -57,9 +57,9 @@ public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
 
     @SuppressWarnings("deprecation")
     static Inventory getInventory(Direction from, BlockCarrier thisThing) {
-        if (thisThing instanceof ISidedInventory) {
-            net.minecraft.util.Direction facing = DirectionFacingProvider.getInstance().get(from).get();
-            int[] slots = ((ISidedInventory) thisThing).getSlotsForFace(facing);
+        if (thisThing instanceof WorldlyContainer) {
+            net.minecraft.core.Direction facing = DirectionFacingProvider.INSTANCE.get(from).get();
+            int[] slots = ((WorldlyContainer) thisThing).getSlotsForFace(facing);
 
             if (slots.length == 0) {
                 return new EmptyInventoryImpl(thisThing.getInventory());

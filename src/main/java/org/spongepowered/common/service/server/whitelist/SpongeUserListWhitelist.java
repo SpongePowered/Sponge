@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.service.server.whitelist;
 
-import net.minecraft.server.management.WhiteList;
-import net.minecraft.server.management.WhitelistEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
-import org.spongepowered.common.SpongeGame;
-import org.spongepowered.common.accessor.server.management.UserListEntryAccessor;
+import org.spongepowered.common.accessor.server.players.StoredUserEntryAccessor;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.io.File;
@@ -38,23 +35,25 @@ import java.util.ArrayList;
 import java.util.List;
 
 import javax.annotation.Nullable;
+import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.server.players.UserWhiteListEntry;
 
 /**
  * Redirects all calls to whitelist to the {@link WhitelistService}.
  */
-public class SpongeUserListWhitelist extends WhiteList {
+public class SpongeUserListWhitelist extends UserWhiteList {
 
     public SpongeUserListWhitelist(final File file) {
         super(file);
     }
 
     @Override
-    protected boolean hasEntry(final com.mojang.authlib.GameProfile entry) {
+    protected boolean contains(final com.mojang.authlib.GameProfile entry) {
         return Sponge.getServer().getServiceProvider().whitelistService().isWhitelisted(SpongeGameProfile.of(entry));
     }
 
     @Override
-    public String[] getKeys() {
+    public String[] getUserList() {
         final List<String> names = new ArrayList<>();
         for (final GameProfile profile : Sponge.getServer().getServiceProvider().whitelistService().getWhitelistedProfiles()) {
             profile.getName().ifPresent(names::add);
@@ -64,12 +63,12 @@ public class SpongeUserListWhitelist extends WhiteList {
 
     @SuppressWarnings("unchecked")
     @Override
-    public void addEntry(final WhitelistEntry entry) {
-        Sponge.getServer().getServiceProvider().whitelistService().addProfile(((UserListEntryAccessor<GameProfile>) entry).accessor$getValue());
+    public void add(final UserWhiteListEntry entry) {
+        Sponge.getServer().getServiceProvider().whitelistService().addProfile(((StoredUserEntryAccessor<GameProfile>) entry).accessor$user());
     }
 
     @Override
-    public void removeEntry(final com.mojang.authlib.GameProfile entry) {
+    public void remove(final com.mojang.authlib.GameProfile entry) {
         Sponge.getServer().getServiceProvider().whitelistService().removeProfile(SpongeGameProfile.of(entry));
     }
 

@@ -24,17 +24,25 @@
  */
 package org.spongepowered.common.hooks;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.ServerPlayerEntity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import org.spongepowered.api.Sponge;
 
 public interface GeneralHooks {
 
-    default double getEntityReachDistanceSq(ServerPlayerEntity player, Entity targeted) {
+    default double getEntityReachDistanceSq(ServerPlayer player, Entity targeted) {
         double d0 = 36.0d; // 6 blocks
-        if (!player.canEntityBeSeen(targeted)) {
+        if (!player.canSee(targeted)) {
             d0 = 9.0D; // 3 blocks
         }
 
         return d0;
+    }
+
+    default boolean onServerThread() {
+        // Return true when the server isn't yet initialized, this means on a client
+        // that the game is still being loaded. This is needed to support initialization
+        // events with cause tracking.
+        return !Sponge.isServerAvailable() || Sponge.getServer().onMainThread();
     }
 }

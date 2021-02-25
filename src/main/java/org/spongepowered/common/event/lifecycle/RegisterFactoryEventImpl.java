@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.event.lifecycle;
 
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterFactoryEvent;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
-import org.spongepowered.common.registry.SpongeFactoryRegistry;
+import org.spongepowered.common.registry.SpongeFactoryProvider;
+
+import java.util.Objects;
 
 public final class RegisterFactoryEventImpl extends AbstractLifecycleEvent implements RegisterFactoryEvent {
 
@@ -40,10 +41,9 @@ public final class RegisterFactoryEventImpl extends AbstractLifecycleEvent imple
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T> T register(Class<T> factoryClass, T factory) throws DuplicateRegistrationException {
-        Preconditions.checkNotNull(factory);
-
-        return (T) ((SpongeFactoryRegistry) Sponge.getRegistry().getFactoryRegistry()).registerFactory(factoryClass, factory);
+    public <T> T register(final Class<T> factoryClass, final T factory) throws DuplicateRegistrationException {
+        return (T) ((SpongeFactoryProvider) Sponge.getGame().getFactoryProvider()).registerFactory(factoryClass, Objects.requireNonNull(factory,
+                "factory"));
     }
 
     @Override

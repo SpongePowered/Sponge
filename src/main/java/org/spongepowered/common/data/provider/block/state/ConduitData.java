@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ConduitBlock;
+import net.minecraft.world.level.block.ConduitBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,8 +39,8 @@ public final class ConduitData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(ConduitBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(ConduitBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(ConduitBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(ConduitBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof ConduitBlock);
     }
     // @formatter:on

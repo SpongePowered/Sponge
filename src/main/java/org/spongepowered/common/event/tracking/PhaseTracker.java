@@ -30,13 +30,6 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import com.google.common.collect.MapMaker;
 import com.google.common.collect.Maps;
 import com.google.common.collect.Queues;
-import net.minecraft.block.Block;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.tileentity.TileEntityType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.chunk.Chunk;
-import net.minecraft.world.server.ServerWorld;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -53,10 +46,10 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.event.cause.entity.SpongeSpawnTypes;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.registry.builtin.sponge.SpawnTypeStreamGenerator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.ThreadUtil;
@@ -78,6 +71,13 @@ import java.util.StringJoiner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
 import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 /**
  * The core state machine of Sponge. Acts a as proxy between various engine objects by processing actions through
@@ -89,8 +89,8 @@ public final class PhaseTracker implements CauseStackManager {
 
     public static final PhaseTracker CLIENT = new PhaseTracker();
     public static final PhaseTracker SERVER = new PhaseTracker();
-    public static final Logger LOGGER = LogManager.getLogger();
-    static final CopyOnWriteArrayList<net.minecraft.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
+    public static final Logger LOGGER = LogManager.getLogger(PhaseTracker.class);
+    static final CopyOnWriteArrayList<net.minecraft.world.entity.Entity> ASYNC_CAPTURED_ENTITIES = new CopyOnWriteArrayList<>();
     private static final Map<Thread, PhaseTracker> SPINOFF_TRACKERS = new MapMaker().weakKeys().concurrencyLevel(8).makeMap();
     private static final boolean DEBUG_CAUSE_FRAMES = Boolean.parseBoolean(System.getProperty("sponge.debugcauseframes", "false"));
     private static final String INITIAL_POOL_SIZE_PROPERTY = "sponge.cause.initialFramePoolSize";
@@ -119,34 +119,34 @@ public final class PhaseTracker implements CauseStackManager {
     }
 
     public static CauseStackManager getCauseStackManager() {
-        return getInstance();
+        return PhaseTracker.getInstance();
     }
 
-    public static Block validateBlockForNeighborNotification(final ServerWorld worldServer, final BlockPos pos, @Nullable Block blockIn,
-        final BlockPos otherPos, final Chunk chunk) {
+    public static Block validateBlockForNeighborNotification(final ServerLevel worldServer, final BlockPos pos, @Nullable Block blockIn,
+        final BlockPos otherPos, final LevelChunk chunk) {
         if (blockIn == null) {
             // If the block is null, check with the PhaseState to see if it can perform a safe way
             final PhaseContext<?> currentContext = PhaseTracker.getInstance().getPhaseContext();
-            final PhaseTrackerCategory trackerConfig = SpongeConfigs.getCommon().get().getPhaseTracker();
+            final PhaseTrackerCategory trackerConfig = SpongeConfigs.getCommon().get().phaseTracker;
 
             if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
                 // Try to save ourselves
-                @Nullable final TileEntity source = (TileEntity) currentContext.getSource();
+                @Nullable final BlockEntity source = (BlockEntity) currentContext.getSource();
 
-                @Nullable final TileEntityType<?> type = Optional.ofNullable(source)
-                                                   .map(TileEntity::getType)
+                @Nullable final BlockEntityType<?> type = Optional.ofNullable(source)
+                                                   .map(BlockEntity::getType)
                                                    .orElse(null);
                 if (type != null) {
-                    @Nullable ResourceLocation id = TileEntityType.getId(type);
+                    @Nullable ResourceLocation id = BlockEntityType.getKey(type);
                     if (id == null) {
                         id = new ResourceLocation(source.getClass().getCanonicalName());
                     }
-                    final Map<String, Boolean> autoFixedTiles = trackerConfig.getAutoFixedTiles();
+                    final Map<String, Boolean> autoFixedTiles = trackerConfig.autoFixNullSourceBlockProvidingBlockEntities;
                     final boolean contained = autoFixedTiles.containsKey(type.toString());
                     // If we didn't map the tile entity yet, we should apply the mapping
                     // based on whether the source is the same as the TileEntity.
                     if (!contained) {
-                        autoFixedTiles.put(id.toString(), pos.equals(source.getPos()));
+                        autoFixedTiles.put(id.toString(), pos.equals(source.getBlockPos()));
                     }
                     final boolean useTile = contained && autoFixedTiles.get(id.toString());
                     if (useTile) {
@@ -156,14 +156,14 @@ public final class PhaseTracker implements CauseStackManager {
                                       ? chunk.getBlockState(pos).getBlock()
                                       : worldServer.getBlockState(pos).getBlock();
                     }
-                    if (!contained && trackerConfig.isReportNullSourceBlocks()) {
+                    if (!contained && trackerConfig.reportNullSourceBlocksOnNeighborNotifications) {
                         PhasePrinter.printNullSourceBlockWithTile(pos, blockIn, otherPos, id, useTile, new NullPointerException("Null Source Block For TileEntity Neighbor Notification"));
                     }
                 } else {
                     blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
                                   ? chunk.getBlockState(pos).getBlock()
                                   : worldServer.getBlockState(pos).getBlock();
-                    if (trackerConfig.isReportNullSourceBlocks()) {
+                    if (trackerConfig.reportNullSourceBlocksOnNeighborNotifications) {
                         PhasePrinter.printNullSourceBlockNeighborNotificationWithNoTileSource(pos, blockIn, otherPos,
                             new NullPointerException("Null Source Block For Neighbor Notification"));
                     }
@@ -173,7 +173,7 @@ public final class PhaseTracker implements CauseStackManager {
                 blockIn = (pos.getX() >> 4 == chunk.getPos().x && pos.getZ() >> 4 == chunk.getPos().z)
                               ? chunk.getBlockState(pos).getBlock()
                               : worldServer.getBlockState(pos).getBlock();
-                if (trackerConfig.isReportNullSourceBlocks()) {
+                if (trackerConfig.reportNullSourceBlocksOnNeighborNotifications) {
                     PhasePrinter.printNullSourceForBlock(worldServer, pos, blockIn, otherPos, new NullPointerException("Null Source Block For Neighbor Notification"));
                 }
             }
@@ -185,28 +185,28 @@ public final class PhaseTracker implements CauseStackManager {
         int initialPoolSize = 50;
         int maxPoolSize = 100;
         try {
-            initialPoolSize = Integer.parseInt(System.getProperty(INITIAL_POOL_SIZE_PROPERTY, "50"));
+            initialPoolSize = Integer.parseInt(System.getProperty(PhaseTracker.INITIAL_POOL_SIZE_PROPERTY, "50"));
         } catch (final NumberFormatException ex) {
             SpongeCommon.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 50.",
-                INITIAL_POOL_SIZE_PROPERTY,
-                System.getProperty(INITIAL_POOL_SIZE_PROPERTY));
+                PhaseTracker.INITIAL_POOL_SIZE_PROPERTY,
+                System.getProperty(PhaseTracker.INITIAL_POOL_SIZE_PROPERTY));
         }
         try {
-            maxPoolSize = Integer.parseInt(System.getProperty(MAX_POOL_SIZE_PROPERTY, "100"));
+            maxPoolSize = Integer.parseInt(System.getProperty(PhaseTracker.MAX_POOL_SIZE_PROPERTY, "100"));
         } catch (final NumberFormatException ex) {
             SpongeCommon.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 100.",
-                MAX_POOL_SIZE_PROPERTY,
-                System.getProperty(MAX_POOL_SIZE_PROPERTY));
+                PhaseTracker.MAX_POOL_SIZE_PROPERTY,
+                System.getProperty(PhaseTracker.MAX_POOL_SIZE_PROPERTY));
         }
         MAX_POOL_SIZE = Math.max(0, maxPoolSize);
-        INITIAL_POOL_SIZE = Math.max(0, Math.min(MAX_POOL_SIZE, initialPoolSize));
+        INITIAL_POOL_SIZE = Math.max(0, Math.min(PhaseTracker.MAX_POOL_SIZE, initialPoolSize));
     }
 
     private final Deque<Object> cause = Queues.newArrayDeque();
     // Frames in use
-    private final Deque<CauseStackFrameImpl> frames = Queues.newArrayDeque();
+    private final Deque<SpongeCauseStackFrame> frames = Queues.newArrayDeque();
     // Frames not currently in use
-    private final Deque<CauseStackFrameImpl> framePool = new ArrayDeque<>(MAX_POOL_SIZE);
+    private final Deque<SpongeCauseStackFrame> framePool = new ArrayDeque<>(PhaseTracker.MAX_POOL_SIZE);
     private final Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
     private int min_depth = 0;
     private int[] duplicateCauses = new int[100];
@@ -225,8 +225,8 @@ public final class PhaseTracker implements CauseStackManager {
 
 
     PhaseTracker() {
-        for (int i = 0; i < INITIAL_POOL_SIZE; i++) {
-            this.framePool.push(new CauseStackFrameImpl(this));
+        for (int i = 0; i < PhaseTracker.INITIAL_POOL_SIZE; i++) {
+            this.framePool.push(new SpongeCauseStackFrame(this));
         }
     }
 
@@ -246,15 +246,15 @@ public final class PhaseTracker implements CauseStackManager {
                     return;
                 }
 
-                final List<net.minecraft.entity.Entity> entities = new ArrayList<>(PhaseTracker.ASYNC_CAPTURED_ENTITIES);
+                final List<net.minecraft.world.entity.Entity> entities = new ArrayList<>(PhaseTracker.ASYNC_CAPTURED_ENTITIES);
                 PhaseTracker.ASYNC_CAPTURED_ENTITIES.removeAll(entities);
                 try (final CauseStackManager.StackFrame frame = this.pushCauseFrame()) {
                     // We are forcing the spawn, as we can't throw the proper event at the proper time, so
                     // we'll just mark it as "forced".
-                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypeStreamGenerator.FORCED);
-                    for (final net.minecraft.entity.Entity entity : entities) {
+                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpongeSpawnTypes.FORCED);
+                    for (final net.minecraft.world.entity.Entity entity : entities) {
                         // At this point, we don't care what the causes are...
-                        entity.getEntityWorld().addEntity(entity);
+                        entity.getCommandSenderWorld().addFreshEntity(entity);
                     }
                 }
 
@@ -337,7 +337,7 @@ public final class PhaseTracker implements CauseStackManager {
         checkNotNull(state, "State cannot be null!");
         checkNotNull(phaseContext, "PhaseContext cannot be null!");
         checkArgument(phaseContext.isComplete(), "PhaseContext must be complete!");
-        if (SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
+        if (this == PhaseTracker.SERVER && SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             if (this.stack.size() > 6) {
                 if (this.stack.checkForRunaways(state, phaseContext)) {
                     PhasePrinter.printRunawayPhase(this.stack, state, phaseContext);
@@ -346,7 +346,7 @@ public final class PhaseTracker implements CauseStackManager {
             }
         }
 
-        if (((IPhaseState) state).shouldProvideModifiers(phaseContext)) {
+        if (phaseContext.shouldProvideModifiers()) {
             this.registerPhaseContextProvider(phaseContext);
         }
         this.stack.push(state, phaseContext);
@@ -383,7 +383,7 @@ public final class PhaseTracker implements CauseStackManager {
             return;
         }
 
-        if (SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose()) {
+        if (SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING, null)) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
@@ -392,7 +392,7 @@ public final class PhaseTracker implements CauseStackManager {
         }
 
         final boolean hasCaptures = currentContext.hasCaptures();
-        try (final UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(state, currentContext, hasCaptures)) {
+        try (final @Nullable UnwindingPhaseContext unwinding = UnwindingPhaseContext.unwind(currentContext, hasCaptures)) {
             // With UnwindingPhaseContext#unwind checking for post, if it is null, the try
             // will not attempt to close the phase context. If it is required,
             // it already automatically pushes onto the phase stack, along with
@@ -415,26 +415,10 @@ public final class PhaseTracker implements CauseStackManager {
         // so it's an error properly handled.
         this.stack.pop();
 
-        if (this.stack.isEmpty()) {
-            // TODO Minecraft 1.14 - PhaseTracker is per-engine, cannot assume this anymore
-//            for (final org.spongepowered.api.world.server.ServerWorld apiWorld : SpongeCommon.getWorldManager().getWorlds()) {
-//                final TrackedWorldBridge trackedWorld = (TrackedWorldBridge) apiWorld;
-//                if (trackedWorld.bridge$getProxyAccess().hasProxy()) {
-//                    new PrettyPrinter().add("BlockPRoxy has extra proxies not pruned!").centre().hr()
-//                        .add("When completing the Phase: %s, some foreign BlockProxy was pushed, but never pruned.", state)
-//                        .add()
-//                        .add("Please analyze the following exception from the proxy:")
-//                        .add(new Exception())
-//                        .print(System.err);
-//
-//                }
-//            }
-        }
-
     }
 
     private void checkPhaseContextProcessed(final IPhaseState<?> state, final PhaseContext<?> context) {
-        if (!SpongeConfigs.getCommon().get().getPhaseTracker().isVerbose() && PhasePrinter.printedExceptionsForUnprocessedState.contains(state)) {
+        if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && PhasePrinter.printedExceptionsForUnprocessedState.contains(state)) {
             return;
         }
 
@@ -593,9 +577,9 @@ public final class PhaseTracker implements CauseStackManager {
             this.duplicateCauses = Arrays.copyOf(this.duplicateCauses, (int) (size * 1.5));
         }
 
-        final CauseStackFrameImpl frame;
+        final SpongeCauseStackFrame frame;
         if (this.framePool.isEmpty()) {
-            frame = new CauseStackFrameImpl(this).set(this.min_depth, this.duplicateCauses[size]);
+            frame = new SpongeCauseStackFrame(this).set(this.min_depth, this.duplicateCauses[size]);
         } else {
             frame = this.framePool.pop();
 
@@ -608,11 +592,11 @@ public final class PhaseTracker implements CauseStackManager {
 
         this.frames.push(frame);
         this.min_depth = size;
-        if (DEBUG_CAUSE_FRAMES) {
+        if (PhaseTracker.DEBUG_CAUSE_FRAMES) {
             // Attach an exception to the frame so that if there is any frame
             // corruption we can print out the stack trace of when the frames
             // were created.
-            frame.stack_debug = new Exception();
+            frame.stackDebug = new Exception();
         }
         return frame;
     }
@@ -621,7 +605,7 @@ public final class PhaseTracker implements CauseStackManager {
     public void popCauseFrame(final StackFrame oldFrame) {
         checkNotNull(oldFrame, "oldFrame");
         this.enforceMainThread();
-        @Nullable final CauseStackFrameImpl frame = this.frames.peek();
+        @Nullable final SpongeCauseStackFrame frame = this.frames.peek();
         if (frame != oldFrame) {
             // If the given frame is not the top frame then some form of
             // corruption of the stack has occurred and we do our best to correct
@@ -632,14 +616,14 @@ public final class PhaseTracker implements CauseStackManager {
             // to simply throw an error.
             int offset = -1;
             int i = 0;
-            for (final CauseStackFrameImpl f : this.frames) {
+            for (final SpongeCauseStackFrame f : this.frames) {
                 if (f == oldFrame) {
                     offset = i;
                     break;
                 }
                 i++;
             }
-            if (!DEBUG_CAUSE_FRAMES && offset == -1) {
+            if (!PhaseTracker.DEBUG_CAUSE_FRAMES && offset == -1) {
                 // if we're not debugging the cause frames then throw an error
                 // immediately otherwise let the pretty printer output the frame
                 // that was erroneously popped.
@@ -647,24 +631,24 @@ public final class PhaseTracker implements CauseStackManager {
             }
             final PrettyPrinter printer = new PrettyPrinter(100).add("Cause Stack Frame Corruption!").centre().hr()
                                               .add("Found %n frames left on the stack. Clearing them all.", new Object[]{offset + 1});
-            if (!DEBUG_CAUSE_FRAMES) {
+            if (!PhaseTracker.DEBUG_CAUSE_FRAMES) {
                 printer.add()
                     .add("Please add -Dsponge.debugcauseframes=true to your startup flags to enable further debugging output.");
                 SpongeCommon.getLogger().warn("  Add -Dsponge.debugcauseframes to your startup flags to enable further debugging output.");
             } else {
                 printer.add()
                     .add("Attempting to pop frame:")
-                    .add(frame.stack_debug)
+                    .add(frame.stackDebug)
                     .add()
                     .add("Frames being popped are:")
-                    .add(((CauseStackFrameImpl) oldFrame).stack_debug);
+                    .add(((SpongeCauseStackFrame) oldFrame).stackDebug);
             }
 
             while (offset >= 0) {
-                @Nullable final CauseStackFrameImpl f = this.frames.peek();
-                if (DEBUG_CAUSE_FRAMES && offset > 0) {
+                @Nullable final SpongeCauseStackFrame f = this.frames.peek();
+                if (PhaseTracker.DEBUG_CAUSE_FRAMES && offset > 0) {
                     printer.add("   Stack frame in position %n :", offset);
-                    printer.add(f.stack_debug);
+                    printer.add(f.stackDebug);
                 }
                 this.popCauseFrame(f);
                 offset--;
@@ -714,7 +698,7 @@ public final class PhaseTracker implements CauseStackManager {
         }
 
         // finally, return the frame to the pool
-        if (this.framePool.size() < MAX_POOL_SIZE) {
+        if (this.framePool.size() < PhaseTracker.MAX_POOL_SIZE) {
             // cache it, but also call clear so we remove references to
             // other objects that may go out of scope
             frame.clear();
@@ -760,7 +744,7 @@ public final class PhaseTracker implements CauseStackManager {
             throw new IllegalStateException(String.format(
                 "CauseStackManager called from off main thread (current='%s', expected='%s')!",
                 ThreadUtil.getDescription(Thread.currentThread()),
-                ThreadUtil.getDescription(SpongeCommon.getServer().getExecutionThread())
+                ThreadUtil.getDescription(SpongeCommon.getServer().getRunningThread())
             ));
         }
         this.checkProviders();

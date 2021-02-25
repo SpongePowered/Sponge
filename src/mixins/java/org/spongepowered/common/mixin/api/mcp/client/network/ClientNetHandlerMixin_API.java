@@ -25,38 +25,38 @@
 package org.spongepowered.common.mixin.api.mcp.client.network;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.client.network.login.ClientLoginNetHandler;
-import net.minecraft.client.network.play.ClientPlayNetHandler;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.minecraft.client.multiplayer.ClientHandshakePacketListenerImpl;
+import net.minecraft.client.multiplayer.ClientPacketListener;
+import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge;
-import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 
 import java.net.InetSocketAddress;
 
-@Mixin({ ClientLoginNetHandler.class, ClientPlayNetHandler.class })
+@Mixin({ ClientHandshakePacketListenerImpl.class, ClientPacketListener.class })
 public abstract class ClientNetHandlerMixin_API implements ClientSideConnection {
 
     @Override
     public void close() {
-        ((NetworkManagerHolderBridge) this).bridge$getNetworkManager().closeChannel(
-                new TranslationTextComponent("disconnect.disconnected"));
+        ((ConnectionHolderBridge) this).bridge$getConnection().disconnect(
+                new TranslatableComponent("disconnect.disconnected"));
     }
 
     @Override
     public void close(final Component reason) {
-        ((NetworkManagerHolderBridge) this).bridge$getNetworkManager().closeChannel(SpongeAdventure.asVanilla(reason));
+        ((ConnectionHolderBridge) this).bridge$getConnection().disconnect(SpongeAdventure.asVanilla(reason));
     }
 
     @Override
     public InetSocketAddress getAddress() {
-        return ((NetworkManagerBridge) ((NetworkManagerHolderBridge) this).bridge$getNetworkManager()).bridge$getAddress();
+        return ((ConnectionBridge) ((ConnectionHolderBridge) this).bridge$getConnection()).bridge$getAddress();
     }
 
     @Override
     public InetSocketAddress getVirtualHost() {
-        return ((NetworkManagerBridge) ((NetworkManagerHolderBridge) this).bridge$getNetworkManager()).bridge$getVirtualHost();
+        return ((ConnectionBridge) ((ConnectionHolderBridge) this).bridge$getConnection()).bridge$getVirtualHost();
     }
 }

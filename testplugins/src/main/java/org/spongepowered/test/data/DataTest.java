@@ -27,9 +27,12 @@ package org.spongepowered.test.data;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -56,6 +59,7 @@ import org.spongepowered.api.data.type.HorseColors;
 import org.spongepowered.api.data.type.HorseStyles;
 import org.spongepowered.api.data.type.InstrumentTypes;
 import org.spongepowered.api.data.type.LlamaTypes;
+import org.spongepowered.api.data.type.MatterTypes;
 import org.spongepowered.api.data.type.MooshroomTypes;
 import org.spongepowered.api.data.type.PandaGenes;
 import org.spongepowered.api.data.type.ParrotTypes;
@@ -67,12 +71,11 @@ import org.spongepowered.api.data.type.RailDirections;
 import org.spongepowered.api.data.type.SlabPortions;
 import org.spongepowered.api.data.type.SpellTypes;
 import org.spongepowered.api.data.type.StairShapes;
-import org.spongepowered.api.data.type.ToolTypes;
+import org.spongepowered.api.data.type.ItemTiers;
 import org.spongepowered.api.data.type.TropicalFishShapes;
 import org.spongepowered.api.data.type.VillagerTypes;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.api.data.type.WireAttachmentTypes;
-import org.spongepowered.api.data.type.WoodTypes;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.MapValue;
 import org.spongepowered.api.data.value.SetValue;
@@ -101,14 +104,15 @@ import org.spongepowered.api.item.enchantment.EnchantmentTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Axis;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.weighted.WeightedTable;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.api.world.weather.Weathers;
+import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
@@ -126,7 +130,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.function.Supplier;
 
 @Plugin("datatest")
 public final class DataTest  {
@@ -159,7 +162,7 @@ public final class DataTest  {
 
         final BlockState oldState = world.getBlock(blockPos);
 
-        world.setWeather(Weathers.CLEAR.get());
+        world.setWeather(WeatherTypes.CLEAR.get());
 
         this.checkOfferData(player, Keys.ABSORPTION, 0.0);
         this.checkOfferData(player, Keys.ABSORPTION, 10.0);
@@ -180,9 +183,9 @@ public final class DataTest  {
         final Entity minecartEntity = world.createEntity(EntityTypes.MINECART.get(), position);
         this.checkOfferData(minecartEntity, Keys.AIRBORNE_VELOCITY_MODIFIER, new Vector3d(2, 0.5, 2)); // falls at ~50% flies at -200%
 
-        final Entity zombiePigman = world.createEntity(EntityTypes.ZOMBIE_PIGMAN.get(), position);
-        this.checkGetData(zombiePigman, Keys.ANGER_LEVEL, 0);
-        this.checkOfferData(zombiePigman, Keys.ANGER_LEVEL, 10);
+        final Entity zombifiedPiglin = world.createEntity(EntityTypes.ZOMBIFIED_PIGLIN.get(), position);
+        this.checkGetData(zombifiedPiglin, Keys.ANGER_LEVEL, 0);
+        this.checkOfferData(zombifiedPiglin, Keys.ANGER_LEVEL, 10);
 
         final ItemStack goldenApple = ItemStack.of(ItemTypes.ENCHANTED_GOLDEN_APPLE);
         final List<PotionEffect> notchAppleEffects = Arrays.asList(
@@ -387,6 +390,12 @@ public final class DataTest  {
         this.checkOfferData(jungleAxe, Keys.CUSTOM_NAME, Component.text("Jungle Axe"));
         this.checkOfferData(shulkerBullet, Keys.CUSTOM_NAME, Component.text("Angry Shulker Bullet"));
 
+        final ItemStack redFlard = ItemStack.of(ItemTypes.SLIME_BLOCK);
+        checkOfferData(redFlard, Keys.CUSTOM_MODEL_DATA, 123456);
+        redFlard.offer(Keys.CUSTOM_NAME, Component.text("Red FLARD", NamedTextColor.DARK_RED));
+        redFlard.offer(Keys.LORE, Arrays.asList(Component.text("May ignite holder! Handle with care", NamedTextColor.GOLD)));
+        player.getInventory().offer(redFlard);
+
         // TODO Keys.CUSTOM_ATTACK_DAMAGE
 
         this.checkGetData(leatherBoots, Keys.DAMAGE_ABSORPTION, 1.0);
@@ -427,9 +436,17 @@ public final class DataTest  {
         this.checkGetData(acaciaStairs, Keys.DIRECTION, Direction.NORTH);
         this.checkWithData(acaciaStairs, Keys.DIRECTION, Direction.WEST);
 
-        this.checkGetData(jungleAxe, Keys.DISPLAY_NAME, Component.text("Jungle Axe"));
-        this.checkGetData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet")); // TODO entity DisplayName includes a hoverevent
-        this.checkGetData(sheep, Keys.DISPLAY_NAME, Component.text("A sheep")); // Set with CUSTOM_NAME
+        // TODO DisplayNames include font
+
+        this.checkGetData(jungleAxe, Keys.DISPLAY_NAME,
+                Component.translatable("chat.square_brackets").args(Component.empty().append(Component.text("Jungle Axe")).decorate(TextDecoration.ITALIC))
+                        .color(NamedTextColor.WHITE).hoverEvent(jungleAxe.createSnapshot().asHoverEvent()));
+        this.checkGetData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet")
+                .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("shulker_bullet"), shulkerBullet.getUniqueId(), Component.text("Angry Shulker Bullet")))
+                .insertion(shulkerBullet.getUniqueId().toString()));
+        this.checkGetData(sheep, Keys.DISPLAY_NAME, Component.text("A sheep")
+                .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("sheep"), sheep.getUniqueId(), Component.text("A sheep")))
+                .insertion(sheep.getUniqueId().toString())); // Set with CUSTOM_NAME
         world.setBlock(blockPos, BlockTypes.CHEST.get().getDefaultState());
         this.checkGetData(location, Keys.CUSTOM_NAME, null);
         this.checkGetData(location, Keys.DISPLAY_NAME, Component.translatable("container.chest"));
@@ -566,9 +583,9 @@ public final class DataTest  {
         this.checkWithData(cactusState, Keys.GROWTH_STAGE, 4);
 
 
-        this.checkGetData(obisidanState, Keys.HARDNESS, 50.0);
-        this.checkGetData(dirtState, Keys.HARDNESS, 0.5);
-        this.checkGetData(bricksState, Keys.HARDNESS, 2.0);
+        this.checkGetData(obisidanState, Keys.DESTROY_SPEED, 50.0);
+        this.checkGetData(dirtState, Keys.DESTROY_SPEED, 0.5);
+        this.checkGetData(bricksState, Keys.DESTROY_SPEED, 2.0);
 
         this.checkOfferData(armorStand, Keys.HAS_ARMS, false);
         this.checkOfferData(armorStand, Keys.HAS_ARMS, true);
@@ -723,8 +740,7 @@ public final class DataTest  {
 
         this.checkOfferData(sheep, Keys.IS_CUSTOM_NAME_VISIBLE, false);
 
-// TODO provider
-//        this.checkOfferData(fox, Keys.IS_DEFENDING, true);
+        this.checkOfferData(fox, Keys.IS_DEFENDING, true);
 
         final BlockState tripWireState = BlockTypes.TRIPWIRE.get().getDefaultState();
         this.checkWithData(tripWireState, Keys.IS_DISARMED, true);
@@ -794,7 +810,7 @@ public final class DataTest  {
         this.checkWithData(redstoneTorchState, Keys.IS_LIT, false);
         this.checkWithData(redstoneTorchState, Keys.IS_LIT, true);
 
-//        this.checkOfferData(cat, Keys.IS_LYING_DOWN, true);
+        this.checkOfferData(cat, Keys.IS_LYING_DOWN, true);
 
         final BlockState bedState = BlockTypes.BLACK_BED.get().getDefaultState();
         this.checkWithData(bedState, Keys.IS_OCCUPIED, true);
@@ -827,7 +843,7 @@ public final class DataTest  {
         this.checkGetData(tntEntity, Keys.IS_PRIMED, true);
 
         //        this.checkOfferData(cat, Keys.IS_PURRING, true);
-//        this.checkOfferData(cat, Keys.IS_RELAXED, true);
+        this.checkOfferData(cat, Keys.IS_RELAXED, true);
 
         this.checkGetData(waterBlockState, Keys.IS_REPLACEABLE, true);
         this.checkGetData(dirtState, Keys.IS_REPLACEABLE, false);
@@ -951,10 +967,9 @@ public final class DataTest  {
 //        this.checkOfferData(jungleAxe, Keys.LOCK_TOKEN, "Key");
         this.checkOfferListData(jungleAxe, Keys.LORE, Arrays.asList(Component.text("Loreline1"), Component.text("Loreline2")));
 
-// TODO NPE?
-//        this.checkGetData(dirtState, Keys.MATTER_STATE, MatterStates.SOLID.get());
-//        this.checkGetData(waterBlockState, Keys.MATTER_STATE, MatterStates.LIQUID.get());
-//        this.checkGetData(BlockTypes.AIR.get().getDefaultState(), Keys.MATTER_STATE, MatterStates.GAS.get());
+        this.checkGetData(dirtState, Keys.MATTER_TYPE, MatterTypes.SOLID.get());
+        this.checkGetData(waterBlockState, Keys.MATTER_TYPE, MatterTypes.LIQUID.get());
+        this.checkGetData(BlockTypes.AIR.get().getDefaultState(), Keys.MATTER_TYPE, MatterTypes.GAS.get());
 
 //        this.checkOfferData(player, Keys.MAX_AIR, 20);
 
@@ -1123,6 +1138,7 @@ public final class DataTest  {
         final BlockState signState = BlockTypes.SPRUCE_SIGN.get().getDefaultState();
         world.setBlock(blockPos, signState);
         final Component emptyText = Component.empty().style(Style.empty());
+        // TODO signlines component contain font
         this.checkGetListData(location, Keys.SIGN_LINES, Arrays.asList(emptyText, emptyText, emptyText, emptyText));
         final Component text = Component.text("Test").style(Style.style(NamedTextColor.RED));
         this.checkOfferListData(location, Keys.SIGN_LINES, Arrays.asList(text, text, text, text));
@@ -1131,8 +1147,7 @@ public final class DataTest  {
         this.checkOfferData(slime, Keys.SIZE, 10);
 
         final Entity human = world.createEntity(EntityTypes.HUMAN.get(), position);
-        // TODO HumanEntity#getSkinProperty NPE / offer not working?
-        //        this.checkOfferData(human, Keys.SKIN_PROFILE_PROPERTY, player.get(Keys.SKIN_PROFILE_PROPERTY).get());
+        this.checkOfferData(human, Keys.SKIN_PROFILE_PROPERTY, player.get(Keys.SKIN_PROFILE_PROPERTY).get());
 
         this.checkOfferData(dolphin, Keys.SKIN_MOISTURE, 1);
 
@@ -1199,7 +1214,7 @@ public final class DataTest  {
         this.checkOfferData(parrot, Keys.TAMER, player.getUniqueId());
         this.checkOfferData(parrot, Keys.TAMER, null);
 
-        this.checkOfferData(zombiePigman, Keys.TARGET_ENTITY, player);
+        this.checkOfferData(zombifiedPiglin, Keys.TARGET_ENTITY, player);
         this.checkOfferData(shulkerBullet, Keys.TARGET_ENTITY, sheep);
         // FishingBobber
 
@@ -1212,9 +1227,9 @@ public final class DataTest  {
 
         // Keys.TICKS_REMAINING
 
-        this.checkGetData(jungleAxe, Keys.TOOL_TYPE, ToolTypes.WOOD.get());
+        this.checkGetData(jungleAxe, Keys.TOOL_TYPE, ItemTiers.WOOD.get());
         final ItemStack diamondPick = ItemStack.of(ItemTypes.DIAMOND_PICKAXE);
-        this.checkGetData(diamondPick, Keys.TOOL_TYPE, ToolTypes.DIAMOND.get());
+        this.checkGetData(diamondPick, Keys.TOOL_TYPE, ItemTiers.DIAMOND.get());
 
         // Keys.TRACKS_OUTPUT
 
@@ -1276,83 +1291,81 @@ public final class DataTest  {
         this.checkOfferData(evoker, Keys.WOLOLO_TARGET, (Sheep) sheep);
 
         this.checkOfferData(boat, Keys.BOAT_TYPE, BoatTypes.ACACIA.get());
-        final BlockState woodState = BlockTypes.ACACIA_WOOD.get().getDefaultState();
-        this.checkGetData(woodState, Keys.WOOD_TYPE, WoodTypes.ACACIA.get());
 
         // And now test nbt data
         final EntitySnapshot snapshot = sheep.createSnapshot();
-        this.checkWithData(snapshot, Keys.DISPLAY_NAME, Component.text("Snapshot"));
+        this.checkWithData(snapshot, Keys.CUSTOM_NAME, Component.text("Snapshot"));
 
         final EntityArchetype archetype = sheep.createArchetype();
-        this.checkOfferData(archetype, Keys.DISPLAY_NAME, Component.text("Archetype"));
+        this.checkOfferData(archetype, Keys.CUSTOM_NAME, Component.text("Archetype"));
 
         world.setBlock(blockPos, oldState);
     }
 
-    private <T> void checkOfferSetData(final DataHolder.Mutable holder, final Supplier<Key<SetValue<T>>> key, final Set<T> value) {
+    private <T> void checkOfferSetData(final DataHolder.Mutable holder, final Key<SetValue<T>> key, final Set<T> value) {
         final DataTransactionResult result = holder.offer(key, value);
         if (this.checkResult(holder, key, value, result)) {
             this.checkGetSetData(holder, key, value);
         }
     }
 
-    private <T> void checkOfferListData(final DataHolder.Mutable holder, final Supplier<Key<ListValue<T>>> key, final List<T> value) {
+    private <T> void checkOfferListData(final DataHolder.Mutable holder, final Key<ListValue<T>> key, final List<T> value) {
         final DataTransactionResult result = holder.offer(key, value);
         if (this.checkResult(holder, key, value, result)) {
             this.checkGetListData(holder, key, value);
         }
     }
 
-    private <T> void checkWithData(final DataHolder.Immutable<?> holder, final Supplier<Key<Value<T>>> key, final T value) {
+    private <T> void checkWithData(final DataHolder.Immutable<?> holder, final Key<Value<T>> key, final T value) {
         final DataHolder.Immutable<?> newHolder = holder.with(key, value).get();
         this.checkGetData(newHolder, key, value);
     }
 
 
-    private <T> void checkOfferData(final DataHolder.Mutable holder, final Supplier<Key<Value<T>>> key, final T value) {
+    private <T> void checkOfferData(final DataHolder.Mutable holder, final Key<Value<T>> key, final T value) {
         final DataTransactionResult result = holder.offer(key, value);
         if (this.checkResult(holder, key, value, result)) {
             this.checkGetData(holder, key, value);
         }
     }
 
-    private <V extends Value<?>> boolean checkResult(final DataHolder.Mutable holder, final Supplier<Key<V>> key, final Object value, final DataTransactionResult result) {
+    private <V extends Value<?>> boolean checkResult(final DataHolder.Mutable holder, final Key<V> key, final Object value, final DataTransactionResult result) {
         if (!result.isSuccessful()) {
-            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.get().getKey()
+            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.getKey()
                     .asString(), value);
             return true;
         }
         return false;
     }
 
-    private <T> void checkGetWeightedData(final DataHolder holder, final Supplier<Key<WeightedCollectionValue<T>>> key, final List<T> expected) {
+    private <T> void checkGetWeightedData(final DataHolder holder, final Key<WeightedCollectionValue<T>> key, final List<T> expected) {
         final Optional<WeightedTable<T>> gotValue = holder.get(key);
         if (gotValue.isPresent()) {
             final List<T> actual = gotValue.get().get(new Random());
             if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
                 this.plugin.getLogger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
-                        key.get().getKey().asString(), expected, actual);
+                        key.getKey().asString(), expected, actual);
             }
         } else {
             this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder),
-                    key.get().getKey().asString(), expected);
+                    key.getKey().asString(), expected);
         }
     }
 
-    private <T> void checkGetListData(final DataHolder holder, final Supplier<Key<ListValue<T>>> key, final List<T> expected) {
-        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    private <T> void checkGetListData(final DataHolder holder, final Key<ListValue<T>> key, final List<T> expected) {
+        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
-    private <T> void checkGetSetData(final DataHolder holder, final Supplier<Key<SetValue<T>>> key, final Set<T> expected) {
-        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    private <T> void checkGetSetData(final DataHolder holder, final Key<SetValue<T>> key, final Set<T> expected) {
+        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
-    private <K, V> void checkGetMapData(final DataHolder holder, final Supplier<Key<MapValue<K, V>>> key, final Map<K, V> expected) {
-        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    private <K, V> void checkGetMapData(final DataHolder holder, final Key<MapValue<K, V>> key, final Map<K, V> expected) {
+        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
-    private <T> void checkGetData(final DataHolder holder, final Supplier<Key<Value<T>>> key, final T expected) {
-        this.checkData(holder, key.get().getKey().asString(), expected, holder.get(key).orElse(null));
+    private <T> void checkGetData(final DataHolder holder, final Key<Value<T>> key, final T expected) {
+        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
     }
 
     private <T> void checkData(final DataHolder holder, final String key, final T expectedValue, @Nullable final T actualValue) {
@@ -1369,9 +1382,9 @@ public final class DataTest  {
     private static String getHolderName(final DataHolder holder) {
         String value = "";
         if (holder instanceof BlockState) {
-            value = ((BlockState) holder).getType().getKey().getValue();
+            value = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.getGame().registries(), ((BlockState) holder).getType()).getValue();
         } else if (holder instanceof ItemStack) {
-            value = ((ItemStack) holder).getType().getKey().getValue();
+            value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.getGame().registries(), ((ItemStack) holder).getType()).getValue();
         }
         return String.format("%s[%s]", holder.getClass().getSimpleName(), value);
     }

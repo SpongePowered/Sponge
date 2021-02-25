@@ -28,19 +28,17 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.EventContextKey;
-import org.spongepowered.common.util.TypeTokenHelper;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
 
 import javax.annotation.Nullable;
 
-@SuppressWarnings("UnstableApiUsage")
-public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Builder<T> {
+public final class SpongeEventContextKeyBuilder<T> extends AbstractResourceKeyedBuilder<EventContextKey<T>, EventContextKey.Builder<T>> implements EventContextKey.Builder<T> {
 
     @Nullable Type typeClass;
-    @Nullable ResourceKey key;
 
     @SuppressWarnings("unchecked")
     @Override
@@ -54,30 +52,19 @@ public final class SpongeEventContextKeyBuilder<T> implements EventContextKey.Bu
     @Override
     public <N> SpongeEventContextKeyBuilder<N> type(final Class<N> aClass) {
         checkArgument(aClass != null, "Class cannot be null!");
-        this.typeClass = TypeTokenHelper.requireCompleteGenerics(aClass);
+        this.typeClass = TypeTokenUtil.requireCompleteGenerics(aClass);
         return (SpongeEventContextKeyBuilder<N>) this;
     }
 
     @Override
-    public EventContextKey.Builder<T> key(ResourceKey key) {
-        checkArgument(key != null, "CatalogKey cannot be null!");
-        this.key = key;
-        return this;
-    }
-
-    @Override
-    public EventContextKey<T> build() {
+    public EventContextKey<T> build0() {
         checkState(this.typeClass != null, "Allowed type cannot be null!");
-        checkState(this.key != null, "ID cannot be null!");
-        checkState(!this.key.toString().isEmpty(), "ID cannot be empty!");
-        final SpongeEventContextKey<T> key = new SpongeEventContextKey<>(this);
-        return key;
+        return new SpongeEventContextKey<>(this);
     }
 
     @Override
     public SpongeEventContextKeyBuilder<T> reset() {
         this.typeClass = null;
-        this.key = null;
         return this;
     }
 }

@@ -30,8 +30,8 @@ import static com.google.common.base.Preconditions.checkState;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.cause.entity.damage.source.BlockDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSourceBuilder;
-import org.spongepowered.api.world.ServerLocation;
-import org.spongepowered.common.accessor.util.DamageSourceAccessor;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
 
 public final class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBuilder<BlockDamageSource, BlockDamageSource.Builder> implements BlockDamageSource.Builder {
@@ -57,28 +57,28 @@ public final class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBu
         checkState(this.location != null);
         checkState(this.blockSnapshot != null);
         checkState(this.damageType != null);
-        final MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getKey().getFormatted(), this.location);
+        final MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getName(), this.location);
         final DamageSourceAccessor accessor = (DamageSourceAccessor) (Object) damageSource;
         if (this.absolute) {
-            accessor.accessor$setDamageIsAbsolute();
+            accessor.invoker$bypassMagic();
         }
         if (this.bypasses) {
-            accessor.accessor$setDamageBypassesArmor();
+            accessor.invoker$bypassArmor();
         }
         if (this.scales) {
-            damageSource.setDifficultyScaled();
+            damageSource.setScalesWithDifficulty();
         }
         if (this.explosion) {
             damageSource.setExplosion();
         }
         if (this.magical) {
-            damageSource.setMagicDamage();
+            damageSource.setMagic();
         }
         if (this.creative) {
-            accessor.accessor$setDamageAllowedInCreativeMode();
+            accessor.invoker$bypassInvul();
         }
         if (this.exhaustion != null) {
-            accessor.accessor$setHungerDamage(this.exhaustion.floatValue());
+            accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
         return (BlockDamageSource) (Object) damageSource;
     }

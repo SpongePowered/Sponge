@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.network.channel.packet;
 
-import net.minecraft.network.IPacket;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
@@ -80,7 +79,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
     static final int TYPE_DYNAMIC_RESPONSE = 4;
 
     static final int TYPE_BITS = 3; // 3 bits are reserved for types
-    static final int TYPE_MASK = (1 << TYPE_BITS) - 1;
+    static final int TYPE_MASK = (1 << SpongePacketChannel.TYPE_BITS) - 1;
 
     /**
      * A value which is used when "not" a dynamic opcode is represented.
@@ -105,20 +104,20 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final EngineConnectionSide<?> side = connection.getSide();
 
         final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
-        final Supplier<IPacket<?>> mcPacketSupplier;
+        final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (isLoginPhase) {
             if (side == EngineConnectionSide.CLIENT) {
                 payload.writeString(this.getKey().getFormatted());
-                payload.writeVarLong(packTypeAndValue(TYPE_REQUEST, transactionId));
+                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, transactionId));
                 payload.writeVarInt(binding.getOpcode());
                 mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
             } else {
-                payload.writeVarLong(packTypeAndValue(TYPE_REQUEST, binding.getOpcode()));
+                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, binding.getOpcode()));
                 mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(this.getKey(), payload, transactionId);
             }
         } else {
-            payload.writeVarLong(packTypeAndValue(TYPE_REQUEST, transactionId));
+            payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, transactionId));
             payload.writeVarInt(binding.getOpcode());
             mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.getKey(), payload, side);
         }
@@ -135,7 +134,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             transactionStore.put(transactionId, this, transactionData);
         }
 
-        final IPacket<?> mcPacket = mcPacketSupplier.get();
+        final net.minecraft.network.protocol.Packet<?> mcPacket = mcPacketSupplier.get();
         PacketSender.sendTo(connection, mcPacket, sendFuture -> {
             if (!sendFuture.isSuccess()) {
                 this.handleException(connection, sendFuture.cause(), future);
@@ -156,21 +155,21 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final EngineConnectionSide<?> side = connection.getSide();
 
         final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
-        final Supplier<IPacket<?>> mcPacketSupplier;
+        final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (packet == null || requestBinding instanceof SpongeFixedTransactionalPacketBinding) {
-            final int type = packet == null ? TYPE_NO_RESPONSE : TYPE_RESPONSE;
+            final int type = packet == null ? SpongePacketChannel.TYPE_NO_RESPONSE : SpongePacketChannel.TYPE_RESPONSE;
             if (isLoginPhase) {
                 if (side == EngineConnectionSide.CLIENT) {
-                    payload.writeVarLong(packTypeAndValue(type, 0));
+                    payload.writeVarLong(SpongePacketChannel.packTypeAndValue(type, 0));
                     mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(payload, transactionId);
                 } else {
-                    payload.writeVarLong(packTypeAndValue(type, transactionId));
+                    payload.writeVarLong(SpongePacketChannel.packTypeAndValue(type, transactionId));
                     mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(
                             this.getKey(), payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
                 }
             } else {
-                payload.writeVarLong(packTypeAndValue(type, transactionId));
+                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(type, transactionId));
                 mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.getKey(), payload, side);
             }
         } else {
@@ -178,16 +177,16 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             final int opcode = this.requireBinding(packet.getClass()).getOpcode();
             if (isLoginPhase) {
                 if (side == EngineConnectionSide.CLIENT) {
-                    payload.writeVarLong(packTypeAndValue(TYPE_DYNAMIC_RESPONSE, opcode));
+                    payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_DYNAMIC_RESPONSE, opcode));
                     mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(payload, transactionId);
                 } else {
-                    payload.writeVarLong(packTypeAndValue(TYPE_DYNAMIC_RESPONSE, transactionId));
+                    payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_DYNAMIC_RESPONSE, transactionId));
                     payload.writeVarInt(opcode);
                     mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(
                             this.getKey(), payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
                 }
             } else {
-                payload.writeVarLong(packTypeAndValue(TYPE_DYNAMIC_RESPONSE, transactionId));
+                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_DYNAMIC_RESPONSE, transactionId));
                 payload.writeVarInt(opcode);
                 mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.getKey(), payload, side);
             }
@@ -200,7 +199,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             return;
         }
 
-        final IPacket<?> mcPacket = mcPacketSupplier.get();
+        final net.minecraft.network.protocol.Packet<?> mcPacket = mcPacketSupplier.get();
         PacketSender.sendTo(connection, mcPacket);
     }
 
@@ -212,20 +211,20 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final EngineConnectionSide<?> side = connection.getSide();
 
         final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
-        final Supplier<IPacket<?>> mcPacketSupplier;
+        final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (isLoginPhase) {
             if (side == EngineConnectionSide.CLIENT) {
                 payload.writeString(this.getKey().getFormatted());
-                payload.writeVarLong(packTypeAndValue(TYPE_NORMAL, binding.getOpcode()));
+                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.getOpcode()));
                 mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
             } else {
-                payload.writeVarLong(packTypeAndValue(TYPE_NORMAL, binding.getOpcode()));
+                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.getOpcode()));
                 final int transactionId = ConnectionUtil.getTransactionStore(connection).nextId();
                 mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(this.getKey(), payload, transactionId);
             }
         } else {
-            payload.writeVarLong(packTypeAndValue(TYPE_NORMAL, binding.getOpcode()));
+            payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.getOpcode()));
             mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.getKey(), payload, side);
         }
 
@@ -236,7 +235,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             return;
         }
 
-        final IPacket<?> mcPacket = mcPacketSupplier.get();
+        final net.minecraft.network.protocol.Packet<?> mcPacket = mcPacketSupplier.get();
         PacketSender.sendTo(connection, mcPacket, future);
     }
 
@@ -312,12 +311,12 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                     @Override
                     protected void fail0(final ChannelException exception) {
                         // TODO: Use response failure?
-                        sendResponsePacketTo(connection, null, null, transactionId);
+                        SpongePacketChannel.this.sendResponsePacketTo(connection, null, null, transactionId);
                     }
 
                     @Override
                     protected void success0(final Packet response) {
-                        sendResponsePacketTo(connection, (SpongeTransactionalPacketBinding) binding, response, transactionId);
+                        SpongePacketChannel.this.sendResponsePacketTo(connection, (SpongeTransactionalPacketBinding) binding, response, transactionId);
                     }
                 };
                 try {
@@ -348,19 +347,19 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
     protected void handlePlayPayload(final EngineConnection connection, final ChannelBuf payload) {
         final long typeAndValue = payload.readVarLong();
 
-        final int type = extractType(typeAndValue);
-        final int value = extractValue(typeAndValue);
+        final int type = SpongePacketChannel.extractType(typeAndValue);
+        final int value = SpongePacketChannel.extractValue(typeAndValue);
 
-        if (type == TYPE_NORMAL) {
+        if (type == SpongePacketChannel.TYPE_NORMAL) {
             this.handleNormalPacket(connection, value, payload);
-        } else if (type == TYPE_REQUEST) {
+        } else if (type == SpongePacketChannel.TYPE_REQUEST) {
             final int opcode = payload.readVarInt();
             this.handleRequestPacket(connection, opcode, value, payload);
-        } else if (type == TYPE_RESPONSE) {
-            this.handleResponsePacket(connection, value, payload, NO_DYNAMIC_OPCODE);
-        } else if (type == TYPE_NO_RESPONSE) {
-            this.handleResponsePacket(connection, value, null, NO_DYNAMIC_OPCODE);
-        } else if (type == TYPE_DYNAMIC_RESPONSE) {
+        } else if (type == SpongePacketChannel.TYPE_RESPONSE) {
+            this.handleResponsePacket(connection, value, payload, SpongePacketChannel.NO_DYNAMIC_OPCODE);
+        } else if (type == SpongePacketChannel.TYPE_NO_RESPONSE) {
+            this.handleResponsePacket(connection, value, null, SpongePacketChannel.NO_DYNAMIC_OPCODE);
+        } else if (type == SpongePacketChannel.TYPE_DYNAMIC_RESPONSE) {
             final int opcode = payload.readVarInt();
             this.handleResponsePacket(connection, value, payload, opcode);
         } else {
@@ -372,18 +371,18 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
     protected void handleLoginRequestPayload(final EngineConnection connection, final int transactionId, final ChannelBuf payload) {
         final long typeAndValue = payload.readVarLong();
 
-        final int type = extractType(typeAndValue);
-        final int value = extractValue(typeAndValue);
+        final int type = SpongePacketChannel.extractType(typeAndValue);
+        final int value = SpongePacketChannel.extractValue(typeAndValue);
 
-        if (type == TYPE_NORMAL) {
+        if (type == SpongePacketChannel.TYPE_NORMAL) {
             this.handleNormalPacket(connection, value, payload);
-        } else if (type == TYPE_REQUEST) {
+        } else if (type == SpongePacketChannel.TYPE_REQUEST) {
             this.handleRequestPacket(connection, value, transactionId, payload);
-        } else if (type == TYPE_RESPONSE) {
-            this.handleResponsePacket(connection, transactionId, payload, NO_DYNAMIC_OPCODE);
-        } else if (type == TYPE_NO_RESPONSE) {
-            this.handleResponsePacket(connection, transactionId, null, NO_DYNAMIC_OPCODE);
-        } else if (type == TYPE_DYNAMIC_RESPONSE) {
+        } else if (type == SpongePacketChannel.TYPE_RESPONSE) {
+            this.handleResponsePacket(connection, transactionId, payload, SpongePacketChannel.NO_DYNAMIC_OPCODE);
+        } else if (type == SpongePacketChannel.TYPE_NO_RESPONSE) {
+            this.handleResponsePacket(connection, transactionId, null, SpongePacketChannel.NO_DYNAMIC_OPCODE);
+        } else if (type == SpongePacketChannel.TYPE_DYNAMIC_RESPONSE) {
             this.handleResponsePacket(connection, transactionId, payload, value);
         } else {
             this.handleException(connection, new ChannelIOException("Unknown packet type: " + type), null);
@@ -396,19 +395,20 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             final ChannelBuf payload = result.getPayload();
             final long typeAndValue = payload.readVarLong();
 
-            final int type = extractType(typeAndValue);
-            final int value = extractValue(typeAndValue);
+            final int type = SpongePacketChannel.extractType(typeAndValue);
+            final int value = SpongePacketChannel.extractValue(typeAndValue);
 
-            if (type == TYPE_RESPONSE ||
-                    type == TYPE_NO_RESPONSE ||
-                    type == TYPE_DYNAMIC_RESPONSE) {
+            if (type == SpongePacketChannel.TYPE_RESPONSE ||
+                    type == SpongePacketChannel.TYPE_NO_RESPONSE ||
+                    type == SpongePacketChannel.TYPE_DYNAMIC_RESPONSE) {
                 final TransactionData<RequestPacket<Packet>, Packet> transactionData =
                         (TransactionData<RequestPacket<Packet>, Packet>) stored;
-                if (type == TYPE_RESPONSE) {
-                    this.handleTransactionResponse(connection, transactionData, result, NO_DYNAMIC_OPCODE);
-                } else if (type == TYPE_NO_RESPONSE) {
+                if (type == SpongePacketChannel.TYPE_RESPONSE) {
+                    this.handleTransactionResponse(connection, transactionData, result, SpongePacketChannel.NO_DYNAMIC_OPCODE);
+                } else if (type == SpongePacketChannel.TYPE_NO_RESPONSE) {
                     this.handleTransactionResponse(connection, transactionData,
-                            TransactionResult.failure(new NoResponseException()), NO_DYNAMIC_OPCODE);
+                            TransactionResult.failure(new NoResponseException()), SpongePacketChannel.NO_DYNAMIC_OPCODE
+                    );
                 } else {
                     this.handleTransactionResponse(connection, transactionData, result, value);
                 }
@@ -426,7 +426,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
             SpongePacketBinding<R> responseBinding = null;
 
             final Supplier<R> packetSupplier;
-            if (dynamicOpcode != NO_DYNAMIC_OPCODE) {
+            if (dynamicOpcode != SpongePacketChannel.NO_DYNAMIC_OPCODE) {
                 responseBinding = (SpongePacketBinding<R>) this.requireBinding(dynamicOpcode);
                 packetSupplier = responseBinding.getPacketConstructor();
             } else if (transactionData.binding instanceof SpongeFixedTransactionalPacketBinding) {
@@ -461,14 +461,14 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
     }
 
     private static long packTypeAndValue(final int type, final int value) {
-        return type | value << TYPE_BITS;
+        return type | value << SpongePacketChannel.TYPE_BITS;
     }
 
     private static int extractType(final long typeAndValue) {
-        return (int) (typeAndValue & TYPE_MASK);
+        return (int) (typeAndValue & SpongePacketChannel.TYPE_MASK);
     }
 
     private static int extractValue(final long typeAndValue) {
-        return (int) (typeAndValue >>> TYPE_BITS);
+        return (int) (typeAndValue >>> SpongePacketChannel.TYPE_BITS);
     }
 }

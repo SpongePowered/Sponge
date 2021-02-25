@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.bridge.block;
 
-import net.minecraft.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import net.minecraft.world.level.block.Block;
 
 /**
  * A quasi interface to mix into every possible {@link Block} such that their
@@ -132,7 +132,7 @@ public interface BlockBridge {
 
     void bridge$initializeTrackerState();
 
-    default BiConsumer<CauseStackManager.StackFrame, ServerWorldBridge> bridge$getTickFrameModifier() {
+    default BiConsumer<CauseStackManager.StackFrame, ServerLevelBridge> bridge$getTickFrameModifier() {
         return (frame, world) -> {
         };
     }

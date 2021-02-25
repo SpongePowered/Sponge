@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.ICriterionInstance;
+import net.minecraft.advancements.CriterionTriggerInstance;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,7 +38,7 @@ import java.util.Optional;
 @Mixin(Criterion.class)
 public abstract class CriterionMixin_API implements DefaultedAdvancementCriterion {
 
-    @Shadow @Final private ICriterionInstance criterionInstance;
+    @Shadow @Final private CriterionTriggerInstance trigger;
 
     @Override
     public String getName() {
@@ -47,6 +47,6 @@ public abstract class CriterionMixin_API implements DefaultedAdvancementCriterio
 
     @Override
     public Optional<FilteredTrigger<?>> getTrigger() {
-        return Optional.ofNullable((FilteredTrigger<?>) this.criterionInstance);
+        return Optional.ofNullable((FilteredTrigger<?>) this.trigger);
     }
 }

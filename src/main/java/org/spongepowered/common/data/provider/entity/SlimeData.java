@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.monster.SlimeEntity;
+import net.minecraft.world.entity.monster.Slime;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.monster.SlimeEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.monster.SlimeAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class SlimeData {
@@ -37,12 +37,12 @@ public final class SlimeData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(SlimeEntity.class)
+                .asMutable(Slime.class)
                     .create(Keys.SCALE)
-                        .get(h -> (double) (0.255F * (float) h.getSlimeSize()))
+                        .get(h -> (double) (0.255F * (float) h.getSize()))
                     .create(Keys.SIZE)
-                        .get(h -> h.getSlimeSize() - 1)
-                        .set((h, v) -> ((SlimeEntityAccessor) h).accessor$setSlimeSize(v + 1, false));
+                        .get(h -> h.getSize() - 1)
+                        .set((h, v) -> ((SlimeAccessor) h).invoker$setSize(v + 1, false));
     }
     // @formatter:on
 }

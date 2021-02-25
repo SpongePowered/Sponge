@@ -29,11 +29,15 @@ import com.google.common.collect.Maps;
 import cpw.mods.modlauncher.api.IEnvironment;
 import cpw.mods.modlauncher.api.ITransformationService;
 import cpw.mods.modlauncher.api.ITransformer;
-import net.minecraftforge.accesstransformer.AccessTransformerEngine;
+import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.asm.launch.MixinLaunchPlugin;
+import org.spongepowered.asm.service.modlauncher.MixinServiceModLauncher;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 import org.spongepowered.vanilla.applaunch.Main;
+import org.spongepowered.vanilla.applaunch.service.AccessWidenerLaunchService;
 import org.spongepowered.vanilla.installer.Constants;
 
 import java.nio.file.Path;
@@ -41,9 +45,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.jar.Attributes;
-
-import javax.annotation.Nonnull;
 
 public final class VanillaPlatformService implements ITransformationService {
 
@@ -51,9 +52,8 @@ public final class VanillaPlatformService implements ITransformationService {
 
     private static final VanillaPluginEngine pluginEngine = Main.getInstance().getPluginEngine();
 
-    @Nonnull
     @Override
-    public String name() {
+    public @NonNull String name() {
         return VanillaPlatformService.NAME;
     }
 
@@ -71,26 +71,43 @@ public final class VanillaPlatformService implements ITransformationService {
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
         VanillaPlatformService.pluginEngine.locatePluginResources();
         VanillaPlatformService.pluginEngine.createPluginCandidates();
+        final ILaunchPluginService accessWidener = environment.findLaunchPlugin(AccessWidenerLaunchService.NAME).orElse(null);
+        final ILaunchPluginService mixin = environment.findLaunchPlugin(MixinLaunchPlugin.NAME).orElse(null);
+
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
-        for (final Map.Entry<String, List<PluginResource>> resourcesEntry : pluginEngine.getResources().entrySet()) {
+        for (final Map.Entry<String, List<PluginResource>> resourcesEntry : VanillaPlatformService.pluginEngine.getResources().entrySet()) {
             final List<PluginResource> resources = resourcesEntry.getValue();
             for (final PluginResource resource : resources) {
 
                 // Handle Access Transformers
-                if (resource instanceof JVMPluginResource) {
-                    ((JVMPluginResource) resource).getManifest().ifPresent(manifest -> {
-                        final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.AT);
-                        if (atFiles != null) {
-                            for (final String atFile : atFiles.split(",")) {
-                                if (!atFile.endsWith(".cfg")) {
-                                    continue;
+                if ((accessWidener != null || mixin != null) && resource instanceof JVMPluginResource) {
+                    if (mixin != null) {
+                        // Offer jar to the Mixin service
+                        mixin.offerResource(resource.getPath(), resource.getPath().getFileName().toString());
+                    }
+
+                    // Offer jar to the AW service
+                        ((JVMPluginResource) resource).getManifest().ifPresent(manifest -> {
+                            if (accessWidener != null) {
+                                final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.ACCESS_WIDENER);
+                                if (atFiles != null) {
+                                    for (final String atFile : atFiles.split(",")) {
+                                        if (!atFile.endsWith(".accesswidener")) {
+                                            continue;
+                                        }
+                                        accessWidener.offerResource(resource.getFileSystem().getPath(atFile), atFile);
+                                    }
                                 }
-                                AccessTransformerEngine.INSTANCE.addResource(resource.getFileSystem().getPath("META-INF").resolve(atFile), atFile);
                             }
-                        }
-                    });
+                            if (mixin != null && manifest.getMainAttributes().getValue(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS) != null) {
+                                VanillaPlatformService.pluginEngine.getPluginEnvironment().getLogger().warn(
+                                    "Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the "
+                                    + "problem to Sponge!", resource.getPath()
+                                );
+                            }
+                        });
                 }
 
                 final Map.Entry<String, Path> entry = Maps.immutableEntry(resource.getPath().getFileName().toString(), resource.getPath());
@@ -116,16 +133,15 @@ public final class VanillaPlatformService implements ITransformationService {
                 .getLogger().info("Plugin language loader '{}' found.", k));
     }
 
-    @Nonnull
     @Override
-    public List<ITransformer> transformers() {
+    public @NonNull List<ITransformer> transformers() {
         return ImmutableList.of();
     }
 
     private String getCodeSource() {
         try {
             return this.getClass().getProtectionDomain().getCodeSource().getLocation().toString();
-        } catch (Throwable th) {
+        } catch (final Throwable th) {
             return "Unknown";
         }
     }

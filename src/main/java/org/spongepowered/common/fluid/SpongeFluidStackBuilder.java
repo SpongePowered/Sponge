@@ -36,6 +36,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.util.Constants;
 
 import java.util.LinkedHashMap;
@@ -103,10 +104,11 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<@NonNull FluidS
             return Optional.empty();
         }
         this.reset();
-        final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
-        final Optional<FluidType> fluidType = Sponge.getRegistry().getCatalogRegistry().get(FluidType.class, ResourceKey.resolve(fluidId));
+        final String rawFluid = container.getString(Constants.Fluids.FLUID_TYPE).get();
+
+        final Optional<FluidType> fluidType = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
         if (!fluidType.isPresent()) {
-            throw new InvalidDataException("Invalid fluid id found: " + fluidId);
+            throw new InvalidDataException("Invalid fluid id found: " + rawFluid);
         }
         this.fluidType = fluidType.get();
         this.volume = container.getInt(Constants.Fluids.FLUID_VOLUME).get();

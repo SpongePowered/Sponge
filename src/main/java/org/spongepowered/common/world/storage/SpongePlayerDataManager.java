@@ -25,14 +25,11 @@
 package org.spongepowered.common.world.storage;
 
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.data.persistence.NbtTranslator;
+import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
@@ -53,6 +50,8 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
 import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
 
 public final class SpongePlayerDataManager {
 
@@ -68,7 +67,8 @@ public final class SpongePlayerDataManager {
 
     public void load() {
         try {
-            this.playersDirectory = ((SpongeWorldManager) this.server.getWorldManager()).getSavesDirectory().resolve("data").resolve(SPONGE_DATA);
+            this.playersDirectory = ((SpongeWorldManager) this.server.getWorldManager()).getDefaultWorldDirectory().resolve("data").resolve(
+                SpongePlayerDataManager.SPONGE_DATA);
             Files.createDirectories(this.playersDirectory);
 
             final List<Path> playerFiles = new ArrayList<>();
@@ -81,11 +81,11 @@ public final class SpongePlayerDataManager {
             }
             for (final Path playerFile : playerFiles) {
                 if (Files.isReadable(playerFile)) {
-                    final CompoundNBT compound;
+                    final CompoundTag compound;
 
                     try (final InputStream stream = Files.newInputStream(playerFile)) {
-                        compound = CompressedStreamTools.readCompressed(stream);
-                    } catch (Exception e) {
+                        compound = NbtIo.readCompressed(stream);
+                    } catch (final Exception e) {
                         throw new RuntimeException("Failed to decompress playerdata for playerfile " + playerFile, e);
                     }
 
@@ -93,7 +93,7 @@ public final class SpongePlayerDataManager {
                         throw new RuntimeException("Failed to decompress player data within [" + playerFile + "]!");
                     }
 
-                    final DataContainer container = NbtTranslator.getInstance().translateFrom(compound);
+                    final DataContainer container = NBTTranslator.INSTANCE.translateFrom(compound);
                     final SpongePlayerData data = container.getSerializable(DataQuery.of(), SpongePlayerData.class).get();
                     this.playerDataByUniqueId.put(data.getUniqueId(), data);
                 }
@@ -105,26 +105,26 @@ public final class SpongePlayerDataManager {
         }
     }
 
-    public void readPlayerData(final CompoundNBT compound, @Nullable UUID playerUniqueId, @Nullable Instant creation) {
+    public void readPlayerData(final CompoundTag compound, @Nullable UUID playerUniqueId, @Nullable Instant creation) {
         if (creation == null) {
             creation = Instant.now();
         }
         Instant lastPlayed = Instant.now();
         // first try to migrate bukkit join data stuff
         if (compound.contains(Constants.Bukkit.BUKKIT, Constants.NBT.TAG_COMPOUND)) {
-            final CompoundNBT bukkitCompound = compound.getCompound(Constants.Bukkit.BUKKIT);
+            final CompoundTag bukkitCompound = compound.getCompound(Constants.Bukkit.BUKKIT);
             creation = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_FIRST_PLAYED));
             lastPlayed = Instant.ofEpochMilli(bukkitCompound.getLong(Constants.Bukkit.BUKKIT_LAST_PLAYED));
         }
         // migrate canary join data
         if (compound.contains(Constants.Canary.ROOT, Constants.NBT.TAG_COMPOUND)) {
-            final CompoundNBT canaryCompound = compound.getCompound(Constants.Canary.ROOT);
+            final CompoundTag canaryCompound = compound.getCompound(Constants.Canary.ROOT);
             creation = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.FIRST_JOINED));
             lastPlayed = Instant.ofEpochMilli(canaryCompound.getLong(Constants.Canary.LAST_JOINED));
         }
         if (playerUniqueId == null) {
-            if (compound.hasUniqueId(Constants.UUID)) {
-                playerUniqueId = compound.getUniqueId(Constants.UUID);
+            if (compound.hasUUID(Constants.UUID)) {
+                playerUniqueId = compound.getUUID(Constants.UUID);
             }
         }
         if (playerUniqueId != null) {
@@ -140,7 +140,7 @@ public final class SpongePlayerDataManager {
         }
     }
 
-    public void savePlayer(final UUID uniqueId) {
+    public void saveSpongePlayerData(final UUID uniqueId) {
         if (uniqueId == null) {
             throw new IllegalArgumentException("Player unique id cannot be null!");
         }
@@ -153,11 +153,11 @@ public final class SpongePlayerDataManager {
         }
     }
 
-    private CompoundNBT createCompoundFor(final SpongePlayerData data) {
-        return NbtTranslator.getInstance().translate(data.toContainer());
+    private CompoundTag createCompoundFor(final SpongePlayerData data) {
+        return NBTTranslator.INSTANCE.translate(data.toContainer());
     }
 
-    private void saveFile(final String id, final CompoundNBT compound) {
+    private void saveFile(final String id, final CompoundTag compound) {
         try {
             // Ensure that where we want to put this at ALWAYS exists
             Files.createDirectories(this.playersDirectory);
@@ -165,7 +165,7 @@ public final class SpongePlayerDataManager {
             final Path finalDatPath = this.playersDirectory.resolve(id + ".dat");
             final Path newDatPath = this.playersDirectory.resolve(id + ".dat.tmp");
             try (final OutputStream stream = Files.newOutputStream(newDatPath, StandardOpenOption.CREATE)) {
-                CompressedStreamTools.writeCompressed(compound, stream);
+                NbtIo.writeCompressed(compound, stream);
             }
             Files.move(newDatPath, finalDatPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {

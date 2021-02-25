@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.accessor.world.WorldAccessor;
+import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Iterator;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect implements ProcessingSideEffect {
 
@@ -50,25 +50,26 @@ public final class RemoveProposedTileEntitiesDuringSetIfWorldProcessingEffect im
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag
+        final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
-        final ServerWorld serverWorld = pipeline.getServerWorld();
-        final @Nullable TileEntity tileEntity = oldState.tileEntity;
+        final ServerLevel serverWorld = pipeline.getServerWorld();
+        final @Nullable BlockEntity tileEntity = oldState.tileEntity;
         final BlockPos pos = oldState.pos;
         if (tileEntity == null || tileEntity.isRemoved()) {
             return EffectResult.NULL_RETURN;
         }
-        if (((WorldAccessor) serverWorld).accessor$getProcessingLoadedTiles()) {
-            final Iterator<TileEntity> iterator = ((WorldAccessor) serverWorld).accessor$getAddedTileEntityList().iterator();
+        if (((LevelAccessor) serverWorld).accessor$updatingBlockEntities()) {
+            final Iterator<BlockEntity> iterator = ((LevelAccessor) serverWorld).accessor$pendingBlockEntities().iterator();
 
             while(iterator.hasNext()) {
-                final TileEntity tileentity = iterator.next();
-                if (tileentity.getPos().equals(pos)) {
-                    tileentity.remove();
+                final BlockEntity tileentity = iterator.next();
+                if (tileentity.getBlockPos().equals(pos)) {
+                    tileentity.setRemoved();
                     iterator.remove();
                 }
             }
-            serverWorld.loadedTileEntityList.add(tileEntity);
+            serverWorld.blockEntityList.add(tileEntity);
             return EffectResult.NULL_RETURN;
         }
         return EffectResult.NULL_PASS;

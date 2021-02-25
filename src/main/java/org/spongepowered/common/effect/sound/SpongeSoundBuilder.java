@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.effect.sound;
 
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.SoundEvent;
-import org.spongepowered.api.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.sounds.SoundEvent;
 import org.spongepowered.api.effect.sound.SoundType;
-import org.spongepowered.common.util.SpongeCatalogBuilder;
+import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
-public final class SpongeSoundBuilder extends SpongeCatalogBuilder<SoundType, SoundType.Builder> implements SoundType.Builder {
+public final class SpongeSoundBuilder extends AbstractResourceKeyedBuilder<SoundType, SoundType.Builder> implements SoundType.Builder {
 
     @Override
-    protected SoundType build(ResourceKey key) {
-        return (SoundType) new SoundEvent((ResourceLocation) (Object) key);
+    public SoundType build0() {
+        return (SoundType) new SoundEvent((ResourceLocation) (Object) this.key);
     }
 }

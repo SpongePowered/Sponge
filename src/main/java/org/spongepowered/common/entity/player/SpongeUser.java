@@ -29,17 +29,10 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
-import net.minecraft.inventory.EnderChestInventory;
-import net.minecraft.inventory.EquipmentSlotType;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.CompressedStreamTools;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.util.registry.Registry;
-import net.minecraft.world.dimension.DimensionType;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataSerializable;
 import org.spongepowered.api.data.persistence.Queries;
@@ -60,28 +53,26 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.RespawnLocation;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.storage.SaveHandlerAccessor;
+import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
-import org.spongepowered.common.bridge.data.CustomDataHolderBridge;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.data.InvulnerableTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.entity.player.BedLocationHolderBridge;
+import org.spongepowered.common.bridge.world.entity.player.BedLocationHolderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.service.server.permission.BridgeSubject;
 import org.spongepowered.common.service.server.permission.SubjectHelper;
-import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
-import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -94,8 +85,19 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
+import javax.annotation.Nullable;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.inventory.PlayerEnderChestContainer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageSource;
+
 public final class SpongeUser implements User, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder, BridgeSubject, SubjectBridge,
-        DataCompoundHolder, InvulnerableTrackedBridge, VanishableBridge, GameProfileHolderBridge {
+        DataCompoundHolder, VanishableBridge, GameProfileHolderBridge {
 
     public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
     public static final Set<SpongeUser> initializedUsers = ConcurrentHashMap.newKeySet();
@@ -103,7 +105,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     private final GameProfile profile;
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
 
-    private ResourceKey worldKey = SpongeWorldManager.VANILLA_OVERWORLD;
+    private ResourceKey worldKey = (ResourceKey) (Object) Level.OVERWORLD.location();
     private double x;
     private double y;
     private double z;
@@ -112,13 +114,13 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     private boolean invulnerable;
     private boolean isVanished;
     private boolean isInvisible;
-    private boolean isVanishCollide;
-    private boolean isVanishTarget;
+    private boolean vanishIgnoresCollision;
+    private boolean vanishPreventsTargeting;
 
     @Nullable private SubjectReference subjectReference;
     @Nullable private SpongeUserInventory inventory; // lazy load when accessing inventory
-    @Nullable private EnderChestInventory enderChest; // lazy load when accessing inventory
-    @Nullable private CompoundNBT compound;
+    @Nullable private PlayerEnderChestContainer enderChest; // lazy load when accessing inventory
+    @Nullable private CompoundTag compound;
     private boolean isConstructing;
 
     public SpongeUser(final GameProfile profile) {
@@ -157,8 +159,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.inventory = null;
         this.enderChest = null;
 
-        ((CustomDataHolderBridge) (Object) this).bridge$getFailedData().clear();
-        initializedUsers.remove(this);
+        ((SpongeDataHolderBridge) (Object) this).bridge$invalidateFailedData();
+        SpongeUser.initializedUsers.remove(this);
     }
 
     public void initializeIfRequired() {
@@ -168,89 +170,25 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     public void initialize() {
-        initializedUsers.add(this);
-        this.compound = new CompoundNBT();
-        final ServerWorld world = ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getDefaultWorld();
+        SpongeUser.initializedUsers.add(this);
+        this.compound = new CompoundTag();
+        final ServerLevel world = SpongeCommon.getServer().overworld();
         if (world == null) {
             return;
         }
 
-        // Note: Uses the overworld's player data
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) world.getSaveHandler();
-        final File file = new File(saveHandler.accessor$getPlayersDirectory(),
-            this.profile.getId().toString() + ".dat");
+        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.getServer()).accessor$storageSource();
+        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.profile.getId().toString() + ".dat").toFile();
         if (!file.exists()) {
             return;
         }
 
         try {
             try (final FileInputStream in = new FileInputStream(file)) {
-                this.readFromNBT(CompressedStreamTools.readCompressed(in));
+                this.readCompound(NbtIo.readCompressed(in));
             }
         } catch (final IOException e) {
             SpongeCommon.getLogger().warn("Corrupt user file '{}'!", file, e);
-        }
-    }
-
-    public void readFromNBT(final CompoundNBT compound) {
-        this.reset();
-        this.compound = compound;
-
-        if (!compound.contains(Constants.Sponge.World.KEY)) {
-            if (compound.contains(Constants.Sponge.World.DIMENSION_ID)) {
-                final DimensionType type = DimensionType.getById(compound.getInt(Constants.Sponge.World.DIMENSION_ID));
-
-                if (type != null) {
-                    this.worldKey = (ResourceKey) (Object) Registry.DIMENSION_TYPE.getKey(type);
-                }
-            }
-        } else {
-            this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.KEY));
-        }
-        final ListNBT position = compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
-        final ListNBT rotation = compound.getList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
-        this.x = position.getDouble(0);
-        this.y = position.getDouble(1);
-        this.z = position.getDouble(2);
-        this.yaw = rotation.getFloat(0);
-        this.pitch = rotation.getFloat(1);
-
-        this.invulnerable = compound.getBoolean(Constants.Entity.Player.INVULNERABLE);
-        final CompoundNBT spongeCompound = compound.getCompound(Constants.Forge.FORGE_DATA).getCompound(Constants.Sponge.SPONGE_DATA);
-        this.isConstructing = true;
-        CustomDataHolderBridge.syncTagToCustom(this);
-        this.isConstructing = false;
-
-        if (spongeCompound.isEmpty()) {
-            return;
-        }
-
-        this.isVanished = spongeCompound.getBoolean(Constants.Sponge.Entity.IS_VANISHED);
-        this.isInvisible = spongeCompound.getBoolean(Constants.Sponge.Entity.IS_INVISIBLE);
-        if (this.isVanished) {
-            this.isVanishTarget = spongeCompound.getBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
-            this.isVanishCollide = spongeCompound.getBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
-        }
-
-        final ListNBT spawns = spongeCompound.getList(Constants.Sponge.User.USER_SPAWN_LIST, Constants.NBT.TAG_COMPOUND);
-
-        for (int i = 0; i < spawns.size(); i++) {
-            final CompoundNBT spawnCompound = spawns.getCompound(i);
-
-            if (!spawnCompound.contains(Constants.Sponge.World.KEY)) {
-                continue;
-            }
-
-            final ResourceKey key = ResourceKey.resolve(spawnCompound.getString(Constants.Sponge.World.KEY));
-            final double xPos = spawnCompound.getDouble(Constants.Sponge.User.USER_SPAWN_X);
-            final double yPos = spawnCompound.getDouble(Constants.Sponge.User.USER_SPAWN_Y);
-            final double zPos = spawnCompound.getDouble(Constants.Sponge.User.USER_SPAWN_Z);
-            final boolean forced = spawnCompound.getBoolean(Constants.Sponge.User.USER_SPAWN_FORCED);
-            this.spawnLocations.put(key, new RespawnLocation.Builder()
-                .world(key)
-                .position(new Vector3d(xPos, yPos, zPos))
-                .forceSpawn(forced)
-                .build());
         }
     }
 
@@ -260,8 +198,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
                 this.initialize();
             }
             this.inventory = new SpongeUserInventory(this);
-            final ListNBT listNBT = this.compound.getList(Constants.Entity.Player.INVENTORY, 10);
-            this.inventory.readFromNBT(listNBT);
+            final ListTag listNBT = this.compound.getList(Constants.Entity.Player.INVENTORY, 10);
+            this.inventory.readList(listNBT);
             this.inventory.currentItem = this.compound.getInt(Constants.Entity.Player.SELECTED_ITEM_SLOT);
         }
         return (UserInventory) this.inventory;
@@ -274,64 +212,48 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             }
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9)) {
-                final ListNBT nbttaglist1 = this.compound.getList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
-                this.enderChest.read(nbttaglist1);
+                final ListTag nbttaglist1 = this.compound.getList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
+                this.enderChest.fromTag(nbttaglist1);
             }
         }
         return this;
     }
 
-    public void writeToNbt(final CompoundNBT compound) {
+    public void readCompound(final CompoundTag compound) {
+        this.reset();
+        this.compound = compound;
 
-        compound.putString(Constants.Sponge.World.KEY, this.worldKey.getFormatted());
+        if (!compound.contains(Constants.Sponge.World.WORLD_KEY)) {
+            this.worldKey = ResourceKey.resolve(compound.getString(Constants.Sponge.World.WORLD_KEY));
+        }
+        final ListTag position = compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+        final ListTag rotation = compound.getList(Constants.Entity.ENTITY_ROTATION, Constants.NBT.TAG_FLOAT);
+        this.x = position.getDouble(0);
+        this.y = position.getDouble(1);
+        this.z = position.getDouble(2);
+        this.yaw = rotation.getFloat(0);
+        this.pitch = rotation.getFloat(1);
+
+        this.isConstructing = true;
+        DataUtil.syncTagToData(this);
+        this.isConstructing = false;
+    }
+
+    public void writeCompound(final CompoundTag compound) {
+
+        compound.putString(Constants.Sponge.World.WORLD_KEY, this.worldKey.getFormatted());
 
         this.loadInventory();
         this.loadEnderInventory();
 
-        compound.put(Constants.Entity.Player.INVENTORY, this.inventory.writeToNBT(new ListNBT()));
-        compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.write());
+        compound.put(Constants.Entity.Player.INVENTORY, this.inventory.writeList(new ListTag()));
+        compound.put(Constants.Entity.Player.ENDERCHEST_INVENTORY, this.enderChest.createTag());
         compound.putInt(Constants.Entity.Player.SELECTED_ITEM_SLOT, this.inventory.currentItem);
 
         compound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.x, this.y, this.z));
         compound.put(Constants.Entity.ENTITY_ROTATION, Constants.NBT.newFloatNBTList(this.yaw, this.pitch));
 
-        compound.putBoolean(Constants.Entity.Player.INVULNERABLE, this.invulnerable);
-
-        final CompoundNBT forgeCompound = compound.getCompound(Constants.Forge.FORGE_DATA);
-        final CompoundNBT spongeCompound = forgeCompound.getCompound(Constants.Sponge.SPONGE_DATA);
-        spongeCompound.remove(Constants.Sponge.User.USER_SPAWN_LIST);
-        spongeCompound.remove(Constants.Sponge.Entity.IS_VANISHED);
-        spongeCompound.remove(Constants.Sponge.Entity.IS_INVISIBLE);
-        spongeCompound.remove(Constants.Sponge.Entity.VANISH_UNTARGETABLE);
-        spongeCompound.remove(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE);
-
-        final ListNBT spawns = new ListNBT();
-        for (final Map.Entry<ResourceKey, RespawnLocation> entry : this.spawnLocations.entrySet()) {
-            final RespawnLocation respawn = entry.getValue();
-
-            final CompoundNBT spawnCompound = new CompoundNBT();
-            spawnCompound.putString(Constants.Sponge.World.KEY, respawn.getWorldKey().getFormatted());
-            spawnCompound.putDouble(Constants.Sponge.User.USER_SPAWN_X, respawn.getPosition().getX());
-            spawnCompound.putDouble(Constants.Sponge.User.USER_SPAWN_Y, respawn.getPosition().getY());
-            spawnCompound.putDouble(Constants.Sponge.User.USER_SPAWN_Z, respawn.getPosition().getZ());
-            spawnCompound.putBoolean(Constants.Sponge.User.USER_SPAWN_FORCED, false); // No way to know
-            spawns.add(spawnCompound);
-        }
-
-        if (!spawns.isEmpty()) {
-            spongeCompound.put(Constants.Sponge.User.USER_SPAWN_LIST, spawns);
-        }
-        if (this.isVanished) {
-            spongeCompound.putBoolean(Constants.Sponge.Entity.IS_VANISHED, true);
-            spongeCompound.putBoolean(Constants.Sponge.Entity.VANISH_UNCOLLIDEABLE, this.isVanishCollide);
-            spongeCompound.putBoolean(Constants.Sponge.Entity.VANISH_UNTARGETABLE, this.isVanishTarget);
-        }
-        if (this.isInvisible) {
-            spongeCompound.putBoolean(Constants.Sponge.Entity.IS_INVISIBLE, true);
-        }
-
-        forgeCompound.put(Constants.Sponge.SPONGE_DATA, spongeCompound);
-        compound.put(Constants.Forge.FORGE_DATA, forgeCompound);
+        DataUtil.syncDataToTag(this);
     }
 
     @Override
@@ -471,6 +393,11 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         }
         this.spawnLocations.clear();
         this.spawnLocations.putAll(value);
+        if (value.isEmpty()) {
+            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.RESPAWN_LOCATIONS);
+        } else {
+            ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.RESPAWN_LOCATIONS, value);
+        }
         this.markDirty();
         return true;
     }
@@ -483,6 +410,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         }
         final ImmutableMap<ResourceKey, RespawnLocation> locations = ImmutableMap.copyOf(this.spawnLocations);
         this.spawnLocations.clear();
+        ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.RESPAWN_LOCATIONS);
         this.markDirty();
         return locations;
     }
@@ -496,28 +424,29 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
                     .warn("Unable to mark user data for [{}] as dirty, data is not initialized! Any changes may be lost.",
                             this.profile.getId());
         } else {
-            dirtyUsers.add(this);
+            SpongeUser.dirtyUsers.add(this);
         }
     }
 
     public void save() {
         Preconditions.checkState(this.isInitialized(), "User {} is not initialized", this.profile.getId());
-        final SaveHandlerAccessor saveHandler = (SaveHandlerAccessor) ((SpongeWorldManager) Sponge.getServer().getWorldManager()).getDefaultWorld();
-        final File dataFile = new File(saveHandler.accessor$getPlayersDirectory(), this.getUniqueId() + ".dat");
-        CompoundNBT compound;
+
+        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.getServer()).accessor$storageSource();
+        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.getUniqueId() + ".dat").toFile();
+        CompoundTag compound;
         try {
-            compound = CompressedStreamTools.readCompressed(new FileInputStream(dataFile));
+            compound = NbtIo.readCompressed(new FileInputStream(file));
         } catch (final IOException ignored) {
             // Nevermind
-            compound = new CompoundNBT();
+            compound = new CompoundTag();
         }
-        this.writeToNbt(compound);
-        try (final FileOutputStream out = new FileOutputStream(dataFile)) {
-            CompressedStreamTools.writeCompressed(compound, out);
-            dirtyUsers.remove(this);
+        this.writeCompound(compound);
+        try (final FileOutputStream out = new FileOutputStream(file)) {
+            NbtIo.writeCompressed(compound, out);
+            SpongeUser.dirtyUsers.remove(this);
             this.invalidate();
         } catch (final IOException e) {
-            SpongeCommon.getLogger().warn("Failed to save user file [{}]!", dataFile, e);
+            SpongeCommon.getLogger().warn("Failed to save user file [{}]!", file, e);
         }
     }
 
@@ -531,26 +460,26 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         throw new MissingImplementationException("SpongeUser", "setEquippedItem");
     }
 
-    private net.minecraft.item.ItemStack getItemStackFromSlot(final EquipmentSlotType slotIn) {
+    private net.minecraft.world.item.ItemStack getItemStackFromSlot(final EquipmentSlot slotIn) {
         this.loadInventory();
-        if (slotIn == EquipmentSlotType.MAINHAND) {
+        if (slotIn == EquipmentSlot.MAINHAND) {
             return this.inventory.getCurrentItem();
-        } else if (slotIn == EquipmentSlotType.OFFHAND) {
+        } else if (slotIn == EquipmentSlot.OFFHAND) {
             return this.inventory.offHandInventory.get(0);
         } else {
-            return slotIn.getSlotType() == EquipmentSlotType.Group.ARMOR ? this.inventory.armorInventory.get(
-                slotIn.getIndex()) :
-                net.minecraft.item.ItemStack.EMPTY;
+            return slotIn.getType() == EquipmentSlot.Type.ARMOR ?
+                    this.inventory.armorInventory.get(slotIn.getIndex()) :
+                    net.minecraft.world.item.ItemStack.EMPTY;
         }
     }
 
-    private void setItemStackToSlot(final EquipmentSlotType slotIn, final net.minecraft.item.ItemStack stack) {
+    private void setItemStackToSlot(final EquipmentSlot slotIn, final net.minecraft.world.item.ItemStack stack) {
         this.loadInventory();
-        if (slotIn == EquipmentSlotType.MAINHAND) {
+        if (slotIn == EquipmentSlot.MAINHAND) {
             this.inventory.mainInventory.set(this.inventory.currentItem, stack);
-        } else if (slotIn == EquipmentSlotType.OFFHAND) {
+        } else if (slotIn == EquipmentSlot.OFFHAND) {
             this.inventory.offHandInventory.set(0, stack);
-        } else if (slotIn.getSlotType() == EquipmentSlotType.Group.ARMOR) {
+        } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
             this.inventory.armorInventory.set(slotIn.getIndex(), stack);
         }
     }
@@ -567,7 +496,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public Optional<ServerPlayer> getPlayer() {
-        return Optional.ofNullable((ServerPlayer) SpongeCommon.getServer().getPlayerList().getPlayerByUUID(this.profile.getId()));
+        return Optional.ofNullable((ServerPlayer) SpongeCommon.getServer().getPlayerList().getPlayer(this.profile.getId()));
     }
 
     @Override
@@ -591,7 +520,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
         final Optional<ServerPlayer> player = this.getPlayer();
         if (player.isPresent()) {
-            final Optional<org.spongepowered.api.world.server.ServerWorld> world = Sponge.getServer().getWorldManager().getWorld(key);
+            final Optional<org.spongepowered.api.world.server.ServerWorld> world = Sponge.getServer().getWorldManager().world(key);
             return world.filter(serverWorld -> player.get().setLocation(ServerLocation.of(serverWorld, position))).isPresent();
         }
 
@@ -672,23 +601,6 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         return Tristate.FALSE;
     }
 
-
-    @Override
-    public void bridge$setInvulnerable(final boolean value) {
-        final Optional<ServerPlayer> playerOpt = this.getPlayer();
-        if (playerOpt.isPresent()) {
-            ((InvulnerableTrackedBridge) playerOpt.get()).bridge$setInvulnerable(value);
-            return;
-        }
-        this.invulnerable = value;
-        this.markDirty();
-    }
-
-    @Override
-    public boolean bridge$getIsInvulnerable() {
-        return this.invulnerable;
-    }
-
     @Override
     public void bridge$setVanished(final boolean vanished) {
         final Optional<ServerPlayer> playerOpt = this.getPlayer();
@@ -698,6 +610,13 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         }
         this.isVanished = vanished;
         this.markDirty();
+        if (vanished) {
+            ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.VANISH, true);
+        } else {
+            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.VANISH);
+            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.VANISH_IGNORES_COLLISION);
+            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.VANISH_PREVENTS_TARGETING);
+        }
     }
 
     @Override
@@ -718,45 +637,60 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             return;
         }
         this.isInvisible = invisible;
+        if (invisible) {
+            ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.IS_INVISIBLE, true);
+        } else {
+            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.IS_INVISIBLE);
+        }
     }
 
     @Override
-    public boolean bridge$isUncollideable() {
-        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isUncollideable()).orElseGet(() -> this.isVanishCollide);
+    public boolean bridge$isVanishIgnoresCollision() {
+        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isVanishIgnoresCollision()).orElseGet(() -> this.vanishIgnoresCollision);
     }
 
     @Override
-    public void bridge$setUncollideable(final boolean uncollideable) {
+    public void bridge$setVanishIgnoresCollision(final boolean vanishIgnoresCollision) {
         final Optional<ServerPlayer> player = this.getPlayer();
         if (player.isPresent()) {
-            ((VanishableBridge) player.get()).bridge$setUncollideable(uncollideable);
+            ((VanishableBridge) player.get()).bridge$setVanishIgnoresCollision(vanishIgnoresCollision);
             return;
         }
-        this.isVanishCollide = uncollideable;
+        this.vanishIgnoresCollision = vanishIgnoresCollision;
+        if (vanishIgnoresCollision) {
+            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.VANISH_IGNORES_COLLISION);
+        } else {
+            ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.VANISH_IGNORES_COLLISION, false);
+        }
     }
 
     @Override
-    public boolean bridge$isUntargetable() {
-        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isUntargetable()).orElseGet(() -> this.isVanishTarget);
+    public boolean bridge$isVanishPreventsTargeting() {
+        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isVanishPreventsTargeting()).orElseGet(() -> this.vanishPreventsTargeting);
     }
 
     @Override
-    public void bridge$setUntargetable(final boolean untargetable) {
+    public void bridge$setVanishPreventsTargeting(final boolean vanishPreventsTargeting) {
         final Optional<ServerPlayer> player = this.getPlayer();
         if (player.isPresent()) {
-            ((VanishableBridge) player.get()).bridge$setUntargetable(untargetable);
+            ((VanishableBridge) player.get()).bridge$setVanishPreventsTargeting(vanishPreventsTargeting);
             return;
         }
-        this.isVanishTarget = untargetable;
+        this.vanishPreventsTargeting = vanishPreventsTargeting;
+        if (vanishPreventsTargeting) {
+            ((SpongeDataHolderBridge) (Object) this).bridge$offer(Keys.VANISH_PREVENTS_TARGETING, true);
+        } else {
+            ((SpongeDataHolderBridge) (Object) this).bridge$remove(Keys.VANISH_PREVENTS_TARGETING);
+        }
     }
 
     @Override
-    public CompoundNBT data$getCompound() {
+    public CompoundTag data$getCompound() {
         return this.compound;
     }
 
     @Override
-    public void data$setCompound(CompoundNBT nbt) {
+    public void data$setCompound(CompoundTag nbt) {
         this.compound = nbt;
     }
 
@@ -795,4 +729,17 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         return this.profile;
     }
 
+    public Boolean isInvulnerable() {
+        return this.getPlayer().map(player -> ((net.minecraft.world.entity.Entity) player).isInvulnerable()).orElse(this.invulnerable);
+    }
+
+    public void setInvulnerable(boolean invulnerable) {
+        final Optional<ServerPlayer> playerOpt = this.getPlayer();
+        if (playerOpt.isPresent()) {
+            ((net.minecraft.world.entity.Entity) playerOpt.get()).setInvulnerable(invulnerable);
+            return;
+        }
+        this.invulnerable = invulnerable;
+        this.markDirty();
+    }
 }

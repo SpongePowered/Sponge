@@ -24,22 +24,16 @@
  */
 package org.spongepowered.common.command.registrar.tree.builder;
 
-import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ISuggestionProvider;
-import net.minecraft.command.arguments.SuggestionProviders;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.command.brigadier.tree.ForcedRedirectArgumentSuggestionNode;
 
-import java.util.Map;
-
 public abstract class ArgumentCommandTreeNode<T extends CommandTreeNode<T>>
-        extends AbstractCommandTreeNode<T, CommandNode<ISuggestionProvider>> {
+        extends AbstractCommandTreeNode<T, CommandNode<SharedSuggestionProvider>> {
 
     private final ClientCompletionKey<T> parameterType;
 
@@ -48,7 +42,7 @@ public abstract class ArgumentCommandTreeNode<T extends CommandTreeNode<T>>
     }
 
     @Override
-    protected CommandNode<ISuggestionProvider> createElement(final String nodeKey) {
+    protected CommandNode<SharedSuggestionProvider> createElement(final String nodeKey) {
         return new ForcedRedirectArgumentSuggestionNode<>(
                 nodeKey,
                 this.getArgumentType(),

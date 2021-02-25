@@ -25,9 +25,9 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.api.world.chunk.Chunk;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import javax.annotation.Nullable;
 
@@ -35,7 +35,7 @@ public class ChunkRegenerateContext extends GenerationContext<ChunkRegenerateCon
 
     @Nullable private Chunk chunk;
 
-    public ChunkRegenerateContext(final IPhaseState<? extends ChunkRegenerateContext> state, final PhaseTracker tracker) {
+    public ChunkRegenerateContext(final IPhaseState<ChunkRegenerateContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 
@@ -46,7 +46,7 @@ public class ChunkRegenerateContext extends GenerationContext<ChunkRegenerateCon
     }
 
     @SuppressWarnings("unchecked")
-    public ChunkRegenerateContext chunk(final net.minecraft.world.chunk.Chunk chunk) {
+    public ChunkRegenerateContext chunk(final net.minecraft.world.level.chunk.LevelChunk chunk) {
         this.chunk = (Chunk) chunk;
         return this;
     }

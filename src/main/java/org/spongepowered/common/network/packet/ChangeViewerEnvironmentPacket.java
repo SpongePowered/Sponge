@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.network.packet;
 
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
-import org.spongepowered.api.world.dimension.DimensionType;
+import org.spongepowered.common.SpongeCommon;
 
 public final class ChangeViewerEnvironmentPacket implements Packet {
 
@@ -37,16 +38,16 @@ public final class ChangeViewerEnvironmentPacket implements Packet {
     }
 
     public ChangeViewerEnvironmentPacket(final DimensionType dimensionType) {
-        this.dimensionLogic = (ResourceLocation) (Object) dimensionType.getKey();
+        this.dimensionLogic = (ResourceLocation) (Object) SpongeCommon.getServer().registryAccess().dimensionTypes().getKey(dimensionType);
     }
 
     @Override
-    public void read(ChannelBuf buf) {
+    public void read(final ChannelBuf buf) {
         this.dimensionLogic = new ResourceLocation(buf.readString());
     }
 
     @Override
-    public void write(ChannelBuf buf) {
+    public void write(final ChannelBuf buf) {
         buf.writeString(this.dimensionLogic.toString());
     }
 }

@@ -27,8 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.advancements;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.TreeLayoutElement;
@@ -49,12 +48,12 @@ import org.spongepowered.math.vector.Vector2d;
 public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spongepowered.api.advancement.DisplayInfo {
 
     @Shadow @Final private FrameType frame;
-    @Shadow @Final private ITextComponent title;
-    @Shadow @Final private ITextComponent description;
+    @Shadow @Final private net.minecraft.network.chat.Component title;
+    @Shadow @Final private net.minecraft.network.chat.Component description;
     @Shadow @Final private boolean showToast;
     @Shadow private float x;
     @Shadow private float y;
-    @Shadow public abstract boolean shadow$shouldAnnounceToChat();
+    @Shadow public abstract boolean shadow$shouldAnnounceChat();
     @Shadow public abstract boolean shadow$isHidden();
 
     @Shadow @Final private ItemStack icon;
@@ -110,7 +109,7 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
 
     @Override
     public boolean doesAnnounceToChat() {
-        return this.shadow$shouldAnnounceToChat();
+        return this.shadow$shouldAnnounceChat();
     }
 
     @Intrinsic

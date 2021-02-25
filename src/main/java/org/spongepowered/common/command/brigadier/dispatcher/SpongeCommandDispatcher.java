@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.brigadier.dispatcher;
 
+import com.mojang.brigadier.AmbiguityConsumer;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
@@ -39,13 +40,12 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import net.minecraft.command.CommandSource;
 import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
@@ -62,62 +62,66 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
+import net.minecraft.commands.CommandSourceStack;
 
 // For use on the Brigadier dispatcher
-public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSource> {
+public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSourceStack> {
 
     // Mojang don't provide a way to get this...
-    private ResultConsumer<CommandSource> resultConsumer = (context, success, result) -> { };
+    private ResultConsumer<CommandSourceStack> resultConsumer = (context, success, result) -> { };
+    private final SpongeCommandManager commandManager;
 
-    public SpongeCommandDispatcher() {
+    public SpongeCommandDispatcher(final SpongeCommandManager commandManager) {
         super(new SpongeRootCommandNode());
+        this.commandManager = commandManager;
     }
 
-    public LiteralCommandNode<CommandSource> register(final LiteralCommandNode<CommandSource> command) {
+    public LiteralCommandNode<CommandSourceStack> register(final LiteralCommandNode<CommandSourceStack> command) {
         this.getRoot().addChild(command);
         return command;
     }
 
     @Override
-    public void setConsumer(final ResultConsumer<CommandSource> consumer) {
+    public void setConsumer(final ResultConsumer<CommandSourceStack> consumer) {
         super.setConsumer(consumer);
         this.resultConsumer = consumer;
     }
 
     @Override
-    public ParseResults<CommandSource> parse(final String command, final CommandSource source) {
+    public ParseResults<CommandSourceStack> parse(final String command, final CommandSourceStack source) {
         return this.parse(command, source, false);
     }
 
-    public ParseResults<CommandSource> parse(final String command, final CommandSource source, final boolean isSuggestion) {
+    public ParseResults<CommandSourceStack> parse(final String command, final CommandSourceStack source, final boolean isSuggestion) {
         final SpongeCommandContextBuilder builder = new SpongeCommandContextBuilder(this, source, this.getRoot(), 0);
         return this.parseNodes(true, isSuggestion, this.getRoot(), new SpongeStringReader(command), builder);
     }
 
     @Override
-    public ParseResults<CommandSource> parse(final StringReader command, final CommandSource source) {
+    public ParseResults<CommandSourceStack> parse(final StringReader command, final CommandSourceStack source) {
         return this.parse(command, source, false);
     }
 
-    public ParseResults<CommandSource> parse(final StringReader command, final CommandSource source, final boolean isSuggestion) {
+    public ParseResults<CommandSourceStack> parse(final StringReader command, final CommandSourceStack source, final boolean isSuggestion) {
         final SpongeCommandContextBuilder builder = new SpongeCommandContextBuilder(this, source, this.getRoot(), command.getCursor());
         final SpongeStringReader reader = new SpongeStringReader(command);
         return this.parseNodes(true, isSuggestion, this.getRoot(), reader, builder);
     }
 
     @Override
-    public int execute(final StringReader input, final CommandSource source) throws CommandSyntaxException {
+    public int execute(final StringReader input, final CommandSourceStack source) throws CommandSyntaxException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final CommandSourceBridge sourceBridge = (CommandSourceBridge) source;
-            frame.pushCause(sourceBridge.bridge$getICommandSource());
+            final CommandSourceStackBridge sourceBridge = (CommandSourceStackBridge) source;
             frame.addContext(EventContextKeys.COMMAND, input.getString());
-            return ((SpongeCommandManager) SpongeCommon.getGame().getCommandManager()).process(sourceBridge.bridge$asCommandCause(), input.getRemaining()).getResult();
+            sourceBridge.bridge$updateFrameFromCommandSource(frame);
+            return this.commandManager.process(sourceBridge.bridge$withCurrentCause(), input.getRemaining()).getResult();
         } catch (final CommandException e) {
-            throw new net.minecraft.command.CommandException(SpongeAdventure.asVanilla(e.componentMessage()));
+            throw new net.minecraft.commands.CommandRuntimeException(SpongeAdventure.asVanilla(e.componentMessage()));
         }
     }
 
-    public int execute(final ParseResults<CommandSource> parse) throws CommandSyntaxException {
+    @Override
+    public int execute(final ParseResults<CommandSourceStack> parse) throws CommandSyntaxException {
         if (parse.getReader().canRead()) {
             // TODO plugin exception handling here
             if (parse.getExceptions().size() == 1) {
@@ -135,15 +139,15 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         boolean forked = false;
         boolean foundCommand = false;
         final String command = parse.getReader().getString();
-        final CommandContext<CommandSource> original = parse.getContext().build(command);
-        List<CommandContext<CommandSource>> contexts = Collections.singletonList(original);
-        ArrayList<CommandContext<CommandSource>> next = null;
+        final CommandContext<CommandSourceStack> original = parse.getContext().build(command);
+        List<CommandContext<CommandSourceStack>> contexts = Collections.singletonList(original);
+        ArrayList<CommandContext<CommandSourceStack>> next = null;
 
         while (contexts != null) {
             final int size = contexts.size();
             for (int i = 0; i < size; i++) {
-                final CommandContext<CommandSource> context = contexts.get(i);
-                final CommandContext<CommandSource> child = context.getChild();
+                final CommandContext<CommandSourceStack> context = contexts.get(i);
+                final CommandContext<CommandSourceStack> child = context.getChild();
                 if (child != null) {
                     forked |= context.isForked();
                     if (child.hasNodes()) {
@@ -162,7 +166,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                         //
                         // foundCommand = true
                         // Sponge End
-                        final RedirectModifier<CommandSource> modifier = context.getRedirectModifier();
+                        final RedirectModifier<CommandSourceStack> modifier = context.getRedirectModifier();
                         if (modifier == null) {
                             if (next == null) {
                                 next = new ArrayList<>(1);
@@ -170,12 +174,12 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                             next.add(child.copyFor(context.getSource()));
                         } else {
                             try {
-                                final Collection<CommandSource> results = modifier.apply(context);
+                                final Collection<CommandSourceStack> results = modifier.apply(context);
                                 if (!results.isEmpty()) {
                                     if (next == null) {
                                         next = new ArrayList<>(results.size());
                                     }
-                                    for (final CommandSource source : results) {
+                                    for (final CommandSourceStack source : results) {
                                         next.add(child.copyFor(source));
                                     }
                                 }
@@ -218,32 +222,32 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         return forked ? successfulForks : result;
     }
 
-    private ParseResults<CommandSource> parseNodes(
+    private ParseResults<CommandSourceStack> parseNodes(
             final boolean isRoot, // Sponge: used in permission checks
             final boolean isSuggestion, // Sponge: needed for handling what we do with defaults.
-            final CommandNode<CommandSource> node,
+            final CommandNode<CommandSourceStack> node,
             final SpongeStringReader originalReader,
             final SpongeCommandContextBuilder contextSoFar) {
 
-        final CommandSource source = contextSoFar.getSource();
+        final CommandSourceStack source = contextSoFar.getSource();
         // Sponge Start
-        Map<CommandNode<CommandSource>, CommandSyntaxException> errors = null;
-        List<ParseResults<CommandSource>> potentials = null;
+        Map<CommandNode<CommandSourceStack>, CommandSyntaxException> errors = null;
+        List<ParseResults<CommandSourceStack>> potentials = null;
         // Sponge End
         final int cursor = originalReader.getCursor();
 
         // Sponge Start: get relevant nodes if we're completing
-        final Collection<? extends CommandNode<CommandSource>> nodes;
+        final Collection<? extends CommandNode<CommandSourceStack>> nodes;
         if (isSuggestion && node instanceof SpongeNode) {
             nodes = ((SpongeNode) node).getRelevantNodesForSuggestions(originalReader);
         } else if (originalReader.canRead()) {
             nodes = node.getRelevantNodes(originalReader);
         } else { // Reader cannot read anymore so ONLY nodes with parsers that do not read can be processed
             nodes = node.getChildren().stream().filter(n -> n instanceof SpongeArgumentCommandNode &&
-                    ((SpongeArgumentCommandNode<?>) n).getParser().doesNotRead()).collect(Collectors.toList());
+                    (((SpongeArgumentCommandNode<?>) n).getParser().doesNotRead())).collect(Collectors.toList());
         }
 
-        for (final CommandNode<CommandSource> child : nodes) {
+        for (final CommandNode<CommandSourceStack> child : nodes) {
             final boolean doesNotRead =
                     child instanceof SpongeArgumentCommandNode && ((SpongeArgumentCommandNode<?>) child).getParser().doesNotRead();
             // We need to do a little more scaffolding for permissions
@@ -294,13 +298,13 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             // Sponge End
                 reader.skip();
                 // Sponge Start: redirect is now in a local variable as we use it a fair bit
-                final CommandNode<CommandSource> redirect = child.getRedirect();
+                final CommandNode<CommandSourceStack> redirect = child.getRedirect();
                 if (redirect != null) {
                     final SpongeCommandContextBuilder childContext =
                             new SpongeCommandContextBuilder(this, source, child.getRedirect(), reader.getCursor());
                     // For a redirect, we want to ensure all of our currently parsed information is available.
                     context.applySpongeElementsTo(childContext, false);
-                    final ParseResults<CommandSource> parse = this.parseNodes(redirect instanceof RootCommandNode,
+                    final ParseResults<CommandSourceStack> parse = this.parseNodes(redirect instanceof RootCommandNode,
                             isSuggestion,
                             child.getRedirect(),
                             reader,
@@ -309,7 +313,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                     childContext.applySpongeElementsTo(context, true);
                     // Sponge End
                     context.withChild(parse.getContext());
-                    final ParseResults<CommandSource> parse2 = new ParseResults<>(context, parse.getReader(), parse.getExceptions());
+                    final ParseResults<CommandSourceStack> parse2 = new ParseResults<>(context, parse.getReader(), parse.getExceptions());
                     if (doesNotRead && potentials != null) {
                         // If this is a optional or default parameter we only add the redirect as a potential option
                         potentials.add(parse2);
@@ -317,7 +321,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                     }
                     return parse2;
                 } else {
-                    final ParseResults<CommandSource> parse = this.parseNodes(false, isSuggestion, child, reader, context);
+                    final ParseResults<CommandSourceStack> parse = this.parseNodes(false, isSuggestion, child, reader, context);
                     if (potentials == null) {
                         potentials = new ArrayList<>(1);
                     }
@@ -350,8 +354,8 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                     // BUT if parsing stopped at a non-terminal node this will cause an error later
                     // see at the end of #execute() where !foundCommand
                     // Instead we attempt to sort commands before that happens
-                    final Command<CommandSource> aCommand = SpongeCommandDispatcher.getCommand(a.getContext());
-                    final Command<CommandSource> bCommand = SpongeCommandDispatcher.getCommand(b.getContext());
+                    final Command<CommandSourceStack> aCommand = SpongeCommandDispatcher.getCommand(a.getContext());
+                    final Command<CommandSourceStack> bCommand = SpongeCommandDispatcher.getCommand(b.getContext());
                     if (aCommand == null && bCommand != null) {
                         return 1;
                     } else if (aCommand != null && bCommand == null) {
@@ -366,8 +370,8 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         return new ParseResults<>(contextSoFar, originalReader, errors == null ? Collections.emptyMap() : errors);
     }
 
-    private static Command<CommandSource> getCommand(CommandContextBuilder<CommandSource> context) {
-        final Command<CommandSource> command = context.getCommand();
+    private static Command<CommandSourceStack> getCommand(final CommandContextBuilder<CommandSourceStack> context) {
+        final Command<CommandSourceStack> command = context.getCommand();
         if (command == null && context.getChild() != null) {
             return SpongeCommandDispatcher.getCommand(context.getChild());
         }
@@ -375,17 +379,17 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
     }
 
     @Override
-    public CompletableFuture<Suggestions> getCompletionSuggestions(final ParseResults<CommandSource> parse, final int cursor) {
-        final CommandContextBuilder<CommandSource> context = parse.getContext();
+    public CompletableFuture<Suggestions> getCompletionSuggestions(final ParseResults<CommandSourceStack> parse, final int cursor) {
+        final CommandContextBuilder<CommandSourceStack> context = parse.getContext();
 
-        final SuggestionContext<CommandSource> nodeBeforeCursor = context.findSuggestionContext(cursor);
-        final CommandNode<CommandSource> parent = nodeBeforeCursor.parent;
+        final SuggestionContext<CommandSourceStack> nodeBeforeCursor = context.findSuggestionContext(cursor);
+        final CommandNode<CommandSourceStack> parent = nodeBeforeCursor.parent;
         final int start = Math.min(nodeBeforeCursor.startPos, cursor);
 
         final String fullInput = parse.getReader().getString();
         final String truncatedInput = fullInput.substring(0, cursor);
         // Sponge Start: the collection might be different.
-        final Collection<CommandNode<CommandSource>> children;
+        final Collection<CommandNode<CommandSourceStack>> children;
         if (parent instanceof SpongeNode) {
             children = ((SpongeNode) parent).getChildrenForSuggestions();
         } else {
@@ -395,7 +399,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         @SuppressWarnings("unchecked") final CompletableFuture<Suggestions>[] futures = new CompletableFuture[children.size()];
         // Sponge End
         int i = 0;
-        for (final CommandNode<CommandSource> node : children) { // Sponge: parent.getChildren() -> children
+        for (final CommandNode<CommandSourceStack> node : children) { // Sponge: parent.getChildren() -> children
             CompletableFuture<Suggestions> future = Suggestions.empty();
             try {
                 future = node.listSuggestions(context.build(truncatedInput), new SuggestionsBuilder(truncatedInput, start));
@@ -404,20 +408,28 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             futures[i++] = future;
         }
 
-        final CompletableFuture<Suggestions> result = new CompletableFuture<>();
-        CompletableFuture.allOf(futures).thenRun(() -> {
+        // Sponge Start: if one future fails, don't leave a dangling future
+        // See https://github.com/Mojang/brigadier/pull/81
+        return CompletableFuture.allOf(futures).handle((voidResult, exception) -> {
             final List<Suggestions> suggestions = new ArrayList<>();
             for (final CompletableFuture<Suggestions> future : futures) {
-                suggestions.add(future.join());
+                if (!future.isCompletedExceptionally()) {
+                    suggestions.add(future.join());
+                }
             }
-            result.complete(Suggestions.merge(fullInput, suggestions));
+            return Suggestions.merge(fullInput, suggestions);
         });
-
-        return result;
+        // Sponge End
     }
 
-    private boolean shouldContinueTraversing(final SpongeStringReader reader, final CommandNode<CommandSource> child) {
-        final CommandNode<CommandSource> redirect = child.getRedirect();
+    @Override
+    public void findAmbiguities(final AmbiguityConsumer<CommandSourceStack> consumer) {
+        // No-op, we don't want to spam the logs
+        // This produces bad information for Sponge anyways
+    }
+
+    private boolean shouldContinueTraversing(final SpongeStringReader reader, final CommandNode<CommandSourceStack> child) {
+        final CommandNode<CommandSourceStack> redirect = child.getRedirect();
         if (redirect == null) {
             return reader.canRead(2) || child.getChildren().stream().anyMatch(x -> x instanceof SpongeArgumentCommandNode &&
                     ((SpongeArgumentCommandNode<?>) x).getParser().doesNotRead());
@@ -427,4 +439,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
         }
     }
 
+    CommandManager getCommandManager() {
+        return this.commandManager;
+    }
 }

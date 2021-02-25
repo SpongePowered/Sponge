@@ -40,10 +40,10 @@ import java.util.Map;
 public abstract class AbstractStateMatcherBuilder<S extends State<@NonNull S>, T extends StateContainer<@NonNull S>>
         implements StateMatcher.Builder<@NonNull S, @NonNull T> {
 
-    @Nullable T type;
     final Collection<StateProperty<@NonNull ?>> requiredProperties = new ArrayList<>();
     final Map<StateProperty<@NonNull ?>, Object> properties = new HashMap<>();
     final Collection<KeyValueMatcher<?>> keyValueMatchers = new ArrayList<>();
+    @Nullable T type;
 
     @Override
     public StateMatcher.@NonNull Builder<@NonNull S, @NonNull T> type(@NonNull final T type) {

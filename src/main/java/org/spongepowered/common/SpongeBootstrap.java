@@ -58,16 +58,17 @@ public final class SpongeBootstrap {
         Launch.getInstance().getPluginEngine().getPluginEnvironment().getBlackboard().getOrCreate(SpongeBootstrap.PARENT_INJECTOR,
                 () -> bootstrapInjector);
         SpongeBootstrap.lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);
-        Launch.getInstance().loadPlugins();
         SpongeBootstrap.lifecycle.establishFactories();
         SpongeBootstrap.lifecycle.establishBuilders();
         SpongeBootstrap.lifecycle.initTimings();
+        Launch.getInstance().loadPlugins();
         SpongeBootstrap.lifecycle.registerPluginListeners();
         SpongeBootstrap.lifecycle.callConstructEvent();
         SpongeBootstrap.lifecycle.callRegisterFactoryEvent();
         SpongeBootstrap.lifecycle.callRegisterBuilderEvent();
         SpongeBootstrap.lifecycle.callRegisterChannelEvent();
-        SpongeBootstrap.lifecycle.establishGlobalServices();
+        SpongeBootstrap.lifecycle.establishGameServices();
+        SpongeBootstrap.lifecycle.establishDataKeyListeners();
 
         SpongePacketHandler.init((SpongeChannelRegistry) Sponge.getChannelRegistry());
 

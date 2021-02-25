@@ -25,7 +25,6 @@
 package org.spongepowered.common.fluid;
 
 import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -39,6 +38,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.fluid.FluidStack;
 import org.spongepowered.api.fluid.FluidStackSnapshot;
 import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.util.Constants;
 
 import java.util.LinkedHashMap;
@@ -117,10 +117,10 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
     protected Optional<FluidStackSnapshot> buildContent(@NonNull final DataView container) throws InvalidDataException {
         try {
             if (container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
-                final String fluidId = container.getString(Constants.Fluids.FLUID_TYPE).get();
-                final Optional<FluidType> type = Sponge.getRegistry().getCatalogRegistry().get(FluidType.class, ResourceKey.resolve(fluidId));
+                final String rawFluid = container.getString(Constants.Fluids.FLUID_TYPE).get();
+                final Optional<FluidType> type = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
                 if (!type.isPresent()) {
-                    throw new InvalidDataException("Unknown fluid id found: " + fluidId);
+                    throw new InvalidDataException("Unknown fluid id found: " + rawFluid);
                 }
                 final FluidType fluidType = type.get();
                 final int volume = container.getInt(Constants.Fluids.FLUID_VOLUME).get();

@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BedBlock;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
-import org.spongepowered.common.accessor.block.BedBlockAccessor;
+import org.spongepowered.common.accessor.world.level.block.BedBlockAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.PortionTypeUtils;
+import org.spongepowered.common.util.PortionTypeUtil;
 
 public final class BedData {
 
@@ -42,15 +42,15 @@ public final class BedData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((BedBlockAccessor) h.getBlock()).accessor$getColor())
+                        .get(h -> (DyeColor) (Object) ((BedBlockAccessor) h.getBlock()).accessor$color())
                         .supports(h -> h.getBlock() instanceof BedBlock)
                     .create(Keys.IS_OCCUPIED)
-                        .get(h -> h.get(BedBlock.OCCUPIED))
-                        .set((h, v) -> h.with(BedBlock.OCCUPIED, v))
+                        .get(h -> h.getValue(BedBlock.OCCUPIED))
+                        .set((h, v) -> h.setValue(BedBlock.OCCUPIED, v))
                         .supports(h -> h.getBlock() instanceof BedBlock)
                     .create(Keys.PORTION_TYPE)
-                        .get(h -> PortionTypeUtils.getFromBedBlock(h, BedBlock.PART))
-                        .set((h, v) -> PortionTypeUtils.setForBedBlock(h, v, BedBlock.PART))
+                        .get(h -> PortionTypeUtil.getFromBedBlock(h, BedBlock.PART))
+                        .set((h, v) -> PortionTypeUtil.setForBedBlock(h, v, BedBlock.PART))
                         .supports(h -> h.getBlock() instanceof BedBlock);
     }
     // @formatter:on

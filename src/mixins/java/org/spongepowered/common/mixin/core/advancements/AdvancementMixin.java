@@ -27,15 +27,13 @@ package org.spongepowered.common.mixin.core.advancements;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMap;
 import net.kyori.adventure.text.Component;
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.DisplayInfo;
 import net.minecraft.advancements.FrameType;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.text.ITextComponent;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
@@ -46,17 +44,16 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.advancement.criterion.DefaultedAdvancementCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeScoreCriterion;
-import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
+import org.spongepowered.common.hooks.PlatformHooks;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -66,19 +63,20 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nullable;
-
 @Mixin(Advancement.class)
 public abstract class AdvancementMixin implements AdvancementBridge {
 
+    // @formatter:off
     @Shadow @Final @Mutable @Nullable private Advancement parent;
     @Shadow @Final @Mutable private String[][] requirements;
     @Shadow @Final @Mutable private Map<String, Criterion> criteria;
     @Shadow @Final @Nullable private DisplayInfo display;
     @Shadow @Final private ResourceLocation id;
 
-    @Shadow @Final private ITextComponent displayText;
+    @Shadow @Final private net.minecraft.network.chat.Component chatComponent;
     @Shadow @Final private AdvancementRewards rewards;
+    // @formatter:on
+
     private AdvancementCriterion impl$criterion;
     private List<Component> impl$toastText;
 
@@ -87,7 +85,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
     private void impl$setUpSpongeFields(ResourceLocation location, @Nullable Advancement parent, @Nullable DisplayInfo displayInfo,
             AdvancementRewards rewards, Map<String, Criterion> criteria, String[][] requirements, CallbackInfo ci) {
         // Don't do anything on the client, unless we're performing registry initialization
-        if (!SpongeImplHooks.onServerThread()) {
+        if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             return;
         }
         if (displayInfo != null) {
@@ -132,7 +130,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
         final ImmutableList.Builder<Component> toastText = ImmutableList.builder();
         if (this.display != null) {
             final FrameType frameType = this.display.getFrame();
-            toastText.add(Component.translatable("advancements.toast." + frameType.getName(), SpongeAdventure.asAdventureNamed(frameType.getFormat())));
+            toastText.add(Component.translatable("advancements.toast." + frameType.getName(), SpongeAdventure.asAdventureNamed(frameType.getChatColor())));
             toastText.add(SpongeAdventure.asAdventure(this.display.getTitle()));
         } else {
 
@@ -144,31 +142,31 @@ public abstract class AdvancementMixin implements AdvancementBridge {
 
     @Override
     public Optional<Advancement> bridge$getParent() {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         return Optional.ofNullable(this.parent);
     }
 
     @Override
     public void bridge$setParent(@Nullable final Advancement advancement) {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         this.parent = advancement;
     }
 
     @Override
     public AdvancementCriterion bridge$getCriterion() {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         return this.impl$criterion;
     }
 
     @Override
     public void bridge$setCriterion(final AdvancementCriterion criterion) {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         this.impl$criterion = criterion;
     }
 
     @Override
     public List<Component> bridge$getToastText() {
-        checkState(SpongeImplHooks.onServerThread());
+        checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         return this.impl$toastText;
     }
 

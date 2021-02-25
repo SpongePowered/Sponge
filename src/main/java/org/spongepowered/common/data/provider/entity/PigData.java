@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.passive.PigEntity;
+import net.minecraft.world.entity.animal.Pig;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.accessor.world.entity.animal.PigAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class PigData {
@@ -36,10 +37,17 @@ public final class PigData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(PigEntity.class)
+                .asMutable(Pig.class)
                     .create(Keys.IS_SADDLED)
-                        .get(PigEntity::getSaddled)
-                        .set(PigEntity::setSaddled);
+                        .get(Pig::isSaddled)
+                        .set((h, v) -> {
+                            if (v) {
+                                h.equipSaddle(null);
+                            } else {
+                                ((PigAccessor) h).accessor$steering().setSaddle(false);
+                            }
+                        })
+        ;
     }
     // @formatter:on
 }

@@ -31,7 +31,7 @@ import org.spongepowered.api.data.value.Value;
 public final class KeyValuePair {
 
     public static KeyValuePair slotIndex(int index) {
-        return of(Keys.SLOT_INDEX.get(), index);
+        return KeyValuePair.of(Keys.SLOT_INDEX, index);
     }
 
     public static <V> KeyValuePair of(Key<? extends Value<V>> property, V value) {

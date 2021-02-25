@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.AbstractFurnaceBlock;
-import net.minecraft.block.BlockState;
+import net.minecraft.world.level.block.AbstractFurnaceBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.DirectionUtils;
+import org.spongepowered.common.util.DirectionUtil;
 
 public final class AbstractFurnaceData {
 
@@ -40,12 +40,12 @@ public final class AbstractFurnaceData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.DIRECTION)
-                        .get(h -> DirectionUtils.getFor(h.get(AbstractFurnaceBlock.FACING)))
-                        .set((h, v) -> DirectionUtils.set(h, v, AbstractFurnaceBlock.FACING))
+                        .get(h -> DirectionUtil.getFor(h.getValue(AbstractFurnaceBlock.FACING)))
+                        .set((h, v) -> DirectionUtil.set(h, v, AbstractFurnaceBlock.FACING))
                         .supports(h -> h.getBlock() instanceof AbstractFurnaceBlock)
                     .create(Keys.IS_LIT)
-                        .get(h -> h.get(AbstractFurnaceBlock.LIT))
-                        .set((h, v) -> h.with(AbstractFurnaceBlock.LIT, v))
+                        .get(h -> h.getValue(AbstractFurnaceBlock.LIT))
+                        .set((h, v) -> h.setValue(AbstractFurnaceBlock.LIT, v))
                         .supports(h -> h.getBlock() instanceof AbstractFurnaceBlock);
     }
     // @formatter:on

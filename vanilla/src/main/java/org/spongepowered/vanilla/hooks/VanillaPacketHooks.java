@@ -24,62 +24,48 @@
  */
 package org.spongepowered.vanilla.hooks;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.play.server.SJoinGamePacket;
-import net.minecraft.network.play.server.SRespawnPacket;
-import net.minecraft.world.GameType;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.dimension.DimensionType;
-import org.spongepowered.api.world.dimension.DimensionTypes;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.world.dimension.DimensionTypeBridge;
-import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.hooks.PacketHooks;
-import org.spongepowered.common.world.dimension.SpongeDimensionType;
 
 public final class VanillaPacketHooks implements PacketHooks {
 
-    @Override
-    public SJoinGamePacket createSJoinGamePacket(final ServerPlayerEntity entity, final GameType gameType, final long seed,
-            final boolean hardcodeMode, final DimensionType dimensionType, final int maxPlayers, final WorldType generatorType,
-            final int viewDistance, final boolean isReducedDebugMode, final boolean enableRespawnScreen) {
-        if (((ServerPlayerEntityBridge) entity).bridge$getClientType() == ClientType.SPONGE_VANILLA) {
-            return new SJoinGamePacket(entity.getEntityId(), gameType, seed, hardcodeMode, dimensionType, maxPlayers, generatorType, viewDistance,
-                    isReducedDebugMode, enableRespawnScreen);
-        } else {
-            DimensionType clientType;
-            final SpongeDimensionType logicType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();
-            if (DimensionTypes.OVERWORLD.get() == logicType) {
-                clientType = DimensionType.OVERWORLD;
-            } else if (DimensionTypes.THE_NETHER.get() == logicType) {
-                clientType = DimensionType.THE_NETHER;
-            } else {
-                clientType = DimensionType.THE_END;
-            }
-
-            return new SJoinGamePacket(entity.getEntityId(), gameType, seed, hardcodeMode, clientType, maxPlayers, generatorType, viewDistance,
-                    isReducedDebugMode, enableRespawnScreen);
-        }
-    }
-
-    @Override
-    public SRespawnPacket createSRespawnPacket(final ServerPlayerEntity entity, final DimensionType dimensionType, final long seed,
-            final WorldType worldType, final GameType gameType) {
-
-        if (((ServerPlayerEntityBridge) entity).bridge$getClientType() == ClientType.SPONGE_VANILLA) {
-            return new SRespawnPacket(dimensionType, seed, worldType, gameType);
-        } else {
-            DimensionType clientType;
-            final SpongeDimensionType logicType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();
-            if (DimensionTypes.OVERWORLD.get() == logicType) {
-                clientType = DimensionType.OVERWORLD;
-            } else if (DimensionTypes.THE_NETHER.get() == logicType) {
-                clientType = DimensionType.THE_NETHER;
-            } else {
-                clientType = DimensionType.THE_END;
-            }
-
-            return new SRespawnPacket(clientType, seed, worldType, gameType);
-        }
-    }
+    // TODO Minecraft 1.16.4 - I may no longer need to send fake dimension changes, client knows of all levels now...
+//    @Override
+//    public SRespawnPacket createSRespawnPacket(
+//          final ServerPlayerEntity entity,
+//          final DimensionType dimensionType,
+//          final RegistryKey<World> dimension,
+//          final long seed,
+//          final GameType playerGameType,
+//          final GameType previousPlayerGameType,
+//          final boolean isDebug,
+//          final boolean isFlat,
+//          final boolean keepAllPlayerData
+//    ) {
+//
+//        if (((ServerPlayerEntityBridge) entity).bridge$getClientType() == ClientType.SPONGE_VANILLA) {
+//            return PacketHooks.super.createSRespawnPacket(
+//                  entity,
+//                  dimensionType,
+//                  dimension,
+//                  seed,
+//                  playerGameType,
+//                  previousPlayerGameType,
+//                  isDebug,
+//                  isFlat,
+//                  keepAllPlayerData
+//            );
+//        } else {
+//            DimensionType clientType;
+//            final SpongeDimensionType logicType = ((DimensionTypeBridge) dimensionType).bridge$getSpongeDimensionType();
+//            if (DimensionTypes.OVERWORLD.get() == logicType) {
+//                clientType = DimensionType.OVERWORLD;
+//            } else if (DimensionTypes.THE_NETHER.get() == logicType) {
+//                clientType = DimensionType.THE_NETHER;
+//            } else {
+//                clientType = DimensionType.THE_END;
+//            }
+//
+//            return new SRespawnPacket(clientType, seed, worldType, gameType);
+//        }
+//    }
 }

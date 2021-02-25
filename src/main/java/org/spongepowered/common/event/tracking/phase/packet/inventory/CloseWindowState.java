@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.inventory.container.Container;
-import net.minecraft.network.IPacket;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
@@ -42,16 +42,16 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 public final class CloseWindowState extends BasicPacketState {
 
     @Override
-    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
-        context.openContainer(playerMP.openContainer);
+    public void populateContext(ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+        context.openContainer(playerMP.containerMenu);
     }
 
     @Override
     public void unwind(BasicPacketContext context) {
-        final ServerPlayerEntity player = context.getSource(ServerPlayerEntity.class).get();
-        final Container container = context.getOpenContainer();
+        final ServerPlayer player = context.getSource(ServerPlayer.class).get();
+        final AbstractContainerMenu container = context.getOpenContainer();
         ItemStackSnapshot lastCursor = context.getCursor();
-        ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getItemStack());
+        ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         final CauseStackManager stackManager = PhaseTracker.getCauseStackManager();
         if (lastCursor != null) {
             stackManager.pushCause(player);

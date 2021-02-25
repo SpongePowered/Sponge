@@ -29,14 +29,10 @@ import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 
 @ConfigSerializable
-public class PermissionCategory {
+public final class PermissionCategory {
 
-    @Setting(value = "forge-permissions-handler")
+    @Setting("use-platform-permissions-handler")
     @Comment("If 'true', Sponge plugins will be used to handle permissions rather "
-            + "than any Forge mod")
-    private boolean enableHandler = false;
-
-    public boolean shouldEnableHandler() {
-        return this.enableHandler;
-    }
+            + "than any a platform may provide")
+    public boolean usePlatformPermissionsHandler = false;
 }

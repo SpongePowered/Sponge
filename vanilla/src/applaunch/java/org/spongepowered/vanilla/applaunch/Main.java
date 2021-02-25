@@ -27,6 +27,7 @@ package org.spongepowered.vanilla.applaunch;
 import cpw.mods.modlauncher.Launcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.fusesource.jansi.AnsiConsole;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.PluginKeys;
@@ -36,9 +37,15 @@ import org.spongepowered.vanilla.applaunch.util.ArgumentList;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.List;
 
 public final class Main {
+
+    static {
+        AnsiConsole.systemInstall();
+    }
 
     private static Main instance;
 
@@ -72,9 +79,13 @@ public final class Main {
         if (Files.notExists(modsDirectory)) {
             Files.createDirectories(modsDirectory);
         }
-        this.pluginEngine.getPluginEnvironment().getBlackboard()
-                .getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> Arrays.asList(modsDirectory, AppCommandLine
-                        .gameDirectory.resolve("plugins")));
+        final Path pluginsDirectory = AppCommandLine.gameDirectory.resolve("plugins");
+        final List<Path> pluginDirectories = new ArrayList<>();
+        pluginDirectories.add(modsDirectory);
+        if (Files.exists(pluginsDirectory)) {
+            pluginDirectories.add(pluginsDirectory);
+        }
+        this.pluginEngine.getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> pluginDirectories);
 
         this.logger.info("Transitioning to ModLauncher, please wait...");
         final ArgumentList lst = ArgumentList.from(AppCommandLine.RAW_ARGS);

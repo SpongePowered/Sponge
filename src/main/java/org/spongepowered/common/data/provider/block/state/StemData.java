@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.StemBlock;
+import net.minecraft.world.level.block.StemBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.BoundedUtils;
+import org.spongepowered.common.util.BoundedUtil;
 
 public final class StemData {
 
@@ -40,9 +40,9 @@ public final class StemData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.GROWTH_STAGE)
-                        .constructValue((h, v) -> BoundedUtils.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, StemBlock.AGE))
-                        .get(h -> h.get(StemBlock.AGE))
-                        .set((h, v) -> BoundedUtils.setInteger(h, v, StemBlock.AGE))
+                        .constructValue((h, v) -> BoundedUtil.constructImmutableValueInteger(v, Keys.GROWTH_STAGE, StemBlock.AGE))
+                        .get(h -> h.getValue(StemBlock.AGE))
+                        .set((h, v) -> BoundedUtil.setInteger(h, v, StemBlock.AGE))
                         .supports(h -> h.getBlock() instanceof StemBlock);
     }
     // @formatter:on

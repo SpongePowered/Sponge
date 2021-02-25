@@ -24,12 +24,11 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.query.Query;
 import org.spongepowered.api.item.inventory.query.QueryType;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.CompoundSlotLensProvider;
 import org.spongepowered.common.inventory.lens.impl.CompoundLens;
@@ -43,17 +42,6 @@ import java.util.List;
  * Reverses the slot order of an inventory.
  */
 public final class ReverseQuery extends SpongeQuery implements QueryType.NoParam {
-
-    private final ResourceKey key;
-
-    public ReverseQuery(final ResourceKey key) {
-        this.key = key;
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
-    }
 
     @Override
     public Inventory execute(Inventory parent, InventoryAdapter inventory) {

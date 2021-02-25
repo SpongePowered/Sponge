@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.entity.player.PlayerEntity;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Identifiable;
@@ -34,6 +33,7 @@ import org.spongepowered.common.entity.player.SpongeUser;
 
 import java.time.Instant;
 import java.util.UUID;
+import net.minecraft.world.entity.player.Player;
 
 public final class IdentifiableData {
 
@@ -51,7 +51,7 @@ public final class IdentifiableData {
                             final Instant played = ((SpongeServer) Sponge.getServer()).getPlayerDataManager().getFirstJoined(id).orElse(v);
                             ((SpongeServer) Sponge.getServer()).getPlayerDataManager().setPlayerInfo(id, played, v);
                         })
-                        .supports(h -> h instanceof PlayerEntity || h instanceof SpongeUser)
+                        .supports(h -> h instanceof Player || h instanceof SpongeUser)
                     .create(Keys.LAST_DATE_PLAYED)
                         .get(h -> ((SpongeServer) Sponge.getServer()).getPlayerDataManager().getLastPlayed(h.getUniqueId()).orElse(null))
                         .set((h, v) -> {
@@ -59,7 +59,7 @@ public final class IdentifiableData {
                             final Instant played = ((SpongeServer) Sponge.getServer()).getPlayerDataManager().getFirstJoined(id).orElse(v);
                             ((SpongeServer) Sponge.getServer()).getPlayerDataManager().setPlayerInfo(id, played, v);
                         })
-                        .supports(h -> h instanceof PlayerEntity || h instanceof SpongeUser);
+                        .supports(h -> h instanceof Player || h instanceof SpongeUser);
     }
     // @formatter:on
 }

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.query.type;
 
-import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.value.Value;
@@ -40,18 +39,19 @@ import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 @SuppressWarnings("unchecked")
 public final class KeyValueMatcherQuery<T> extends SpongeQuery {
 
     private final KeyValueMatcher<T> matcher;
 
-    public KeyValueMatcherQuery(KeyValueMatcher<T> matcher) {
+    public KeyValueMatcherQuery(final KeyValueMatcher<T> matcher) {
         this.matcher = matcher;
     }
 
     @Override
-    public Inventory execute(Inventory inventory, InventoryAdapter adapter) {
+    public Inventory execute(final Inventory inventory, final InventoryAdapter adapter) {
         final Fabric fabric = adapter.inventoryAdapter$getFabric();
         final Lens lens = adapter.inventoryAdapter$getRootLens();
 
@@ -62,11 +62,11 @@ public final class KeyValueMatcherQuery<T> extends SpongeQuery {
         return this.toResult(inventory, fabric, this.reduce(fabric, lens, this.search(inventory, lens)));
     }
 
-    private Map<Lens, Integer> search(Inventory inventory, Lens lens) {
-        if (inventory instanceof Container) {
-            Map<Lens, Integer> matches = new LinkedHashMap<>();
+    private Map<Lens, Integer> search(final Inventory inventory, final Lens lens) {
+        if (inventory instanceof AbstractContainerMenu) {
+            final Map<Lens, Integer> matches = new LinkedHashMap<>();
             // Search for Container Slot properties
-            for (net.minecraft.inventory.container.Slot slot : ((Container) inventory).inventorySlots) {
+            for (final net.minecraft.world.inventory.Slot slot : ((AbstractContainerMenu) inventory).slots) {
                 if (this.matches(null, null, (Inventory) slot)) {
                     matches.put(((InventoryAdapter)slot).inventoryAdapter$getRootLens(), 0);
                 }
@@ -75,12 +75,12 @@ public final class KeyValueMatcherQuery<T> extends SpongeQuery {
                 return matches;
             }
             // Search for Container Viewed inventory properties
-            Set<Inventory> viewedInventories = new HashSet<>();
-            for (Slot slot : inventory.slots()) {
+            final Set<Inventory> viewedInventories = new HashSet<>();
+            for (final Slot slot : inventory.slots()) {
                 viewedInventories.add(slot.viewedSlot().parent());
             }
             // TODO does this work?
-            for (Inventory viewedInventory : viewedInventories) {
+            for (final Inventory viewedInventory : viewedInventories) {
                 if (this.matches(null, null, viewedInventory)) {
                     matches.put(((InventoryAdapter) viewedInventory).inventoryAdapter$getRootLens(), 0);
                 }
@@ -93,11 +93,11 @@ public final class KeyValueMatcherQuery<T> extends SpongeQuery {
         return this.depthLaterSearch(inventory, lens);
     }
 
-    private Map<Lens, Integer> depthLaterSearch(Inventory inventory, Lens lens) {
-        Map<Lens, Integer> matches = new LinkedHashMap<>();
+    private Map<Lens, Integer> depthLaterSearch(final Inventory inventory, final Lens lens) {
+        final Map<Lens, Integer> matches = new LinkedHashMap<>();
 
         // Search for any match with the direct children
-        for (Lens child : lens.getChildren()) {
+        for (final Lens child : lens.getChildren()) {
             if (child == null) {
                 continue;
             }
@@ -107,7 +107,7 @@ public final class KeyValueMatcherQuery<T> extends SpongeQuery {
         }
         // If no match was found go one layer deeper
         if (matches.isEmpty()) {
-            for (Lens child : lens.getChildren()) {
+            for (final Lens child : lens.getChildren()) {
                 if (child == null) {
                     continue;
                 }
@@ -122,13 +122,13 @@ public final class KeyValueMatcherQuery<T> extends SpongeQuery {
         return matches;
     }
 
-    private void delegateOffset(Lens lens, Map<Lens, Integer> matches) {
+    private void delegateOffset(final Lens lens, final Map<Lens, Integer> matches) {
         if (lens.base() != 0 && !matches.isEmpty() && lens instanceof DelegatingLens) {
             matches.entrySet().forEach(entry -> entry.setValue(entry.getValue() + lens.base()));
         }
     }
 
-    public boolean matches(Lens lens, Lens parent, Inventory inventory) {
+    public boolean matches(final Lens lens, final Lens parent, final Inventory inventory) {
         final Key<? extends Value<T>> key = this.matcher.getKey();
         if (this.matcher.matches(inventory.get(key).orElse(null))) {
             return true;

@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.tileentity.BrewingStandTileEntityAccessor;
+import org.spongepowered.common.accessor.world.level.block.entity.BrewingStandBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -37,21 +37,21 @@ public final class BrewingStandData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(BrewingStandTileEntityAccessor.class)
+                .asMutable(BrewingStandBlockEntityAccessor.class)
                     .create(Keys.FUEL)
-                        .get(BrewingStandTileEntityAccessor::accessor$getFuel)
+                        .get(BrewingStandBlockEntityAccessor::accessor$fuel)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.accessor$setFuel(v);
+                            h.accessor$fuel(v);
                             return true;
                         })
                     .create(Keys.REMAINING_BREW_TIME)
-                        .get(h -> h.accessor$canBrew() ? new SpongeTicks(h.accessor$getBrewTime()) : null)
+                        .get(h -> h.invoker$isBrewable() ? new SpongeTicks(h.accessor$brewTime()) : null)
                         .set((h, v) -> {
-                            if (h.accessor$canBrew()) {
-                                h.accessor$setBrewTime((int) v.getTicks());
+                            if (h.invoker$isBrewable()) {
+                                h.accessor$brewTime((int) v.getTicks());
                             }
                         });
     }

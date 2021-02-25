@@ -28,20 +28,21 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.configurate.BasicConfigurationNode;
-import org.spongepowered.configurate.ConfigurationNode;
-import org.spongepowered.configurate.ConfigurationOptions;
-import org.spongepowered.configurate.ConfigurationVisitor;
-import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.configurate.serialize.TypeSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.data.persistence.ConfigurateTranslator.ToDataView;
+import org.spongepowered.common.data.persistence.ConfigurateTranslator.VisitState;
+import org.spongepowered.configurate.BasicConfigurationNode;
+import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.ConfigurationOptions;
+import org.spongepowered.configurate.ConfigurationVisitor;
+import org.spongepowered.configurate.serialize.SerializationException;
+import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.util.Collection;
 import java.util.Deque;
@@ -57,7 +58,6 @@ import java.util.Set;
  */
 public final class ConfigurateTranslator implements DataTranslator<ConfigurationNode> {
 
-    private static final ResourceKey KEY = ResourceKey.sponge("configuration_node");
     private static final ConfigurateTranslator INSTANCE = new ConfigurateTranslator();
     private static final TypeToken<ConfigurationNode> TOKEN = TypeToken.get(ConfigurationNode.class);
     private static final ConfigurationOptions DEFAULT_OPTS = ConfigurationOptions.defaults()
@@ -83,11 +83,6 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
     }
 
     private ConfigurateTranslator() {
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return ConfigurateTranslator.KEY;
     }
 
     @Override

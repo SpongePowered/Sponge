@@ -24,19 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 
 /**
  * A specialized phase for forge event listeners during pre tick, may need to do the same
@@ -59,24 +55,17 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
         return true;
     }
 
-
-    @Override
-    public void appendNotifierToBlockEvent(final L context, final PhaseContext<?> currentContext,
-                                           final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
-
-    }
-
     @Override
     public void associateNeighborStateNotifier(final L unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
-        final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
+        final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         unwindingContext.getCapturedPlayer().ifPresent(player ->
-            ((ChunkBridge) minecraftWorld.getChunkAt(notifyPos))
+            ((LevelChunkBridge) minecraftWorld.getChunkAt(notifyPos))
                 .bridge$addTrackedBlockPosition(block, notifyPos, ((ServerPlayer) player).getUser(), PlayerTracker.Type.NOTIFIER)
         );
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlock(@Nullable final ItemStack stack, final ServerPlayerEntity playerMP, final L context) {
+    public void capturePlayerUsingStackToBreakBlock(@Nullable final ItemStack stack, final net.minecraft.server.level.ServerPlayer playerMP, final L context) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 

@@ -31,7 +31,6 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -39,18 +38,20 @@ import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.InteractBlockEvent;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeApplicators;
 import org.spongepowered.api.world.volume.stream.VolumeCollectors;
 import org.spongepowered.api.world.volume.stream.VolumePositionTranslators;
-import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -104,12 +105,8 @@ public final class VolumeStreamTest implements LoadableModule {
                     final Vector3i min = data.getPos1().min(data.getPos2());
                     final Vector3i max = data.getPos1().max(data.getPos2());
                     data.setOrigin(player.getBlockPosition());
-                    final VolumeStream<?, BlockState> stream = player.getWorld().getBlockStateStream(
-                        min,
-                        max,
-                        StreamOptions.lazily()
-                    );
-                    data.setClipboard(stream);
+                    final ArchetypeVolume archetypeVolume = player.getWorld().createArchetypeVolume(min, max, player.getBlockPosition());
+                    data.setClipboard(archetypeVolume);
                     player.sendMessage(Identity.nil(), Component.text("Saved to clipboard.", NamedTextColor.GREEN));
                     return CommandResult.success();
                 }).build(),
@@ -126,18 +123,39 @@ public final class VolumeStreamTest implements LoadableModule {
                     }
                     final ServerPlayer player = (ServerPlayer) src.getCause().root();
                     final PlayerData data = VolumeStreamTest.get(player);
-                    final VolumeStream<?, BlockState> volume = data.getClipboard();
+                    final ArchetypeVolume volume = data.getClipboard();
                     if (volume == null) {
                         player.sendMessage(Identity.nil(), Component.text("You must copy something before pasting", NamedTextColor.RED));
                         return CommandResult.success();
                     }
-                    Sponge.getServer().getCauseStackManager().pushCause(this.plugin);
-                    volume
-                        .apply(VolumeCollectors.of(player.getWorld(),
-                            VolumePositionTranslators.offsetPosition(player.getBlockPosition(), data.getOrigin()),
-                            VolumeApplicators.applyBlocks(BlockChangeFlags.ALL))
-                        );
-                    Sponge.getServer().getCauseStackManager().popCause();
+                    try (CauseStackManager.StackFrame frame = Sponge.getServer().getCauseStackManager().pushCauseFrame()) {
+                        frame.pushCause(this.plugin);
+                        volume.getBlockStateStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                            .apply(VolumeCollectors.of(
+                                player.getWorld(),
+                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                VolumeApplicators.applyBlocks(BlockChangeFlags.ALL)
+                            ));
+                        volume.getBiomeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                            .apply(VolumeCollectors.of(
+                                player.getWorld(),
+                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                VolumeApplicators.applyBiomes()
+                            ));
+                        volume.getBlockEntityArchetypeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                            .apply(VolumeCollectors.of(
+                                player.getWorld(),
+                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                VolumeApplicators.applyBlockEntityArchetype()
+                            ));
+                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT.get());
+                        volume.getEntityArchetypeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                            .apply(VolumeCollectors.of(
+                                player.getWorld(),
+                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                VolumeApplicators.applyEntityArchetype()
+                            ));
+                    }
                     src.sendMessage(Identity.nil(), Component.text("Pasted clipboard into world.", NamedTextColor.GREEN));
                     return CommandResult.success();
                 }).build(),
@@ -173,7 +191,7 @@ public final class VolumeStreamTest implements LoadableModule {
         private Vector3i pos1;
         private Vector3i pos2;
         private Vector3i origin;
-        private VolumeStream<?, BlockState> clipboard;
+        private ArchetypeVolume clipboard;
 
         public PlayerData(final UUID uid) {
             this.uid = uid;
@@ -199,11 +217,11 @@ public final class VolumeStreamTest implements LoadableModule {
             this.pos2 = pos;
         }
 
-        public VolumeStream<?, BlockState> getClipboard() {
+        public ArchetypeVolume getClipboard() {
             return this.clipboard;
         }
 
-        public void setClipboard(final VolumeStream<?, BlockState> volume) {
+        public void setClipboard(final ArchetypeVolume volume) {
             this.clipboard = volume;
         }
 

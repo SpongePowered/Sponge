@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.accessor.entity.item.minecart.FurnaceMinecartEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.vehicle.MinecartFurnaceAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class FurnaceMinecartData {
@@ -36,14 +36,14 @@ public final class FurnaceMinecartData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(FurnaceMinecartEntityAccessor.class)
+                .asMutable(MinecartFurnaceAccessor.class)
                     .create(Keys.FUEL)
-                        .get(FurnaceMinecartEntityAccessor::accessor$getFuel)
+                        .get(MinecartFurnaceAccessor::accessor$fuel)
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
                             }
-                            h.accessor$setFuel(v);
+                            h.accessor$fuel(v);
                             return true;
                         });
     }

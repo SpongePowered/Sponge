@@ -25,16 +25,17 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.entity.Entity;
-import net.minecraft.tileentity.TileEntity;
+import com.google.common.collect.ImmutableMultimap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Deque;
@@ -42,11 +43,14 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 @DefaultQualifier(NonNull.class)
 public abstract class GameTransaction<E extends Event & Cancellable> {
 
-    private final TransactionType transactionType;
+    private final TransactionType<? extends E> transactionType;
+    protected final ResourceKey worldKey;
     boolean cancelled = false;
 
     // Children Definitions
@@ -56,8 +60,9 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
     @Nullable GameTransaction<@NonNull ?> previous;
     @Nullable GameTransaction<@NonNull ?> next;
 
-    GameTransaction(final TransactionType transactionType) {
+    GameTransaction(final TransactionType<? extends E> transactionType, final ResourceKey worldKey) {
         this.transactionType = transactionType;
+        this.worldKey = worldKey;
     }
 
     @Override
@@ -66,7 +71,7 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
             .toString();
     }
 
-    public TransactionType getTransactionType() {
+    public TransactionType<? extends E> getTransactionType() {
         return this.transactionType;
     }
 
@@ -104,15 +109,15 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
 
     public abstract void addToPrinter(PrettyPrinter printer);
 
-    public boolean acceptTileRemoval(final @Nullable TileEntity tileentity) {
+    public boolean acceptTileRemoval(final @Nullable BlockEntity tileentity) {
         return false;
     }
 
-    public boolean acceptTileAddition(final TileEntity tileEntity) {
+    public boolean acceptTileAddition(final BlockEntity tileEntity) {
         return false;
     }
 
-    public boolean acceptTileReplacement(final @Nullable TileEntity existing, final TileEntity proposed) {
+    public boolean acceptTileReplacement(final @Nullable BlockEntity existing, final BlockEntity proposed) {
         return false;
     }
 
@@ -124,11 +129,12 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
         return false;
     }
 
-    public abstract E generateEvent(
+    public abstract Optional<E> generateEvent(
         PhaseContext<@NonNull ?> context,
         @Nullable GameTransaction<@NonNull ?> parent,
         ImmutableList<GameTransaction<E>> transactions,
-        Cause currentCause
+        Cause currentCause,
+        ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     );
 
     public abstract void restore();

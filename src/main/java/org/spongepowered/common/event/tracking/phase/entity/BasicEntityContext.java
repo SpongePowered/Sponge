@@ -29,7 +29,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class BasicEntityContext extends EntityContext<BasicEntityContext> {
 
-    BasicEntityContext(final IPhaseState<? extends BasicEntityContext> state, PhaseTracker tracker) {
+    BasicEntityContext(final IPhaseState<BasicEntityContext> state, PhaseTracker tracker) {
         super(state, tracker);
     }
 

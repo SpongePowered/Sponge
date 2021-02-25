@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.advancements;
 
-import net.minecraft.advancements.AdvancementProgress;
 import net.minecraft.advancements.CriterionProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,18 +42,20 @@ import javax.annotation.Nullable;
 @Mixin(CriterionProgress.class)
 public abstract class CriterionProgressMixin implements CriterionProgressBridge, ImplementationBackedCriterionProgress {
 
+    // @formatter:off
     @Shadow @Nullable private Date obtained;
-    @Shadow public abstract void shadow$reset();
+    @Shadow public abstract void shadow$revoke();
+    // @formatter:on
 
     @Nullable private AdvancementCriterion impl$criterion;
     private org.spongepowered.api.advancement.AdvancementProgress impl$advancementProgress;
 
-    @Inject(method = "obtain", at = @At("RETURN"))
+    @Inject(method = "grant", at = @At("RETURN"))
     private void onObtain(CallbackInfo ci) {
         ((AdvancementProgressBridge) this.impl$advancementProgress).bridge$invalidateAchievedState();
     }
 
-    @Inject(method = "reset", at = @At("RETURN"))
+    @Inject(method = "revoke", at = @At("RETURN"))
     private void onReset(CallbackInfo ci) {
         ((AdvancementProgressBridge) this.impl$advancementProgress).bridge$invalidateAchievedState();
     }

@@ -27,7 +27,6 @@ package org.spongepowered.common.data;
 import com.google.common.collect.Multimap;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
@@ -35,7 +34,6 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.UnregisteredKeyException;
 import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.plugin.PluginContainer;
 
 import java.lang.reflect.Type;
 import java.util.Collection;
@@ -45,18 +43,14 @@ import java.util.Optional;
 
 public final class SpongeDataRegistration implements DataRegistration {
 
-    final ResourceKey key;
     final List<Key<?>> keys;
     final Map<Type, DataStore> dataStoreMap;
     final Multimap<Key, DataProvider> dataProviderMap;
-    final PluginContainer plugin;
 
-    SpongeDataRegistration(ResourceKey key, PluginContainer plugin, SpongeDataRegistrationBuilder builder) {
-        this.key = key;
+    SpongeDataRegistration(final SpongeDataRegistrationBuilder builder) {
         this.keys = builder.keys;
         this.dataStoreMap = builder.dataStoreMap;
         this.dataProviderMap = builder.dataProviderMap;
-        this.plugin = plugin;
     }
 
     @Override
@@ -67,12 +61,12 @@ public final class SpongeDataRegistration implements DataRegistration {
 
     @Override
     public Optional<DataStore> getDataStore(final TypeToken<? extends DataHolder> token) {
-        return getDataStore0(token.getType());
+        return this.getDataStore0(token.getType());
     }
 
     @Override
     public Optional<DataStore> getDataStore(final Class<? extends DataHolder> token) {
-        return getDataStore0(token);
+        return this.getDataStore0(token);
     }
 
     private Optional<DataStore> getDataStore0(final Type type) {
@@ -95,18 +89,8 @@ public final class SpongeDataRegistration implements DataRegistration {
         return this.keys;
     }
 
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public PluginContainer getPluginContainer() {
-        return this.plugin;
-    }
-
     public Collection<DataStore> getDataStores() {
-        return dataStoreMap.values();
+        return this.dataStoreMap.values();
     }
 
     public Collection<DataProvider> getDataProviders() {

@@ -32,35 +32,22 @@ import java.util.ArrayList;
 import java.util.List;
 
 @ConfigSerializable
-public class TeleportHelperCategory {
+public final class TeleportHelperCategory {
 
     @Setting("force-blacklist")
     @Comment("If 'true', this blacklist will always be respected, otherwise, plugins can choose whether \n"
              + "or not to respect it.")
-    private boolean forceBlacklistOn = false;
+    public boolean forceBlacklist = false;
 
-    @Setting("unsafe-floor-block-ids")
-    @Comment("Block IDs that are listed here will not be selected by Sponge's safe \n"
+    @Setting("unsafe-floor-blocks")
+    @Comment("Blocks that are listed here will not be selected by Sponge's safe \n"
              + "teleport routine as a safe floor block.")
-    private List<String> unsafeFloorBlockIds = new ArrayList<>();
+    public final List<String> unsafeFloorBlocks = new ArrayList<>();
 
-    @Setting("unsafe-body-block-ids")
-    @Comment("Block IDs that are listed here will not be selected by Sponge's safe teleport routine as \n"
+    @Setting("unsafe-body-blocks")
+    @Comment("Blocks that are listed here will not be selected by Sponge's safe teleport routine as \n"
               + "a safe block for players to warp into. \n"
               + "You should only list blocks here that are incorrectly selected, solid blocks that prevent \n"
               + "movement are automatically excluded.")
-    private List<String> unsafeBlockBlockIds = new ArrayList<>();
-
-    public boolean isForceBlacklistOn() {
-        return this.forceBlacklistOn;
-    }
-
-    public List<String> getUnsafeFloorBlockIds() {
-        return this.unsafeFloorBlockIds;
-    }
-
-    public List<String> getUnsafeBodyBlockIds() {
-        return this.unsafeBlockBlockIds;
-    }
-
+    public final List<String> unsafeBlockBlocks = new ArrayList<>();
 }

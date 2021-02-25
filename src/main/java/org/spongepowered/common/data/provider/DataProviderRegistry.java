@@ -30,7 +30,7 @@ import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.key.SpongeKey;
-import org.spongepowered.common.data.provider.block.entity.TileEntityDataProviders;
+import org.spongepowered.common.data.provider.block.entity.BlockEntityDataProviders;
 import org.spongepowered.common.data.provider.block.location.LocationDataProviders;
 import org.spongepowered.common.data.provider.block.state.BlockStateDataProviders;
 import org.spongepowered.common.data.provider.entity.EntityDataProviders;
@@ -211,7 +211,7 @@ public final class DataProviderRegistry {
                 new BlockStateDataProviders(),
                 new NBTDataProviders(),
                 new ItemDataProviders(),
-                new TileEntityDataProviders(),
+                new BlockEntityDataProviders(),
                 new GenericDataProviders(),
                 new ItemStackDataProviders(),
                 new InventoryDataProviders(),

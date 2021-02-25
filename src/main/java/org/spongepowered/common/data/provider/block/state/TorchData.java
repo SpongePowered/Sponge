@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.block.Blocks;
-import net.minecraft.block.RedstoneTorchBlock;
-import net.minecraft.block.RedstoneWallTorchBlock;
-import net.minecraft.block.TorchBlock;
-import net.minecraft.block.WallTorchBlock;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.RedstoneTorchBlock;
+import net.minecraft.world.level.block.RedstoneWallTorchBlock;
+import net.minecraft.world.level.block.TorchBlock;
+import net.minecraft.world.level.block.WallTorchBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -52,10 +52,10 @@ public final class TorchData {
                                 return h;
                             }
                             if (block instanceof RedstoneTorchBlock) {
-                                return (isWallBlock ? Blocks.REDSTONE_WALL_TORCH : Blocks.REDSTONE_TORCH).getDefaultState()
-                                        .with(RedstoneTorchBlock.LIT, h.get(RedstoneTorchBlock.LIT));
+                                return (isWallBlock ? Blocks.REDSTONE_WALL_TORCH : Blocks.REDSTONE_TORCH).defaultBlockState()
+                                        .setValue(RedstoneTorchBlock.LIT, h.getValue(RedstoneTorchBlock.LIT));
                             }
-                            return (isWallBlock ? Blocks.WALL_TORCH : Blocks.TORCH).getDefaultState();
+                            return (isWallBlock ? Blocks.WALL_TORCH : Blocks.TORCH).defaultBlockState();
                         })
                         .supports(h -> h.getBlock() instanceof TorchBlock);
     }

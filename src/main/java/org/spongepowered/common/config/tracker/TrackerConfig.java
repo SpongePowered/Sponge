@@ -29,7 +29,7 @@ import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 
-public class TrackerConfig implements Config {
+public final class TrackerConfig implements Config {
 
     public static final String FILE_NAME = "tracker.conf";
 
@@ -53,23 +53,11 @@ public class TrackerConfig implements Config {
     public static final String ENTITY_EVENT_CREATION = "entity-block-creation";
 
     @Setting("block")
-    private BlockTrackerCategory blockTracker = new BlockTrackerCategory();
+    public final BlockTrackerCategory block = new BlockTrackerCategory();
 
     @Setting("entity")
-    private EntityTrackerCategory entityTracker = new EntityTrackerCategory();
+    public final EntityTrackerCategory entity = new EntityTrackerCategory();
 
-    @Setting("blockentity")
-    private BlockEntityTrackerCategory blockEntityTracker = new BlockEntityTrackerCategory();
-
-    public BlockTrackerCategory getBlockTracker() {
-        return this.blockTracker;
-    }
-
-    public EntityTrackerCategory getEntityTracker() {
-        return this.entityTracker;
-    }
-
-    public BlockEntityTrackerCategory getBlockEntityTracker() {
-        return this.blockEntityTracker;
-    }
+    @Setting("block-entity")
+    public final BlockEntityTrackerCategory blockEntity = new BlockEntityTrackerCategory();
 }

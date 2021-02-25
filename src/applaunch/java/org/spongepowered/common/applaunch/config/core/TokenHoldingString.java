@@ -72,14 +72,14 @@ public final class TokenHoldingString {
     }
 
     private static void register(final String token, final Blackboard.Key<?> getter) {
-        register(token, env -> {
+        TokenHoldingString.register(token, env -> {
             final Object value = env.getBlackboard().get(getter).orElse(null);
             return value == null ? null : value.toString();
         });
     }
 
     private static void register(final String token, final Function<PluginEnvironment, String> getter) {
-        TOKENS.put(token.toLowerCase(Locale.ROOT), getter);
+        TokenHoldingString.TOKENS.put(token.toLowerCase(Locale.ROOT), getter);
     }
 
     /**
@@ -93,14 +93,14 @@ public final class TokenHoldingString {
      */
     private static String parsePlaceholders(final String input) {
         final PluginEnvironment env = SpongeConfigs.getPluginEnvironment();
-        final Matcher matcher = TOKEN_MATCH.matcher(input);
+        final Matcher matcher = TokenHoldingString.TOKEN_MATCH.matcher(input);
         if (!matcher.find()) {
             return input;
         }
         final StringBuffer result = new StringBuffer();
         do {
             final String token = matcher.group(1);
-            final Function<PluginEnvironment, String> replacer = TOKENS.get(token.toLowerCase());
+            final Function<PluginEnvironment, String> replacer = TokenHoldingString.TOKENS.get(token.toLowerCase());
             final String replaced = replacer == null ? "" : replacer.apply(env);
             matcher.appendReplacement(result, replaced == null ? "" : replaced);
         } while (matcher.find());

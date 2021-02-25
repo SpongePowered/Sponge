@@ -24,6 +24,20 @@
  */
 package org.spongepowered.common.util;
 
+import com.google.common.base.Strings;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+import org.spongepowered.common.util.PrettyPrinter.CentredText;
+import org.spongepowered.common.util.PrettyPrinter.Column;
+import org.spongepowered.common.util.PrettyPrinter.HorizontalRule;
+import org.spongepowered.common.util.PrettyPrinter.ISpecialEntry;
+import org.spongepowered.common.util.PrettyPrinter.IVariableWidthEntry;
+import org.spongepowered.common.util.PrettyPrinter.KeyValue;
+import org.spongepowered.common.util.PrettyPrinter.Row;
+import org.spongepowered.common.util.PrettyPrinter.Table;
 import java.io.PrintStream;
 import java.util.ArrayList;
 import java.util.Collection;
@@ -31,12 +45,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
-
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-
-import com.google.common.base.Strings;
 
 /**
  * Prints information in a pretty box
@@ -82,7 +90,7 @@ public class PrettyPrinter {
 
         private final Object value;
 
-        public KeyValue(String key, Object value) {
+        public KeyValue(final String key, final Object value) {
             this.key = key;
             this.value = value;
         }
@@ -106,7 +114,7 @@ public class PrettyPrinter {
 
         private final char[] hrChars;
 
-        public HorizontalRule(char... hrChars) {
+        public HorizontalRule(final char... hrChars) {
             this.hrChars = hrChars;
         }
 
@@ -124,13 +132,13 @@ public class PrettyPrinter {
 
         private final Object centred;
 
-        public CentredText(Object centred) {
+        public CentredText(final Object centred) {
             this.centred = centred;
         }
 
         @Override
         public String toString() {
-            String text = this.centred.toString();
+            final String text = this.centred.toString();
             return String.format("%" + (((PrettyPrinter.this.width - (text.length())) / 2) + text.length()) + "s", text);
         }
 
@@ -163,12 +171,12 @@ public class PrettyPrinter {
             this.addHeader = false;
         }
 
-        void setColSpacing(int spacing) {
+        void setColSpacing(final int spacing) {
             this.colSpacing = Math.max(0, spacing);
             this.updateFormat();
         }
 
-        Table grow(int size) {
+        Table grow(final int size) {
             while (this.columns.size() < size) {
                 this.columns.add(new Column(this));
             }
@@ -176,34 +184,34 @@ public class PrettyPrinter {
             return this;
         }
 
-        Column add(Column column) {
+        Column add(final Column column) {
             this.columns.add(column);
             return column;
         }
 
-        Row add(Row row) {
+        Row add(final Row row) {
             this.rows.add(row);
             return row;
         }
 
-        Column addColumn(String title) {
+        Column addColumn(final String title) {
             return this.add(new Column(this, title));
         }
 
         Column addColumn(
-            Alignment align, int size, String title) {
+            final Alignment align, final int size, final String title) {
             return this.add(new Column(this, align, size, title));
         }
 
-        Row addRow(Object... args) {
+        Row addRow(final Object... args) {
             return this.add(new Row(this, args));
         }
 
         void updateFormat() {
-            String spacing = Strings.repeat(" ", this.colSpacing);
-            StringBuilder format = new StringBuilder();
+            final String spacing = Strings.repeat(" ", this.colSpacing);
+            final StringBuilder format = new StringBuilder();
             boolean addSpacing = false;
-            for (Column column : this.columns) {
+            for (final Column column : this.columns) {
                 if (addSpacing) {
                     format.append(spacing);
                 }
@@ -218,8 +226,8 @@ public class PrettyPrinter {
         }
 
         Object[] getTitles() {
-            List<Object> titles = new ArrayList<Object>();
-            for (Column column : this.columns) {
+            final List<Object> titles = new ArrayList<Object>();
+            for (final Column column : this.columns) {
                 titles.add(column.getTitle());
             }
             return titles.toArray();
@@ -228,7 +236,7 @@ public class PrettyPrinter {
         @Override
         public String toString() {
             boolean nonEmpty = false;
-            String[] titles = new String[this.columns.size()];
+            final String[] titles = new String[this.columns.size()];
             for (int col = 0; col < this.columns.size(); col++) {
                 titles[col] = this.columns.get(col).toString();
                 nonEmpty |= !titles[col].isEmpty();
@@ -238,7 +246,7 @@ public class PrettyPrinter {
 
         @Override
         public int getWidth() {
-            String str = this.toString();
+            final String str = this.toString();
             return str != null ? str.length() : 0;
         }
 
@@ -263,11 +271,11 @@ public class PrettyPrinter {
 
         private String format = "%s";
 
-        Column(Table table) {
+        Column(final Table table) {
             this.table = table;
         }
 
-        Column(Table table, String title) {
+        Column(final Table table, final String title) {
             this(table);
             this.title = title;
             this.minWidth = title.length();
@@ -275,44 +283,44 @@ public class PrettyPrinter {
         }
 
         Column(
-            Table table, Alignment align, int size, String title) {
+            final Table table, final Alignment align, final int size, final String title) {
             this(table, title);
             this.align = align;
             this.size = size;
         }
 
-        void setAlignment(Alignment align) {
+        void setAlignment(final Alignment align) {
             this.align = align;
             this.updateFormat();
         }
 
-        void setWidth(int width) {
+        void setWidth(final int width) {
             if (width > this.size) {
                 this.size = width;
                 this.updateFormat();
             }
         }
 
-        void setMinWidth(int width) {
+        void setMinWidth(final int width) {
             if (width > this.minWidth) {
                 this.minWidth = width;
                 this.updateFormat();
             }
         }
 
-        void setMaxWidth(int width) {
+        void setMaxWidth(final int width) {
             this.size = Math.min(this.size, this.maxWidth);
             this.maxWidth = Math.max(1, width);
             this.updateFormat();
         }
 
-        void setTitle(String title) {
+        void setTitle(final String title) {
             this.title = title;
             this.setWidth(title.length());
         }
 
         private void updateFormat() {
-            int width = Math.min(this.maxWidth, this.size == 0 ? this.minWidth : this.size);
+            final int width = Math.min(this.maxWidth, this.size == 0 ? this.minWidth : this.size);
             this.format = "%" + (this.align == Alignment.RIGHT ? "" : "-") + width + "s";
             this.table.updateFormat();
         }
@@ -349,7 +357,7 @@ public class PrettyPrinter {
 
         final String[] args;
 
-        public Row(Table table, Object... args) {
+        public Row(final Table table, final Object... args) {
             this.table = table.grow(args.length);
             this.args = new String[args.length];
             for (int i = 0; i < args.length; i++) {
@@ -360,9 +368,9 @@ public class PrettyPrinter {
 
         @Override
         public String toString() {
-            Object[] args = new Object[this.table.columns.size()];
+            final Object[] args = new Object[this.table.columns.size()];
             for (int col = 0; col < args.length; col++) {
-                Column column = this.table.columns.get(col);
+                final Column column = this.table.columns.get(col);
                 if (col >= this.args.length) {
                     args[col] = "";
                 } else {
@@ -385,10 +393,19 @@ public class PrettyPrinter {
      */
     private static final int MIN_WIDTH = 40;
 
+    private static final char DEFAULT_RULER = System.getProperty("sponge.prettyPrintingRulerChar", "-").charAt(0);
+    private static final boolean INCLUDE_BORDERS = Boolean.parseBoolean(System.getProperty("sponge.prettyPrinting.borders"));
+    private static String border() {
+        return PrettyPrinter.INCLUDE_BORDERS ? "/*" : "";
+    }
+    private static String endBorder() {
+        return PrettyPrinter.INCLUDE_BORDERS ? "*/" : "";
+    }
+
     /**
      * Horizontal rule
      */
-    private final HorizontalRule horizontalRule = new HorizontalRule('*');
+    private final HorizontalRule horizontalRule = new HorizontalRule(PrettyPrinter.DEFAULT_RULER);
 
     /**
      * Content lines
@@ -421,14 +438,14 @@ public class PrettyPrinter {
      */
     protected int kvKeyWidth = 10;
 
-    protected String kvFormat = makeKvFormat(this.kvKeyWidth);
+    protected String kvFormat = PrettyPrinter.makeKvFormat(this.kvKeyWidth);
 
     public PrettyPrinter() {
         this(100);
     }
 
-    public PrettyPrinter(int width) {
-        this.width = Math.max(MIN_WIDTH, width);
+    public PrettyPrinter(final int width) {
+        this.width = Math.max(PrettyPrinter.MIN_WIDTH, width);
         this.wrapWidth = this.width - 20;
     }
 
@@ -438,7 +455,7 @@ public class PrettyPrinter {
      * @param wrapWidth new width (in characters) to wrap to
      * @return fluent interface
      */
-    public PrettyPrinter wrapTo(int wrapWidth) {
+    public PrettyPrinter wrapTo(final int wrapWidth) {
         this.wrapWidth = wrapWidth;
         return this;
     }
@@ -468,9 +485,9 @@ public class PrettyPrinter {
      * @param titles Column titles
      * @return fluent interface
      */
-    public PrettyPrinter table(String... titles) {
+    public PrettyPrinter table(final String... titles) {
         this.table = new Table();
-        for (String title : titles) {
+        for (final String title : titles) {
             this.table.addColumn(title);
         }
         return this;
@@ -497,14 +514,14 @@ public class PrettyPrinter {
      * @param format format string, see description
      * @return fluent interface
      */
-    public PrettyPrinter table(Object... format) {
+    public PrettyPrinter table(final Object... format) {
         this.table = new Table();
         Column column = null;
-        for (Object entry : format) {
+        for (final Object entry : format) {
             if (entry instanceof String) {
                 column = this.table.addColumn((String)entry);
             } else if (entry instanceof Integer && column != null) {
-                int width = ((Integer)entry).intValue();
+                final int width = ((Integer)entry).intValue();
                 if (width > 0) {
                     column.setWidth(width);
                 } else if (width < 0) {
@@ -525,7 +542,7 @@ public class PrettyPrinter {
      * @param spacing Column spacing in characters
      * @return fluent interface
      */
-    public PrettyPrinter spacing(int spacing) {
+    public PrettyPrinter spacing(final int spacing) {
         if (this.table == null) {
             this.table = new Table();
         }
@@ -543,7 +560,7 @@ public class PrettyPrinter {
         return this.th(false);
     }
 
-    private PrettyPrinter th(boolean onlyIfNeeded) {
+    private PrettyPrinter th(final boolean onlyIfNeeded) {
         if (this.table == null) {
             this.table = new Table();
         }
@@ -562,7 +579,7 @@ public class PrettyPrinter {
      * @param args column values
      * @return fluent interface
      */
-    public PrettyPrinter tr(Object... args) {
+    public PrettyPrinter tr(final Object... args) {
         this.th(true);
         this.addLine(this.table.addRow(args));
         this.recalcWidth = true;
@@ -585,7 +602,7 @@ public class PrettyPrinter {
      * @param string format string
      * @return fluent interface
      */
-    public PrettyPrinter add(String string) {
+    public PrettyPrinter add(final String string) {
         this.addLine(string);
         this.width = Math.max(this.width, string.length());
         return this;
@@ -599,8 +616,8 @@ public class PrettyPrinter {
      *
      * @return fluent interface
      */
-    public PrettyPrinter add(String format, Object... args) {
-        String line = String.format(format, args);
+    public PrettyPrinter add(final String format, final Object... args) {
+        final String line = String.format(format, args);
         this.addLine(line);
         this.width = Math.max(this.width, line.length());
         return this;
@@ -612,7 +629,7 @@ public class PrettyPrinter {
      * @param array Array of objects to print 
      * @return fluent interface
      */
-    public PrettyPrinter add(Object[] array) {
+    public PrettyPrinter add(final Object[] array) {
         return this.add(array, "%s");
     }
 
@@ -623,8 +640,8 @@ public class PrettyPrinter {
      * @param format Format for each row
      * @return fluent interface
      */
-    public PrettyPrinter add(Object[] array, String format) {
-        for (Object element : array) {
+    public PrettyPrinter add(final Object[] array, final String format) {
+        for (final Object element : array) {
             this.add(format, element);
         }
 
@@ -637,9 +654,9 @@ public class PrettyPrinter {
      * @param array Array of objects to print
      * @return fluent interface
      */
-    public PrettyPrinter addIndexed(Object[] array) {
-        int indexWidth = String.valueOf(array.length - 1).length();
-        String format = "[%" + indexWidth + "d] %s";
+    public PrettyPrinter addIndexed(final Object[] array) {
+        final int indexWidth = String.valueOf(array.length - 1).length();
+        final String format = "[%" + indexWidth + "d] %s";
         for (int index = 0; index < array.length; index++) {
             this.add(format, index, array[index]);
         }
@@ -653,7 +670,7 @@ public class PrettyPrinter {
      * @param c Collection of objects to print
      * @return fluent interface
      */
-    public PrettyPrinter addWithIndices(Collection<?> c) {
+    public PrettyPrinter addWithIndices(final Collection<?> c) {
         return this.addIndexed(c.toArray());
     }
 
@@ -665,7 +682,7 @@ public class PrettyPrinter {
      * @return fluent interface
      */
     public PrettyPrinter add(
-        IPrettyPrintable printable) {
+        final IPrettyPrintable printable) {
         if (printable != null) {
             printable.print(this);
         }
@@ -679,7 +696,7 @@ public class PrettyPrinter {
      * @param th Throwable to print
      * @return fluent interface
      */
-    public PrettyPrinter add(Throwable th) {
+    public PrettyPrinter add(final Throwable th) {
         return this.add(th, 4);
     }
 
@@ -691,7 +708,7 @@ public class PrettyPrinter {
      * @param indent Indent size for stacktrace lines
      * @return fluent interface
      */
-    public PrettyPrinter add(Throwable th, int indent) {
+    public PrettyPrinter add(Throwable th, final int indent) {
         while (th != null) {
             this.add("    %s: %s", th.getClass().getName(), th.getMessage());
             this.add(th.getStackTrace(), indent);
@@ -708,9 +725,9 @@ public class PrettyPrinter {
      * @param indent Indent size for stacktrace lines
      * @return fluent interface
      */
-    public PrettyPrinter add(StackTraceElement[] stackTrace, int indent) {
-        String margin = Strings.repeat(" ", indent);
-        for (StackTraceElement st : stackTrace) {
+    public PrettyPrinter add(final StackTraceElement[] stackTrace, final int indent) {
+        final String margin = Strings.repeat(" ", indent);
+        for (final StackTraceElement st : stackTrace) {
             this.add("%s%s", margin, st);
         }
         return this;
@@ -722,7 +739,7 @@ public class PrettyPrinter {
      * @param object object to add
      * @return fluent interface
      */
-    public PrettyPrinter add(Object object) {
+    public PrettyPrinter add(final Object object) {
         return this.add(object, 0);
     }
 
@@ -733,16 +750,16 @@ public class PrettyPrinter {
      * @param indent indent amount
      * @return fluent interface
      */
-    public PrettyPrinter add(Object object, int indent) {
-        String margin = Strings.repeat(" ", indent);
+    public PrettyPrinter add(final Object object, final int indent) {
+        final String margin = Strings.repeat(" ", indent);
         return this.append(object, indent, margin);
     }
 
-    private PrettyPrinter append(Object object, int indent, String margin) {
+    private PrettyPrinter append(final Object object, final int indent, final String margin) {
         if (object instanceof String) {
             return this.add("%s%s", margin, object);
         } else if (object instanceof Iterable) {
-            for (Object entry : (Iterable<?>)object) {
+            for (final Object entry : (Iterable<?>)object) {
                 this.append(entry, indent, margin);
             }
             return this;
@@ -768,7 +785,7 @@ public class PrettyPrinter {
      *
      * @return fluent interface
      */
-    public PrettyPrinter addWrapped(String format, Object... args) {
+    public PrettyPrinter addWrapped(final String format, final Object... args) {
         return this.addWrapped(this.wrapWidth, format, args);
     }
 
@@ -782,33 +799,33 @@ public class PrettyPrinter {
      *
      * @return fluent interface
      */
-    public PrettyPrinter addWrapped(int width, String format, Object... args) {
+    public PrettyPrinter addWrapped(final int width, final String format, final Object... args) {
         String indent = "";
-        String line = String.format(format, args).replace("\t", "    ");
-        Matcher indentMatcher = Pattern.compile("^(\\s+)[^\\s]").matcher(line);
+        final String line = String.format(format, args).replace("\t", "    ");
+        final Matcher indentMatcher = Pattern.compile("^(\\s+)[^\\s]").matcher(line);
         if (indentMatcher.find()) {
             indent = indentMatcher.group(1);
         }
 
         try {
-            for (String wrappedLine : this.getWrapped(width, line, indent)) {
+            for (final String wrappedLine : this.getWrapped(width, line, indent)) {
                 this.add(wrappedLine);
             }
-        } catch (Exception ex) {
+        } catch (final Exception ex) {
             this.add(line);
         }
         return this;
     }
 
-    private List<String> getWrapped(int width, String line, String indent) {
-        List<String> lines = new ArrayList<String>();
+    private List<String> getWrapped(final int width, String line, final String indent) {
+        final List<String> lines = new ArrayList<String>();
 
         while (line.length() > width) {
-            int wrapPoint = lastBreakIndex(line, width);
+            int wrapPoint = PrettyPrinter.lastBreakIndex(line, width);
             if (wrapPoint < 10) {
                 wrapPoint = width;
             }
-            String head = line.substring(0, wrapPoint);
+            final String head = line.substring(0, wrapPoint);
             lines.add(head);
             line = indent + line.substring(wrapPoint + 1);
         }
@@ -820,8 +837,8 @@ public class PrettyPrinter {
         return lines;
     }
 
-    private static int lastBreakIndex(String line, int width) {
-        int lineBreakPos = line.lastIndexOf('\n', width);
+    private static int lastBreakIndex(final String line, final int width) {
+        final int lineBreakPos = line.lastIndexOf('\n', width);
         return lineBreakPos > -1 ? lineBreakPos : Math.max(line.lastIndexOf(' ', width), line.lastIndexOf('\t', width));
     }
 
@@ -833,7 +850,7 @@ public class PrettyPrinter {
      * @param args Value args
      * @return fluent interface
      */
-    public PrettyPrinter kv(String key, String format, Object... args) {
+    public PrettyPrinter kv(final String key, final String format, final Object... args) {
         return this.kv(key, String.format(format, args));
     }
 
@@ -844,7 +861,7 @@ public class PrettyPrinter {
      * @param value Value
      * @return fluent interface
      */
-    public PrettyPrinter kv(String key, Object value) {
+    public PrettyPrinter kv(final String key, final Object value) {
         this.addLine(new KeyValue(key, value));
         return this.kvWidth(key.length());
     }
@@ -855,10 +872,10 @@ public class PrettyPrinter {
      * @param width width to set
      * @return fluent
      */
-    public PrettyPrinter kvWidth(int width) {
+    public PrettyPrinter kvWidth(final int width) {
         if (width > this.kvKeyWidth) {
             this.kvKeyWidth = width;
-            this.kvFormat = makeKvFormat(width);
+            this.kvFormat = PrettyPrinter.makeKvFormat(width);
         }
         this.recalcWidth = true;
         return this;
@@ -870,9 +887,9 @@ public class PrettyPrinter {
      * @param map Map with entries to add
      * @return fluent
      */
-    public PrettyPrinter add(Map<?, ?> map) {
-        for (Map.Entry<?, ?> entry : map.entrySet()) {
-            String key = entry.getKey() == null ? "null" : entry.getKey().toString();
+    public PrettyPrinter add(final Map<?, ?> map) {
+        for (final Map.Entry<?, ?> entry : map.entrySet()) {
+            final String key = entry.getKey() == null ? "null" : entry.getKey().toString();
             this.kv(key, entry.getValue());
         }
         return this;
@@ -894,7 +911,7 @@ public class PrettyPrinter {
      * @param ruleChar character to use for the horizontal rule
      * @return fluent interface
      */
-    public PrettyPrinter hr(char ruleChar) {
+    public PrettyPrinter hr(final char ruleChar) {
         this.addLine(new HorizontalRule(ruleChar));
         return this;
     }
@@ -906,7 +923,7 @@ public class PrettyPrinter {
      */
     public PrettyPrinter centre() {
         if (!this.lines.isEmpty()) {
-            Object lastLine = this.lines.get(this.lines.size() - 1);
+            final Object lastLine = this.lines.get(this.lines.size() - 1);
             if (lastLine instanceof String) {
                 this.addLine(new CentredText(this.lines.remove(this.lines.size() - 1)));
             }
@@ -914,7 +931,7 @@ public class PrettyPrinter {
         return this;
     }
 
-    private void addLine(Object line) {
+    private void addLine(final Object line) {
         if (line == null) {
             return;
         }
@@ -929,7 +946,7 @@ public class PrettyPrinter {
      * @return fluent interface
      */
     public PrettyPrinter trace() {
-        return this.trace(getDefaultLoggerName());
+        return this.trace(PrettyPrinter.getDefaultLoggerName());
     }
 
     /**
@@ -939,8 +956,8 @@ public class PrettyPrinter {
      * @param level Log level to write messages
      * @return fluent interface
      */
-    public PrettyPrinter trace(Level level) {
-        return this.trace(getDefaultLoggerName(), level);
+    public PrettyPrinter trace(final Level level) {
+        return this.trace(PrettyPrinter.getDefaultLoggerName(), level);
     }
 
     /**
@@ -950,7 +967,7 @@ public class PrettyPrinter {
      * @param logger Logger name to write to
      * @return fluent interface
      */
-    public PrettyPrinter trace(String logger) {
+    public PrettyPrinter trace(final String logger) {
         return this.trace(System.err, LogManager.getLogger(logger));
     }
 
@@ -962,7 +979,7 @@ public class PrettyPrinter {
      * @param level Log level to write messages
      * @return fluent interface
      */
-    public PrettyPrinter trace(String logger, Level level) {
+    public PrettyPrinter trace(final String logger, final Level level) {
         return this.trace(System.err, LogManager.getLogger(logger), level);
     }
 
@@ -973,7 +990,7 @@ public class PrettyPrinter {
      * @param logger Logger to write to
      * @return fluent interface
      */
-    public PrettyPrinter trace(Logger logger) {
+    public PrettyPrinter trace(final Logger logger) {
         return this.trace(System.err, logger);
     }
 
@@ -985,7 +1002,7 @@ public class PrettyPrinter {
      * @param level Log level to write messages
      * @return fluent interface
      */
-    public PrettyPrinter trace(Logger logger, Level level) {
+    public PrettyPrinter trace(final Logger logger, final Level level) {
         return this.trace(System.err, logger, level);
     }
 
@@ -996,8 +1013,8 @@ public class PrettyPrinter {
      * @param stream Output stream to print to
      * @return fluent interface
      */
-    public PrettyPrinter trace(PrintStream stream) {
-        return this.trace(stream, getDefaultLoggerName());
+    public PrettyPrinter trace(final PrintStream stream) {
+        return this.trace(stream, PrettyPrinter.getDefaultLoggerName());
     }
 
     /**
@@ -1008,8 +1025,8 @@ public class PrettyPrinter {
      * @param level Log level to write messages
      * @return fluent interface
      */
-    public PrettyPrinter trace(PrintStream stream, Level level) {
-        return this.trace(stream, getDefaultLoggerName(), level);
+    public PrettyPrinter trace(final PrintStream stream, final Level level) {
+        return this.trace(stream, PrettyPrinter.getDefaultLoggerName(), level);
     }
 
     /**
@@ -1020,7 +1037,7 @@ public class PrettyPrinter {
      * @param logger Logger name to write to
      * @return fluent interface
      */
-    public PrettyPrinter trace(PrintStream stream, String logger) {
+    public PrettyPrinter trace(final PrintStream stream, final String logger) {
         return this.trace(stream, LogManager.getLogger(logger));
     }
 
@@ -1033,7 +1050,7 @@ public class PrettyPrinter {
      * @param level Log level to write messages
      * @return fluent interface
      */
-    public PrettyPrinter trace(PrintStream stream, String logger, Level level) {
+    public PrettyPrinter trace(final PrintStream stream, final String logger, final Level level) {
         return this.trace(stream, LogManager.getLogger(logger), level);
     }
 
@@ -1045,7 +1062,7 @@ public class PrettyPrinter {
      * @param logger Logger to write to
      * @return fluent interface
      */
-    public PrettyPrinter trace(PrintStream stream, Logger logger) {
+    public PrettyPrinter trace(final PrintStream stream, final Logger logger) {
         return this.trace(stream, logger, Level.DEBUG);
     }
 
@@ -1058,7 +1075,7 @@ public class PrettyPrinter {
      * @param level Log level to write messages
      * @return fluent interface
      */
-    public PrettyPrinter trace(PrintStream stream, Logger logger, Level level) {
+    public PrettyPrinter trace(final PrintStream stream, final Logger logger, final Level level) {
         this.log(logger, level);
         this.print(stream);
         return this;
@@ -1079,10 +1096,10 @@ public class PrettyPrinter {
      * @param stream stream to print to
      * @return fluent interface
      */
-    public PrettyPrinter print(PrintStream stream) {
+    public PrettyPrinter print(final PrintStream stream) {
         this.updateWidth();
         this.printSpecial(stream, this.horizontalRule);
-        for (Object line : this.lines) {
+        for (final Object line : this.lines) {
             if (line instanceof ISpecialEntry) {
                 this.printSpecial(stream, (ISpecialEntry)line);
             } else {
@@ -1093,13 +1110,13 @@ public class PrettyPrinter {
         return this;
     }
 
-    private void printSpecial(PrintStream stream, ISpecialEntry line) {
-        stream.printf("/*%s*/\n", line.toString());
+    private void printSpecial(final PrintStream stream, final ISpecialEntry line) {
+        stream.printf(PrettyPrinter.border() + "%s" + PrettyPrinter.endBorder() + "\n", line.toString());
     }
 
-    private void printString(PrintStream stream, String string) {
+    private void printString(final PrintStream stream, final String string) {
         if (string != null) {
-            stream.printf("/* %-" + this.width + "s */\n", string);
+            stream.printf(PrettyPrinter.border() + " %-" + this.width + "s" + PrettyPrinter.endBorder() + "\n", string);
         }
     }
 
@@ -1109,7 +1126,7 @@ public class PrettyPrinter {
      * @param logger logger to log to
      * @return fluent interface
      */
-    public PrettyPrinter log(Logger logger) {
+    public PrettyPrinter log(final Logger logger) {
         return this.log(logger, Level.INFO);
     }
 
@@ -1119,8 +1136,8 @@ public class PrettyPrinter {
      * @param level log level
      * @return fluent interface
      */
-    public PrettyPrinter log(Level level) {
-        return this.log(LogManager.getLogger(getDefaultLoggerName()), level);
+    public PrettyPrinter log(final Level level) {
+        return this.log(LogManager.getLogger(PrettyPrinter.getDefaultLoggerName()), level);
     }
 
     /**
@@ -1130,34 +1147,46 @@ public class PrettyPrinter {
      * @param level log level
      * @return fluent interface
      */
-    public PrettyPrinter log(Logger logger, Level level) {
+    public PrettyPrinter log(final Logger logger, final Level level) {
+        return this.log(logger, MarkerManager.getMarker(""), level);
+    }
+
+    public PrettyPrinter log(final Logger logger, final Marker marker, final Level level) {
         this.updateWidth();
-        this.logSpecial(logger, level, this.horizontalRule);
-        for (Object line : this.lines) {
+        this.logSpecial(logger, level, marker, this.horizontalRule);
+        for (final Object line : this.lines) {
             if (line instanceof ISpecialEntry) {
-                this.logSpecial(logger, level, (ISpecialEntry)line);
+                this.logSpecial(logger, level, marker, (ISpecialEntry)line);
             } else {
-                this.logString(logger, level, line.toString());
+                this.logString(logger, level, marker, line.toString());
             }
         }
         this.logSpecial(logger, level, this.horizontalRule);
         return this;
     }
 
-    private void logSpecial(Logger logger, Level level, ISpecialEntry line) {
-        logger.log(level, "/*{}*/", line.toString());
+    private void logSpecial(final Logger logger, final Level level, final ISpecialEntry line) {
+        logger.log(level, PrettyPrinter.border() + "{}" + PrettyPrinter.endBorder(), line.toString());
     }
 
-    private void logString(Logger logger, Level level, String line) {
+    private void logSpecial(final Logger logger, final Level level, final Marker marker, final ISpecialEntry line) {
+        logger.log(level, marker, PrettyPrinter.border() + "{}" + PrettyPrinter.endBorder(), line.toString());
+    }
+
+    private void logString(final Logger logger, final Level level, final String line) {
+        this.logString(logger, level, MarkerManager.getMarker(""), line);
+    }
+
+    private void logString(final Logger logger, final Level level, final Marker marker, final String line) {
         if (line != null) {
-            logger.log(level, String.format("/* %-" + this.width + "s */", line));
+            logger.log(level, String.format(PrettyPrinter.border() + " %-" + this.width + "s" + PrettyPrinter.endBorder(), line));
         }
     }
 
     private void updateWidth() {
         if (this.recalcWidth) {
             this.recalcWidth = false;
-            for (Object line : this.lines) {
+            for (final Object line : this.lines) {
                 if (line instanceof IVariableWidthEntry) {
                     this.width = Math.min(4096, Math.max(this.width, ((IVariableWidthEntry)line).getWidth()));
                 }
@@ -1165,13 +1194,13 @@ public class PrettyPrinter {
         }
     }
 
-    private static String makeKvFormat(int keyWidth) {
+    private static String makeKvFormat(final int keyWidth) {
         return String.format("%%%ds : %%s", keyWidth);
     }
 
     private static String getDefaultLoggerName() {
-        String name = new Throwable().getStackTrace()[2].getClassName();
-        int pos = name.lastIndexOf('.');
+        final String name = new Throwable().getStackTrace()[2].getClassName();
+        final int pos = name.lastIndexOf('.');
         return pos == -1 ? name : name.substring(pos + 1);
     }
 
@@ -1188,7 +1217,7 @@ public class PrettyPrinter {
      *
      * @param th Throwable to log
      */
-    public static void print(Throwable th) {
+    public static void print(final Throwable th) {
         new PrettyPrinter().add(th).print(System.err);
     }
 

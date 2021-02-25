@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.optimization.mcp.tileentity;
 
-import net.minecraft.tileentity.TileEntity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.optimization.HopperOptimizationBridge;
 
-@Mixin(value = TileEntity.class, priority = 1300)
+@Mixin(value = BlockEntity.class, priority = 1300)
 public abstract class TileEntityMixin_Optimization_Hopper implements HopperOptimizationBridge {
 
     private boolean hopper$shouldCancelDirtyUpdate = false;
@@ -41,7 +41,7 @@ public abstract class TileEntityMixin_Optimization_Hopper implements HopperOptim
         this.hopper$shouldCancelDirtyUpdate = canMarkDirty;
     }
 
-    @Inject(method = "markDirty", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setChanged", at = @At("HEAD"), cancellable = true)
     private void hopper$DoNotUpdateIfMarked(final CallbackInfo ci) {
         if (this.hopper$shouldCancelDirtyUpdate) {
             ci.cancel();

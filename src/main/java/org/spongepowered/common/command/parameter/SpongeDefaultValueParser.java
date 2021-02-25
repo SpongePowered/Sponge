@@ -33,8 +33,8 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParser;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
+import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
-import org.spongepowered.common.command.brigadier.argument.CustomArgumentParser;
 
 import java.util.List;
 import java.util.Optional;
@@ -42,7 +42,7 @@ import java.util.function.Function;
 
 public final class SpongeDefaultValueParser<T> implements ValueParser<T> {
 
-    private static final List<ClientCompletionType> CLIENT_COMPLETION_TYPE = ImmutableList.of(CustomArgumentParser.NONE_CLIENT_COMPLETION_TYPE);
+    private static final List<ClientCompletionType> CLIENT_COMPLETION_TYPE = ImmutableList.of(ClientCompletionTypes.NONE.get());
 
     private final Function<CommandCause, T> defaultFunction;
 

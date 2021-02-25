@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.TrapDoorBlock;
+import net.minecraft.world.level.block.TrapDoorBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.data.provider.util.PortionTypeUtils;
+import org.spongepowered.common.util.PortionTypeUtil;
 
 public final class TrapDoorData {
 
@@ -40,20 +40,20 @@ public final class TrapDoorData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.PORTION_TYPE)
-                        .get(h -> PortionTypeUtils.getFromHalfBlock(h, TrapDoorBlock.HALF))
-                        .set((h, v) -> PortionTypeUtils.setForHalfBlock(h, v, TrapDoorBlock.HALF))
+                        .get(h -> PortionTypeUtil.getFromHalfBlock(h, TrapDoorBlock.HALF))
+                        .set((h, v) -> PortionTypeUtil.setForHalfBlock(h, v, TrapDoorBlock.HALF))
                         .supports(h -> h.getBlock() instanceof TrapDoorBlock)
                     .create(Keys.IS_OPEN)
-                        .get(h -> h.get(TrapDoorBlock.OPEN))
-                        .set((h, v) -> h.with(TrapDoorBlock.OPEN, v))
+                        .get(h -> h.getValue(TrapDoorBlock.OPEN))
+                        .set((h, v) -> h.setValue(TrapDoorBlock.OPEN, v))
                         .supports(h -> h.getBlock() instanceof TrapDoorBlock)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(TrapDoorBlock.POWERED))
-                        .set((h, v) -> h.with(TrapDoorBlock.POWERED, v))
+                        .get(h -> h.getValue(TrapDoorBlock.POWERED))
+                        .set((h, v) -> h.setValue(TrapDoorBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof TrapDoorBlock)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(TrapDoorBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(TrapDoorBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(TrapDoorBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(TrapDoorBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof TrapDoorBlock);
     }
     // @formatter:on

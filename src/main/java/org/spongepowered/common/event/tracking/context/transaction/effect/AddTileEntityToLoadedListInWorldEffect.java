@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.tileentity.TileEntity;
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -45,14 +45,15 @@ public final class AddTileEntityToLoadedListInWorldEffect implements ProcessingS
     
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState,
-        final SpongeBlockChangeFlag flag
+        final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
-        final ServerWorld serverWorld = pipeline.getServerWorld();
-        final TileEntity tileEntity = oldState.tileEntity;
+        final ServerLevel serverWorld = pipeline.getServerWorld();
+        final BlockEntity tileEntity = oldState.tileEntity;
         if (tileEntity == null) {
             return EffectResult.NULL_RETURN;
         }
-        serverWorld.loadedTileEntityList.add(tileEntity);
+        serverWorld.blockEntityList.add(tileEntity);
         return new EffectResult(oldState.state, false);
     }
 }

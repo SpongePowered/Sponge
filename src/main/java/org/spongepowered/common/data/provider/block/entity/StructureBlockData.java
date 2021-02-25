@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.tileentity.StructureBlockTileEntity;
+import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.StructureMode;
-import org.spongepowered.common.accessor.tileentity.StructureBlockTileEntityAccessor;
+import org.spongepowered.common.accessor.world.level.block.entity.StructureBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
 
@@ -39,38 +39,38 @@ public final class StructureBlockData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asMutable(StructureBlockTileEntity.class)
+                .asMutable(StructureBlockEntity.class)
                     .create(Keys.STRUCTURE_IGNORE_ENTITIES)
-                        .get(h -> ((StructureBlockTileEntityAccessor) h).accessor$getIgnoreEntities())
-                        .set(StructureBlockTileEntity::setIgnoresEntities)
+                        .get(h -> ((StructureBlockEntityAccessor) h).accessor$ignoreEntities())
+                        .set(StructureBlockEntity::setIgnoreEntities)
                     .create(Keys.STRUCTURE_INTEGRITY)
-                        .get(h -> (double) ((StructureBlockTileEntityAccessor) h).accessor$getIntegrity())
+                        .get(h -> (double) ((StructureBlockEntityAccessor) h).accessor$integrity())
                         .set((h, v) -> h.setIntegrity(v.floatValue()))
                     .create(Keys.STRUCTURE_MODE)
-                        .get(h -> (StructureMode) (Object) ((StructureBlockTileEntityAccessor) h).accessor$getMode())
-                        .set((h, v) -> h.setMode((net.minecraft.state.properties.StructureMode) (Object) v))
+                        .get(h -> (StructureMode) (Object) ((StructureBlockEntityAccessor) h).accessor$mode())
+                        .set((h, v) -> h.setMode((net.minecraft.world.level.block.state.properties.StructureMode) (Object) v))
                     .create(Keys.STRUCTURE_POWERED)
-                        .get(StructureBlockTileEntity::isPowered)
-                        .set(StructureBlockTileEntity::setPowered)
+                        .get(StructureBlockEntity::isPowered)
+                        .set(StructureBlockEntity::setPowered)
                     .create(Keys.STRUCTURE_SEED)
-                        .get(h -> ((StructureBlockTileEntityAccessor) h).accessor$getSeed())
-                        .set(StructureBlockTileEntity::setSeed)
+                        .get(h -> ((StructureBlockEntityAccessor) h).accessor$seed())
+                        .set(StructureBlockEntity::setSeed)
                     .create(Keys.STRUCTURE_SHOW_AIR)
-                        .get(h -> ((StructureBlockTileEntityAccessor) h).accessor$getShowAir())
-                        .set(StructureBlockTileEntity::setShowAir)
+                        .get(h -> ((StructureBlockEntityAccessor) h).accessor$showAir())
+                        .set(StructureBlockEntity::setShowAir)
                     .create(Keys.STRUCTURE_SHOW_BOUNDING_BOX)
-                        .get(h -> ((StructureBlockTileEntityAccessor) h).accessor$getShowBoundingBox())
-                        .set(StructureBlockTileEntity::setShowBoundingBox)
-                .asMutable(StructureBlockTileEntityAccessor.class)
+                        .get(h -> ((StructureBlockEntityAccessor) h).accessor$showBoundingBox())
+                        .set(StructureBlockEntity::setShowBoundingBox)
+                .asMutable(StructureBlockEntityAccessor.class)
                     .create(Keys.STRUCTURE_AUTHOR)
-                        .get(StructureBlockTileEntityAccessor::accessor$getAuthor)
-                        .set(StructureBlockTileEntityAccessor::accessor$setAuthor)
+                        .get(StructureBlockEntityAccessor::accessor$author)
+                        .set(StructureBlockEntityAccessor::accessor$author)
                     .create(Keys.STRUCTURE_POSITION)
-                        .get(h -> VecHelper.toVector3i(h.accessor$getPosition()))
-                        .set((h, v) -> h.accessor$setPosition(VecHelper.toBlockPos(v)))
+                        .get(h -> VecHelper.toVector3i(h.accessor$structurePos()))
+                        .set((h, v) -> h.accessor$structurePos(VecHelper.toBlockPos(v)))
                     .create(Keys.STRUCTURE_SIZE)
-                        .get(h -> VecHelper.toVector3i(h.accessor$getSize()))
-                        .set((h, v) -> h.accessor$setSize(VecHelper.toBlockPos(v)));
+                        .get(h -> VecHelper.toVector3i(h.accessor$structureSize()))
+                        .set((h, v) -> h.accessor$structureSize(VecHelper.toBlockPos(v)));
     }
     // @formatter:on
 }

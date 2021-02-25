@@ -25,20 +25,29 @@
 package org.spongepowered.common.service.game.pagination;
 
 import com.google.common.annotations.VisibleForTesting;
+
+import java.text.MessageFormat;
+import java.util.ArrayDeque;
+
+import com.google.common.base.Strings;
+import net.kyori.adventure.text.BuildableComponent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.util.text.TranslationTextComponent;
+import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextDecoration;
+import net.kyori.adventure.translation.GlobalTranslator;
+import net.minecraft.locale.Language;
 import org.apache.commons.lang3.ArrayUtils;
+import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.math.GenericMath;
 
 import java.util.Collections;
+import java.util.Deque;
 import java.util.PrimitiveIterator;
 
 /**
@@ -146,23 +155,48 @@ final class PaginationCalculator {
      */
     @VisibleForTesting
     int getWidth(final Component text) {
-        final Iterable<ITextComponent> children = SpongeAdventure.asVanilla(text);
+        final Deque<Component> children = new ArrayDeque<>(1 + text.children().size());
+        children.add(text);
         int total = 0;
 
-        for (final ITextComponent child : children) {
+        Component child;
+        while ((child = children.pollFirst()) != null) {
+            // Add all children
+            for (final Component grandchild : child.children()) {
+                children.add(grandchild.style(child.style().merge(grandchild.style())));
+            }
+
+            // Then if we contain text, we can capture that
             final PrimitiveIterator.OfInt i_it;
-            if (child instanceof StringTextComponent || child instanceof TranslationTextComponent) {
-                i_it = child.getUnformattedComponentText().codePoints().iterator();
+            if (child instanceof TextComponent) {
+                i_it = ((TextComponent) child).content().codePoints().iterator();
+            } else if (child instanceof TranslatableComponent) {
+                final TranslatableComponent tl = (TranslatableComponent) child;
+                // Try to find a value registered from Adventure
+                final MessageFormat global = GlobalTranslator.get().translate(tl.key(), Locales.EN_US);
+                if (global != null) {
+                    i_it = global.toPattern().codePoints().iterator();
+                    children.addAll(tl.args());
+                } else {
+                    // If there's no adventure translation, then fall back to native
+                    final String mc = Language.getInstance().getOrDefault(tl.key());
+                    if (!mc.equals(tl.key())) {
+                        // we found a translation, so let's include the with elements
+                        children.addAll(tl.args());
+                    }
+                    // Either way, this is the best we'll get for calculating width
+                    i_it = mc.codePoints().iterator();
+                }
             } else {
                 continue;
             }
 
-            final boolean bold = child.getStyle().getBold();
+            final boolean bold = child.style().hasDecoration(TextDecoration.BOLD);
 
-            Integer cp;
+            int cp;
             boolean newLine = false;
             while (i_it.hasNext()) {
-                cp = i_it.next();
+                cp = i_it.nextInt();
                 if (cp == '\n') {
                     // if the previous character is a '\n'
                     if (newLine) {
@@ -212,7 +246,7 @@ final class PaginationCalculator {
 
         //Using 0 width unicode symbols as padding throws us into an unending loop, replace them with the default padding
         if (paddingLength < 1) {
-            padding = Component.text("=");
+            padding = SpongePaginationBuilder.DEFAULT_PADDING;
             paddingLength = this.getWidth(padding);
         }
 
@@ -262,12 +296,11 @@ final class PaginationCalculator {
      * @param text The text to add to
      * @return The text with the added spaces
      */
-    private Component addSpaces(final Component spaces, final Component text) {
-        return Component.text()
-                .append(spaces)
-                .append(text)
-                .append(spaces)
+    private Component addSpaces(final BuildableComponent<?, ?> spaces, final Component text) {
+        return spaces.toBuilder()
                 .style(text.style())
+                .append(text.style(Style.empty()))
+                .append(spaces)
                 .build();
     }
 
@@ -281,7 +314,12 @@ final class PaginationCalculator {
      */
     private void addPadding(final Component padding, final TextComponent.Builder build, final int count) {
         if (count > 0) {
-            build.append(Collections.nCopies(count, padding));
+            // In simple cases, we can create a more compact component
+            if (padding instanceof TextComponent && padding.children().isEmpty()) {
+                build.append(Component.text(Strings.repeat(((TextComponent) padding).content(), count), padding.style()));
+            } else {
+                build.append(Collections.nCopies(count, padding));
+            }
         }
     }
 }

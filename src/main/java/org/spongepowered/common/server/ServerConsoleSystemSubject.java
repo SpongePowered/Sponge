@@ -24,28 +24,26 @@
  */
 package org.spongepowered.common.server;
 
+import java.util.UUID;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.minecraft.command.CommandSource;
-import net.minecraft.command.ICommandSource;
-import net.minecraft.entity.Entity;
-import net.minecraft.util.math.Vec2f;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.util.text.ITextComponent;
-import net.minecraft.util.text.StringTextComponent;
-import net.minecraft.world.dimension.DimensionType;
-import org.apache.logging.log4j.LogManager;
+import net.minecraft.commands.CommandSource;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.Vec2;
+import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeSystemSubject;
+import org.spongepowered.common.bridge.commands.CommandSourceBridge;
+import org.spongepowered.common.service.server.permission.SpongeSystemSubject;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 
-public final class ServerConsoleSystemSubject extends SpongeSystemSubject implements CommandSourceProviderBridge, ICommandSource {
+public final class ServerConsoleSystemSubject extends SpongeSystemSubject implements CommandSourceProviderBridge, CommandSource, CommandSourceBridge {
+
     @Override
     public String getIdentifier() {
         return "console";
@@ -53,39 +51,39 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
 
     @Override
     public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
-        SpongeCommon.getServer().sendMessage(SpongeAdventure.asVanilla(message));
+        SpongeCommon.getServer().sendMessage(SpongeAdventure.asVanilla(message), identity.uuid());
     }
 
     @Override
-    public CommandSource bridge$getCommandSource(final Cause cause) {
-        return new CommandSource(this,
-                Vec3d.ZERO,
-                Vec2f.ZERO,
-                SpongeCommon.getServer().getWorld(DimensionType.OVERWORLD),
+    public CommandSourceStack bridge$getCommandSource(final Cause cause) {
+        return new CommandSourceStack(this,
+                Vec3.ZERO,
+                Vec2.ZERO,
+                SpongeCommon.getServer().getLevel(Level.OVERWORLD),
                 4,
                 "System Subject",
-                new StringTextComponent("System Subject"),
+                new TextComponent("System Subject"),
                 SpongeCommon.getServer(),
                 null);
     }
 
     @Override
-    public void sendMessage(final ITextComponent component) {
+    public void sendMessage(final net.minecraft.network.chat.Component component, final UUID identity) {
         SpongeCommon.getLogger().info(component.getString());
     }
 
     @Override
-    public boolean shouldReceiveFeedback() {
+    public boolean acceptsSuccess() {
         return true;
     }
 
     @Override
-    public boolean shouldReceiveErrors() {
+    public boolean acceptsFailure() {
         return true;
     }
 
     @Override
-    public boolean allowLogging() {
+    public boolean shouldInformAdmins() {
         return true;
     }
 

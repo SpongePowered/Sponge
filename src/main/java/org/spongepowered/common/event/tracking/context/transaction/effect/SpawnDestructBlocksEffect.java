@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import net.minecraft.block.Block;
-import net.minecraft.block.BlockState;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.List;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class SpawnDestructBlocksEffect implements ProcessingSideEffect {
 
@@ -50,14 +50,15 @@ public final class SpawnDestructBlocksEffect implements ProcessingSideEffect {
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
     public EffectResult processSideEffect(
-        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag
+        final BlockPipeline pipeline, final PipelineCursor oldState, final BlockState newState, final SpongeBlockChangeFlag flag,
+        final int limit
     ) {
-        final ServerWorld world = pipeline.getServerWorld();
+        final ServerLevel world = pipeline.getServerWorld();
         final BlockPos pos = oldState.pos;
 
         final List<ItemStack> drops = oldState.drops;
 
-        drops.forEach(drop -> Block.spawnAsEntity(world, pos, drop));
+        drops.forEach(drop -> Block.popResource(world, pos, drop));
 
         return EffectResult.NULL_PASS;
     }

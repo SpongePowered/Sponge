@@ -25,21 +25,22 @@
 package org.spongepowered.common.world.volume.buffer.block;
 
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.world.schematic.Palette;
-import org.spongepowered.api.world.volume.block.ReadableBlockVolume;
-import org.spongepowered.common.world.volume.buffer.AbstractObjectArrayBuffer;
+import org.spongepowered.api.world.volume.block.BlockVolume;
+import org.spongepowered.common.world.volume.buffer.AbstractVolumeBuffer;
 import org.spongepowered.math.vector.Vector3i;
 
 /**
  * Base class for block buffers.
  */
-public abstract class AbstractBlockBuffer extends AbstractObjectArrayBuffer implements ReadableBlockVolume {
+public abstract class AbstractBlockBuffer extends AbstractVolumeBuffer implements BlockVolume {
 
     protected AbstractBlockBuffer(final Vector3i start, final Vector3i size) {
         super(start, size);
     }
     
-    public abstract Palette<BlockState> getPalette();
+    public abstract Palette<BlockState, BlockType> getPalette();
 
 
 }

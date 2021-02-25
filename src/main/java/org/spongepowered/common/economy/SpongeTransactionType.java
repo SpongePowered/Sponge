@@ -24,42 +24,7 @@
  */
 package org.spongepowered.common.economy;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.MoreObjects;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.economy.transaction.TransactionType;
 
 public final class SpongeTransactionType implements TransactionType {
-
-    private final ResourceKey key;
-
-    public SpongeTransactionType(ResourceKey key) {
-        this.key = checkNotNull(key);
-    }
-
-    @Override
-    public ResourceKey getKey() {
-        return this.key;
-    }
-
-    @Override
-    public boolean equals(Object other) {
-        if (other == null || !(other instanceof TransactionType)) {
-            return false;
-        }
-        return ((TransactionType) other).getKey().equals(this.getKey());
-    }
-
-    @Override
-    public int hashCode() {
-        return java.util.Objects.hash(this.key);
-    }
-
-    @Override
-    public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("key", this.getKey())
-                .toString();
-    }
 }

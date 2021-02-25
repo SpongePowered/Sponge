@@ -24,12 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.SpawnEggItem;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.client.CPlayerTryUseItemOnBlockPacket;
-import net.minecraft.util.Hand;
-import net.minecraft.util.math.BlockPos;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
@@ -44,11 +38,10 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.bridge.block.BlockEventDataBridge;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -56,9 +49,14 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.SpongeLocatableBlockBuilder;
+import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
 import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.item.SpawnEggItem;
 
 @SuppressWarnings("unchecked")
 public final class PlaceBlockPacketState extends BasicPacketState {
@@ -83,9 +81,9 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(final ServerPlayerEntity playerMP, final IPacket<?> packet, final BasicPacketContext context) {
-        final CPlayerTryUseItemOnBlockPacket placeBlock = (CPlayerTryUseItemOnBlockPacket) packet;
-        final net.minecraft.item.ItemStack itemUsed = playerMP.getHeldItem(placeBlock.getHand());
+    public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet, final BasicPacketContext context) {
+        final ServerboundUseItemOnPacket placeBlock = (ServerboundUseItemOnPacket) packet;
+        final net.minecraft.world.item.ItemStack itemUsed = playerMP.getItemInHand(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(itemUsed);
         context.itemUsed(itemstack);
         final HandType handType = (HandType) (Object) placeBlock.getHand();
@@ -99,8 +97,9 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     }
 
     @Override
-    public void appendNotifierToBlockEvent(final BasicPacketContext context, final PhaseContext<?> currentContext,
-                                           final ServerWorldBridge mixinWorldServer, final BlockPos pos, final BlockEventDataBridge blockEvent) {
+    public void appendNotifierToBlockEvent(final BasicPacketContext context,
+        final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
+    ) {
         final Player player = PhaseTracker.getCauseStackManager().getCurrentCause().first(Player.class).get();
         final BlockState state = ((ServerWorld) mixinWorldServer).getBlock(pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatable =
@@ -113,7 +112,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void unwind(final BasicPacketContext context) {
-        final ServerPlayerEntity player = context.getPacketPlayer();
+        final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = context.getItemUsedSnapshot();
 //        context.getCapturedEntitySupplier()
@@ -125,16 +124,16 @@ public final class PlaceBlockPacketState extends BasicPacketState {
 //            });
         // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
         // Swap the items used, the item used is what we want to "restore" it to the player
-        final Hand hand = (Hand) (Object) context.getHandUsed();
-        final net.minecraft.item.ItemStack replaced = player.getHeldItem(hand);
-        player.setHeldItem(hand, ItemStackUtil.toNative(itemStack.copy()));
+        final InteractionHand hand = (InteractionHand) (Object) context.getHandUsed();
+        final net.minecraft.world.item.ItemStack replaced = player.getItemInHand(hand);
+        player.setItemInHand(hand, ItemStackUtil.toNative(itemStack.copy()));
         if (!TrackingUtil.processBlockCaptures(context) && !snapshot.isEmpty()) {
             PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);
         } else {
-            player.setHeldItem(hand, replaced);
+            player.setItemInHand(hand, replaced);
         }
 
-        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.openContainer;
+        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
         trackedInventory.bridge$setCaptureInventory(false);
         trackedInventory.bridge$getCapturedSlotTransactions().clear();
     }

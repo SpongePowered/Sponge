@@ -30,13 +30,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class TickContext<T extends TickContext<T>> extends PhaseContext<T> {
 
-    TickContext(final IPhaseState<? extends T> phaseState, final PhaseTracker tracker) {
+    TickContext(final IPhaseState<T> phaseState, final PhaseTracker tracker) {
         super(phaseState, tracker);
     }
 
     public static class General extends TickContext<General> {
 
-        public General(final IPhaseState<? extends General> phaseState, final PhaseTracker tracker) {
+        public General(final IPhaseState<General> phaseState, final PhaseTracker tracker) {
             super(phaseState, tracker);
         }
     }

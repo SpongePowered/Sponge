@@ -24,21 +24,21 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
-import net.minecraft.inventory.container.Container;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.CarriedBridge;
+import org.spongepowered.common.bridge.world.inventory.CarriedBridge;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
 import org.spongepowered.common.inventory.custom.CustomInventory;
 
 import java.util.Optional;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 
 /**
  * Implements {@link CarriedInventory} using {@link CarriedBridge}
  */
 @Mixin(value = {
-    Container.class,
+    AbstractContainerMenu.class,
     CarriedWrapperInventory.class,
     CustomInventory.class
 })

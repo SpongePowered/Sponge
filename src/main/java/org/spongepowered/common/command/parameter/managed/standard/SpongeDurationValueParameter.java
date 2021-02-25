@@ -32,21 +32,17 @@ import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.common.command.brigadier.argument.CatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
 import java.util.List;
 import java.util.Optional;
 
-public final class SpongeDurationValueParameter extends CatalogedArgumentParser<Duration> {
+public final class SpongeDurationValueParameter extends ResourceKeyedArgumentValueParser<Duration> {
 
-    private static final ResourceKey RESOURCE_KEY = ResourceKey.sponge("duration");
-
-    @Override
-    @NonNull
-    public ResourceKey getKey() {
-        return SpongeDurationValueParameter.RESOURCE_KEY;
+    public SpongeDurationValueParameter(final ResourceKey key) {
+        super(key);
     }
 
     @Override

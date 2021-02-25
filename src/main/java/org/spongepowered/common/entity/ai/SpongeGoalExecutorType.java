@@ -24,13 +24,7 @@
  */
 package org.spongepowered.common.entity.ai;
 
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
-import org.spongepowered.common.SpongeCatalogType;
 
-public final class SpongeGoalExecutorType extends SpongeCatalogType implements GoalExecutorType {
-
-    public SpongeGoalExecutorType(ResourceKey key) {
-        super(key);
-    }
+public final class SpongeGoalExecutorType implements GoalExecutorType {
 }

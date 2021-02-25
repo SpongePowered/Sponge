@@ -41,7 +41,7 @@ public @interface RegressionTest {
     /**
      * A fully-qualified link to the GitHub issue being tested by this test.
      *
-     * <p>Example: 'https://github.com/SpongePowered/SpongeCommon/issues/1945'</p>
+     * <p>Example: 'https://github.com/SpongePowered/Sponge/issues/1945'</p>
      *
      * @return The URL of the issue
      */
@@ -51,7 +51,7 @@ public @interface RegressionTest {
      * A fully qualified link to a commit related to the issue where possible
      * regressions took place as a byproduct to said commits.
      *
-     * <p>Example: 'https://github.com/SpongePowered/SpongeCommon/commit/2e394dc71f03026f937ad332eab57020eb55e536'</p>
+     * <p>Example: 'https://github.com/SpongePowered/Sponge/commit/2e394dc71f03026f937ad332eab57020eb55e536'</p>
      *
      * @return The URL of the related commits
      */

@@ -93,22 +93,19 @@ public final class SpongeKeyValueMatcherBuilder<V> implements KeyValueMatcher.Bu
     @Override
     public Optional<KeyValueMatcher<V>> build(final DataView container) throws InvalidDataException {
         Objects.requireNonNull(container, "container");
-        final Optional<Key> key = container.getCatalogType(Constants.KeyValueMatcher.KEY, Key.class);
-        if (!key.isPresent()) {
+        final Optional<Key<Value<V>>> optKey = container.getDataKey(Constants.KeyValueMatcher.KEY);
+        if (!optKey.isPresent()) {
             return Optional.empty();
         }
-        final Optional<KeyValueMatcher.Operator> operator = container.getString(Constants.KeyValueMatcher.OPERATOR)
-                .map(s -> KeyValueMatcher.Operator.valueOf(s.toUpperCase()));
+        final Key<Value<V>> key = optKey.get();
+        final Optional<KeyValueMatcher.Operator> operator = container.getString(Constants.KeyValueMatcher.OPERATOR).map(s -> KeyValueMatcher.Operator.valueOf(s.toUpperCase()));
         if (!operator.isPresent()) {
             return Optional.empty();
         }
-        final Optional<?> value = container.getObject(Constants.KeyValueMatcher.VALUE,
-                                                      GenericTypeReflector.erase(key.get().getElementType()));
+        final Optional<V> value = (Optional<V>) container.getObject(Constants.KeyValueMatcher.VALUE, GenericTypeReflector.erase(key.getElementType()));
         if (!value.isPresent()) {
             return Optional.empty();
         }
-        final KeyValueMatcher<V> keyValueMatcher = new SpongeKeyValueMatcher<>(
-                key.get(), operator.get(), value.orElse(null));
-        return Optional.of(keyValueMatcher);
+        return Optional.of(new SpongeKeyValueMatcher<V>(key, operator.get(), value.orElse(null)));
     }
 }

@@ -34,10 +34,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.server.management.PlayerChunkMapBridge;
-import org.spongepowered.common.bridge.server.management.PlayerChunkMapEntryBridge;
+import org.spongepowered.common.bridge.server.players.PlayerChunkMapBridge;
+import org.spongepowered.common.bridge.server.players.PlayerChunkMapEntryBridge;
 import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ChunkBridge;
 
 import javax.annotation.Nullable;
 

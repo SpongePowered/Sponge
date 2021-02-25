@@ -25,6 +25,8 @@
 package org.spongepowered.test.particle;
 
 import com.google.inject.Inject;
+import io.leangen.geantyref.TypeToken;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
@@ -38,6 +40,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.math.vector.Vector3d;
@@ -56,11 +59,17 @@ public final class ParticleTest {
 
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<ParticleType> particleType = Parameter.catalogedElement(ParticleType.class).setKey("particletype").build();
+        final Parameter.Value<ParticleType> particleType =
+                Parameter.registryElement(TypeToken.get(ParticleType.class),
+                        (ctx) -> Sponge.getGame().registries(),
+                        RegistryTypes.PARTICLE_TYPE,
+                        "minecraft",
+                        "sponge")
+                        .setKey("particletype").build();
         final Command.Parameterized myCommand = Command.builder()
                 .parameter(particleType)
                 .setExecutor(context -> {
-                    spawnParticles(context.getCause().first(ServerPlayer.class).get(), context.requireOne(particleType));
+                    this.spawnParticles(context.getCause().first(ServerPlayer.class).get(), context.requireOne(particleType));
                     return CommandResult.success();
                 })
                 .build();
@@ -73,7 +82,7 @@ public final class ParticleTest {
                 .type(type)
                 .option(ParticleOptions.BLOCK_STATE, BlockTypes.DIAMOND_BLOCK.get().getDefaultState())
                 .option(ParticleOptions.COLOR, Color.LIME)
-                .option(ParticleOptions.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.GOLDEN_APPLE).createSnapshot())
+                .option(ParticleOptions.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.GOLDEN_APPLE.get()).createSnapshot())
                 .option(ParticleOptions.DIRECTION, Direction.EAST)
                 .option(ParticleOptions.POTION_EFFECT_TYPE, PotionEffectTypes.HASTE.get())
                 .offset(Vector3d.from(0, 1, 1))

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.LeverBlock;
+import net.minecraft.world.level.block.LeverBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,8 +39,8 @@ public final class LeverData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_POWERED)
-                        .get(h -> h.get(LeverBlock.POWERED))
-                        .set((h, v) -> h.with(LeverBlock.POWERED, v))
+                        .get(h -> h.getValue(LeverBlock.POWERED))
+                        .set((h, v) -> h.setValue(LeverBlock.POWERED, v))
                         .supports(h -> h.getBlock() instanceof LeverBlock);
     }
     // @formatter:on

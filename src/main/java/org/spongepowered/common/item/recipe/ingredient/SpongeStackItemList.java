@@ -25,7 +25,7 @@
 package org.spongepowered.common.item.recipe.ingredient;
 
 import com.google.gson.JsonObject;
-import net.minecraft.item.ItemStack;
+import net.minecraft.world.item.ItemStack;
 
 public class SpongeStackItemList extends SpongeItemList {
 
@@ -50,7 +50,7 @@ public class SpongeStackItemList extends SpongeItemList {
 
         for (ItemStack itemstack : this.stacks) {
             if (itemstack.getItem() == testStack.getItem()) {
-                if (ItemStack.areItemStackTagsEqual(itemstack, testStack)) {
+                if (ItemStack.matches(itemstack, testStack)) {
                     return true;
                 }
             }

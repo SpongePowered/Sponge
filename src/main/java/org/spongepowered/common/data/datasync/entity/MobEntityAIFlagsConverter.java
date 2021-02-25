@@ -24,21 +24,20 @@
  */
 package org.spongepowered.common.data.datasync.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.common.accessor.world.entity.MobAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.accessor.entity.MobEntityAccessor;
-
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.world.entity.Entity;
 
-public class MobEntityAIFlagsConverter extends DataParameterConverter<Byte> {
+public final class MobEntityAIFlagsConverter extends DataParameterConverter<Byte> {
 
     public MobEntityAIFlagsConverter() {
-        super(MobEntityAccessor.accessor$getAIFlags());
+        super(MobAccessor.accessor$DATA_MOB_FLAGS_ID());
     }
 
     @Override
@@ -55,7 +54,7 @@ public class MobEntityAIFlagsConverter extends DataParameterConverter<Byte> {
     @Override
     public Byte getValueFromEvent(Byte originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.IS_AI_ENABLED.get()) {
+            if (immutableValue.getKey() == Keys.IS_AI_ENABLED) {
                 final Boolean hasAi = (Boolean) immutableValue.get();
                 originalValue = hasAi ? (byte) (originalValue & -2) : (byte) (originalValue | 1);
             }

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.event.cause.entity.damage;
 
-import net.minecraft.entity.Entity;
-import org.spongepowered.common.accessor.util.EntityDamageSourceAccessor;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDamageSource;
-import org.spongepowered.common.accessor.util.DamageSourceAccessor;
-import org.spongepowered.common.accessor.util.IndirectEntityDamageSourceAccessor;
+import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
+import org.spongepowered.common.accessor.world.damagesource.EntityDamageSourceAccessor;
+import org.spongepowered.common.accessor.world.damagesource.IndirectEntityDamageSourceAccessor;
 
 /*
 To summarize, the way this works is that DamageSource isn't directly created, but
@@ -41,7 +41,7 @@ but it can certainly declare the methods as abstract.
 More notes are geared for abstraction of generating the builders, since those
 will require sending the builders into the ctors.
  */
-public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecraft.util.IndirectEntityDamageSource implements IndirectEntityDamageSource {
+public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecraft.world.damagesource.IndirectEntityDamageSource implements IndirectEntityDamageSource {
 
     public SpongeCommonIndirectEntityDamageSource() {
         super("SpongeEntityDamageSource", null, null);
@@ -54,28 +54,28 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecra
      * @param type The damage type id
      */
     public void setDamageType(final String type) {
-        ((DamageSourceAccessor) this).accessor$setDamageType(type);
+        ((DamageSourceAccessor) this).accessor$msgId(type);
     }
 
     public void setEntitySource(final Entity entitySource) {
-        ((EntityDamageSourceAccessor) this).accessor$setDamageSourceEntity(entitySource);
+        ((EntityDamageSourceAccessor) this).accessor$entity(entitySource);
     }
 
     public void setIndirectSource(final Entity entity) {
-        ((IndirectEntityDamageSourceAccessor) this).accessor$setIndirectEntity(entity);
+        ((IndirectEntityDamageSourceAccessor) this).accessor$owner(entity);
     }
 
 
     public void bridge$setDamageIsAbsolute() {
-        this.setDamageIsAbsolute();
+        this.bypassMagic();
     }
     public void bridge$setDamageBypassesArmor() {
-        this.setDamageBypassesArmor();
+        this.bypassArmor();
     }
 
 
     @Override
-    public Entity getTrueSource() {
+    public Entity getEntity() {
         return (Entity) this.getSource();
     }
 
@@ -85,32 +85,27 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecra
     }
 
     @Override
-    public boolean isUnblockable() {
+    public boolean isBypassArmor() {
         return this.isBypassingArmor();
     }
 
     @Override
-    public boolean canHarmInCreative() {
+    public boolean isBypassInvul() {
         return this.doesAffectCreative();
     }
 
     @Override
-    public boolean isDamageAbsolute() {
+    public boolean isBypassMagic() {
         return this.isAbsolute();
     }
 
     @Override
-    public boolean isDifficultyScaled() {
+    public boolean scalesWithDifficulty() {
         return this.isScaledByDifficulty();
     }
 
     @Override
-    public boolean isMagicDamage() {
-        return this.isMagic();
-    }
-
-    @Override
-    public float getHungerDamage() {
+    public float getFoodExhaustion() {
         return (float) this.getExhaustion();
     }
 

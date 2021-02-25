@@ -34,7 +34,7 @@ public final class SpongeAsset implements Asset {
     private final PluginContainer plugin;
     private final URL url;
 
-    SpongeAsset(PluginContainer plugin, URL url) {
+    SpongeAsset(final PluginContainer plugin, final URL url) {
         this.plugin = plugin;
         this.url = url;
     }

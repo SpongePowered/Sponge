@@ -24,18 +24,10 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.dedicated;
 
-import com.google.gson.JsonElement;
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.minecraft.MinecraftSessionService;
-import com.mojang.authlib.yggdrasil.YggdrasilAuthenticationService;
-import com.mojang.datafixers.DataFixer;
-import net.minecraft.command.Commands;
-import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.server.management.PlayerProfileCache;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.WorldType;
-import net.minecraft.world.chunk.listener.IChunkStatusListenerFactory;
+import org.spongepowered.api.Server;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -44,55 +36,38 @@ import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.vanilla.VanillaServer;
-
-import java.io.File;
-import java.net.Proxy;
+import org.spongepowered.vanilla.mixin.core.server.MinecraftServerMixin_Vanilla;
 
 @Mixin(DedicatedServer.class)
-public abstract class DedicatedServerMixin_Vanilla extends MinecraftServer implements VanillaServer {
+@Implements(@Interface(iface = Server.class, prefix = "server$"))
+public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_Vanilla implements VanillaServer {
 
-    public DedicatedServerMixin_Vanilla(final File p_i50590_1_, final Proxy p_i50590_2_, final DataFixer dataFixerIn,
-        final Commands p_i50590_4_, final YggdrasilAuthenticationService p_i50590_5_,
-        final MinecraftSessionService p_i50590_6_, final GameProfileRepository p_i50590_7_,
-        final PlayerProfileCache p_i50590_8_, final IChunkStatusListenerFactory p_i50590_9_,
-        final String p_i50590_10_) {
-        super(p_i50590_1_, p_i50590_2_, dataFixerIn, p_i50590_4_, p_i50590_5_, p_i50590_6_, p_i50590_7_, p_i50590_8_, p_i50590_9_, p_i50590_10_);
-    }
-
-    @Override
-    public void run() {
+    @Inject(method = "initServer", at = @At("HEAD"))
+    private void vanilla$runEngineStartLifecycle(final CallbackInfoReturnable<Boolean> cir) {
         // Save config now that registries have been initialized
         ConfigHandle.setSaveSuppressed(false);
 
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.establishServerServices();
 
-        lifecycle.establishRegistries();
-        lifecycle.establishDataProviders();
 
         lifecycle.establishServerFeatures();
-        lifecycle.establishCommands();
 
-        // TODO Minecraft 1.14 - Evaluate exactly where we want to call this
+        lifecycle.establishServerRegistries(this);
         lifecycle.callStartingEngineEvent(this);
-
-        lifecycle.establishDataPackRegistries();
-
-        super.run();
     }
 
-    @Inject(method = "init", at = @At("RETURN"))
+    @Inject(method = "initServer", at = @At("RETURN"))
     private void vanilla$callStartedEngineAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
         final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
         lifecycle.callStartedEngineEvent(this);
-
-        // TODO Minecraft 1.14 - For now, fire LoadedGameEvent right away but this may not be the best place..
 
         lifecycle.callLoadedGameEvent();
     }
 
     @Override
-    protected void loadAllWorlds(final String saveName, final String worldNameIn, final long seed, final WorldType type, final JsonElement generatorOptions) {
-        this.getWorldManager().loadAllWorlds(saveName, worldNameIn, seed, type, generatorOptions, false, null, Difficulty.NORMAL);
+    protected void loadLevel() {
+        this.shadow$detectBundledResources();
+        this.getWorldManager().loadLevel();
     }
 }

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import net.minecraft.entity.MobEntity;
-import net.minecraft.inventory.EquipmentSlotType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -36,20 +34,22 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.function.Predicate;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.Mob;
 
 public class EquipmentSlotLens extends FilteringSlotLens {
     
     private final Predicate<EquipmentType> equipmentTypeFilter;
 
     public EquipmentSlotLens(Lens parent, SlotLens lens, EquipmentType type) {
-        super(lens, equipmentTypeFilter(type), EquipmentSlotAdapter.class);
+        super(lens, EquipmentSlotLens.equipmentTypeFilter(type), EquipmentSlotAdapter.class);
         this.equipmentTypeFilter = e -> e == type;
         this.setParent(parent);
     }
 
     private static FilteringSlotLens.ItemStackFilter equipmentTypeFilter(EquipmentType type) {
         return (fabric, item) -> {
-            final EquipmentSlotType itemSlotType = MobEntity.getSlotForItemStack(ItemStackUtil.toNative(item));
+            final EquipmentSlot itemSlotType = Mob.getEquipmentSlotForItem(ItemStackUtil.toNative(item));
             return itemSlotType == (Object) type;
         };
     }

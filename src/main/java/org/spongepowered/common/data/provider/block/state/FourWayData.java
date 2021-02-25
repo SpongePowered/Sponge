@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.FourWayBlock;
+import net.minecraft.world.level.block.CrossCollisionBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,9 +39,9 @@ public final class FourWayData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(FourWayBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(FourWayBlock.WATERLOGGED, v))
-                        .supports(h -> h.getBlock() instanceof FourWayBlock);
+                        .get(h -> h.getValue(CrossCollisionBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(CrossCollisionBlock.WATERLOGGED, v))
+                        .supports(h -> h.getBlock() instanceof CrossCollisionBlock);
     }
     // @formatter:on
 }

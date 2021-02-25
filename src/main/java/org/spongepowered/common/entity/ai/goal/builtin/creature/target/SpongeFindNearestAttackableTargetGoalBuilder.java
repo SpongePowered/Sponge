@@ -27,16 +27,15 @@ package org.spongepowered.common.entity.ai.goal.builtin.creature.target;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.entity.LivingEntity;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.target.FindNearestAttackableTargetGoal;
 import org.spongepowered.api.entity.living.Creature;
 import org.spongepowered.api.entity.living.Living;
 
-import java.util.function.Predicate;
-
 import javax.annotation.Nullable;
-import net.minecraft.entity.CreatureEntity;
-import net.minecraft.entity.ai.goal.NearestAttackableTargetGoal;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+import java.util.function.Predicate;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class SpongeFindNearestAttackableTargetGoalBuilder extends SpongeTargetGoalBuilder<FindNearestAttackableTargetGoal, FindNearestAttackableTargetGoal.Builder>
@@ -95,7 +94,7 @@ public final class SpongeFindNearestAttackableTargetGoalBuilder extends SpongeTa
         Preconditions.checkNotNull(owner);
         Preconditions.checkNotNull(this.targetClass);
 
-        return (FindNearestAttackableTargetGoal) new NearestAttackableTargetGoal((CreatureEntity) owner, this.targetClass, this.chance,
-            this.checkSight, this.checkOnlyNearby, this.predicate == null ? ALWAYS_TRUE : this.predicate);
+        return (FindNearestAttackableTargetGoal) new NearestAttackableTargetGoal((PathfinderMob) owner, this.targetClass, this.chance,
+            this.checkSight, this.checkOnlyNearby, this.predicate == null ? SpongeFindNearestAttackableTargetGoalBuilder.ALWAYS_TRUE : this.predicate);
     }
 }

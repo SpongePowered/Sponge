@@ -24,35 +24,51 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
-import net.minecraft.entity.merchant.IMerchant;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.inventory.IInventory;
-import net.minecraft.inventory.container.INamedContainerProvider;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
+import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
 
 import java.util.Collections;
 import java.util.Set;
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.npc.AbstractVillager;
+import net.minecraft.world.entity.npc.ClientSideMerchant;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
 
+/**
+ * {@link org.spongepowered.common.mixin.inventory.impl.TraitMixin_ViewableBridge_Inventory}
+ */
 @Mixin(value = {
-        INamedContainerProvider.class,
-        IMerchant.class
+        // INamedContainerProvider impls:
+        AbstractMinecartContainer.class,
+        LecternBlockEntity.class,
+        BaseContainerBlockEntity.class,
+        ViewableCustomInventory.class,
+        // IMerchant impls:
+        AbstractVillager.class,
+        ClientSideMerchant.class,
+        // ChestBlock - DoubleSidedInventory
+        CompoundContainer.class,
 }, priority = 999)
-public interface TraitMixin_Viewable_Inventory_API extends ViewableInventory {
+public abstract class TraitMixin_Viewable_Inventory_API implements ViewableInventory {
 
     @Override
-    default Set<ServerPlayer> getViewers() {
+    public Set<ServerPlayer> getViewers() {
         if (this instanceof ViewableInventoryBridge) {
             return ((ViewableInventoryBridge) this).viewableBridge$getViewers();
         }
         return Collections.emptySet();
     }
     @Override
-    default boolean hasViewers() {
+    public boolean hasViewers() {
         if (this instanceof ViewableInventoryBridge) {
             return ((ViewableInventoryBridge) this).viewableBridge$hasViewers();
         }
@@ -60,16 +76,16 @@ public interface TraitMixin_Viewable_Inventory_API extends ViewableInventory {
     }
 
     @Override
-    default boolean canInteractWith(ServerPlayer player) {
-        if (this instanceof IInventory) {
-            return ((IInventory) this).isUsableByPlayer((PlayerEntity) player);
+    public boolean canInteractWith(ServerPlayer player) {
+        if (this instanceof Container) {
+            return ((Container) this).stillValid((Player) player);
         }
         // TODO other impl possible?
         return true;
     }
 
     @Override
-    default InventoryMenu asMenu() {
+    public InventoryMenu asMenu() {
         return new SpongeInventoryMenu(this);
     }
 }

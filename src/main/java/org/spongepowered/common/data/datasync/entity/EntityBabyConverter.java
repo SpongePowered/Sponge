@@ -24,21 +24,20 @@
  */
 package org.spongepowered.common.data.datasync.entity;
 
-import net.minecraft.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.Value.Immutable;
+import org.spongepowered.common.accessor.world.entity.AgableMobAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import org.spongepowered.common.accessor.entity.AgeableEntityAccessor;
-
 import java.util.List;
 import java.util.Optional;
+import net.minecraft.world.entity.Entity;
 
 public final class EntityBabyConverter extends DataParameterConverter<Boolean> {
 
     public EntityBabyConverter() {
-        super(AgeableEntityAccessor.accessor$getBaby());
+        super(AgableMobAccessor.accessor$DATA_BABY_ID());
     }
 
     @Override
@@ -53,7 +52,7 @@ public final class EntityBabyConverter extends DataParameterConverter<Boolean> {
     @Override
     public Boolean getValueFromEvent(final Boolean originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> value : immutableValues) {
-            if (value.getKey() == Keys.IS_ADULT.get()) {
+            if (value.getKey() == Keys.IS_ADULT) {
                 return !(Boolean) value.get();
             }
         }

@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
-import net.minecraft.block.Block;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.server.ServerWorld;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -39,8 +35,8 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -48,6 +44,9 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.world.BlockChange;
 
 import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -86,15 +85,15 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
 
     @Override
     public void associateNeighborStateNotifier(final CommandPhaseContext context, @Nullable final BlockPos sourcePos, final Block block,
-        final BlockPos notifyPos, final ServerWorld minecraftWorld, final PlayerTracker.Type notifier) {
+        final BlockPos notifyPos, final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         context.getSource(Player.class)
-            .ifPresent(player -> ((ChunkBridge) minecraftWorld.getChunkAt(notifyPos))
+            .ifPresent(player -> ((LevelChunkBridge) minecraftWorld.getChunkAt(notifyPos))
                 .bridge$addTrackedBlockPosition(block, notifyPos, ((ServerPlayer) player).getUser(), PlayerTracker.Type.NOTIFIER));
     }
 
     @Override
     public void unwind(final CommandPhaseContext phaseContext) {
-        final Optional<PlayerEntity> playerSource = phaseContext.getSource(PlayerEntity.class);
+        final Optional<net.minecraft.world.entity.player.Player> playerSource = phaseContext.getSource(net.minecraft.world.entity.player.Player.class);
         final CauseStackManager csm = PhaseTracker.getCauseStackManager();
         if (playerSource.isPresent()) {
             // Post event for inventory changes

@@ -25,9 +25,11 @@
 package org.spongepowered.common.util;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.util.DamageSource;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
+
+import java.util.Objects;
+import net.minecraft.world.damagesource.DamageSource;
 
 public final class MinecraftBlockDamageSource extends DamageSource {
 
@@ -36,14 +38,14 @@ public final class MinecraftBlockDamageSource extends DamageSource {
 
     public MinecraftBlockDamageSource(final String damageTypeIn, final ServerLocation location) {
         super(damageTypeIn);
-        this.location = location;
+        this.location = Objects.requireNonNull(location);
         this.blockSnapshot = location.createSnapshot();
     }
 
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-            .add("Name", this.damageType)
+            .add("Name", this.msgId)
             .add("BlockSnapshot", this.blockSnapshot)
             .add("Location", this.location)
             .toString();

@@ -24,15 +24,15 @@
  */
 package org.spongepowered.common.world.volume.buffer.biome;
 
-import org.spongepowered.api.world.volume.biome.ReadableBiomeVolume;
-import org.spongepowered.common.world.volume.buffer.AbstractObjectArrayBuffer;
+import org.spongepowered.api.world.volume.biome.BiomeVolume;
+import org.spongepowered.common.world.volume.buffer.AbstractVolumeBuffer;
 import org.spongepowered.math.vector.Vector3i;
 
 /**
  * Base class for biome areas. This class provides methods for retrieving the
  * size and for range checking.
  */
-public abstract class AbstractBiomeBuffer extends AbstractObjectArrayBuffer implements ReadableBiomeVolume {
+public abstract class AbstractBiomeBuffer extends AbstractVolumeBuffer implements BiomeVolume {
 
     protected AbstractBiomeBuffer(final Vector3i start, final Vector3i size) {
         super(start, size);

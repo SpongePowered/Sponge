@@ -24,37 +24,37 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.network.IPacket;
-import net.minecraft.network.play.client.CUseEntityPacket;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundInteractPacket;
+import net.minecraft.server.level.ServerPlayer;
 
 public final class InteractAtEntityPacketState extends BasicPacketState {
 
     @Override
-    public boolean isPacketIgnored(IPacket<?> packetIn, ServerPlayerEntity packetPlayer) {
-        final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packetIn;
+    public boolean isPacketIgnored(Packet<?> packetIn, ServerPlayer packetPlayer) {
+        final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        @Nullable net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(packetPlayer.world);
+        @Nullable net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(packetPlayer.level);
         return entity == null;
     }
 
     @Override
-    public void populateContext(ServerPlayerEntity playerMP, IPacket<?> packet, BasicPacketContext context) {
-        final CUseEntityPacket useEntityPacket = (CUseEntityPacket) packet;
-        final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getHeldItem(useEntityPacket.getHand()));
+    public void populateContext(ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+        final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packet;
+        final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getItemInHand(useEntityPacket.getHand()));
         if (stack != null) {
             context.itemUsed(stack);
         }
@@ -64,19 +64,19 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
 
     @Override
     public void unwind(BasicPacketContext context) {
-        final ServerPlayerEntity player = context.getPacketPlayer();
+        final ServerPlayer player = context.getPacketPlayer();
 
-        final CUseEntityPacket useEntityPacket = context.getPacket();
-        final net.minecraft.entity.Entity entity = useEntityPacket.getEntityFromWorld(player.world);
+        final ServerboundInteractPacket useEntityPacket = context.getPacket();
+        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(player.level);
         if (entity == null) {
             // Something happened?
             return;
         }
-        final World spongeWorld = (World) player.world;
+        final World spongeWorld = (World) player.level;
         if (entity instanceof CreatorTrackedBridge) {
-            ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerEntityBridge) player).bridge$getUser());
+            ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerBridge) player).bridge$getUser());
         } else {
-            ((Entity) entity).offer(Keys.NOTIFIER, player.getUniqueID());
+            ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
         }
 
 

@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.block.BlockState;
-import net.minecraft.block.ScaffoldingBlock;
+import net.minecraft.world.level.block.ScaffoldingBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -39,8 +39,8 @@ public final class ScaffoldingData {
         registrator
                 .asImmutable(BlockState.class)
                     .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.get(ScaffoldingBlock.WATERLOGGED))
-                        .set((h, v) -> h.with(ScaffoldingBlock.WATERLOGGED, v))
+                        .get(h -> h.getValue(ScaffoldingBlock.WATERLOGGED))
+                        .set((h, v) -> h.setValue(ScaffoldingBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof ScaffoldingBlock);
     }
     // @formatter:on
