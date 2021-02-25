@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.passivenet.minecraft.world.entity.animal;
+package org.spongepowered.common.mixin.core.world.entity.animal;
 
 import net.minecraft.world.entity.animal.Cat;
 import org.spongepowered.asm.mixin.Mixin;

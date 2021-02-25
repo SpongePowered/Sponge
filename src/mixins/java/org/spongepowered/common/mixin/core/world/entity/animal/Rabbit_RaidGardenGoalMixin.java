@@ -22,28 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.monsternet.minecraft.world.entity.monster;
+package org.spongepowered.common.mixin.core.world.entity.animal;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.Ghast;
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.MoveToBlockGoal;
+import net.minecraft.world.entity.animal.Rabbit;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.entity.GrieferBridge;
 
-@Mixin(targets = "net/minecraft/world/entity/monster/Ghast$GhastShootFireballGoal")
-public abstract class Ghast_GhastShootFireballGoalMixin extends Goal {
+@Mixin(targets = "net/minecraft/world/entity/animal/Rabbit$RaidGardenGoal")
+public abstract class Rabbit_RaidGardenGoalMixin extends MoveToBlockGoal {
 
     // @formatter:off
-    @Shadow(aliases = "this$0") @Final private Ghast ghast;
+    @Shadow @Final private Rabbit rabbit;
     // @formatter:on
 
-    @ModifyArg(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"))
-    private Entity impl$onSpawnFireball(final Entity entity) {
-        ((GrieferBridge) entity).bridge$setCanGrief(((GrieferBridge) this.ghast).bridge$canGrief());
-        return entity;
+    public Rabbit_RaidGardenGoalMixin(final PathfinderMob entityCreature, final double a, final int b) {
+        super(entityCreature, a, b);
+    }
+
+    /**
+     * @author gabizou - April 13th, 2018
+     * @reason Forge changes the gamerule method calls, so the old injection/redirect
+     * would fail in forge environments. This changes the injection to a predictable
+     * place where we still can forcibly call things but still cancel as needed.
+     *
+     * @param cir
+     */
+    @Inject(
+        method = "canUse()Z",
+        at = @At(value = "HEAD"),
+        cancellable = true
+    )
+    private void impl$onCanGrief(final CallbackInfoReturnable<Boolean> cir) {
+        if (this.nextStartTick <= 0) {
+            if (!((GrieferBridge) this.rabbit).bridge$canGrief()) {
+                cir.setReturnValue(false);
+            }
+        }
     }
 }

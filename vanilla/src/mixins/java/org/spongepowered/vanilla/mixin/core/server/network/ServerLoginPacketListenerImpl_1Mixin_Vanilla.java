@@ -22,27 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.monsternet.minecraft.world.entity.monster;
+package org.spongepowered.vanilla.mixin.core.server.network;
 
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
-import net.minecraft.world.level.block.InfestedBlock;
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.server.network.ServerLoginPacketListenerImplAccessor;
 
-@Mixin(targets = "net/minecraft/world/entity/monster/Silverfish$SilverfishMergeWithStoneGoal")
-public abstract class Silverfish_SilverfishMergeWithStoneGoalMixin extends RandomStrollGoal {
+@Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
+public abstract class ServerLoginPacketListenerImpl_1Mixin_Vanilla extends Thread {
 
-    public Silverfish_SilverfishMergeWithStoneGoalMixin(PathfinderMob creatureIn, double speedIn) { // Ignored
-        super(creatureIn, speedIn);
-    }
+    // @formatter:off
+    @Shadow(aliases="this$0",remap=false) @Final private ServerLoginPacketListenerImpl handler;
+    // @formatter:on
 
-    @Redirect(method = "canUse()Z",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/InfestedBlock;isCompatibleHostBlock(Lnet/minecraft/world/level/block/state/BlockState;)Z"))
-    private boolean impl$onCanGrief(final BlockState blockState) {
-        return InfestedBlock.isCompatibleHostBlock(blockState) && ((GrieferBridge) this.mob).bridge$canGrief();
+    @Inject(method = "run()V", at = @At("RETURN"), remap = false)
+    private void impl$onReadyToAccept(final CallbackInfo ci) {
+        final ServerLoginPacketListenerImplAccessor accessor = (ServerLoginPacketListenerImplAccessor) this.handler;
+        if (accessor.accessor$state() == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {
+            accessor.accessor$state(ServerLoginPacketListenerImpl.State.NEGOTIATING);
+        }
     }
 }

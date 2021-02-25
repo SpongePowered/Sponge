@@ -22,29 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.entity.monsternet.minecraft.world.entity.monster;
+package org.spongepowered.common.mixin.core.server.network;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.Blaze;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.ModifyArg;
-import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.network.ServerLoginNetHandlerBridge;
 
-@Mixin(targets = "net/minecraft/world/entity/monster/Blaze$BlazeAttackGoal")
-public abstract class Blaze_BlazeAttackGoalMixin extends Goal {
+@Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
+public abstract class ServerLoginPacketListenerImpl_1Mixin extends Thread {
 
-    // @formatter:off
-    @Shadow(aliases = "this$0") @Final private Blaze blaze;
-    // @formatter:on
+    @Shadow(aliases = {"this$0"}, remap = false)
+    @Final
+    private ServerLoginPacketListenerImpl handler;
 
-    @ModifyArg(method = "tick()V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addFreshEntity(Lnet/minecraft/entity/Entity;)Z"))
-    private Entity impl$setCanGrief(final Entity entity) {
-        ((GrieferBridge) entity).bridge$setCanGrief(((GrieferBridge) this.blaze).bridge$canGrief());
-        return entity;
+    @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
+            remap = false, cancellable = true)
+    private void impl$fireAuthEvent(final CallbackInfo ci) {
+        if (((ServerLoginNetHandlerBridge) this.handler).bridge$fireAuthEvent()) {
+            ci.cancel();
+        }
     }
 }

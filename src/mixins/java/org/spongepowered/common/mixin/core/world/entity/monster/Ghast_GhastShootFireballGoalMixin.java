@@ -22,30 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.loginnet.minecraft.server.network;
+package org.spongepowered.common.mixin.core.world.entity.monster;
 
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import org.objectweb.asm.Opcodes;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.Ghast;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.ServerLoginNetHandlerBridge;
+import org.spongepowered.asm.mixin.injection.ModifyArg;
+import org.spongepowered.common.bridge.entity.GrieferBridge;
 
-@Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
-public abstract class ServerLoginPacketListenerImpl_Mixin extends Thread {
+@Mixin(targets = "net/minecraft/world/entity/monster/Ghast$GhastShootFireballGoal")
+public abstract class Ghast_GhastShootFireballGoalMixin extends Goal {
 
-    @Shadow(aliases = {"this$0", "field_151292_a"}, remap = false)
-    @Final
-    private ServerLoginPacketListenerImpl handler;
+    // @formatter:off
+    @Shadow(aliases = "this$0") @Final private Ghast ghast;
+    // @formatter:on
 
-    @Inject(method = "run()V", at = @At(value = "JUMP", opcode = Opcodes.IFNULL, ordinal = 0, shift = At.Shift.AFTER),
-            remap = false, cancellable = true)
-    private void impl$fireAuthEvent(final CallbackInfo ci) {
-        if (((ServerLoginNetHandlerBridge) this.handler).bridge$fireAuthEvent()) {
-            ci.cancel();
-        }
+    @ModifyArg(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"))
+    private Entity impl$onSpawnFireball(final Entity entity) {
+        ((GrieferBridge) entity).bridge$setCanGrief(((GrieferBridge) this.ghast).bridge$canGrief());
+        return entity;
     }
 }
