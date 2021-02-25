@@ -49,8 +49,6 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API {
     @Shadow public abstract Component shadow$getName();
     // @formatter:on
 
-    @Shadow protected abstract Vec3 maybeBackOffFromEdge(final Vec3 var1, final MoverType var2);
-
     public final boolean impl$isFake = ((PlatformEntityBridge) (net.minecraft.world.entity.player.Player) (Object) this).bridge$isFakePlayer();
 
     @Intrinsic

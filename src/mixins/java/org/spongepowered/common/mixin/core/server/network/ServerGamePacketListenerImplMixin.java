@@ -54,7 +54,6 @@ import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ClipContext;
 import net.minecraft.world.level.Level;
@@ -80,7 +79,6 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.block.entity.ChangeSignEvent;
-import org.spongepowered.api.event.entity.InteractEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.AnimateHandEvent;
@@ -103,6 +101,7 @@ import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
 import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
+import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
 import org.spongepowered.common.bridge.server.management.PlayerListBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
@@ -127,7 +126,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @Mixin(ServerGamePacketListenerImpl.class)
-public abstract class ServerGamePacketListenerImplMixin implements NetworkManagerHolderBridge {
+public abstract class ServerGamePacketListenerImplMixin implements NetworkManagerHolderBridge, ServerPlayNetHandlerBridge {
 
     private static final String[] IMPL$EMPTY_COMMAND_ARRAY = new String[] { "" };
 
@@ -154,6 +153,11 @@ public abstract class ServerGamePacketListenerImplMixin implements NetworkManage
     @Override
     public Connection bridge$getConnection() {
         return this.connection;
+    }
+
+    @Override
+    public void bridge$incrementIgnorePackets() {
+        this.impl$ignorePackets++;
     }
 
     @Inject(method = "handleCustomCommandSuggestions", at = @At(value = "NEW", target = "com/mojang/brigadier/StringReader", remap = false),
@@ -353,43 +357,6 @@ public abstract class ServerGamePacketListenerImplMixin implements NetworkManage
                 packetInAccessor.accessor$y(toPosition.getY());
                 packetInAccessor.accessor$z(toPosition.getZ());
             }
-        }
-    }
-
-    @Inject(
-            method = "handleInteract",
-            cancellable = true,
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;interactAt(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
-            )
-    )
-    public void impl$onRightClickAtEntity(final ServerboundInteractPacket p_147340_1, final CallbackInfo ci) {
-        final Entity entity = p_147340_1.getTarget(this.player.getLevel());
-        final ItemStack itemInHand = p_147340_1.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(p_147340_1.getHand());
-        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
-                .callInteractEntityEventSecondary(this.player, itemInHand, entity, p_147340_1.getHand(), VecHelper.toVector3d(p_147340_1.getLocation()));
-        if (event.isCancelled()) {
-            ci.cancel();
-        } else {
-            this.impl$ignorePackets++;
-        }
-    }
-
-    @Inject(
-            method = "handleInteract",
-            cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;attack(Lnet/minecraft/world/entity/Entity;)V")
-    )
-    public void impl$onLeftClickEntity(final ServerboundInteractPacket p_147340_1_, final CallbackInfo ci) {
-        final Entity entity = p_147340_1_.getTarget(this.player.getLevel());
-
-        final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
-                this.player.getItemInHand(this.player.getUsedItemHand()), entity, this.player.getUsedItemHand());
-        if (event.isCancelled()) {
-            ci.cancel();
-        } else {
-            this.impl$ignorePackets++;
         }
     }
 

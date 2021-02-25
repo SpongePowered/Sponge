@@ -38,7 +38,7 @@ import org.spongepowered.api.network.channel.packet.RequestPacket;
 import org.spongepowered.api.network.channel.packet.RequestPacketHandler;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.PacketSender;
-import org.spongepowered.common.network.channel.PacketUtil;
+import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.network.channel.TransactionResult;
 import org.spongepowered.common.network.channel.TransactionStore;

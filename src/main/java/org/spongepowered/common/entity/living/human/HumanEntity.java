@@ -72,12 +72,12 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundAddPlayerPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoPacketAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -95,7 +95,7 @@ import java.util.stream.Stream;
 public final class HumanEntity extends PathfinderMob implements TeamMember, RangedAttackMob {
     public static final ResourceKey<EntityType<?>> KEY = ResourceKey.create(Registry.ENTITY_TYPE_REGISTRY, new ResourceLocation("sponge", "human"));
     public static final EntityType<HumanEntity> TYPE = Registry.ENTITY_TYPE.register(
-        KEY,
+        HumanEntity.KEY,
         EntityType.Builder.of(HumanEntity::new, MobCategory.MISC)
             .noSave()
             .clientTrackingRange(Constants.Entity.Player.TRACKING_RANGE)
@@ -116,7 +116,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     private boolean aiDisabled = false, leftHanded = false;
 
     public HumanEntity(final EntityType<? extends HumanEntity> type, final Level world) {
-        super(TYPE, world);
+        super(HumanEntity.TYPE, world);
         this.fakeProfile = new GameProfile(this.uuid, "");
         this.setCanPickUpLoot(true);
     }
@@ -452,16 +452,15 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      */
     @Override
     public ClientboundAddPlayerPacket getAddEntityPacket() {
-        final ClientboundAddPlayerPacket packet = new ClientboundAddPlayerPacket();
-        final ClientboundAddPlayerPacketAccessor accessor = (ClientboundAddPlayerPacketAccessor) packet;
-        accessor.accessor$entityId(this.getId());
-        accessor.accessor$playerId(this.fakeProfile.getId());
-        accessor.accessor$x(this.getX());
-        accessor.accessor$y(this.getY());
-        accessor.accessor$z(this.getZ());
-        accessor.accessor$yRot((byte) ((int) (this.yRot * 256.0F / 360.0F)));
-        accessor.accessor$xRot((byte) ((int) (this.xRot * 256.0F / 360.0F)));
-        return packet;
+        return PacketUtil.createClientboundAddPlayerPacket(
+            this.getId(),
+            this.fakeProfile.getId(),
+            this.getX(),
+            this.getY(),
+            this.getZ(),
+            (byte) ((int) (this.yRot * 256.0F / 360.0F)),
+            (byte) ((int) (this.xRot * 256.0F / 360.0F))
+        );
     }
 
     /**

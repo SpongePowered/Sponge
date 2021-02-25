@@ -35,7 +35,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 @Mixin(ClientIntentionPacket.class)
 public abstract class ClientIntentionPacketMixin_IpForward {
 
-    @Redirect(method = "read",
+    @Redirect(method = "<init>(Lnet/minecraft/network/FriendlyByteBuf;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/network/FriendlyByteBuf;readUtf(I)Ljava/lang/String;"))
     private String bungee$patchReadStringForPortForwarding(final FriendlyByteBuf buf, final int value) {
         if (SpongeConfigs.getCommon().get().ipForwarding.mode != IpForwardingCategory.Mode.LEGACY) {

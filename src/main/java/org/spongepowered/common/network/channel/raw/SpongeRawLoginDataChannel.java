@@ -34,7 +34,7 @@ import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataReque
 import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataRequestResponse;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.PacketSender;
-import org.spongepowered.common.network.channel.PacketUtil;
+import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.channel.SpongeChannel;
 import org.spongepowered.common.network.channel.TransactionResult;
 import org.spongepowered.common.network.channel.TransactionStore;

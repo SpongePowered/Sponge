@@ -32,7 +32,7 @@ import org.spongepowered.api.network.channel.raw.play.RawPlayDataHandler;
 import org.spongepowered.common.network.channel.ConcurrentMultimap;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.PacketSender;
-import org.spongepowered.common.network.channel.PacketUtil;
+import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.channel.SpongeChannel;
 
 import java.util.Collection;

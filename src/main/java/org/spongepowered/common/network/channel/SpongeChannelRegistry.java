@@ -50,7 +50,7 @@ import org.spongepowered.common.accessor.network.protocol.login.ServerboundCusto
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.bridge.network.NetworkManagerBridge;
 import org.spongepowered.common.entity.player.ClientType;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry.CreateFunction;
+import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.channel.packet.SpongeBasicPacketChannel;
 import org.spongepowered.common.network.channel.packet.SpongePacketChannel;
 import org.spongepowered.common.network.channel.raw.SpongeRawDataChannel;

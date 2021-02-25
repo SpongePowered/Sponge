@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.network.channel.PacketSender;
-import org.spongepowered.common.network.channel.PacketUtil;
+import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 
 @Mixin(ClientHandshakePacketListenerImpl.class)

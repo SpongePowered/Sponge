@@ -43,4 +43,6 @@ public interface ServerPlayNetHandlerBridge {
     void bridge$setLastMoveLocation(ServerLocation location);
 
     long bridge$getLastTryBlockPacketTimeStamp();
+
+    void bridge$incrementIgnorePackets();
 }

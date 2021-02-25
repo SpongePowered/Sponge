@@ -211,7 +211,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         this.impl$players.add(player);
         if (sendPackets) {
             for (final PlayerTeam team : this.getPlayerTeams()) {
-                player.connection.send(new ClientboundSetPlayerTeamPacket(team, 0));
+                player.connection.send(ClientboundSetPlayerTeamPacket.createAddOrModifyPacket(team, true));
             }
 
             for (final net.minecraft.world.scores.Objective objective : this.getObjectives()) {
@@ -401,7 +401,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     private void impl$removeTeams(final ServerPlayer player) {
         for (final PlayerTeam team : this.getPlayerTeams()) {
-            player.connection.send(new ClientboundSetPlayerTeamPacket(team, 1));
+            player.connection.send(ClientboundSetPlayerTeamPacket.createRemovePacket(team));
         }
     }
 

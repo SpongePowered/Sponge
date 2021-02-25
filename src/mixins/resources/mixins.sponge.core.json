@@ -76,6 +76,7 @@
         "server.level.ServerPlayerMixin_HealthScale",
         "server.network.LegacyQueryHandlerMixin",
         "server.network.ServerGamePacketListenerImplMixin",
+        "server.network.ServerGamePacketListenerImpl_1Mixin",
         "server.network.ServerHandshakePacketListenerImplMixin",
         "server.network.ServerLoginPacketListenerImplMixin",
         "server.network.ServerStatusPacketListenerImplMixin",

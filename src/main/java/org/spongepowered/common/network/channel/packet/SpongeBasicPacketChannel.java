@@ -42,7 +42,7 @@ import org.spongepowered.common.network.channel.ChannelBuffers;
 import org.spongepowered.common.network.channel.ChannelExceptionUtil;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.PacketSender;
-import org.spongepowered.common.network.channel.PacketUtil;
+import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.network.channel.TransactionResult;
 import org.spongepowered.common.network.channel.TransactionStore;
