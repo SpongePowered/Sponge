@@ -99,7 +99,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public PermissionService getService() {
+        public PermissionService service() {
             return DataFactoryCollection.this.service;
         }
 
@@ -113,11 +113,11 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
             Tristate ret = super.permissionValue(permission, cause);
 
             if (ret == Tristate.UNDEFINED) {
-                ret = this.getDataPermissionValue(DataFactoryCollection.this.defaults().transientSubjectData(), permission);
+                ret = this.dataPermissionValue(DataFactoryCollection.this.defaults().transientSubjectData(), permission);
             }
 
             if (ret == Tristate.UNDEFINED) {
-                ret = this.getDataPermissionValue(DataFactoryCollection.this.service.defaults().transientSubjectData(), permission);
+                ret = this.dataPermissionValue(DataFactoryCollection.this.service.defaults().transientSubjectData(), permission);
             }
             return ret;
         }
@@ -126,10 +126,10 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         public Optional<String> option(final String option, final Cause cause) {
             Optional<String> ret = super.option(option, cause);
             if (!ret.isPresent()) {
-                ret = this.getDataOptionValue(DataFactoryCollection.this.defaults().subjectData(), option);
+                ret = this.dataOptionValue(DataFactoryCollection.this.defaults().subjectData(), option);
             }
             if (!ret.isPresent()) {
-                ret = this.getDataOptionValue(DataFactoryCollection.this.service.defaults().subjectData(), option);
+                ret = this.dataOptionValue(DataFactoryCollection.this.service.defaults().subjectData(), option);
             }
             return ret;
         }

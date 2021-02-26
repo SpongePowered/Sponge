@@ -98,7 +98,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
             SpongePermissions.populateNonCommandPermissions(this.data, (permLevel, name) -> level == permLevel);
         }
 
-        public int getOpLevel() {
+        public int opLevel() {
             return this.level;
         }
 
@@ -113,7 +113,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public PermissionService getService() {
+        public PermissionService service() {
             return this.service;
         }
 

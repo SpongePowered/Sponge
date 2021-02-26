@@ -26,11 +26,11 @@ package org.spongepowered.common.service.server.context;
 
 import com.google.common.collect.ImmutableSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
-import org.spongepowered.api.service.context.ContextualService;
+import org.spongepowered.api.service.context.ContextService;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.List;
 import java.util.Set;
@@ -39,22 +39,20 @@ import java.util.function.Consumer;
 
 import javax.inject.Inject;
 
-public class SpongeContextService implements ContextualService {
-    private final Server server;
+public class SpongeContextService implements ContextService {
     private final List<ContextCalculator> calculator = new CopyOnWriteArrayList<>();
 
     @Inject
-    SpongeContextService(final Server server) {
-        this.server = server;
+    SpongeContextService() {
     }
 
     @Override
-    public @NonNull Set<Context> getContexts() {
-        return this.getContextsFor(this.server.getCauseStackManager().getCurrentCause());
+    public @NonNull Set<Context> contexts() {
+        return this.contextsFor(PhaseTracker.getInstance().currentCause());
     }
 
     @Override
-    public @NonNull Set<Context> getContextsFor(final @NonNull Cause cause) {
+    public @NonNull Set<Context> contextsFor(final @NonNull Cause cause) {
         final ImmutableSet.Builder<Context> result = ImmutableSet.builder();
         final Consumer<Context> accumulator = result::add;
         for (final ContextCalculator calc : this.calculator) {

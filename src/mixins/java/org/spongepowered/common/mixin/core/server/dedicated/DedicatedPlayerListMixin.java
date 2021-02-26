@@ -56,7 +56,7 @@ public abstract class DedicatedPlayerListMixin extends PlayerList {
             return;
         }
         final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
-        Subject subject = permissionService.userSubjects().sbject(profile.getId().toString()).orElse(null);
+        Subject subject = permissionService.userSubjects().subject(profile.getId().toString()).orElse(null);
         if (subject == null) {
             subject = permissionService.userSubjects().defaults();
         }
@@ -67,7 +67,7 @@ public abstract class DedicatedPlayerListMixin extends PlayerList {
     @Inject(method = "canBypassPlayerLimit", at = @At("HEAD"), cancellable = true)
     private void impl$checkForPlayerLimitBypassPermission(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
         final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
-        Subject subject = permissionService.userSubjects().getSubject(profile.getId().toString()).orElse(null);
+        Subject subject = permissionService.userSubjects().subject(profile.getId().toString()).orElse(null);
         if (subject == null) {
             subject = permissionService.userSubjects().defaults();
         }

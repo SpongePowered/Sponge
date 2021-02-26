@@ -47,7 +47,7 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
 
     @Override
     public List<SubjectReference> parents(final Set<Context> contexts) {
-        final SubjectReference parent = this.getParent();
+        final SubjectReference parent = this.parent();
         return contexts.isEmpty() && parent != null ? Collections.singletonList(parent) : Collections.emptyList();
     }
 
@@ -92,7 +92,7 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
         this.parent = parent;
     }
 
-    public @Nullable SubjectReference getParent() {
+    public @Nullable SubjectReference parent() {
         return this.parent;
     }
 }

@@ -32,8 +32,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.context.ContextCalculator;
-import org.spongepowered.api.world.Locatable;
-import org.spongepowered.api.world.ServerLocation;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
@@ -52,11 +51,11 @@ import java.util.function.Predicate;
 public class SpongeContextCalculator implements ContextCalculator {
 
     private final LoadingCache<RemoteConnection, Set<Context>> remoteIpCache =
-            this.buildAddressCache(Context.REMOTE_IP_KEY, rs -> SpongeContextCalculator.getAddress(rs, RemoteConnection::getAddress));
+            this.buildAddressCache(Context.REMOTE_IP_KEY, rs -> SpongeContextCalculator.address(rs, RemoteConnection::address));
     private final LoadingCache<RemoteConnection, Set<Context>> localIpCache =
-            this.buildAddressCache(Context.LOCAL_IP_KEY, rs -> SpongeContextCalculator.getAddress(rs, RemoteConnection::getVirtualHost));
+            this.buildAddressCache(Context.LOCAL_IP_KEY, rs -> SpongeContextCalculator.address(rs, RemoteConnection::virtualHost));
 
-    private static InetAddress getAddress(final RemoteConnection input, final Function<RemoteConnection, InetSocketAddress> func) {
+    private static InetAddress address(final RemoteConnection input, final Function<RemoteConnection, InetSocketAddress> func) {
         final InetSocketAddress socket = func.apply(input);
         if (!socket.isUnresolved()) {
             return socket.getAddress();
@@ -89,21 +88,19 @@ public class SpongeContextCalculator implements ContextCalculator {
 
     @Override
     public void accumulateContexts(final Cause causes, final Consumer<Context> accumulator) {
-        final /* @Nullable */ ServerLocation location =
-                causes.getContext().get(EventContextKeys.LOCATION)
-                        .orElse(causes.first(Locatable.class).map(Locatable::getServerLocation).orElse(null));
+        final /* @Nullable */ ServerLocation location = causes.context().get(EventContextKeys.LOCATION).orElse(null);
         if (location != null) {
-            final ServerWorld world = location.getWorldIfAvailable().orElse(null);
+            final ServerWorld world = location.worldIfAvailable().orElse(null);
             if (world != null) {
-                accumulator.accept(world.getContext());
-                accumulator.accept(world.getDimensionType().getContext());
+                accumulator.accept(world.context());
+                accumulator.accept(world.worldType().context());
             }
         }
         causes.first(RemoteConnection.class).ifPresent(connection -> { // TODO(zml): Wrong way to get a connection, add API?
             this.remoteIpCache.get(connection).forEach(accumulator);
             this.localIpCache.get(connection).forEach(accumulator);
-            accumulator.accept(new Context(Context.LOCAL_PORT_KEY, String.valueOf(connection.getVirtualHost().getPort())));
-            accumulator.accept(new Context(Context.LOCAL_HOST_KEY, connection.getVirtualHost().getHostName()));
+            accumulator.accept(new Context(Context.LOCAL_PORT_KEY, String.valueOf(connection.virtualHost().getPort())));
+            accumulator.accept(new Context(Context.LOCAL_HOST_KEY, connection.virtualHost().getHostName()));
 
         });
     }

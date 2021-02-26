@@ -35,7 +35,7 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.service.ban.BanService;
-import org.spongepowered.api.service.context.ContextualService;
+import org.spongepowered.api.service.context.ContextService;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
@@ -68,7 +68,7 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
                         servicePluginSubCategory -> servicePluginSubCategory.banService,
                         SpongeBanService.class))
                 .add(new Service<>(
-                        ContextualService.class,
+                        ContextService.class,
                         servicePluginSubCategory -> servicePluginSubCategory.contextService,
                         SpongeContextService.class))
                 .add(new Service<>(
@@ -103,8 +103,8 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
     }
 
     @Override
-    public final @NonNull ContextualService contextService() {
-        return this.provideUnchecked(ContextualService.class);
+    public final @NonNull ContextService contextService() {
+        return this.provideUnchecked(ContextService.class);
     }
 
     @Override

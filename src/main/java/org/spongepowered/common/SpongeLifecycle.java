@@ -146,7 +146,7 @@ public final class SpongeLifecycle {
     }
 
     public void establishServerFeatures() {
-        Sponge.getServer().getServiceProvider().contextService().registerContextCalculator(new SpongeContextCalculator());
+        Sponge.server().serviceProvider().contextService().registerContextCalculator(new SpongeContextCalculator());
         // Yes this looks odd but prevents having to do sided lifecycle solely to always point at the Server
         ((SpongeServer) this.game.server()).getUsernameCache().load();
     }

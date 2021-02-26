@@ -91,7 +91,7 @@ class SpongePermissionDescription implements PermissionDescription {
 
     @Override
     public boolean query(final Subject subj, final ResourceKey key) {
-        return subj.hasPermission(this.strippedId + '.' + key.getNamespace() + '.' + key.getValue());
+        return subj.hasPermission(this.strippedId + '.' + key.namespace() + '.' + key.value());
     }
 
     @Override
@@ -126,8 +126,8 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
-    public Tristate getDefaultValue() {
-        return this.permissionService.getDefaults().getPermissionValue(this.strippedId);
+    public Tristate defaultValue() {
+        return this.permissionService.defaults().permissionValue(this.strippedId);
     }
 
     @Override
@@ -178,7 +178,8 @@ class SpongePermissionDescription implements PermissionDescription {
         @Override
         public SpongePermissionDescription.Builder id(final String id) {
             if (!SpongePermissionDescription.PERMISSION_FORMAT.matcher(Objects.requireNonNull(id, "permissionId")).matches()) {
-                throw new IllegalArgumentException("Input permission '" + this.id + "' is not in the allowed format '" + PERMISSION_FORMAT.pattern() + "'");
+                throw new IllegalArgumentException("Input permission '" + this.id + "' is not in the allowed format '"
+                    + SpongePermissionDescription.PERMISSION_FORMAT.pattern() + "'");
             }
             this.id = id;
             return this;
@@ -208,7 +209,7 @@ class SpongePermissionDescription implements PermissionDescription {
             if (this.id == null) {
                 throw new IllegalStateException("No id set");
             }
-            final String strippedId = PLACEHOLDER.matcher(this.id).replaceAll("");
+            final String strippedId = SpongePermissionDescription.PLACEHOLDER.matcher(this.id).replaceAll("");
 
             final SpongePermissionDescription description = new SpongePermissionDescription(
                     this.permissionService,
@@ -220,7 +221,7 @@ class SpongePermissionDescription implements PermissionDescription {
 
             // Set default value
             if (this.defaultValue != Tristate.UNDEFINED) {
-                this.permissionService.getDefaults().getTransientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, strippedId, this.defaultValue);
+                this.permissionService.defaults().transientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, strippedId, this.defaultValue);
             }
 
             // Set role-templates
