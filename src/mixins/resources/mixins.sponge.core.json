@@ -200,6 +200,7 @@
         "world.level.levelgen.NoiseGeneratorSettingsMixin",
         "world.level.levelgen.WorldGenSettingsMixin",
         "world.level.levelgen.structure.LegacyStructureDataHandlerMixin",
+        "world.level.levelgen.structure.templatesystem.StructureManagerMixin",
         "world.level.portal.PortalForcerMixin",
         "world.level.storage.LevelDataMixin",
         "world.level.storage.LevelStorageSourceMixin",
