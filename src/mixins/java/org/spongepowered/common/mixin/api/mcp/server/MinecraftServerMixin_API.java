@@ -136,6 +136,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
     private SpongeUserManager api$userManager;
+    private MapStorage api$mapStorage;
     private RegistryHolder api$registryHolder;
     private MapStorage api$mapStorage;
 
@@ -154,6 +155,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
         this.api$userManager = new SpongeUserManager(this);
+        this.api$mapStorage = new SpongeMapStorage();
         this.api$registryHolder = new SpongeRegistryHolder(p_i232576_2_);
         this.api$mapStorage = new SpongeMapStorage();
     }
