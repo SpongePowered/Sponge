@@ -1,8 +1,18 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <Configuration status="warn">
+  <Properties>
+    <Property name="sponge.exceptionFormat">StyleMapName=Spock Name=reset,red NameMessageSeparator=red Message=red StackTraceElement.ClassName=red StackTraceElement.ClassMethodSeparator=red,faint StackTraceElement.MethodName=yellow StackTraceElement.NativeMethod=yellow</Property>
+  </Properties>
   <Appenders>
     <TerminalConsole name="SysOut">
-      <PatternLayout pattern="%highlightError{[%d{HH:mm:ss}] [%t/%level] [%c{1.3}/%markerSimpleName]: %msg%n}"/>
+      <PatternLayout>
+        <LoggerNamePatternSelector
+                defaultPattern="%highlightError{[%d{HH:mm:ss}] [%t/%level] [%c{1.3}%notEmpty{/%markerSimpleName}]: %msg%n%xEx{ansi(${sponge.exceptionFormat})}}">
+          <!-- Use a simplified pattern for Vanilla log messages -->
+          <PatternMatch key="net.minecraft.,com.mojang."
+                        pattern="%highlightError{[%d{HH:mm:ss}] [%t/%level]: %msg%n%xEx{ansi(${sponge.exceptionFormat})}}"/>
+        </LoggerNamePatternSelector>
+      </PatternLayout>
     </TerminalConsole>
     <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
       <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level]: %msg%n"/>
