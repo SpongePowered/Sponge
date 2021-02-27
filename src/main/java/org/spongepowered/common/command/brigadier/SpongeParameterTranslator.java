@@ -153,8 +153,18 @@ public final class SpongeParameterTranslator {
             }
         }
 
-        // Make all terminal nodes return to the parent node's children.
-        node.getChildren().forEach(x -> nodesToAddChildrenTo.forEach(y -> y.addChild(x)));
+        if (!nodesToAddChildrenTo.isEmpty()) {
+
+            for (final CommandNode<CommandSourceStack> target : node.getChildren()) {
+                if (!target.getChildren().isEmpty() && target instanceof SpongeFlagLiteralCommandNode) {
+                    nodesToAddChildrenTo.forEach(x -> x.addChild(((SpongeFlagLiteralCommandNode) target).cloneWithRedirectToThis()));
+                } else {
+                    nodesToAddChildrenTo.forEach(x -> x.addChild(target));
+                }
+            }
+
+        }
+
     }
 
     private Collection<? extends CommandNode<CommandSourceStack>> createAndAttachNode(
