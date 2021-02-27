@@ -25,9 +25,6 @@
 package org.spongepowered.vanilla.generator;
 
 import com.github.javaparser.utils.Log;
-import com.squareup.javapoet.ParameterizedTypeName;
-import com.squareup.javapoet.TypeName;
-import com.squareup.javapoet.WildcardTypeName;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.Bootstrap;
@@ -55,7 +52,7 @@ public final class GeneratorMain {
      */
     public static void main(final String[] args) {
         Logger.info("Begining bootstrap");
-        Log.setAdapter(new TinyLogAdapter());
+        Log.setAdapter(new JavaparserLog());
         Bootstrap.bootStrap();
         Bootstrap.validate();
 
@@ -73,8 +70,8 @@ public final class GeneratorMain {
             System.exit(1);
             return;
         }
-        final var context = new Context(outputDir, RegistryAccess.builtin(), licenseHeader);
 
+        final var context = new Context(outputDir, RegistryAccess.builtin(), licenseHeader);
         Logger.info("Generating data for Minecraft version {}", context.gameVersion());
 
         // Execute every generator
@@ -87,15 +84,15 @@ public final class GeneratorMain {
                 failed = true;
             }
         }
+        if (failed) {
+            Logger.error("A failure occurred earlier in generating data. See log for details.");
+            System.exit(1);
+        }
 
         // Write modified files to disk
         context.complete();
-
-        if (failed) {
-            Logger.error("A failure occurred earlier in generating data. See your log for details.");
-            System.exit(1);
-        }
         // Success!
+        Logger.info("Successfully generated data!");
     }
 
     private static List<Generator> generators(final Context context) {
@@ -219,11 +216,11 @@ public final class GeneratorMain {
                 context.relativeClass("statistic", "Statistic"),
                 Registry.CUSTOM_STAT_REGISTRY
             ),
-            new RegistryEntriesValidator<>(
+            /*new RegistryEntriesValidator<>( // TODO: Needs to be updated
                 "statistic",
                 "StatisticCategories",
                 Registry.STAT_TYPE_REGISTRY
-            ),
+            ), */
             new RegistryEntriesGenerator<>(
                 "world.generation.structure",
                 "Structures",

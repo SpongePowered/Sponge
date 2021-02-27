@@ -35,7 +35,6 @@ import com.squareup.javapoet.JavaFile;
 import com.squareup.javapoet.TypeSpec;
 import net.minecraft.SharedConstants;
 import net.minecraft.core.RegistryAccess;
-import org.tinylog.Logger;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
@@ -54,9 +53,9 @@ final class Context {
         this.registries = registries;
         this.licenseHeader = licenseHeader;
         this.sourceRoot = new SourceRoot(outputDirectory);
-        final DefaultPrinterConfiguration config = new DefaultPrinterConfiguration();
+        final var config = new DefaultPrinterConfiguration();
         config.addOption(new DefaultConfigurationOption(DefaultPrinterConfiguration.ConfigOption.PRINT_COMMENTS, true));
-        final DefaultPrettyPrinter printer = new DefaultPrettyPrinter(config);
+        final var printer = new DefaultPrettyPrinter(config);
         this.sourceRoot.setPrinter(printer::print);
     }
 

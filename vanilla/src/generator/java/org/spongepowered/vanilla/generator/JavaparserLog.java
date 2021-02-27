@@ -29,7 +29,7 @@ import org.tinylog.Logger;
 
 import java.util.function.Supplier;
 
-public class TinyLogAdapter implements Log.Adapter {
+public class JavaparserLog implements Log.Adapter {
 
     @Override
     public void info(final Supplier<String> message) {
