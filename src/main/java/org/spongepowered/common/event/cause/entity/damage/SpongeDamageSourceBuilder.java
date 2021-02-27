@@ -47,7 +47,7 @@ public class SpongeDamageSourceBuilder extends AbstractDamageSourceBuilder<Damag
                 && !this.creative
                 && !this.fire
                 && this.exhaustion == null
-                && this.damageType.equals(DamageTypes.DROWN)
+                && this.damageType.equals(DamageTypes.DROWN.get())
         ) {
             return (DamageSource) net.minecraft.world.damagesource.DamageSource.DROWN;
         }

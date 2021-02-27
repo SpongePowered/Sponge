@@ -534,6 +534,20 @@ project("SpongeVanilla") {
         extendsFrom(vanillaMinecraftConfig)
         extendsFrom(vanillaMinecraftClasspathConfig)
     }
+    val generator by sourceSets.registering {
+        tasks.named(compileJavaTaskName, JavaCompile::class) {
+            options.release.set(11)
+            if (!JavaVersion.current().isJava11Compatible) {
+                javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(11)) })
+            }
+        }
+
+        configurations.named(implementationConfigurationName) {
+            extendsFrom(vanillaMinecraftConfig)
+            extendsFrom(vanillaMinecraftClasspathConfig)
+        }
+    }
+
     configurations.named(vanillaMixins.annotationProcessorConfigurationName)
     configurations.named(vanillaInstaller.implementationConfigurationName) {
         extendsFrom(vanillaInstallerConfig)
@@ -670,6 +684,11 @@ project("SpongeVanilla") {
                 exclude(group = "org.spongepowered")
             }
         }
+
+        "generatorImplementation"("com.squareup:javapoet:1.13.0")
+        "generatorImplementation"("com.github.javaparser:javaparser-core:3.19.0")
+        "generatorImplementation"("org.tinylog:tinylog-api:2.2.1")
+        "generatorRuntimeOnly"("org.tinylog:tinylog-impl:2.2.1")
     }
 
     val vanillaManifest = the<JavaPluginConvention>().manifest {
@@ -775,6 +794,35 @@ project("SpongeVanilla") {
         }
         assemble {
             dependsOn(shadowJar)
+        }
+
+        val apiBase = apiProject.file("src/main/java/")
+        val temporaryLicenseHeader = project.buildDir.resolve("api-gen-license-header.txt")
+        register("generateApiData", JavaExec::class) {
+            group = "sponge"
+            description = "Generate API Catalog classes"
+            if (!JavaVersion.current().isJava11Compatible) {
+                javaLauncher.set(project.javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(11)) })
+            }
+
+            classpath(generator.map { it.output }, generator.map { it.runtimeClasspath })
+            mainClass.set("org.spongepowered.vanilla.generator.GeneratorMain")
+            args(apiBase.canonicalPath, temporaryLicenseHeader.canonicalPath)
+
+            doFirst {
+                // Write a template-expanded license header to the temporary file
+                license.header.bufferedReader(Charsets.UTF_8).use { reader ->
+                    val template = groovy.text.GStringTemplateEngine().createTemplate(reader)
+
+                    val propertyMap = (license as ExtensionAware).extra.properties.toMutableMap()
+                    propertyMap["name"] = "SpongeAPI"
+                    val out = template.make(propertyMap)
+
+                    temporaryLicenseHeader.bufferedWriter(Charsets.UTF_8).use { writer ->
+                        out.writeTo(writer)
+                    }
+                }
+            }
         }
     }
 
