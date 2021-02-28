@@ -37,7 +37,6 @@ public final class SpongeCommandResultBuilder implements CommandResult.Builder {
 
     @Override
     public CommandResult.@NonNull Builder setResult(final int result) {
-        Preconditions.checkArgument(result >= 0, "Result must be non-negative!");
         this.result = result;
         return this;
     }
@@ -51,7 +50,7 @@ public final class SpongeCommandResultBuilder implements CommandResult.Builder {
     @Override
     @NonNull
     public CommandResult build() {
-        return new SpongeCommandResult(this.errorMessage == null && this.result > 0, this.result, this.errorMessage);
+        return new SpongeCommandResult(this.errorMessage == null && this.result != 0, this.result, this.errorMessage);
     }
 
     @Override
