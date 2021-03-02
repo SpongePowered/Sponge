@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.plugin;
 import com.google.common.collect.ImmutableList;
 import org.apache.logging.log4j.Level;
 import org.objectweb.asm.tree.ClassNode;
-import org.spongepowered.asm.mixin.extensibility.IMixinConfigPlugin;
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
@@ -36,12 +35,11 @@ import org.spongepowered.common.util.MissingImplementationException;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 
-public class CorePlugin implements IMixinConfigPlugin {
+public class CorePlugin extends AbstractMixinConfigPlugin {
 
 
     private static final Map<String, BiConsumer<ClassNode, IMixinInfo>> SUPERCLASS_TRANSFORMATIONS;
@@ -61,29 +59,6 @@ public class CorePlugin implements IMixinConfigPlugin {
         .build();
 
     @Override
-    public void onLoad(final String mixinPackage) {
-    }
-
-    @Override
-    public String getRefMapperConfig() {
-        return null;
-    }
-
-    @Override
-    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
-        return true;
-    }
-
-    @Override
-    public void acceptTargets(final Set<String> myTargets, final Set<String> otherTargets) {
-    }
-
-    @Override
-    public List<String> getMixins() {
-        return null;
-    }
-
-    @Override
     public void preApply(final String targetClassName, final ClassNode targetClass, final String mixinClassName, final IMixinInfo mixinInfo) {
         final Consumer<ClassNode> classNodeConsumer = CorePlugin.INCOMPATIBILITY_DETECTION_ERRORS.get(mixinClassName);
         if (classNodeConsumer != null) {
@@ -94,12 +69,6 @@ public class CorePlugin implements IMixinConfigPlugin {
             superTransformer.accept(targetClass, mixinInfo);
         }
     }
-
-    @Override
-    public void postApply(final String targetClassName, final ClassNode targetClass, final String mixinClassName, final IMixinInfo mixinInfo) {
-    }
-
-
 
     private static void printFoamFixAndShutDown() {
         new PrettyPrinter(60).add("!!! FoamFix Incompatibility !!!").centre().hr()
