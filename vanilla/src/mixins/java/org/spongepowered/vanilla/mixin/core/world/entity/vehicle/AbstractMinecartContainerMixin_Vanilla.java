@@ -26,7 +26,7 @@ package org.spongepowered.vanilla.mixin.core.world.entity.vehicle;
 
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
 
 @Mixin(AbstractMinecartContainer.class)
 public abstract class AbstractMinecartContainerMixin_Vanilla implements EntityBridge {

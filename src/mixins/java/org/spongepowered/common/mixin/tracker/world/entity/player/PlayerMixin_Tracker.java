@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -87,8 +87,8 @@ public abstract class PlayerMixin_Tracker extends LivingEntityMixin_Tracker {
         }
         // Sponge Start - redirect to our handling to capture and throw events.
         if (!((WorldBridge) this.level).bridge$isFake()) {
-            ((PlayerEntityBridge) this).bridge$shouldRestoreInventory(false);
-            final Player player = (Player) (PlayerEntityBridge) this;
+            ((PlayerBridge) this).bridge$shouldRestoreInventory(false);
+            final Player player = (Player) (PlayerBridge) this;
 
             final double posX1 = player.getX();
             final double posY1 = this.shadow$getEyeY() - (double)0.3F;
@@ -101,7 +101,7 @@ public abstract class PlayerMixin_Tracker extends LivingEntityMixin_Tracker {
 
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
 
-                item = SpongeCommonEventFactory.throwDropItemAndConstructEvent((Player) (PlayerEntityBridge) this, posX1, posY1, posZ1, snapshot, original, frame);
+                item = SpongeCommonEventFactory.throwDropItemAndConstructEvent((Player) (PlayerBridge) this, posX1, posY1, posZ1, snapshot, original, frame);
 
                 if (item == null || item.isEmpty()) {
                     return null;

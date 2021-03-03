@@ -28,7 +28,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.util.registry.RegistryBridge;
+import org.spongepowered.common.bridge.core.RegistryBridge;
 
 import java.util.LinkedHashMap;
 import java.util.Map;

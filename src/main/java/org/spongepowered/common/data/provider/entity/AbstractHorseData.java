@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.passive.horse.AbstractHorseEntityBridge;
+import org.spongepowered.common.bridge.world.entity.animal.horse.AbstractHorseBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class AbstractHorseData {
@@ -47,10 +47,10 @@ public final class AbstractHorseData {
                             h.setOwnerUUID(v);
                             h.setTamed(v != null);
                         })
-                .asMutable(AbstractHorseEntityBridge.class)
+                .asMutable(AbstractHorseBridge.class)
                     .create(Keys.IS_SADDLED)
-                        .get(AbstractHorseEntityBridge::bridge$isSaddled)
-                        .set(AbstractHorseEntityBridge::bridge$setSaddled);
+                        .get(AbstractHorseBridge::bridge$isSaddled)
+                        .set(AbstractHorseBridge::bridge$setSaddled);
     }
     // @formatter:on
 }

@@ -33,10 +33,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.world.BossInfoBridge;
+import org.spongepowered.common.bridge.world.BossEventBridge;
 
 @Mixin(BossEvent.class)
-public abstract class BossEventMixin implements BossInfoBridge {
+public abstract class BossEventMixin implements BossEventBridge {
 
     @Shadow protected Component name;
     @Shadow protected float progress;

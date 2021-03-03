@@ -66,6 +66,13 @@ public final class SpongeFlagLiteralCommandNode extends SpongeLiteralCommandNode
         return this.executor;
     }
 
+    public SpongeFlagLiteralCommandNode cloneWithRedirectToThis() {
+        return new SpongeFlagLiteralCommandNode(LiteralArgumentBuilder.<CommandSourceStack>literal(this.getLiteral())
+                .executes(this.getCommand())
+                .requires(this.getRequirement())
+                .redirect(this), this.flag);
+    }
+
     // Circular references cause problems - this sidesteps the issue.
     @Override
     public boolean equals(final Object o) {

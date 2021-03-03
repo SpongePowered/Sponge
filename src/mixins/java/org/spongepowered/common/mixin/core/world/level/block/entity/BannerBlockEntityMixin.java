@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.CustomNameableBridge;
-import org.spongepowered.common.bridge.tileentity.BannerTileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.BannerBlockEntityBridge;
 import org.spongepowered.common.data.provider.item.stack.ShieldItemStackData;
 
 import java.util.ArrayList;
@@ -49,7 +49,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BannerBlockEntity;
 
 @Mixin(BannerBlockEntity.class)
-public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements BannerTileEntityBridge, CustomNameableBridge {
+public abstract class BannerBlockEntityMixin extends BlockEntityMixin implements BannerBlockEntityBridge, CustomNameableBridge {
 
     @Shadow private net.minecraft.world.item.DyeColor baseColor;
     @Shadow private ListTag itemPatterns;

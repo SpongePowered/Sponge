@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.inventory.api;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.CarriedBridge;
+import org.spongepowered.common.bridge.world.inventory.CarriedBridge;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
 import org.spongepowered.common.inventory.custom.CustomInventory;
 

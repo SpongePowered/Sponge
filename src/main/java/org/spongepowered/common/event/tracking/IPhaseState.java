@@ -44,11 +44,11 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
-import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.server.TickTaskBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
@@ -205,7 +205,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * </p>
      *
      * <p>Note that the {@link PhaseTracker} is only provided for easy access
-     * to the {@link ServerLevel}, {@link ServerWorldBridge}, and
+     * to the {@link ServerLevel}, {@link ServerLevelBridge}, and
      * {@link World} instances.</p>
      *
      * @param phaseContext The context of the current state being unwound
@@ -417,7 +417,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     default void appendNotifierPreBlockTick(final ServerLevel world, final BlockPos pos, final C context, final LocationBasedTickContext<@NonNull ?> phaseContext) {
         final LevelChunk chunk = world.getChunkAt(pos);
-        final ChunkBridge mixinChunk = (ChunkBridge) chunk;
+        final LevelChunkBridge mixinChunk = (LevelChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
             mixinChunk.bridge$getBlockCreator(pos).ifPresent(phaseContext::creator);
             mixinChunk.bridge$getBlockNotifier(pos).ifPresent(phaseContext::notifier);
@@ -574,7 +574,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return blockChange.toOperation();
     }
 
-    default void foldContextForThread(final C context, final TrackedTickDelayedTaskBridge returnValue) {
+    default void foldContextForThread(final C context, final TickTaskBridge returnValue) {
     }
 
     default void associateScheduledTickUpdate(C asContext, TickNextTickData<?> entry) {

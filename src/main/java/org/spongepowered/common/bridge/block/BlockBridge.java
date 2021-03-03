@@ -29,7 +29,7 @@ import org.spongepowered.api.data.DataManipulator.Immutable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 
 import java.util.List;
 import java.util.Optional;
@@ -132,7 +132,7 @@ public interface BlockBridge {
 
     void bridge$initializeTrackerState();
 
-    default BiConsumer<CauseStackManager.StackFrame, ServerWorldBridge> bridge$getTickFrameModifier() {
+    default BiConsumer<CauseStackManager.StackFrame, ServerLevelBridge> bridge$getTickFrameModifier() {
         return (frame, world) -> {
         };
     }

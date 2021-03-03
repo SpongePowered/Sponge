@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.util.PrettyPrinter;
-import org.spongepowered.common.bridge.world.chunk.BlockStateContainerBridge;
+import org.spongepowered.common.bridge.world.level.chunk.BlockStateContainerBridge;
 
 @Mixin(SChunkDataPacket.class)
 public abstract class SChunkDataPacketMixin {

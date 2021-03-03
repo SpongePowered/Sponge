@@ -32,12 +32,12 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.NaturalSpawnerAccessor;
-import org.spongepowered.common.bridge.world.spawner.WorldEntitySpawner_EntityDensityManagerBridge;
+import org.spongepowered.common.bridge.world.level.NaturalSpawner_SpawnStateBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.SpawnerCategory;
 
 @Mixin(NaturalSpawner.SpawnState.class)
-public abstract class NaturalSpawner_SpawnStateMixin implements WorldEntitySpawner_EntityDensityManagerBridge {
+public abstract class NaturalSpawner_SpawnStateMixin implements NaturalSpawner_SpawnStateBridge {
 
     // @formatter:off
     @Shadow @Final private int spawnableChunkCount;

@@ -53,8 +53,8 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
-import org.spongepowered.common.bridge.advancements.PlayerAdvancementsBridge;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 
 import javax.annotation.Nullable;
 import java.time.Instant;

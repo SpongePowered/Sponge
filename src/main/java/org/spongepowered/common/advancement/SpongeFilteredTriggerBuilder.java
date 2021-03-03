@@ -55,7 +55,7 @@ public class SpongeFilteredTriggerBuilder<C extends FilteredTriggerConfiguration
     public FilteredTrigger<C> build() {
         checkState(this.type != null, "The type must be set");
         checkState(this.config != null, "The config must be set");
-        return new SpongeFilteredTrigger((SpongeTrigger) this.type, this.config);
+        return new SpongeFilteredTrigger((SpongeCriterionTrigger) this.type, this.config);
     }
 
     @Override

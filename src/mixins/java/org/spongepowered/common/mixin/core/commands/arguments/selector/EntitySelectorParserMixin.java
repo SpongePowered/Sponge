@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.commands.arguments.selector.options.EntitySelectorOptionsAccessor;
 import org.spongepowered.common.accessor.commands.arguments.selector.options.EntitySelectorOptions_OptionAccessor;
-import org.spongepowered.common.bridge.command.arguments.EntitySelectorParserBridge;
+import org.spongepowered.common.bridge.commands.arguments.selector.EntitySelectorParserBridge;
 
 @Mixin(EntitySelectorParser.class)
 public abstract class EntitySelectorParserMixin implements EntitySelectorParserBridge {

@@ -31,7 +31,7 @@ import net.minecraft.world.level.chunk.EmptyLevelChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.accessor.world.level.chunk.LevelChunkAccessor;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
@@ -56,7 +56,7 @@ public final class UpdateOrCreateNewTileEntityPostPlacementEffect implements Pro
         final ServerLevel serverWorld = pipeline.getServerWorld();
         final LevelChunk chunk = pipeline.getAffectedChunk();
         if (((BlockStateBridge) newState).bridge$hasTileEntity()) {
-            final @Nullable BlockEntity maybeNewTileEntity = chunk.getBlockEntity(oldState.pos, LevelChunk.EntityCreationType.CHECK);
+        final @Nullable BlockEntity maybeNewTileEntity = chunk.getBlockEntity(oldState.pos, LevelChunk.EntityCreationType.CHECK);
             if (maybeNewTileEntity == null) {
                 // var15 = ((EntityBlock)var12).newBlockEntity(var1, var2); // Vanilla
                 // tileentity1 = state.createTileEntity(this.world); // Forge

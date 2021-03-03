@@ -32,10 +32,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.server.management.PlayerInteractionManagerBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerGameModeBridge;
 
 @Mixin(ServerPlayerGameMode.class)
-public abstract class ServerPlayerGameModeMixin implements PlayerInteractionManagerBridge {
+public abstract class ServerPlayerGameModeMixin implements ServerPlayerGameModeBridge {
 
     private boolean impl$interactBlockLeftClickEventCancelled = false;
     private boolean impl$interactBlockRightClickEventCancelled = false;

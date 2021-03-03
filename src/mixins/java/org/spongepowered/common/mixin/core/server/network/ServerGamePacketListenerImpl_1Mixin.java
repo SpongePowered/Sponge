@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.network.ServerPlayNetHandlerBridge;
+import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.VecHelper;
 
@@ -58,7 +58,7 @@ public abstract class ServerGamePacketListenerImpl_1Mixin implements Serverbound
         if (event.isCancelled()) {
             ci.cancel();
         } else {
-            ((ServerPlayNetHandlerBridge) this.this$0).bridge$incrementIgnorePackets();
+            ((ServerGamePacketListenerImplBridge) this.this$0).bridge$incrementIgnorePackets();
         }
     }
 
@@ -73,7 +73,7 @@ public abstract class ServerGamePacketListenerImpl_1Mixin implements Serverbound
         if (event.isCancelled()) {
             ci.cancel();
         } else {
-            ((ServerPlayNetHandlerBridge) this.this$0).bridge$incrementIgnorePackets();
+            ((ServerGamePacketListenerImplBridge) this.this$0).bridge$incrementIgnorePackets();
         }
     }
 

@@ -33,7 +33,7 @@ import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.common.applaunch.config.common.PhaseTrackerCategory;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -110,7 +110,7 @@ public final class PhasePrinter {
     }
 
 
-    static void printUnexpectedBlockChange(final ServerWorldBridge mixinWorld, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState currentState,
+    static void printUnexpectedBlockChange(final ServerLevelBridge mixinWorld, final BlockPos pos, final net.minecraft.world.level.block.state.BlockState currentState,
                                             final net.minecraft.world.level.block.state.BlockState newState) {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             return;

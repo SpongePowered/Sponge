@@ -47,10 +47,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -70,7 +70,7 @@ import java.util.function.Function;
 
 
 @Mixin(LevelChunk.class)
-public abstract class LevelChunkMixin_Tracker implements TrackedChunkBridge {
+public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge {
     // @formatter:off
     @Shadow @Final public static LevelChunkSection EMPTY_SECTION;
     @Shadow @Final private LevelChunkSection[] sections;

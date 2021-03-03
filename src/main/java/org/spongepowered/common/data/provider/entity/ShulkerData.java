@@ -26,7 +26,7 @@ package org.spongepowered.common.data.provider.entity;
 
 import net.minecraft.world.entity.monster.Shulker;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.entity.monster.ShulkerEntityBridge;
+import org.spongepowered.common.bridge.world.entity.monster.ShulkerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class ShulkerData {
@@ -39,13 +39,13 @@ public final class ShulkerData {
         registrator
                 .asMutable(Shulker.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> ((ShulkerEntityBridge) h).bridge$getColor())
-                        .set((h, v) -> ((ShulkerEntityBridge) h).bridge$setColor(v))
-                        .delete(h -> ((ShulkerEntityBridge) h).bridge$setColor(null))
-                .asMutable(ShulkerEntityBridge.class)
+                        .get(h -> ((ShulkerBridge) h).bridge$getColor())
+                        .set((h, v) -> ((ShulkerBridge) h).bridge$setColor(v))
+                        .delete(h -> ((ShulkerBridge) h).bridge$setColor(null))
+                .asMutable(ShulkerBridge.class)
                     .create(Keys.DIRECTION)
-                        .get(ShulkerEntityBridge::bridge$getDirection)
-                        .set(ShulkerEntityBridge::bridge$setDirection);
+                        .get(ShulkerBridge::bridge$getDirection)
+                        .set(ShulkerBridge::bridge$setDirection);
     }
     // @formatter:on
 }

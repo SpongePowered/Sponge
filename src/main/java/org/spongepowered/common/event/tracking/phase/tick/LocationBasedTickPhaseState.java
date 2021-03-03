@@ -29,7 +29,7 @@ import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.world.BlockChange;
@@ -61,7 +61,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
                                                final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
-            final ChunkBridge mixinChunk = (ChunkBridge) minecraftWorld.getChunkAt(notifyPos);
+            final LevelChunkBridge mixinChunk = (LevelChunkBridge) minecraftWorld.getChunkAt(notifyPos);
             mixinChunk.bridge$addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         });
     }
@@ -75,7 +75,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
             final Block block = (Block) original.getState().getType();
             final BlockPos changedBlockPos = original.getBlockPos();
             original.getServerWorld().ifPresent(worldServer -> {
-                final ChunkBridge changedMixinChunk = (ChunkBridge) worldServer.getChunkAt(changedBlockPos);
+                final LevelChunkBridge changedMixinChunk = (LevelChunkBridge) worldServer.getChunkAt(changedBlockPos);
                 changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER);
                 // and check for owner, if it's available, only if the block change was placement
                 // We don't want to set owners on modify because that would mean the current context owner

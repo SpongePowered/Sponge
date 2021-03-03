@@ -24,18 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.level.levelgen;
 
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.Lifecycle;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.gen.DimensionGeneratorSettingsBridge;
+import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
 import org.spongepowered.common.server.BootstrapProperties;
 
-import java.util.Objects;
 import java.util.Random;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
@@ -49,7 +46,7 @@ import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 @Mixin(WorldGenSettings.class)
-public abstract class WorldGenSettingsMixin implements DimensionGeneratorSettingsBridge {
+public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
 
     // @formatter:off
     @Shadow @Final private long seed;

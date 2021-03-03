@@ -44,14 +44,14 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.scoreboard.ScorePlayerTeamBridge;
+import org.spongepowered.common.bridge.world.scores.PlayerTeamBridge;
 
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Mixin(PlayerTeam.class)
-public abstract class PlayerTeamMixin implements ScorePlayerTeamBridge {
+public abstract class PlayerTeamMixin implements PlayerTeamBridge {
 
     // @formatter:off
     @Shadow @Final @Mutable @Nullable private Scoreboard scoreboard;

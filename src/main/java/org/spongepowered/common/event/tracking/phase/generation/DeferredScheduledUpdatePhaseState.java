@@ -25,8 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.bridge.world.TrackedNextTickEntryBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.Objects;
@@ -56,7 +55,7 @@ final class DeferredScheduledUpdatePhaseState extends GeneralGenerationPhaseStat
 
     @Override
     public void associateScheduledTickUpdate(final Context asContext, final TickNextTickData<?> entry) {
-        ((TrackedNextTickEntryBridge) entry).bridge$setIsPartOfWorldGeneration(true);
+        ((TickNextTickDataBridge) entry).bridge$setIsPartOfWorldGeneration(true);
     }
 
     public static final class Context extends GenerationContext<Context> {

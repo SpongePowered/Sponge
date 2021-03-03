@@ -34,8 +34,8 @@ import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.profile.GameProfileProvider;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCache_ProfileEntryBridge;
+import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
+import org.spongepowered.common.bridge.server.players.GameProfileCache_GameProfileInfoBridge;
 import org.spongepowered.common.util.UsernameCache;
 
 import java.time.Instant;
@@ -54,13 +54,13 @@ import java.util.concurrent.Executors;
 public final class SpongeGameProfileManager implements GameProfileManager {
 
     private final UsernameCache usernameCache;
-    private final PlayerProfileCacheBridge cache;
+    private final GameProfileCacheBridge cache;
     private final UncachedGameProfileProvider uncached = new UncachedGameProfileProvider();
     private final ExecutorService gameLookupExecutorService;
 
     public SpongeGameProfileManager(final Server server) {
         this.usernameCache = ((SpongeServer) server).getUsernameCache();
-        this.cache = (PlayerProfileCacheBridge) ((MinecraftServer) server).getProfileCache();
+        this.cache = (GameProfileCacheBridge) ((MinecraftServer) server).getProfileCache();
         this.gameLookupExecutorService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
                 .setNameFormat("Sponge - Async User Lookup Thread").build());
     }
@@ -78,7 +78,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
     @Override
     public CompletableFuture<GameProfile> getBasicProfile(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
-        final Optional<PlayerProfileCache_ProfileEntryBridge> entry = this.cache.bridge$getEntry(uniqueId);
+        final Optional<GameProfileCache_GameProfileInfoBridge> entry = this.cache.bridge$getEntry(uniqueId);
         if (entry.isPresent()) {
             return CompletableFuture.completedFuture(entry.get().bridge$getBasic());
         }

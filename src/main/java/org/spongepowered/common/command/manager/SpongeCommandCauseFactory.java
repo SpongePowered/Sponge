@@ -45,9 +45,8 @@ import org.spongepowered.api.util.Nameable;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
-import org.spongepowered.common.bridge.command.ICommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.VecHelper;
 
@@ -102,7 +101,7 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
             // We don't want the command source to have altered the cause here (unless there is the special case of the
             // server), so we reset it back to what it was (in the ctor of CommandSource, it will add the current source
             // to the cause - that's for if the source is created elsewhere, not here)
-            ((CommandSourceBridge) commandSource).bridge$setCause(frame.getCurrentCause());
+            ((CommandSourceStackBridge) commandSource).bridge$setCause(frame.getCurrentCause());
             return (CommandCause) commandSource;
         }
     }

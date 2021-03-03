@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 
 @Mixin(KickCommand.class)
 public abstract class KickCommandMixin {
@@ -40,7 +40,7 @@ public abstract class KickCommandMixin {
     @Redirect(method = "kickPlayers", at =
         @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;disconnect(Lnet/minecraft/network/chat/Component;)V"))
     private static void impl$fireEventOnDisconnect(final ServerGamePacketListenerImpl netHandlerPlayServer, final Component textComponent) {
-        ((ServerPlayerEntityBridge) netHandlerPlayServer.player).bridge$kick(SpongeAdventure.asAdventure(textComponent));
+        ((ServerPlayerBridge) netHandlerPlayServer.player).bridge$kick(SpongeAdventure.asAdventure(textComponent));
     }
 
 }

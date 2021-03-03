@@ -146,6 +146,22 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
+                        .flag(Flag.builder().alias("t").alias("text").setParameter(Parameter.string().setKey(testKey).build()).build())
+                        .parameter(Parameter.formattingCodeText().setKey(requiredKey).build())
+                        .setExecutor(context -> {
+                            context.sendMessage(Identity.nil(), Component.text("optional_test"));
+                            context.sendMessage(Identity.nil(), Component.text(context.getFlagInvocationCount("t")));
+                            context.getAll(testKey).forEach(x -> context.sendMessage(Identity.nil(), Component.text(x)));
+                            context.sendMessage(Identity.nil(), context.requireOne(requiredKey));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "optionalflagtest"
+        );
+
+        event.register(
+                this.plugin,
+                Command.builder()
                         .setExecutor(x -> {
                             x.sendMessage(Identity.nil(), Component.text().content("Click Me")
                                     .clickEvent(SpongeComponents.executeCallback(ctx -> ctx.sendMessage(Identity.nil(), Component.text("Hello"))))

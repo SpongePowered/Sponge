@@ -45,7 +45,7 @@ import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
@@ -111,9 +111,9 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
     @Override
     public int execute(final StringReader input, final CommandSourceStack source) throws CommandSyntaxException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final CommandSourceBridge sourceBridge = (CommandSourceBridge) source;
+            final CommandSourceStackBridge sourceBridge = (CommandSourceStackBridge) source;
             frame.addContext(EventContextKeys.COMMAND, input.getString());
-            sourceBridge.bridge$updateFrameFromICommandSource(frame);
+            sourceBridge.bridge$updateFrameFromCommandSource(frame);
             return this.commandManager.process(sourceBridge.bridge$withCurrentCause(), input.getRemaining()).getResult();
         } catch (final CommandException e) {
             throw new net.minecraft.commands.CommandRuntimeException(SpongeAdventure.asVanilla(e.componentMessage()));

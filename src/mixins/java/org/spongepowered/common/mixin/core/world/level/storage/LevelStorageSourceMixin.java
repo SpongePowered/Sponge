@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.UUID;
@@ -100,9 +100,9 @@ public abstract class LevelStorageSourceMixin {
                 p_237369_6_, p_237369_7_);
 
         if (LevelStorageSourceMixin.impl$spongeLevelData == null) {
-            ((ServerWorldInfoBridge) levelData).bridge$setUniqueId(UUID.randomUUID());
+            ((PrimaryLevelDataBridge) levelData).bridge$setUniqueId(UUID.randomUUID());
         } else {
-            ((ServerWorldInfoBridge) levelData).bridge$setUniqueId(LevelStorageSourceMixin.impl$spongeLevelData.get(Constants.Sponge.World.UNIQUE_ID).read(
+            ((PrimaryLevelDataBridge) levelData).bridge$setUniqueId(LevelStorageSourceMixin.impl$spongeLevelData.get(Constants.Sponge.World.UNIQUE_ID).read(
                     SerializableUUID.CODEC).result().orElse(UUID.randomUUID()));
         }
 

@@ -52,8 +52,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.commands.CommandSourceStackAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
-import org.spongepowered.common.bridge.command.ICommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.service.server.permission.SpongePermissions;
 import org.spongepowered.common.util.VecHelper;
@@ -61,7 +61,7 @@ import org.spongepowered.common.util.VecHelper;
 import java.util.function.Supplier;
 
 @Mixin(CommandSourceStack.class)
-public abstract class CommandSourceStackMixin implements CommandSourceBridge {
+public abstract class CommandSourceStackMixin implements CommandSourceStackBridge {
 
     private static final String PROTECTED_CTOR = "(Lnet/minecraft/commands/CommandSource;Lnet/minecraft/world/phys/Vec3;"
             + "Lnet/minecraft/world/phys/Vec2;Lnet/minecraft/server/level/ServerLevel;ILjava/lang/String;Lnet/minecraft/network/chat/Component;"
@@ -138,9 +138,9 @@ public abstract class CommandSourceStackMixin implements CommandSourceBridge {
     }, at = @At("RETURN"))
     private void impl$copyPermissionOnCopy(final CallbackInfoReturnable<CommandSourceStack> cir) {
         if (cir.getReturnValue() != (Object) this) {
-            final CommandSourceBridge commandSourceBridge = ((CommandSourceBridge) cir.getReturnValue());
-            commandSourceBridge.bridge$setPotentialPermissionNode(this.impl$potentialPermissionNode);
-            commandSourceBridge.bridge$setCause(this.impl$cause);
+            final CommandSourceStackBridge commandSourceStackBridge = ((CommandSourceStackBridge) cir.getReturnValue());
+            commandSourceStackBridge.bridge$setPotentialPermissionNode(this.impl$potentialPermissionNode);
+            commandSourceStackBridge.bridge$setCause(this.impl$cause);
         }
     }
 
@@ -168,7 +168,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceBridge {
                     .map(x -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld, x.getPosition()))
                     .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld,
                             VecHelper.toVector3d(cir.getReturnValue().getPosition())));
-            ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION, location));
+            ((CommandSourceStackBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION, location));
         }
     }
 
@@ -179,7 +179,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceBridge {
             final ServerLocation location = this.impl$cause.getContext().get(EventContextKeys.LOCATION)
                     .map(x -> ServerLocation.of(x.getWorld(), position))
                     .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) cir.getReturnValue().getLevel(), position));
-            ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION, location));
+            ((CommandSourceStackBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION, location));
         }
     }
 
@@ -187,7 +187,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceBridge {
     private void impl$updateCauseOnWithRotation(final Vec2 rotation, final CallbackInfoReturnable<CommandSourceStack> cir) {
         if (cir.getReturnValue() != (Object) this) {
             final org.spongepowered.math.vector.Vector3d rot = new org.spongepowered.math.vector.Vector3d(rotation.x, rotation.y, 0); // no roll
-            ((CommandSourceBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.ROTATION, rot));
+            ((CommandSourceStackBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.ROTATION, rot));
         }
     }
 
@@ -218,13 +218,13 @@ public abstract class CommandSourceStackMixin implements CommandSourceBridge {
     }
 
     @Override
-    public CommandSource bridge$getICommandSource() {
+    public CommandSource bridge$getCommandSource() {
         return this.source;
     }
 
     @Override
-    public void bridge$updateFrameFromICommandSource(final CauseStackManager.StackFrame frame) {
-        ((ICommandSourceBridge) this.source).bridge$addToCauseStack(frame);
+    public void bridge$updateFrameFromCommandSource(final CauseStackManager.StackFrame frame) {
+        ((CommandSourceBridge) this.source).bridge$addToCauseStack(frame);
     }
 
     @Override

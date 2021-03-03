@@ -39,8 +39,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.network.rcon.ClientThreadBridge;
-import org.spongepowered.common.bridge.network.rcon.RConConsoleSourceBridge;
+import org.spongepowered.common.bridge.server.rcon.thread.RconClientBridge;
+import org.spongepowered.common.bridge.server.rcon.RconConsoleSourceBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.io.BufferedInputStream;
@@ -53,7 +53,7 @@ import net.minecraft.server.rcon.thread.GenericThread;
 import net.minecraft.server.rcon.thread.RconClient;
 
 @Mixin(RconClient.class)
-public abstract class RconClientMixin extends GenericThread implements ClientThreadBridge {
+public abstract class RconClientMixin extends GenericThread implements RconClientBridge {
 
     private static final Logger LOGGER = LogManager.getLogger();
 
@@ -100,7 +100,7 @@ public abstract class RconClientMixin extends GenericThread implements ClientThr
         /// Sponge: START
         // Initialize the source
         this.impl$source = new RconConsoleSource(SpongeCommon.getServer());
-        ((RConConsoleSourceBridge) this.impl$source).bridge$setConnection((RconClient) (Object) this);
+        ((RconConsoleSourceBridge) this.impl$source).bridge$setClient((RconClient) (Object) this);
 
         // Call the connection event
         final RconConnectionEvent.Connect connectEvent;

@@ -31,10 +31,10 @@ import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.math.vector.Vector3d;
@@ -81,13 +81,13 @@ public final class EntityUtil {
     public static void performPostChangePlayerWorldLogic(final ServerPlayer player, final ServerLevel fromWorld,
             final ServerLevel originalToWorld, final ServerLevel toWorld, final boolean isPortal) {
         // Sponge Start - Send any platform dimension data
-        ((ServerPlayerEntityBridge) player).bridge$sendDimensionData(player.connection.connection, toWorld.dimensionType(), toWorld.dimension());
+        ((ServerPlayerBridge) player).bridge$sendDimensionData(player.connection.connection, toWorld.dimensionType(), toWorld.dimension());
         // Sponge End
         LevelData worldinfo = toWorld.getLevelData();
         // We send dimension change for portals before loading chunks
         if (!isPortal) {
             // Sponge Start - Allow the platform to handle how dimension changes are sent down
-            ((ServerPlayerEntityBridge) player).bridge$sendChangeDimension(toWorld.dimensionType(), toWorld.dimension(), BiomeManager.obfuscateSeed(toWorld.getSeed()),
+            ((ServerPlayerBridge) player).bridge$sendChangeDimension(toWorld.dimensionType(), toWorld.dimension(), BiomeManager.obfuscateSeed(toWorld.getSeed()),
                     player.gameMode.getGameModeForPlayer(), player.gameMode.getPreviousGameModeForPlayer(),
                     toWorld.isDebug(), toWorld.isFlat(), true);
         }
@@ -98,7 +98,7 @@ public final class EntityUtil {
 
         // Sponge Start - Have the platform handle removing the entity from the world. Move this to after the event call so
         //                that we do not remove the player from the world unless we really have teleported..
-        ((PlatformServerWorldBridge) fromWorld).bridge$removeEntity(player, Entity.RemovalReason.CHANGED_DIMENSION, true);
+        ((PlatformServerLevelBridge) fromWorld).bridge$removeEntity(player, Entity.RemovalReason.CHANGED_DIMENSION, true);
         ((PlatformEntityBridge) player).bridge$revive();
         // Sponge End
 
@@ -120,8 +120,8 @@ public final class EntityUtil {
             player.connection.send(new ClientboundLevelEventPacket(1032, BlockPos.ZERO, 0, false));
         }
 
-        ((ServerWorldBridge) fromWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
-        ((ServerWorldBridge) toWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
+        ((ServerLevelBridge) fromWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
+        ((ServerLevelBridge) toWorld).bridge$getBossBarManager().onPlayerDisconnect(player);
 
         ((ServerPlayerAccessor) player).accessor$lastSentExp(-1);
         ((ServerPlayerAccessor) player).accessor$lastSentHealth(-1.0f);

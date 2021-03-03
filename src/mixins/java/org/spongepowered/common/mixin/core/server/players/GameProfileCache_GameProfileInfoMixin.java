@@ -29,11 +29,11 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCache_ProfileEntryBridge;
+import org.spongepowered.common.bridge.server.players.GameProfileCache_GameProfileInfoBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 @Mixin(targets = "net.minecraft.server.players.GameProfileCache$GameProfileInfo")
-public abstract class GameProfileCache_GameProfileInfoMixin implements PlayerProfileCache_ProfileEntryBridge {
+public abstract class GameProfileCache_GameProfileInfoMixin implements GameProfileCache_GameProfileInfoBridge {
 
     @Shadow @Final private com.mojang.authlib.GameProfile profile;
 

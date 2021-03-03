@@ -25,7 +25,6 @@
 package org.spongepowered.common.advancement;
 
 import com.google.gson.Gson;
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
@@ -44,10 +43,10 @@ public final class SpongeFilteredTrigger implements CriterionTriggerInstance, Fi
 
     private final static Gson GSON = new Gson();
 
-    private final SpongeTrigger triggerType;
+    private final SpongeCriterionTrigger triggerType;
     private final FilteredTriggerConfiguration configuration;
 
-    SpongeFilteredTrigger(final SpongeTrigger triggerType, final FilteredTriggerConfiguration configuration) {
+    SpongeFilteredTrigger(final SpongeCriterionTrigger triggerType, final FilteredTriggerConfiguration configuration) {
         this.triggerType = triggerType;
         this.configuration = configuration;
     }

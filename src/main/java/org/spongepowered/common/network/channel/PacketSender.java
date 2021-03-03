@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
-import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
+import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
@@ -47,7 +47,7 @@ public final class PacketSender {
 
     public static void sendTo(final EngineConnection connection, final Packet<?> packet,
             final @Nullable Consumer<Future<? super Void>> listener) {
-        final Connection networkManager = ((NetworkManagerHolderBridge) connection).bridge$getConnection();
+        final Connection networkManager = ((ConnectionHolderBridge) connection).bridge$getConnection();
         GenericFutureListener<? extends Future<? super Void>> asyncListener = null;
         if (listener != null) {
             final EngineConnectionSide<?> side = connection.getSide();

@@ -39,8 +39,8 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
-import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
@@ -488,7 +488,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().getBlockOperation(original, blockChange);
     }
 
-    default void foldContextForThread(TrackedTickDelayedTaskBridge returnValue) {
+    default void foldContextForThread(TickTaskBridge returnValue) {
         this.getState().foldContextForThread(this.asContext(), returnValue);
     }
 

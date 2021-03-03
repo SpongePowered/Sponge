@@ -48,8 +48,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.chunk.CacheKeyBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.CacheKeyBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 
 import javax.annotation.Nullable;
@@ -63,7 +63,7 @@ import java.util.UUID;
 import java.util.function.Consumer;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
-public abstract class LevelChunkMixin implements ChunkBridge, CacheKeyBridge {
+public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridge {
 
     // @formatter:off
     @Shadow @Final private Level level;

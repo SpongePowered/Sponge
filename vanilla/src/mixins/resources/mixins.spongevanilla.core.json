@@ -29,7 +29,7 @@
         "server.level.ServerPlayerMixin_Vanilla",
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
-        "server.network.ServerLoginPacketListenerImpl_1_Mixin_Vanilla",
+        "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
         "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla"
     ],
     "injectors": {

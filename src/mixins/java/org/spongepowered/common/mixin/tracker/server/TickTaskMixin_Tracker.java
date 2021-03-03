@@ -28,7 +28,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
+import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.Optional;
@@ -36,7 +36,7 @@ import java.util.function.BiConsumer;
 import net.minecraft.server.TickTask;
 
 @Mixin(TickTask.class)
-public abstract class TickTaskMixin_Tracker implements TrackedTickDelayedTaskBridge {
+public abstract class TickTaskMixin_Tracker implements TickTaskBridge {
 
     private @MonotonicNonNull BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame> impl$stackFramePopulator;
 

@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.tileentity.TileEntityTypeBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityTypeBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.config.tracker.BlockEntityTrackerCategory;
@@ -41,7 +41,7 @@ import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(BlockEntityType.class)
-public abstract class BlockEntityTypeMixin implements ResourceKeyBridge, TileEntityTypeBridge {
+public abstract class BlockEntityTypeMixin implements ResourceKeyBridge, BlockEntityTypeBridge {
 
     private ResourceKey impl$key;
     private boolean impl$canTick;

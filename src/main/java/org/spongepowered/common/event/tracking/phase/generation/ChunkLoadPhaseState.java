@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.common.bridge.world.TrackedNextTickEntryBridge;
+import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.function.BiConsumer;
@@ -54,6 +54,6 @@ public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<Chunk
 
     @Override
     public void associateScheduledTickUpdate(final ChunkLoadContext asContext, final TickNextTickData<?> entry) {
-        ((TrackedNextTickEntryBridge) entry).bridge$setIsPartOfWorldGeneration(true);
+        ((TickNextTickDataBridge) entry).bridge$setIsPartOfWorldGeneration(true);
     }
 }

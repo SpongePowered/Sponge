@@ -79,16 +79,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.TimingBridge;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.EntityTypeBridge;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.util.DamageSourceBridge;
-import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
+import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
@@ -280,7 +280,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             ((Entity) (Object) this).unRide();
 
             final net.minecraft.server.level.ServerLevel originalWorld = (net.minecraft.server.level.ServerLevel) this.shadow$getCommandSenderWorld();
-            ((PlatformServerWorldBridge) this.shadow$getCommandSenderWorld()).bridge$removeEntity((Entity) (Object) this, Entity.RemovalReason.CHANGED_DIMENSION, true);
+            ((PlatformServerLevelBridge) this.shadow$getCommandSenderWorld()).bridge$removeEntity((Entity) (Object) this, Entity.RemovalReason.CHANGED_DIMENSION, true);
             this.bridge$revive();
             // TODO - Zidane, you want to take a look at this.
 //            this.shadow$setLevel(destinationWorld);
@@ -508,7 +508,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             final net.minecraft.server.level.ServerLevel serverworld = (net.minecraft.server.level.ServerLevel) this.level;
             final ResourceKey<Level> registrykey = serverworld.dimension();
             if (isPlayer && registrykey == Level.END && targetWorld.dimension() == Level.OVERWORLD && platformTeleporter.isVanilla()) { // avoids modded dimensions
-                return ((ServerPlayerEntityBridge) this).bridge$performGameWinLogic();
+                return ((ServerPlayerBridge) this).bridge$performGameWinLogic();
             } else {
                 // Sponge Start: Redirect the find portal call to the teleporter.
 

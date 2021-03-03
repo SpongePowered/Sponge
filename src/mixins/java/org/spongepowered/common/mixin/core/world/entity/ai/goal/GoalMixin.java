@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.entity.ai.GoalBridge;
+import org.spongepowered.common.bridge.world.entity.ai.GoalBridge;
 import org.spongepowered.common.registry.provider.GoalTypeProvider;
 
 import java.util.Optional;

@@ -33,8 +33,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 
 @Mixin(HopperBlockEntity.class)
@@ -48,7 +48,7 @@ public abstract class HopperBlockEntityMixin extends RandomizableContainerBlockE
             ((CreatorTrackedBridge) entityItem).tracked$getCreatorReference().ifPresent(creator -> {
                 if (inventory instanceof ActiveChunkReferantBridge && inventory instanceof BlockEntity) {
                     final BlockEntity te = (BlockEntity) inventory;
-                    final ChunkBridge spongeChunk = ((ActiveChunkReferantBridge) inventory).bridge$getActiveChunk();
+                    final LevelChunkBridge spongeChunk = ((ActiveChunkReferantBridge) inventory).bridge$getActiveChunk();
                     spongeChunk.bridge$addTrackedBlockPosition(te.getBlockState().getBlock(), te.getBlockPos(), creator, PlayerTracker.Type.NOTIFIER);
                 }
             });

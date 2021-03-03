@@ -35,14 +35,13 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityHealthScaleBridge;
-import org.spongepowered.common.bridge.stats.StatisticsManagerBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerEntityHealthScaleBridge;
+import org.spongepowered.common.bridge.stats.StatsCounterBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Arrays;
 import java.util.stream.Collectors;
 
 public final class ServerPlayerData {
@@ -64,7 +63,7 @@ public final class ServerPlayerData {
                         .set((h, v) -> h.setCamera((net.minecraft.world.entity.Entity) v))
                         .delete(h -> h.setCamera(null))
                     .create(Keys.STATISTICS)
-                        .get(h -> ((StatisticsManagerBridge) h.getStats()).bridge$getStatsData().entrySet().stream()
+                        .get(h -> ((StatsCounterBridge) h.getStats()).bridge$getStatsData().entrySet().stream()
                                 .collect(Collectors.toMap(e -> (Statistic)e.getKey(), e -> e.getValue().longValue())))
                         .set((h, v) -> v.forEach((ik, iv) -> h.getStats().setValue(h, (Stat<?>) ik, iv.intValue())))
                     .create(Keys.CHAT_VISIBILITY)
@@ -82,9 +81,9 @@ public final class ServerPlayerData {
 
                    .create(Keys.CHAT_COLORS_ENABLED)
                         .get(ServerPlayerAccessor::accessor$canChatColor)
-                .asMutable(ServerPlayerEntityBridge.class)
+                .asMutable(ServerPlayerBridge.class)
                     .create(Keys.LOCALE)
-                        .get(ServerPlayerEntityBridge::bridge$getLanguage)
+                        .get(ServerPlayerBridge::bridge$getLanguage)
                     .create(Keys.HEALTH_SCALE)
                         .get(ServerPlayerEntityHealthScaleBridge::bridge$getHealthScale)
                         .setAnd((h, v) -> {
@@ -96,9 +95,9 @@ public final class ServerPlayerData {
                         })
                         .delete(b -> b.bridge$setHealthScale(null))
                     .create(Keys.VIEW_DISTANCE)
-                        .get(ServerPlayerEntityBridge::bridge$getViewDistance)
+                        .get(ServerPlayerBridge::bridge$getViewDistance)
                     .create(Keys.SKIN_PARTS)
-                        .get(ServerPlayerEntityBridge::bridge$getSkinParts);
+                        .get(ServerPlayerBridge::bridge$getSkinParts);
 
         registrator.spongeDataStore(Keys.HEALTH_SCALE.getKey(), ServerPlayerEntityHealthScaleBridge.class, Keys.HEALTH_SCALE);
         SpongeDataManager.INSTANCE.registerLegacySpongeData(Constants.Sponge.Entity.Player.HEALTH_SCALE, Keys.HEALTH_SCALE.getKey(), Keys.HEALTH_SCALE);

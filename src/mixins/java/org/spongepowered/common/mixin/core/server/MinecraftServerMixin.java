@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.server;
 import co.aikar.timings.Timing;
 import com.google.inject.Injector;
 import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
@@ -62,12 +61,12 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.command.CommandSourceProviderBridge;
-import org.spongepowered.common.bridge.command.ICommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
-import org.spongepowered.common.bridge.server.management.PlayerProfileCacheBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
@@ -81,7 +80,6 @@ import java.io.IOException;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Map;
-import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.atomic.AtomicReference;
 import java.util.function.BooleanSupplier;
@@ -91,7 +89,7 @@ import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge,
-        CommandSourceProviderBridge, SubjectProxy, ICommandSourceBridge {
+        CommandSourceProviderBridge, SubjectProxy, CommandSourceBridge {
 
     // @formatter:off
     @Shadow @Final private Map<ResourceKey<Level>, ServerLevel> levels;
@@ -175,9 +173,9 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             final boolean flush,
             final boolean forced,
             final CallbackInfoReturnable<Boolean> cir) {
-        ((PlayerProfileCacheBridge) this.profileCache).bridge$setCanSave(true);
+        ((GameProfileCacheBridge) this.profileCache).bridge$setCanSave(true);
         this.profileCache.save();
-        ((PlayerProfileCacheBridge) this.profileCache).bridge$setCanSave(false);
+        ((GameProfileCacheBridge) this.profileCache).bridge$setCanSave(false);
     }
 
     /**
@@ -201,7 +199,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
                 continue;
             }
 
-            final LevelStorageSource.LevelStorageAccess levelSave = ((ServerWorldBridge) entry.getValue()).bridge$getLevelSave();
+            final LevelStorageSource.LevelStorageAccess levelSave = ((ServerLevelBridge) entry.getValue()).bridge$getLevelSave();
             try {
                 levelSave.close();
             } catch (IOException e) {
@@ -239,12 +237,12 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Overwrite
     public boolean saveAllChunks(final boolean suppressLog, final boolean flush, final boolean isForced) {
         for (final ServerLevel world : this.shadow$getAllLevels()) {
-            final SerializationBehavior serializationBehavior = ((ServerWorldInfoBridge) world.getLevelData()).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+            final SerializationBehavior serializationBehavior = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
             boolean log = !suppressLog;
 
             // Not forced happens during ticks and when shutting down
             if (!isForced) {
-                final InheritableConfigHandle<WorldConfig> adapter = ((ServerWorldInfoBridge) world.getLevelData()).bridge$configAdapter();
+                final InheritableConfigHandle<WorldConfig> adapter = ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter();
                 final int autoSaveInterval = adapter.get().world.autoSaveInterval;
                 if (log) {
                     if (this.bridge$performAutosaveChecks()) {
@@ -256,7 +254,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
                 // If the server isn't running or we hit Vanilla's save interval, save our configs
                 if (!this.shadow$isRunning() || this.tickCount % 6000 == 0) {
-                    ((ServerWorldInfoBridge) world.getLevelData()).bridge$configAdapter().save();
+                    ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().save();
                 }
 
                 final boolean canSaveAtAll = serializationBehavior != SerializationBehavior.NONE;
@@ -295,7 +293,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
                     MinecraftServerMixin.LOGGER.info("Manually saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
                 }
 
-                ((ServerWorldInfoBridge) world.getLevelData()).bridge$configAdapter().save();
+                ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().save();
 
                 world.save(null, false, world.noSave);
             }
@@ -323,8 +321,8 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
         if (forceDifficulty) {
             // Don't allow vanilla forcing the difficulty at launch set ours if we have a custom one
-            if (!((ServerWorldInfoBridge) world.getLevelData()).bridge$customDifficulty()) {
-                ((ServerWorldInfoBridge) world.getLevelData()).bridge$forceSetDifficulty(newDifficulty);
+            if (!((PrimaryLevelDataBridge) world.getLevelData()).bridge$customDifficulty()) {
+                ((PrimaryLevelDataBridge) world.getLevelData()).bridge$forceSetDifficulty(newDifficulty);
             }
         } else {
             ((PrimaryLevelData) world.getLevelData()).setDifficulty(newDifficulty);

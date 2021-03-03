@@ -44,9 +44,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
-import org.spongepowered.common.bridge.command.CommandsBridge;
-import org.spongepowered.common.bridge.command.arguments.CompletionsArgumentTypeBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
+import org.spongepowered.common.bridge.commands.CommandsBridge;
+import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.DelegatingCommandDispatcher;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeNodePermissionCache;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
@@ -296,7 +296,7 @@ public abstract class CommandsMixin implements CommandsBridge {
             final ServerPlayer playerEntity) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, (Subject) playerEntity);
-            final CommandCause sourceToUse = ((CommandSourceBridge) p_197052_3_).bridge$withCurrentCause();
+            final CommandCause sourceToUse = ((CommandSourceStackBridge) p_197052_3_).bridge$withCurrentCause();
             try {
                 this.impl$playerNodeCache.put(playerEntity, new IdentityHashMap<>());
                 // We use this because the redirects should be a 1:1 mapping (which is what this map is for).

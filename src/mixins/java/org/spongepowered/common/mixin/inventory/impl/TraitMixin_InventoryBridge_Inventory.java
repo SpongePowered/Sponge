@@ -25,8 +25,8 @@
 package org.spongepowered.common.mixin.inventory.impl;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.InventoryBridge;
-import org.spongepowered.common.bridge.inventory.LensGeneratorBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.LensGeneratorBridge;
 import org.spongepowered.common.entity.player.SpongeUserInventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.CustomInventory;

@@ -28,7 +28,7 @@ import com.mojang.serialization.Lifecycle;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.util.registry.MutableRegistryBridge;
+import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -41,7 +41,7 @@ public abstract class WritableRegistryMixin_API<T> extends RegistryMixin_API<T> 
 
     @Override
     public boolean isDynamic() {
-        return ((MutableRegistryBridge<T>) this).bridge$isDynamic();
+        return ((WritableRegistryBridge<T>) this).bridge$isDynamic();
     }
 
     @Override
@@ -49,7 +49,7 @@ public abstract class WritableRegistryMixin_API<T> extends RegistryMixin_API<T> 
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(value, "value");
 
-        return Optional.ofNullable(((MutableRegistryBridge<V>) this).bridge$register(net.minecraft.resources.ResourceKey.create((net.minecraft.resources.ResourceKey<? extends Registry<V>>) this
+        return Optional.ofNullable(((WritableRegistryBridge<V>) this).bridge$register(net.minecraft.resources.ResourceKey.create((net.minecraft.resources.ResourceKey<? extends Registry<V>>) this
                         .shadow$key(), (ResourceLocation) (Object) key), value, Lifecycle.stable()));
     }
 }

@@ -33,8 +33,8 @@ import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.entity.ai.GoalBridge;
-import org.spongepowered.common.bridge.entity.ai.GoalSelectorBridge;
+import org.spongepowered.common.bridge.world.entity.ai.GoalBridge;
+import org.spongepowered.common.bridge.world.entity.ai.goal.GoalSelectorBridge;
 
 import java.util.List;
 import java.util.Set;

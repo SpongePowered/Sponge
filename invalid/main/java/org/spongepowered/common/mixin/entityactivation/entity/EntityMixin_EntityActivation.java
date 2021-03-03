@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.storage.WorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.storage.WorldInfoBridge;
 import org.spongepowered.common.mixin.invalid.plugin.entityactivation.EntityActivationRange;
 
 @Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)

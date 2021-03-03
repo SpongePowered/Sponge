@@ -37,8 +37,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.accessor.world.entity.projectile.ProjectileAccessor;
-import org.spongepowered.common.bridge.entity.GrieferBridge;
-import org.spongepowered.common.bridge.entity.projectile.WitherSkullEntityBridge;
+import org.spongepowered.common.bridge.world.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.entity.projectile.WitherSkullBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -47,12 +47,12 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundTag;
+
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion.BlockInteraction;
 
 @Mixin(net.minecraft.world.entity.projectile.WitherSkull.class)
-public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin implements WitherSkullEntityBridge, ExplosiveBridge {
+public abstract class WitherSkullMixin extends AbstractHurtingProjectileMixin implements WitherSkullBridge, ExplosiveBridge {
 
     private int impl$explosionRadius = Constants.Entity.WitherSkull.DEFAULT_EXPLOSION_RADIUS;
 

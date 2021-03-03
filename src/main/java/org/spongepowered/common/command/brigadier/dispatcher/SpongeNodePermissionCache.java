@@ -29,7 +29,7 @@ import com.mojang.brigadier.tree.RootCommandNode;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.command.CommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.command.brigadier.tree.SpongePermissionWrappedLiteralCommandNode;
 import org.spongepowered.common.service.server.permission.SpongePermissions;
 
@@ -57,16 +57,16 @@ public final class SpongeNodePermissionCache {
             supplier = new CachingStringSupplier(() -> SpongeNodePermissionCache.createFromNode(dispatcher, node));
         }
         try {
-            ((CommandSourceBridge) source).bridge$setPotentialPermissionNode(supplier);
+            ((CommandSourceStackBridge) source).bridge$setPotentialPermissionNode(supplier);
             final boolean result = node.canUse(source);
             if (isRoot && node instanceof SpongePermissionWrappedLiteralCommandNode
-                    && ((CommandSourceBridge) source).bridge$getICommandSource() instanceof ServerPlayer) {
+                    && ((CommandSourceStackBridge) source).bridge$getCommandSource() instanceof ServerPlayer) {
                 // If the entity is a player, then we should try to add it anyway.
                 SpongePermissions.registerPermission(supplier.get(), 0);
             }
             return result;
         } finally {
-            ((CommandSourceBridge) source).bridge$setPotentialPermissionNode(null);
+            ((CommandSourceStackBridge) source).bridge$setPotentialPermissionNode(null);
         }
     }
 

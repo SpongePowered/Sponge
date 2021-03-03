@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.nio.file.Path;
@@ -64,7 +64,7 @@ public abstract class LevelStorageSource_LevelStorageAccessMixin {
             final WorldData levelData) {
         final CompoundTag spongeLevelData = new CompoundTag();
         root.put(Constants.Sponge.Data.V2.SPONGE_DATA, spongeLevelData);
-        spongeLevelData.putUUID(Constants.Sponge.World.UNIQUE_ID, ((ServerWorldInfoBridge) levelData).bridge$uniqueId());
+        spongeLevelData.putUUID(Constants.Sponge.World.UNIQUE_ID, ((PrimaryLevelDataBridge) levelData).bridge$uniqueId());
 
         return root.put(path, data);
     }

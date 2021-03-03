@@ -32,8 +32,8 @@ import org.spongepowered.api.data.type.HandPreference;
 import org.spongepowered.common.accessor.world.entity.player.AbilitiesAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.accessor.world.food.FoodDataAccessor;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.ExperienceHolderUtil;
 
@@ -83,11 +83,11 @@ public final class PlayerData {
                             h.totalExperience = ExperienceHolderUtil.xpAtLevel(v);
                             h.experienceProgress = 0;
                             h.experienceLevel = v;
-                            ((ServerPlayerEntityBridge) h).bridge$refreshExp();
+                            ((ServerPlayerBridge) h).bridge$refreshExp();
                             return true;
                         })
                     .create(Keys.EXPERIENCE_SINCE_LEVEL)
-                        .get(h -> ((PlayerEntityBridge) h).bridge$getExperienceSinceLevel())
+                        .get(h -> ((PlayerBridge) h).bridge$getExperienceSinceLevel())
                         .setAnd((h, v) -> {
                             if (v < 0) {
                                 return false;
@@ -150,10 +150,10 @@ public final class PlayerData {
                             h.getAttribute(Attributes.MOVEMENT_SPEED).setBaseValue(v);
                             h.onUpdateAbilities();
                         })
-                .asMutable(PlayerEntityBridge.class)
+                .asMutable(PlayerBridge.class)
                     .create(Keys.AFFECTS_SPAWNING)
-                        .get(PlayerEntityBridge::bridge$affectsSpawning)
-                        .set(PlayerEntityBridge::bridge$setAffectsSpawning);
+                        .get(PlayerBridge::bridge$affectsSpawning)
+                        .set(PlayerBridge::bridge$setAffectsSpawning);
     }
     // @formatter:on
 }

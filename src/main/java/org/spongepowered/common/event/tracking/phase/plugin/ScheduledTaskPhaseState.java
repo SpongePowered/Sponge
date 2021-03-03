@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.plugin;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
+import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -46,7 +46,7 @@ public final class ScheduledTaskPhaseState extends BasicPluginState {
     @Override
     public void foldContextForThread(
             final BasicPluginContext context,
-            final TrackedTickDelayedTaskBridge returnValue
+            final TickTaskBridge returnValue
     ) {
         @Nullable final Object source = context.getSource();
         final PluginContainer plugin = Objects.requireNonNull(context.container, "Scheduled Task has a null plugin!");

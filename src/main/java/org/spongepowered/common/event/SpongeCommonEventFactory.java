@@ -115,16 +115,16 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.entity.EntityBridge;
-import org.spongepowered.common.bridge.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.entity.player.PlayerEntityBridge;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
-import org.spongepowered.common.bridge.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
@@ -141,7 +141,6 @@ import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
@@ -154,6 +153,8 @@ import java.util.Optional;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
+
+import javax.annotation.Nullable;
 
 public final class SpongeCommonEventFactory {
 
@@ -371,18 +372,18 @@ public final class SpongeCommonEventFactory {
             } else {
                 frame.addContext(EventContextKeys.PISTON_RETRACT, (org.spongepowered.api.world.server.ServerWorld) world);
             }
-            return SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) world, ImmutableList.copyOf(locations), locatable)
+            return SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) world, ImmutableList.copyOf(locations), locatable)
                 .isCancelled();
         }
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos) {
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerLevelBridge worldIn, final BlockPos pos) {
 
         return SpongeCommonEventFactory.callChangeBlockEventPre(worldIn, ImmutableList.of(
             ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldIn, pos.getX(), pos.getY(), pos.getZ())), null);
     }
 
-    public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final BlockPos pos, final Object source) {
+    public static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerLevelBridge worldIn, final BlockPos pos, final Object source) {
         return SpongeCommonEventFactory.callChangeBlockEventPre(worldIn, ImmutableList.of(
             ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) worldIn, pos.getX(), pos.getY(), pos.getZ())), source);
     }
@@ -396,7 +397,7 @@ public final class SpongeCommonEventFactory {
      * @return The event
      */
     @SuppressWarnings({"unchecked", "rawtypes"})
-    private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerWorldBridge worldIn, final ImmutableList<ServerLocation> locations, @Nullable Object source) {
+    private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerLevelBridge worldIn, final ImmutableList<ServerLocation> locations, @Nullable Object source) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             if (source == null) {
@@ -414,8 +415,8 @@ public final class SpongeCommonEventFactory {
             }
             if (phaseContext.getCreator().isPresent()) {
                 phaseContext.getCreator().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
-            } else if (player instanceof ServerPlayerEntityBridge) {
-                final @Nullable User user = ((ServerPlayerEntityBridge) player).bridge$getUser();
+            } else if (player instanceof ServerPlayerBridge) {
+                final @Nullable User user = ((ServerPlayerBridge) player).bridge$getUser();
                 if (user != null) {
                     frame.addContext(EventContextKeys.CREATOR, user);
                 }
@@ -515,7 +516,7 @@ public final class SpongeCommonEventFactory {
                 context.addCreatorAndNotifierToCauseStack(frame);
             } else {
 
-                final ChunkBridge mixinChunk = (ChunkBridge) ((ServerLevel) world).getChunkAt(sourcePos);
+                final LevelChunkBridge mixinChunk = (LevelChunkBridge) ((ServerLevel) world).getChunkAt(sourcePos);
                 mixinChunk.bridge$getBlockCreator(sourcePos).ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
                 mixinChunk.bridge$getBlockNotifier(sourcePos).ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
             }
@@ -631,8 +632,8 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
         } else {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerEntityBridge) player).bridge$getUser());
-            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerEntityBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerBridge) player).bridge$getUser());
         }
 
         if (!stack.isEmpty()) {
@@ -767,7 +768,7 @@ public final class SpongeCommonEventFactory {
                 if (!pos.equals(spongeEntity.bridge$getLastCollidedBlockPos())) {
                     final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
                     context.applyNotifierIfAvailable(notifier -> {
-                        final ChunkBridge spongeChunk = (ChunkBridge) world.getChunkAt(pos);
+                        final LevelChunkBridge spongeChunk = (LevelChunkBridge) world.getChunkAt(pos);
                         spongeChunk.bridge$addTrackedBlockPosition(block, pos, notifier, PlayerTracker.Type.NOTIFIER);
 
                     });
@@ -808,7 +809,7 @@ public final class SpongeCommonEventFactory {
                 // Track impact block if event is not cancelled
                 if (!cancelled && creator.isPresent()) {
                     final BlockPos targetPos = VecHelper.toBlockPos(impactPoint.getBlockPosition());
-                    final ChunkBridge spongeChunk = (ChunkBridge) projectile.level.getChunkAt(targetPos);
+                    final LevelChunkBridge spongeChunk = (LevelChunkBridge) projectile.level.getChunkAt(targetPos);
                     spongeChunk.bridge$addTrackedBlockPosition((Block) targetBlock.getState().getType(), targetPos, creator.get(), PlayerTracker.Type.NOTIFIER);
                 }
             } else if (movingObjectType == HitResult.Type.ENTITY) { // entity
@@ -925,9 +926,9 @@ public final class SpongeCommonEventFactory {
     @Nullable
     public static ItemStack throwDropItemAndConstructEvent(final net.minecraft.world.entity.Entity entity, final double posX, final double posY,
         final double posZ, final ItemStackSnapshot snapshot, final List<ItemStackSnapshot> original, final CauseStackManager.StackFrame frame) {
-        final PlayerEntityBridge mixinPlayer;
-        if (entity instanceof PlayerEntityBridge) {
-            mixinPlayer = (PlayerEntityBridge) entity;
+        final PlayerBridge mixinPlayer;
+        if (entity instanceof PlayerBridge) {
+            mixinPlayer = (PlayerBridge) entity;
         } else {
             mixinPlayer = null;
         }

@@ -31,12 +31,12 @@ import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.tileentity.StructureBlockTileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.StructureBlockEntityBridge;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(StructureBlockEntity.class)
-public abstract class StructureBlockEntityMixin extends BlockEntityMixin implements StructureBlockTileEntityBridge {
+public abstract class StructureBlockEntityMixin extends BlockEntityMixin implements StructureBlockEntityBridge {
 
     @Shadow private String author;
     @Shadow private BlockPos structurePos;

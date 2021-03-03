@@ -34,10 +34,9 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.bridge.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.util.AxisUtil;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.world.portal.NetherPortalType.Teleporter;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Objects;

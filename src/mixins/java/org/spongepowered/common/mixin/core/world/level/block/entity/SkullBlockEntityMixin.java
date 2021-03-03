@@ -39,13 +39,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.tileentity.SkullTileEntityBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.SkullBlockEntityBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(SkullBlockEntity.class)
-public abstract class SkullBlockEntityMixin extends BlockEntity implements SkullTileEntityBridge {
+public abstract class SkullBlockEntityMixin extends BlockEntity implements SkullBlockEntityBridge {
 
     @Shadow private GameProfile owner;
 

@@ -36,7 +36,7 @@ import net.minecraftforge.api.distmarker.OnlyIn;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
-import org.spongepowered.common.bridge.util.text.TextComponentBridge;
+import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
 import org.spongepowered.common.util.LocaleCache;
 
 import java.util.List;
@@ -44,7 +44,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 
-public class AdventureTextComponent implements net.minecraft.network.chat.Component, TextComponentBridge {
+public class AdventureTextComponent implements net.minecraft.network.chat.Component, BaseComponentBridge {
     private net.minecraft.network.chat.@MonotonicNonNull Component converted;
     private @Nullable Locale deepConvertedLocalized;
     private final net.kyori.adventure.text.Component wrapped;

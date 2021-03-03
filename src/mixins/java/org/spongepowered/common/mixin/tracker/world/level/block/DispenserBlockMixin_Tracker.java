@@ -40,8 +40,7 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -66,7 +65,7 @@ public class DispenserBlockMixin_Tracker {
     private void tracker$createContextOnDispensing(final ServerLevel worldIn, final BlockPos pos, final CallbackInfo ci) {
         final net.minecraft.world.level.block.state.BlockState state = worldIn.getBlockState(pos);
         final SpongeBlockSnapshot spongeBlockSnapshot = ((TrackedWorldBridge) worldIn).bridge$createSnapshot(state, pos, BlockChangeFlags.ALL);
-        final ChunkBridge mixinChunk = (ChunkBridge) worldIn.getChunkAt(pos);
+        final LevelChunkBridge mixinChunk = (LevelChunkBridge) worldIn.getChunkAt(pos);
         this.tracker$context = BlockPhase.State.DISPENSE.createPhaseContext(PhaseTracker.SERVER)
                 .source(spongeBlockSnapshot)
                 .creator(() -> mixinChunk.bridge$getBlockCreator(pos))

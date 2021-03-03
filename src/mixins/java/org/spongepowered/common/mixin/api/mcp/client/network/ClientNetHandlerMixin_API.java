@@ -31,8 +31,8 @@ import net.minecraft.network.chat.TranslatableComponent;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge;
-import org.spongepowered.common.bridge.network.NetworkManagerHolderBridge;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 
 import java.net.InetSocketAddress;
 
@@ -41,22 +41,22 @@ public abstract class ClientNetHandlerMixin_API implements ClientSideConnection 
 
     @Override
     public void close() {
-        ((NetworkManagerHolderBridge) this).bridge$getConnection().disconnect(
+        ((ConnectionHolderBridge) this).bridge$getConnection().disconnect(
                 new TranslatableComponent("disconnect.disconnected"));
     }
 
     @Override
     public void close(final Component reason) {
-        ((NetworkManagerHolderBridge) this).bridge$getConnection().disconnect(SpongeAdventure.asVanilla(reason));
+        ((ConnectionHolderBridge) this).bridge$getConnection().disconnect(SpongeAdventure.asVanilla(reason));
     }
 
     @Override
     public InetSocketAddress getAddress() {
-        return ((NetworkManagerBridge) ((NetworkManagerHolderBridge) this).bridge$getConnection()).bridge$getAddress();
+        return ((ConnectionBridge) ((ConnectionHolderBridge) this).bridge$getConnection()).bridge$getAddress();
     }
 
     @Override
     public InetSocketAddress getVirtualHost() {
-        return ((NetworkManagerBridge) ((NetworkManagerHolderBridge) this).bridge$getConnection()).bridge$getVirtualHost();
+        return ((ConnectionBridge) ((ConnectionHolderBridge) this).bridge$getConnection()).bridge$getVirtualHost();
     }
 }

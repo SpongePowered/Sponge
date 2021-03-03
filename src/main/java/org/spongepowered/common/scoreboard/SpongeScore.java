@@ -30,8 +30,8 @@ import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.common.accessor.world.scores.ObjectiveAccessor;
 import org.spongepowered.common.accessor.world.scores.ScoreAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.scoreboard.ScoreBridge;
-import org.spongepowered.common.bridge.scoreboard.ScoreObjectiveBridge;
+import org.spongepowered.common.bridge.world.scores.ScoreBridge;
+import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.util.Constants;
 
 import java.util.HashMap;
@@ -99,7 +99,7 @@ public final class SpongeScore implements Score {
     public Set<Objective> getObjectives() {
         final Set<Objective> objectives = new HashSet<>();
         for (final net.minecraft.world.scores.Objective objective: this.scores.keySet()) {
-            objectives.add(((ScoreObjectiveBridge) objective).bridge$getSpongeObjective());
+            objectives.add(((ObjectiveBridge) objective).bridge$getSpongeObjective());
         }
         return objectives;
     }

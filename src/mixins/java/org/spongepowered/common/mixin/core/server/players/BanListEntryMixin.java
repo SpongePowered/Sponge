@@ -33,14 +33,14 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.server.management.BanUserListEntryBridge;
+import org.spongepowered.common.bridge.server.players.BanListEntryBridge;
 
 import java.util.Optional;
 
 import javax.annotation.Nullable;
 
 @Mixin(BanListEntry.class)
-public abstract class BanListEntryMixin<T> extends StoredUserEntryMixin<T> implements BanUserListEntryBridge {
+public abstract class BanListEntryMixin<T> extends StoredUserEntryMixin<T> implements BanListEntryBridge {
 
     // @formatter:off
     @Shadow @Final @Nullable protected String reason;

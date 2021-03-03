@@ -173,16 +173,16 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
         Objects.requireNonNull(this.name, "name");
         checkState(!this.name.isEmpty(), "The name cannot be empty!");
         checkState(this.configType != null, "The configType must be set");
-        return (Trigger<C>) new SpongeTrigger(this.configType, (Function) this.constructor, (ResourceLocation) (Object) this.key, (Consumer) this.eventHandler, this.name);
+        return (Trigger<C>) new SpongeCriterionTrigger(this.configType, (Function) this.constructor, (ResourceLocation) (Object) this.key, (Consumer) this.eventHandler, this.name);
     }
 
     @Override
     public Trigger.Builder<C> from(final Trigger<C> value) {
         this.configType = value.getConfigurationType();
-        if (value instanceof SpongeTrigger) {
-            this.constructor = (Function<JsonObject, C>) ((SpongeTrigger) value).constructor;
-            this.eventHandler = (Consumer) ((SpongeTrigger) value).getEventHandler();
-            this.name = ((SpongeTrigger) value).getName();
+        if (value instanceof SpongeCriterionTrigger) {
+            this.constructor = (Function<JsonObject, C>) ((SpongeCriterionTrigger) value).constructor;
+            this.eventHandler = (Consumer) ((SpongeCriterionTrigger) value).getEventHandler();
+            this.name = ((SpongeCriterionTrigger) value).getName();
         }
         return this;
     }

@@ -26,9 +26,9 @@ package org.spongepowered.common.mixin.core.commands;
 
 import net.minecraft.commands.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.command.ICommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceBridge;
 
 @Mixin(CommandSource.class)
-public interface CommandSourceMixin extends ICommandSourceBridge {
+public interface CommandSourceMixin extends CommandSourceBridge {
 
 }

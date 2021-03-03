@@ -1,4 +1,3 @@
-import java.nio.file.Files
 import java.security.MessageDigest
 import java.util.Locale
 
@@ -162,7 +161,7 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:$asmVersion")
 
     // Implementation-only Adventure
-    implementation(platform("net.kyori:adventure-bom:4.4.0"))
+    implementation(platform("net.kyori:adventure-bom:4.6.0"))
     implementation("net.kyori:adventure-serializer-configurate4")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
@@ -562,22 +561,36 @@ project("SpongeVanilla") {
         version(minecraftVersion)
         injectRepositories().set(false)
         runs {
-            server {
-                args("--nogui", "--launchTarget", "sponge_server_dev")
-                // ideaModule("${rootProject.name}.${project.name}.applaunch")
+            sequenceOf(8, 11, 15).forEach {
+                server("runJava${it}Server") {
+                    args("--nogui", "--launchTarget", "sponge_server_dev")
+                    // ideaModule("${rootProject.name}.${project.name}.applaunch")
+                }
+                client("runJava${it}Client") {
+                    args("--launchTarget", "sponge_client_dev")
+                    // ideaModule("${rootProject.name}.${project.name}.applaunch")
+                }
+                tasks.named("runJava${it}Server", JavaExec::class).configure {
+                    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(it)) })
+                }
+                tasks.named("runJava${it}Client", JavaExec::class).configure {
+                    javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(it)) })
+                }
             }
 
-            client {
-                args("--launchTarget", "sponge_client_dev")
-                // ideaModule("${rootProject.name}.${project.name}.applaunch")
-            }
 
             configureEach {
                 workingDirectory().set(vanillaProject.file("run/"))
+                if (System.getProperty("idea.active")?.toBoolean() == true) {
+                    // IntelliJ does not properly report its compatibility
+                    jvmArgs("-Dterminal.ansi=true", "-Djansi.mode=force")
+                }
                 jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
                 allJvmArgumentProviders() += CommandLineArgumentProvider {
-                    if (JavaVersion.current() >= JavaVersion.VERSION_1_9) {
+                    if (!this.name.contains("Java8")) {
                         listOf(
+                                "--illegal-access=deny", // enable strict mode in prep for Java 16
+                                "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
                                 "--add-opens=java.base/java.util.jar=ALL-UNNAMED", // ModLauncher
                                 "--add-opens=java.base/java.lang=ALL-UNNAMED" // Guice
                         )
@@ -606,10 +619,7 @@ project("SpongeVanilla") {
         val jlineVersion: String by project
         api(launch.map { it.output })
         implementation(accessors.map { it.output })
-        implementation(project(commonProject.path)) {
-            // exclude(group = "net.minecraft", module = minecraftDep)
-        }
-        // annotationProcessor("org.spongepowered:mixin:$mixinVersion:processor")
+        implementation(project(commonProject.path))
 
         vanillaMixinsImplementation(project(commonProject.path))
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
@@ -635,7 +645,7 @@ project("SpongeVanilla") {
         vanillaInstallerConfig("org.cadixdev:lorenz-io-proguard:0.5.6")
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
-        vanillaAppLaunchConfig(platform("net.kyori:adventure-bom:4.4.0"))
+        vanillaAppLaunchConfig(platform("net.kyori:adventure-bom:4.6.0"))
         vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate4")
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
         vanillaAppLaunchConfig("org.ow2.asm:asm-util:$asmVersion")
@@ -664,7 +674,11 @@ project("SpongeVanilla") {
         vanillaLibrariesConfig("net.minecrell:terminalconsoleappender:1.2.0")
         vanillaLibrariesConfig("org.jline:jline-terminal:$jlineVersion")
         vanillaLibrariesConfig("org.jline:jline-reader:$jlineVersion")
-        vanillaLibrariesConfig("org.jline:jline-terminal-jansi:$jlineVersion")
+        vanillaLibrariesConfig("org.jline:jline-terminal-jansi:$jlineVersion") {
+            exclude("org.fusesource.jansi") // Use our own JAnsi
+        }
+        // A newer version is required to make log4j happy
+        vanillaLibrariesConfig("org.fusesource.jansi:jansi:2.3.1")
 
         // Launch Dependencies - Needed to bootstrap the engine(s)
         // The ModLauncher compatibility launch layer

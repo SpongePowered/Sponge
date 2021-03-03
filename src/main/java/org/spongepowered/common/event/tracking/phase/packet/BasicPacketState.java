@@ -26,7 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.bridge.util.concurrent.TrackedTickDelayedTaskBridge;
+import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public class BasicPacketState extends PacketState<BasicPacketContext> {
@@ -39,7 +39,7 @@ public class BasicPacketState extends PacketState<BasicPacketContext> {
     }
 
     @Override
-    public void foldContextForThread(final BasicPacketContext context, final TrackedTickDelayedTaskBridge returnValue) {
+    public void foldContextForThread(final BasicPacketContext context, final TickTaskBridge returnValue) {
         @Nullable final ServerPlayer source = context.getPacketPlayer();
         returnValue.bridge$contextShift((c, f) -> {
             if (source != null) {

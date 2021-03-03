@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.WorldServerBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkProviderServerBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ChunkProviderServerBridge;
 import org.spongepowered.vanilla.bridge.world.chunkio.ChunkIOProviderBridge_Vanilla;
 
 import java.util.function.Consumer;

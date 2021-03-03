@@ -68,11 +68,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.PlatformServerWorldBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
+import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -93,7 +93,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 
 @Mixin(ServerLevel.class)
-public abstract class ServerLevelMixin extends LevelMixin implements ServerWorldBridge, PlatformServerWorldBridge, ResourceKeyBridge {
+public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge, PlatformServerLevelBridge, ResourceKeyBridge {
 
     // @formatter:off
     @Shadow @Final private ServerLevelData serverLevelData;
@@ -257,8 +257,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerWorld
         if (blockEntity != null) {
             TrackingUtil.addTileEntityToBuilder(blockEntity, builder);
         }
-        ((ChunkBridge) chunk).bridge$getBlockCreatorUUID(pos).ifPresent(builder::creator);
-        ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos).ifPresent(builder::notifier);
+        ((LevelChunkBridge) chunk).bridge$getBlockCreatorUUID(pos).ifPresent(builder::creator);
+        ((LevelChunkBridge) chunk).bridge$getBlockNotifierUUID(pos).ifPresent(builder::notifier);
 
         builder.flag(BlockChangeFlags.NONE);
         return builder.build();
@@ -294,7 +294,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerWorld
 
         if (!skipSave) {
 
-            final SerializationBehavior behavior = ((ServerWorldInfoBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
+            final SerializationBehavior behavior = ((PrimaryLevelDataBridge) levelData).bridge$serializationBehavior().orElse(SerializationBehavior.AUTOMATIC);
 
             if (progress != null) {
                 progress.progressStartNoAbort(new TranslatableComponent("menu.savingLevel"));
@@ -309,9 +309,9 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerWorld
 
                 levelData.setWorldBorder(this.getWorldBorder().createSettings());
 
-                levelData.setCustomBossEvents(((ServerWorldBridge) this).bridge$getBossBarManager().save());
+                levelData.setCustomBossEvents(((ServerLevelBridge) this).bridge$getBossBarManager().save());
 
-                ((ServerWorldBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.getServer().registryAccess()
+                ((ServerLevelBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.getServer().registryAccess()
                     , (PrimaryLevelData) this.shadow$getLevelData(), this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.getServer().getPlayerList()
                         .getSingleplayerData() : null);
 

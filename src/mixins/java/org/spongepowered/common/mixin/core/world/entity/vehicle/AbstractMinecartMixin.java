@@ -41,7 +41,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
-import org.spongepowered.common.bridge.entity.item.minecart.MinecartEntityBridge;
+import org.spongepowered.common.bridge.world.entity.vehicle.AbstractMinecartBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
@@ -50,7 +50,7 @@ import org.spongepowered.math.vector.Vector3d;
 import java.util.ArrayList;
 
 @Mixin(AbstractMinecart.class)
-public abstract class AbstractMinecartMixin extends EntityMixin implements MinecartEntityBridge {
+public abstract class AbstractMinecartMixin extends EntityMixin implements AbstractMinecartBridge {
 
     protected double impl$maxSpeed = Constants.Entity.Minecart.DEFAULT_MAX_SPEED;
     private boolean impl$slowWhenEmpty = true;

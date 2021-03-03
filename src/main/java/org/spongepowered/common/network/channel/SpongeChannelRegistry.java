@@ -48,7 +48,7 @@ import org.spongepowered.common.accessor.network.protocol.game.ServerboundCustom
 import org.spongepowered.common.accessor.network.protocol.login.ClientboundCustomQueryPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.login.ServerboundCustomQueryPacketAccessor;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.network.channel.packet.SpongeBasicPacketChannel;
@@ -209,7 +209,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
             return;
         }
 
-        ((NetworkManagerBridge) ((ServerLoginPacketListenerImpl) connection).connection).bridge$setClientType(clientType);
+        ((ConnectionBridge) ((ServerLoginPacketListenerImpl) connection).connection).bridge$setClientType(clientType);
     }
 
     /**

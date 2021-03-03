@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.NetworkManagerBridge;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.net.InetSocketAddress;
@@ -74,12 +74,12 @@ public abstract class ServerGamePacketListenerImplMixin_API implements ServerPla
 
     @Override
     public InetSocketAddress getAddress() {
-        return ((NetworkManagerBridge) this.connection).bridge$getAddress();
+        return ((ConnectionBridge) this.connection).bridge$getAddress();
     }
 
     @Override
     public InetSocketAddress getVirtualHost() {
-        return ((NetworkManagerBridge) this.connection).bridge$getVirtualHost();
+        return ((ConnectionBridge) this.connection).bridge$getVirtualHost();
     }
 
     @Override

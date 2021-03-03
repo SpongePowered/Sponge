@@ -32,7 +32,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -101,7 +101,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         final PlayerTracker.Type notifier) {
         final Player player = unwindingContext.getSpongePlayer();
         final LevelChunk chunk = minecraftWorld.getChunkAt(notifyPos);
-        ((ChunkBridge) chunk).bridge$setBlockNotifier(notifyPos, player.getUniqueId());
+        ((LevelChunkBridge) chunk).bridge$setBlockNotifier(notifyPos, player.getUniqueId());
     }
 
     @Override

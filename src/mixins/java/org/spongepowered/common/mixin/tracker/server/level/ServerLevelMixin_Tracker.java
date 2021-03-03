@@ -70,15 +70,15 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
-import org.spongepowered.common.bridge.block.BlockStateBridge;
-import org.spongepowered.common.bridge.block.TrackedBlockBridge;
-import org.spongepowered.common.bridge.block.TrackerBlockEventDataBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.TrackedNextTickEntryBridge;
+import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
+import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
-import org.spongepowered.common.bridge.world.chunk.TrackedChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -145,14 +145,14 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     private void tracker$wrapNormalEntityTick(final ServerLevel serverWorld, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
     ) {
-        ((ServerWorldBridge) this).bridge$getTimingsHandler().entityTick.startTiming();
+        ((ServerLevelBridge) this).bridge$getTimingsHandler().entityTick.startTiming();
         final PhaseContext<@NonNull ?> currentState = PhaseTracker.SERVER.getPhaseContext();
         if (currentState.alreadyCapturingEntityTicks()) {
             this.shadow$guardEntityTick(entityUpdateConsumer, entity);
             return;
         }
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);
-        ((ServerWorldBridge) this).bridge$getTimingsHandler().entityTick.stopTiming();
+        ((ServerLevelBridge) this).bridge$getTimingsHandler().entityTick.stopTiming();
     }
 
     @Override
@@ -187,7 +187,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             blockState.tick(worldIn, posIn, randomIn);
             return;
         }
-        if (((TrackedNextTickEntryBridge) entry).bridge$isPartOfWorldGeneration()) {
+        if (((TickNextTickDataBridge) entry).bridge$isPartOfWorldGeneration()) {
             try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(PhaseTracker.SERVER)
                 .source(this)
                 .scheduledUpdate(entry)
@@ -209,7 +209,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             fluidState.tick(worldIn, pos);
             return;
         }
-        if (((TrackedNextTickEntryBridge) entry).bridge$isPartOfWorldGeneration()) {
+        if (((TickNextTickDataBridge) entry).bridge$isPartOfWorldGeneration()) {
             try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(PhaseTracker.SERVER)
                 .source(this)
                 .scheduledUpdate(entry)
@@ -320,7 +320,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                     return false;
                 }
             } else {
-                if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerWorldBridge) this, pos).isCancelled()) {
+                if (SpongeCommonEventFactory.callChangeBlockEventPre((ServerLevelBridge) this, pos).isCancelled()) {
                     return false;
                 }
             }
@@ -442,7 +442,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         final SpongeBlockChangeFlag spongeFlag,
         final int limit
     ) {
-        final TrackedChunkBridge mixinChunk = (TrackedChunkBridge) chunk;
+        final TrackedLevelChunkBridge mixinChunk = (TrackedLevelChunkBridge) chunk;
 
         // Then build and use the BlockPipeline
         final ChunkPipeline chunkPipeline = mixinChunk.bridge$createChunkPipeline(pos, newState, currentState, spongeFlag, limit);
@@ -548,8 +548,8 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         if (chunk == null) {
             return builder.flag(updateFlag).build();
         }
-        final Optional<UUID> creator = ((ChunkBridge) chunk).bridge$getBlockCreatorUUID(pos);
-        final Optional<UUID> notifier = ((ChunkBridge) chunk).bridge$getBlockNotifierUUID(pos);
+        final Optional<UUID> creator = ((LevelChunkBridge) chunk).bridge$getBlockCreatorUUID(pos);
+        final Optional<UUID> notifier = ((LevelChunkBridge) chunk).bridge$getBlockNotifierUUID(pos);
         creator.ifPresent(builder::creator);
         notifier.ifPresent(builder::notifier);
         final boolean hasTileEntity = ((BlockStateBridge) state).bridge$hasTileEntity();

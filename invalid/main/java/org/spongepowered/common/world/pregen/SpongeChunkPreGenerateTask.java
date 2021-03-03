@@ -41,7 +41,7 @@ import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.chunk.ServerChunkProviderBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ServerChunkProviderBridge;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.GenericMath;
 import org.spongepowered.math.vector.Vector3d;

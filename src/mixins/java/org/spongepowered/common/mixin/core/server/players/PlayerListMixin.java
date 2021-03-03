@@ -72,11 +72,11 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.entity.player.ServerPlayerEntityBridge;
-import org.spongepowered.common.bridge.scoreboard.ServerScoreboardBridge;
-import org.spongepowered.common.bridge.server.management.PlayerListBridge;
-import org.spongepowered.common.bridge.world.ServerWorldBridge;
-import org.spongepowered.common.bridge.world.storage.ServerWorldInfoBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.server.players.PlayerListBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.PerWorldBorderListener;
@@ -124,7 +124,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         )
     )
     private CompoundTag impl$setPlayerDataForNewPlayers(final PlayerList playerList, final net.minecraft.server.level.ServerPlayer playerIn) {
-        final SpongeUser user = (SpongeUser) ((ServerPlayerEntityBridge) playerIn).bridge$getUserObject();
+        final SpongeUser user = (SpongeUser) ((ServerPlayerBridge) playerIn).bridge$getUserObject();
         if (user != null) {
             if (SpongeUser.dirtyUsers.contains(user)) {
                 user.save();
@@ -256,7 +256,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final net.minecraft.server.level.ServerPlayer playerIn
     ) {
         // Don't send here, will be done later. We cache the expected message.
-        ((ServerPlayerEntityBridge) playerIn).bridge$setConnectionMessageToSend(message);
+        ((ServerPlayerBridge) playerIn).bridge$setConnectionMessageToSend(message);
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "NEW", target = "net/minecraft/network/protocol/game/ClientboundLoginPacket"))
@@ -267,19 +267,19 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             final boolean p_i242082_15_, final boolean p_i242082_16_, final Connection p_72355_1_, final net.minecraft.server.level.ServerPlayer player) {
 
         return new ClientboundLoginPacket(p_i242082_1_, p_i242082_2_, p_i242082_3_, p_i242082_4_, p_i242082_6_, p_i242082_7_, p_i242082_8_, p_i242082_9_,
-                p_i242082_10_, p_i242082_11_, ((ServerWorldInfoBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse(this.viewDistance),
+                p_i242082_10_, p_i242082_11_, ((PrimaryLevelDataBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse(this.viewDistance),
                 p_i242082_13_, p_i242082_14_, p_i242082_15_, p_i242082_16_);
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
     private CustomBossEvents impl$getPerWorldBossBarManager(
             final MinecraftServer minecraftServer, final Connection netManager, final net.minecraft.server.level.ServerPlayer playerIn) {
-        return ((ServerWorldBridge) playerIn.getLevel()).bridge$getBossBarManager();
+        return ((ServerLevelBridge) playerIn.getLevel()).bridge$getBossBarManager();
     }
 
     @Redirect(method = "placeNewPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;updateEntireScoreboard(Lnet/minecraft/server/ServerScoreboard;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void impl$sendScoreboard(final PlayerList playerList, final ServerScoreboard scoreboardIn, final net.minecraft.server.level.ServerPlayer playerIn) {
-        ((ServerPlayerEntityBridge)playerIn).bridge$initScoreboard();
+        ((ServerPlayerBridge)playerIn).bridge$initScoreboard();
     }
 
     @Inject(method = "placeNewPlayer", at = @At(value = "RETURN"))
@@ -288,7 +288,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final ServerSideConnection connection = player.getConnection();
         final Cause cause = Cause.of(EventContext.empty(), connection, player);
         final Audience audience = Audiences.onlinePlayers();
-        final Component joinComponent = SpongeAdventure.asAdventure(((ServerPlayerEntityBridge) mcPlayer).bridge$getConnectionMessageToSend());
+        final Component joinComponent = SpongeAdventure.asAdventure(((ServerPlayerBridge) mcPlayer).bridge$getConnectionMessageToSend());
 
         final ServerSideConnectionEvent.Join event = SpongeEventFactory.createServerSideConnectionEventJoin(cause, audience,
                 Optional.of(audience), joinComponent, joinComponent, connection, player, false);
@@ -297,12 +297,12 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             event.getAudience().ifPresent(audience1 -> audience1.sendMessage(Identity.nil(), event.getMessage()));
         }
 
-        ((ServerPlayerEntityBridge) mcPlayer).bridge$setConnectionMessageToSend(null);
+        ((ServerPlayerBridge) mcPlayer).bridge$setConnectionMessageToSend(null);
     }
 
     @Redirect(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getCustomBossEvents()Lnet/minecraft/server/bossevents/CustomBossEvents;"))
     private CustomBossEvents impl$getPerWorldBossBarManager(final MinecraftServer minecraftServer, final net.minecraft.server.level.ServerPlayer playerIn) {
-        return ((ServerWorldBridge) playerIn.getLevel()).bridge$getBossBarManager();
+        return ((ServerLevelBridge) playerIn.getLevel()).bridge$getBossBarManager();
     }
 
     @Inject(method = "remove", at = @At("HEAD"))
@@ -375,7 +375,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         this.impl$newDestination = null;
 
         final ServerLevel targetWorld = (ServerLevel) event.getDestinationWorld();
-        ((ServerPlayerEntityBridge) recreatedPlayer).bridge$sendChangeDimension(
+        ((ServerPlayerBridge) recreatedPlayer).bridge$sendChangeDimension(
             targetWorld.dimensionType(),
             ((ClientboundRespawnPacketAccessor) packetIn).accessor$dimension(),
             ((ClientboundRespawnPacketAccessor) packetIn).accessor$seed(),
@@ -420,7 +420,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Inject(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;save(Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void impl$invalidateUserOnSave(final net.minecraft.server.level.ServerPlayer player, final CallbackInfo ci) {
         // Just to be safe ignore dirty users that exist on online player
-        final User user = ((ServerPlayerEntityBridge) player).bridge$getUser();
+        final User user = ((ServerPlayerBridge) player).bridge$getUser();
         SpongeUser.dirtyUsers.remove(user);
         ((SpongeUser) user).invalidate();
     }

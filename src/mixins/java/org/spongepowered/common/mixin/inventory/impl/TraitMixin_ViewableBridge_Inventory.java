@@ -26,8 +26,8 @@ package org.spongepowered.common.mixin.inventory.impl;
 
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.inventory.ViewableInventoryBridge;
-import org.spongepowered.common.bridge.inventory.container.ContainerBridge;
+import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
 
 import java.util.ArrayList;
@@ -47,12 +47,12 @@ import net.minecraft.world.level.block.entity.LecternBlockEntity;
  * {@link org.spongepowered.common.mixin.inventory.api.TraitMixin_Viewable_Inventory_API}
  */
 @Mixin(value = {
-        // INamedContainerProvider impls:
+        // MenuProvider impls:
         AbstractMinecartContainer.class,
         LecternBlockEntity.class,
         BaseContainerBlockEntity.class,
         ViewableCustomInventory.class,
-        // IMerchant impls:
+        // Merchant impls:
         AbstractVillager.class,
         ClientSideMerchant.class,
         // ChestBlock - DoubleSidedInventory

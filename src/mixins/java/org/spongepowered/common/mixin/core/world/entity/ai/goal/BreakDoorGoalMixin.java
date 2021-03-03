@@ -30,7 +30,7 @@ import net.minecraft.world.entity.ai.goal.DoorInteractGoal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.entity.GrieferBridge;
+import org.spongepowered.common.bridge.world.entity.GrieferBridge;
 
 @Mixin(BreakDoorGoal.class)
 public abstract class BreakDoorGoalMixin extends DoorInteractGoal {
