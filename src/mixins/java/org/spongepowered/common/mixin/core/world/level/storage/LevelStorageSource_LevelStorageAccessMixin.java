@@ -39,6 +39,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
+import org.spongepowered.common.util.MapUtil;
 
 @Mixin(LevelStorageSource.LevelStorageAccess.class)
 public abstract class LevelStorageSource_LevelStorageAccessMixin {
@@ -65,6 +66,11 @@ public abstract class LevelStorageSource_LevelStorageAccessMixin {
         final CompoundTag spongeLevelData = new CompoundTag();
         root.put(Constants.Sponge.Data.V2.SPONGE_DATA, spongeLevelData);
         spongeLevelData.putUUID(Constants.Sponge.World.UNIQUE_ID, ((PrimaryLevelDataBridge) levelData).bridge$uniqueId());
+
+        // Map Storage
+        final CompoundTag mapUUIDIndexTag = new CompoundTag();
+        MapUtil.saveMapUUIDIndex(mapUUIDIndexTag, ((PrimaryLevelDataBridge) levelData).bridge$getMapUUIDIndex());
+        spongeLevelData.put(Constants.Map.MAP_UUID_INDEX, mapUUIDIndexTag);
 
         return root.put(path, data);
     }

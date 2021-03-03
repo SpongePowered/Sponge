@@ -43,13 +43,14 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.map.color.SpongeMapColor;
 import org.spongepowered.common.map.color.SpongeMapColorType;
-import org.spongepowered.common.registry.builtin.sponge.MapShadeStreamGenerator;
 
 import java.io.IOException;
 import java.util.HashSet;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 public final class MapUtil {
 
@@ -108,19 +109,19 @@ public final class MapUtil {
         }
     }
 
-    public static Optional<MapColor> getMapColorFromPixelValue(byte value) {
-        int intColor = Byte.toUnsignedInt(value);
-        int shade = intColor % Constants.Map.MAP_SHADES;
-        int colorIndex = (intColor - shade)/Constants.Map.MAP_SHADES;
-        Optional<MapColorType> mapColorType = MapUtil.getMapColorTypeByColorIndex(colorIndex);
-        MapShade mapShade = MapUtil.getMapShadeById(shade);
+    public static Optional<MapColor> getMapColorFromPixelValue(final byte value) {
+        final int intColor = Byte.toUnsignedInt(value);
+        final int shade = intColor % Constants.Map.MAP_SHADES;
+        final int colorIndex = (intColor - shade)/Constants.Map.MAP_SHADES;
+        final Optional<MapColorType> mapColorType = MapUtil.getMapColorTypeByColorIndex(colorIndex);
+        final MapShade mapShade = MapUtil.getMapShadeById(shade);
         if (!mapColorType.isPresent()) {
             return Optional.empty();
         }
         return Optional.of(new SpongeMapColor(mapColorType.get(), mapShade));
     }
 
-    public static byte[] getMapCanvasFromContainer(DataView container) {
+    public static byte[] getMapCanvasFromContainer(final DataView container) {
         final DataQuery canvasQuery = Constants.Map.MAP_CANVAS;
         final List<Byte> data = container.getByteList(canvasQuery)
                 .orElseThrow(() -> new InvalidDataException(canvasQuery + " was not a byte list!"));
@@ -148,19 +149,25 @@ public final class MapUtil {
         return Math.floorMod(rotation, 16); // Different to java modulo, when rotation is negative.
     }
 
-    public static Optional<MapColorType> getMapColorTypeByColorIndex(int colorIndex) {
+    public static Optional<MapColorType> getMapColorTypeByColorIndex(final int colorIndex) {
         return Sponge.getGame().registries().registry(RegistryTypes.MAP_COLOR_TYPE).stream()
                 .filter(type -> colorIndex == ((SpongeMapColorType) type).getColorIndex())
                 .findAny();
     }
 
-    public static MapShade getMapShadeById(int id) {
+    public static MapShade getMapShadeById(final int id) {
         switch (id) {
             case 0: return MapShades.BASE.get();
             case 1: return MapShades.DARK.get();
             case 2: return MapShades.DARKER.get();
             case 3: return MapShades.DARKEST.get();
             default: throw new IllegalStateException("Map shade with id " + id + " does not exist! should be 0-3");
+        }
+    }
+
+    public static void saveMapUUIDIndex(final CompoundTag tag, final Map<Integer, UUID> index) {
+        for (final Map.Entry<Integer, UUID> entry : index.entrySet()) {
+            tag.putUUID(String.valueOf(entry.getKey()), entry.getValue());
         }
     }
 }

@@ -31,8 +31,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.map.MapInfo;
-import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
+import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.map.canvas.SpongeMapByteCanvas;
 import org.spongepowered.common.map.canvas.SpongeMapCanvas;
@@ -50,14 +49,14 @@ public final class MapInfoData {
 					.get(mapData -> new SpongeMapByteCanvas(mapData.colors))
 					.set((mapData, mapCanvas) -> {
 						((SpongeMapCanvas)mapCanvas).applyToMapData(mapData);
-						((MapDataBridge)mapData).bridge$updateWholeMap();
+						((MapItemSavedDataBridge)mapData).bridge$updateWholeMap();
 					})
 				.create(Keys.MAP_DECORATIONS)
 					.get(mapData -> {
 						mapData.setDirty(); // TODO: review, you can change the decorations so we assume they will be changed. Is there a better way?
-						return (((MapDataBridge) mapData).bridge$getDecorations());
+						return (((MapItemSavedDataBridge) mapData).bridge$getDecorations());
 					})
-					.set((mapData, mapDecorations) -> ((MapDataBridge) mapData).bridge$setDecorations(mapDecorations))
+					.set((mapData, mapDecorations) -> ((MapItemSavedDataBridge) mapData).bridge$setDecorations(mapDecorations))
 				.create(Keys.MAP_LOCATION)
 					.get(mapData -> Vector2i.from(mapData.x, mapData.z))
 					.set((mapData, vector2i) -> {
@@ -91,7 +90,7 @@ public final class MapInfoData {
 					})
 				.create(Keys.MAP_WORLD)
 					.get(mapData -> {
-						final int id = ((MapDataBridge)mapData).bridge$getMapId();
+						final int id = ((MapItemSavedDataBridge)mapData).bridge$getMapId();
 						if (mapData.dimension == null) {
 							LogManager.getLogger().error("Map with id: {}, uuid: {} has an null world. This will probably cause more errors later/on save", id, ((MapInfo)mapData).getUniqueId());
 							return null;

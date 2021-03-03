@@ -296,7 +296,7 @@ public class MapTest implements LoadableModule {
                                 .rotation(dir)
                                 .position(Vector2i.from(x, y))
                                 .build());
-                player.sendMessage(Component.text("rotation: " + dir.toString()));
+                player.sendMessage(Component.text("rotation: " + dir.key(RegistryTypes.MAP_DECORATION_ORIENTATION)));
                 player.sendMessage(Component.text("x: " + x));
                 player.sendMessage(Component.text("y: " + y));
                 x += 16;
@@ -481,6 +481,33 @@ public class MapTest implements LoadableModule {
                     .orElseThrow(() -> new CommandException(Component.text("You must look at a banner")));
 
             mapInfo.addBannerDecoration(hit.getSelectedObject().getServerLocation());
+
+            return CommandResult.success();
+        }, event);
+
+        this.createDefaultCommand("recentermap", ctx -> {
+            final Player player = this.requirePlayer(ctx);
+            final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
+            if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
+                throw new CommandException(Component.text("You must hold a map in your hand"));
+            }
+            MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
+            mapInfo.offer(Keys.MAP_LOCATION, player.getLocation().getBlockPosition().toVector2(true));
+            player.sendMessage(Component.text("New center " + mapInfo.require(Keys.MAP_LOCATION)));
+
+            return CommandResult.success();
+        }, event);
+
+        this.createDefaultCommand("setmapworld", ctx -> {
+            final Player player = this.requirePlayer(ctx);
+            final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
+            if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
+                throw new CommandException(Component.text("You must hold a map in your hand"));
+            }
+            MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
+            ServerWorld serverWorld = (ServerWorld) player.getLocation().getWorld();
+            mapInfo.offer(Keys.MAP_WORLD, serverWorld.getKey());
+            player.sendMessage(Component.text("New map world: " + mapInfo.require(Keys.MAP_WORLD)));
 
             return CommandResult.success();
         }, event);

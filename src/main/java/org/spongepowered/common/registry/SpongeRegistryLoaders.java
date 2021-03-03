@@ -926,22 +926,22 @@ public final class SpongeRegistryLoaders {
 
     public static RegistryLoader<MapDecorationOrientation> mapDecorationOrientation() {
         return RegistryLoader.of(l -> {
-            l.add(MapDecorationOrientations.NORTH, k -> new SpongeMapDecorationOrientation(0));
-            l.add(MapDecorationOrientations.NORTH_NORTHEAST, k -> new SpongeMapDecorationOrientation(1));
-            l.add(MapDecorationOrientations.NORTHEAST, k -> new SpongeMapDecorationOrientation(2));
-            l.add(MapDecorationOrientations.EAST_NORTHEAST, k -> new SpongeMapDecorationOrientation(3));
-            l.add(MapDecorationOrientations.EAST, k -> new SpongeMapDecorationOrientation(4));
-            l.add(MapDecorationOrientations.EAST_SOUTHEAST, k -> new SpongeMapDecorationOrientation(5));
-            l.add(MapDecorationOrientations.SOUTHEAST, k -> new SpongeMapDecorationOrientation(6));
-            l.add(MapDecorationOrientations.SOUTH_SOUTHEAST, k -> new SpongeMapDecorationOrientation(7));
-            l.add(MapDecorationOrientations.SOUTH, k -> new SpongeMapDecorationOrientation(8));
-            l.add(MapDecorationOrientations.SOUTH_SOUTHWEST, k -> new SpongeMapDecorationOrientation(9));
-            l.add(MapDecorationOrientations.SOUTHWEST, k -> new SpongeMapDecorationOrientation(10));
-            l.add(MapDecorationOrientations.WEST_SOUTHWEST, k -> new SpongeMapDecorationOrientation(11));
-            l.add(MapDecorationOrientations.WEST, k -> new SpongeMapDecorationOrientation(12));
-            l.add(MapDecorationOrientations.WEST_NORTHWEST, k -> new SpongeMapDecorationOrientation(13));
-            l.add(MapDecorationOrientations.NORTHWEST, k -> new SpongeMapDecorationOrientation(14));
-            l.add(MapDecorationOrientations.NORTH_NORTHWEST, k -> new SpongeMapDecorationOrientation(15));
+            l.add(MapDecorationOrientations.SOUTH, k -> new SpongeMapDecorationOrientation(0));
+            l.add(MapDecorationOrientations.SOUTH_SOUTHEAST, k -> new SpongeMapDecorationOrientation(1));
+            l.add(MapDecorationOrientations.SOUTHWEST, k -> new SpongeMapDecorationOrientation(2));
+            l.add(MapDecorationOrientations.WEST_SOUTHWEST, k -> new SpongeMapDecorationOrientation(3));
+            l.add(MapDecorationOrientations.WEST, k -> new SpongeMapDecorationOrientation(4));
+            l.add(MapDecorationOrientations.WEST_NORTHWEST, k -> new SpongeMapDecorationOrientation(5));
+            l.add(MapDecorationOrientations.NORTHWEST, k -> new SpongeMapDecorationOrientation(6));
+            l.add(MapDecorationOrientations.NORTH_NORTHWEST, k -> new SpongeMapDecorationOrientation(7));
+            l.add(MapDecorationOrientations.NORTH, k -> new SpongeMapDecorationOrientation(8));
+            l.add(MapDecorationOrientations.NORTH_NORTHEAST, k -> new SpongeMapDecorationOrientation(9));
+            l.add(MapDecorationOrientations.NORTHEAST, k -> new SpongeMapDecorationOrientation(10));
+            l.add(MapDecorationOrientations.EAST_NORTHEAST, k -> new SpongeMapDecorationOrientation(11));
+            l.add(MapDecorationOrientations.EAST, k -> new SpongeMapDecorationOrientation(12));
+            l.add(MapDecorationOrientations.EAST_SOUTHEAST, k -> new SpongeMapDecorationOrientation(13));
+            l.add(MapDecorationOrientations.SOUTHEAST, k -> new SpongeMapDecorationOrientation(14));
+            l.add(MapDecorationOrientations.SOUTH_SOUTHEAST, k -> new SpongeMapDecorationOrientation(15));
         });
     }
 

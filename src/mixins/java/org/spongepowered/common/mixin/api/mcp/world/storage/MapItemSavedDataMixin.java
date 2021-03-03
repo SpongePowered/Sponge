@@ -24,9 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.storage;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,19 +40,22 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
+import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
+import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MapUtil;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.io.File;
 import java.util.Map;
 import java.util.Set;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Mixin(MapItemSavedData.class)
-public abstract class MapDataMixin extends SavedData implements MapDataBridge {
+public abstract class MapItemSavedDataMixin extends SavedData implements MapItemSavedDataBridge {
     /*
      * Lots of possible String formats:
      *  - Player name
@@ -67,10 +73,10 @@ public abstract class MapDataMixin extends SavedData implements MapDataBridge {
 
     @Shadow public abstract void setDirty(int x, int y);
 
-    private int impl$mapId = 0;
-    private UUID impl$uuid = UUID.randomUUID();
+    private int impl$mapId; // Set in <init>
+    private UUID impl$uuid;
 
-    public MapDataMixin(final String name) {
+    public MapItemSavedDataMixin(final String name) {
         super(name);
     }
 
@@ -127,14 +133,25 @@ public abstract class MapDataMixin extends SavedData implements MapDataBridge {
         } catch (final NumberFormatException e) {
             SpongeCommon.getLogger().error("Map id could not be got from map name, (" + mapname + ")", e);
         }
+        final SpongeMapStorage mapStorage = (SpongeMapStorage) Sponge.getServer().getMapStorage();
+        mapStorage.addMapInfo((MapInfo) this);
+        this.impl$uuid = mapStorage.requestUUID(this.impl$mapId);
     }
 
-    // Save to disk if we don't want to auto explore the map
-    // No point saving additional data if its default.
-    /*@Inject(method = "write", at = @At("RETURN"))
-    public void impl$writeAdditionalNBT(final CompoundTag compound, final CallbackInfoReturnable<CompoundTag> cir) {
-        compound.putUUID(Constants.Map.SPONGE_UUID_KEY, this.impl$uuid);
-        ListTag nbtList = new ListTag();
+    @Override
+    public void bridge$readSpongeData(CompoundTag nbt) {
+        final ListTag decorationsList = ((ListTag) nbt.get(Constants.Map.DECORATIONS_KEY));
+        if (decorationsList != null) {
+            for (final net.minecraft.nbt.Tag tag : decorationsList) {
+                final CompoundTag decorationNbt = (CompoundTag) tag;
+                this.impl$addDecorationToDecorationsMapIfNotExists(MapUtil.mapDecorationFromNBT(decorationNbt));
+            }
+        }
+    }
+
+    @Override
+    public void bridge$writeSpongeData(CompoundTag spongeData) {
+        final ListTag nbtList = new ListTag();
         for (final Map.Entry<String, MapDecoration> entry : this.decorations.entrySet()) {
             final org.spongepowered.api.map.decoration.MapDecoration mapDecoration = (org.spongepowered.api.map.decoration.MapDecoration)entry.getValue();
             if (!((MapDecorationBridge) mapDecoration).bridge$isPersistent()) {
@@ -144,22 +161,10 @@ public abstract class MapDataMixin extends SavedData implements MapDataBridge {
             nbt.putString("id", entry.getKey());
             nbtList.add(nbt);
         }
-        compound.put(Constants.Map.DECORATIONS_KEY, nbtList);
+        if (!nbtList.isEmpty()) {
+            spongeData.put(Constants.Map.DECORATIONS_KEY, nbtList);
+        }
     }
-
-    @Inject(method = "read", at = @At("RETURN"))
-    public void impl$readAdditionalNBT(final CompoundTag nbt, final CallbackInfo ci) {
-        if (nbt.hasUUID(Constants.Map.SPONGE_UUID_KEY)) {
-            this.impl$uuid = nbt.getUUID(Constants.Map.SPONGE_UUID_KEY);
-        }
-        final ListTag decorationsList = ((ListTag)nbt.get(Constants.Map.DECORATIONS_KEY));
-        if (decorationsList != null) {
-            for (int i = 0; i < decorationsList.size(); i++) {
-                final CompoundTag decorationNbt = (CompoundTag) decorationsList.get(i);
-                this.impl$addDecorationToDecorationsMapIfNotExists(MapUtil.mapDecorationFromNBT(decorationNbt));
-            }
-        }
-    }*/
 
     public void impl$addDecorationToDecorationsMapIfNotExists(final MapDecoration mapDecoration) {
         MapDecorationBridge bridge = (MapDecorationBridge)mapDecoration;

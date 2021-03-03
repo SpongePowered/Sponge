@@ -361,7 +361,7 @@
     "mcp.world.scores.Team_VisibilityMixin_API",
     "mcp.world.scores.criteria.ObjectiveCriteria_RenderTypeMixin_API",
     "mcp.world.scores.criteria.ObjectiveCriteriaMixin_API",
-    "mcp.world.storage.MapDataMixin",
+    "mcp.world.storage.MapItemSavedDataMixin",
     "mcp.world.storage.MapDecorationMixin",
     "mojang.authlib.properties.PropertyMixin_API",
     "service.permission.SubjectMixin_API",

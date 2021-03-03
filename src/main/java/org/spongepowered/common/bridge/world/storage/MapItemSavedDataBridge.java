@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.bridge.world.storage;
 
+import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.map.decoration.MapDecoration;
 
 import java.util.Set;
 import java.util.UUID;
 
-// Partially implemented in Common, rest implemented in Vanilla/Forge
-public interface MapDataBridge {
+public interface MapItemSavedDataBridge {
 
     int bridge$getDimensionId();
 
@@ -47,4 +47,8 @@ public interface MapDataBridge {
     Set<MapDecoration> bridge$getDecorations();
 
     UUID bridge$getUniqueId();
+
+    void bridge$readSpongeData(CompoundTag tag);
+
+    void bridge$writeSpongeData(CompoundTag tag);
 }

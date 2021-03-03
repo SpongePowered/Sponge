@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.map;
 
+import com.google.common.collect.BiMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import org.spongepowered.api.Sponge;
@@ -32,7 +33,7 @@ import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
@@ -54,8 +55,8 @@ import java.util.UUID;
  */
 public final class SpongeMapStorage implements MapStorage {
 
-	private final Map<UUID, MapInfo> uuidCache = new HashMap<>();
-	private final Map<UUID, Integer> uuidMapIndex = new HashMap<>();
+	private final Map<UUID, MapInfo> loadedMapUUIDs = new HashMap<>();
+	private BiMap<Integer, UUID> mapIdUUIDIndex = null;
 
 	@Override
 	public Collection<MapInfo> getAllMapInfos() {
@@ -81,33 +82,18 @@ public final class SpongeMapStorage implements MapStorage {
 
 	@Override
 	public Optional<MapInfo> getMapInfo(final UUID uuid) {
-		// TODO: Have methods for getting cached and getting all (getting all could involve opening a *lot* of files)
-		// 	maybe add a index file for uuids?
-		final MapInfo cachedInfo = this.uuidCache.get(uuid);
-
-		if (cachedInfo != null) {
-			return Optional.of(cachedInfo);
+		MapInfo mapInfo = this.loadedMapUUIDs.get(uuid);
+		if (mapInfo != null) {
+			return Optional.of(mapInfo);
 		}
-
-		final ServerLevel defaultWorld = (ServerLevel) Sponge.getServer().getWorldManager().defaultWorld();
-
-		final int highestId = ((MapIdTrackerBridge)defaultWorld.getDataStorage().computeIfAbsent(MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME)).bridge$getHighestMapId()
-				.orElse(-1);
-		for (int i = 0; i <= highestId; i++) {
-			final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + i);
-			if (mapInfo == null) {
-				SpongeCommon.getLogger().warn("Missing map with id: " + i);
-				continue;
-			}
-			final UUID mapUUID = mapInfo.getUniqueId();
-			this.uuidCache.put(mapUUID, mapInfo);
-
-			if (mapUUID.equals(uuid)) {
-				return Optional.of(mapInfo);
-			}
+		Integer mapId = this.mapIdUUIDIndex.inverse().get(uuid);
+		if (mapId == null) {
+			return Optional.empty();
 		}
-
-		return Optional.empty();
+		final ServerWorld spongeWorld = Sponge.getServer().getWorldManager().defaultWorld();
+		final ServerLevel defaultWorld = (ServerLevel) spongeWorld;
+		final MapInfo loadedMapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + mapId);
+		return Optional.ofNullable(loadedMapInfo);
 	}
 
 	@Override
@@ -115,12 +101,29 @@ public final class SpongeMapStorage implements MapStorage {
 		return SpongeCommonEventFactory.fireCreateMapEvent(PhaseTracker.getCauseStackManager().getCurrentCause());
 	}
 
-	public void addMapInfo(final MapInfo mapInfo) {
-		this.uuidCache.put(mapInfo.getUniqueId(), mapInfo);
-		this.uuidMapIndex.put(mapInfo.getUniqueId(), ((MapDataBridge)mapInfo).bridge$getMapId());
+	/**
+	 * Request the UUID for the given map id.
+	 * If there is no known UUID, one is created and saved.
+	 * @param id Map id
+	 * @return UUID of the map.
+	 */
+	public UUID requestUUID(final int id) {
+		ensureHasMapUUIDIndex();
+		UUID uuid = this.mapIdUUIDIndex.get(id);
+		if (uuid == null) {
+			uuid = UUID.randomUUID();
+			this.mapIdUUIDIndex.put(id, uuid);
+		}
+		return uuid;
 	}
 
-	public Map<UUID, Integer> getUuidMapIndex() {
-		return this.uuidMapIndex;
+	public void addMapInfo(final MapInfo mapInfo) {
+		this.loadedMapUUIDs.put(mapInfo.getUniqueId(), mapInfo);
+	}
+
+	private void ensureHasMapUUIDIndex() {
+		if (this.mapIdUUIDIndex == null) {
+			this.mapIdUUIDIndex = ((PrimaryLevelDataBridge) Sponge.getServer().getWorldManager().defaultWorld().getProperties()).bridge$getMapUUIDIndex();
+		}
 	}
 }

@@ -1175,6 +1175,8 @@ public final class Constants {
         public static final String MAP_INDEX_DATA_NAME = "idcounts";
         public static final String MAP_ID = "map";
 
+        public static final String MAP_UUID_INDEX = "MapUUIDs";
+
         public static final DataQuery MAP_UNSAFE_ID = of("UnsafeMapId");
         public static final DataQuery MAP_DATA = of("MapData");
         public static final DataQuery SHADE_NUM = of("shade");

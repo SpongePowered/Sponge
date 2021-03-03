@@ -29,7 +29,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.BannerBlock;
 import net.minecraft.world.level.saveddata.SavedData;
-import net.minecraft.world.level.saveddata.maps.MapBanner;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
@@ -38,16 +37,14 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
+import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Map;
 import java.util.UUID;
 
 @Mixin(MapItemSavedData.class)
@@ -77,7 +74,7 @@ public abstract class MapInfoMixin_API extends SavedData implements MapInfo, Spo
 
     @Override
     public UUID getUniqueId() {
-        return ((MapDataBridge) this).bridge$getUniqueId();
+        return ((MapItemSavedDataBridge) this).bridge$getUniqueId();
     }
 
     @Override
@@ -93,7 +90,7 @@ public abstract class MapInfoMixin_API extends SavedData implements MapInfo, Spo
                 .forEach(decorationList::add);
 
         return DataContainer.createNew()
-                .set(Constants.Map.MAP_UNSAFE_ID, ((MapDataBridge) this).bridge$getMapId())
+                .set(Constants.Map.MAP_UNSAFE_ID, ((MapItemSavedDataBridge) this).bridge$getMapId())
                 .set(Constants.Map.MAP_DATA,
                         DataContainer.createNew()
                                 .set(Constants.Map.MAP_LOCATION,            this.require(Keys.MAP_LOCATION)))

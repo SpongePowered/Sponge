@@ -22,47 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.item.stack;
+package org.spongepowered.common.mixin.core.world.level;
 
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.MapItem;
-import net.minecraft.world.level.Level;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.map.MapInfo;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
+import java.io.File;
 
-public final class MapInfoItemStackData {
+@Mixin(SavedData.class)
+public abstract class SavedDataMixin {
 
-	private MapInfoItemStackData() {
-	}
-
-	// @formatter:off
-	public static void register(final DataProviderRegistrator registrator) {
-		registrator
-				.asMutable(ItemStack.class)
-					.create(Keys.MAP_INFO)
-						.supports(item -> item.getItem() instanceof MapItem)
-						.get(itemStack -> {
-							if (itemStack.getTag() == null) {
-								return null;
-							}
-							return (MapInfo) ((Level)Sponge.getServer().getWorldManager().defaultWorld())
-									.getMapData(Constants.Map.MAP_PREFIX + itemStack.getTag().getInt(Constants.Map.MAP_ID));
-						}) // Nullable
-						.set((itemStack, mapInfo) -> {
-							@Nullable CompoundTag nbt = itemStack.getTag();
-							if (nbt == null) {
-								nbt = new CompoundTag();
-							}
-							nbt.putInt(Constants.Map.MAP_ID, ((MapItemSavedDataBridge)mapInfo).bridge$getMapId());
-							itemStack.setTag(nbt);
-						});
-	}
-	// @formatter:on
+    @Inject(method = "save(Ljava/io/File;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/saveddata/SavedData;save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;"),
+            locals = LocalCapture.CAPTURE_FAILHARD)
+    public void impl$writeAdditionalMapNBT(File file, final CallbackInfo cir,
+                                           CompoundTag compound) {
+        if ((Object)this instanceof MapItemSavedData) {
+            CompoundTag spongeData = compound.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA);
+            ((MapItemSavedDataBridge) this).bridge$writeSpongeData(spongeData);
+            if (!spongeData.isEmpty()) {
+                compound.put(Constants.Sponge.Data.V2.SPONGE_DATA, spongeData);
+            }
+        }
+    }
 }

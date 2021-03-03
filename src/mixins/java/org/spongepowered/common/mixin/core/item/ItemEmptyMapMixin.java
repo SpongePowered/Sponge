@@ -46,7 +46,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.bridge.world.storage.MapDataBridge;
+import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
@@ -87,7 +87,7 @@ public abstract class ItemEmptyMapMixin {
             if (!optMapInfo.isPresent()) {
                 return ItemStack.EMPTY;
             }
-            final int id = ((MapDataBridge) optMapInfo.get()).bridge$getMapId();
+            final int id = ((MapItemSavedDataBridge) optMapInfo.get()).bridge$getMapId();
 
             final ItemStack newMap = new ItemStack(Items.FILLED_MAP, 1);
             final CompoundTag nbt = newMap.getOrCreateTag();

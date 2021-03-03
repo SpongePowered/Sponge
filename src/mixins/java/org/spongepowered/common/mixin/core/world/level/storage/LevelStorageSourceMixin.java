@@ -24,7 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.level.storage;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.mojang.datafixers.DataFixer;
+import com.mojang.datafixers.util.Pair;
+import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
@@ -35,6 +39,7 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.util.Constants;
 
+import java.util.List;
 import java.util.UUID;
 import net.minecraft.core.SerializableUUID;
 import net.minecraft.nbt.CompoundTag;
@@ -102,6 +107,16 @@ public abstract class LevelStorageSourceMixin {
         } else {
             ((PrimaryLevelDataBridge) levelData).bridge$setUniqueId(LevelStorageSourceMixin.impl$spongeLevelData.get(Constants.Sponge.World.UNIQUE_ID).read(
                     SerializableUUID.CODEC).result().orElse(UUID.randomUUID()));
+
+            final List<Pair<String, UUID>> mapIndexList = LevelStorageSourceMixin.impl$spongeLevelData.get(Constants.Map.MAP_UUID_INDEX).readMap(
+                    Codec.STRING, SerializableUUID.CODEC
+            ).getOrThrow(false, s -> System.err.println("ERROR READING MAP_UUID_INDEX: " + s));//.result().orElse(Collections.emptyList());
+            final BiMap<Integer, UUID> mapIndex = HashBiMap.create();
+            for (final Pair<String, UUID> pair : mapIndexList) {
+                final int id = Integer.parseInt(pair.getFirst());
+                mapIndex.put(id, pair.getSecond());
+            }
+            ((PrimaryLevelDataBridge) levelData).bridge$setMapUUIDIndex(mapIndex);
         }
 
         LevelStorageSourceMixin.impl$spongeLevelData = null;
