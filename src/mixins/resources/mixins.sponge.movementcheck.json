@@ -1,13 +1,13 @@
 {
-  "minVersion": "0.8",
-  "package": "org.spongepowered.common.mixin.movementcheck",
-  "plugin": "org.spongepowered.common.mixin.plugin.MovementCheckPlugin",
-  "target": "@env(DEFAULT)",
-  "compatibilityLevel": "JAVA_8",
-  "mixins": [
-    "server.network.ServerGamePacketListenerImplMixin_MovementCheck"
-  ],
-  "injectors": {
-    "defaultRequire": 1
-  }
+    "minVersion": "0.8",
+    "package": "org.spongepowered.common.mixin.movementcheck",
+    "plugin": "org.spongepowered.common.mixin.plugin.MovementCheckPlugin",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+        "server.network.ServerGamePacketListenerImplMixin_MovementCheck"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
 }
