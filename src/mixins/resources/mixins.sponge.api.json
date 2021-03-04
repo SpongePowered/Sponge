@@ -264,6 +264,7 @@
         "mcp.world.level.EntityGetterMixin_API",
         "mcp.world.level.ExplosionMixin_API",
         "mcp.world.level.GameTypeMixin_API",
+        "mcp.world.level.GameRules_KeyMixin_API",
         "mcp.world.level.LevelAccessorMixin_API",
         "mcp.world.level.LevelMixin_API",
         "mcp.world.level.LevelReaderMixin_API",

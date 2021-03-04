@@ -22,22 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level;
+package org.spongepowered.common.mixin.api.mcp.world.level;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-
-import java.util.Map;
 import net.minecraft.world.level.GameRules;
-import org.spongepowered.common.UntransformedAccessorError;
+import org.spongepowered.api.world.gamerule.GameRule;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 
-@Mixin(GameRules.class)
-public interface GameRulesAccessor {
+import java.lang.reflect.Type;
 
-    @Accessor("rules") Map<GameRules.Key<?>, GameRules.Value<?>> accessor$rules();
+@Mixin(GameRules.Key.class)
+public class GameRules_KeyMixin_API<T> implements GameRule<T> {
 
-    @Accessor("GAME_RULE_TYPES") static Map<GameRules.Key<?>, GameRules.Type<?>> accessor$GAME_RULE_TYPES() {
-        throw new UntransformedAccessorError();
+    @Shadow @Final private String id;
+
+    @Override
+    public String getName() {
+        return this.id;
     }
 
+    @Override
+    public Type getValueType() {
+        throw new UnsupportedOperationException("Not implemented yet");
+    }
+
+    @Override
+    @SuppressWarnings("unchecked")
+    public T getDefaultValue() {
+        final GameRules.Type<?> type = GameRulesAccessor.accessor$GAME_RULE_TYPES().get(this);
+        final GameRules.Value<?> value = type.createRule();
+        if (value instanceof GameRules.BooleanValue) {
+            return (T) (Object)((GameRules.BooleanValue) value).get();
+        }
+        if (value instanceof GameRules.IntegerValue) {
+            return (T)(Object)((GameRules.IntegerValue) value).get();
+        }
+        throw new IllegalStateException("Unexpected GameRule.Value implementation " + value.getClass().getName());
+    }
 }

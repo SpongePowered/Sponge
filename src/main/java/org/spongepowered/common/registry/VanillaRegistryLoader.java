@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import com.google.common.base.CaseFormat;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.FrameType;
@@ -79,10 +80,12 @@ import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.MushroomCow_MushroomTypeAccessor;
 import org.spongepowered.common.accessor.world.item.ArmorMaterialsAccessor;
+import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.BannerPatternAccessor;
 import org.spongepowered.common.advancement.criterion.SpongeDummyTrigger;
 import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -120,6 +123,7 @@ final class VanillaRegistryLoader {
         this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape().values());
         this.holder.createRegistry(RegistryTypes.TRIGGER, () -> VanillaRegistryLoader.trigger().values(), true,
                 (k, trigger) -> CriteriaTriggersAccessor.invoker$register((CriterionTrigger<?>) trigger));
+        this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
     }
 
     private void loadEnumRegistries() {
@@ -282,6 +286,15 @@ final class VanillaRegistryLoader {
     @SuppressWarnings("UnusedReturnValue")
     private <A, I extends Enum<I>> Registry<A> knownName(final RegistryType<A> type,final I[] values, final Function<I, String> name) {
         return this.naming(type, values, name);
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    private <A, I> Registry<A> knownName(RegistryType<A> type, Collection<I> values, Function<I, String> name) {
+        final Map<I, String> map = new HashMap<>();
+        for (final I value : values) {
+            map.put(value, name.apply(value));
+        }
+        return this.naming(type, values.size(), map);
     }
 
     @SuppressWarnings("UnusedReturnValue")
