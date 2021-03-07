@@ -29,6 +29,8 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import io.netty.util.AttributeKey;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
@@ -688,17 +690,29 @@ public final class SpongeAdventure {
         public final @NonNull Component render(
             final @NonNull Component component,
             final @NonNull CommandCause senderContext,
-            final @Nullable Entity viewer,
+            @Nullable Audience viewer,
             final @NonNull DefaultedRegistryReference<ResolveOperation> firstOperation,
             final @NonNull DefaultedRegistryReference<ResolveOperation>@NonNull... otherOperations
         ) {
             Component output = Objects.requireNonNull(component, "component");
             Objects.requireNonNull(senderContext, "senderContext");
+
+            // Unwrap the Audience to an entity
+            while (viewer instanceof ForwardingAudience.Single && !(viewer instanceof Entity)) {
+                viewer = ((ForwardingAudience.Single) viewer).audience();
+            }
+            final Entity backing;
+            if (viewer instanceof Entity) {
+                backing = (Entity) viewer;
+            } else {
+                backing = null;
+            }
+
             output = ((SpongeResolveOperation) Objects.requireNonNull(firstOperation, "firstOperation").get())
-                .resolve(output, senderContext, viewer);
+                .resolve(output, senderContext, backing);
 
             for (final DefaultedRegistryReference<ResolveOperation> ref : otherOperations) {
-                output = ((SpongeResolveOperation) ref.get()).resolve(output, senderContext, viewer);
+                output = ((SpongeResolveOperation) ref.get()).resolve(output, senderContext, backing);
             }
             return output;
         }
