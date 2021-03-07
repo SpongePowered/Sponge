@@ -5,13 +5,15 @@ name: License Check
 
 on:
   push:
-    branches: [ api-8 ]
+    branches-ignore: [ stable-7 ]
   pull_request:
-    branches: [ api-8 ]
+    branches-ignore: [ stable-7 ]
 
 jobs:
-  build:
-    runs-on: ubuntu-latest
+  check:
+    # Only run on PRs if the source branch is on someone else's repo
+    if: "${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}"
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
         with:
@@ -28,7 +30,5 @@ jobs:
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
       - name: Build with Gradle
         run: ./gradlew -PenableTestPlugins=true checkLicenses
