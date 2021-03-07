@@ -106,7 +106,7 @@ public final class InstallerUtils {
         final String name = path.getFileName().toString();
 
         Logger.info("Downloading {}. This may take a while...", name);
-        Logger.info("URL -> <{}>", url);
+        Logger.debug("URL -> <{}>", url);
 
         if (!requiresRequest) {
             // Pipe the download stream into the file and compute the hash

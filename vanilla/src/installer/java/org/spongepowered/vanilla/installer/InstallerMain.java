@@ -28,6 +28,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import org.cadixdev.atlas.Atlas;
 import org.cadixdev.bombe.asm.jar.JarEntryRemappingTransformer;
+import org.cadixdev.bombe.jar.JarClassEntry;
 import org.cadixdev.lorenz.MappingSet;
 import org.cadixdev.lorenz.asm.LorenzRemapper;
 import org.cadixdev.lorenz.io.proguard.ProGuardReader;
@@ -227,9 +228,21 @@ public final class InstallerMain {
         }
 
         try (final Atlas atlas = new Atlas(service)) {
-            atlas.install(ctx -> new JarEntryRemappingTransformer(
-                    new LorenzRemapper(mappings, ctx.inheritanceProvider())
-            ));
+            atlas.install(ctx -> new JarEntryRemappingTransformer(new LorenzRemapper(mappings, ctx.inheritanceProvider())) {
+                @Override
+                public JarClassEntry transform(final JarClassEntry entry) {
+                    // Skip shaded classes that we know are non-obf
+                    final String name = entry.getName();
+                    if (name.startsWith("it/unimi")
+                        || name.startsWith("com/google")
+                        || name.startsWith("com/mojang/datafixers")
+                        || name.startsWith("org/apache")) {
+                        return entry;
+                    }
+
+                    return super.transform(entry);
+                }
+            });
             atlas.run(inputJar, outputJar);
         }
 
