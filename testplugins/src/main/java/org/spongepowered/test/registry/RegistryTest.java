@@ -183,7 +183,7 @@ public final class RegistryTest {
             PotionTypes.class, RecipeTypes.class, FireworkShapes.class, ItemTypes.class, PlaceholderParsers.class, TaskPriorities.class, Criteria.class,
             DisplaySlots.class, ObjectiveDisplayModes.class, CollisionRules.class, Visibilities.class, BanTypes.class, AccountDeletionResultTypes.class,
             TransactionTypes.class, BooleanStateProperties.class, EnumStateProperties.class, IntegerStateProperties.class, StatisticCategories.class,
-            Statistics.class, Mirrors.class, Orientations.class, Rotations.class, Biomes.class, ChunkStates.class, Difficulties.class,
+            Statistics.class, Mirrors.class, Orientations.class, Rotations.class, ChunkStates.class, Difficulties.class,
             GameRules.class, Structures.class, PortalTypes.class, PaletteTypes.class, TeleportHelperFilters.class, WeatherTypes.class, ChunkRegenerateFlags.class,
             HeightTypes.class, LightTypes.class, WorldTypes.class, MapDecorationOrientations.class, MapDecorationTypes.class, MapShades.class, MapColorTypes.class,
     };
@@ -218,8 +218,6 @@ public final class RegistryTest {
                 holder = Sponge.getGame().registries();
             } else if (registryScope == RegistryScope.ENGINE) {
                 holder = Sponge.getServer().registries();
-            } else if (registryScope == RegistryScope.WORLD) {
-                holder = Sponge.getGame().getServer().getWorldManager().defaultWorld().registries();
             }
         }
         if (holder == null) {
