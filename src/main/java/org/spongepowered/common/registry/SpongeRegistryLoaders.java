@@ -297,30 +297,30 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
             l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.BLOCK_STATE, () -> StandardCatalogedArgumentParser.createConverter(BlockStateArgument.block(),
+            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> StandardCatalogedArgumentParser.createConverter(k, BlockStateArgument.block(),
                     (reader, cause, state) -> (BlockState) state.getState()));
-            l.add(ResourceKeyedValueParameters.BOOLEAN, () -> StandardCatalogedArgumentParser.createIdentity(BoolArgumentType.bool()));
+            l.add(ResourceKeyedValueParameters.BOOLEAN, k -> StandardCatalogedArgumentParser.createIdentity(k, BoolArgumentType.bool()));
             l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new); //Includes ColorArgumentParser.color(), but does more. TODO: what does 1.16 do?
             l.add(ResourceKeyedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
             l.add(ResourceKeyedValueParameters.DATE_TIME, SpongeDateTimeValueParameter::new);
-            l.add(ResourceKeyedValueParameters.DOUBLE, k -> StandardCatalogedArgumentParser.createIdentity(DoubleArgumentType.doubleArg()));
+            l.add(ResourceKeyedValueParameters.DOUBLE, k -> StandardCatalogedArgumentParser.createIdentity(k, DoubleArgumentType.doubleArg()));
             l.add(ResourceKeyedValueParameters.DURATION, SpongeDurationValueParameter::new);
             l.add(ResourceKeyedValueParameters.ENTITY, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entity(), (reader, cause, selector) -> (Entity) selector.findSingleEntity(cause.getSource())));
             l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
-            l.add(ResourceKeyedValueParameters.INTEGER, k -> StandardCatalogedArgumentParser.createIdentity(IntegerArgumentType.integer()));
+            l.add(ResourceKeyedValueParameters.INTEGER, k -> StandardCatalogedArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
             l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
             l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> StandardCatalogedArgumentParser.createConverter(k, ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
             l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
-            l.add(ResourceKeyedValueParameters.LONG, k -> StandardCatalogedArgumentParser.createIdentity(LongArgumentType.longArg()));
+            l.add(ResourceKeyedValueParameters.LONG, k -> StandardCatalogedArgumentParser.createIdentity(k, LongArgumentType.longArg()));
             l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())));
             l.add(ResourceKeyedValueParameters.MANY_GAME_PROFILES, k -> StandardCatalogedArgumentParser.createConverter(k, GameProfileArgument.gameProfile(), (reader, cause, converter) -> converter.getNames(cause.getSource())));
             l.add(ResourceKeyedValueParameters.MANY_PLAYERS, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.players(), (reader, cause, selector) -> selector.findPlayers(cause.getSource())));
             l.add(ResourceKeyedValueParameters.NONE, SpongeNoneValueParameter::new);
             l.add(ResourceKeyedValueParameters.PLAYER, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer(cause.getSource())));
             l.add(ResourceKeyedValueParameters.PLUGIN, SpongePluginContainerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.REMAINING_JOINED_STRINGS, k -> StandardCatalogedArgumentParser.createIdentity(StringArgumentType.greedyString()));
+            l.add(ResourceKeyedValueParameters.REMAINING_JOINED_STRINGS, k -> StandardCatalogedArgumentParser.createIdentity(k, StringArgumentType.greedyString()));
             l.add(ResourceKeyedValueParameters.RESOURCE_KEY, k -> StandardCatalogedArgumentParser.createConverter(k, ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation));
-            l.add(ResourceKeyedValueParameters.STRING, k -> StandardCatalogedArgumentParser.createIdentity(StringArgumentType.string()));
+            l.add(ResourceKeyedValueParameters.STRING, k -> StandardCatalogedArgumentParser.createIdentity(k, StringArgumentType.string()));
             l.add(ResourceKeyedValueParameters.TARGET_BLOCK, SpongeTargetBlockValueParameter::new);
             l.add(ResourceKeyedValueParameters.TARGET_ENTITY, k -> new SpongeTargetEntityValueParameter(k, false));
             l.add(ResourceKeyedValueParameters.TARGET_PLAYER, k -> new SpongeTargetEntityValueParameter(k, true));
