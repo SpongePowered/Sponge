@@ -260,6 +260,11 @@ public final class RegistryTest {
                     this.plugin.getLogger().error("Mismatched key: Expected ({}) but Sponge is using ({})", ((ResourceKeyed) value).getKey().getFormatted(), reference.location().getFormatted());
                 }
 
+                Registry<Object> r = (Registry<Object>) registryOpt.get();
+                if (!r.valueKey(value).equals(reference.location())) {
+                    this.plugin.getLogger().error("Mismatched key: Minecraft returned ({}) but Sponge is using ({})", r.valueKey(value).getFormatted(), reference.location().getFormatted());
+                }
+
                 if (value instanceof ResourceKeyed) {
                     Objects.requireNonNull(((ResourceKeyed) value).getKey(), reference.location().getFormatted() + " getKey"); // Ensure this doesn't throw abstract method error or class cast exception
                 }
