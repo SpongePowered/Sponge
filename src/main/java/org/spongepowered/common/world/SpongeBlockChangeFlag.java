@@ -52,12 +52,12 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
         this.updateNeighbors = (flag & Constants.BlockChangeFlags.BLOCK_UPDATED) != 0; // 1
         this.notifyClients = (flag & Constants.BlockChangeFlags.NOTIFY_CLIENTS) != 0; // 2
         this.ignoreRender = (flag & Constants.BlockChangeFlags.IGNORE_RENDER) != 0; // 4
-        this.forceReRender = (flag & Constants.BlockChangeFlags.FORCE_RE_RENDER) != 0 && !this.ignoreRender; // 8
+        this.forceReRender = (flag & Constants.BlockChangeFlags.FORCE_RE_RENDER) != 0; // 8
         this.updateNeighborShapes = (flag & Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE) == 0; // 16
         this.neighborDrops = (flag & Constants.BlockChangeFlags.NEIGHBOR_DROPS) == 0; // 32
         this.blockMoving = (flag & Constants.BlockChangeFlags.BLOCK_MOVING) != 0; // 64
+        this.lighting = (flag & Constants.BlockChangeFlags.LIGHTING_UPDATES) == 0; // 128
         this.performBlockPhysics = (flag & Constants.BlockChangeFlags.PHYSICS_MASK) == 0; // sponge
-        this.lighting = (flag & Constants.BlockChangeFlags.LIGHTING_UPDATES) == 0; // sponge
         this.pathfindingUpdates = (flag & Constants.BlockChangeFlags.PATHFINDING_UPDATES) == 0; // sponge
         this.rawFlag = flag;
     }
@@ -291,9 +291,7 @@ public final class SpongeBlockChangeFlag implements BlockChangeFlag {
     }
 
     public SpongeBlockChangeFlag asNestedNeighborUpdates() {
-        final int maskedFlag =
-            Constants.BlockChangeFlags.NEIGHBOR_DROPS
-                | (this.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
+        final int maskedFlag = (this.notifyClients ? Constants.BlockChangeFlags.NOTIFY_CLIENTS : 0)
                 | (this.ignoreRender ? Constants.BlockChangeFlags.IGNORE_RENDER : 0)
                 | (this.forceReRender ? Constants.BlockChangeFlags.FORCE_RE_RENDER : 0)
                 | (this.updateNeighborShapes ? 0 : Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE)

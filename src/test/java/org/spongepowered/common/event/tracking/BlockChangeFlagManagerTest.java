@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
 
@@ -223,7 +224,7 @@ class BlockChangeFlagManagerTest {
         assertTrue(inverse.updateNeighbors());
         assertTrue(inverse.notifyClients());
         assertTrue(inverse.isIgnoreRender());
-        assertFalse(inverse.isForceReRender());
+        assertTrue(inverse.isForceReRender());
         assertFalse(inverse.updateNeighboringShapes());
         assertFalse(inverse.neighborDrops());
         assertTrue(inverse.isBlockMoving());
@@ -248,29 +249,51 @@ class BlockChangeFlagManagerTest {
     @Test
     void verifyNestedNeighborPhysics() {
         final SpongeBlockChangeFlag flag = BlockChangeFlagManagerTest.createDefaultFlag();
-        final SpongeBlockChangeFlag otherFlag = BlockChangeFlagManager.fromNativeInt(47);
-        assertTrue(otherFlag.updateNeighboringShapes()); // 16
-        assertTrue(otherFlag.getRawFlag() > 0);
         assertTrue(flag.updateNeighboringShapes()); // 16
         assertTrue(flag.getRawFlag() > 0);
+        assertEquals((flag.getRawFlag() & 32), 0);
+        assertTrue(flag.neighborDrops());
         final SpongeBlockChangeFlag nestedNeighbor = flag.asNestedNeighborUpdates();
         assertFalse(nestedNeighbor.updateNeighbors());
         assertTrue(nestedNeighbor.notifyClients());
         assertFalse(nestedNeighbor.isIgnoreRender());
         assertFalse(nestedNeighbor.isForceReRender());
         assertTrue(nestedNeighbor.updateNeighboringShapes());
-        assertFalse(nestedNeighbor.neighborDrops());
+        assertTrue(nestedNeighbor.neighborDrops());
         assertFalse(nestedNeighbor.isBlockMoving());
         assertTrue(nestedNeighbor.updateLighting());
         assertTrue(nestedNeighbor.performBlockPhysics());
         assertTrue(nestedNeighbor.notifyPathfinding());
+        assertEquals(3 & -34, nestedNeighbor.getRawFlag());
+
+        final int overloadedFlag =
+            Constants.BlockChangeFlags.BLOCK_UPDATED
+            | Constants.BlockChangeFlags.NOTIFY_CLIENTS
+            | Constants.BlockChangeFlags.IGNORE_RENDER
+            | Constants.BlockChangeFlags.FORCE_RE_RENDER
+            | Constants.BlockChangeFlags.NEIGHBOR_DROPS
+            | Constants.BlockChangeFlags.BLOCK_MOVING
+            | Constants.BlockChangeFlags.LIGHTING_UPDATES
+            | Constants.BlockChangeFlags.PHYSICS_MASK
+            | Constants.BlockChangeFlags.PATHFINDING_UPDATES;
+        final SpongeBlockChangeFlag otherFlag = BlockChangeFlagManager.fromNativeInt(overloadedFlag);
+        assertTrue(otherFlag.updateNeighboringShapes()); // 16
+        assertTrue(otherFlag.getRawFlag() > 0);
+        assertFalse(otherFlag.neighborDrops());
         final SpongeBlockChangeFlag nestedOther = otherFlag.asNestedNeighborUpdates();
         assertFalse(nestedOther.updateNeighbors()); // 1
         assertTrue(nestedOther.notifyClients());    // 2
         assertTrue(nestedOther.isIgnoreRender());   // 4
-        assertFalse(nestedOther.isForceReRender()); // 8
+        assertTrue(nestedOther.isForceReRender()); // 8
         assertTrue(nestedOther.updateNeighboringShapes()); // 16
-        assertFalse(nestedOther.neighborDrops());    // 32
+        assertTrue(nestedOther.neighborDrops());    // 32
+        assertTrue(nestedOther.isBlockMoving());
+        assertFalse(nestedOther.updateLighting());
+        assertFalse(nestedOther.performBlockPhysics());
+        assertFalse(nestedOther.notifyPathfinding());
+
+        // Finally, verify that with mojang's flag logic, we're still abiding by it.
+        assertEquals(overloadedFlag & -34, nestedOther.getRawFlag());
 
 
     }

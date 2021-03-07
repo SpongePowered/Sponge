@@ -943,7 +943,8 @@ public final class Constants {
          */
         public static final int DENY_NEIGHBOR_SHAPE_UPDATE =   1 << 4; // 16
         /**
-         * Prevents neighbor changes from spawning drops.
+         * If unset, allows for a block being destroyed to drop itself, used in
+         * {@link net.minecraft.world.level.block.Block#updateOrDestroy(BlockState, BlockState, LevelAccessor, BlockPos, int, int)}.
          */
         public static final int NEIGHBOR_DROPS =  1 << 5; // 32
         /**
