@@ -176,7 +176,7 @@ public final class RegistryTest {
             MooshroomTypes.class, NotePitches.class, PandaGenes.class, ParrotTypes.class, PhantomPhases.class, PickupRules.class, PistonTypes.class,
             PortionTypes.class, ProfessionTypes.class, RabbitTypes.class, RaidStatuses.class, RailDirections.class, SkinParts.class, SlabPortions.class,
             SpellTypes.class, StairShapes.class, StructureModes.class, TropicalFishShapes.class, VillagerTypes.class, WireAttachmentTypes.class,
-            DataPackTypes.class, ParticleOptions.class, ParticleTypes.class, PotionEffectTypes.class, MusicDiscs.class, SoundTypes.class,
+            ParticleOptions.class, ParticleTypes.class, PotionEffectTypes.class, MusicDiscs.class, SoundTypes.class,
             GoalExecutorTypes.class, GoalTypes.class, AttributeTypes.class, AttributeOperations.class, DragonPhaseTypes.class, ChatVisibilities.class,
             GameModes.class, EntityTypes.class, DamageModifierTypes.class, DamageTypes.class, DismountTypes.class, MovementTypes.class, SpawnTypes.class,
             FluidTypes.class, EnchantmentTypes.class, EquipmentGroups.class, EquipmentTypes.class, ClickTypes.class, QueryTypes.class, ContainerTypes.class,
