@@ -60,6 +60,7 @@ jobs:
           path: "${{ github.workspace }}/vanilla/build/libs/*-universal.jar"
   integrationTest:
     needs: build
+    timeout-minutes: 10
     strategy:
       matrix:
         os: [ubuntu-20.04, windows-latest, macos-latest]

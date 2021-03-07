@@ -57,6 +57,7 @@ jobs:
           path: "${{ github.workspace }}/vanilla/build/libs/*-universal.jar"
   integrationTest:
     needs: build
+    timeout-minutes: 10
     strategy:
       matrix:
         os: [ubuntu-20.04, windows-latest, macos-latest]
@@ -82,7 +83,7 @@ jobs:
         if: "runner.os != 'Windows'"
         run: java -jar *-universal.jar --launchTarget sponge_server_it
   publish:
-    needs: [build, integrationTest]
+    needs: integrationTest
     runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
