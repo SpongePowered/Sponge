@@ -107,6 +107,7 @@ public final class InstallerMain {
                 .invoke(null, (Object) args);
         } catch (final ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
             Logger.error(ex, "Failed to invoke main class {} due to an error", className);
+            System.exit(1);
         }
     }
 
