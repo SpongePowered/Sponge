@@ -69,7 +69,7 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
         return new WorldGenSettings(this.seed, this.generateFeatures, this.generateBonusChest, this.dimensions);
     }
 
-    @Redirect(method = "guardExperimentalaaa", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/MappedRegistry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
+    @Redirect(method = "guardExperimental", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/MappedRegistry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
     private Object impl$useBootstrapDimensionRegistryForGuard(MappedRegistry registry, ResourceKey<LevelStem> registryKey) {
         if (BootstrapProperties.dimensionGeneratorSettings == null) {
             BootstrapProperties.dimensionGeneratorSettings = (WorldGenSettings) (Object) this;
