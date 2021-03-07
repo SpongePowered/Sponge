@@ -65,8 +65,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.adventure.ResolveOperation;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.common.accessor.client.KeyMappingAccessor;
 import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAccessor;
 import org.spongepowered.common.accessor.network.chat.TextColorAccessor;
@@ -656,28 +659,59 @@ public final class SpongeAdventure {
         // once Adventure exposes support
 
         @Override
-        public LegacyComponentSerializer legacySectionSerializer() {
+        public @NonNull LegacyComponentSerializer legacySectionSerializer() {
             return LegacyComponentSerializer.legacySection();
         }
 
         @Override
-        public LegacyComponentSerializer legacyAmpersandSerializer() {
+        public @NonNull LegacyComponentSerializer legacyAmpersandSerializer() {
             return LegacyComponentSerializer.legacyAmpersand();
         }
 
         @Override
-        public LegacyComponentSerializer legacySerializer(final char formatChar) {
+        public @NonNull LegacyComponentSerializer legacySerializer(final char formatChar) {
             return LegacyComponentSerializer.legacy(formatChar);
         }
 
         @Override
-        public GsonComponentSerializer gsonSerializer() {
+        public @NonNull GsonComponentSerializer gsonSerializer() {
             return SpongeAdventure.GSON;
         }
 
         @Override
-        public PlainComponentSerializer plainSerializer() {
+        public @NonNull PlainComponentSerializer plainSerializer() {
             return SpongeAdventure.PLAIN;
+        }
+
+        @Override
+        @SafeVarargs
+        public final @NonNull Component render(
+            final @NonNull Component component,
+            final @NonNull CommandCause senderContext,
+            final @Nullable Entity viewer,
+            final @NonNull DefaultedRegistryReference<ResolveOperation> firstOperation,
+            final @NonNull DefaultedRegistryReference<ResolveOperation>@NonNull... otherOperations
+        ) {
+            Component output = Objects.requireNonNull(component, "component");
+            Objects.requireNonNull(senderContext, "senderContext");
+            output = ((SpongeResolveOperation) Objects.requireNonNull(firstOperation, "firstOperation").get())
+                .resolve(output, senderContext, viewer);
+
+            for (final DefaultedRegistryReference<ResolveOperation> ref : otherOperations) {
+                output = ((SpongeResolveOperation) ref.get()).resolve(output, senderContext, viewer);
+            }
+            return output;
+        }
+
+        @Override
+        @SafeVarargs
+        public final @NonNull Component render(
+            final @NonNull Component component,
+            final @NonNull CommandCause senderContext,
+            final @NonNull DefaultedRegistryReference<ResolveOperation> firstOperation,
+            final @NonNull DefaultedRegistryReference<ResolveOperation>@NonNull... otherOperations
+        ) {
+            return this.render(component, senderContext, null, firstOperation, otherOperations);
         }
     }
 

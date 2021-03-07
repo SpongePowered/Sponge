@@ -63,6 +63,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.PORTAL_TYPE, SpongeRegistryLoaders.portalType().values());
         holder.createRegistry(RegistryTypes.QUERY_TYPE, SpongeRegistryLoaders.queryType().values());
         holder.createRegistry(RegistryTypes.RABBIT_TYPE, SpongeRegistryLoaders.rabbitType().values());
+        holder.createRegistry(RegistryTypes.RESOLVE_OPERATION, SpongeRegistryLoaders.resolveOperation().values());
         holder.createRegistry(RegistryTypes.SELECTOR_TYPE, SpongeRegistryLoaders.selectorType().values());
         holder.createRegistry(RegistryTypes.SELECTOR_SORT_ALGORITHM, SpongeRegistryLoaders.selectorSortAlgorithm().values());
         holder.createRegistry(RegistryTypes.SKIN_PART, SpongeRegistryLoaders.skinPart().values());

@@ -54,6 +54,8 @@ import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.adventure.ResolveOperation;
+import org.spongepowered.api.adventure.ResolveOperations;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
@@ -161,6 +163,7 @@ import org.spongepowered.common.accessor.commands.arguments.DimensionArgumentAcc
 import org.spongepowered.common.accessor.commands.synchronization.ArgumentTypesAccessor;
 import org.spongepowered.common.accessor.commands.synchronization.EmptyArgumentSerializerAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.adventure.SpongeResolveOperation;
 import org.spongepowered.common.ban.SpongeBanType;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;
 import org.spongepowered.common.block.transaction.BlockOperation;
@@ -769,6 +772,13 @@ public final class SpongeRegistryLoaders {
             l.add(99, RabbitTypes.KILLER, SpongeRabbitType::new);
             l.add(5, RabbitTypes.SALT_AND_PEPPER, SpongeRabbitType::new);
             l.add(1, RabbitTypes.WHITE, SpongeRabbitType::new);
+        });
+    }
+
+    public static RegistryLoader<ResolveOperation> resolveOperation() {
+        return RegistryLoader.of(l -> {
+            l.add(ResolveOperations.CONTEXTUAL_COMPONENTS, SpongeResolveOperation::newContextualComponents);
+            l.add(ResolveOperations.CUSTOM_TRANSLATIONS, SpongeResolveOperation::newCustomTranslations);
         });
     }
 
