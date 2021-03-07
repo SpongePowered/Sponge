@@ -64,6 +64,10 @@ jobs:
         java: [8, 11, 15]
     runs-on: "${{ matrix.os }}"
     steps:
+      - name: Check out repository to use the build.gradle.kts as a hash file
+        uses: actions/checkout@v2
+        with:
+          path: code
       - name: "Setup JDK ${{ matrix.java }}"
         uses: actions/setup-java@v1
         with:
@@ -71,7 +75,8 @@ jobs:
       - uses: actions/cache@v2
         with:
           path: "${{ github.workspace}}/libraries"
-          key: "${{runner.os}}-${{matrix.java}}-it-libraries"
+          key: "${{runner.os}}-${{matrix.java}}-it-libraries-${{ hashFiles('code/build.gradle.kts') }}"
+          restore-keys: "${{runner.os}}-${{matrix.java}}-it-libraries-"
       - name: Download SpongeVanilla server
         uses: actions/download-artifact@v2
         with:
