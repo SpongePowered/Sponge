@@ -895,6 +895,7 @@ public final class SpongeRegistryLoaders {
             l.add(MaterialColor.COLOR_GREEN.id, MapColorTypes.COLOR_GREEN, k -> new SpongeMapColorType(MaterialColor.COLOR_GREEN));
             l.add(MaterialColor.COLOR_RED.id, MapColorTypes.COLOR_RED, k -> new SpongeMapColorType(MaterialColor.COLOR_RED));
             l.add(MaterialColor.COLOR_BLACK.id, MapColorTypes.COLOR_BLACK, k -> new SpongeMapColorType(MaterialColor.COLOR_BLACK));
+            l.add(MaterialColor.GOLD.id, MapColorTypes.GOLD, k -> new SpongeMapColorType(MaterialColor.GOLD));
             l.add(MaterialColor.DIAMOND.id, MapColorTypes.DIAMOND, k -> new SpongeMapColorType(MaterialColor.DIAMOND));
             l.add(MaterialColor.LAPIS.id, MapColorTypes.LAPIS_LAZULI, k -> new SpongeMapColorType(MaterialColor.LAPIS));
             l.add(MaterialColor.EMERALD.id, MapColorTypes.EMERALD, k -> new SpongeMapColorType(MaterialColor.EMERALD));
