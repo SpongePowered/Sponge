@@ -236,6 +236,7 @@ public final class InstallerMain {
                     if (name.startsWith("it/unimi")
                         || name.startsWith("com/google")
                         || name.startsWith("com/mojang/datafixers")
+                        || name.startsWith("com/mojang/brigadier")
                         || name.startsWith("org/apache")) {
                         return entry;
                     }
