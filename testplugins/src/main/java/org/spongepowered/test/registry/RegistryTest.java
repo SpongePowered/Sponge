@@ -114,6 +114,10 @@ import org.spongepowered.api.item.inventory.menu.ClickTypes;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.potion.PotionTypes;
 import org.spongepowered.api.item.recipe.RecipeTypes;
+import org.spongepowered.api.map.color.MapColorTypes;
+import org.spongepowered.api.map.color.MapShades;
+import org.spongepowered.api.map.decoration.MapDecorationTypes;
+import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
 import org.spongepowered.api.placeholder.PlaceholderParsers;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.Registry;
@@ -181,7 +185,7 @@ public final class RegistryTest {
             TransactionTypes.class, BooleanStateProperties.class, EnumStateProperties.class, IntegerStateProperties.class, StatisticCategories.class,
             Statistics.class, Mirrors.class, Orientations.class, Rotations.class, Biomes.class, BiomeSamplers.class, ChunkStates.class, Difficulties.class,
             GameRules.class, Structures.class, PortalTypes.class, PaletteTypes.class, TeleportHelperFilters.class, WeatherTypes.class, ChunkRegenerateFlags.class,
-            HeightTypes.class, LightTypes.class, WorldTypes.class,
+            HeightTypes.class, LightTypes.class, WorldTypes.class, MapDecorationOrientations.class, MapDecorationTypes.class, MapShades.class, MapColorTypes.class,
     };
 
     @Inject
