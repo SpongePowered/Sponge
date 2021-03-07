@@ -759,6 +759,23 @@ project("SpongeVanilla") {
             dependsOn("integrationTestServer", "integrationTestClient")
         }
 
+        val installerTemplateSource = vanillaProject.file("src/installer/templates")
+        val installerTemplateDest = vanillaProject.layout.buildDirectory.dir("generated/sources/installerTemplates")
+        val generateInstallerTemplates by registering(Copy::class) {
+            group = "sponge"
+            description = "Generate classes from templates for the SpongeVanilla installer"
+            val properties = mutableMapOf(
+                "minecraftVersion" to minecraftVersion
+            )
+            inputs.properties(properties)
+
+            // Copy template
+            from(installerTemplateSource)
+            into(installerTemplateDest)
+            expand(properties)
+        }
+        vanillaInstaller.java.srcDir(generateInstallerTemplates.map { it.outputs })
+
         val installerResources = vanillaProject.layout.buildDirectory.dir("generated/resources/installer")
         vanillaInstaller.resources.srcDir(installerResources)
         val emitDependencies by registering(OutputDependenciesToJson::class) {
