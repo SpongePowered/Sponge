@@ -547,6 +547,7 @@ project("SpongeVanilla") {
         version(minecraftVersion)
         injectRepositories().set(false)
         runs {
+            // Full development environment
             sequenceOf(8, 11, 15).forEach {
                 server("runJava${it}Server") {
                     args("--nogui", "--launchTarget", "sponge_server_dev")
@@ -564,6 +565,13 @@ project("SpongeVanilla") {
                 }
             }
 
+            // Lightweight integration tests
+            server("integrationTestServer") {
+                args("--launchTarget", "sponge_server_it")
+            }
+            client("integrationTestClient") {
+                args("--launchTarget", "sponge_client_it")
+            }
 
             configureEach {
                 workingDirectory().set(vanillaProject.file("run/"))
@@ -744,6 +752,11 @@ project("SpongeVanilla") {
             archiveClassifier.set("mixins")
             manifest.from(vanillaManifest)
             from(vanillaMixins.output)
+        }
+
+        val integrationTest by registering {
+            group = LifecycleBasePlugin.VERIFICATION_GROUP
+            dependsOn("integrationTestServer", "integrationTestClient")
         }
 
         val installerResources = vanillaProject.layout.buildDirectory.dir("generated/resources/installer")
