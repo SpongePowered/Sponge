@@ -49,15 +49,15 @@ public final class UpdateConnectingBlocksEffect implements ProcessingSideEffect 
     ) {
         final ServerLevel world = pipeline.getServerWorld();
         final BlockPos pos = oldState.pos;
-        if (flag.notifyObservers() && flag.getRawFlag() > 0) {
-            // int i = p_241211_3_ & -34; // Vanilla negates 34 to flip neighbor notification and and "is moving?"
-            final int strangeFlag = flag.getRawFlag() & -34;
+        if (flag.updateNeighboringShapes() && flag.getRawFlag() > 0) {
+            // int i = p_241211_3_ & -34; // Vanilla negates 34 to flip neighbor notification and and "state drops"
+            final int withoutNeighborDropsAndNestedNeighborUpdates = flag.asNestedNeighborUpdates().getRawFlag();
             // blockstate.updateIndirectNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
-            oldState.state.updateIndirectNeighbourShapes(world, pos, strangeFlag, limit - 1);
+            oldState.state.updateIndirectNeighbourShapes(world, pos, withoutNeighborDropsAndNestedNeighborUpdates, limit - 1);
             // p_241211_2_.updateNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
-            newState.updateNeighbourShapes(world, pos, strangeFlag, limit - 1);
+            newState.updateNeighbourShapes(world, pos, withoutNeighborDropsAndNestedNeighborUpdates, limit - 1);
             // p_241211_2_.updateIndirectNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
-            newState.updateIndirectNeighbourShapes(world, pos, strangeFlag, limit - 1);
+            newState.updateIndirectNeighbourShapes(world, pos, withoutNeighborDropsAndNestedNeighborUpdates, limit - 1);
         }
 
         return EffectResult.NULL_PASS;
