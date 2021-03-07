@@ -49,7 +49,7 @@ public final class UpdateConnectingBlocksEffect implements ProcessingSideEffect 
     ) {
         final ServerLevel world = pipeline.getServerWorld();
         final BlockPos pos = oldState.pos;
-        if (flag.updateNeighboringShapes() && flag.getRawFlag() > 0) {
+        if (flag.updateNeighboringShapes() && limit > 0) {
             // int i = p_241211_3_ & -34; // Vanilla negates 34 to flip neighbor notification and and "state drops"
             final int withoutNeighborDropsAndNestedNeighborUpdates = flag.asNestedNeighborUpdates().getRawFlag();
             // blockstate.updateIndirectNeighbourShapes(this, p_241211_1_, i, p_241211_4_ - 1);
