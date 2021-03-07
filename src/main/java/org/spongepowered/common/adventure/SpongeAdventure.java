@@ -29,6 +29,8 @@ import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.codecs.PrimitiveCodec;
 import io.netty.util.AttributeKey;
+import net.kyori.adventure.audience.Audience;
+import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.key.Key;
@@ -65,8 +67,11 @@ import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.api.distmarker.OnlyIn;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.adventure.ResolveOperation;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.common.accessor.client.KeyMappingAccessor;
 import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAccessor;
 import org.spongepowered.common.accessor.network.chat.TextColorAccessor;
@@ -656,28 +661,71 @@ public final class SpongeAdventure {
         // once Adventure exposes support
 
         @Override
-        public LegacyComponentSerializer legacySectionSerializer() {
+        public @NonNull LegacyComponentSerializer legacySectionSerializer() {
             return LegacyComponentSerializer.legacySection();
         }
 
         @Override
-        public LegacyComponentSerializer legacyAmpersandSerializer() {
+        public @NonNull LegacyComponentSerializer legacyAmpersandSerializer() {
             return LegacyComponentSerializer.legacyAmpersand();
         }
 
         @Override
-        public LegacyComponentSerializer legacySerializer(final char formatChar) {
+        public @NonNull LegacyComponentSerializer legacySerializer(final char formatChar) {
             return LegacyComponentSerializer.legacy(formatChar);
         }
 
         @Override
-        public GsonComponentSerializer gsonSerializer() {
+        public @NonNull GsonComponentSerializer gsonSerializer() {
             return SpongeAdventure.GSON;
         }
 
         @Override
-        public PlainComponentSerializer plainSerializer() {
+        public @NonNull PlainComponentSerializer plainSerializer() {
             return SpongeAdventure.PLAIN;
+        }
+
+        @Override
+        @SafeVarargs
+        public final @NonNull Component render(
+            final @NonNull Component component,
+            final @NonNull CommandCause senderContext,
+            @Nullable Audience viewer,
+            final @NonNull DefaultedRegistryReference<ResolveOperation> firstOperation,
+            final @NonNull DefaultedRegistryReference<ResolveOperation>@NonNull... otherOperations
+        ) {
+            Component output = Objects.requireNonNull(component, "component");
+            Objects.requireNonNull(senderContext, "senderContext");
+
+            // Unwrap the Audience to an entity
+            while (viewer instanceof ForwardingAudience.Single && !(viewer instanceof Entity)) {
+                viewer = ((ForwardingAudience.Single) viewer).audience();
+            }
+            final Entity backing;
+            if (viewer instanceof Entity) {
+                backing = (Entity) viewer;
+            } else {
+                backing = null;
+            }
+
+            output = ((SpongeResolveOperation) Objects.requireNonNull(firstOperation, "firstOperation").get())
+                .resolve(output, senderContext, backing);
+
+            for (final DefaultedRegistryReference<ResolveOperation> ref : otherOperations) {
+                output = ((SpongeResolveOperation) ref.get()).resolve(output, senderContext, backing);
+            }
+            return output;
+        }
+
+        @Override
+        @SafeVarargs
+        public final @NonNull Component render(
+            final @NonNull Component component,
+            final @NonNull CommandCause senderContext,
+            final @NonNull DefaultedRegistryReference<ResolveOperation> firstOperation,
+            final @NonNull DefaultedRegistryReference<ResolveOperation>@NonNull... otherOperations
+        ) {
+            return this.render(component, senderContext, null, firstOperation, otherOperations);
         }
     }
 
