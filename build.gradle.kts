@@ -573,15 +573,27 @@ project("SpongeVanilla") {
                 }
                 jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
                 allJvmArgumentProviders() += CommandLineArgumentProvider {
+                    // Resolve the Mixin artifact for use as a reload agent
+                    val mixinJar = vanillaAppLaunchConfig.resolvedConfiguration
+                            .getFiles { it.name == "mixin" && it.group == "org.spongepowered" }
+                            .firstOrNull()
+
+                    val base = if (mixinJar != null) {
+                        listOf("-javaagent:$mixinJar")
+                    } else {
+                        emptyList()
+                    }
+
+                    // Then add necessary module cracks
                     if (!this.name.contains("Java8")) {
-                        listOf(
+                        base + listOf(
                                 "--illegal-access=deny", // enable strict mode in prep for Java 16
                                 "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
                                 "--add-opens=java.base/java.util.jar=ALL-UNNAMED", // ModLauncher
                                 "--add-opens=java.base/java.lang=ALL-UNNAMED" // Guice
                         )
                     } else {
-                        listOf()
+                        base
                     }
                 }
                 mainClass().set("org.spongepowered.vanilla.applaunch.Main")
