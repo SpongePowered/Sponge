@@ -53,6 +53,9 @@ import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.map.MapCanvas;
+import org.spongepowered.api.map.MapInfo;
+import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
@@ -65,6 +68,8 @@ import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
+import org.spongepowered.common.map.canvas.SpongeMapCanvasDataBuilder;
+import org.spongepowered.common.map.decoration.SpongeMapDecorationDataBuilder;
 import org.spongepowered.common.registry.provider.DataTranslatorProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.storage.SpongePlayerData;
@@ -324,6 +329,8 @@ public final class SpongeDataManager implements DataManager {
         this.registerBuilder(EntityArchetype.class, new SpongeEntityArchetypeBuilder());
         this.registerBuilder(SpongePlayerData.class, new SpongePlayerDataBuilder());
         this.registerBuilder(BlockState.class, new SpongeBlockStateBuilder());
+        this.registerBuilder(MapDecoration.class, new SpongeMapDecorationDataBuilder());
+        this.registerBuilder(MapCanvas.class, new SpongeMapCanvasDataBuilder());
     }
 
     public Optional<DataStore> getDataStore(ResourceKey key, Class<? extends DataHolder> typeToken) {

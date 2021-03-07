@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.world.level.storage;
 
+import com.google.common.collect.BiMap;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
@@ -90,4 +91,8 @@ public interface PrimaryLevelDataBridge {
     void bridge$configAdapter(InheritableConfigHandle<WorldConfig> adapter);
 
     void bridge$populateFromDimension(LevelStem dimension);
+
+    void bridge$setMapUUIDIndex(BiMap<Integer, UUID> index);
+
+    BiMap<Integer, UUID> bridge$getMapUUIDIndex();
 }

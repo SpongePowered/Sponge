@@ -90,6 +90,9 @@ import org.spongepowered.api.item.recipe.crafting.ShapelessCraftingRecipe;
 import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.api.item.recipe.smithing.SmithingRecipe;
+import org.spongepowered.api.map.MapCanvas;
+import org.spongepowered.api.map.color.MapColor;
+import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.placeholder.PlaceholderComponent;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
@@ -186,6 +189,9 @@ import org.spongepowered.common.item.recipe.crafting.shapeless.SpongeShapelessCr
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredientBuilder;
 import org.spongepowered.common.item.recipe.smithing.SpongeSmithingRecipeBuilder;
 import org.spongepowered.common.item.recipe.stonecutting.SpongeStoneCutterRecipeBuilder;
+import org.spongepowered.common.map.canvas.SpongeMapCanvasBuilder;
+import org.spongepowered.common.map.color.SpongeMapColorBuilder;
+import org.spongepowered.common.map.decoration.SpongeMapDecorationBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderComponentBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderContextBuilder;
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
@@ -343,6 +349,9 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(EndStyleBiomeConfig.Builder.class, SpongeEndStyleBiomeConfig.BuilderImpl::new)
                 .register(LayeredBiomeConfig.Builder.class, SpongeLayeredBiomeConfg.BuilderImpl::new)
                 .register(MultiNoiseBiomeConfig.Builder.class, SpongeMultiNoiseBiomeConfig.BuilderImpl::new)
+                .register(MapColor.Builder.class, SpongeMapColorBuilder::new)
+                .register(MapDecoration.Builder.class, SpongeMapDecorationBuilder::new)
+                .register(MapCanvas.Builder.class, SpongeMapCanvasBuilder::new)
         ;
     }
 }

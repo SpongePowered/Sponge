@@ -22,33 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.item.stack;
+package org.spongepowered.common.data.provider.map;
 
 import org.spongepowered.common.data.provider.DataProviderRegistratorBuilder;
 
-public final class ItemStackDataProviders extends DataProviderRegistratorBuilder {
+public final class MapInfoDataProviders extends DataProviderRegistratorBuilder {
 
-    @Override
-    public void registerProviders() {
-        AbstractBannerItemStackData.register(this.registrator);
-        ArmorItemStackData.register(this.registrator);
-        BlockItemStackData.register(this.registrator);
-        BlockTypeItemStackData.register(this.registrator);
-        BookItemStackData.register(this.registrator);
-        BookPagesItemStackData.register(this.registrator);
-        CompassItemData.register(this.registrator);
-        FireworkItemStackData.register(this.registrator);
-        HideFlagsItemStackData.register(this.registrator);
-        IDyeableArmorItemStackData.register(this.registrator);
-        ItemStackData.register(this.registrator);
-        MusicDiscItemStackData.register(this.registrator);
-        PotionItemStackData.register(this.registrator);
-        ShieldItemStackData.register(this.registrator);
-        SignItemStackData.register(this.registrator);
-        SkullItemStackData.register(this.registrator);
-        TieredItemStackData.register(this.registrator);
-        ToolItemStackData.register(this.registrator);
-        WoolItemStackData.register(this.registrator);
-        MapInfoItemStackData.register(this.registrator);
-    }
+	@Override
+	protected void registerProviders() {
+		MapInfoData.register(this.registrator);
+	}
 }
