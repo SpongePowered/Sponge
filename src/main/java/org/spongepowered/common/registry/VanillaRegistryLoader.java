@@ -48,6 +48,7 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.state.properties.AttachFace;
@@ -179,6 +180,7 @@ final class VanillaRegistryLoader {
         this.knownName(RegistryTypes.PANDA_GENE, Panda.Gene.values(), Panda.Gene::getName);
         this.automaticName(RegistryTypes.PHANTOM_PHASE, Phantom.AttackPhase.values());
         this.automaticName(RegistryTypes.PICKUP_RULE, AbstractArrow.Pickup.values());
+        this.automaticName(RegistryTypes.MIRROR, Mirror.values());
         this.knownName(RegistryTypes.PISTON_TYPE, PistonType.values(), PistonType::getSerializedName);
         this.knownName(RegistryTypes.PORTION_TYPE, Half.values(), Half::getSerializedName);
         this.automaticName(RegistryTypes.RAID_STATUS, Raid.RaidStatus.values());
