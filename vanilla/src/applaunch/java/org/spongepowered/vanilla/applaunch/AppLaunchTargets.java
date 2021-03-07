@@ -28,7 +28,9 @@ public enum AppLaunchTargets {
     CLIENT_DEVELOPMENT("sponge_client_dev"),
     CLIENT_PRODUCTION("sponge_client_prod"),
     SERVER_DEVELOPMENT("sponge_server_dev"),
-    SERVER_PRODUCTION("sponge_server_prod");
+    SERVER_PRODUCTION("sponge_server_prod"),
+    CLIENT_INTEGRATION_TEST("sponge_client_it"),
+    SERVER_INTEGRATION_TEST("sponge_server_it");
 
     private final String launchTarget;
 
@@ -51,6 +53,10 @@ public enum AppLaunchTargets {
                 return AppLaunchTargets.SERVER_DEVELOPMENT;
             case "sponge_server_prod":
                 return AppLaunchTargets.SERVER_PRODUCTION;
+            case "sponge_client_it":
+                return AppLaunchTargets.CLIENT_INTEGRATION_TEST;
+            case "sponge_server_it":
+                return AppLaunchTargets.SERVER_INTEGRATION_TEST;
         }
 
         return null;

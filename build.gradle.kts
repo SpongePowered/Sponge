@@ -547,6 +547,7 @@ project("SpongeVanilla") {
         version(minecraftVersion)
         injectRepositories().set(false)
         runs {
+            // Full development environment
             sequenceOf(8, 11, 15).forEach {
                 server("runJava${it}Server") {
                     args("--nogui", "--launchTarget", "sponge_server_dev")
@@ -564,6 +565,13 @@ project("SpongeVanilla") {
                 }
             }
 
+            // Lightweight integration tests
+            server("integrationTestServer") {
+                args("--launchTarget", "sponge_server_it")
+            }
+            client("integrationTestClient") {
+                args("--launchTarget", "sponge_client_it")
+            }
 
             configureEach {
                 workingDirectory().set(vanillaProject.file("run/"))
@@ -745,6 +753,28 @@ project("SpongeVanilla") {
             manifest.from(vanillaManifest)
             from(vanillaMixins.output)
         }
+
+        val integrationTest by registering {
+            group = LifecycleBasePlugin.VERIFICATION_GROUP
+            dependsOn("integrationTestServer", "integrationTestClient")
+        }
+
+        val installerTemplateSource = vanillaProject.file("src/installer/templates")
+        val installerTemplateDest = vanillaProject.layout.buildDirectory.dir("generated/sources/installerTemplates")
+        val generateInstallerTemplates by registering(Copy::class) {
+            group = "sponge"
+            description = "Generate classes from templates for the SpongeVanilla installer"
+            val properties = mutableMapOf(
+                "minecraftVersion" to minecraftVersion
+            )
+            inputs.properties(properties)
+
+            // Copy template
+            from(installerTemplateSource)
+            into(installerTemplateDest)
+            expand(properties)
+        }
+        vanillaInstaller.java.srcDir(generateInstallerTemplates.map { it.outputs })
 
         val installerResources = vanillaProject.layout.buildDirectory.dir("generated/resources/installer")
         vanillaInstaller.resources.srcDir(installerResources)

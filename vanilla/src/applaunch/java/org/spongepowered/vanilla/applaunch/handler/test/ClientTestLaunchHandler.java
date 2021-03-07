@@ -22,30 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.installer;
+package org.spongepowered.vanilla.applaunch.handler.test;
 
-import org.objectweb.asm.Opcodes;
+import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
+import org.spongepowered.vanilla.applaunch.Main;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 
-public final class Constants {
+public class ClientTestLaunchHandler extends AbstractVanillaTestLaunchHandler {
 
-    public static final int ASM_VERSION = Opcodes.ASM9;
-
-    public static final class Libraries {
-
-        public static final String MINECRAFT_VERSION_TARGET = "1.16.5";
-        public static final String MINECRAFT_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-        public static final String MINECRAFT_PATH_PREFIX = "net/minecraft";
-        public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
-        public static final String MINECRAFT_MAPPINGS_PREFIX = Libraries.MINECRAFT_PATH_PREFIX + "/mappings";
-        public static final String MINECRAFT_MAPPINGS_NAME = "server.txt";
-
-        public static final String SPONGE_NEXUS_DOWNLOAD_URL = "https://repo-new.spongepowered.org/service/rest/v1/search/assets?md5=%s&maven"
-            + ".groupId=%s&maven.artifactId=%s&maven.baseVersion=%s&maven.extension=jar";
+    @Override
+    public String name() {
+        return AppLaunchTargets.CLIENT_INTEGRATION_TEST.getLaunchTarget();
     }
 
-    public static final class ManifestAttributes {
-
-        public static final String ACCESS_WIDENER = "Access-Widener";
-        public static final String LAUNCH_TARGET = "Launch-Target";
+    @Override
+    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
+        Class.forName("org.spongepowered.vanilla.launch.IntegrationTestLaunch", true, launchClassLoader.getInstance())
+            .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
+            .invoke(null, Main.getInstance().getPluginEngine(), /* isServer = */ Boolean.FALSE, arguments);
     }
 }
