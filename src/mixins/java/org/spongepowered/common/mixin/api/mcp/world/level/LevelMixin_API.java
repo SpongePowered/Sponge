@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.world.level;
 import net.kyori.adventure.sound.Sound;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.resources.ResourceKey;
@@ -78,7 +77,6 @@ import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MissingImplementationException;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.archetype.SpongeArchetypeVolume;
@@ -86,9 +84,7 @@ import org.spongepowered.common.world.volume.buffer.entity.ObjectArrayMutableEnt
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.AbstractMap;
 import java.util.ArrayList;
-import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -296,7 +292,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public ArchetypeVolume createArchetypeVolume(final Vector3i min, final Vector3i max, final Vector3i origin) {
-        final Vector3i rawVolMin = Objects.requireNonNull(Objects.requireNonNull(max, "max"), "min").min(max);
+        final Vector3i rawVolMin = Objects.requireNonNull(min, "min").min(Objects.requireNonNull(max, "max"));
         final Vector3i adjustedVolMin = rawVolMin.sub(Objects.requireNonNull(origin, "origin"));
         final Vector3i volMax = max.max(min);
         final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(adjustedVolMin, volMax.sub(rawVolMin).add(1, 1, 1), this.registries());
