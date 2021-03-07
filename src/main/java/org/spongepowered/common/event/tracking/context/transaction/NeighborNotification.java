@@ -31,14 +31,20 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
+import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
+import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
+import java.util.Collections;
+import java.util.EnumMap;
+import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
@@ -121,9 +127,20 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
         final Cause currentCause,
         ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
-        // TODO - for all neighbor notifications in the transactions find the direction of notification being used and pump into map.
+        final Map<Direction, org.spongepowered.api.block.BlockState> neighbors = new EnumMap<Direction, org.spongepowered.api.block.BlockState>(Direction.class);
+        for (GameTransaction<NotifyNeighborBlockEvent> transaction : transactions) {
+            final NeighborNotification neighborNotification = (NeighborNotification) transaction;
+            final BlockPos sourcePos = neighborNotification.sourcePos;
+            final BlockPos notifyPos = neighborNotification.notifyPos;
+            int var6 = Integer.signum(notifyPos.getX() - sourcePos.getX());
+            int var7 = Integer.signum(notifyPos.getY() - sourcePos.getY());
+            int var8 = Integer.signum(notifyPos.getZ() - sourcePos.getZ());
+            final net.minecraft.core.Direction dir = net.minecraft.core.Direction.fromNormal(var6, var7, var8);
 
-        return Optional.empty();
+            neighbors.put(DirectionUtil.getFor(dir), ((org.spongepowered.api.block.BlockState) neighborNotification.originalState));
+        }
+
+        return Optional.of(SpongeEventFactory.createNotifyNeighborBlockEvent(currentCause, neighbors, neighbors));
     }
 
     @Override
