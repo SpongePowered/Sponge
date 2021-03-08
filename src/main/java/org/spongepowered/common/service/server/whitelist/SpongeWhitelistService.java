@@ -36,6 +36,8 @@ import org.spongepowered.common.util.UserListUtil;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
+import java.util.concurrent.CompletableFuture;
+
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.server.players.UserWhiteListEntry;
 
@@ -44,7 +46,7 @@ public final class SpongeWhitelistService implements WhitelistService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<GameProfile> getWhitelistedProfiles() {
+    public CompletableFuture<Collection<GameProfile>> getWhitelistedProfiles() {
         final List<GameProfile> profiles = new ArrayList<>();
 
         final UserWhiteList list = SpongeCommon.getServer().getPlayerList().getWhiteList();
@@ -52,31 +54,29 @@ public final class SpongeWhitelistService implements WhitelistService {
             profiles.add(SpongeGameProfile.of(((StoredUserEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user()));
         }
 
-        return profiles;
+        return CompletableFuture.completedFuture(profiles);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean isWhitelisted(final GameProfile profile) {
+    public CompletableFuture<Boolean> isWhitelisted(final GameProfile profile) {
         final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserWhiteListEntry> whitelist = (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserWhiteListEntry>) SpongeWhitelistService
             .getWhitelist();
 
         whitelist.invoker$removeExpired();
-        return whitelist.accessor$map().containsKey(whitelist.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile)));
+        return CompletableFuture.completedFuture(whitelist.accessor$map().containsKey(whitelist.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile))));
     }
 
     @Override
-    public boolean addProfile(final GameProfile profile) {
-        final boolean wasWhitelisted = this.isWhitelisted(profile);
-        UserListUtil.addEntry(SpongeWhitelistService.getWhitelist(), new UserWhiteListEntry(SpongeGameProfile.toMcProfile(profile)));
-        return wasWhitelisted;
+    public CompletableFuture<Boolean> addProfile(final GameProfile profile) {
+        final boolean wasWhitelisted = UserListUtil.addEntry(SpongeWhitelistService.getWhitelist(), new UserWhiteListEntry(SpongeGameProfile.toMcProfile(profile))) != null;
+        return CompletableFuture.completedFuture(wasWhitelisted);
     }
 
     @Override
-    public boolean removeProfile(final GameProfile profile) {
-        final boolean wasWhitelisted = this.isWhitelisted(profile);
-        UserListUtil.removeEntry(SpongeWhitelistService.getWhitelist(), profile);
-        return wasWhitelisted;
+    public CompletableFuture<Boolean> removeProfile(final GameProfile profile) {
+        final boolean wasWhitelisted = UserListUtil.removeEntry(SpongeWhitelistService.getWhitelist(), SpongeGameProfile.toMcProfile(profile)) != null;
+        return CompletableFuture.completedFuture(wasWhitelisted);
     }
 
     private static UserWhiteList getWhitelist() {
