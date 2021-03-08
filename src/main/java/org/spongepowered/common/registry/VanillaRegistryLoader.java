@@ -40,6 +40,7 @@ import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.monster.SpellcasterIllager;
+import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -181,6 +182,7 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.PHANTOM_PHASE, Phantom.AttackPhase.values());
         this.automaticName(RegistryTypes.PICKUP_RULE, AbstractArrow.Pickup.values());
         this.automaticName(RegistryTypes.MIRROR, Mirror.values());
+        this.automaticName(RegistryTypes.CHAT_VISIBILITY, ChatVisiblity.values());
         this.knownName(RegistryTypes.PISTON_TYPE, PistonType.values(), PistonType::getSerializedName);
         this.knownName(RegistryTypes.PORTION_TYPE, Half.values(), Half::getSerializedName);
         this.automaticName(RegistryTypes.RAID_STATUS, Raid.RaidStatus.values());
