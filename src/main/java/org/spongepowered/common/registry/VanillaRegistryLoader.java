@@ -111,7 +111,7 @@ final class VanillaRegistryLoader {
     }
 
     private void loadInstanceRegistries() {
-        this.holder.createRegistry(RegistryTypes.CRITERION, VanillaRegistryLoader.criterion().values());
+        this.holder.createRegistry(RegistryTypes.CRITERION, VanillaRegistryLoader.criterion());
         this.manualName(RegistryTypes.DRAGON_PHASE_TYPE, EnderDragonPhase.getCount(), map -> {
             map.put(EnderDragonPhase.HOLDING_PATTERN, "holding_pattern");
             map.put(EnderDragonPhase.STRAFE_PLAYER, "strafe_player");
@@ -125,8 +125,8 @@ final class VanillaRegistryLoader {
             map.put(EnderDragonPhase.DYING, "dying");
             map.put(EnderDragonPhase.HOVERING, "hover");
         });
-        this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape().values());
-        this.holder.createRegistry(RegistryTypes.TRIGGER, () -> VanillaRegistryLoader.trigger().values(), true,
+        this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
+        this.holder.createRegistry(RegistryTypes.TRIGGER, VanillaRegistryLoader.trigger(), true,
                 (k, trigger) -> CriteriaTriggersAccessor.invoker$register((CriterionTrigger<?>) trigger));
         this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
     }
@@ -297,7 +297,7 @@ final class VanillaRegistryLoader {
     }
 
     @SuppressWarnings("UnusedReturnValue")
-    private <A, I> Registry<A> knownName(RegistryType<A> type, Collection<I> values, Function<I, String> name) {
+    private <A, I> Registry<A> knownName(final RegistryType<A> type, final Collection<I> values, final Function<I, String> name) {
         final Map<I, String> map = new HashMap<>();
         for (final I value : values) {
             map.put(value, name.apply(value));
