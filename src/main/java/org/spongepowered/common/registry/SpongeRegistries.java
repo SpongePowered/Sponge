@@ -77,7 +77,6 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.MAP_DECORATION_ORIENTATION, SpongeRegistryLoaders.mapDecorationOrientation());
         holder.createRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoaders.mapDecorationType());
         holder.createRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoaders.mapShade());
-        System.out.println("Bananas!");
     }
 
     public static void registerServerRegistries(final SpongeRegistryHolder holder) {
