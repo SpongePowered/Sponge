@@ -27,6 +27,7 @@ package org.spongepowered.vanilla.generator;
 import com.github.javaparser.utils.Log;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
 import org.tinylog.Logger;
 
@@ -35,6 +36,7 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 /**
@@ -118,7 +120,7 @@ public final class GeneratorMain {
                 "world.biome",
                 "Biomes",
                 "BIOME",
-                context.relativeClass("world.biome", "Biomes"),
+                context.relativeClass("world.biome", "Biome"),
                 Registry.BIOME_REGISTRY
             ),
             new RegistryEntriesGenerator<>(
@@ -153,7 +155,9 @@ public final class GeneratorMain {
             new RegistryEntriesValidator<>(
                 "entity",
                 "EntityTypes",
-                Registry.ENTITY_TYPE_REGISTRY
+                Registry.ENTITY_TYPE_REGISTRY,
+                $ -> true,
+                Set.of(new ResourceLocation("sponge", "human")) // Sponge's Human type is an extra addition
             ),
             new RegistryEntriesGenerator<>(
                 "fluid",

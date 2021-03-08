@@ -46,6 +46,7 @@ import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.Predicate;
 
 // Generates a constants file based on registry entries
@@ -55,25 +56,28 @@ class RegistryEntriesValidator<V> implements Generator {
     private final String targetClassSimpleName;
     private final ResourceKey<? extends Registry<V>> registry;
     private final Predicate<V> filter;
+    private final Set<ResourceLocation> extraEntries;
 
     RegistryEntriesValidator(
         final String targetRelativePackage,
         final String targetClassSimpleName,
         final ResourceKey<? extends Registry<V>> registry
     ) {
-        this(targetRelativePackage, targetClassSimpleName, registry, $ -> true);
+        this(targetRelativePackage, targetClassSimpleName, registry, $ -> true, Set.of());
     }
 
     RegistryEntriesValidator(
         final String targetRelativePackage,
         final String targetClassSimpleName,
         final ResourceKey<? extends Registry<V>> registry,
-        final Predicate<V> filter
+        final Predicate<V> filter,
+        final Set<ResourceLocation> extraEntries
     ) {
         this.relativePackageName = targetRelativePackage;
         this.targetClassSimpleName = targetClassSimpleName;
         this.registry = registry;
         this.filter = filter;
+        this.extraEntries = Set.copyOf(extraEntries);
     }
 
     @Override
@@ -118,7 +122,9 @@ class RegistryEntriesValidator<V> implements Generator {
         // Now, iterate the registry, discovering which fields were added and removed
         final var added = new HashSet<ResourceLocation>();
         final var processedFields = new ArrayList<FieldDeclaration>(registry.keySet().size());
-        for (final ResourceLocation key : registry.keySet()) {
+        final Set<ResourceLocation> allKeys = new HashSet<>(registry.keySet());
+        allKeys.addAll(this.extraEntries);
+        for (final ResourceLocation key : allKeys) {
             if (!this.filter.test(registry.get(key))) {
                 continue;
             }
