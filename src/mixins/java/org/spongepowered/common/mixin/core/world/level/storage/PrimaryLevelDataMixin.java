@@ -289,7 +289,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     @Override
-    public void bridge$setMapUUIDIndex(BiMap<Integer, UUID> index) {
+    public void bridge$setMapUUIDIndex(final BiMap<Integer, UUID> index) {
         this.impl$mapUUIDIndex = index;
     }
 
