@@ -152,8 +152,10 @@ public class ReusableComponentMessageFactory implements MessageFactory2 {
             final Object param = this.getParameter();
             // TODO: ansi formatting
             if (param instanceof ComponentLike) {
-                buffer.append(SpongeAdventure.PLAIN.serialize(
-                    ComponentMessage.RENDERER.render(((ComponentLike) param).asComponent(), Locale.getDefault())));
+                SpongeAdventure.FLATTENER.flatten(
+                    ComponentMessage.RENDERER.render(((ComponentLike) param).asComponent(), Locale.getDefault()),
+                    buffer::append
+                );
             } else if (param instanceof net.minecraft.network.chat.Component) {
                 buffer.append(NativeComponentRenderer.apply((Component) param, Locale.getDefault()).getString());
             } else {

@@ -39,8 +39,10 @@ import net.kyori.adventure.serializer.configurate4.ConfigurateComponentSerialize
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.KeybindComponent;
+import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.flattener.ComponentFlattener;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
@@ -49,6 +51,8 @@ import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
+import net.kyori.adventure.translation.TranslationRegistry;
+import net.kyori.adventure.translation.Translator;
 import net.kyori.adventure.util.Codec;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
@@ -91,6 +95,8 @@ import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 public final class SpongeAdventure {
     public static final AttributeKey<Locale> CHANNEL_LOCALE = AttributeKey.newInstance("sponge:locale");
@@ -136,19 +142,75 @@ public final class SpongeAdventure {
             .build();
 
     private static final Set<ServerBossEvent> ACTIVE_BOSS_BARS = ConcurrentHashMap.newKeySet();
-    public static final PlainComponentSerializer PLAIN = new PlainComponentSerializer(
-        keybind -> {
-            if (!Launch.getInstance().isDedicatedServer()) {
-                return SpongeAdventure.resolveKeybind(keybind);
-            } else {
-                return keybind.keybind();
+    private static final Pattern LOCALIZATION_PATTERN = Pattern.compile("%(?:(\\d+)\\$)?s");
+    public static final ComponentFlattener FLATTENER;
+    public static final PlainComponentSerializer PLAIN;
+    public static final LegacyComponentSerializer LEGACY_AMPERSAND;
+    public static final LegacyComponentSerializer LEGACY_SECTION;
+
+    static {
+        final ComponentFlattener.Builder flattenerBuilder = ComponentFlattener.basic().toBuilder();
+        if (!Launch.getInstance().isDedicatedServer()) {
+            flattenerBuilder.mapper(KeybindComponent.class, SpongeAdventure::resolveKeybind);
+        }
+
+        flattenerBuilder.complexMapper(TranslatableComponent.class, (component, consumer) -> {
+            final String key = component.key();
+            for(final Translator registry : GlobalTranslator.get().sources()) {
+                if(registry instanceof TranslationRegistry && ((TranslationRegistry) registry).contains(key)) {
+                    consumer.accept(GlobalTranslator.render(component, Locale.getDefault()));
+                    return;
+                }
             }
-        },
-        translatable -> String.format(
-            Language.getInstance().getOrDefault(translatable.key()),
-            translatable.args().stream().map(SpongeAdventure.PLAIN::serialize).toArray(Object[]::new)
-        )
-    );
+
+            final /* @NonNull */ String translated = Language.getInstance().getOrDefault(key);
+            final Matcher matcher = SpongeAdventure.LOCALIZATION_PATTERN.matcher(translated);
+            final List<Component> args = component.args();
+            int argPosition = 0;
+            int lastIdx = 0;
+            while (matcher.find()) {
+                // append prior
+                if (lastIdx < matcher.start()) {
+                    consumer.accept(Component.text(translated.substring(lastIdx, matcher.start())));
+                }
+                lastIdx = matcher.end();
+
+                final /* @Nullable */ String argIdx = matcher.group(1);
+                // calculate argument position
+                if (argIdx != null) {
+                    try {
+                        final int idx = Integer.parseInt(argIdx);
+                        if (idx < args.size()) {
+                            consumer.accept(args.get(idx));
+                        }
+                    } catch (final NumberFormatException ex) {
+                        // ignore, drop the format placeholder
+                    }
+                } else {
+                    final int idx = argPosition++;
+                    if (idx < args.size()) {
+                        consumer.accept(args.get(idx));
+                    }
+                }
+            }
+
+            // append tail
+            if (lastIdx < translated.length()) {
+                consumer.accept(Component.text(translated.substring(lastIdx)));
+            }
+        });
+
+        FLATTENER = flattenerBuilder.build();
+        PLAIN = PlainComponentSerializer.builder().flattener(SpongeAdventure.FLATTENER).build();
+        LEGACY_AMPERSAND = LegacyComponentSerializer.builder()
+            .character(LegacyComponentSerializer.AMPERSAND_CHAR)
+            .flattener(SpongeAdventure.FLATTENER)
+            .build();
+        LEGACY_SECTION = LegacyComponentSerializer.builder()
+            .character(LegacyComponentSerializer.SECTION_CHAR)
+            .flattener(SpongeAdventure.FLATTENER)
+            .build();
+    }
 
     @OnlyIn(Dist.CLIENT)
     private static String resolveKeybind(final KeybindComponent component) {
@@ -657,22 +719,28 @@ public final class SpongeAdventure {
             return ClickEvent.runCommand("/sponge:callback " + key.toString());
         }
 
-        // TODO: Implement 'flattening' of components using server info
-        // once Adventure exposes support
-
         @Override
         public @NonNull LegacyComponentSerializer legacySectionSerializer() {
-            return LegacyComponentSerializer.legacySection();
+            return SpongeAdventure.LEGACY_SECTION;
         }
 
         @Override
         public @NonNull LegacyComponentSerializer legacyAmpersandSerializer() {
-            return LegacyComponentSerializer.legacyAmpersand();
+            return SpongeAdventure.LEGACY_AMPERSAND;
         }
 
         @Override
         public @NonNull LegacyComponentSerializer legacySerializer(final char formatChar) {
-            return LegacyComponentSerializer.legacy(formatChar);
+            if (formatChar == LegacyComponentSerializer.SECTION_CHAR) {
+                return this.legacySectionSerializer();
+            } else if (formatChar == LegacyComponentSerializer.AMPERSAND_CHAR) {
+                return this.legacyAmpersandSerializer();
+            }
+
+            return LegacyComponentSerializer.builder()
+                .character(formatChar)
+                .flattener(SpongeAdventure.FLATTENER)
+                .build();
         }
 
         @Override
