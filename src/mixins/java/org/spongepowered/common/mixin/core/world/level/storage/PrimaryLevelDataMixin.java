@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.level.storage;
 
 import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
@@ -104,7 +105,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup,
         impl$performsSpawnLogic;
 
-    private BiMap<Integer, UUID> impl$mapUUIDIndex;
+    private BiMap<Integer, UUID> impl$mapUUIDIndex = HashBiMap.create();
 
     @Override
     public ResourceKey bridge$getKey() {
