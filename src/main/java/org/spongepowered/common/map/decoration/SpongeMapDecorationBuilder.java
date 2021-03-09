@@ -25,7 +25,8 @@
 package org.spongepowered.common.map.decoration;
 
 import com.google.common.base.Preconditions;
-import net.kyori.adventure.text.TextComponent;
+import net.kyori.adventure.text.Component;
+import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -49,7 +50,7 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     private int y;
     private MapDecorationOrientation rot = MapDecorationOrientations.NORTH.get();
     @Nullable
-    private TextComponent customName = null;
+    private Component customName = null;
 
     @Override
     public MapDecoration.Builder type(MapDecorationType type) {
@@ -95,7 +96,7 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     }
 
     @Override
-    public MapDecoration.Builder customName(TextComponent customName) {
+    public MapDecoration.Builder customName(Component customName) {
         this.customName = customName;
         return this;
     }
@@ -134,6 +135,14 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
             final byte y = getByteFromContainer(container, Constants.Map.DECORATION_Y);
 
             this.position(Vector2i.from(x, y));
+        }
+
+        if (container.contains(Constants.Map.NAME)) {
+            final Component component = SpongeComponents.gsonSerializer().deserialize(
+                    container.getString(Constants.Map.NAME)
+                            .orElseThrow(() -> new InvalidDataException("Invalid data type for " + Constants.Map.NAME + ". Should be String"))
+            );
+            this.customName(component);
         }
 
         return this;

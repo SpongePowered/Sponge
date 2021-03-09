@@ -33,6 +33,7 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.entity.Banner;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
@@ -205,8 +206,8 @@ public class MapTest implements LoadableModule {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
         MapDecoration decoration = MapDecoration.builder()
-                .type(MapDecorationTypes.BLUE_MARKER)
-                .customName(Component.text("I AM A BLOO MARKER"))
+                .type(MapDecorationTypes.BANNER_BLUE)
+                .customName(Component.text("I AM A ").color(NamedTextColor.BLUE).append(BlockTypes.BLUE_BANNER.get()))
                 .rotation(MapDecorationOrientations.NORTH)
                 .build();
         heldMap.require(Keys.MAP_INFO).offer(Keys.MAP_DECORATIONS, Sets.newHashSet(decoration));
