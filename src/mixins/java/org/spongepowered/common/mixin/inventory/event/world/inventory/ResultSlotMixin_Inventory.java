@@ -95,7 +95,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
     }
 
     @Inject(method = "onTake", at = @At("HEAD"))
-    private void beforeTake(final Player thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
+    private void beforeTake(final Player thePlayer, final ItemStack stack, final CallbackInfo ci) {
         if (this.impl$lastRecipe == null || !((Recipe) this.impl$lastRecipe).matches(this.craftSlots, thePlayer.level)) {
             this.impl$lastRecipe = ((CraftingRecipe) thePlayer.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots,
                     thePlayer.level).orElse(null));
@@ -128,7 +128,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
     }
 
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))
-    private void afterTake(final Player thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
+    private void afterTake(final Player thePlayer, final ItemStack stack, final CallbackInfo ci) {
         if (((WorldBridge) thePlayer.level).bridge$isFake()) {
             return;
         }

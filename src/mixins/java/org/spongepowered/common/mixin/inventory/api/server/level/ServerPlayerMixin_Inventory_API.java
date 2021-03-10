@@ -105,8 +105,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
                 // intentionally missing the lastCursor to not double throw close event
         ) {
             ctx.buildAndSwitch();
-            final net.minecraft.world.entity.player.Inventory inventory = this.shadow$getInventory();
-            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(inventory.getCarried());
+            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.containerMenu.getCarried());
             return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(openContainer, (net.minecraft.server.level.ServerPlayer) (Object) this, cursor, cursor, false).isCancelled();
         }
     }

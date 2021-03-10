@@ -47,6 +47,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.List;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.item.ItemStack;
@@ -63,7 +64,7 @@ public abstract class CraftingMenuMixin_Inventory {
      */
     @Inject(method = "slotChangedCraftingGrid", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ResultContainer;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
-    private static void beforeSlotChangedCraftingGrid(int p_217066_0_, final Level p_217066_1_, final Player p_217066_2_,
+    private static void beforeSlotChangedCraftingGrid(AbstractContainerMenu p_217066_0_, final Level p_217066_1_, final Player p_217066_2_,
             final net.minecraft.world.inventory.CraftingContainer p_217066_3_, final ResultContainer p_217066_4_, final CallbackInfo ci,
             ServerPlayer serverPlayerEntity, ItemStack itemStack) {
         TrackedInventoryBridge trackedContainer = (TrackedInventoryBridge) p_217066_2_.containerMenu;
@@ -88,7 +89,7 @@ public abstract class CraftingMenuMixin_Inventory {
      */
     @Inject(method = "slotChangedCraftingGrid", cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerGamePacketListenerImpl;send(Lnet/minecraft/network/protocol/Packet;)V"))
-    private static void afterSlotChangedCraftingGrid(int p_217066_0_,
+    private static void afterSlotChangedCraftingGrid(AbstractContainerMenu p_217066_0_,
             final Level world, final Player player, final net.minecraft.world.inventory.CraftingContainer craftingInventory, final ResultContainer output, final CallbackInfo ci) {
 
         TrackedContainerBridge container = (TrackedContainerBridge) player.containerMenu;

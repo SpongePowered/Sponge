@@ -100,7 +100,7 @@ public abstract class PlayerEntityMixin_Inventory {
                     .openContainer(container)) {
                 // intentionally missing the lastCursor to not double throw close event
                 ctx.buildAndSwitch();
-                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.shadow$getInventory().getCarried());
+                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.containerMenu.getCarried());
                 container.removed(player);
                 SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.containerMenu, serverPlayer, cursor, ItemStackSnapshot.empty(), false);
             }

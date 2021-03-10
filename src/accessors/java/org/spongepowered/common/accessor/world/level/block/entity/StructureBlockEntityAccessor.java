@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.level.block.entity;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Vec3i;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 import org.spongepowered.asm.mixin.Mixin;
@@ -41,9 +42,9 @@ public interface StructureBlockEntityAccessor {
 
     @Accessor("structurePos") void accessor$structurePos(final BlockPos structurePos);
 
-    @Accessor("structureSize") BlockPos accessor$structureSize();
+    @Accessor("structureSize") Vec3i accessor$structureSize();
 
-    @Accessor("structureSize") void accessor$structureSize(final BlockPos structureSize);
+    @Accessor("structureSize") void accessor$structureSize(final Vec3i structureSize);
 
     @Accessor("mode") StructureMode accessor$mode();
 

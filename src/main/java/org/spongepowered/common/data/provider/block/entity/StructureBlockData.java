@@ -70,7 +70,7 @@ public final class StructureBlockData {
                         .set((h, v) -> h.accessor$structurePos(VecHelper.toBlockPos(v)))
                     .create(Keys.STRUCTURE_SIZE)
                         .get(h -> VecHelper.toVector3i(h.accessor$structureSize()))
-                        .set((h, v) -> h.accessor$structureSize(VecHelper.toBlockPos(v)));
+                        .set((h, v) -> h.accessor$structureSize(VecHelper.toVanillaVector3i(v)));
     }
     // @formatter:on
 }
