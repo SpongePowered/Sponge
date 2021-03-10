@@ -47,6 +47,7 @@ import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ExecutorService;
+import java.util.concurrent.LinkedBlockingQueue;
 import java.util.concurrent.ThreadPoolExecutor;
 import java.util.concurrent.TimeUnit;
 
@@ -66,9 +67,9 @@ public final class LibraryManager {
         // We'll be performing mostly IO-blocking operations, so more threads will help us for now
         // It might make sense to make this overridable eventually
         this.preparationWorker = new ThreadPoolExecutor(
-            Math.max(4, availableCpus), Integer.MAX_VALUE,
+            Math.min(Math.max(4, availableCpus * 2), 64), Integer.MAX_VALUE,
             60L, TimeUnit.SECONDS,
-            new ArrayBlockingQueue<>(256) // this is the number of tasks allowed to be waiting before the pool will spawn off a new thread
+            new LinkedBlockingQueue<>() // this is the number of tasks allowed to be waiting before the pool will spawn off a new thread (unbounded)
         );
     }
 
@@ -166,7 +167,15 @@ public final class LibraryManager {
             }, this.preparationWorker));
         }
 
-        CompletableFuture.allOf(operations.toArray(new CompletableFuture<?>[0])).join();
+
+        CompletableFuture.allOf(operations.toArray(new CompletableFuture<?>[0])).handle((result, err) -> {
+            if (err != null) {
+                failures.add(err.getMessage());
+                Logger.error(err, "Failed to download library");
+            }
+            return result;
+        }).join();
+
         if (!failures.isEmpty()) {
             Logger.error("Failed to download some libraries:");
             for (final String message : failures) {

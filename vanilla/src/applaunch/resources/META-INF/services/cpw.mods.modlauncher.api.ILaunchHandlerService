@@ -1,3 +1,5 @@
 org.spongepowered.vanilla.applaunch.handler.dev.ServerDevLaunchHandler
 org.spongepowered.vanilla.applaunch.handler.dev.ClientDevLaunchHandler
 org.spongepowered.vanilla.applaunch.handler.prod.ServerProdLaunchHandler
+org.spongepowered.vanilla.applaunch.handler.test.ServerTestLaunchHandler
+org.spongepowered.vanilla.applaunch.handler.test.ClientTestLaunchHandler

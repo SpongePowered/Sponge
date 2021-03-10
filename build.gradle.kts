@@ -161,7 +161,7 @@ dependencies {
     implementation("org.ow2.asm:asm-tree:$asmVersion")
 
     // Implementation-only Adventure
-    implementation(platform("net.kyori:adventure-bom:4.6.0"))
+    implementation(platform("net.kyori:adventure-bom:4.7.0"))
     implementation("net.kyori:adventure-serializer-configurate4")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
@@ -561,6 +561,7 @@ project("SpongeVanilla") {
         version(minecraftVersion)
         injectRepositories().set(false)
         runs {
+            // Full development environment
             sequenceOf(8, 11, 15).forEach {
                 server("runJava${it}Server") {
                     args("--nogui", "--launchTarget", "sponge_server_dev")
@@ -578,6 +579,13 @@ project("SpongeVanilla") {
                 }
             }
 
+            // Lightweight integration tests
+            server("integrationTestServer") {
+                args("--launchTarget", "sponge_server_it")
+            }
+            client("integrationTestClient") {
+                args("--launchTarget", "sponge_client_it")
+            }
 
             configureEach {
                 workingDirectory().set(vanillaProject.file("run/"))
@@ -587,15 +595,27 @@ project("SpongeVanilla") {
                 }
                 jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
                 allJvmArgumentProviders() += CommandLineArgumentProvider {
+                    // Resolve the Mixin artifact for use as a reload agent
+                    val mixinJar = vanillaAppLaunchConfig.resolvedConfiguration
+                            .getFiles { it.name == "mixin" && it.group == "org.spongepowered" }
+                            .firstOrNull()
+
+                    val base = if (mixinJar != null) {
+                        listOf("-javaagent:$mixinJar")
+                    } else {
+                        emptyList()
+                    }
+
+                    // Then add necessary module cracks
                     if (!this.name.contains("Java8")) {
-                        listOf(
+                        base + listOf(
                                 "--illegal-access=deny", // enable strict mode in prep for Java 16
                                 "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
                                 "--add-opens=java.base/java.util.jar=ALL-UNNAMED", // ModLauncher
                                 "--add-opens=java.base/java.lang=ALL-UNNAMED" // Guice
                         )
                     } else {
-                        listOf()
+                        base
                     }
                 }
                 mainClass().set("org.spongepowered.vanilla.applaunch.Main")
@@ -645,7 +665,7 @@ project("SpongeVanilla") {
         vanillaInstallerConfig("org.cadixdev:lorenz-io-proguard:0.5.6")
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
-        vanillaAppLaunchConfig(platform("net.kyori:adventure-bom:4.6.0"))
+        vanillaAppLaunchConfig(platform("net.kyori:adventure-bom:4.7.0"))
         vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate4")
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
         vanillaAppLaunchConfig("org.ow2.asm:asm-util:$asmVersion")
@@ -752,6 +772,28 @@ project("SpongeVanilla") {
             manifest.from(vanillaManifest)
             from(vanillaMixins.output)
         }
+
+        val integrationTest by registering {
+            group = LifecycleBasePlugin.VERIFICATION_GROUP
+            dependsOn("integrationTestServer", "integrationTestClient")
+        }
+
+        val installerTemplateSource = vanillaProject.file("src/installer/templates")
+        val installerTemplateDest = vanillaProject.layout.buildDirectory.dir("generated/sources/installerTemplates")
+        val generateInstallerTemplates by registering(Copy::class) {
+            group = "sponge"
+            description = "Generate classes from templates for the SpongeVanilla installer"
+            val properties = mutableMapOf(
+                "minecraftVersion" to minecraftVersion
+            )
+            inputs.properties(properties)
+
+            // Copy template
+            from(installerTemplateSource)
+            into(installerTemplateDest)
+            expand(properties)
+        }
+        vanillaInstaller.java.srcDir(generateInstallerTemplates.map { it.outputs })
 
         val installerResources = vanillaProject.layout.buildDirectory.dir("generated/resources/installer")
         vanillaInstaller.resources.srcDir(installerResources)

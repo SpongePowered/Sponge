@@ -31,6 +31,7 @@ import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.ListValue;
+import org.spongepowered.api.data.value.MapValue;
 import org.spongepowered.api.data.value.SetValue;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.data.value.WeightedCollectionValue;
@@ -42,6 +43,7 @@ import java.lang.reflect.ParameterizedType;
 import java.lang.reflect.Type;
 import java.util.ArrayList;
 import java.util.Comparator;
+import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Objects;
 import java.util.function.BiPredicate;
@@ -124,6 +126,8 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends AbstractResou
             defaultValueSupplier = () -> (E) new HashSet();
         } else if (WeightedCollectionValue.class.isAssignableFrom(rawType)) {
             defaultValueSupplier = () -> (E) new WeightedTable();
+        } else if (MapValue.class.isAssignableFrom(rawType)) {
+            defaultValueSupplier = () -> (E) new HashMap<>();
         }
         final SpongeKey<Value<E>, E> key = new SpongeKey<>(this.key, this.valueType, this.elementType, comparator, includesTester, defaultValueSupplier);
         KeyProvider.INSTANCE.register(this.key, (Key<Value<?>>) (Object) key);

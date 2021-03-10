@@ -194,6 +194,7 @@
         "world.level.levelgen.NoiseGeneratorSettingsAccessor",
         "world.level.levelgen.flat.FlatLayerInfoAccessor",
         "world.level.levelgen.flat.FlatLevelGeneratorSettingsAccessor",
+        "world.level.saveddata.maps.MapItemSavedDataAccessor",
         "world.level.storage.LevelStorageSource_LevelStorageAccessAccessor",
         "world.level.storage.PlayerDataStorageAccessor",
         "world.level.storage.PrimaryLevelDataAccessor",

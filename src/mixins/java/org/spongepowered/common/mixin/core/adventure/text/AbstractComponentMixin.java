@@ -52,7 +52,6 @@ public abstract class AbstractComponentMixin implements ComponentBridge {
     @Override
     @SuppressWarnings("ConstantConditions")
     public net.minecraft.network.chat.Component bridge$asVanillaComponent() {
-        // TODO(adventure): in 1.16 evaluate using an ITextComponent wrapper as a first stage for conversion
         if (this.bridge$vanillaComponent == null) {
             if (this instanceof TextComponent) {
                 this.bridge$vanillaComponent = new net.minecraft.network.chat.TextComponent(((TextComponent) this).content());
@@ -60,7 +59,7 @@ public abstract class AbstractComponentMixin implements ComponentBridge {
                 final TranslatableComponent $this = (TranslatableComponent) this;
                 final List<net.minecraft.network.chat.Component> with = new ArrayList<>($this.args().size());
                 for (final Component arg : $this.args()) {
-                    with.add(SpongeAdventure.asVanilla(arg));
+                    with.add(((ComponentBridge) arg).bridge$asVanillaComponent());
                 }
                 this.bridge$vanillaComponent = new net.minecraft.network.chat.TranslatableComponent($this.key(), with.toArray(new Object[0]));
             } else if (this instanceof KeybindComponent) {
@@ -68,26 +67,26 @@ public abstract class AbstractComponentMixin implements ComponentBridge {
             } else if (this instanceof ScoreComponent) {
                 final ScoreComponent $this = (ScoreComponent) this;
                 this.bridge$vanillaComponent = new net.minecraft.network.chat.ScoreComponent($this.name(), $this.objective());
-                // ((ScoreTextComponent) this.bridge$vanillaComponent).($this.value()); // value removed
             } else if (this instanceof SelectorComponent) {
                 this.bridge$vanillaComponent = new net.minecraft.network.chat.SelectorComponent(((SelectorComponent) this).pattern());
             } else if (this instanceof NBTComponent<?, ?>) {
                 if (this instanceof BlockNBTComponent) {
                     final BlockNBTComponent $this = (BlockNBTComponent) this;
-                    this.bridge$vanillaComponent = new NbtComponent.BlockNbtComponent(
-                      $this.pos().asString(),
-                      $this.interpret(),
-                      $this.nbtPath()
-                    );
+                    this.bridge$vanillaComponent = new NbtComponent.BlockNbtComponent($this.nbtPath(), $this.interpret(), $this.pos().asString());
                 } else if (this instanceof EntityNBTComponent) {
                     final EntityNBTComponent $this = (EntityNBTComponent) this;
-                    this.bridge$vanillaComponent = new NbtComponent.EntityNbtComponent($this.selector(), $this.interpret(), $this.nbtPath());
+                    this.bridge$vanillaComponent = new NbtComponent.EntityNbtComponent($this.nbtPath(), $this.interpret(), $this.selector());
                 } else if (this instanceof StorageNBTComponent) {
-                    // TODO(adventure) 1.16
+                    final StorageNBTComponent $this = (StorageNBTComponent) this;
+                    this.bridge$vanillaComponent = new NbtComponent.StorageNbtComponent(
+                        $this.nbtPath(),
+                        $this.interpret(),
+                        SpongeAdventure.asVanilla($this.storage())
+                    );
                 }
             }
             for (final Component child : ((Component) this).children()) {
-                this.bridge$vanillaComponent.append(SpongeAdventure.asVanilla(child));
+                this.bridge$vanillaComponent.append(((ComponentBridge) child).bridge$asVanillaComponent());
             }
             this.bridge$vanillaComponent.setStyle(((StyleBridge) (Object) ((Component) this).style()).bridge$asVanilla());
         }

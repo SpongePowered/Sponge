@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.level.storage;
 
+import com.google.common.collect.BiMap;
+import com.google.common.collect.HashBiMap;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
@@ -71,6 +73,7 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -83,13 +86,13 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     @Shadow private int xSpawn;
     @Shadow private int ySpawn;
     @Shadow private int zSpawn;
+    @Shadow private float spawnAngle;
 
     @Shadow public abstract boolean shadow$isDifficultyLocked();
+    @Shadow public abstract void setSpawn(BlockPos p_176143_1_, float p_176143_2_);
     // @formatter:on
 
-    @Shadow public abstract void setSpawn(BlockPos p_176143_1_, float p_176143_2_);
 
-    @Shadow private float spawnAngle;
     @Nullable private ResourceKey impl$key;
     private DimensionType impl$dimensionType;
     @Nullable private SerializationBehavior impl$serializationBehavior;
@@ -101,6 +104,8 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
 
     private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup,
         impl$performsSpawnLogic;
+
+    private BiMap<Integer, UUID> impl$mapUUIDIndex = HashBiMap.create();
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -281,6 +286,16 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         this.impl$loadOnStartup = levelStemBridge.bridge$loadOnStartup();
         this.impl$performsSpawnLogic = levelStemBridge.bridge$performsSpawnLogic();
         this.impl$viewDistance = levelStemBridge.bridge$viewDistance().orElse(null);
+    }
+
+    @Override
+    public void bridge$setMapUUIDIndex(final BiMap<Integer, UUID> index) {
+        this.impl$mapUUIDIndex = index;
+    }
+
+    @Override
+    public BiMap<Integer, UUID> bridge$getMapUUIDIndex() {
+        return this.impl$mapUUIDIndex;
     }
 
     @Override

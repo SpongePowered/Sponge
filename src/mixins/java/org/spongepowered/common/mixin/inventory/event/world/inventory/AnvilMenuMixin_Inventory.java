@@ -58,7 +58,7 @@ public abstract class AnvilMenuMixin_Inventory extends ItemCombinerMenuMixin_Inv
         final ItemStack result = this.resultSlots.getItem(0);
         final UpdateAnvilEvent event = InventoryEventFactory.callUpdateAnvilEvent(
                 (AnvilMenu) (Object) this, itemstack, itemstack2, result,
-                this.itemName, this.cost.get(), this.repairItemCountCost);
+                this.itemName == null ? "" : this.itemName, this.cost.get(), this.repairItemCountCost);
 
         final ItemStackSnapshot finalItem = event.getResult().getFinal();
         if (event.isCancelled() || finalItem.isEmpty()) {

@@ -29,10 +29,15 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.Map;
 import net.minecraft.world.level.GameRules;
+import org.spongepowered.common.UntransformedAccessorError;
 
 @Mixin(GameRules.class)
 public interface GameRulesAccessor {
 
     @Accessor("rules") Map<GameRules.Key<?>, GameRules.Value<?>> accessor$rules();
+
+    @Accessor("GAME_RULE_TYPES") static Map<GameRules.Key<?>, GameRules.Type<?>> accessor$GAME_RULE_TYPES() {
+        throw new UntransformedAccessorError();
+    }
 
 }

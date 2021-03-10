@@ -144,15 +144,31 @@ public final class SpongeRegistryHolder implements RegistryHolder {
         final @Nullable Supplier<Map<ResourceKey, T>> defaultValues,
         final boolean isDynamic
     ) {
-        return this.createRegistry(type, defaultValues, isDynamic, null);
+        return this.createRegistry(type, InitialRegistryData.noIds(defaultValues), isDynamic, null);
+    }
+
+    public <T> Registry<T> createRegistry(
+        final RegistryType<T> type,
+        final RegistryLoader<T> loader
+    ) {
+        return this.createRegistry(type, loader, false);
+    }
+
+    public <T> Registry<T> createRegistry(
+        final RegistryType<T> type,
+        final RegistryLoader<T> loader,
+        final boolean isDynamic
+    ) {
+        return this.createRegistry(type, loader, isDynamic, null);
     }
 
     public <T> Registry<T> createRegistry(
             final RegistryType<T> type,
-            final @Nullable Supplier<Map<ResourceKey, T>> defaultValues,
+            final @Nullable InitialRegistryData<T> defaultValues,
             final boolean isDynamic,
             final @Nullable
-            BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback) {
+            BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback
+    ) {
         Objects.requireNonNull(type, "type");
 
         final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(type.root());
@@ -181,13 +197,15 @@ public final class SpongeRegistryHolder implements RegistryHolder {
 
         ((WritableRegistryBridge<T>) registry).bridge$setDynamic(isDynamic);
         if (defaultValues != null) {
-            for (final Map.Entry<ResourceKey, T> entry : defaultValues.get().entrySet()) {
-                ((MappedRegistry<T>) registry).register(
-                        net.minecraft.resources.ResourceKey.create(key, (ResourceLocation) (Object) entry.getKey()),
-                        entry.getValue(),
+            final net.minecraft.core.MappedRegistry<T> mr = (MappedRegistry<T>) registry;
+            defaultValues.forEach((vk, vi, vv) -> {
+                mr.registerOrOverride(
+                        vi,
+                        net.minecraft.resources.ResourceKey.create(key, (ResourceLocation) (Object) vk),
+                        vv,
                         Lifecycle.stable()
                 );
-            }
+            });
         }
         ((WritableRegistry) root).register(key, registry, Lifecycle.stable());
         if (registry instanceof CallbackRegistry) {

@@ -26,6 +26,8 @@ package org.spongepowered.test.chat;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.bossbar.BossBar;
+import net.kyori.adventure.identity.Identified;
+import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
@@ -37,9 +39,12 @@ import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.adventure.ResolveOperations;
+import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -116,6 +121,21 @@ public class ChatTest implements LoadableModule {
                                                                                Component.translatable("chattest.book.2")));
                           return CommandResult.success();
                       }).build(), "sendbook");
+
+        final Parameter.Value<ServerPlayer> targetArg = Parameter.player().setKey("target").build();
+        final Parameter.Value<Component> messageArg = Parameter.jsonText().setKey("message").build();
+
+        event.register(this.container, Command.builder()
+        .setPermission("chatttest.tell-resolve")
+            .parameters(targetArg, messageArg)
+        .setExecutor(ctx -> {
+            final ServerPlayer target = ctx.requireOne(targetArg);
+            final Component message = ctx.requireOne(messageArg);
+            final Component resolvedMessage = SpongeComponents.resolve(message, ctx.getCause(), target, ResolveOperations.CONTEXTUAL_COMPONENTS);
+            target.sendMessage(ctx.getCause().first(Identified.class).map(Identified::identity).orElse(Identity.nil()), resolvedMessage);
+            return CommandResult.success();
+        })
+        .build(), "tellresolve");
     }
 
     public static class Listeners {

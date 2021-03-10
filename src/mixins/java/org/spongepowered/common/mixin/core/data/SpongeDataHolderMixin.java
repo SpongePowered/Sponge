@@ -30,6 +30,7 @@ import com.google.common.collect.Multimap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataProvider;
@@ -50,7 +51,8 @@ import org.spongepowered.common.entity.player.SpongeUser;
         SpongeEntityArchetype.class,
         SpongeEntitySnapshot.class,
         SpongeBlockSnapshot.class,
-        SimpleNBTDataHolder.class})
+        SimpleNBTDataHolder.class,
+        MapItemSavedData.class})
 public abstract class SpongeDataHolderMixin implements SpongeDataHolderBridge {
 
     private DataManipulator.Mutable impl$manipulator;

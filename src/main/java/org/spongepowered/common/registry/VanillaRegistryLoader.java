@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import com.google.common.base.CaseFormat;
 import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.FrameType;
@@ -39,6 +40,7 @@ import net.minecraft.world.entity.animal.TropicalFish;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import net.minecraft.world.entity.monster.Phantom;
 import net.minecraft.world.entity.monster.SpellcasterIllager;
+import net.minecraft.world.entity.player.ChatVisiblity;
 import net.minecraft.world.entity.projectile.AbstractArrow;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.vehicle.Boat;
@@ -47,6 +49,8 @@ import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.block.Mirror;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BannerPattern;
 import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.ChestType;
@@ -61,6 +65,7 @@ import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraft.world.level.block.state.properties.StructureMode;
 import net.minecraft.world.level.levelgen.Heightmap;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.scores.Team;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.api.ResourceKey;
@@ -69,6 +74,7 @@ import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.advancement.criteria.trigger.Triggers;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.api.item.FireworkShapes;
+import org.spongepowered.api.map.decoration.MapDecorationTypes;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryKey;
@@ -79,10 +85,12 @@ import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.MushroomCow_MushroomTypeAccessor;
 import org.spongepowered.common.accessor.world.item.ArmorMaterialsAccessor;
+import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.BannerPatternAccessor;
 import org.spongepowered.common.advancement.criterion.SpongeDummyTrigger;
 import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 
+import java.util.Collection;
 import java.util.HashMap;
 import java.util.Locale;
 import java.util.Map;
@@ -103,7 +111,7 @@ final class VanillaRegistryLoader {
     }
 
     private void loadInstanceRegistries() {
-        this.holder.createRegistry(RegistryTypes.CRITERION, VanillaRegistryLoader.criterion().values());
+        this.holder.createRegistry(RegistryTypes.CRITERION, VanillaRegistryLoader.criterion());
         this.manualName(RegistryTypes.DRAGON_PHASE_TYPE, EnderDragonPhase.getCount(), map -> {
             map.put(EnderDragonPhase.HOLDING_PATTERN, "holding_pattern");
             map.put(EnderDragonPhase.STRAFE_PLAYER, "strafe_player");
@@ -117,9 +125,10 @@ final class VanillaRegistryLoader {
             map.put(EnderDragonPhase.DYING, "dying");
             map.put(EnderDragonPhase.HOVERING, "hover");
         });
-        this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape().values());
-        this.holder.createRegistry(RegistryTypes.TRIGGER, () -> VanillaRegistryLoader.trigger().values(), true,
+        this.holder.createRegistry(RegistryTypes.FIREWORK_SHAPE, VanillaRegistryLoader.fireworkShape());
+        this.holder.createRegistry(RegistryTypes.TRIGGER, VanillaRegistryLoader.trigger(), true,
                 (k, trigger) -> CriteriaTriggersAccessor.invoker$register((CriterionTrigger<?>) trigger));
+        this.knownName(RegistryTypes.GAME_RULE, GameRulesAccessor.accessor$GAME_RULE_TYPES().keySet(), rule -> CaseFormat.UPPER_CAMEL.to(CaseFormat.LOWER_UNDERSCORE, rule.getId()));
     }
 
     private void loadEnumRegistries() {
@@ -171,9 +180,12 @@ final class VanillaRegistryLoader {
         this.knownName(RegistryTypes.PANDA_GENE, Panda.Gene.values(), Panda.Gene::getName);
         this.automaticName(RegistryTypes.PHANTOM_PHASE, Phantom.AttackPhase.values());
         this.automaticName(RegistryTypes.PICKUP_RULE, AbstractArrow.Pickup.values());
+        this.automaticName(RegistryTypes.MIRROR, Mirror.values());
+        this.automaticName(RegistryTypes.CHAT_VISIBILITY, ChatVisiblity.values());
         this.knownName(RegistryTypes.PISTON_TYPE, PistonType.values(), PistonType::getSerializedName);
         this.knownName(RegistryTypes.PORTION_TYPE, Half.values(), Half::getSerializedName);
         this.automaticName(RegistryTypes.RAID_STATUS, Raid.RaidStatus.values());
+        this.automaticName(RegistryTypes.ROTATION, Rotation.values());
         this.knownName(RegistryTypes.RAIL_DIRECTION, RailShape.values(), RailShape::getSerializedName);
         this.knownName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values(), RedstoneSide::getSerializedName);
         this.knownName(RegistryTypes.SLAB_PORTION, SlabType.values(), SlabType::getSerializedName);
@@ -281,6 +293,15 @@ final class VanillaRegistryLoader {
     @SuppressWarnings("UnusedReturnValue")
     private <A, I extends Enum<I>> Registry<A> knownName(final RegistryType<A> type,final I[] values, final Function<I, String> name) {
         return this.naming(type, values, name);
+    }
+
+    @SuppressWarnings("UnusedReturnValue")
+    private <A, I> Registry<A> knownName(final RegistryType<A> type, final Collection<I> values, final Function<I, String> name) {
+        final Map<I, String> map = new HashMap<>();
+        for (final I value : values) {
+            map.put(value, name.apply(value));
+        }
+        return this.naming(type, values.size(), map);
     }
 
     @SuppressWarnings("UnusedReturnValue")

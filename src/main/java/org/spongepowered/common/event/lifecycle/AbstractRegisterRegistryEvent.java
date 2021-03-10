@@ -33,6 +33,7 @@ import org.spongepowered.api.event.lifecycle.RegisterRegistryEvent;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.common.registry.RegistryLoader;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 
 import java.util.Map;
@@ -51,7 +52,7 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
 
         final SpongeRegistryHolder holder = this.getHolder();
         final RegistryType<T> type = RegistryType.of(RegistryRoots.SPONGE, key);
-        holder.createRegistry(type, null, isDynamic);
+        holder.createRegistry(type, (RegistryLoader<T>) null, isDynamic);
         return type;
     }
 

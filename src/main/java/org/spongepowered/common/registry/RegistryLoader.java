@@ -35,7 +35,7 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.function.Function;
 
-public final class RegistryLoader<T> {
+public final class RegistryLoader<T> extends InitialRegistryData<T> {
 
     private final Map<ResourceKey, T> values = new HashMap<>();
     private @MonotonicNonNull Map<ResourceKey, Integer> ids;
@@ -112,7 +112,18 @@ public final class RegistryLoader<T> {
         return this.ids;
     }
 
+    @Override
+    Map<ResourceKey, T> keyToValue() {
+        return this.values;
+    }
+
+    @Override
+    @Nullable Map<ResourceKey, Integer> keyToId() {
+        return this.ids;
+    }
+
     public interface Mapping<T> {
         Mapping<T> add(final RegistryKey<? extends T>... keys);
     }
+
 }

@@ -22,30 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.installer;
+package org.spongepowered.common.mixin.core.world.level;
 
-import org.objectweb.asm.Opcodes;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.saveddata.SavedData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
+import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.data.DataUtil;
 
-public final class Constants {
+import java.io.File;
 
-    public static final int ASM_VERSION = Opcodes.ASM9;
+@Mixin(SavedData.class)
+public abstract class SavedDataMixin {
 
-    public static final class Libraries {
-
-        public static final String MINECRAFT_VERSION_TARGET = "21w08b";
-        public static final String MINECRAFT_MANIFEST_URL = "https://launchermeta.mojang.com/mc/game/version_manifest.json";
-        public static final String MINECRAFT_PATH_PREFIX = "net/minecraft";
-        public static final String MINECRAFT_SERVER_JAR_NAME = "minecraft_server";
-        public static final String MINECRAFT_MAPPINGS_PREFIX = Libraries.MINECRAFT_PATH_PREFIX + "/mappings";
-        public static final String MINECRAFT_MAPPINGS_NAME = "server.txt";
-
-        public static final String SPONGE_NEXUS_DOWNLOAD_URL = "https://repo-new.spongepowered.org/service/rest/v1/search/assets?md5=%s&maven"
-            + ".groupId=%s&maven.artifactId=%s&maven.baseVersion=%s&maven.extension=jar";
-    }
-
-    public static final class ManifestAttributes {
-
-        public static final String ACCESS_WIDENER = "Access-Widener";
-        public static final String LAUNCH_TARGET = "Launch-Target";
+    @Inject(method = "save(Ljava/io/File;)V",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/saveddata/SavedData;save(Lnet/minecraft/nbt/CompoundTag;)Lnet/minecraft/nbt/CompoundTag;"),
+            locals = LocalCapture.CAPTURE_FAILHARD)
+    public void impl$writeAdditionalMapNBT(File file, final CallbackInfo cir, CompoundTag compound) {
+        if (this instanceof DataCompoundHolder) {
+            if (DataUtil.syncDataToTag(this)) {
+                compound.merge(((DataCompoundHolder) this).data$getCompound());
+            }
+        }
     }
 }

@@ -27,10 +27,15 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static org.spongepowered.api.data.persistence.DataQuery.of;
 
+import com.google.common.collect.BiMap;
 import com.google.common.collect.ComparisonChain;
+import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -910,21 +915,52 @@ public final class Constants {
              Otherwise, the world.setBlockState(pos, newState, 2 & -33 [ basically says to allow future breakages and update neighbors] )
 
          */
-        //    * 1 will cause a block update.
-        //    * 2 will send the change to clients.
-        //    * 4 will prevent the block from being re-rendered.
-        //    * 8 will force any re-renders to run on the main thread instead
-        //    * 16 will prevent neighbor reactions (e.g. fences connecting, observers pulsing).
-        //    * 32 will prevent neighbor reactions from spawning drops, if 16 is not set
-        //    * 64 will signify the block is being moved.
-        public static final int NEIGHBOR_MASK =   1 << 0; // 1
+
+        /**
+         * Calls {@link net.minecraft.world.level.Level#blockUpdated(BlockPos, net.minecraft.world.level.block.Block)}
+         * if the flag is set.
+         */
+        public static final int BLOCK_UPDATED =   1 << 0; // 1
+        /**
+         * Calls {@link net.minecraft.world.level.Level#sendBlockUpdated(BlockPos, BlockState, BlockState, int)}
+         * if the flag is set (which is basically notifying clients).
+         */
         public static final int NOTIFY_CLIENTS =  1 << 1; // 2
+        /**
+         * Stops the blocks from being marked for a render update if set (defaults to flag & 4 == 0)
+         */
         public static final int IGNORE_RENDER =   1 << 2; // 4
+        /**
+         * Makes the block be re-rendered immediately, on the main thread.
+         * If {@link #IGNORE_RENDER} is set, then this will be ignored.
+         */
         public static final int FORCE_RE_RENDER = 1 << 3; // 8
+        /**
+         * Causes neighboring states to be notified of changes (including diagonal positions),
+         * which effectively calls
+         * {@link net.minecraft.world.level.block.state.BlockState#updateNeighbourShapes(LevelAccessor, BlockPos, int)}
+         * and
+         * {@link net.minecraft.world.level.block.state.BlockState#updateIndirectNeighbourShapes(LevelAccessor, BlockPos, int)}
+         * if unset (defaults to flag & 16 == 0)
+         */
         public static final int DENY_NEIGHBOR_SHAPE_UPDATE =   1 << 4; // 16
+        /**
+         * If unset, allows for a block being destroyed to drop itself, used in
+         * {@link net.minecraft.world.level.block.Block#updateOrDestroy(BlockState, BlockState, LevelAccessor, BlockPos, int, int)}.
+         */
         public static final int NEIGHBOR_DROPS =  1 << 5; // 32
+        /**
+         * Tell the block being changed that it's being moved, rather than being replaced/removed.
+         * The flag, if set, is set as a boolean to {@link BlockState#onPlace(Level, BlockPos, BlockState, boolean)}
+         * by means of calling
+         * {@link net.minecraft.world.level.chunk.LevelChunk#setBlockState(BlockPos, BlockState, boolean)}
+         */
         public static final int BLOCK_MOVING =    1 << 6; // 64
-        public static final int LIGHTING_UPDATES = 1 << 7; // 128 - flag & 128 == 0 turns off lighting
+        /**
+         * Used in {@link Level#setBlock(BlockPos, BlockState, int)}  as {@code (var3 & 128) == 0} to
+         * check if lighting is queued for the block change.
+         */
+        public static final int LIGHTING_UPDATES = 1 << 7; // 128 if set, blocks lighting updates
         public static final int PHYSICS_MASK =    1 << 8; // Sponge Added mask, because vanilla doesn't support it yet
         public static final int PATHFINDING_UPDATES = 1 << 9; // Sponge Added mask, because vanilla doesn't allow bypassing notifications to ai pathfinders
         // All of these flags are what we "expose" to the API
@@ -935,36 +971,17 @@ public final class Constants {
             | Constants.BlockChangeFlags.PHYSICS_MASK
             | Constants.BlockChangeFlags.FORCE_RE_RENDER
             | Constants.BlockChangeFlags.NEIGHBOR_DROPS
+            | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE
             ;
-        public static final int ALL = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.NEIGHBOR_MASK;
-        public static final int DEFAULT = Constants.BlockChangeFlags.NEIGHBOR_MASK
+        public static final int DEFAULT = Constants.BlockChangeFlags.BLOCK_UPDATED
             | Constants.BlockChangeFlags.NOTIFY_CLIENTS;
         public static final int NONE = Constants.BlockChangeFlags.NOTIFY_CLIENTS
             | Constants.BlockChangeFlags.PHYSICS_MASK
             | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE
-            | Constants.BlockChangeFlags.FORCE_RE_RENDER
-            | Constants.BlockChangeFlags.NEIGHBOR_DROPS;
-        public static final int NEIGHBOR = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.NEIGHBOR_MASK
-            | Constants.BlockChangeFlags.PHYSICS_MASK
-            | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE
-            | Constants.BlockChangeFlags.NEIGHBOR_DROPS;
-        public static final int PHYSICS = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE;
+            | Constants.BlockChangeFlags.NEIGHBOR_DROPS
+            | Constants.BlockChangeFlags.PATHFINDING_UPDATES
+            ;
 
-        public static final int OBSERVER = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.PHYSICS_MASK
-            | Constants.BlockChangeFlags.NEIGHBOR_DROPS;
-
-        public static final int NEIGHBOR_PHYSICS = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.NEIGHBOR_MASK
-            | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE;
-        public static final int NEIGHBOR_OBSERVER = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.NEIGHBOR_MASK
-            | Constants.BlockChangeFlags.PHYSICS_MASK;
-
-        public static final int PHYSICS_OBSERVER = Constants.BlockChangeFlags.NOTIFY_CLIENTS;
 
     }
 
@@ -1166,6 +1183,89 @@ public final class Constants {
         public static final String ATTRIBUTE_MODIFIERS = "AttributeModifiers";
         public static final String ATTRIBUTE_NAME = "AttributeName";
         public static final String ATTRIBUTE_SLOT = "Slot";
+    }
+
+    public static final class Map {
+        public static final String MAP_INFO_DATA_PROVIDER_NAME = "map_info";
+        public static final String MAP_INDEX_DATA_NAME = "idcounts";
+        public static final String MAP_ID = "map";
+
+        public static final String MAP_UUID_INDEX = "MapUUIDs";
+
+        public static final DataQuery MAP_UNSAFE_ID = of("UnsafeMapId");
+        public static final DataQuery MAP_DATA = of("MapData");
+        public static final DataQuery SHADE_NUM = of("shade");
+        public static final DataQuery COLOR_INDEX = of("colorIndex");
+
+
+        // @formatter:off
+        public static final DataQuery MAP_LOCATION =           of("MapLocation");
+        public static final DataQuery MAP_WORLD =              of("MapWorld");
+        public static final DataQuery MAP_TRACKS_PLAYERS =     of("TracksPlayers");
+        public static final DataQuery MAP_UNLIMITED_TRACKING = of("MapUnlimitedTracking");
+        public static final DataQuery MAP_SCALE =              of("MapScale");
+        public static final DataQuery MAP_CANVAS =             of("MapCanvas");
+        public static final DataQuery MAP_LOCKED =             of("MapLocked");
+        public static final DataQuery MAP_DECORATIONS =        of("MapDecorations");
+        // @formatter:on
+
+        // This need to be what they are to be easily convertable to MC NBT
+        public static final DataQuery DECORATION_TYPE = of("type");
+        public static final DataQuery DECORATION_ID = of("id");
+        public static final DataQuery DECORATION_X = of("x");
+        public static final DataQuery DECORATION_Y = of("z"); // This isn't a mistake
+        public static final DataQuery DECORATION_ROTATION = of("rot");
+        public static final DataQuery NAME = of("Name");
+
+        // Sponge's way to save decorations, to ensure persistence
+        public static final String DECORATIONS_KEY = "Decorations";
+        // Key in the map for getting the highest map number
+        public static final String ID_COUNTS_KEY = "map";
+        // Used to add a UUID to maps. Prefixed with sponge- to show it is added by sponge
+        public static final String SPONGE_UUID_KEY = "sponge-uuid";
+
+        // Doesn't particulary matter what this is, just something that identifies it
+        public static final String DECORATION_KEY_PREFIX = "sponge-";
+
+        // Filled maps
+        public static final int DEFAULT_MAP_SCALE = 0;
+        public static final int MIN_MAP_SCALE = 0;
+        public static final int MAX_MAP_SCALE = Byte.MAX_VALUE;
+        public static final boolean DEFAULT_TRACKS_PLAYERS = true;
+        public static final boolean DEFAULT_UNLIMITED_TRACKING = false;
+        public static final boolean DEFAULT_MAP_LOCKED = false;
+        public static final String MAP_PREFIX = "map_";
+        public static final int MAP_SIZE = 16384;
+        public static final int MAP_MAX_INDEX = 127;
+        public static final int MAP_PIXELS = 128;
+        public static final int MAP_SHADES = 4;
+
+        // Colors are multiplied by something then divided by 255 to make the true RGB displayed
+        public static final int SHADE_DIVIDER = 255;
+
+        // Converts directions into a byte from 0-15 relating to the
+        // BiMap - Allows Direction -> Byte and Byte -> Direction easily.
+        public static final BiMap<Direction, Byte> DIRECTION_CONVERSION_MAP = HashBiMap.create(16);
+
+        static {
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTH,             (byte) 0);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTH_SOUTHWEST,   (byte) 1);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTHWEST,         (byte) 2);
+            DIRECTION_CONVERSION_MAP.put(Direction.WEST_SOUTHWEST,    (byte) 3);
+            DIRECTION_CONVERSION_MAP.put(Direction.WEST,              (byte) 4);
+            DIRECTION_CONVERSION_MAP.put(Direction.WEST_NORTHWEST,    (byte) 5);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTHWEST,         (byte) 6);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTH_NORTHWEST,   (byte) 7);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTH,             (byte) 8);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTH_NORTHEAST,   (byte) 9);
+            DIRECTION_CONVERSION_MAP.put(Direction.NORTHEAST,         (byte) 10);
+            DIRECTION_CONVERSION_MAP.put(Direction.EAST_NORTHEAST,    (byte) 11);
+            DIRECTION_CONVERSION_MAP.put(Direction.EAST,              (byte) 12);
+            DIRECTION_CONVERSION_MAP.put(Direction.EAST_SOUTHEAST,    (byte) 13);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTHEAST,         (byte) 14);
+            DIRECTION_CONVERSION_MAP.put(Direction.SOUTH_SOUTHEAST,   (byte) 15);
+            // This should always be 16 long, unless minecraft changes the supported amount of directions for maps.
+        }
     }
 
     public static final class Particles {

@@ -58,6 +58,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryScope;
@@ -84,6 +85,7 @@ import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ServerScheduler;
@@ -133,6 +135,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     private ServerScoreboard api$scoreboard;
     private GameProfileManager api$profileManager;
     private SpongeUserManager api$userManager;
+    private MapStorage api$mapStorage;
     private RegistryHolder api$registryHolder;
 
     public MinecraftServerMixin_API(final String name) {
@@ -150,6 +153,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
         this.api$userManager = new SpongeUserManager(this);
+        this.api$mapStorage = new SpongeMapStorage();
         this.api$registryHolder = new SpongeRegistryHolder(p_i232576_2_);
     }
 
@@ -427,5 +431,9 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     @Override
     public RegistryHolder registries() {
         return this.api$registryHolder;
+    }
+    @Override
+    public MapStorage getMapStorage() {
+        return this.api$mapStorage;
     }
 }

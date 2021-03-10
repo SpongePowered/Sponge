@@ -69,22 +69,14 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     @Override
     public Optional<ItemStack> getEquipped(final EquipmentType type) {
         final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
-        final Lens rootLens = inv.inventoryAdapter$getRootLens();
-        final EquipmentInventoryLens lens;
-        if (rootLens instanceof EquipmentInventoryLens) {
-            lens = (EquipmentInventoryLens) rootLens;
-        } else if (rootLens instanceof PlayerInventoryLens) {
-            lens = ((PlayerInventoryLens) rootLens).getEquipmentLens();
-        } else {
-            throw new IllegalStateException("Unexpected lens for Equipable Inventory " + rootLens.getClass().getName());
-        }
+        final EquipmentInventoryLens lens = this.impl$equipmentInventory(inv);
         return Optional.of(ItemStackUtil.fromNative(lens.getStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlot) (Object) type).getIndex())));
     }
 
     @Override
     public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
         final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
-        final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();
+        final EquipmentInventoryLens lens = this.impl$equipmentInventory(inv);
         return lens.setStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlot) (Object) type).getIndex(), ItemStackUtil.toNative(equipment));
     }
 
@@ -139,5 +131,16 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     @Override
     public void setFeet(ItemStack feet) {
         this.equip(EquipmentTypes.FEET, feet);
+    }
+
+    private EquipmentInventoryLens impl$equipmentInventory(final InventoryAdapter adapter) {
+        final Lens rootLens = adapter.inventoryAdapter$getRootLens();
+        if (rootLens instanceof EquipmentInventoryLens) {
+            return (EquipmentInventoryLens) rootLens;
+        } else if (rootLens instanceof PlayerInventoryLens) {
+            return ((PlayerInventoryLens) rootLens).getEquipmentLens();
+        } else {
+            throw new IllegalStateException("Unexpected lens for Equipable Inventory " + rootLens.getClass().getName());
+        }
     }
 }

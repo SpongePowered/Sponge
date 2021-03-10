@@ -294,7 +294,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public ArchetypeVolume createArchetypeVolume(final Vector3i min, final Vector3i max, final Vector3i origin) {
-        final Vector3i rawVolMin = Objects.requireNonNull(Objects.requireNonNull(max, "max"), "min").min(max);
+        final Vector3i rawVolMin = Objects.requireNonNull(min, "min").min(Objects.requireNonNull(max, "max"));
         final Vector3i adjustedVolMin = rawVolMin.sub(Objects.requireNonNull(origin, "origin"));
         final Vector3i volMax = max.max(min);
         final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(adjustedVolMin, volMax.sub(rawVolMin).add(1, 1, 1), this.registries());
@@ -380,10 +380,13 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             ,
             // Filtered Position Entity Accessor
             (entityUuid, world) -> {
-                final net.minecraft.world.entity.Entity tileEntity = shouldCarbonCopy
+                final net.minecraft.world.entity.@Nullable Entity entity = shouldCarbonCopy
                     ? (net.minecraft.world.entity.Entity) backingVolume.getEntity(entityUuid).orElse(null)
                     : (net.minecraft.world.entity.Entity) ((ProtoWorld) world).getEntity(entityUuid).orElse(null);
-                return new Tuple<>(tileEntity.blockPosition(), tileEntity);
+                if (entity == null) {
+                    return null;
+                }
+                return new Tuple<>(entity.blockPosition(), entity);
             }
         );
     }

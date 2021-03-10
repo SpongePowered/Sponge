@@ -5,13 +5,16 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [ api-8 ]
+    branches-ignore: [ api-8 ]
+    tags-ignore: ["*"]
   pull_request:
-    branches: [ api-8 ]
+    branches-ignore: [ stable-7 ]
 
 jobs:
   build:
-    runs-on: ubuntu-latest
+    # Only run on PRs if the source branch is on someone else's repo
+    if: "${{ github.event_name != 'pull_request' || github.repository != github.event.pull_request.head.repo.full_name }}"
+    runs-on: ubuntu-20.04
     steps:
       - uses: actions/checkout@v2
         with:
@@ -20,20 +23,27 @@ jobs:
         with:
           path: |
             ~/.gradle/caches
-            ${{ github.workspace}}/buildSrc/.gradle/caches
-            ${{ github.workspace}}/build/fg_cache
+            ~/.gradle/wrapper
+            ${{ github.workspace}}/buildSrc/.gradle/
             ${{ github.workspace}}/forge/build/fg_cache
-          key: ${{ runner.os }}-minecraft-${{ hashFiles('**/*.gradle*') }}
+            ${{ github.workspace}}/.gradle/
+          key: "${{ runner.os }}-minecraft-${{ hashFiles('**/*.gradle*') }}"
           restore-keys: |
             ${{ runner.os }}-minecraft-
       - name: Set up JDK 1.8
         uses: actions/setup-java@v1
         with:
           java-version: 1.8
-      - name: Grant execute permission for gradlew
-        run: chmod +x gradlew
+      - name: Validate Gradle Wrapper
+        uses: gradle/wrapper-validation-action@v1
+      - name: Setup workspace
+        run: |
+          echo "GIT_COMMIT=${GITHUB_SHA}" >> $GITHUB_ENV
+          echo "GIT_BRANCH=${GITHUB_REF##*/}" >> $GITHUB_ENV
       - name: Build with Gradle
         run: ./gradlew -PenableTestPlugins=true build --stacktrace
+        env:
+          CI_SYSTEM: Github Actions
       - name: Archive artifacts for build
         uses: actions/upload-artifact@v2
         with:
@@ -43,17 +53,41 @@ jobs:
             ${{ github.workspace }}/build/libs/*.jar
             ${{ github.workspace }}/vanilla/build/libs/*.jar
             ${{ github.workspace }}/forge/build/libs/*.jar
-      # The USERNAME and TOKEN need to correspond to the credentials environment variables used in
-      # the publishing section of your build.gradle
-      - name: Publish to Sponge Maven & GitHub Packages
-        if: github.events.push
-        run: ./gradlew publish
-        env:
-          GITHUB_USERNAME: ${{ github.actor }}
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          ORG_GRADLE_PROJECT_spongeSnapshotRepo: ${{ secrets.SPONGE_MAVEN_SNAPSHOT_REPO_URL }}
-          ORG_GRADLE_PROJECT_spongeReleaseRepo: ${{ secrets.SPONGE_MAVEN_RELEASE_REPO_URL }}
-          ORG_GRADLE_PROJECT_spongeUsername: ${{ secrets.SPONGE_MAVEN_REPO_USER }}
-          ORG_GRADLE_PROJECT_spongePassword: ${{ secrets.SPONGE_MAVEN_REPO_PASSWORD }}
-
-
+      - name: SpongeVanilla Production Jar
+        uses: actions/upload-artifact@v2
+        with:
+          name: SpongeVanilla Production Jar
+          path: "${{ github.workspace }}/vanilla/build/libs/*-universal.jar"
+  integrationTest:
+    needs: build
+    timeout-minutes: 10
+    strategy:
+      fail-fast: false
+      matrix:
+        os: [ubuntu-20.04, windows-latest, macos-latest]
+        java: [8, 11, 15]
+    runs-on: "${{ matrix.os }}"
+    steps:
+      - name: Check out repository to use the build.gradle.kts as a hash file
+        uses: actions/checkout@v2
+        with:
+          path: code
+      - name: "Setup JDK ${{ matrix.java }}"
+        uses: actions/setup-java@v1
+        with:
+          java-version: "${{ matrix.java }}"
+      - uses: actions/cache@v2
+        with:
+          path: "${{ github.workspace}}/libraries"
+          key: "${{runner.os}}-${{matrix.java}}-it-libraries-${{ hashFiles('code/build.gradle.kts') }}"
+          restore-keys: "${{runner.os}}-${{matrix.java}}-it-libraries-"
+      - name: Download SpongeVanilla server
+        uses: actions/download-artifact@v2
+        with:
+          name: SpongeVanilla Production Jar
+      - name: Run SpongeVanilla Test (windows)
+        if: "runner.os == 'Windows'"
+        run: java -jar $(gci | Where-Object NameString -Match "-universal.jar") --launchTarget sponge_server_it
+      - name: Run SpongeVanilla Test (other)
+        if: "runner.os != 'Windows'"
+        run: java -jar *-universal.jar --launchTarget sponge_server_it
