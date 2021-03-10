@@ -147,10 +147,13 @@ public abstract class LevelChunkMixin_API implements Chunk {
             (key, entity) -> entity.getUUID(),
             // Filtered Position Entity Accessor
             (entityUuid, chunk) -> {
-                final net.minecraft.world.entity.Entity tileEntity = shouldCarbonCopy
+                final net.minecraft.world.entity.@Nullable Entity entity = shouldCarbonCopy
                     ? (net.minecraft.world.entity.Entity) backingVolume.getEntity(entityUuid).orElse(null)
                     : (net.minecraft.world.entity.Entity) chunk.getWorld().getEntity(entityUuid).orElse(null);
-                return new Tuple<>(tileEntity.blockPosition(), tileEntity);
+                if (entity == null) {
+                    return null;
+                }
+                return new Tuple<>(entity.blockPosition(), entity);
             }
             );
     }

@@ -38,8 +38,7 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
-import org.checkerframework.checker.nullness.qual.EnsuresNonNullIf;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -176,7 +175,7 @@ public final class VolumeStreamUtils {
 
     @NotNull
     public static Stream<Map.Entry<BlockPos, net.minecraft.world.entity.Entity>> getEntitiesFromChunk(
-        Vector3i min, Vector3i max, LevelChunk chunk
+        final Vector3i min, final Vector3i max, final LevelChunk chunk
     ) {
         return Arrays.stream(chunk.getEntitySections())
             .flatMap(Collection::stream)
@@ -189,7 +188,7 @@ public final class VolumeStreamUtils {
     @NotNull
     public static BiConsumer<UUID, net.minecraft.world.entity.Entity> getOrCloneEntityWithVolume(
         final boolean shouldCarbonCopy,
-        final ObjectArrayMutableEntityBuffer backingVolume,
+        final @MonotonicNonNull ObjectArrayMutableEntityBuffer backingVolume,
         final Level level
     ) {
         return shouldCarbonCopy ? (pos, entity) -> {
@@ -210,7 +209,7 @@ public final class VolumeStreamUtils {
 
     @NotNull
     public static BiConsumer<BlockPos, net.minecraft.world.level.block.entity.BlockEntity> getBlockEntityOrCloneToBackingVolume(
-        boolean shouldCarbonCopy, ObjectArrayMutableBlockEntityBuffer backingVolume, final @Nullable Level level
+        final boolean shouldCarbonCopy, final ObjectArrayMutableBlockEntityBuffer backingVolume, final @Nullable Level level
     ) {
         return shouldCarbonCopy ? (pos, tile) -> {
             final CompoundTag nbt = tile.save(new CompoundTag());
@@ -228,6 +227,10 @@ public final class VolumeStreamUtils {
             backingVolume.addBlockEntity(pos.getX(), pos.getY(), pos.getZ(), (BlockEntity) cloned);
         } : (pos, tile) -> {
         };
+    }
+
+    public static Predicate<net.minecraft.world.entity.Entity> apiToImplPredicate(final Predicate<? super Entity> filter) {
+        return entity -> entity instanceof Entity && filter.test((Entity) entity);
     }
 
     private interface TriFunction<A, B, C, Out> {
@@ -270,43 +273,31 @@ public final class VolumeStreamUtils {
         final TriFunction<ChunkAccess, LevelChunkSection, BlockPos, T> elementAccessor, final Vector3i min,
         final Vector3i max
     ) {
-        // Get the mins
-        final int minChunkX = min.getX() >> 4;
-        final int minXOffset = min.getX() & 15;
-        final int minChunkZ = min.getZ() >> 4;
-        final int minZOffset = min.getZ() & 15;
-        final int minYSection = min.getY() >> 4 << 4;
-        final int minYOffset = min.getY() & 15;
-
-        // Now for the maxes
-        final int maxChunkX = max.getX() >> 4;
-        final int maxXOffset = max.getX() & 15;
-        final int maxChunkZ = max.getZ() >> 4;
-        final int maxZOffset = max.getZ() & 15;
-        final int maxYSection = max.getY() >> 4 << 4;
-        final int maxYOffset = max.getY() & 15;
+        // Build the min and max
+        final ChunkCursor minCursor = new ChunkCursor(min);
+        final ChunkCursor maxCursor = new ChunkCursor(max);
 
         return chunk -> {
             final ChunkPos pos = chunk.getPos();
 
-            final int xStart = pos.x == minChunkX ? minXOffset : 0;
-            final int xEnd = pos.x == maxChunkX ? maxXOffset + 1 : 16; // 16 because IntStream.range is upper range exclusive
-            final int zStart = pos.z == minChunkZ ? minZOffset : 0;
-            final int zEnd = pos.z == maxChunkZ ? maxZOffset + 1 : 16; // 16 because IntStream.range is upper range exclusive
+            final int xStart = pos.x == minCursor.chunkX ? minCursor.xOffset : 0;
+            final int xEnd = pos.x == maxCursor.chunkX ? maxCursor.xOffset + 1 : 16; // 16 because IntStream.range is upper range exclusive
+            final int zStart = pos.z == minCursor.chunkZ ? minCursor.zOffset : 0;
+            final int zEnd = pos.z == maxCursor.chunkZ ? maxCursor.zOffset + 1 : 16; // 16 because IntStream.range is upper range exclusive
 
             final int chunkMinX = pos.x << 4;
             final int chunkMinZ = pos.z << 4;
 
             return Arrays.stream(chunk.getSections())
                 .filter(Objects::nonNull)
-                .filter(chunkSection -> chunkSection.bottomBlockY() >= minYSection && chunkSection.bottomBlockY() <= maxYSection)
+                .filter(chunkSection -> chunkSection.bottomBlockY() >= minCursor.ySection && chunkSection.bottomBlockY() <= maxCursor.ySection)
                 .flatMap(
                 chunkSection -> IntStream.range(zStart, zEnd)
                     .mapToObj(z -> IntStream.range(xStart, xEnd)
                         .mapToObj(x -> {
                             final int sectionY = chunkSection.bottomBlockY();
-                            final int yStart = sectionY == minYSection ? minYOffset : 0;
-                            final int yEnd = sectionY == maxYSection ? maxYOffset + 1 : 16; // plus 1 because of IntStream range exclusive
+                            final int yStart = sectionY == minCursor.ySection ? minCursor.yOffset : 0;
+                            final int yEnd = sectionY == maxCursor.ySection ? maxCursor.yOffset + 1 : 16; // plus 1 because of IntStream range exclusive
                             return IntStream.range(yStart, yEnd)
                                 .mapToObj(y ->
                                     {
@@ -362,7 +353,7 @@ public final class VolumeStreamUtils {
         final Function<Section, Stream<Map.Entry<BlockPos, MC>>> entityAccessor,
         final BiConsumer<KeyReference, MC> identityFunction,
         final BiFunction<BlockPos, MC, KeyReference> entityToKey,
-        final BiFunction<KeyReference, R, Tuple<BlockPos, MC>> filteredPositionEntityAccessor
+        final BiFunction<KeyReference, R, Tuple<BlockPos, @Nullable MC>> filteredPositionEntityAccessor
 
     ) {
         final Supplier<R> worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier(ref, "World");
@@ -381,12 +372,14 @@ public final class VolumeStreamUtils {
         );
     }
 
+    @SuppressWarnings("unchecked")
     private static <R extends Volume, API, MC, Section, KeyReference> SpongeVolumeStream<R, API> generateStreamInternal(
-        StreamOptions options, R ref, BiConsumer<KeyReference, MC> identityFunction,
-        BiFunction<BlockPos, MC, KeyReference> entityToKey,
-        Function<Section, Stream<Map.Entry<BlockPos, MC>>> entityAccessor,
-        BiFunction<KeyReference, R, Tuple<BlockPos, MC>> filteredPositionEntityAccessor, Supplier<R> worldSupplier,
-        Stream<Section> sectionStream
+        final StreamOptions options, final R ref, final BiConsumer<KeyReference, MC> identityFunction,
+        final BiFunction<BlockPos, MC, KeyReference> entityToKey,
+        final Function<Section, Stream<Map.Entry<BlockPos, MC>>> entityAccessor,
+        final BiFunction<KeyReference, R, @Nullable Tuple<BlockPos, @Nullable MC>> filteredPositionEntityAccessor,
+        final Supplier<R> worldSupplier,
+        final Stream<Section> sectionStream
     ) {
         // This effectively creates a weakly referenced object supplier casting the MC variant to the API variant
         // without consideration, assuming the MC variant is always mixed in to implement the API variant.
@@ -404,7 +397,6 @@ public final class VolumeStreamUtils {
         // itself.
         final BiConsumer<Map.Entry<BlockPos, MC>, Set<KeyReference>> entryConsumer = (entry, poses) -> {
             final BlockPos pos = entry.getKey();
-            final Vector3i v = VecHelper.toVector3i(pos);
             final KeyReference keyRef = entityToKey.apply(pos, entry.getValue());
             poses.add(keyRef);
             identityFunction.accept(keyRef, entry.getValue());
@@ -435,6 +427,7 @@ public final class VolumeStreamUtils {
         // And finally, the complete stream turning objects into VolumeElements.
         final Stream<VolumeElement<R, API>> volumeStreamBacker = filteredPosStream
             .map(pos -> filteredPositionEntityAccessor.apply(pos, ref))
+            .filter(Objects::nonNull)
             .filter(tuple -> Objects.nonNull(tuple.getB()))
             .map(elementGenerator);
         return new SpongeVolumeStream<>(volumeStreamBacker, worldSupplier);

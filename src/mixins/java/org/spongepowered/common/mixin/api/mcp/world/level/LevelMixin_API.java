@@ -378,10 +378,13 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             ,
             // Filtered Position Entity Accessor
             (entityUuid, world) -> {
-                final net.minecraft.world.entity.Entity tileEntity = shouldCarbonCopy
+                final net.minecraft.world.entity.@Nullable Entity entity = shouldCarbonCopy
                     ? (net.minecraft.world.entity.Entity) backingVolume.getEntity(entityUuid).orElse(null)
                     : (net.minecraft.world.entity.Entity) ((ProtoWorld) world).getEntity(entityUuid).orElse(null);
-                return new Tuple<>(tileEntity.blockPosition(), tileEntity);
+                if (entity == null) {
+                    return null;
+                }
+                return new Tuple<>(entity.blockPosition(), entity);
             }
         );
     }

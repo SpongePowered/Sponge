@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level;
 
+import net.minecraft.world.level.EntityGetter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
@@ -31,10 +32,10 @@ import org.spongepowered.api.world.volume.entity.EntityVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.level.EntityGetter;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -90,8 +91,7 @@ public interface EntityGetterMixin_API extends EntityVolume {
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     @Override
     default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
-        return (Collection) this
-                .shadow$getEntities(null, VecHelper.toMinecraftAABB(box), entity -> entity instanceof Entity && filter.test((Entity) entity));
+        return (Collection) this.shadow$getEntities(null, VecHelper.toMinecraftAABB(box), VolumeStreamUtils.apiToImplPredicate(filter));
     }
 
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
