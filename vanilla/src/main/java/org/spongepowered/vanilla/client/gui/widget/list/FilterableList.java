@@ -24,7 +24,7 @@
  */
 package org.spongepowered.vanilla.client.gui.widget.list;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -36,6 +36,7 @@ import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.screens.Screen;
+import net.minecraft.client.renderer.GameRenderer;
 import org.spongepowered.common.accessor.client.gui.components.AbstractSelectionListAccessor;
 import org.spongepowered.vanilla.util.Bounds;
 
@@ -262,23 +263,24 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
                 if (((AbstractSelectionListAccessor) this).accessor$renderSelection() && Objects.equals(this.getSelected(), filteredList.get(i))) {
                     final int xSelectStart = this.x0 + this.width / 2 - rowWidth / 2 - 2;
                     final int xSelectEnd = this.x0 + this.width / 2 + rowWidth / 2 - 4;
-                    GlStateManager._disableTexture();
+                    RenderSystem.disableTexture();
+                    RenderSystem.setShader(GameRenderer::getPositionShader);
                     final float f = this.isFocused() ? 1.0F : 0.5F;
-                    GlStateManager._color4f(f, f, f, 1.0F);
+                    RenderSystem.setShaderColor(f, f, f, 1.0F);
                     bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
                     bufferbuilder.vertex(xSelectStart, yStart + yEnd + 2, 0.0D).endVertex();
                     bufferbuilder.vertex(xSelectEnd, yStart + yEnd + 2, 0.0D).endVertex();
                     bufferbuilder.vertex(xSelectEnd, yStart - 2, 0.0D).endVertex();
                     bufferbuilder.vertex(xSelectStart, yStart - 2, 0.0D).endVertex();
                     tessellator.end();
-                    GlStateManager._color4f(0.0F, 0.0F, 0.0F, 1.0F);
+                    RenderSystem.setShaderColor(0.0F, 0.0F, 0.0F, 1.0F);
                     bufferbuilder.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION);
                     bufferbuilder.vertex(xSelectStart + 1, yStart + yEnd + 1, 0.0D).endVertex();
                     bufferbuilder.vertex(xSelectEnd - 1, yStart + yEnd + 1, 0.0D).endVertex();
                     bufferbuilder.vertex(xSelectEnd - 1, yStart - 1, 0.0D).endVertex();
                     bufferbuilder.vertex(xSelectStart + 1, yStart - 1, 0.0D).endVertex();
                     tessellator.end();
-                    GlStateManager._enableTexture();
+                    RenderSystem.enableTexture();
                 }
 
                 final E entry = filteredList.get(i);

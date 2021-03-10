@@ -28,7 +28,7 @@
  */
 package org.spongepowered.vanilla.client.gui.widget;
 
-import com.mojang.blaze3d.platform.GlStateManager;
+import com.mojang.blaze3d.systems.RenderSystem;
 import com.mojang.blaze3d.vertex.BufferBuilder;
 import com.mojang.blaze3d.vertex.DefaultVertexFormat;
 import com.mojang.blaze3d.vertex.PoseStack;
@@ -36,10 +36,11 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
+import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
-import org.lwjgl.opengl.GL11;
+import net.minecraft.client.renderer.GameRenderer;
 
 import java.util.Collections;
 import java.util.List;
@@ -185,14 +186,12 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
         final BufferBuilder worldr = tess.getBuilder();
 
         final double scale = this.client.getWindow().getGuiScale();
-        GL11.glEnable(GL11.GL_SCISSOR_TEST);
-        GL11.glScissor((int) (this.left * scale), (int) (this.client.getWindow().getHeight() - (this.bottom * scale)), (int) (this.width * scale),
+        RenderSystem.enableScissor((int) (this.left * scale), (int) (this.client.getWindow().getHeight() - (this.bottom * scale)), (int) (this.width * scale),
             (int) (this.height * scale));
 
-        GlStateManager._disableLighting();
-        GlStateManager._disableFog();
-        this.client.getTextureManager().bind(GuiComponent.BACKGROUND_LOCATION);
-        GlStateManager._color4f(1.0F, 1.0F, 1.0F, 1.0F);
+        RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+        RenderSystem.setShaderTexture(0, GuiComponent.BACKGROUND_LOCATION);
+        RenderSystem.setShaderColor(1.0F, 1.0F, 1.0F, 1.0F);
         final float texScale = 32.0F;
         worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
         worldr.vertex(this.left, this.bottom, 0.0f).uv(this.left / texScale, (this.bottom + (int) this.scrollDistance) / texScale)
@@ -208,7 +207,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
         final int baseY = this.top + this.border - (int) this.scrollDistance;
         this.drawPanel(stack, this.right, baseY, tess, mouseX, mouseY);
 
-        GlStateManager._disableDepthTest();
+        RenderSystem.disableDepthTest();
 
         final int extraHeight = (this.getContentHeight() + this.border) - this.height;
         if (extraHeight > 0) {
@@ -219,7 +218,9 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
                 barTop = this.top;
             }
 
-            GlStateManager._disableTexture();
+            RenderSystem.disableTexture();
+            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
+            RenderSystem._setShaderTexture(0, AbstractSelectionList.WHITE_TEXTURE_LOCATION);
             worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
             worldr.vertex(this.barLeft, this.bottom, 0.0f).uv(0.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
             worldr.vertex(this.barLeft + this.barWidth, this.bottom, 0.0f).uv(1.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
@@ -240,11 +241,9 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             tess.end();
         }
 
-        GlStateManager._enableTexture();
-        GlStateManager._shadeModel(GL11.GL_FLAT);
-        GlStateManager._enableAlphaTest();
-        GlStateManager._disableBlend();
-        GL11.glDisable(GL11.GL_SCISSOR_TEST);
+        RenderSystem.enableTexture();
+        RenderSystem.disableBlend();
+        RenderSystem.disableScissor();
     }
 
     @Override
