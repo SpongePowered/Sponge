@@ -71,11 +71,11 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     // Called when clicking in an inventory
     // InventoryMenu Callback
     @Inject(method = "doClick", at = @At(value = "HEAD"), cancellable = true)
-    private void impl$onClick(int slotId, int dragType, ClickType clickTypeIn, Player player, CallbackInfoReturnable<ItemStack> cir) {
+    private void impl$onClick(int slotId, int dragType, ClickType clickTypeIn, Player player, CallbackInfo ci) {
         final SpongeInventoryMenu menu = this.bridge$getMenu();
         if (menu != null) {
             if (!menu.onClick(slotId, dragType, clickTypeIn, player, (org.spongepowered.api.item.inventory.Container) this)) {
-                cir.setReturnValue(ItemStack.EMPTY);
+                ci.cancel();
                 // Accept all changes made by plugin
                 for (int i = 0; i < this.slots.size(); i++) {
                     Slot slot = this.slots.get(i);

@@ -152,7 +152,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow private int lastSentExp;
     @Shadow private float lastSentHealth;
     @Shadow private int lastSentFood;
-    @Shadow public boolean ignoreSlotUpdateHack;
 
     @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
     @Shadow public abstract void shadow$setCamera(final Entity entity);

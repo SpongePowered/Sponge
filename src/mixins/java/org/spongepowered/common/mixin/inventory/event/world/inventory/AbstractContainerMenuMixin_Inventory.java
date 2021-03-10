@@ -235,7 +235,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                     ordinal = 1))
     private void impl$ClearOnSlot(final net.minecraft.world.entity.player.Inventory inventoryPlayer, final ItemStack itemStackIn) {
         if (!this.impl$dropCancelled || !((PlayerBridge) inventoryPlayer.player).bridge$shouldRestoreInventory()) {
-            inventoryPlayer.setCarried(itemStackIn); // original behaviour
+            inventoryPlayer.player.containerMenu.setCarried(itemStackIn); // original behaviour
         }
         ((PlayerBridge) inventoryPlayer.player).bridge$shouldRestoreInventory(false);
         this.impl$dropCancelled = false;
@@ -256,13 +256,13 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         }
         if (entityItem == null) {
             ItemStack original;
-            if (player.getInventory().getCarried().isEmpty()) {
+            if (player.containerMenu.getCarried().isEmpty()) {
                 original = itemStackIn;
             } else {
-                player.getInventory().getCarried().grow(1);
-                original = player.getInventory().getCarried();
+                player.containerMenu.getCarried().grow(1);
+                original = player.containerMenu.getCarried();
             }
-            player.getInventory().setCarried(original);
+            player.containerMenu.setCarried(original);
             ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, original));
         }
         ((PlayerBridge) player).bridge$shouldRestoreInventory(false);
@@ -324,17 +324,17 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Inject(method = "doClick",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;grow(I)V", ordinal = 1))
     private void beforeOnTakeClickWithItem(
-            final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<Integer> cir) {
-        this.bridge$setPreviousCursor(player.getInventory().getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
+            final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfo ci) {
+        this.bridge$setPreviousCursor(player.containerMenu.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
     }
 
     // Called when setting the cursor item (pickup with empty cursor)
     // Captures the previous cursor for later use
     @Inject(method = "doClick",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;setCarried(Lnet/minecraft/world/item/ItemStack;)V", ordinal = 3))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ContainerMenu;setCarried(Lnet/minecraft/world/item/ItemStack;)V", ordinal = 3))
     private void beforeOnTakeClick(
-            final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<Integer> cir) {
-        this.bridge$setPreviousCursor(player.getInventory().getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
+            final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfo ci) {
+        this.bridge$setPreviousCursor(player.containerMenu.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
     }
 
     // ClickType.THROW (for Crafting) -------------------------
@@ -342,11 +342,11 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // When it is crafting check if it was cancelled and prevent item drop
     @Redirect(method = "doClick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/inventory/Slot;onTake(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;",
+                    target = "Lnet/minecraft/world/inventory/Slot;onTake(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)V",
                     ordinal = 5))
-    private ItemStack redirectOnTakeThrow(final Slot slot, final Player player, final ItemStack stackToDrop) {
+    private void redirectOnTakeThrow(final Slot slot, final Player player, final ItemStack stackToDrop) {
         this.bridge$setLastCraft(null);
-        final ItemStack result = slot.onTake(player, stackToDrop);
+        slot.onTake(player, stackToDrop);
         CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
         if (lastCraft != null) {
             if (slot instanceof ResultSlot) {
@@ -355,7 +355,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 }
             }
         }
-        return result;
     }
 
     // ClickType.QUICK_MOVE (for Crafting) -------------------------
@@ -386,7 +385,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     // cleanup after slot click was captured
     @Inject(method = "doClick", at = @At("RETURN"))
-    private void impl$onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<ItemStack> cir) {
+    private void impl$onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfo ci) {
         // Reset variables needed for CraftItemEvent.Craft
         this.bridge$setLastCraft(null);
         this.bridge$setPreviousCursor(null);
@@ -501,7 +500,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             DataSlot intreferenceholder = this.dataSlots.get(j);
             if (intreferenceholder.checkAndClearUpdateFlag()) {
                 for(ContainerListener icontainerlistener1 : this.containerListeners) {
-                    icontainerlistener1.setContainerData((AbstractContainerMenu) (Object) this, j, intreferenceholder.get());
+                    icontainerlistener1.dataChanged((AbstractContainerMenu) (Object) this, j, intreferenceholder.get());
                 }
             }
         }
