@@ -280,6 +280,9 @@ public final class SpongeAdventure {
     public static net.minecraft.network.chat.Component asVanilla(final Component component) {
         return new AdventureTextComponent(component, GlobalTranslator.renderer());
     }
+    public static net.minecraft.network.chat.Component asVanillaRendered(final Component component, Locale locale) {
+        return new AdventureTextComponent(component, GlobalTranslator.renderer()).rendered(locale);
+    }
 
     public static Component asAdventure(final net.minecraft.network.chat.Component component) {
         return ((BaseComponentBridge) component).bridge$asAdventureComponent();

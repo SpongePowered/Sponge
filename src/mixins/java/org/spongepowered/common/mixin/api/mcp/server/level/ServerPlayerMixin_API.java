@@ -388,8 +388,8 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.impl$isFake) {
             return;
         }
-        this.connection.send(new ClientboundChatPacket(SpongeAdventure.asVanilla(Objects.requireNonNull(message, "message")),
-                SpongeAdventure.asVanilla(Objects.requireNonNull(type, "type")), Objects.requireNonNull(identity, "identity").uuid()));
+        this.connection.send(new ClientboundChatPacket(SpongeAdventure.asVanillaRendered(Objects.requireNonNull(message, "message"),
+                this.getLocale()), SpongeAdventure.asVanilla(Objects.requireNonNull(type, "type")), Objects.requireNonNull(identity, "identity").uuid()));
     }
 
     @Override
