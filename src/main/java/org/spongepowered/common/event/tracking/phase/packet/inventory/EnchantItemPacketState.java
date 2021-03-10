@@ -75,7 +75,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         // TODO clear this shit out of the context
         final ServerboundContainerButtonClickPacket packetIn = context.getPacket();
         final ItemStackSnapshot lastCursor = context.getCursor();
-        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.getInventory().getCarried());
+        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.containerMenu.getCarried());
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(lastCursor, newCursor);
 
         final net.minecraft.world.inventory.AbstractContainerMenu openContainer = player.containerMenu;

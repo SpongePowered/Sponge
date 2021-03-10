@@ -29,13 +29,10 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
 import net.minecraft.network.protocol.game.ServerboundCommandSuggestionPacket;
-import net.minecraft.network.protocol.game.ServerboundContainerAckPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerButtonClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundContainerClosePacket;
@@ -320,7 +317,6 @@ public final class PacketPhase {
         this.packetTranslationMap.put(ServerboundPlayerInputPacket.class, packet -> PacketPhase.General.HANDLED_EXTERNALLY);
         this.packetTranslationMap.put(ServerboundContainerClosePacket.class, packet -> PacketPhase.General.CLOSE_WINDOW);
         this.packetTranslationMap.put(ServerboundContainerClickPacket.class, packet -> PacketPhase.fromWindowPacket((ServerboundContainerClickPacket) packet));
-        this.packetTranslationMap.put(ServerboundContainerAckPacket.class, packet -> PacketPhase.General.UNKNOWN);
         this.packetTranslationMap.put(ServerboundSetCreativeModeSlotPacket.class, packet -> PacketPhase.General.CREATIVE_INVENTORY);
         this.packetTranslationMap.put(ServerboundContainerButtonClickPacket.class, packet -> PacketPhase.Inventory.ENCHANT_ITEM);
         this.packetTranslationMap.put(ServerboundSignUpdatePacket.class, packet -> PacketPhase.General.UPDATE_SIGN);

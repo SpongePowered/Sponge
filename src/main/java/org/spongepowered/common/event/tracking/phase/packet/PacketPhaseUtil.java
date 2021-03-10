@@ -105,7 +105,7 @@ public final class PacketPhaseUtil {
             // If event is cancelled, always resync with player
             // we must also validate the player still has the same container open after the event has been processed
             if (eventCancelled && player.containerMenu == containerMenu && player instanceof net.minecraft.server.level.ServerPlayer) {
-                ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(containerMenu);
+                containerMenu.sendAllDataToRemote();
             }
         }
         return restoredAny;
@@ -113,7 +113,7 @@ public final class PacketPhaseUtil {
 
     public static void handleCustomCursor(final Player player, final ItemStackSnapshot customCursor) {
         final ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
-        player.getInventory().setCarried(cursor);
+        player.containerMenu.setCarried(cursor);
         if (player instanceof net.minecraft.server.level.ServerPlayer) {
             ((net.minecraft.server.level.ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, cursor));
         }
@@ -136,7 +136,7 @@ public final class PacketPhaseUtil {
             return;
         }
 
-        player.ignoreSlotUpdateHack = false;
+        player.containerMenu.suppressRemoteUpdates();
         int slotId = 0;
         if (hand == InteractionHand.OFF_HAND) {
             player.getInventory().offhand.set(0, itemStack);
@@ -153,7 +153,7 @@ public final class PacketPhaseUtil {
         }
 
         player.containerMenu.broadcastChanges();
-        player.ignoreSlotUpdateHack = false;
+        player.containerMenu.resumeRemoteUpdates();
         player.connection.send(new ClientboundContainerSetSlotPacket(player.containerMenu.containerId, slotId, itemStack));
     }
 
@@ -203,7 +203,7 @@ public final class PacketPhaseUtil {
                 if (ignoreMovementCapture || (packetIn instanceof ServerboundClientInformationPacket)) {
                     packetIn.handle(netHandler);
                 } else {
-                    final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.getInventory().getCarried());
+                    final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.containerMenu.getCarried());
                     final IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
                     final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.SERVER);
