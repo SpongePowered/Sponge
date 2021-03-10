@@ -53,6 +53,7 @@ import org.spongepowered.api.event.filter.cause.Root;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
+import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -139,6 +140,11 @@ public class ChatTest implements LoadableModule {
     }
 
     public static class Listeners {
+
+        @Listener
+        public void onLogin(final ServerSideConnectionEvent.Join event) {
+            event.getPlayer().sendMessage(Component.translatable("chattest.response"));
+        }
 
         @Listener(order = Order.LAST)
         public void onChat(final PlayerChatEvent event, final @Root ServerPlayer player) {

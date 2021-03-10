@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.network;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyVariable;
@@ -42,10 +43,7 @@ public abstract class FriendlyByteBufMixin implements FriendlyByteBufBridge {
 
     @ModifyVariable(method = "writeComponent", at = @At("HEAD"), argsOnly = true)
     private Component localizeComponent(final Component input) {
-        if(this.impl$locale != null) {
-            return NativeComponentRenderer.apply(input, this.impl$locale);
-        }
-        return input;
+        return NativeComponentRenderer.apply(input, this.impl$locale == null ? Locales.EN_US : this.impl$locale);
     }
 
     @Override

@@ -324,6 +324,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Override
     public void bridge$setLanguage(final Locale language) {
+        // Update locale on Channel, used for sending localized messages
+        if (this.connection != null) {
+            final Channel channel = ((ConnectionAccessor) this.connection.connection).accessor$channel();
+            channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(language);
+            SpongeAdventure.forEachBossBar(bar -> {
+                if (bar.getPlayers().contains(this)) {
+                    this.connection.send(new ClientboundBossEventPacket(ClientboundBossEventPacket.Operation.UPDATE_NAME, bar));
+                }
+            });
+        }
         this.impl$language = language;
     }
 
@@ -808,13 +818,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
         final int viewDistance = $packet.accessor$viewDistance();
 
-        // Update locale on Channel, used for sending localized messages
-        final Channel channel = ((ConnectionAccessor) this.connection.connection).accessor$channel();
-        channel.attr(SpongeAdventure.CHANNEL_LOCALE).set(newLocale);
-        SpongeAdventure.forEachBossBar(bar -> this.connection.send(new ClientboundBossEventPacket(ClientboundBossEventPacket.Operation.UPDATE_NAME, bar)));
-
         // Update the fields we track ourselves
         this.impl$viewDistance = viewDistance;
+        this.bridge$setLanguage(newLocale);
         this.impl$language = newLocale;
     }
 
