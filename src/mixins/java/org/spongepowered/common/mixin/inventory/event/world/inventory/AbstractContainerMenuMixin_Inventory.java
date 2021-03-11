@@ -397,7 +397,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 if (slotId == 0) {
                     this.shadow$sendAllDataToRemote();
                 } else {
-                    listener.slotChanged((AbstractContainerMenu) (Object) this, 0, this.shadow$getItems().get(0));
+                    listener.slotChanged((AbstractContainerMenu) (Object) this, 0, this.slots.get(0).getItem());
                 }
             }
 
@@ -422,8 +422,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Final @Shadow public NonNullList<Slot> slots;
     @Final @Shadow private List<ContainerListener> containerListeners;
     @Final @Shadow private List<DataSlot> dataSlots;
-
-    @Shadow public abstract NonNullList<ItemStack> shadow$getItems();
 
     @Override
     public void bridge$detectAndSendChanges(final boolean captureOnly) {
