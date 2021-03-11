@@ -37,7 +37,6 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import net.minecraft.network.protocol.game.ClientboundBossEventPacket;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundGameEventPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerAbilitiesPacket;
@@ -59,7 +58,6 @@ import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.GameRules;
@@ -108,11 +106,11 @@ import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundClientInformationPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
-import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.entity.EntityUtil;
@@ -827,20 +825,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
         this.shadow$setItemInHand(hand, this.impl$packetItem);
         this.containerMenu.broadcastChanges();
-    }
-
-    /**
-     * Send SlotCrafting updates to client for custom recipes.
-     *
-     * @author Faithcaio - 31.12.2016
-     * @reason Vanilla is not updating the Client when Slot is SlotCrafting - this is an issue when plugins register new recipes
-     */
-    @Inject(method = "slotChanged", at = @At("HEAD"))
-    private void sendSlotContents(
-            final net.minecraft.world.inventory.AbstractContainerMenu containerToSend, final int slotIn, final ItemStack stack, final CallbackInfo ci) {
-        if (containerToSend.getSlot(slotIn) instanceof ResultSlot) {
-            this.connection.send(new ClientboundContainerSetSlotPacket(containerToSend.containerId, slotIn, stack));
-        }
     }
 
     @Override

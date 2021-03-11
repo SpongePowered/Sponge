@@ -31,8 +31,8 @@ import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.menu.ClickTypes;
@@ -49,12 +49,11 @@ import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 public class SpongeInventoryMenu implements InventoryMenu {
 
@@ -71,7 +70,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
 
     private boolean readonly; // TODO make with wrapper slot
 
-    public SpongeInventoryMenu(ViewableInventory inventory) {
+    public SpongeInventoryMenu(final ViewableInventory inventory) {
         this.inventory = inventory;
     }
 
@@ -81,10 +80,10 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public void setCurrentInventory(ViewableInventory inventory) {
+    public void setCurrentInventory(final ViewableInventory inventory) {
         if (inventory.getClass().equals(this.inventory.getClass()) && inventory instanceof ViewableCustomInventory && inventory.capacity() == this.inventory.capacity()) {
             this.inventory = inventory;
-            for (Map.Entry<Container, ServerPlayer> entry : this.tracked.entrySet()) {
+            for (final Map.Entry<Container, ServerPlayer> entry : this.tracked.entrySet()) {
                 final net.minecraft.world.inventory.AbstractContainerMenu container = (net.minecraft.world.inventory.AbstractContainerMenu) entry.getKey();
                 final ServerPlayer player = entry.getValue();
                 // create a new container for the viewable inventory
@@ -95,11 +94,12 @@ public class SpongeInventoryMenu implements InventoryMenu {
                     container.slots.set(i, slot);
                     // Update Container items
                     ((AbstractContainerMenuAccessor)container).accessor$lastSlots().set(i, slot.getItem());
+                    // send update to Client
+                    for (final ContainerListener listener : ((AbstractContainerMenuAccessor) container).accessor$containerListeners()) {
+                        listener.slotChanged(container, i, slot.getItem());
+                    }
                 }
-                // send update to Client
-                for (ContainerListener listener : ((AbstractContainerMenuAccessor) container).accessor$containerListeners()) {
-                    listener.refreshContainer(container, ((AbstractContainerMenuAccessor) container).accessor$lastSlots());
-                }
+
             }
         } else {
             // Get all distinct players and reopen inventory for them
@@ -114,19 +114,19 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public void setTitle(Component title) {
+    public void setTitle(final Component title) {
         this.title = title;
         this.reopen();
     }
 
     @Override
-    public InventoryMenu setReadOnly(boolean readOnly) {
+    public InventoryMenu setReadOnly(final boolean readOnly) {
         this.readonly = readOnly;
         return this;
     }
 
     @Override
-    public void registerHandler(InventoryCallbackHandler handler) {
+    public void registerHandler(final InventoryCallbackHandler handler) {
         if (handler instanceof ClickHandler) {
             this.registerClick(((ClickHandler) handler));
         }
@@ -149,27 +149,27 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public void registerClose(CloseHandler handler) {
+    public void registerClose(final CloseHandler handler) {
         this.closeHandler = handler;
     }
 
     @Override
-    public void registerClick(ClickHandler handler) {
+    public void registerClick(final ClickHandler handler) {
         this.clickHandler = handler;
     }
 
     @Override
-    public void registerSlotClick(SlotClickHandler handler) {
+    public void registerSlotClick(final SlotClickHandler handler) {
         this.slotClickHandler = handler;
     }
 
     @Override
-    public void registerKeySwap(KeySwapHandler handler) {
+    public void registerKeySwap(final KeySwapHandler handler) {
         this.keySwapHandler = handler;
     }
 
     @Override
-    public void registerChange(SlotChangeHandler handler) {
+    public void registerChange(final SlotChangeHandler handler) {
         this.changeHandler = handler;
     }
 
@@ -183,8 +183,8 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public Optional<Container> open(ServerPlayer player) {
-        Optional<Container> container = player.openInventory(this.inventory, this.title);
+    public Optional<Container> open(final ServerPlayer player) {
+        final Optional<Container> container = player.openInventory(this.inventory, this.title);
         container.ifPresent(c -> {
             ((MenuBridge)c).bridge$setMenu(this);
             this.tracked.put(c, player);
@@ -192,32 +192,33 @@ public class SpongeInventoryMenu implements InventoryMenu {
         return container;
     }
 
-    public void onClose(Player player, Container container) {
+    public void onClose(final Player player, final Container container) {
 
         if (this.closeHandler != null) {
-            try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
-                Cause cause = frame.getCurrentCause();
+                final Cause cause = frame.getCurrentCause();
                 this.closeHandler.handle(cause, container);
             }
         }
         this.tracked.remove(container);
     }
 
-    public boolean onClick(int slotId, int dragType, ClickType clickTypeIn, Player player, Container container) {
-        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+    public boolean onClick(
+        final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final Container container) {
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            Cause cause = frame.getCurrentCause();
+            final Cause cause = frame.getCurrentCause();
             if (clickTypeIn == ClickType.QUICK_CRAFT) {
                 return this.onClickDrag(cause, slotId, dragType, container);
             }
-            Optional<org.spongepowered.api.item.inventory.Slot> slot = container.getSlot(slotId);
+            final Optional<org.spongepowered.api.item.inventory.Slot> slot = container.getSlot(slotId);
 
             if (slot.isPresent()) {
                 switch (clickTypeIn) {
                     case SWAP:
                         if (dragType >= 0 && dragType < 9) {
-                            Optional<org.spongepowered.api.item.inventory.Slot> slot2 = container.getSlot(dragType);
+                            final Optional<org.spongepowered.api.item.inventory.Slot> slot2 = container.getSlot(dragType);
                             if (slot2.isPresent() && this.keySwapHandler != null) {
                                 return this.keySwapHandler.handle(cause, container, slot.get(), slotId, ClickTypes.KEY_SWAP.get(), slot2.get());
                             }
@@ -275,10 +276,10 @@ public class SpongeInventoryMenu implements InventoryMenu {
         }
     }
 
-    private boolean onClickDrag(Cause cause, int slotId, int dragType, Container container) {
+    private boolean onClickDrag(final Cause cause, final int slotId, final int dragType, final Container container) {
 
-        int dragMode = dragType >> 2 & 3; // (0 : evenly split, 1 : one item by slot, 2 : creative)
-        int dragEvent = dragType & 3; // (0 : start drag, 1 : add slot, 2 : end drag)
+        final int dragMode = dragType >> 2 & 3; // (0 : evenly split, 1 : one item by slot, 2 : creative)
+        final int dragEvent = dragType & 3; // (0 : start drag, 1 : add slot, 2 : end drag)
 
         switch (dragEvent) {
             case 0: // start drag
@@ -287,7 +288,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
                 }
                 break;
             case 1: // add drag
-                Optional<org.spongepowered.api.item.inventory.Slot> slot = container.getSlot(slotId);
+                final Optional<org.spongepowered.api.item.inventory.Slot> slot = container.getSlot(slotId);
                 if (slot.isPresent() && this.slotClickHandler != null) {
                     switch (dragMode) {
                         case 0:
@@ -308,8 +309,9 @@ public class SpongeInventoryMenu implements InventoryMenu {
         return true;
     }
 
-    private boolean onClickRight(Cause cause, SlotClickHandler handler, ClickType clickTypeIn, Container container,
-                                 int idx, org.spongepowered.api.item.inventory.Slot slot) {
+    private boolean onClickRight(
+        final Cause cause, final SlotClickHandler handler, final ClickType clickTypeIn, final Container container,
+                                 final int idx, final org.spongepowered.api.item.inventory.Slot slot) {
         switch (clickTypeIn) {
             case PICKUP:
                 return handler.handle(cause, container, slot, idx, ClickTypes.CLICK_RIGHT.get());
@@ -323,8 +325,9 @@ public class SpongeInventoryMenu implements InventoryMenu {
         return true;
     }
 
-    private Boolean onClickLeft(Cause cause, SlotClickHandler handler, ClickType clickTypeIn, Container container,
-                                int idx, org.spongepowered.api.item.inventory.Slot slot) {
+    private Boolean onClickLeft(
+        final Cause cause, final SlotClickHandler handler, final ClickType clickTypeIn, final Container container,
+                                final int idx, final org.spongepowered.api.item.inventory.Slot slot) {
         switch (clickTypeIn) {
             case PICKUP:
                 return handler.handle(cause, container, slot, idx, ClickTypes.CLICK_LEFT.get());
@@ -337,7 +340,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         return true;
     }
 
-    public boolean onChange(ItemStack newStack, ItemStack oldStack, Container container, int slotIndex, Slot slot) {
+    public boolean onChange(final ItemStack newStack, final ItemStack oldStack, final Container container, final int slotIndex, final Slot slot) {
 
         // readonly by default cancels top inventory changes . but can be overridden by change callbacks
         if (this.readonly && !(slot.container instanceof PlayerInventory)) {
@@ -345,7 +348,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         }
 
         if (this.changeHandler != null) {
-            Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+            final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
             return this.changeHandler.handle(cause, container, ((org.spongepowered.api.item.inventory.Slot) slot), slotIndex,
                     ItemStackUtil.snapshotOf(oldStack), ItemStackUtil.snapshotOf(newStack));
         }

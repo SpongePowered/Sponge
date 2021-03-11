@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
 import net.minecraft.core.NonNullList;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
@@ -39,13 +38,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 
-import java.util.List;
-
 import javax.annotation.Nullable;
+import java.util.List;
 
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuBridge {
@@ -54,6 +51,8 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     @Shadow @Final private List<ContainerListener> containerListeners;
     @Shadow @Final private NonNullList<ItemStack> lastSlots;
     @Shadow @Final public NonNullList<Slot> slots;
+
+    @Shadow public abstract void shadow$sendAllDataToRemote();
     // @formatter:on
 
     @Nullable private SpongeInventoryMenu impl$menu;
@@ -82,9 +81,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
                     this.lastSlots.set(i, slot.getItem().copy());
                 }
                 // and update client
-                for (ContainerListener listener : this.containerListeners) {
-                    listener.refreshContainer((AbstractContainerMenu) (Object) this, this.lastSlots);
-                }
+                this.shadow$sendAllDataToRemote();
             }
         }
     }
@@ -100,6 +97,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
         this.bridge$setMenu(null);
     }
 
+    @SuppressWarnings("UnresolvedMixinReference") // Lambda
     @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPlace(Lnet/minecraft/world/item/ItemStack;)Z"))
     public boolean impl$onMayPlace(final Slot slot, final ItemStack stack) {
         if (this.bridge$isReadonlyMenu(slot)) {
@@ -112,6 +110,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     /**
      * We already have another mixin for the ordinal=4 in {@link org.spongepowered.common.mixin.inventory.event.world.inventory.AbstractContainerMenuMixin_Inventory#onCanTakeStack}
      */
+    @SuppressWarnings("UnresolvedMixinReference") // Lambda
     @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z"))
     public boolean impl$onMayPickup(final Slot slot, final Player player) {
         if (this.bridge$isReadonlyMenu(slot)) {
@@ -138,12 +137,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
 
     @Override
     public void bridge$refreshListeners() {
-        for (ContainerListener listener : this.containerListeners) {
-            listener.refreshContainer((AbstractContainerMenu) (Object) this, this.lastSlots);
-            if (listener instanceof ServerPlayer) {
-                ((ServerPlayer) listener).broadcastCarriedItem();
-            }
-        }
+        this.shadow$sendAllDataToRemote();
     }
 
 }

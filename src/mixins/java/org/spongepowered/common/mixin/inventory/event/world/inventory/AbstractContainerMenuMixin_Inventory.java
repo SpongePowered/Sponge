@@ -24,36 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
-import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
-import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
-import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
-import org.spongepowered.common.item.util.ItemStackUtil;
-
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -68,10 +38,40 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
+import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
+import org.spongepowered.common.item.util.ItemStackUtil;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Inventory implements TrackedContainerBridge, InventoryAdapter, TrackedInventoryBridge {
 
+    @Shadow private boolean suppressRemoteUpdates;
+    @Shadow public abstract void shadow$sendAllDataToRemote();
     // TrackedContainerBridge
 
     private boolean impl$shiftCraft = false;
@@ -308,7 +308,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             final ItemStack original = ItemStackUtil.fromSnapshotToNative(this.impl$itemStackSnapshot);
             this.impl$lastSlotUsed.set(original);
             player.containerMenu.broadcastChanges(); // TODO check if this is needed?
-            ((ServerPlayer) player).ignoreSlotUpdateHack = false;
+            player.containerMenu.resumeRemoteUpdates();
             ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(player.containerMenu.containerId, this.impl$lastSlotUsed.index, original));
         }
         this.impl$itemStackSnapshot = ItemStackSnapshot.empty();
@@ -395,7 +395,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         if (((Object) this) instanceof CraftingMenu || ((Object) this) instanceof InventoryMenu) {
             for (ContainerListener listener : this.containerListeners) {
                 if (slotId == 0) {
-                    listener.refreshContainer((AbstractContainerMenu) (Object) this, this.shadow$getItems());
+                    this.shadow$sendAllDataToRemote();
                 } else {
                     listener.slotChanged((AbstractContainerMenu) (Object) this, 0, this.shadow$getItems().get(0));
                 }
@@ -485,12 +485,12 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         for (ContainerListener listener : this.containerListeners) {
             boolean isChangingQuantityOnly = true;
             if (listener instanceof ServerPlayer) {
-                isChangingQuantityOnly = ((ServerPlayer) listener).ignoreSlotUpdateHack;
-                ((ServerPlayer) listener).ignoreSlotUpdateHack = false;
+                isChangingQuantityOnly = this.suppressRemoteUpdates;
+                this.suppressRemoteUpdates = false;
             }
             listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
             if (listener instanceof ServerPlayer) {
-                ((ServerPlayer) listener).ignoreSlotUpdateHack = isChangingQuantityOnly;
+                this.suppressRemoteUpdates = isChangingQuantityOnly;
             }
         }
     }

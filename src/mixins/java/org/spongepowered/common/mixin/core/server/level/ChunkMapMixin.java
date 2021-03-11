@@ -86,6 +86,7 @@ public abstract class ChunkMapMixin {
         chunkManager.write(pos, compound);
     }
 
+    @SuppressWarnings("UnresolvedMixinReference") // Lambda
     @Redirect(method = "*",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;unload(Lnet/minecraft/world/level/chunk/LevelChunk;)V"),
             slice = @Slice(
@@ -120,6 +121,7 @@ public abstract class ChunkMapMixin {
         }
     }
 
+    @SuppressWarnings("UnresolvedMixinReference") // Lambda
     @Redirect(method = "*",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"),
             slice = @Slice(
