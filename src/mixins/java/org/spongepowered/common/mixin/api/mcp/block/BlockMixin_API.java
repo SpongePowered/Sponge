@@ -53,12 +53,12 @@ public abstract class BlockMixin_API extends AbstractBlockMixin_API {
     // @formatter:on
 
     @Override
-    public BlockState getDefaultState() {
+    public BlockState defaultState() {
         return (BlockState) this.shadow$defaultBlockState();
     }
 
     @Override
-    public Optional<ItemType> getItem() {
+    public Optional<ItemType> item() {
         final Item item = this.shadow$asItem();
         if (item == Items.AIR) {
             return Optional.empty();
@@ -73,12 +73,12 @@ public abstract class BlockMixin_API extends AbstractBlockMixin_API {
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<StateProperty<?>> getStateProperties() {
+    public Collection<StateProperty<?>> stateProperties() {
         return (Collection<StateProperty<?>>) (Object) this.stateDefinition.getProperties();
     }
 
     @Override
-    public Optional<StateProperty<?>> getStatePropertyByName(final String name) {
+    public Optional<StateProperty<?>> statePropertyByName(final String name) {
         return Optional.ofNullable((StateProperty<?>) this.stateDefinition.getProperty(name));
     }
 

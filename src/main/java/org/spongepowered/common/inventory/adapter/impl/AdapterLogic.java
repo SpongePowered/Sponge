@@ -161,7 +161,7 @@ public abstract class AdapterLogic {
         }
 
         int maxStackSize = Math.min(lens.getMaxStackSize(fabric), nativeStack.getMaxStackSize());
-        int remaining = stack.getQuantity();
+        int remaining = stack.quantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
             final net.minecraft.world.item.ItemStack old = lens.getStack(fabric, ord);
@@ -193,7 +193,7 @@ public abstract class AdapterLogic {
         net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         int maxStackSize = Math.min(lens.getMaxStackSize(fabric), nativeStack.getMaxStackSize());
-        int remaining = stack.getQuantity();
+        int remaining = stack.quantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
             net.minecraft.world.item.ItemStack old = lens.getStack(fabric, ord);
@@ -214,7 +214,7 @@ public abstract class AdapterLogic {
 
         }
 
-        if (remaining == stack.getQuantity()) {
+        if (remaining == stack.quantity()) {
             // No items were consumed
             result.type(Type.FAILURE).reject(ItemStackUtil.cloneDefensive(nativeStack));
         } else {
@@ -245,7 +245,7 @@ public abstract class AdapterLogic {
     }
 
     public static boolean contains(InventoryAdapter adapter, ItemStack stack) {
-        return AdapterLogic.contains(adapter.inventoryAdapter$getFabric(), adapter.inventoryAdapter$getRootLens(), stack, stack.getQuantity());
+        return AdapterLogic.contains(adapter.inventoryAdapter$getFabric(), adapter.inventoryAdapter$getRootLens(), stack, stack.quantity());
     }
 
     public static boolean contains(InventoryAdapter adapter, ItemStack stack, int quantity) {
@@ -309,7 +309,7 @@ public abstract class AdapterLogic {
         net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
         int maxStackSize = Math.min(lens.getMaxStackSize(fabric), nativeStack.getMaxStackSize());
-        int remaining = stack.getQuantity();
+        int remaining = stack.quantity();
 
         for (int ord = 0; ord < lens.slotCount() && remaining > 0; ord++) {
             net.minecraft.world.item.ItemStack old = lens.getStack(fabric, ord);

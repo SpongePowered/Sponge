@@ -138,18 +138,18 @@ public final class SpongeBanBuilder implements Ban.Builder {
     @Override
     public Ban.Builder from(final Ban ban) {
         this.reset();
-        this.banType = ban.getType();
+        this.banType = ban.type();
 
         if (this.banType.equals(BanTypes.PROFILE.get())) {
-            this.profile = ((Ban.Profile) ban).getProfile();
+            this.profile = ((Ban.Profile) ban).profile();
         } else {
-            this.address = ((Ban.IP) ban).getAddress();
+            this.address = ((Ban.IP) ban).address();
         }
 
-        this.reason = ban.getReason().orElse(null);
-        this.start = ban.getCreationDate();
-        this.end = ban.getExpirationDate().orElse(null);
-        this.source = ban.getBanSource().orElse(null);
+        this.reason = ban.reason().orElse(null);
+        this.start = ban.creationDate();
+        this.end = ban.expirationDate().orElse(null);
+        this.source = ban.banSource().orElse(null);
         return this;
     }
 

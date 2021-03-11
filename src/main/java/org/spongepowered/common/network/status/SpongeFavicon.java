@@ -66,7 +66,7 @@ public class SpongeFavicon implements Favicon {
     }
 
     @Override
-    public BufferedImage getImage() {
+    public BufferedImage image() {
         return this.decoded;
     }
 

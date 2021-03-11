@@ -43,16 +43,16 @@ public abstract class LecternMenuMixin_BlockCarrier_Inventory_API implements Def
     private LecternBlockEntity impl$lectern;
 
     @Override
-    public ServerLocation getLocation() {
+    public ServerLocation location() {
         if (this.impl$lectern == null) {
             this.impl$lectern = ((LecternBlockEntity_Accessor) this.lectern).accessor$this$0();
         }
-        return ((BlockEntity) this.impl$lectern).getServerLocation();
+        return ((BlockEntity) this.impl$lectern).serverLocation();
     }
 
     @Override
-    public World<?, ?> getWorld() {
-        return ((BlockEntity) this.lectern).getWorld();
+    public World<?, ?> world() {
+        return ((BlockEntity) this.lectern).world();
     }
 
 }

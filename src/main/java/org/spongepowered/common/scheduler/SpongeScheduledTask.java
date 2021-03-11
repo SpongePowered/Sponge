@@ -53,17 +53,17 @@ public final class SpongeScheduledTask implements ScheduledTask {
     }
 
     @Override
-    public UUID getUniqueId() {
+    public UUID uniqueId() {
         return this.id;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public Task getTask() {
+    public Task task() {
         return this.task;
     }
 

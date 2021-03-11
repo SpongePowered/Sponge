@@ -81,7 +81,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
 
     @Override
     default DataTransactionResult offer(Value<?> value) {
-        return this.impl$applyTransaction(value.getKey(), (p, m) -> ((DataProvider<Value<?>, ?>) p).offerValue(m, value),
+        return this.impl$applyTransaction(value.key(), (p, m) -> ((DataProvider<Value<?>, ?>) p).offerValue(m, value),
                 () -> DataTransactionResult.failResult(value.asImmutable()));
     }
 
@@ -218,7 +218,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
 
     @Override
     default DataTransactionResult remove(Value<?> value) {
-        return this.impl$applyTransaction(value.getKey(), (p, m) -> {
+        return this.impl$applyTransaction(value.key(), (p, m) -> {
             final Optional<?> opt = p.get(m);
             if (opt.isPresent() && opt.get().equals(value.get())) {
                 return p.remove(m);
@@ -245,7 +245,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         } else if (function == MergeFunction.ORIGINAL_PREFERRED) {
             // Produce less garbage if we know we don't have to merge any values
             for (final Value replacement : that.getValues()) {
-                final Key<Value<Object>> key = replacement.getKey();
+                final Key<Value<Object>> key = replacement.key();
                 if (this.get(key).isPresent()) {
                     continue;
                 }
@@ -258,7 +258,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
             }
         } else {
             for (final Value replacement : that.getValues()) {
-                final Key<Value<Object>> key = replacement.getKey();
+                final Key<Value<Object>> key = replacement.key();
                 @Nullable final Value original = this.getValue(key).map(Value::asImmutable).orElse(null);
                 final Value merged = function.merge(original, replacement);
                 final DataTransactionResult result = this.offer(merged);
@@ -278,14 +278,14 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
 
     @Override
     default DataTransactionResult undo(DataTransactionResult result) {
-        if (result.getReplacedData().isEmpty() && result.getSuccessfulData().isEmpty()) {
+        if (result.replacedData().isEmpty() && result.successfulData().isEmpty()) {
             return DataTransactionResult.successNoData();
         }
         final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        for (final Value<?> value : result.getReplacedData()) {
+        for (final Value<?> value : result.replacedData()) {
             builder.absorbResult(this.offer(value));
         }
-        for (final Value<?> value : result.getSuccessfulData()) {
+        for (final Value<?> value : result.successfulData()) {
             builder.absorbResult(this.remove(value));
         }
         return DataTransactionResult.failNoData();
@@ -304,22 +304,22 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
 
     @Override
     default DataTransactionResult offerAll(CollectionValue<?, ?> value) {
-        return this.offerAll((Key<? extends CollectionValue<Object, ?>>) value.getKey(), value.get());
+        return this.offerAll((Key<? extends CollectionValue<Object, ?>>) value.key(), value.get());
     }
 
     @Override
     default DataTransactionResult offerAll(MapValue<?, ?> value) {
-        return this.offerAll((Key<? extends MapValue<Object, Object>>) value.getKey(), value.get());
+        return this.offerAll((Key<? extends MapValue<Object, Object>>) value.key(), value.get());
     }
 
     @Override
     default DataTransactionResult removeAll(CollectionValue<?, ?> value) {
-        return this.removeAll((Key<? extends CollectionValue<Object, ?>>) value.getKey(), value.get());
+        return this.removeAll((Key<? extends CollectionValue<Object, ?>>) value.key(), value.get());
     }
 
     @Override
     default DataTransactionResult removeAll(MapValue<?, ?> value) {
-        return this.removeAll((Key<? extends MapValue<Object, Object>>) value.getKey(), value.get());
+        return this.removeAll((Key<? extends MapValue<Object, Object>>) value.key(), value.get());
     }
 
 }

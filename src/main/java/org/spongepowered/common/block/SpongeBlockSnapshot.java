@@ -96,7 +96,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     @Override
-    public BlockState getState() {
+    public BlockState state() {
         return this.blockState;
     }
 
@@ -111,17 +111,17 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     @Override
-    public ResourceKey getWorld() {
+    public ResourceKey world() {
         return this.worldKey;
     }
 
     @Override
-    public Vector3i getPosition() {
+    public Vector3i position() {
         return this.pos;
     }
 
     @Override
-    public Optional<ServerLocation> getLocation() {
+    public Optional<ServerLocation> location() {
         return this.getServerWorld()
                 .map(world -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) world, this.pos));
     }
@@ -214,12 +214,12 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     @Override
-    public Optional<UUID> getCreator() {
+    public Optional<UUID> creator() {
         return Optional.empty();
     }
 
     @Override
-    public Optional<UUID> getNotifier() {
+    public Optional<UUID> notifier() {
         return Optional.empty();
     }
 
@@ -244,20 +244,20 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, getContentVersion())
+                .set(Queries.CONTENT_VERSION, contentVersion())
                 .set(Queries.WORLD_KEY, this.worldKey.asString())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.pos.getX())
                 .set(Queries.POSITION_Y, this.pos.getY())
                 .set(Queries.POSITION_Z, this.pos.getZ())
-                .getContainer()
+                .container()
                 .set(Constants.Block.BLOCK_STATE, this.blockState);
         if (this.compound != null) {
             container.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.INSTANCE.translateFrom(this.compound));
@@ -268,7 +268,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     public Optional<ServerLevel> getServerWorld() {
         @Nullable ServerLevel world = this.world != null ? this.world.get() : null;
         if (world == null) {
-            world = (ServerLevel) Sponge.getServer().getWorldManager().world(this.worldKey).orElse(null);
+            world = (ServerLevel) Sponge.server().worldManager().world(this.worldKey).orElse(null);
             if (world != null) {
                 this.world = new WeakReference<>(world);
             }
@@ -322,7 +322,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public List<DataHolder> impl$delegateDataHolder() {
-        return Arrays.asList(this, this.getState());
+        return Arrays.asList(this, this.state());
     }
 
     @Override

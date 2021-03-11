@@ -45,8 +45,8 @@ public interface FusedExplosiveBridge {
     default boolean bridge$shouldPrime() {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_PRE) {
             final PrimeExplosiveEvent.Pre event = SpongeEventFactory.createPrimeExplosiveEventPre(
-                PhaseTracker.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
-            return !Sponge.getEventManager().post(event);
+                PhaseTracker.getCauseStackManager().currentCause(), (FusedExplosive) this);
+            return !Sponge.eventManager().post(event);
         }
         return true;
     }
@@ -54,16 +54,16 @@ public interface FusedExplosiveBridge {
     default void bridge$postPrime() {
         if (ShouldFire.PRIME_EXPLOSIVE_EVENT_POST) {
             final PrimeExplosiveEvent.Post event = SpongeEventFactory.createPrimeExplosiveEventPost(
-                PhaseTracker.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
-            Sponge.getEventManager().post(event);
+                PhaseTracker.getCauseStackManager().currentCause(), (FusedExplosive) this);
+            Sponge.eventManager().post(event);
         }
     }
 
     default boolean bridge$shouldDefuse() {
         if (ShouldFire.DEFUSE_EXPLOSIVE_EVENT_PRE) {
             final DefuseExplosiveEvent.Pre event = SpongeEventFactory.createDefuseExplosiveEventPre(
-                PhaseTracker.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
-            return !Sponge.getEventManager().post(event);
+                PhaseTracker.getCauseStackManager().currentCause(), (FusedExplosive) this);
+            return !Sponge.eventManager().post(event);
         }
         return true;
     }
@@ -71,8 +71,8 @@ public interface FusedExplosiveBridge {
     default void bridge$postDefuse() {
         if (ShouldFire.DEFUSE_EXPLOSIVE_EVENT_POST) {
             final DefuseExplosiveEvent.Post event = SpongeEventFactory.createDefuseExplosiveEventPost(
-                PhaseTracker.getCauseStackManager().getCurrentCause(), (FusedExplosive) this);
-            Sponge.getEventManager().post(event);
+                PhaseTracker.getCauseStackManager().currentCause(), (FusedExplosive) this);
+            Sponge.eventManager().post(event);
         }
     }
 }

@@ -49,7 +49,7 @@ public final class ReplaceTileEntity extends BlockEventBasedTransaction {
     ReplaceTileEntity(final BlockEntity added, final @Nullable BlockEntity removed,
         final SpongeBlockSnapshot attachedSnapshot
     ) {
-        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.getState(), attachedSnapshot.getWorld());
+        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.state(), attachedSnapshot.world());
         this.added = added;
         this.removed = removed;
         this.removedSnapshot = attachedSnapshot;

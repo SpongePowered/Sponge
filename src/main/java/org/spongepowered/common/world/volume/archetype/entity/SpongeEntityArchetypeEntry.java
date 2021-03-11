@@ -41,12 +41,12 @@ public class SpongeEntityArchetypeEntry implements EntityArchetypeEntry {
     }
 
     @Override
-    public EntityArchetype getArchetype() {
+    public EntityArchetype archetype() {
         return this.archetype;
     }
 
     @Override
-    public Vector3d getPosition() {
+    public Vector3d position() {
         return this.position;
     }
 

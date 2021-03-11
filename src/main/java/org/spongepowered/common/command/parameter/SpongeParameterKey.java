@@ -51,7 +51,7 @@ public final class SpongeParameterKey<T> implements Parameter.Key<T> {
 
     private SpongeParameterKey(final Parameter.@NonNull Key<T> parameterKey) {
         this.key = parameterKey.key();
-        this.type = parameterKey.getType();
+        this.type = parameterKey.type();
     }
 
     public SpongeParameterKey(final @NonNull String key, final @NonNull Type type) {
@@ -67,7 +67,7 @@ public final class SpongeParameterKey<T> implements Parameter.Key<T> {
 
     @Override
     @NonNull
-    public Type getType() {
+    public Type type() {
         return this.type;
     }
 

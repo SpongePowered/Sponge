@@ -37,7 +37,7 @@ public abstract class EquipmentSlotMixin_Inventory_API implements EquipmentType 
     @Shadow @Final private EquipmentSlot.Type type;
 
     @Override
-    public EquipmentGroup getGroup() {
+    public EquipmentGroup group() {
         return (EquipmentGroup) (Object) this.type;
     }
 }

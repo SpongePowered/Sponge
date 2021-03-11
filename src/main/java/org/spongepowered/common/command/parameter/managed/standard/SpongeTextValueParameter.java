@@ -66,14 +66,14 @@ public final class SpongeTextValueParameter extends AbstractArgumentParser<Compo
 
     @Override
     @NonNull
-    public Optional<? extends Component> getValue(
+    public Optional<? extends Component> parseValue(
             final Parameter.@NonNull Key<? super Component> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 
         final String toConvert;
         if (this.consumeAll) {
-            toConvert = reader.getRemaining();
+            toConvert = reader.remaining();
             while (reader.canRead()) {
                 reader.parseString();
             }

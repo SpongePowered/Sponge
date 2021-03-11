@@ -52,7 +52,7 @@ public class GridQuery extends SpongeQuery {
 
         GridInventoryAdapter gridAdapter = (GridInventoryAdapter) adapter;
 
-        Vector2i max = gridAdapter.getDimensions();
+        Vector2i max = gridAdapter.dimensions();
         if (max.getX() < this.offset.getX() + this.size.getX() && max.getY() < this.offset.getY() + this.size.getY()) {
             // queried grid does not fit inventory
             return new EmptyInventoryImpl(inventory);

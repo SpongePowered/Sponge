@@ -71,16 +71,16 @@ public final class ChangeBlockTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.plugin, new ChangeBlockListener());
-        Sponge.getEventManager().registerListeners(this.plugin, new HarvestEntityListener());
-        Sponge.getEventManager().registerListeners(this.plugin, new SpawnEntityListener());
-        Sponge.getEventManager().registerListeners(this.plugin, new EntityDeathPrinter());
+        Sponge.eventManager().registerListeners(this.plugin, new ChangeBlockListener());
+        Sponge.eventManager().registerListeners(this.plugin, new HarvestEntityListener());
+        Sponge.eventManager().registerListeners(this.plugin, new SpawnEntityListener());
+        Sponge.eventManager().registerListeners(this.plugin, new EntityDeathPrinter());
     }
 
     @Listener
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.plugin, Command.builder()
-            .setExecutor(context -> {
+            .executor(context -> {
                 this.cancelAll = !this.cancelAll;
                 final Component newState = Component.text(this.cancelAll ? "OFF" : "ON", this.cancelAll ? NamedTextColor.GREEN : NamedTextColor.RED);
                 context.sendMessage(Identity.nil(), Component.text("Turning Block Changes: ").append(newState));
@@ -89,7 +89,7 @@ public final class ChangeBlockTest implements LoadableModule {
             .build(), "toggleBlockChanges"
         );
         event.register(this.plugin, Command.builder()
-            .setExecutor(context -> {
+            .executor(context -> {
                 this.waterProofRedstone = !this.waterProofRedstone;
                 final Component newState = Component.text(this.waterProofRedstone ? "ON" : "OFF", this.waterProofRedstone ? NamedTextColor.GREEN : NamedTextColor.RED);
                 context.sendMessage(Identity.nil(), Component.text("Waterproof Redstone : ").append(newState));
@@ -98,7 +98,7 @@ public final class ChangeBlockTest implements LoadableModule {
             .build(), "toggleRedstoneWaterProofing"
         );
         event.register(this.plugin, Command.builder()
-            .setExecutor(context -> {
+            .executor(context -> {
                 this.printEntityHarvests = !this.printEntityHarvests;
                 final Component newState = Component.text(this.printEntityHarvests ? "ON" : "OFF", this.printEntityHarvests ? NamedTextColor.GREEN : NamedTextColor.RED);
                 context.sendMessage(Identity.nil(), Component.text("Logging Entity Harvests : ").append(newState));
@@ -107,7 +107,7 @@ public final class ChangeBlockTest implements LoadableModule {
             .build(), "toggleEntityHarvestPrinting"
         );
         event.register(this.plugin, Command.builder()
-            .setExecutor(context -> {
+            .executor(context -> {
                 this.printEntityDeaths = !this.printEntityDeaths;
                 final Component newState = Component.text(this.printEntityDeaths ? "ON" : "OFF", this.printEntityDeaths ? NamedTextColor.GREEN : NamedTextColor.RED);
                 context.sendMessage(Identity.nil(), Component.text("Logging Entity Harvests : ").append(newState));
@@ -116,7 +116,7 @@ public final class ChangeBlockTest implements LoadableModule {
             .build(), "toggleEntityDeathPrinting"
         );
         event.register(this.plugin, Command.builder()
-            .setExecutor(context -> {
+            .executor(context -> {
                 this.printEntitySpawns = !this.printEntitySpawns;
                 final Component newState = Component.text(this.printEntitySpawns ? "ON" : "OFF", this.printEntitySpawns ? NamedTextColor.GREEN : NamedTextColor.RED);
                 context.sendMessage(Identity.nil(), Component.text("Logging Entity Spawns : ").append(newState));
@@ -138,7 +138,7 @@ public final class ChangeBlockTest implements LoadableModule {
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* HarvestEntityEvent");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/ Cause:");
-            for (final Object o : event.getCause()) {
+            for (final Object o : event.cause()) {
                 pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/ - " + o);
             }
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
@@ -156,7 +156,7 @@ public final class ChangeBlockTest implements LoadableModule {
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* SpawnEntityEvent");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/ Cause:");
-            for (final Object o : event.getCause()) {
+            for (final Object o : event.cause()) {
                 pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/ - " + o);
             }
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
@@ -174,7 +174,7 @@ public final class ChangeBlockTest implements LoadableModule {
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* DestructEntityEvent.Death");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/ Cause:");
-            for (final Object o : event.getCause()) {
+            for (final Object o : event.cause()) {
                 pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/ - " + o);
             }
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
@@ -189,13 +189,13 @@ public final class ChangeBlockTest implements LoadableModule {
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* ChangeBlockEvent");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/ Cause:");
-            for (final Object o : post.getCause()) {
+            for (final Object o : post.cause()) {
                 pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/ - " + o);
             }
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
-            if (post.getCause().root() instanceof LocatableBlock) {
+            if (post.cause().root() instanceof LocatableBlock) {
                 // Leaves are the bane of all existence... they just spam so many events....
-                final BlockType type = ((LocatableBlock) post.getCause().root()).getBlockState().getType();
+                final BlockType type = ((LocatableBlock) post.cause().root()).blockState().type();
                 if (type == BlockTypes.ACACIA_LEAVES.get()
                    || type == BlockTypes.BIRCH_LEAVES.get()
                    || type == BlockTypes.OAK_LEAVES.get()
@@ -209,9 +209,9 @@ public final class ChangeBlockTest implements LoadableModule {
                 post.setCancelled(true);
             }
             if (ChangeBlockTest.this.waterProofRedstone) {
-                for (final BlockTransaction transaction : post.getTransactions()) {
-                    final boolean wasRedstone = transaction.getOriginal().getState().getType() == BlockTypes.REDSTONE_WIRE.get();
-                    final boolean becomesLiquid = transaction.getFinal().getState().get(Keys.MATTER_TYPE).get() == MatterTypes.LIQUID.get();
+                for (final BlockTransaction transaction : post.transactions()) {
+                    final boolean wasRedstone = transaction.original().state().type() == BlockTypes.REDSTONE_WIRE.get();
+                    final boolean becomesLiquid = transaction.finalReplacement().state().get(Keys.MATTER_TYPE).get() == MatterTypes.LIQUID.get();
                     if (wasRedstone && becomesLiquid) {
                         post.setCancelled(true);
                         return;

@@ -73,7 +73,7 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
         // from the instance of checks.
         checkNotNull(container);
         checkNotNull(compound);
-        for (Map.Entry<DataQuery, Object> entry : container.getValues(false).entrySet()) {
+        for (Map.Entry<DataQuery, Object> entry : container.values(false).entrySet()) {
             Object value = entry.getValue();
             String key = entry.getKey().asString('.');
             if (value instanceof DataView) {
@@ -293,7 +293,7 @@ public final class NBTTranslator implements DataTranslator<CompoundTag> {
     }
 
     @Override
-    public TypeToken<CompoundTag> getToken() {
+    public TypeToken<CompoundTag> token() {
         return NBTTranslator.TOKEN;
     }
 

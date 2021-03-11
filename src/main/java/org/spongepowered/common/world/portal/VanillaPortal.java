@@ -44,18 +44,18 @@ public final class VanillaPortal implements Portal {
     }
 
     @Override
-    public PortalType getType() {
+    public PortalType type() {
         return this.type;
     }
 
     @Override
-    public ServerLocation getOrigin() {
+    public ServerLocation origin() {
         return this.origin;
     }
 
     // Vanilla has no knowledge of where portals go to until you try, best we can do...
     @Override
-    public Optional<ServerLocation> getDestination() {
+    public Optional<ServerLocation> destination() {
         return Optional.ofNullable(this.destination);
     }
 }

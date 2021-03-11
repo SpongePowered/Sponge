@@ -42,7 +42,6 @@ import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
-import java.util.Collections;
 import java.util.EnumMap;
 import java.util.Map;
 import java.util.Optional;
@@ -69,7 +68,7 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
         final BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos
     ) {
-        super(TransactionTypes.NEIGHBOR_NOTIFICATION.get(), ((org.spongepowered.api.world.server.ServerWorld) serverWorldSupplier.get()).getKey());
+        super(TransactionTypes.NEIGHBOR_NOTIFICATION.get(), ((org.spongepowered.api.world.server.ServerWorld) serverWorldSupplier.get()).key());
         this.affectedPosition = sourcePos;
         this.originalState = notifyState;
         this.serverWorld = serverWorldSupplier;

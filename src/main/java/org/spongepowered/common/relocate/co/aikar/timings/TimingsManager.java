@@ -89,7 +89,7 @@ public final class TimingsManager {
                 handler.processTick(violated);
             }
 
-            TimingHistory.playerTicks += SpongeCommon.getGame().getServer().getOnlinePlayers().size();
+            TimingHistory.playerTicks += SpongeCommon.getGame().server().onlinePlayers().size();
             TimingHistory.timedTicks++;
             // Generate TPS/Ping/Tick reports every minute
         }
@@ -150,13 +150,13 @@ public final class TimingsManager {
         if (!("minecraft".equals(pluginName)
                 || "bukkit".equals(pluginName)
                 || "Spigot".equals(pluginName))) {
-            plugin = SpongeCommon.getGame().getPluginManager().getPlugin(pluginName);
+            plugin = SpongeCommon.getGame().pluginManager().plugin(pluginName);
         }
         if (!plugin.isPresent()) {
-            return SpongeTimingsFactory.ofSafe("Command: " + pluginName + ":" + command.getPrimaryAlias());
+            return SpongeTimingsFactory.ofSafe("Command: " + pluginName + ":" + command.primaryAlias());
         }
 
-        return SpongeTimingsFactory.ofSafe(plugin.get(), "Command: " + pluginName + ":" + command.getPrimaryAlias());
+        return SpongeTimingsFactory.ofSafe(plugin.get(), "Command: " + pluginName + ":" + command.primaryAlias());
     }
 
 }

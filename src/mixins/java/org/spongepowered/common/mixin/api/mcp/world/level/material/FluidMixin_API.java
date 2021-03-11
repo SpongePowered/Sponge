@@ -44,22 +44,22 @@ public abstract class FluidMixin_API implements FluidType {
     // @formatter:on
 
     @Override
-    public ImmutableList<FluidState> getValidStates() {
+    public ImmutableList<FluidState> validStates() {
         return (ImmutableList) this.shadow$getStateDefinition().getPossibleStates();
     }
 
     @Override
-    public FluidState getDefaultState() {
+    public FluidState defaultState() {
         return (FluidState) (Object) this.shadow$defaultFluidState();
     }
 
     @Override
-    public Collection<StateProperty<?>> getStateProperties() {
+    public Collection<StateProperty<?>> stateProperties() {
         return (Collection) this.shadow$getStateDefinition().getProperties();
     }
 
     @Override
-    public Optional<StateProperty<?>> getStatePropertyByName(final String name) {
+    public Optional<StateProperty<?>> statePropertyByName(final String name) {
         return Optional.ofNullable((StateProperty) this.shadow$getStateDefinition().getProperty(name));
     }
 }

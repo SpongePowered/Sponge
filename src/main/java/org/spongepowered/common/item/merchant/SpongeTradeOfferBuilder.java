@@ -138,15 +138,15 @@ public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> imp
     public TradeOffer.Builder from(final TradeOffer offer) {
         checkNotNull(offer, "Trade offer cannot be null");
         // Assumes the offer's values don't need to be validated
-        this.firstItem = offer.getFirstBuyingItem();
-        this.secondItem = offer.getSecondBuyingItem().orElse(null);
-        this.sellingItem = offer.getSellingItem();
-        this.useCount = offer.getUses();
-        this.maxUses = offer.getMaxUses();
+        this.firstItem = offer.firstBuyingItem();
+        this.secondItem = offer.secondBuyingItem().orElse(null);
+        this.sellingItem = offer.sellingItem();
+        this.useCount = offer.uses();
+        this.maxUses = offer.maxUses();
         this.allowsExperience = offer.doesGrantExperience();
-        this.merchantExperienceGranted = offer.getExperienceGrantedToMerchant();
-        this.priceGrowthMultiplier = offer.getPriceGrowthMultiplier();
-        this.demandBonus = offer.getDemandBonus();
+        this.merchantExperienceGranted = offer.experienceGrantedToMerchant();
+        this.priceGrowthMultiplier = offer.priceGrowthMultiplier();
+        this.demandBonus = offer.demandBonus();
         return this;
     }
 

@@ -68,14 +68,14 @@ public final class VanillaPluginManager implements SpongePluginManager {
     }
 
     @Override
-    public Optional<PluginContainer> getPlugin(final String id) {
+    public Optional<PluginContainer> plugin(final String id) {
         Objects.requireNonNull(id);
 
         return Optional.ofNullable(this.plugins.get(id));
     }
 
     @Override
-    public Collection<PluginContainer> getPlugins() {
+    public Collection<PluginContainer> plugins() {
         return Collections.unmodifiableCollection(this.sortedPlugins);
     }
 

@@ -187,8 +187,8 @@ public class FilterGenerator {
                             "Cannot have additional parameters filters without an array source (for " + param.getName() + ")");
                 }
                 Tuple<Integer, Integer> localState = source.write(cw, mv, method, param, local);
-                local = localState.getFirst();
-                plocals[i - 1] = localState.getSecond();
+                local = localState.first();
+                plocals[i - 1] = localState.second();
 
                 for (ParameterFilterDelegate paramFilter : paramFilters) {
                     paramFilter.write(cw, mv, method, param, plocals[i - 1]);

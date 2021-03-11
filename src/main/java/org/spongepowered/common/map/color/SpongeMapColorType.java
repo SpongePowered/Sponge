@@ -43,7 +43,7 @@ public final class SpongeMapColorType implements MapColorType {
     }
 
     @Override
-    public Color getColor() {
+    public Color color() {
         return Color.of(new java.awt.Color(this.materialColor.col));
     }
 }

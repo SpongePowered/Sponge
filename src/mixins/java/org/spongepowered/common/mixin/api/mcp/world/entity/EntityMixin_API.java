@@ -111,23 +111,23 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     // @formatter:on
 
     @Override
-    public Random getRandom() {
+    public Random random() {
         return this.random;
     }
 
     @Override
-    public Vector3d getPosition() {
+    public Vector3d position() {
         return new Vector3d(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return (World<?, ?>) this.level;
     }
 
     @Override
-    public ServerLocation getLocation() {
-        return ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.shadow$getCommandSenderWorld(), this.getPosition());
+    public ServerLocation location() {
+        return ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) this.shadow$getCommandSenderWorld(), this.position());
     }
 
     @Override
@@ -146,7 +146,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Vector3d getScale() {
+    public Vector3d scale() {
         return Vector3d.ONE;
     }
 
@@ -156,8 +156,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Transform getTransform() {
-        return Transform.of(this.getPosition(), this.getRotation(), this.getScale());
+    public Transform transform() {
+        return Transform.of(this.position(), this.rotation(), this.scale());
     }
 
     @Override
@@ -166,10 +166,10 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             return false;
         }
         Preconditions.checkNotNull(transform, "The transform cannot be null!");
-        final Vector3d position = transform.getPosition();
+        final Vector3d position = transform.position();
         this.shadow$setPos(position.getX(), position.getY(), position.getZ());
-        this.setRotation(transform.getRotation());
-        this.setScale(transform.getScale());
+        this.setRotation(transform.rotation());
+        this.setScale(transform.scale());
         if (!((WorldBridge) this.shadow$getCommandSenderWorld()).bridge$isFake()) {
             ((ServerLevel) this.shadow$getCommandSenderWorld()).updateChunkPos((Entity) (Object) this);
         }
@@ -185,7 +185,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Vector3d getRotation() {
+    public Vector3d rotation() {
         return new Vector3d(this.xRot, this.yRot, 0);
     }
 
@@ -198,11 +198,11 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         if (((Entity) (Object) this) instanceof ServerPlayer && ((ServerPlayer) (Entity) (Object) this).connection != null) {
             // Force an update, this also set the rotation in this entity
-            ((ServerPlayer) (Entity) (Object) this).connection.teleport(this.getPosition().getX(), this.getPosition().getY(),
-                    this.getPosition().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class));
+            ((ServerPlayer) (Entity) (Object) this).connection.teleport(this.position().getX(), this.position().getY(),
+                    this.position().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class));
         } else {
             if (!this.shadow$getCommandSenderWorld().isClientSide) { // We can't set the rotation update on client worlds.
-                ((ServerLevelBridge) this.getWorld()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
+                ((ServerLevelBridge) this.world()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
             }
 
             // Let the entity tracker do its job, this just updates the variables
@@ -211,7 +211,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public Optional<AABB> getBoundingBox() {
+    public Optional<AABB> boundingBox() {
         final net.minecraft.world.phys.AABB boundingBox = this.shadow$getBoundingBox();
         if (boundingBox == null) {
             return Optional.empty();
@@ -250,47 +250,46 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         return this.shadow$hurt((DamageSource) damageSource, (float) damage);
     }
 
-    @Override
-    public EntityType getType() {
+    public EntityType type() {
         return (EntityType) this.type;
     }
 
     @Override
-    public UUID getUniqueId() {
+    public UUID uniqueId() {
         return this.uuid;
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
-        final Transform transform = this.getTransform();
+        final Transform transform = this.transform();
         final CompoundTag compound = new CompoundTag();
         this.shadow$saveAsPassenger(compound);
         final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(compound);
         final DataContainer container = DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Entity.CLASS, this.getClass().getName())
-                .set(Queries.WORLD_KEY, ((org.spongepowered.api.world.server.ServerWorld) this.getWorld()).getKey().getFormatted())
+                .set(Queries.WORLD_KEY, ((org.spongepowered.api.world.server.ServerWorld) this.world()).key().formatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
-                .set(Queries.POSITION_X, transform.getPosition().getX())
-                .set(Queries.POSITION_Y, transform.getPosition().getY())
-                .set(Queries.POSITION_Z, transform.getPosition().getZ())
-                .getContainer()
+                .set(Queries.POSITION_X, transform.position().getX())
+                .set(Queries.POSITION_Y, transform.position().getY())
+                .set(Queries.POSITION_Z, transform.position().getZ())
+                .container()
                 .createView(Constants.Entity.ROTATION)
-                .set(Queries.POSITION_X, transform.getRotation().getX())
-                .set(Queries.POSITION_Y, transform.getRotation().getY())
-                .set(Queries.POSITION_Z, transform.getRotation().getZ())
-                .getContainer()
+                .set(Queries.POSITION_X, transform.rotation().getX())
+                .set(Queries.POSITION_Y, transform.rotation().getY())
+                .set(Queries.POSITION_Z, transform.rotation().getZ())
+                .container()
                 .createView(Constants.Entity.SCALE)
-                .set(Queries.POSITION_X, transform.getScale().getX())
-                .set(Queries.POSITION_Y, transform.getScale().getY())
-                .set(Queries.POSITION_Z, transform.getScale().getZ())
-                .getContainer()
-                .set(Constants.Entity.TYPE, Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) this.getType()))
+                .set(Queries.POSITION_X, transform.scale().getX())
+                .set(Queries.POSITION_Y, transform.scale().getY())
+                .set(Queries.POSITION_Z, transform.scale().getZ())
+                .container()
+                .set(Constants.Entity.TYPE, Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) this.type()))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
         return container;
     }
@@ -339,8 +338,8 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public HoverEvent<HoverEvent.ShowEntity> asHoverEvent(final UnaryOperator<HoverEvent.ShowEntity> op) {
-        final ResourceLocation entityTypeKey = Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) this.getType());
-        return HoverEvent.showEntity(op.apply(HoverEvent.ShowEntity.of((Key) (Object) entityTypeKey, this.getUniqueId(), this.displayName().get())));
+        final ResourceLocation entityTypeKey = Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) this.type());
+        return HoverEvent.showEntity(op.apply(HoverEvent.ShowEntity.of((Key) (Object) entityTypeKey, this.uniqueId(), this.displayName().get())));
     }
 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {

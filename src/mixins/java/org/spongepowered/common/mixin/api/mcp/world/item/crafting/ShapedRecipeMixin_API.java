@@ -45,13 +45,13 @@ public abstract class ShapedRecipeMixin_API implements ShapedCraftingRecipe {
     // @formatter:on
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return (ResourceKey) (Object) this.id;
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public org.spongepowered.api.item.recipe.crafting.Ingredient getIngredient(final int x, final int y) {
+    public org.spongepowered.api.item.recipe.crafting.Ingredient ingredient(final int x, final int y) {
         if (x < 0 || x >= this.width || y < 0 || y >= this.height) {
             throw new IndexOutOfBoundsException("Invalid ingredient predicate location");
         }
@@ -61,12 +61,12 @@ public abstract class ShapedRecipeMixin_API implements ShapedCraftingRecipe {
     }
 
     @Override
-    public int getWidth() {
+    public int width() {
         return this.width;
     }
 
     @Override
-    public int getHeight() {
+    public int height() {
         return this.height;
     }
 

@@ -71,20 +71,20 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
     // @formatter:on
 
     @Override
-    public Optional<Recipe> getByKey(ResourceKey key) {
+    public Optional<Recipe> byKey(ResourceKey key) {
         Preconditions.checkNotNull(key);
         return this.shadow$byKey((ResourceLocation) (Object) key).map(Recipe.class::cast);
     }
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public Collection<Recipe> getAll() {
+    public Collection<Recipe> all() {
         return (Collection) this.shadow$getRecipes();
     }
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public <T extends Recipe> Collection<T> getAllOfType(RecipeType<T> type) {
+    public <T extends Recipe> Collection<T> allOfType(RecipeType<T> type) {
         Preconditions.checkNotNull(type);
         return this.shadow$byType((net.minecraft.world.item.crafting.RecipeType)type).values();
     }
@@ -93,8 +93,8 @@ public abstract class RecipeManagerMixin_API implements RecipeRegistry {
     public <T extends Recipe> Collection<T> findByResult(RecipeType<T> type, ItemStackSnapshot result) {
         Preconditions.checkNotNull(type);
         Preconditions.checkNotNull(result);
-        return this.getAllOfType(type).stream()
-                .filter(r -> r.getExemplaryResult().equals(result))
+        return this.allOfType(type).stream()
+                .filter(r -> r.exemplaryResult().equals(result))
                 .collect(Collectors.toList());
     }
 

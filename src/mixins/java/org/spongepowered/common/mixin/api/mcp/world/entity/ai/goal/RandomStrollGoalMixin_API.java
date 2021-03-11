@@ -40,7 +40,7 @@ public abstract class RandomStrollGoalMixin_API extends GoalMixin_API<Creature> 
     // @formatter:on
 
     @Override
-    public double getSpeed() {
+    public double speed() {
         return this.speedModifier;
     }
 
@@ -51,7 +51,7 @@ public abstract class RandomStrollGoalMixin_API extends GoalMixin_API<Creature> 
     }
 
     @Override
-    public int getExecutionChance() {
+    public int executionChance() {
         return this.interval;
     }
 

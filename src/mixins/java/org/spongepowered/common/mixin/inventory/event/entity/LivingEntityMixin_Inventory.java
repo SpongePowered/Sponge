@@ -111,12 +111,12 @@ public abstract class LivingEntityMixin_Inventory {
             this.shadow$setItemSlot(equipmentslottype, oldStack);
             return true;
         }
-        final Transaction<ItemStackSnapshot> transaction = event.getTransaction();
+        final Transaction<ItemStackSnapshot> transaction = event.transaction();
         if (!transaction.isValid()) {
             this.shadow$setItemSlot(equipmentslottype, oldStack);
             return true;
         }
-        final Optional<ItemStackSnapshot> optional = transaction.getCustom();
+        final Optional<ItemStackSnapshot> optional = transaction.custom();
         if (optional.isPresent()) {
             final ItemStack custom = ItemStackUtil.fromSnapshotToNative(optional.get());
             this.shadow$setItemSlot(equipmentslottype, custom);

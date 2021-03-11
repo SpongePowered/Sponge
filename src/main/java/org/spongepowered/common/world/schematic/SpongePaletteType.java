@@ -52,12 +52,12 @@ public class SpongePaletteType<T, R> implements PaletteType<T, R> {
     }
 
     @Override
-    public BiFunction<String, Registry<R>, Optional<T>> getResolver() {
+    public BiFunction<String, Registry<R>, Optional<T>> resolver() {
         return this.resolver;
     }
 
     @Override
-    public BiFunction<Registry<R>, T, String> getStringifier() {
+    public BiFunction<Registry<R>, T, String> stringifier() {
         return this.stringifier;
     }
 

@@ -145,7 +145,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     public DataHolder.Mutable getDataHolder(final boolean markDirty) {
         if (this.isOnline()) {
-            return this.getPlayer().get();
+            return this.player().get();
         }
         if (!this.isInitialized()) {
             this.initialize();
@@ -179,7 +179,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             return;
         }
 
-        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.getServer()).accessor$storageSource();
+        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
         final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.profile.getId().toString() + ".dat").toFile();
         if (!file.exists()) {
             return;
@@ -243,7 +243,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     public void writeCompound(final CompoundTag compound) {
 
-        compound.putString(Constants.Sponge.World.WORLD_KEY, this.worldKey.getFormatted());
+        compound.putString(Constants.Sponge.World.WORLD_KEY, this.worldKey.formatted());
 
         this.loadInventory();
         this.loadEnderInventory();
@@ -259,17 +259,17 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public UUID getUniqueId() {
+    public UUID uniqueId() {
         return this.profile.getId();
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.profile.getName();
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
@@ -277,7 +277,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     public DataContainer toContainer() {
         // TODO More data
         return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.contentVersion())
             .set(Constants.Entity.Player.UUID, this.profile.getId())
             .set(Constants.Entity.Player.NAME, this.profile.getName())
             .set(Constants.Entity.Player.SPAWNS, this.spawnLocations);
@@ -294,8 +294,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public Optional<ItemStack> getEquipped(final EquipmentType type) {
-        throw new MissingImplementationException("SpongeUser", "getEquipped");
+    public Optional<ItemStack> equipped(final EquipmentType type) {
+        throw new MissingImplementationException("SpongeUser", "equipped");
     }
 
     @Override
@@ -309,28 +309,28 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public UserInventory getInventory() {
+    public UserInventory inventory() {
         return this.loadInventory();
     }
 
     @Override
-    public EquipmentInventory getEquipment() {
-        return this.getInventory().getEquipment();
+    public EquipmentInventory equipment() {
+        return this.inventory().equipment();
     }
 
     @Override
-    public ItemStack getItemInHand(final HandType handType) {
+    public ItemStack itemInHand(final HandType handType) {
         if (handType == HandTypes.MAIN_HAND.get()) {
-            this.getEquipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new);
+            this.equipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new);
         } else if (handType == HandTypes.OFF_HAND.get()) {
-            this.getEquipped(EquipmentTypes.OFF_HAND).orElseThrow(IllegalStateException::new);
+            this.equipped(EquipmentTypes.OFF_HAND).orElseThrow(IllegalStateException::new);
         }
         throw new IllegalArgumentException("Invalid hand " + handType);
     }
 
     @Override
-    public ItemStack getHead() {
-        return this.getEquipped(EquipmentTypes.HEAD).orElseThrow(IllegalStateException::new);
+    public ItemStack head() {
+        return this.equipped(EquipmentTypes.HEAD).orElseThrow(IllegalStateException::new);
     }
 
     @Override
@@ -339,8 +339,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public ItemStack getChest() {
-        return this.getEquipped(EquipmentTypes.CHEST).orElseThrow(IllegalStateException::new);
+    public ItemStack chest() {
+        return this.equipped(EquipmentTypes.CHEST).orElseThrow(IllegalStateException::new);
     }
 
     @Override
@@ -349,8 +349,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public ItemStack getLegs() {
-        return this.getEquipped(EquipmentTypes.LEGS).orElseThrow(IllegalStateException::new);
+    public ItemStack legs() {
+        return this.equipped(EquipmentTypes.LEGS).orElseThrow(IllegalStateException::new);
     }
 
     @Override
@@ -359,8 +359,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public ItemStack getFeet() {
-        return this.getEquipped(EquipmentTypes.FEET).orElseThrow(IllegalStateException::new);
+    public ItemStack feet() {
+        return this.equipped(EquipmentTypes.FEET).orElseThrow(IllegalStateException::new);
     }
 
     @Override
@@ -381,7 +381,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public Map<ResourceKey, RespawnLocation> bridge$getBedlocations() {
-        final Optional<ServerPlayer> player = this.getPlayer();
+        final Optional<ServerPlayer> player = this.player();
         return player
             .map(value -> ((BedLocationHolderBridge) value).bridge$getBedlocations())
             .orElse(this.spawnLocations);
@@ -389,7 +389,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public boolean bridge$setBedLocations(final Map<ResourceKey, RespawnLocation> value) {
-        final Optional<ServerPlayer> player = this.getPlayer();
+        final Optional<ServerPlayer> player = this.player();
         if (player.isPresent()) {
             return ((BedLocationHolderBridge) player.get()).bridge$setBedLocations(value);
         }
@@ -406,7 +406,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public ImmutableMap<ResourceKey, RespawnLocation> bridge$removeAllBeds() {
-        final Optional<ServerPlayer> player = this.getPlayer();
+        final Optional<ServerPlayer> player = this.player();
         if (player.isPresent()) {
             return ((BedLocationHolderBridge) player.get()).bridge$removeAllBeds();
         }
@@ -433,8 +433,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     public void save() {
         Preconditions.checkState(this.isInitialized(), "User {} is not initialized", this.profile.getId());
 
-        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.getServer()).accessor$storageSource();
-        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.getUniqueId() + ".dat").toFile();
+        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
+        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.uniqueId() + ".dat").toFile();
         CompoundTag compound;
         try {
             compound = NbtIo.readCompressed(new FileInputStream(file));
@@ -487,31 +487,31 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public org.spongepowered.api.profile.GameProfile getProfile() {
+    public org.spongepowered.api.profile.GameProfile profile() {
         return SpongeGameProfile.of(this.profile);
     }
 
     @Override
     public boolean isOnline() {
-        return this.getPlayer().isPresent();
+        return this.player().isPresent();
     }
 
     @Override
-    public Optional<ServerPlayer> getPlayer() {
+    public Optional<ServerPlayer> player() {
         return Optional.ofNullable((ServerPlayer) SpongeCommon.getServer().getPlayerList().getPlayer(this.profile.getId()));
     }
 
     @Override
-    public Vector3d getPosition() {
-        return this.getPlayer()
-                .map(Player::getPosition)
+    public Vector3d position() {
+        return this.player()
+                .map(Player::position)
                 .orElseGet(() -> new Vector3d(this.x, this.y, this.z));
     }
 
     @Override
-    public ResourceKey getWorldKey() {
-        final Optional<ServerPlayer> player = this.getPlayer();
-        return player.map(serverPlayer -> serverPlayer.getWorld().getKey()).orElseGet(() -> this.worldKey);
+    public ResourceKey worldKey() {
+        final Optional<ServerPlayer> player = this.player();
+        return player.map(serverPlayer -> serverPlayer.world().key()).orElseGet(() -> this.worldKey);
 
     }
 
@@ -520,9 +520,9 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         Preconditions.checkNotNull(key);
         Preconditions.checkNotNull(position);
 
-        final Optional<ServerPlayer> player = this.getPlayer();
+        final Optional<ServerPlayer> player = this.player();
         if (player.isPresent()) {
-            final Optional<org.spongepowered.api.world.server.ServerWorld> world = Sponge.getServer().getWorldManager().world(key);
+            final Optional<org.spongepowered.api.world.server.ServerWorld> world = Sponge.server().worldManager().world(key);
             return world.filter(serverWorld -> player.get().setLocation(ServerLocation.of(serverWorld, position))).isPresent();
         }
 
@@ -535,16 +535,16 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public Vector3d getRotation() {
-        return this.getPlayer()
-                .map(Entity::getRotation)
+    public Vector3d rotation() {
+        return this.player()
+                .map(Entity::rotation)
                 .orElseGet(() -> new Vector3d(this.pitch, this.yaw, 0));
     }
 
     @Override
     public void setRotation(final Vector3d rotation) {
         Preconditions.checkNotNull(rotation, "Rotation was null!");
-        final Optional<ServerPlayer> playerOpt = this.getPlayer();
+        final Optional<ServerPlayer> playerOpt = this.player();
         if (playerOpt.isPresent()) {
             playerOpt.get().setRotation(rotation);
             return;
@@ -555,15 +555,15 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public String getIdentifier() {
+    public String identifier() {
         return this.profile.getId().toString();
     }
 
     @Override
-    public Inventory getEnderChestInventory() {
-        final Optional<ServerPlayer> playerOpt = this.getPlayer();
+    public Inventory enderChestInventory() {
+        final Optional<ServerPlayer> playerOpt = this.player();
         if (playerOpt.isPresent()) {
-            return playerOpt.get().getEnderChestInventory();
+            return playerOpt.get().enderChestInventory();
         }
         this.loadEnderInventory();
         return ((Inventory) this.enderChest);
@@ -605,7 +605,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public void bridge$setVanished(final boolean vanished) {
-        final Optional<ServerPlayer> playerOpt = this.getPlayer();
+        final Optional<ServerPlayer> playerOpt = this.player();
         if (playerOpt.isPresent()) {
             ((VanishableBridge) playerOpt.get()).bridge$setVanished(vanished);
             return;
@@ -623,17 +623,17 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public boolean bridge$isVanished() {
-        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isVanished()).orElseGet(() -> this.isVanished);
+        return this.player().map(player -> ((VanishableBridge) player).bridge$isVanished()).orElseGet(() -> this.isVanished);
     }
 
     @Override
     public boolean bridge$isInvisible() {
-        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isInvisible()).orElseGet(() -> this.isInvisible);
+        return this.player().map(player -> ((VanishableBridge) player).bridge$isInvisible()).orElseGet(() -> this.isInvisible);
     }
 
     @Override
     public void bridge$setInvisible(final boolean invisible) {
-        final Optional<ServerPlayer> player = this.getPlayer();
+        final Optional<ServerPlayer> player = this.player();
         if (player.isPresent()) {
             ((VanishableBridge) player.get()).bridge$setInvisible(invisible);
             return;
@@ -648,12 +648,12 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public boolean bridge$isVanishIgnoresCollision() {
-        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isVanishIgnoresCollision()).orElseGet(() -> this.vanishIgnoresCollision);
+        return this.player().map(player -> ((VanishableBridge) player).bridge$isVanishIgnoresCollision()).orElseGet(() -> this.vanishIgnoresCollision);
     }
 
     @Override
     public void bridge$setVanishIgnoresCollision(final boolean vanishIgnoresCollision) {
-        final Optional<ServerPlayer> player = this.getPlayer();
+        final Optional<ServerPlayer> player = this.player();
         if (player.isPresent()) {
             ((VanishableBridge) player.get()).bridge$setVanishIgnoresCollision(vanishIgnoresCollision);
             return;
@@ -668,12 +668,12 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public boolean bridge$isVanishPreventsTargeting() {
-        return this.getPlayer().map(player -> ((VanishableBridge) player).bridge$isVanishPreventsTargeting()).orElseGet(() -> this.vanishPreventsTargeting);
+        return this.player().map(player -> ((VanishableBridge) player).bridge$isVanishPreventsTargeting()).orElseGet(() -> this.vanishPreventsTargeting);
     }
 
     @Override
     public void bridge$setVanishPreventsTargeting(final boolean vanishPreventsTargeting) {
-        final Optional<ServerPlayer> player = this.getPlayer();
+        final Optional<ServerPlayer> player = this.player();
         if (player.isPresent()) {
             ((VanishableBridge) player.get()).bridge$setVanishPreventsTargeting(vanishPreventsTargeting);
             return;
@@ -722,7 +722,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .add("isOnline", this.isOnline())
-            .add("profile", this.getProfile())
+            .add("profile", this.profile())
             .toString();
     }
 
@@ -732,11 +732,11 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     public Boolean isInvulnerable() {
-        return this.getPlayer().map(player -> ((net.minecraft.world.entity.Entity) player).isInvulnerable()).orElse(this.invulnerable);
+        return this.player().map(player -> ((net.minecraft.world.entity.Entity) player).isInvulnerable()).orElse(this.invulnerable);
     }
 
     public void setInvulnerable(boolean invulnerable) {
-        final Optional<ServerPlayer> playerOpt = this.getPlayer();
+        final Optional<ServerPlayer> playerOpt = this.player();
         if (playerOpt.isPresent()) {
             ((net.minecraft.world.entity.Entity) playerOpt.get()).setInvulnerable(invulnerable);
             return;

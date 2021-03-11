@@ -59,15 +59,15 @@ public final class SpongePermissions {
 
     public static void registerPermission(final String permissionNode, final int opLevel) {
         if (SpongePermissions.REGISTERED_PERMISSIONS.add(permissionNode)) {
-            final PermissionService service = Sponge.getServer().getServiceProvider().permissionService();
+            final PermissionService service = Sponge.server().serviceProvider().permissionService();
             if (opLevel == 0) {
                 // register as a default permission
-                 service.getDefaults()
-                        .getTransientSubjectData()
+                 service.defaults()
+                        .transientSubjectData()
                         .setPermission(SubjectData.GLOBAL_CONTEXT, permissionNode, Tristate.TRUE);
             }
             if (service instanceof SpongePermissionService) {
-                ((SpongePermissionService) service).getGroupForOpLevel(opLevel).getTransientSubjectData()
+                ((SpongePermissionService) service).getGroupForOpLevel(opLevel).transientSubjectData()
                         .setPermission(SubjectData.GLOBAL_CONTEXT, permissionNode, Tristate.TRUE);
             }
         }

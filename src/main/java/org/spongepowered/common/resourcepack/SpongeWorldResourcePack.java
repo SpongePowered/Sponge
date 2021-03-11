@@ -58,7 +58,7 @@ public final class SpongeWorldResourcePack extends SpongeResourcePack {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return "resourceszip";
     }
 
@@ -68,7 +68,7 @@ public final class SpongeWorldResourcePack extends SpongeResourcePack {
     }
 
     @Override
-    public URI getUri() {
+    public URI uri() {
         return this.uri;
     }
 

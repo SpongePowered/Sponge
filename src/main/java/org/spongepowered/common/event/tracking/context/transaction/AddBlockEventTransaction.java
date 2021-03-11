@@ -45,7 +45,7 @@ public class AddBlockEventTransaction extends BlockEventBasedTransaction {
 
 
     AddBlockEventTransaction(final SpongeBlockSnapshot original, final TrackerBlockEventDataBridge blockEvent) {
-        super(original.getBlockPos(), (BlockState) original.getState(), original.getWorld());
+        super(original.getBlockPos(), (BlockState) original.state(), original.world());
         this.blockEvent = (BlockEventData) blockEvent;
         this.original = original;
     }

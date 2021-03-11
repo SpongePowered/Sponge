@@ -70,7 +70,7 @@ public final class SpongeBootstrap {
         SpongeBootstrap.lifecycle.establishGameServices();
         SpongeBootstrap.lifecycle.establishDataKeyListeners();
 
-        SpongePacketHandler.init((SpongeChannelRegistry) Sponge.getChannelRegistry());
+        SpongePacketHandler.init((SpongeChannelRegistry) Sponge.channelRegistry());
 
         Launch.getInstance().getLogger().info("Loading Minecraft {}, please wait...", engineName);
         engineStart.run();

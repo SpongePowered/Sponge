@@ -71,9 +71,9 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
 
     @Override
     public BlockEntityArchetype.Builder from(final BlockEntityArchetype value) {
-        this.type = value.getBlockEntityType();
-        this.blockState = value.getState();
-        this.data = value.getBlockEntityData();
+        this.type = value.blockEntityType();
+        this.blockState = value.state();
+        this.data = value.blockEntityData();
         return this;
     }
 
@@ -98,7 +98,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
 
     @Override
     public BlockEntityArchetype.Builder from(final ServerLocation location) {
-        final BlockEntity tileEntity = location.getBlockEntity()
+        final BlockEntity tileEntity = location.blockEntity()
                 .orElseThrow(() -> new IllegalArgumentException("There is no block entity available at the provided location: " + location));
 
         return this.blockEntity(tileEntity);
@@ -118,8 +118,8 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
         compound.remove("id");
         compound.putString(Constants.Sponge.BlockEntityArchetype.TILE_ENTITY_ID, tileId);
         this.data = NBTTranslator.INSTANCE.translate(compound);
-        this.blockState = blockEntity.getBlock();
-        this.type = blockEntity.getType();
+        this.blockState = blockEntity.block();
+        this.type = blockEntity.type();
         return this;
     }
 

@@ -38,7 +38,7 @@ public abstract class DyeColorMixin_API implements DyeColor {
     // @formatter:on
 
     @Override
-    public Color getColor() {
+    public Color color() {
         float[] components = this.shadow$getTextureDiffuseColors();
         int r = GenericMath.floor(components[0] * 255);
         int g = GenericMath.floor(components[1] * 255);

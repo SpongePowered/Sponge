@@ -51,14 +51,14 @@ public class RawCommandTest implements Command.Raw {
         if (!arguments.canRead()) {
             cause.sendMessage(Identity.nil(), Component.text("No arguments"));
         }
-        cause.sendMessage(Identity.nil(), Component.text(arguments.getRemaining()));
+        cause.sendMessage(Identity.nil(), Component.text(arguments.remaining()));
         return CommandResult.success();
     }
 
     @Override
     @NonNull
-    public List<String> getSuggestions(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) throws CommandException {
-        if (arguments.getRemaining().endsWith(" ")) {
+    public List<String> suggestions(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) throws CommandException {
+        if (arguments.remaining().endsWith(" ")) {
             return this.suggestions;
         }
 
@@ -78,19 +78,19 @@ public class RawCommandTest implements Command.Raw {
 
     @Override
     @NonNull
-    public Optional<Component> getShortDescription(@NonNull final CommandCause cause) {
+    public Optional<Component> shortDescription(@NonNull final CommandCause cause) {
         return Optional.empty();
     }
 
     @Override
     @NonNull
-    public Optional<Component> getExtendedDescription(@NonNull final CommandCause cause) {
+    public Optional<Component> extendedDescription(@NonNull final CommandCause cause) {
         return Optional.empty();
     }
 
     @Override
     @NonNull
-    public Component getUsage(@NonNull final CommandCause cause) {
+    public Component usage(@NonNull final CommandCause cause) {
         return Component.text("[string] [string]");
     }
 

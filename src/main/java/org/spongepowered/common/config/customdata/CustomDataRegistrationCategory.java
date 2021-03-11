@@ -98,7 +98,7 @@ public final class CustomDataRegistrationCategory {
     public void populateRegistrations(final Collection<SpongeDataStore> stores) {
         this.registeredData.clear();
         for (final SpongeDataStore store : stores) {
-            this.registeredData.add(store.getDataStoreKey().getFormatted());
+            this.registeredData.add(store.getDataStoreKey().formatted());
         }
     }
 

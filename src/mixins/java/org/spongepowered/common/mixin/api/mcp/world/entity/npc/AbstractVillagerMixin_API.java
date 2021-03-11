@@ -45,7 +45,7 @@ public abstract class AbstractVillagerMixin_API extends AgableMobMixin_API imple
     // @formatter:on
 
     @Override
-    public Optional<Humanoid> getCustomer() {
+    public Optional<Humanoid> customer() {
         return Optional.ofNullable((Humanoid) this.shadow$getTradingPlayer());
     }
 

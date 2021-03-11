@@ -37,12 +37,12 @@ public abstract class BiomeMixin_API implements Biome {
     //@formatter:on
 
     @Override
-    public double getTemperature() {
+    public double temperature() {
         return this.shadow$getBaseTemperature();
     }
 
     @Override
-    public double getHumidity() {
+    public double humidity() {
         return this.shadow$getDownfall();
     }
 }

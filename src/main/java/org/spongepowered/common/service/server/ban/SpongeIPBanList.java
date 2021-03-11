@@ -59,7 +59,7 @@ public final class SpongeIPBanList extends IpBanList {
         }
 
         try {
-            return Sponge.getServer().getServiceProvider().banService().isBanned(InetAddress.getByName(entry)).join();
+            return Sponge.server().serviceProvider().banService().isBanned(InetAddress.getByName(entry)).join();
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -72,7 +72,7 @@ public final class SpongeIPBanList extends IpBanList {
         }
 
         try {
-            return (IpBanListEntry) Sponge.getServer().getServiceProvider().banService().getBanFor(InetAddress.getByName(obj)).join().orElse(null);
+            return (IpBanListEntry) Sponge.server().serviceProvider().banService().banFor(InetAddress.getByName(obj)).join().orElse(null);
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -85,7 +85,7 @@ public final class SpongeIPBanList extends IpBanList {
         }
 
         try {
-            Sponge.getServer().getServiceProvider().banService().pardon(InetAddress.getByName(entry));
+            Sponge.server().serviceProvider().banService().pardon(InetAddress.getByName(entry));
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -94,20 +94,20 @@ public final class SpongeIPBanList extends IpBanList {
     @Override
     public String[] getUserList() {
         final List<String> ips = new ArrayList<>();
-        for (final Ban.IP ban : Sponge.getServer().getServiceProvider().banService().getIpBans().join()) {
-            ips.add(this.getIpFromAddress(new InetSocketAddress(ban.getAddress(), 0)));
+        for (final Ban.IP ban : Sponge.server().serviceProvider().banService().ipBans().join()) {
+            ips.add(this.getIpFromAddress(new InetSocketAddress(ban.address(), 0)));
         }
         return ips.toArray(new String[0]);
     }
 
     @Override
     public void add(final IpBanListEntry entry) {
-        Sponge.getServer().getServiceProvider().banService().addBan((Ban) entry);
+        Sponge.server().serviceProvider().banService().addBan((Ban) entry);
     }
 
     @Override
     public boolean isEmpty() {
-        return Sponge.getServer().getServiceProvider().banService().getIpBans().join().isEmpty();
+        return Sponge.server().serviceProvider().banService().ipBans().join().isEmpty();
     }
 
     /**

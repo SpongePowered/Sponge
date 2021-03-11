@@ -39,7 +39,7 @@ public abstract class RunAroundLikeCrazyGoalMixin_API extends Goal implements Ru
     // @formatter:on
 
     @Override
-    public double getSpeed() {
+    public double speed() {
         return this.speedModifier;
     }
 

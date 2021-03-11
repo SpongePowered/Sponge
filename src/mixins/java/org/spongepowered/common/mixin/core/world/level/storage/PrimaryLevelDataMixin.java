@@ -317,7 +317,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         dimensionGeneratorSettings = ((WorldGenSettingsBridge) input).bridge$copy();
         final MappedRegistry<LevelStem> registry = new MappedRegistry<>(Registry.LEVEL_STEM_REGISTRY, Lifecycle.stable());
         ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) dimensionGeneratorSettings.dimensions()).streamEntries().forEach(entry -> {
-            if (Constants.MINECRAFT.equals(entry.key().getNamespace())) {
+            if (Constants.MINECRAFT.equals(entry.key().namespace())) {
                 ((org.spongepowered.api.registry.Registry<LevelStem>) (Object) registry).register(entry.key(), entry.value());
             }
         });

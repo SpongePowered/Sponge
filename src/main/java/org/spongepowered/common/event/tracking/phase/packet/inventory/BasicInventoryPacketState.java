@@ -175,7 +175,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             if (ShouldFire.SPAWN_ENTITY_EVENT && !capturedItems.isEmpty()) {
                 for (final Entity entiy: capturedItems) {
                     if (entiy instanceof CreatorTrackedBridge) {
-                        ((CreatorTrackedBridge) entiy).tracked$setCreatorReference(((ServerPlayer) player).getUser());
+                        ((CreatorTrackedBridge) entiy).tracked$setCreatorReference(((ServerPlayer) player).user());
                     } else {
                         entiy.offer(Keys.CREATOR, player.getUUID());
                     }
@@ -235,20 +235,20 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                 // Therefore, we never add any 'fake' transactions, as the final
                 // packet has everything we want.
                 if (!(inventoryEvent instanceof ClickContainerEvent.Drag)) {
-                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotNum(), openContainer, inventoryEvent.getTransactions());
+                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getSlotNum(), openContainer, inventoryEvent.transactions());
                 }
 
                 SpongeCommon.postEvent(inventoryEvent);
 
                 // Handle cursor
-                if (inventoryEvent.isCancelled() || !inventoryEvent.getCursorTransaction().isValid()) {
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
-                } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()){
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
+                if (inventoryEvent.isCancelled() || !inventoryEvent.cursorTransaction().isValid()) {
+                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.cursorTransaction().original());
+                } else if (inventoryEvent.cursorTransaction().custom().isPresent()){
+                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.cursorTransaction().finalReplacement());
                 }
 
                 // Handle slots
-                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), inventoryEvent.isCancelled());
+                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.transactions(), inventoryEvent.isCancelled());
 
                 if (!inventoryEvent.isCancelled()) {
                     if (inventoryEvent instanceof SpawnEntityEvent) {

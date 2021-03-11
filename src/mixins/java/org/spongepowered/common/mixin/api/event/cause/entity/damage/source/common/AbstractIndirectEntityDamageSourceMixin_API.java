@@ -49,9 +49,9 @@ public abstract class AbstractIndirectEntityDamageSourceMixin_API implements Ind
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setUpBridges(final CallbackInfo callbackInfo) {
         final SpongeCommonIndirectEntityDamageSource commonIndirect = (SpongeCommonIndirectEntityDamageSource) (Object) this;
-        commonIndirect.setDamageType(this.getType().getName());
-        commonIndirect.setEntitySource((Entity) this.getSource());
-        commonIndirect.setIndirectSource((Entity) this.getIndirectSource());
+        commonIndirect.setDamageType(this.type().name());
+        commonIndirect.setEntitySource((Entity) this.source());
+        commonIndirect.setIndirectSource((Entity) this.indirectSource());
         if (this.isAbsolute()) {
             commonIndirect.bridge$setDamageIsAbsolute();
         }

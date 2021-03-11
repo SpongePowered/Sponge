@@ -43,7 +43,7 @@ public abstract class ServerStatus_VersionMixin_API implements MinecraftVersion,
     // @formatter:on
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
@@ -53,7 +53,7 @@ public abstract class ServerStatus_VersionMixin_API implements MinecraftVersion,
     }
 
     @Override
-    public OptionalInt getDataVersion() {
+    public OptionalInt dataVersion() {
         return OptionalInt.empty();
     }
 

@@ -108,7 +108,7 @@ public class ReflectionTest {
             };
 
             @Override
-            public String getId() {
+            public String id() {
                 return "test";
             }
 
@@ -118,12 +118,12 @@ public class ReflectionTest {
             }
 
             @Override
-            public Type getValueType() {
+            public Type valueType() {
                 return this.token;
             }
 
             @Override
-            public Type getElementType() {
+            public Type elementType() {
                 return Double.class;
             }
 

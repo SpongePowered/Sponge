@@ -38,7 +38,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 public interface EventHooks {
 
     default ChangeEntityWorldEvent.Pre callChangeEntityWorldEventPre(final Entity entity, final ServerLevel toWorld) {
-        final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
+        final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                 (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) entity.getCommandSenderWorld(),
                 (org.spongepowered.api.world.server.ServerWorld) toWorld, (org.spongepowered.api.world.server.ServerWorld) toWorld);
         SpongeCommon.postEvent(event);
@@ -47,7 +47,7 @@ public interface EventHooks {
 
     default void callChangeEntityWorldEventPost(final Entity entity, final net.minecraft.server.level.ServerLevel fromWorld,
             final ServerLevel originalDestinationWorld) {
-        final ChangeEntityWorldEvent.Post event = SpongeEventFactory.createChangeEntityWorldEventPost(PhaseTracker.getCauseStackManager().getCurrentCause(),
+        final ChangeEntityWorldEvent.Post event = SpongeEventFactory.createChangeEntityWorldEventPost(PhaseTracker.getCauseStackManager().currentCause(),
                 (org.spongepowered.api.entity.Entity) entity, (org.spongepowered.api.world.server.ServerWorld) fromWorld,
                 (org.spongepowered.api.world.server.ServerWorld) entity.getCommandSenderWorld(),
                 (org.spongepowered.api.world.server.ServerWorld) originalDestinationWorld);

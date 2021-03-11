@@ -69,13 +69,13 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
 
     protected static void processSpawnedEntities(final net.minecraft.server.level.ServerPlayer player, final SpawnEntityEvent event) {
-        final List<Entity> entities = event.getEntities();
+        final List<Entity> entities = event.entities();
         PacketState.processEntities(player, entities);
     }
 
     protected static void processEntities(final net.minecraft.server.level.ServerPlayer player, final Collection<Entity> entities) {
         for (final Entity entity : entities) {
-            EntityUtil.processEntitySpawn(entity, () -> Optional.of(((ServerPlayer)player).getUser()));
+            EntityUtil.processEntitySpawn(entity, () -> Optional.of(((ServerPlayer)player).user()));
         }
     }
 
@@ -101,7 +101,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         final PlayerTracker.Type notifier) {
         final Player player = unwindingContext.getSpongePlayer();
         final LevelChunk chunk = minecraftWorld.getChunkAt(notifyPos);
-        ((LevelChunkBridge) chunk).bridge$setBlockNotifier(notifyPos, player.getUniqueId());
+        ((LevelChunkBridge) chunk).bridge$setBlockNotifier(notifyPos, player.uniqueId());
     }
 
     @Override
@@ -143,8 +143,8 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             frame.addContext(EventContextKeys.SPAWN_TYPE, this.getEntitySpawnType(context));
-            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayer)player).getUser());
-            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayer)player).getUser());
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayer)player).user());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayer)player).user());
             return SpongeCommonEventFactory.callSpawnEntity(entities, context);
         }
     }

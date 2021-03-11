@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Mixin;
 public abstract class RconConsoleSourceMixin_API implements Subject {
 
     @Override
-    public String getIdentifier() {
+    public String identifier() {
         // RCon no longer has an identifier on the class, but it passes this to its CommandSource
         return "Recon";
     }

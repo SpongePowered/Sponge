@@ -40,7 +40,7 @@ public abstract class IndirectEntityDamageSourceMixin_API extends EntityDamageSo
     // @formatter:on
 
     @Override
-    public org.spongepowered.api.entity.Entity getIndirectSource() {
+    public org.spongepowered.api.entity.Entity indirectSource() {
         return (org.spongepowered.api.entity.Entity) this.owner;
     }
 

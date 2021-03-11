@@ -62,7 +62,7 @@ public final class BookPagesItemStackData {
                 .asMutable(ItemStack.class)
                     .create(Keys.APPLIED_ENCHANTMENTS)
                         .get(h -> BookPagesItemStackData.get(h, BookPagesItemStackData.NBTKeyAppliedEnchantments))
-                        .set((h, v) -> BookPagesItemStackData.set(h, v, iv -> iv.stream().filter(Predicates.distinctBy(Enchantment::getType)), BookPagesItemStackData.NBTKeyAppliedEnchantments))
+                        .set((h, v) -> BookPagesItemStackData.set(h, v, iv -> iv.stream().filter(Predicates.distinctBy(Enchantment::type)), BookPagesItemStackData.NBTKeyAppliedEnchantments))
                         .delete(h -> BookPagesItemStackData.delete(h, BookPagesItemStackData.NBTKeyAppliedEnchantments))
                     .create(Keys.STORED_ENCHANTMENTS)
                         .get(h -> BookPagesItemStackData.get(h, BookPagesItemStackData.NBTKeyStoredEnchantments))
@@ -114,9 +114,9 @@ public final class BookPagesItemStackData {
 
     private static CompoundTag enchantmentToNbt(final Enchantment enchantment) {
         final CompoundTag compound = new CompoundTag();
-        final String enchantmentId = String.valueOf(Registry.ENCHANTMENT.getKey((net.minecraft.world.item.enchantment.Enchantment) enchantment.getType()));
+        final String enchantmentId = String.valueOf(Registry.ENCHANTMENT.getKey((net.minecraft.world.item.enchantment.Enchantment) enchantment.type()));
         compound.putString(Constants.Item.ITEM_ENCHANTMENT_ID, enchantmentId);
-        compound.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) ((byte) enchantment.getLevel()));
+        compound.putShort(Constants.Item.ITEM_ENCHANTMENT_LEVEL, (short) ((byte) enchantment.level()));
         return compound;
     }
 }

@@ -35,7 +35,6 @@ import net.minecraft.nbt.NbtUtils;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket.PlayerUpdate;
 import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
@@ -161,7 +160,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    public Component getTeamRepresentation() {
+    public Component teamRepresentation() {
         return Component.text(this.fakeProfile.getName());
     }
 
@@ -385,7 +384,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         if (delay == 0) {
             removeTask.run();
         } else {
-            Sponge.getServer().getScheduler().submit(Task.builder()
+            Sponge.server().scheduler().submit(Task.builder()
                     .execute(removeTask)
                     .delay(new SpongeTicks(delay))
                     .plugin(Launch.getInstance().getCommonPlugin())

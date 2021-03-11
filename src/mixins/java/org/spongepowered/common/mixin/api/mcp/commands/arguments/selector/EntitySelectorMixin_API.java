@@ -52,9 +52,9 @@ public abstract class EntitySelectorMixin_API implements Selector {
     @Override
     @NonNull
     public Collection<Entity> select(@NonNull final ServerLocation location) throws IllegalStateException {
-        return this.api$select(((MinecraftServer) Sponge.getServer()).createCommandSourceStack()
-                .withLevel((net.minecraft.server.level.ServerLevel) location.getWorld())
-                .withPosition(VecHelper.toVanillaVector3d(location.getPosition())));
+        return this.api$select(((MinecraftServer) Sponge.server()).createCommandSourceStack()
+                .withLevel((net.minecraft.server.level.ServerLevel) location.world())
+                .withPosition(VecHelper.toVanillaVector3d(location.position())));
     }
 
     @Override

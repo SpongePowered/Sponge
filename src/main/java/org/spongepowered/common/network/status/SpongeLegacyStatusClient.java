@@ -45,17 +45,17 @@ public class SpongeLegacyStatusClient implements StatusClient {
     }
 
     @Override
-    public InetSocketAddress getAddress() {
+    public InetSocketAddress address() {
         return this.address;
     }
 
     @Override
-    public MinecraftVersion getVersion() {
+    public MinecraftVersion version() {
         return this.version;
     }
 
     @Override
-    public Optional<InetSocketAddress> getVirtualHost() {
+    public Optional<InetSocketAddress> virtualHost() {
         return this.virtualHost;
     }
 

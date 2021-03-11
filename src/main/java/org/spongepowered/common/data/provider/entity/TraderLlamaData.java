@@ -41,10 +41,10 @@ public final class TraderLlamaData {
                     .create(Keys.DESPAWN_DELAY)
                         .get(x -> Ticks.of(x.accessor$despawnDelay()))
                         .setAnd((h, v) -> {
-                            if (v.getTicks() < 0) {
+                            if (v.ticks() < 0) {
                                 return false;
                             }
-                            h.accessor$despawnDelay((int) v.getTicks());
+                            h.accessor$despawnDelay((int) v.ticks());
                             return true;
                         });
     }

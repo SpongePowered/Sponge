@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.core.world.item;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
-import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.CooldownEvent;
@@ -52,23 +51,23 @@ public abstract class ServerItemCooldownsMixin extends ItemCooldownsMixin {
         if (ticks == 0) {
             return 0;
         }
-        final OptionalInt beforeCooldown = ((CooldownTracker) this).getCooldown(type);
-        final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(PhaseTracker.getCauseStackManager().getCurrentCause(),
+        final OptionalInt beforeCooldown = ((CooldownTracker) this).cooldown(type);
+        final CooldownEvent.Set event = SpongeEventFactory.createCooldownEventSet(PhaseTracker.getCauseStackManager().currentCause(),
                 ticks, ticks, type, (ServerPlayer) this.player, beforeCooldown);
 
-        if (Sponge.getEventManager().post(event)) {
+        if (Sponge.eventManager().post(event)) {
             this.onCooldownStarted((Item) type, beforeCooldown.orElse(0));
             return -1;
         } else {
-            return event.getNewCooldown();
+            return event.newCooldown();
         }
     }
 
     @Override
     protected void impl$throwEndCooldownEvent(final ItemType type) {
-        final CooldownEvent.End event = SpongeEventFactory.createCooldownEventEnd(PhaseTracker.getCauseStackManager().getCurrentCause(),
+        final CooldownEvent.End event = SpongeEventFactory.createCooldownEventEnd(PhaseTracker.getCauseStackManager().currentCause(),
                 type, (ServerPlayer) this.player);
-        Sponge.getEventManager().post(event);
+        Sponge.eventManager().post(event);
     }
 
 }

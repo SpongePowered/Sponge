@@ -174,14 +174,14 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             ci.cancel();
         } else {
             final Optional<CommandMapping> mappingOptional =
-                    manager.getCommandMapping(command[0].toLowerCase(Locale.ROOT))
-                            .filter(x -> !(x.getRegistrar() instanceof BrigadierBasedRegistrar));
+                    manager.commandMapping(command[0].toLowerCase(Locale.ROOT))
+                            .filter(x -> !(x.registrar() instanceof BrigadierBasedRegistrar));
             if (mappingOptional.isPresent()) {
                 final CommandMapping mapping = mappingOptional.get();
-                if (mapping.getRegistrar().canExecute(cause, mapping)) {
+                if (mapping.registrar().canExecute(cause, mapping)) {
                     try {
                         final SuggestionsBuilder builder = new SuggestionsBuilder(rawCommand, rawCommand.lastIndexOf(" ") + 1);
-                        mapping.getRegistrar().suggestions(cause, mapping, command[0], command[1]).forEach(builder::suggest);
+                        mapping.registrar().suggestions(cause, mapping, command[0], command[1]).forEach(builder::suggest);
                         this.connection.send(new ClientboundCommandSuggestionsPacket(packet.getId(), builder.build()));
                     } catch (final CommandException e) {
                         cause.sendMessage(Identity.nil(), Component.text("Unable to create suggestions for your tab completion"));
@@ -224,7 +224,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
      *       if (isMovePlayerPacketInvalid(packetIn)) {
      *          this.disconnect(new TranslationTextComponent("multiplayer.disconnect.invalid_player_movement"));
      *       } else {
-     *          ServerWorld serverworld = this.server.getWorld(this.player.dimension);
+     *          ServerWorld serverworld = this.server.world(this.player.dimension);
      *          if (!this.player.queuedEndExit) { // <---- Here is where we're injecting
      *             if (this.networkTickCount == 0) {
      *                this.captureCurrentPosition();
@@ -278,7 +278,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
 
         // Use the position of the last movement with an event or the current player position if never called
         // We need this because we ignore very small position changes as to not spam as many move events.
-        final org.spongepowered.math.vector.Vector3d fromPosition = player.getPosition();
+        final org.spongepowered.math.vector.Vector3d fromPosition = player.position();
 
         org.spongepowered.math.vector.Vector3d toPosition = new org.spongepowered.math.vector.Vector3d(packetIn.getX(this.player.getX()),
                 packetIn.getY(this.player.getY()), packetIn.getZ(this.player.getZ()));
@@ -292,22 +292,22 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         boolean cancelRotation = false;
         // Call move & rotate event as needed...
         if (fireMoveEvent) {
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (ServerPlayer) this.player, fromPosition,
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerPlayer) this.player, fromPosition,
                     toPosition, toPosition);
             if (SpongeCommon.postEvent(event)) {
                 cancelMovement = true;
             } else {
-                toPosition = event.getDestinationPosition();
+                toPosition = event.destinationPosition();
             }
         }
 
         if (significantRotation && fireRotationEvent) {
-            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (ServerPlayer) this.player, fromRotation,
+            final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (ServerPlayer) this.player, fromRotation,
                     toRotation);
             if (SpongeCommon.postEvent(event)) {
                 cancelRotation = true;
             } else {
-                toRotation = event.getToRotation();
+                toRotation = event.toRotation();
             }
         }
 
@@ -429,7 +429,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(heldItem));
                 frame.addContext(EventContextKeys.USED_HAND, handType);
                 final AnimateHandEvent event =
-                        SpongeEventFactory.createAnimateHandEvent(frame.getCurrentCause(), handType, (Humanoid) this.player);
+                        SpongeEventFactory.createAnimateHandEvent(frame.currentCause(), handType, (Humanoid) this.player);
                 if (SpongeCommon.postEvent(event)) {
                     ci.cancel();
                 }
@@ -485,14 +485,14 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         }
         final ServerLevel destination = destinationWorld == null ? overworld : destinationWorld;
         final RespawnPlayerEvent.SelectWorld event =
-                SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                SpongeEventFactory.createRespawnPlayerEventSelectWorld(PhaseTracker.getCauseStackManager().currentCause(),
                         (org.spongepowered.api.world.server.ServerWorld) destination,
                         (org.spongepowered.api.world.server.ServerWorld) player.getLevel(),
                         (org.spongepowered.api.world.server.ServerWorld) overworld,
                         (ServerPlayer) player);
         SpongeCommon.postEvent(event);
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$setOriginalDestinationDimension(((ServerLevel) event.getOriginalDestinationWorld()).dimension());
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$setNewDestinationDimension(((ServerLevel) event.getDestinationWorld()).dimension());
+        ((PlayerListBridge) this.server.getPlayerList()).bridge$setOriginalDestinationDimension(((ServerLevel) event.originalDestinationWorld()).dimension());
+        ((PlayerListBridge) this.server.getPlayerList()).bridge$setNewDestinationDimension(((ServerLevel) event.destinationWorld()).dimension());
         // The key is reset to null in the overwrite
         return playerList.respawn(player, keepAllPlayerData);
     }
@@ -511,12 +511,12 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
             final Component message = SpongeAdventure.asAdventure(component);
-            Audience audience = Sponge.getServer().getBroadcastAudience();
+            Audience audience = Sponge.server().broadcastAudience();
             final ServerSideConnectionEvent.Disconnect event = SpongeEventFactory.createServerSideConnectionEventDisconnect(
-                    PhaseTracker.getCauseStackManager().getCurrentCause(), audience, Optional.of(audience), message, message,
-                    spongePlayer.getConnection(), spongePlayer);
+                    PhaseTracker.getCauseStackManager().currentCause(), audience, Optional.of(audience), message, message,
+                    spongePlayer.connection(), spongePlayer);
             SpongeCommon.postEvent(event);
-            event.getAudience().ifPresent(a -> a.sendMessage(spongePlayer, event.getMessage()));
+            event.audience().ifPresent(a -> a.sendMessage(spongePlayer, event.message()));
         }
 
         ((ServerPlayerBridge) this.player).bridge$getWorldBorderListener().onPlayerDisconnect();
@@ -549,7 +549,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this.player);
             final ListValue.Mutable<Component> newLinesValue = ListValue.mutableOf(Keys.SIGN_LINES, newLines);
-            final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().getCurrentCause(),
+            final ChangeSignEvent event = SpongeEventFactory.createChangeSignEvent(PhaseTracker.getCauseStackManager().currentCause(),
                     originalLinesValue.asImmutable(), newLinesValue,
                     (Sign) blockEntity);
             final ListValue<Component> toApply = SpongeCommon.postEvent(event) ? originalLinesValue : newLinesValue;

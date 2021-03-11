@@ -70,7 +70,7 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
     public MinecraftDayTime add(final Ticks ticks) {
         Objects.requireNonNull(ticks);
 
-        return new SpongeMinecraftDayTime(this.internalTime + ticks.getTicks());
+        return new SpongeMinecraftDayTime(this.internalTime + ticks.ticks());
     }
 
     @Override
@@ -89,11 +89,11 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
 
     @Override
     public MinecraftDayTime subtract(final Ticks ticks) {
-        final long time = this.internalTime - ticks.getTicks();
+        final long time = this.internalTime - ticks.ticks();
         if (time <= 0) {
             throw new IllegalArgumentException("ticks is larger than this day time object");
         }
-        return new SpongeMinecraftDayTime(this.internalTime - ticks.getTicks());
+        return new SpongeMinecraftDayTime(this.internalTime - ticks.ticks());
     }
 
     @Override
@@ -178,7 +178,7 @@ public final class SpongeMinecraftDayTime implements MinecraftDayTime {
             Objects.requireNonNull(engine);
             Objects.requireNonNull(ticks);
 
-            return new SpongeMinecraftDayTime(ticks.getTicks());
+            return new SpongeMinecraftDayTime(ticks.ticks());
         }
     }
 }

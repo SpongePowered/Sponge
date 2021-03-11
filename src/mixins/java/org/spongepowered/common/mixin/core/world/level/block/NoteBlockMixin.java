@@ -65,7 +65,7 @@ public abstract class NoteBlockMixin extends BlockMixin {
         }
 
         //InstrumentProperty doesn't return what we wan't for the noteblock directly, so we have to check the block under it.
-        InstrumentType instrumentType = ((ServerWorld) worldIn).getBlock(pos.getX(), pos.getY() - 1, pos.getZ()).get(Keys.REPRESENTED_INSTRUMENT).orElse(null);
+        InstrumentType instrumentType = ((ServerWorld) worldIn).block(pos.getX(), pos.getY() - 1, pos.getZ()).get(Keys.REPRESENTED_INSTRUMENT).orElse(null);
         if (instrumentType == null) {
             return;
         }
@@ -73,9 +73,9 @@ public abstract class NoteBlockMixin extends BlockMixin {
         float pitch = (float) Math.pow(2.0D, (double) (param - 12) / 12.0D);
 
         final MappedRegistry<NotePitch> registry =
-                (MappedRegistry<NotePitch>) (Object) Sponge.getGame().registries().registry(RegistryTypes.NOTE_PITCH);
+                (MappedRegistry<NotePitch>) (Object) Sponge.game().registries().registry(RegistryTypes.NOTE_PITCH);
         final PlaySoundEvent.NoteBlock event = SpongeCommonEventFactory.callPlaySoundNoteBlockEvent(
-                PhaseTracker.getCauseStackManager().getCurrentCause(), (ServerWorld) worldIn, pos,
+                PhaseTracker.getCauseStackManager().currentCause(), (ServerWorld) worldIn, pos,
                 NoteBlockInstrument.byState(state).getSoundEvent(), instrumentType, registry.byId(param), pitch);
         if (event.isCancelled()) {
             callbackInfo.setReturnValue(true);

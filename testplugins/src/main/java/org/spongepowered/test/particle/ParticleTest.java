@@ -61,15 +61,15 @@ public final class ParticleTest {
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ParticleType> particleType =
                 Parameter.registryElement(TypeToken.get(ParticleType.class),
-                        (ctx) -> Sponge.getGame().registries(),
+                        (ctx) -> Sponge.game().registries(),
                         RegistryTypes.PARTICLE_TYPE,
                         "minecraft",
                         "sponge")
-                        .setKey("particletype").build();
+                        .key("particletype").build();
         final Command.Parameterized myCommand = Command.builder()
-                .parameter(particleType)
-                .setExecutor(context -> {
-                    this.spawnParticles(context.getCause().first(ServerPlayer.class).get(), context.requireOne(particleType));
+                .addParameter(particleType)
+                .executor(context -> {
+                    this.spawnParticles(context.cause().first(ServerPlayer.class).get(), context.requireOne(particleType));
                     return CommandResult.success();
                 })
                 .build();
@@ -80,7 +80,7 @@ public final class ParticleTest {
         // TODO NOTE color is determined by velocity?
         final ParticleEffect effect = ParticleEffect.builder()
                 .type(type)
-                .option(ParticleOptions.BLOCK_STATE, BlockTypes.DIAMOND_BLOCK.get().getDefaultState())
+                .option(ParticleOptions.BLOCK_STATE, BlockTypes.DIAMOND_BLOCK.get().defaultState())
                 .option(ParticleOptions.COLOR, Color.LIME)
                 .option(ParticleOptions.ITEM_STACK_SNAPSHOT, ItemStack.of(ItemTypes.GOLDEN_APPLE.get()).createSnapshot())
                 .option(ParticleOptions.DIRECTION, Direction.EAST)
@@ -89,6 +89,6 @@ public final class ParticleTest {
                 .velocity(Vector3d.RIGHT.mul(0.5))
                 .quantity(20)
                 .build();
-        serverPlayer.spawnParticles(effect, serverPlayer.getPosition().add(-2, 1, -2));
+        serverPlayer.spawnParticles(effect, serverPlayer.position().add(-2, 1, -2));
     }
 }

@@ -53,7 +53,7 @@ public final class SpongeDurationValueParameter extends ResourceKeyedArgumentVal
 
     @Override
     @NonNull
-    public Optional<? extends Duration> getValue(
+    public Optional<? extends Duration> parseValue(
             final Parameter.@NonNull Key<? super Duration> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {

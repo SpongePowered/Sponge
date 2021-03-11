@@ -64,7 +64,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER =
             ((BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER)
                     .andThen((frame, ctx) -> {
-                        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().getWorld());
+                        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().world());
                         frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
                         frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
                         frame.pushCause(ctx.getSpongePlayer());
@@ -93,20 +93,20 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     @Override
     public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction,
         final BasicPacketContext context) {
-        TrackingUtil.associateTrackerToTarget(blockChange, transaction, ((ServerPlayer) context.getPacketPlayer()).getUser());
+        TrackingUtil.associateTrackerToTarget(blockChange, transaction, ((ServerPlayer) context.getPacketPlayer()).user());
     }
 
     @Override
     public void appendNotifierToBlockEvent(final BasicPacketContext context,
         final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
     ) {
-        final Player player = PhaseTracker.getCauseStackManager().getCurrentCause().first(Player.class).get();
-        final BlockState state = ((ServerWorld) mixinWorldServer).getBlock(pos.getX(), pos.getY(), pos.getZ());
+        final Player player = PhaseTracker.getCauseStackManager().currentCause().first(Player.class).get();
+        final BlockState state = ((ServerWorld) mixinWorldServer).block(pos.getX(), pos.getY(), pos.getZ());
         final LocatableBlock locatable =
                 new SpongeLocatableBlockBuilder().world((ServerWorld) mixinWorldServer).position(pos.getX(), pos.getY(), pos.getZ()).state(state).build();
 
         blockEvent.bridge$setTickingLocatable(locatable);
-        blockEvent.bridge$setSourceUser(((ServerPlayer)player).getUser());
+        blockEvent.bridge$setSourceUser(((ServerPlayer)player).user());
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -140,7 +140,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
 
     @Override
     public SpawnType getEntitySpawnType(final BasicPacketContext context) {
-        if (context.getItemUsed().getType() instanceof SpawnEggItem) {
+        if (context.getItemUsed().type() instanceof SpawnEggItem) {
             return SpawnTypes.SPAWN_EGG.get();
         }
         // Some other items directly cause entities to be spawned, such as

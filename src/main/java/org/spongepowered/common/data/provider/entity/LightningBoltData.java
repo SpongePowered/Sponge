@@ -41,10 +41,10 @@ public final class LightningBoltData {
                     .create(Keys.DESPAWN_DELAY)
                         .get(x -> new SpongeTicks(x.accessor$life()))
                         .setAnd((h, v) -> {
-                            if (v.getTicks() < 0) {
+                            if (v.ticks() < 0) {
                                 return false;
                             }
-                            h.accessor$life((int) v.getTicks());
+                            h.accessor$life((int) v.ticks());
                             return true;
                         })
                     .create(Keys.IS_EFFECT_ONLY)

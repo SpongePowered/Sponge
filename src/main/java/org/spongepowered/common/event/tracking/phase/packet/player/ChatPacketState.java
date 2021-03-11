@@ -35,7 +35,7 @@ public final class ChatPacketState extends BasicPacketState {
     public void populateContext(ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
 //        CPacketChatMessage chatMessage = (CPacketChatMessage) packet;
         // unused, to be removed and re-located when phase context is cleaned up
-//        if (chatMessage.getMessage().contains("kill")) {
+//        if (chatMessage.message().contains("kill")) {
 //            context.add(NamedCause.of(InternalNamedCauses.General.DESTRUCT_ITEM_DROPS, true));
 //        }
     }

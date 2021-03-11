@@ -38,7 +38,7 @@ public abstract class AbstractDataProvider<V extends Value<E>, E> implements Dat
     }
 
     @Override
-    public Key<V> getKey() {
+    public Key<V> key() {
         return this.key;
     }
 

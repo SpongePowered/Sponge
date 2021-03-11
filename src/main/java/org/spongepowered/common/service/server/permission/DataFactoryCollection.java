@@ -67,7 +67,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public Collection<Subject> getLoadedSubjects() {
+    public Collection<Subject> loadedSubjects() {
         return (Collection) this.subjects.values();
     }
 
@@ -81,18 +81,18 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public String getIdentifier() {
+        public String identifier() {
             return this.identifier;
         }
 
         @Override
-        public Optional<String> getFriendlyIdentifier() {
+        public Optional<String> friendlyIdentifier() {
             // TODO provide friendly identifier if possible
             return Optional.empty();
         }
 
         @Override
-        public SubjectCollection getContainingCollection() {
+        public SubjectCollection containingCollection() {
             return DataFactoryCollection.this;
         }
 
@@ -102,32 +102,32 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public MemorySubjectData getSubjectData() {
+        public MemorySubjectData subjectData() {
             return this.data;
         }
 
         @Override
-        public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-            Tristate ret = super.getPermissionValue(contexts, permission);
+        public Tristate permissionValue(Set<Context> contexts, String permission) {
+            Tristate ret = super.permissionValue(contexts, permission);
 
             if (ret == Tristate.UNDEFINED) {
-                ret = this.getDataPermissionValue(DataFactoryCollection.this.getDefaults().getTransientSubjectData(), permission);
+                ret = this.getDataPermissionValue(DataFactoryCollection.this.defaults().transientSubjectData(), permission);
             }
 
             if (ret == Tristate.UNDEFINED) {
-                ret = this.getDataPermissionValue(DataFactoryCollection.this.service.getDefaults().getTransientSubjectData(), permission);
+                ret = this.getDataPermissionValue(DataFactoryCollection.this.service.defaults().transientSubjectData(), permission);
             }
             return ret;
         }
 
         @Override
-        public Optional<String> getOption(Set<Context> contexts, String option) {
-            Optional<String> ret = super.getOption(contexts, option);
+        public Optional<String> option(Set<Context> contexts, String option) {
+            Optional<String> ret = super.option(contexts, option);
             if (!ret.isPresent()) {
-                ret = this.getDataOptionValue(DataFactoryCollection.this.getDefaults().getSubjectData(), option);
+                ret = this.getDataOptionValue(DataFactoryCollection.this.defaults().subjectData(), option);
             }
             if (!ret.isPresent()) {
-                ret = this.getDataOptionValue(DataFactoryCollection.this.service.getDefaults().getSubjectData(), option);
+                ret = this.getDataOptionValue(DataFactoryCollection.this.service.defaults().subjectData(), option);
             }
             return ret;
         }

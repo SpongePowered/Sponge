@@ -88,31 +88,31 @@ public class SpongeFireworkEffect implements FireworkEffect {
     }
 
     @Override
-    public List<Color> getColors() {
+    public List<Color> colors() {
         return this.colors;
     }
 
     @Override
-    public List<Color> getFadeColors() {
+    public List<Color> fadeColors() {
         return this.fades;
     }
 
     @Override
-    public FireworkShape getShape() {
+    public FireworkShape shape() {
         return this.shape;
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE).valueKey(this.shape);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.FIREWORK_SHAPE).valueKey(this.shape);
 
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Item.Fireworks.FIREWORK_SHAPE, resourceKey)
                 .set(Constants.Item.Fireworks.FIREWORK_COLORS, this.colors)
                 .set(Constants.Item.Fireworks.FIREWORK_FADE_COLORS, this.fades)

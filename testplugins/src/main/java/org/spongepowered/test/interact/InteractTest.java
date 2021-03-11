@@ -51,45 +51,45 @@ public final class InteractTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.plugin, new InteractListener());
+        Sponge.eventManager().registerListeners(this.plugin, new InteractListener());
     }
 
     public static class InteractListener {
         @Listener
         public void onInteractBlock(final InteractBlockEvent event) {
-            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
-            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
-            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(),
+            Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
+            Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
+            Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
                     Component.text().append(Component.text("/* Hand: "))
-                            .append(Component.text(event.getContext().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.getGame().registries(), h).getFormatted()).orElse("UNKNOWN")))
+                            .append(Component.text(event.context().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.game().registries(), h).formatted()).orElse("UNKNOWN")))
                             .build()
             );
-            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.getCause().all().toString())).build());
-            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.getContext().toString())).build());
+            Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.cause().all().toString())).build());
+            Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.context().toString())).build());
         }
         @Listener
         public void onInteractItem(final InteractItemEvent event) {
-            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
-            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
-            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(),
+            Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
+            Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
+            Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
                     Component.text().append(Component.text("/* Hand: "))
-                            .append(Component.text(event.getContext().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.getGame().registries(), h).getFormatted()).orElse("UNKNOWN")))
+                            .append(Component.text(event.context().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.game().registries(), h).formatted()).orElse("UNKNOWN")))
                             .build()
             );
-            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.getCause().all().toString())).build());
-            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.getContext().toString())).build());
+            Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.cause().all().toString())).build());
+            Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.context().toString())).build());
         }
         @Listener
         public void onInteractEntity(final InteractEntityEvent event) {
-            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
-            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
-            Sponge.getServer().getBroadcastAudience().sendMessage(Identity.nil(),
+            Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
+            Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
+            Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
                     Component.text().append(Component.text("/* Hand: "))
-                            .append(Component.text(event.getContext().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.getGame().registries(), h).getFormatted()).orElse("UNKNOWN")))
+                            .append(Component.text(event.context().get(EventContextKeys.USED_HAND).map(h -> RegistryTypes.HAND_TYPE.keyFor(Sponge.game().registries(), h).formatted()).orElse("UNKNOWN")))
                             .build()
             );
-            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.getCause().all().toString())).build());
-            Sponge.getGame().getSystemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.getContext().toString())).build());
+            Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Cause: ")).append(Component.text(event.cause().all().toString())).build());
+            Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.context().toString())).build());
         }
     }
 }

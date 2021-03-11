@@ -54,25 +54,25 @@ public class ScaledHealthTest {
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.pluginContainer,
                 Command.builder()
-                        .child(this.getShowHealth(), "show")
-                        .child(this.getSetHealthScale(), "scale", "setScale")
-                        .child(this.getReSetHealthScale(), "resetScale")
-                        .child(this.setHealthCommand(), "setHealth", "set")
-                        .child(this.getSetMaxHealth(), "setMax", "max")
-                        .setExecutor(this::showHealthInfo)
+                        .addChild(this.getShowHealth(), "show")
+                        .addChild(this.getSetHealthScale(), "scale", "setScale")
+                        .addChild(this.getReSetHealthScale(), "resetScale")
+                        .addChild(this.setHealthCommand(), "setHealth", "set")
+                        .addChild(this.getSetMaxHealth(), "setMax", "max")
+                        .executor(this::showHealthInfo)
                         .build(),
                 "health");
     }
 
     private Command.Parameterized getSetMaxHealth() {
-        final Parameter.Value<Double> health = Parameter.doubleNumber().setKey("health").build();
+        final Parameter.Value<Double> health = Parameter.doubleNumber().key("health").build();
         return Command.builder()
-                .parameter(health)
-                .setShortDescription(Component.text("Sets your maximum health", NamedTextColor.AQUA))
-                .setExecutionRequirements(c -> c.getSubject() instanceof ServerPlayer)
-                .setExecutor(ctx -> {
+                .addParameter(health)
+                .shortDescription(Component.text("Sets your maximum health", NamedTextColor.AQUA))
+                .executionRequirements(c -> c.subject() instanceof ServerPlayer)
+                .executor(ctx -> {
                     final Double newHealth = ctx.requireOne(health);
-                    ((ServerPlayer) ctx.getSubject()).offer(Keys.MAX_HEALTH, newHealth);
+                    ((ServerPlayer) ctx.subject()).offer(Keys.MAX_HEALTH, newHealth);
                     ctx.sendMessage(Identity.nil(), Component.text("Max Health set to: ", NamedTextColor.DARK_AQUA).append(Component.text(newHealth, NamedTextColor.RED)));
                     return CommandResult.success();
                 })
@@ -81,14 +81,14 @@ public class ScaledHealthTest {
     }
 
     private Command.Parameterized setHealthCommand() {
-        final Parameter.Value<Double> health = Parameter.doubleNumber().setKey("health").build();
+        final Parameter.Value<Double> health = Parameter.doubleNumber().key("health").build();
         return Command.builder()
-                .parameter(health)
-                .setShortDescription(Component.text("Sets your health", NamedTextColor.AQUA))
-                .setExecutionRequirements(c -> c.getSubject() instanceof ServerPlayer)
-                .setExecutor(ctx -> {
+                .addParameter(health)
+                .shortDescription(Component.text("Sets your health", NamedTextColor.AQUA))
+                .executionRequirements(c -> c.subject() instanceof ServerPlayer)
+                .executor(ctx -> {
                     final Double newHealth = ctx.requireOne(health);
-                    ((ServerPlayer) ctx.getSubject()).offer(Keys.HEALTH, newHealth);
+                    ((ServerPlayer) ctx.subject()).offer(Keys.HEALTH, newHealth);
                     ctx.sendMessage(Identity.nil(), Component.text("Health set to: ", NamedTextColor.DARK_AQUA).append(Component.text(newHealth, NamedTextColor.RED)));
                     return CommandResult.success();
                 })
@@ -96,14 +96,14 @@ public class ScaledHealthTest {
     }
 
     private Command.Parameterized getSetHealthScale() {
-        final Parameter.Value<Double> health = Parameter.doubleNumber().setKey("health").build();
+        final Parameter.Value<Double> health = Parameter.doubleNumber().key("health").build();
         return Command.builder()
-                .parameter(health)
-                .setShortDescription(Component.text("Sets your health scale", NamedTextColor.AQUA))
-                .setExecutionRequirements(c -> c.getSubject() instanceof ServerPlayer)
-                .setExecutor(ctx -> {
+                .addParameter(health)
+                .shortDescription(Component.text("Sets your health scale", NamedTextColor.AQUA))
+                .executionRequirements(c -> c.subject() instanceof ServerPlayer)
+                .executor(ctx -> {
                     final Double newHealth = ctx.requireOne(health);
-                    if (((ServerPlayer) ctx.getSubject()).offer(Keys.HEALTH_SCALE, newHealth).isSuccessful()) {
+                    if (((ServerPlayer) ctx.subject()).offer(Keys.HEALTH_SCALE, newHealth).isSuccessful()) {
                         ctx.sendMessage(Identity.nil(), Component.text("Health scaled to: ", NamedTextColor.DARK_AQUA).append(Component.text(newHealth, NamedTextColor.RED)));
                     }
                     return CommandResult.success();
@@ -113,10 +113,10 @@ public class ScaledHealthTest {
 
     private Command.Parameterized getReSetHealthScale() {
         return Command.builder()
-                .setShortDescription(Component.text("Sets your health scale", NamedTextColor.AQUA))
-                .setExecutionRequirements(c -> c.getSubject() instanceof ServerPlayer)
-                .setExecutor(ctx -> {
-                    ((ServerPlayer) ctx.getSubject()).remove(Keys.HEALTH_SCALE);
+                .shortDescription(Component.text("Sets your health scale", NamedTextColor.AQUA))
+                .executionRequirements(c -> c.subject() instanceof ServerPlayer)
+                .executor(ctx -> {
+                    ((ServerPlayer) ctx.subject()).remove(Keys.HEALTH_SCALE);
                     ctx.sendMessage(Identity.nil(), Component.text("Health not scaled", NamedTextColor.DARK_AQUA));
                     return CommandResult.success();
                 })
@@ -125,16 +125,16 @@ public class ScaledHealthTest {
 
     private Command.Parameterized getShowHealth() {
         return Command.builder()
-                .setShortDescription(Component.text("Shows your health", NamedTextColor.AQUA))
-                .setExecutionRequirements(c -> c.getSubject() instanceof ServerPlayer)
-                .setExecutor(this::showHealthInfo)
+                .shortDescription(Component.text("Shows your health", NamedTextColor.AQUA))
+                .executionRequirements(c -> c.subject() instanceof ServerPlayer)
+                .executor(this::showHealthInfo)
                 .build();
     }
 
     private CommandResult showHealthInfo(org.spongepowered.api.command.parameter.CommandContext ctx) {
-        final double health = ((ServerPlayer) ctx.getSubject()).get(Keys.HEALTH).orElse(0D);
-        final double maxHealth = ((ServerPlayer) ctx.getSubject()).get(Keys.MAX_HEALTH).orElse(0D);
-        final Optional<Double> scaling = ((ServerPlayer) ctx.getSubject()).get(Keys.HEALTH_SCALE);
+        final double health = ((ServerPlayer) ctx.subject()).get(Keys.HEALTH).orElse(0D);
+        final double maxHealth = ((ServerPlayer) ctx.subject()).get(Keys.MAX_HEALTH).orElse(0D);
+        final Optional<Double> scaling = ((ServerPlayer) ctx.subject()).get(Keys.HEALTH_SCALE);
         ctx.sendMessage(Identity.nil(), Component.text("Health: ", NamedTextColor.DARK_AQUA)
                             .append(Component.text(health, NamedTextColor.RED))
                             .append(Component.text("/"))

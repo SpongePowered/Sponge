@@ -198,19 +198,19 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         if (ShouldFire.EXPLOSION_EVENT_PRE) {
             final ExplosionEvent.Pre
                     event =
-                    SpongeEventFactory.createExplosionEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                    SpongeEventFactory.createExplosionEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                             explosion, (org.spongepowered.api.world.server.ServerWorld) this);
             if (SpongeCommon.postEvent(event)) {
                 return;
             }
-            explosion = event.getExplosion();
+            explosion = event.explosion();
         }
 
         final net.minecraft.world.level.Explosion mcExplosion = (net.minecraft.world.level.Explosion) explosion;
 
         try (final PhaseContext<?> ignored = GeneralPhase.State.EXPLOSION.createPhaseContext(PhaseTracker.SERVER)
                 .explosion((net.minecraft.world.level.Explosion) explosion)
-                .source(explosion.getSourceExplosive().isPresent() ? explosion.getSourceExplosive() : this)) {
+                .source(explosion.sourceExplosive().isPresent() ? explosion.sourceExplosive() : this)) {
             ignored.buildAndSwitch();
             final boolean shouldBreakBlocks = explosion.shouldBreakBlocks();
             // Sponge End

@@ -36,7 +36,7 @@ import net.minecraft.world.level.block.entity.ChestBlockEntity;
 public abstract class ChestBlockEntityMixin_Inventory_API implements Chest {
 
     @Override
-    public Optional<Inventory> getDoubleChestInventory() {
+    public Optional<Inventory> doubleChestInventory() {
         return InventoryUtil.getDoubleChestInventory(((ChestBlockEntity)(Object) this));
     }
 

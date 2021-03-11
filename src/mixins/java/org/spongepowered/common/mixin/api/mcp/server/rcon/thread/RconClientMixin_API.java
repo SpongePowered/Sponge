@@ -48,12 +48,12 @@ public abstract class RconClientMixin_API extends GenericThread implements Remot
     }
 
     @Override
-    public InetSocketAddress getAddress() {
+    public InetSocketAddress address() {
         return (InetSocketAddress) this.client.getRemoteSocketAddress();
     }
 
     @Override
-    public InetSocketAddress getVirtualHost() {
+    public InetSocketAddress virtualHost() {
         return (InetSocketAddress) this.client.getLocalSocketAddress();
     }
 

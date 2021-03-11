@@ -172,8 +172,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         final EntityTickContext context) {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
-            final BlockPos blockPos = VecHelper.toBlockPos(transaction.getOriginal().getPosition());
-            final List<HangingEntity> hangingEntities = ((ServerLevel) tickingEntity.getWorld())
+            final BlockPos blockPos = VecHelper.toBlockPos(transaction.original().position());
+            final List<HangingEntity> hangingEntities = ((ServerLevel) tickingEntity.world())
                 .getEntitiesOfClass(HangingEntity.class, new AABB(blockPos, blockPos).inflate(1.1D, 1.1D, 1.1D),
                     entityIn -> {
                         if (entityIn == null) {

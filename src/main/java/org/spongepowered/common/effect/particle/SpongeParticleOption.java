@@ -54,7 +54,7 @@ public final class SpongeParticleOption<V> implements ParticleOption<V> {
     }
 
     @Override
-    public Class<V> getValueType() {
+    public Class<V> valueType() {
         return this.valueType;
     }
 }

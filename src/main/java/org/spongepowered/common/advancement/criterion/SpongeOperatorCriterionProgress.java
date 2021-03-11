@@ -47,7 +47,7 @@ public abstract class SpongeOperatorCriterionProgress implements ImplementationB
     }
 
     @Override
-    public SpongeOperatorCriterion getCriterion() {
+    public SpongeOperatorCriterion criterion() {
         return this.criterion;
     }
 
@@ -64,7 +64,7 @@ public abstract class SpongeOperatorCriterionProgress implements ImplementationB
     @Override
     public Instant grant() {
         Instant time = null;
-        for (final AdvancementCriterion criterion : this.criterion.getCriteria()) {
+        for (final AdvancementCriterion criterion : this.criterion.criteria()) {
             final Instant time1 = this.progress.get(criterion).get().grant();
             if (time == null || time1.isAfter(time)) {
                 time = time1;
@@ -77,7 +77,7 @@ public abstract class SpongeOperatorCriterionProgress implements ImplementationB
     @Override
     public Optional<Instant> revoke() {
         final Optional<Instant> previousState = this.get();
-        for (final AdvancementCriterion criterion : this.criterion.getCriteria()) {
+        for (final AdvancementCriterion criterion : this.criterion.criteria()) {
             this.progress.get(criterion).get().revoke();
         }
         return previousState;

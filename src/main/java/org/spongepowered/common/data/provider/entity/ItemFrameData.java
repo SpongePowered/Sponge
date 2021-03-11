@@ -44,7 +44,7 @@ public final class ItemFrameData {
                         .set((h, v) -> h.setItem(ItemStackUtil.fromSnapshotToNative(v)))
                     .create(Keys.ORIENTATION)
                         .get(h -> Orientation.fromDegrees(h.getRotation() * 45).orElse(null))
-                        .set((h, v) -> h.setRotation(v.getAngle() / 45));
+                        .set((h, v) -> h.setRotation(v.angle() / 45));
     }
     // @formatter:on
 }

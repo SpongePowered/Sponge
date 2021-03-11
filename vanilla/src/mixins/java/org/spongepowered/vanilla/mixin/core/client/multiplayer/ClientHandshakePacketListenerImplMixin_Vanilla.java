@@ -50,7 +50,7 @@ public abstract class ClientHandshakePacketListenerImplMixin_Vanilla implements 
     private void vanilla$handleRequestPayload(final ClientboundCustomQueryPacket packet, final CallbackInfo ci) {
         ci.cancel();
 
-        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.getChannelRegistry();
+        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.channelRegistry();
         this.minecraft.execute(() -> {
             final EngineConnection connection = (EngineConnection) this;
             if (!channelRegistry.handleLoginRequestPayload(connection, packet)) {

@@ -62,9 +62,9 @@ public final class SpongeCallback {
 
         this.executors.invalidateAll();
         return Command.builder()
-                .setShortDescription(Component.text("Execute a callback registered as part of a TextComponent. Primarily for internal use"))
-                .parameter(Parameter.builder(TypeTokens.COMMAND_CAUSE_CONSUMER).setKey(this.executorKey).parser(new CallbackValueParameter()).build())
-                .setExecutor(this::commandCallback)
+                .shortDescription(Component.text("Execute a callback registered as part of a TextComponent. Primarily for internal use"))
+                .addParameter(Parameter.builder(TypeTokens.COMMAND_CAUSE_CONSUMER).key(this.executorKey).addParser(new CallbackValueParameter()).build())
+                .executor(this::commandCallback)
                 .build();
     }
 
@@ -75,7 +75,7 @@ public final class SpongeCallback {
     }
 
     public CommandResult commandCallback(@NonNull final CommandContext context) throws CommandException {
-        context.requireOne(this.executorKey).accept(context.getCause());
+        context.requireOne(this.executorKey).accept(context.cause());
         return CommandResult.success();
     }
 
@@ -90,7 +90,7 @@ public final class SpongeCallback {
 
         @Override
         @NonNull
-        public Optional<? extends Consumer<CommandCause>> getValue(
+        public Optional<? extends Consumer<CommandCause>> parseValue(
                 final Parameter.@NonNull Key<? super Consumer<CommandCause>> parameterKey,
                 final ArgumentReader.@NonNull Mutable reader,
                 final CommandContext.@NonNull Builder context) throws ArgumentParseException {

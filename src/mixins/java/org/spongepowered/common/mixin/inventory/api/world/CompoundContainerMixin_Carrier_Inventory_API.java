@@ -51,42 +51,42 @@ public abstract class CompoundContainerMixin_Carrier_Inventory_API implements Mu
     @Shadow @Final private Container container2;
 
     @Override
-    public List<ServerLocation> getLocations() {
+    public List<ServerLocation> locations() {
         final List<ServerLocation> list = new ArrayList<>();
         if (this.container1 instanceof BlockEntity) {
-            list.add(((BlockEntity) this.container1).getServerLocation());
+            list.add(((BlockEntity) this.container1).serverLocation());
         }
         if (this.container2 instanceof BlockEntity) {
-            list.add(((BlockEntity) this.container2).getServerLocation());
+            list.add(((BlockEntity) this.container2).serverLocation());
         }
         return Collections.unmodifiableList(list);
     }
 
     @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
+    public CarriedInventory<? extends Carrier> inventory() {
         return (CarriedInventory<? extends Carrier>) this;
     }
 
     @Override
-    public ServerLocation getLocation() {
-        return this.getLocations().get(0);
+    public ServerLocation location() {
+        return this.locations().get(0);
     }
 
     @Override
-    public Optional<Inventory> getInventory(final ServerLocation at) {
-        if (this.getLocations().contains(at)) {
-            return Optional.of(this.getInventory());
+    public Optional<Inventory> inventory(final ServerLocation at) {
+        if (this.locations().contains(at)) {
+            return Optional.of(this.inventory());
         }
         return Optional.empty();
     }
 
     @Override
-    public Optional<Inventory> getInventory(final ServerLocation at, final Direction from) {
-        return this.getInventory(at);
+    public Optional<Inventory> inventory(final ServerLocation at, final Direction from) {
+        return this.inventory(at);
     }
 
     @Override
-    public Inventory getInventory(final Direction from) {
-        return DefaultSingleBlockCarrier.getInventory(from, this);
+    public Inventory inventory(final Direction from) {
+        return DefaultSingleBlockCarrier.inventory(from, this);
     }
 }

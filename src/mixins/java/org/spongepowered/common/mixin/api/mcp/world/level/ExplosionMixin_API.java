@@ -54,7 +54,7 @@ public abstract class ExplosionMixin_API implements Explosion {
     @Nullable private ServerLocation api$location;
 
     @Override
-    public ServerLocation getLocation() {
+    public ServerLocation location() {
         if (this.api$location == null) {
             this.api$location = ServerLocation.of((ServerWorld) this.level, this.x, this.y, this.z);
         }
@@ -62,7 +62,7 @@ public abstract class ExplosionMixin_API implements Explosion {
     }
 
     @Override
-    public Optional<Explosive> getSourceExplosive() {
+    public Optional<Explosive> sourceExplosive() {
         if (this.source instanceof Explosive) {
             return Optional.of((Explosive) this.source);
         }
@@ -71,7 +71,7 @@ public abstract class ExplosionMixin_API implements Explosion {
     }
 
     @Override
-    public float getRadius() {
+    public float radius() {
         return this.radius;
     }
 
@@ -96,17 +96,17 @@ public abstract class ExplosionMixin_API implements Explosion {
     }
 
     @Override
-    public int getResolution() {
+    public int resolution() {
         return  ((ExplosionBridge) this).bridge$getResolution();
     }
 
     @Override
-    public float getRandomness() {
+    public float randomness() {
         return  ((ExplosionBridge) this).bridge$getRandomness();
     }
 
     @Override
-    public double getKnockback() {
+    public double knockback() {
         return  ((ExplosionBridge) this).bridge$getKnockback();
     }
 

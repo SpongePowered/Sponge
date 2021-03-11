@@ -37,18 +37,17 @@ import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
 
 @Mixin(net.minecraft.world.item.crafting.CraftingRecipe.class)
-@Implements(@Interface(iface = CraftingRecipe.class, prefix = "craftingRecipe$"))
-public interface CraftingRecipeMixin_API {
+public interface CraftingRecipeMixin_API extends CraftingRecipe {
 
     // @formatter:off
     @Shadow net.minecraft.world.item.crafting.RecipeType<?> shadow$getType();
     // @formatter:on
 
-    default RecipeType<? extends CraftingRecipe> craftingRecipe$getType() {
+    default RecipeType<? extends CraftingRecipe> type() {
         return (RecipeType<? extends CraftingRecipe>) this.shadow$getType();
     }
 
-    default Optional<String> craftingRecipe$getGroup() {
+    default Optional<String> group() {
         String group = "";
         if (this instanceof ShapedRecipe) {
             group = ((ShapedRecipeAccessor) this).accessor$group();

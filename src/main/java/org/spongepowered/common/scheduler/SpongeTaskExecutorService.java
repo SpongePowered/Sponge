@@ -208,13 +208,13 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         }
 
         @Override
-        public ScheduledTask getTask() {
+        public ScheduledTask task() {
             return this.task;
         }
 
         @Override
         public boolean isPeriodic() {
-            final Duration interval = this.task.task.getInterval();
+            final Duration interval = this.task.task.interval();
             return interval.toMillis() > 0;
         }
 
@@ -229,7 +229,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         @SuppressWarnings("rawtypes")
         @Override
         public int compareTo(Delayed other) {
-            // Since getDelay may return different values for each call,
+            // Since delay may return different values for each call,
             // this check is required to correctly implement Comparable
             if (other == this) {
                 return 0;
@@ -241,7 +241,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
                 final SpongeScheduledTask otherTask = ((LanternScheduledFuture) other).task;
                 return ComparisonChain.start()
                         .compare(this.task.nextExecutionTimestamp(), otherTask.nextExecutionTimestamp())
-                        .compare(this.task.getUniqueId(), otherTask.getUniqueId())
+                        .compare(this.task.uniqueId(), otherTask.uniqueId())
                         .result();
             }
 

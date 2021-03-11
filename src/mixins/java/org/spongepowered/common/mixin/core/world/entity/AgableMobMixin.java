@@ -43,7 +43,7 @@ public abstract class AgableMobMixin extends MobMixin {
     private void impl$callReadyToMateOnAgeUp(final int age, final CallbackInfo ci) {
         if (age == 0 && ShouldFire.BREEDING_EVENT_READY_TO_MATE) {
             if (((AgableMob) (Object) this) instanceof net.minecraft.world.entity.animal.Animal) {
-                final BreedingEvent.ReadyToMate event = SpongeEventFactory.createBreedingEventReadyToMate(PhaseTracker.getCauseStackManager().getCurrentCause(), (Animal) this);
+                final BreedingEvent.ReadyToMate event = SpongeEventFactory.createBreedingEventReadyToMate(PhaseTracker.getCauseStackManager().currentCause(), (Animal) this);
                 SpongeCommon.postEvent(event);
             }
         }

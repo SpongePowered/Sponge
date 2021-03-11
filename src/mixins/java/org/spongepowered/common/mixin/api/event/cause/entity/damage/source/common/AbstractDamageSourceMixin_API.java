@@ -48,7 +48,7 @@ public abstract class AbstractDamageSourceMixin_API implements DamageSource {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void api$setUpBridges(final CallbackInfo callbackInfo) {
         final SpongeCommonDamageSource commonSource = (SpongeCommonDamageSource) (Object) this;
-        commonSource.setDamageType(this.getType().getName());
+        commonSource.setDamageType(this.type().name());
         if (this.isAbsolute()) {
             commonSource.bridge$setDamageIsAbsolute();
         }
@@ -69,7 +69,7 @@ public abstract class AbstractDamageSourceMixin_API implements DamageSource {
         }
         // Sets exhaustion last as to allow control if the builder specified a custom exhaustion value
 
-        commonSource.bridge$setHungerDamage((float) this.getExhaustion());
+        commonSource.bridge$setHungerDamage((float) this.exhaustion());
     }
 
 }

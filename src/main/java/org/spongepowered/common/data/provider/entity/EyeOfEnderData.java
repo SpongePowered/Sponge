@@ -44,7 +44,7 @@ public final class EyeOfEnderData {
                         .set((h, v) -> h.accessor$surviveAfterDeath(!v))
                     .create(Keys.DESPAWN_DELAY)
                         .get(h -> new SpongeTicks(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - h.accessor$life()))
-                        .set((h, v) -> h.accessor$life(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - (int) v.getTicks()));
+                        .set((h, v) -> h.accessor$life(Constants.Sponge.Entity.EyeOfEnder.DESPAWN_TIMER_MAX - (int) v.ticks()));
     }
     // @formatter:on
 }

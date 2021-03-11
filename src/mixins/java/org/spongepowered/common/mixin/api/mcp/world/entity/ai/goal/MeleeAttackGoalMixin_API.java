@@ -40,7 +40,7 @@ public abstract class MeleeAttackGoalMixin_API implements AttackLivingGoal {
     // @formatter:on
 
     @Override
-    public double getSpeed() {
+    public double speed() {
         return this.speedModifier;
     }
 

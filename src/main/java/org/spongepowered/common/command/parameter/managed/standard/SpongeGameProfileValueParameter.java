@@ -73,13 +73,13 @@ public final class SpongeGameProfileValueParameter extends ResourceKeyedArgument
     }
 
     @Override
-    public Optional<? extends GameProfile> getValue(
+    public Optional<? extends GameProfile> parseValue(
             final Parameter.@NonNull Key<? super GameProfile> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         try {
             final Collection<com.mojang.authlib.GameProfile> profileCollection =
-                    this.argument.parse((StringReader) reader).getNames((CommandSourceStack) context.getCause());
+                    this.argument.parse((StringReader) reader).getNames((CommandSourceStack) context.cause());
             if (profileCollection.size() == 1) {
                 return Optional.of(SpongeGameProfile.of(profileCollection.iterator().next()));
             } else if (profileCollection.isEmpty()) {
@@ -88,7 +88,7 @@ public final class SpongeGameProfileValueParameter extends ResourceKeyedArgument
                 throw reader.createException(Component.text("Many game profiles were selected when only one was requested."));
             }
         } catch (final CommandSyntaxException e) {
-            throw new ArgumentParseException(Component.text(e.getMessage()), e, reader.getInput(), reader.getCursor());
+            throw new ArgumentParseException(Component.text(e.getMessage()), e, reader.input(), reader.cursor());
         }
     }
 

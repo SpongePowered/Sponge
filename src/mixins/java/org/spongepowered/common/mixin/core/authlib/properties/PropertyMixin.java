@@ -53,8 +53,8 @@ public abstract class PropertyMixin {
         }
 
         final ProfileProperty that = (ProfileProperty) other;
-        return Objects.equal(this.getName(), that.getName())
-                && Objects.equal(this.getValue(), that.getValue())
+        return Objects.equal(this.getName(), that.name())
+                && Objects.equal(this.getValue(), that.value())
                 && Objects.equal(this.getSignature(), ((Property) that).getSignature());
     }
 

@@ -59,7 +59,7 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     }
 
     @Override
-    public V getVolume() {
+    public V volume() {
         return this.volumeSupplier.get();
     }
 
@@ -69,10 +69,10 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
             .filter(element ->
                 predicate.test(
                     this.volumeSupplier.get(),
-                    element::getType,
-                    element.getPosition().getX(),
-                    element.getPosition().getY(),
-                    element.getPosition().getZ()
+                    element::type,
+                    element.position().getX(),
+                    element.position().getY(),
+                    element.position().getZ()
                 )
             ), this.volumeSupplier);
     }
@@ -87,11 +87,11 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
         return new SpongeVolumeStream<>(this.stream.map(element ->
             VolumeElement.of(this.volumeSupplier.get(), mapper.map(
                 this.volumeSupplier.get(),
-                element::getType,
-                element.getPosition().getX(),
-                element.getPosition().getY(),
-                element.getPosition().getZ()
-            ), element.getPosition())
+                element::type,
+                element.position().getX(),
+                element.position().getY(),
+                element.position().getZ()
+            ), element.position())
         ), this.volumeSupplier);
     }
 
@@ -103,12 +103,12 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
                     this.volumeSupplier.get(),
                     mapper.map(
                         this.volumeSupplier.get(),
-                        element::getType,
-                        element.getPosition().getX(),
-                        element.getPosition().getY(),
-                        element.getPosition().getZ()
+                        element::type,
+                        element.position().getX(),
+                        element.position().getY(),
+                        element.position().getZ()
                     ),
-                    element.getPosition()
+                    element.position()
                 )
             ),
             this.volumeSupplier
@@ -118,9 +118,9 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     @Override
     public <Out> VolumeStream<V, Out> map(final Function<VolumeElement<V, T>, ? extends Out> mapper) {
         return new SpongeVolumeStream<>(this.stream.map(element -> VolumeElement.of(
-            this.getVolume(),
+            this.volume(),
             mapper.apply(element),
-            element.getPosition()
+            element.position()
         )), this.volumeSupplier);
     }
 
@@ -133,11 +133,11 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     public boolean allMatch(final VolumePredicate<V, ? super T> predicate) {
         return this.stream
             .allMatch(element -> predicate.test(
-                this.getVolume(),
-                element::getType,
-                element.getPosition().getX(),
-                element.getPosition().getY(),
-                element.getPosition().getZ()
+                this.volume(),
+                element::type,
+                element.position().getX(),
+                element.position().getY(),
+                element.position().getZ()
             ));
     }
 
@@ -149,11 +149,11 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     @Override
     public boolean noneMatch(final VolumePredicate<V, ? super T> predicate) {
         return this.stream.noneMatch(element -> predicate.test(
-            this.getVolume(),
-            element::getType,
-            element.getPosition().getX(),
-            element.getPosition().getY(),
-            element.getPosition().getZ()
+            this.volume(),
+            element::type,
+            element.position().getX(),
+            element.position().getY(),
+            element.position().getZ()
         ));
     }
 
@@ -165,11 +165,11 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     @Override
     public boolean anyMatch(final VolumePredicate<V, ? super T> predicate) {
         return this.stream.anyMatch(element -> predicate.test(
-            this.getVolume(),
-            element::getType,
-            element.getPosition().getX(),
-            element.getPosition().getY(),
-            element.getPosition().getZ()
+            this.volume(),
+            element::type,
+            element.position().getX(),
+            element.position().getY(),
+            element.position().getZ()
         ));
     }
 
@@ -201,8 +201,8 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
                 final W targetVolume = collector.target().get();
                 final VolumeElement<W, T> transformed = collector.positionTransform().apply(VolumeElement.of(
                     collector.target(),
-                    element::getType,
-                    element.getPosition()
+                    element::type,
+                    element.position()
                 ));
                 collector.applicator()
                     .apply(targetVolume, transformed);
@@ -218,8 +218,8 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
             final VolumeElement<V, T> element = iterator.next();
             final VolumeElement<W, T> transformed = collector.positionTransform().apply(VolumeElement.of(
                 collector.target(),
-                element::getType,
-                element.getPosition()
+                element::type,
+                element.position()
             ));
             final R apply = collector.applicator()
                 .apply(targetVolume, transformed);
@@ -230,11 +230,11 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     @Override
     public void forEach(final VolumeConsumer<V, T> visitor) {
         this.stream.forEach(element -> visitor.consume(
-            element.getVolume(),
-            element.getType(),
-            element.getPosition().getX(),
-            element.getPosition().getY(),
-            element.getPosition().getZ()
+            element.volume(),
+            element.type(),
+            element.position().getX(),
+            element.position().getY(),
+            element.position().getZ()
         ));
     }
 

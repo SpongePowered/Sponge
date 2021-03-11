@@ -68,29 +68,29 @@ public final class SpongeKey<V extends Value<E>, E> extends AbstractResourceKeye
     }
 
     @Override
-    public Type getValueType() {
+    public Type valueType() {
         return this.valueType;
     }
 
     @Override
-    public Type getElementType() {
+    public Type elementType() {
         return this.elementType;
     }
 
     @Override
-    public Comparator<? super E> getElementComparator() {
+    public Comparator<? super E> elementComparator() {
         return this.elementComparator;
     }
 
     @Override
-    public BiPredicate<? super E, ? super E> getElementIncludesTester() {
+    public BiPredicate<? super E, ? super E> elementIncludesTester() {
         return this.elementIncludesTester;
     }
 
     @Override
     public <H extends DataHolder> void registerEvent(final PluginContainer plugin, final Class<H> holderFilter,
             final EventListener<ChangeDataHolderEvent.ValueChange> listener) {
-        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerKeyListener(new KeyBasedDataListener<>(plugin, holderFilter, this, listener));
+        ((SpongeDataManager) Sponge.game().dataManager()).registerKeyListener(new KeyBasedDataListener<>(plugin, holderFilter, this, listener));
     }
 
     public ValueConstructor<V, E> getValueConstructor() {

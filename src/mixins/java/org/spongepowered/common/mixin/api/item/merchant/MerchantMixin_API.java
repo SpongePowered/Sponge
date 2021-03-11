@@ -50,7 +50,7 @@ public interface MerchantMixin_API extends Merchant {
 
     @Nullable
     default Player imerchant$getTradingPlayer() {
-        return (Player) this.getCustomer()
+        return (Player) this.customer()
             .filter(humanoid -> humanoid instanceof Player)
             .orElse(null);
     }
@@ -73,6 +73,6 @@ public interface MerchantMixin_API extends Merchant {
     }
 
     default Level imerchant$getLevel() {
-        return ((Level) this.getLocation().getWorld());
+        return ((Level) this.location().world());
     }
 }

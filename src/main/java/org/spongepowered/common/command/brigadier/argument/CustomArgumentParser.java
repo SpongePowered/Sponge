@@ -68,7 +68,7 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
         this.parsers = parsers;
         this.completer = completer;
         this.doesNotRead =
-                doesNotRead || parsers.stream().allMatch(x -> x.getClientCompletionType().contains(ClientCompletionTypes.NONE.get()));
+                doesNotRead || parsers.stream().allMatch(x -> x.clientCompletionType().contains(ClientCompletionTypes.NONE.get()));
         // indicates that we should try to parse this even if there is nothing else to parse.
         if (this.parsers.size() == 1) {
             final ValueParser<? extends T> parser = this.parsers.iterator().next();
@@ -77,7 +77,7 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
             } else if (this.doesNotRead) {
                 this.types = ImmutableList.of(Constants.Command.STANDARD_STRING_ARGUMENT_TYPE);
             } else {
-                this.types = parser.getClientCompletionType().stream()
+                this.types = parser.clientCompletionType().stream()
                         .map(x -> ((SpongeClientCompletionType) x).getType())
                         .filter(Objects::nonNull)
                         .collect(ImmutableList.toImmutableList());
@@ -91,12 +91,12 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
     public T parse(final Parameter.Key<? super T> key, final SpongeCommandContextBuilder contextBuilder, final SpongeStringReader reader)
             throws CommandSyntaxException {
         List<Exception> exceptions = null;
-        final ArgumentReader.Immutable state = reader.getImmutable();
+        final ArgumentReader.Immutable state = reader.immutable();
         Optional<? extends T> value;
         for (final ValueParser<? extends T> parser : this.parsers) {
             final org.spongepowered.api.command.parameter.CommandContext.Builder.Transaction transaction = contextBuilder.startTransaction();
             try {
-                value = parser.getValue(key, reader, contextBuilder);
+                value = parser.parseValue(key, reader, contextBuilder);
                 contextBuilder.commit(transaction);
                 return value.orElse(null);
             } catch (final Exception e) {

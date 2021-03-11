@@ -57,7 +57,7 @@ public class EquipmentInventoryLens extends RealLens {
     public Inventory getAdapter(Fabric fabric, Inventory parent) {
         Equipable carrier = null;
         if (parent instanceof CarriedInventory) {
-            Optional opt = ((CarriedInventory) parent).getCarrier();
+            Optional opt = ((CarriedInventory) parent).carrier();
             if (opt.isPresent() && opt.get() instanceof Equipable) {
                 carrier = ((Equipable) opt.get());
             }

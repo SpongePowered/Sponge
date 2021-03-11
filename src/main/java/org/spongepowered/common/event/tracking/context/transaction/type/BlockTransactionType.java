@@ -60,10 +60,10 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
     protected void consumeEventsAndMarker(final Collection<? extends ChangeBlockEvent.All> changeBlockEvents, final Marker marker) {
 
         final Multimap<ResourceKey, ChangeBlockEvent.All> eventsByWorld = LinkedListMultimap.create();
-        changeBlockEvents.forEach(event -> eventsByWorld.put(event.getWorld().getKey(), event));
+        changeBlockEvents.forEach(event -> eventsByWorld.put(event.world().key(), event));
 
         eventsByWorld.asMap().forEach((key, events) -> {
-            final Optional<ServerWorld> serverWorld = ((SpongeServer) SpongeCommon.getServer()).getWorldManager().world(key);
+            final Optional<ServerWorld> serverWorld = ((SpongeServer) SpongeCommon.getServer()).worldManager().world(key);
             if (!serverWorld.isPresent()) {
                 return;
             }
@@ -71,15 +71,15 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
             // Gather transactions that were valid
             events.stream()
                 .filter(event -> !event.isCancelled())
-                .flatMap(event -> event.getTransactions().stream())
+                .flatMap(event -> event.transactions().stream())
                 .filter(BlockTransaction::isValid)
                 .forEach(transactions -> {
                     // Then "put" the most recent transactions such that we have a complete rebuild of
                     // each position according to what originally existed and then
                     // the ultimate final block on that position
-                    final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transactions.getOriginal();
+                    final SpongeBlockSnapshot original = (SpongeBlockSnapshot) transactions.original();
                     positions.put(original.getBlockPos(), original);
-                    positions.put(original.getBlockPos(), (SpongeBlockSnapshot) transactions.getFinal());
+                    positions.put(original.getBlockPos(), (SpongeBlockSnapshot) transactions.finalReplacement());
                 });
 
             final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
@@ -102,7 +102,7 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
                 .map(Optional::get)
                 .collect(ImmutableList.toImmutableList());
 
-            final Cause cause = PhaseTracker.getInstance().getCurrentCause();
+            final Cause cause = PhaseTracker.getInstance().currentCause();
 
             SpongeCommon.postEvent(SpongeEventFactory.createChangeBlockEventPost(cause, transactions, serverWorld.get()));
         });

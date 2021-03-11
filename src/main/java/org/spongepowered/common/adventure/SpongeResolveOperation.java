@@ -50,7 +50,7 @@ public abstract class SpongeResolveOperation implements ResolveOperation {
         return new SpongeResolveOperation() {
             @Override
             public Component resolve(final Component input, final CommandCause senderContext, final @Nullable Entity viewer) {
-                final Locale targetLocale = viewer instanceof ServerPlayer ? ((ServerPlayer) viewer).getLocale() : Locale.getDefault();
+                final Locale targetLocale = viewer instanceof ServerPlayer ? ((ServerPlayer) viewer).locale() : Locale.getDefault();
                 return GlobalTranslator.render(input, targetLocale);
             }
         };

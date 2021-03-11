@@ -45,12 +45,12 @@ public abstract class FluidStateMixin_API implements FluidState {
     // @formatter:on
 
     @Override
-    public BlockState getBlock() {
+    public BlockState block() {
         return (BlockState) this.shadow$createLegacyBlock();
     }
 
-    @Intrinsic
-    public FluidType fluidState$getType() {
+    @Override
+    public FluidType type() {
         return (FluidType) this.shadow$getType();
     }
 

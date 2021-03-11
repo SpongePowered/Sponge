@@ -79,12 +79,12 @@ public final class SignData {
                         .get(SignData::getSignLines)
                         .set(SignData::setSignLines)
                         .delete(h -> SignData.setSignLines(h, Collections.emptyList()))
-                        .supports(loc -> loc.getBlockEntity().map(b -> b instanceof SignBlockEntity).orElse(false));
+                        .supports(loc -> loc.blockEntity().map(b -> b instanceof SignBlockEntity).orElse(false));
     }
     // @formatter:on
 
     private static SignBlockEntity toSignTileEntity(final ServerLocation holder) {
-        return (SignBlockEntity) holder.getBlockEntity().get();
+        return (SignBlockEntity) holder.blockEntity().get();
     }
 
     private static void setSignLines(final ServerLocation holder, final List<Component> value) {

@@ -59,15 +59,15 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
     @Override
     public InventoryTransactionResult and(InventoryTransactionResult other) {
         Type resultType = Type.SUCCESS;
-        if (this.type == Type.ERROR || other.getType() == Type.ERROR) {
+        if (this.type == Type.ERROR || other.type() == Type.ERROR) {
             resultType = Type.ERROR;
         }
-        if (this.type == Type.FAILURE || other.getType() == Type.FAILURE) {
+        if (this.type == Type.FAILURE || other.type() == Type.FAILURE) {
             resultType = Type.FAILURE;
         }
         InventoryTransactionResult.Builder builder =
-                InventoryTransactionResult.builder().type(resultType).reject(this.rejected).reject(other.getRejectedItems())
-                        .transaction(this.slotTransactions).transaction(other.getSlotTransactions());
+                InventoryTransactionResult.builder().type(resultType).reject(this.rejected).reject(other.rejectedItems())
+                        .transaction(this.slotTransactions).transaction(other.slotTransactions());
         this.polled.forEach(builder::poll);
         return builder.build();
     }
@@ -75,7 +75,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
     @Override
     public void revert() {
         for (SlotTransaction transaction : Lists.reverse(this.slotTransactions)) {
-            transaction.getSlot().set(transaction.getOriginal().createStack());
+            transaction.slot().set(transaction.original().createStack());
         }
     }
 
@@ -89,27 +89,27 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
     }
 
     @Override
-    public Type getType() {
+    public Type type() {
         return this.type;
     }
 
     @Override
-    public List<ItemStackSnapshot> getRejectedItems() {
+    public List<ItemStackSnapshot> rejectedItems() {
         return this.rejected;
     }
 
     @Override
-    public List<SlotTransaction> getSlotTransactions() {
+    public List<SlotTransaction> slotTransactions() {
         return this.slotTransactions;
     }
 
     @Override
-    public List<ItemStackSnapshot> getPolledItems() {
+    public List<ItemStackSnapshot> polledItems() {
         return this.polled;
     }
 
     @Override
-    public ItemStackSnapshot getPolledItem() {
+    public ItemStackSnapshot polledItem() {
         return this.polled.get(0);
     }
 
@@ -186,9 +186,9 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
         @Override
         public InventoryTransactionResult.Builder from(InventoryTransactionResult value) {
             checkNotNull(value, "InventoryTransactionResult cannot be null!");
-            this.resultType = checkNotNull(value.getType(), "ResultType cannot be null!");
-            this.slotTransactions = new ArrayList<>(value.getSlotTransactions());
-            this.rejected = new ArrayList<>(value.getRejectedItems());
+            this.resultType = checkNotNull(value.type(), "ResultType cannot be null!");
+            this.slotTransactions = new ArrayList<>(value.slotTransactions());
+            this.rejected = new ArrayList<>(value.rejectedItems());
             return this;
         }
 

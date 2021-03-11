@@ -58,12 +58,12 @@ public final class NumericalParticleType implements ParticleType {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <V> Optional<V> getDefaultOption(final ParticleOption<V> option) {
+    public <V> Optional<V> defaultOption(final ParticleOption<V> option) {
         return Optional.ofNullable((V) this.defaultOptions.get(option));
     }
 
     @Override
-    public Map<ParticleOption<?>, Object> getDefaultOptions() {
+    public Map<ParticleOption<?>, Object> defaultOptions() {
         return this.defaultOptions;
     }
 

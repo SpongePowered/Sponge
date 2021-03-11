@@ -66,16 +66,16 @@ public class ServerGamePacketListenerImplMixin_Inventory {
                 }
                 ci.cancel();
             } else {
-                if (PacketPhaseUtil.handleSlotRestore(this.player, this.player.containerMenu, clickEvent.getTransactions(), false)) {
+                if (PacketPhaseUtil.handleSlotRestore(this.player, this.player.containerMenu, clickEvent.transactions(), false)) {
                     ci.cancel();
                 }
-                final Transaction<ItemStackSnapshot> cursorTransaction = clickEvent.getCursorTransaction();
+                final Transaction<ItemStackSnapshot> cursorTransaction = clickEvent.cursorTransaction();
                 if (!cursorTransaction.isValid()) {
                     // TODO original cursor is currently always empty
-                    PacketPhaseUtil.handleCustomCursor(this.player, cursorTransaction.getOriginal());
+                    PacketPhaseUtil.handleCustomCursor(this.player, cursorTransaction.original());
                 }
-                else if (cursorTransaction.getCustom().isPresent()) {
-                    PacketPhaseUtil.handleCustomCursor(this.player, cursorTransaction.getFinal());
+                else if (cursorTransaction.custom().isPresent()) {
+                    PacketPhaseUtil.handleCustomCursor(this.player, cursorTransaction.finalReplacement());
                 }
             }
         }

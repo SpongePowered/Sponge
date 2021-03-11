@@ -145,9 +145,9 @@ public final class DataTest  {
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.plugin, Command.builder()
-                .setExecutionRequirements(cc -> cc.first(ServerPlayer.class).isPresent())
-                .setExecutor(context -> {
-                    this.testData(context.getCause().first(ServerPlayer.class).get());
+                .executionRequirements(cc -> cc.first(ServerPlayer.class).isPresent())
+                .executor(context -> {
+                    this.testData(context.cause().first(ServerPlayer.class).get());
                     return CommandResult.success();
                 })
                 .build()
@@ -156,12 +156,12 @@ public final class DataTest  {
 
 
     public void testData(final ServerPlayer player) {
-        final ServerWorld world = player.getWorld();
-        final Vector3d position = player.getPosition();
+        final ServerWorld world = player.world();
+        final Vector3d position = player.position();
         final Vector3i blockPos = position.toInt();
-        final ServerLocation location = world.getLocation(blockPos);
+        final ServerLocation location = world.location(blockPos);
 
-        final BlockState oldState = world.getBlock(blockPos);
+        final BlockState oldState = world.block(blockPos);
 
         world.setWeather(WeatherTypes.CLEAR.get());
 
@@ -169,7 +169,7 @@ public final class DataTest  {
         this.checkOfferData(player, Keys.ABSORPTION, 10.0);
         this.checkOfferData(player, Keys.ABSORPTION, 20.0);
         // TODO launchProjectile is abstract
-//        final Optional<Arrow> arrow = player.launchProjectile(Arrow.class, player.getHeadDirection());
+//        final Optional<Arrow> arrow = player.launchProjectile(Arrow.class, player.headDirection());
 //        this.checkOfferData(arrow.get(), Keys.ACCELERATION, Vector3d.UP);
         // TODO Keys.ACTIVE_ITEM is only when actually using itemsd
         // Test: get during event + setting empty & remove
@@ -206,7 +206,7 @@ public final class DataTest  {
         final Entity painting = world.createEntity(EntityTypes.PAINTING.get(), position);
         this.checkGetData(painting, Keys.ART_TYPE, ArtTypes.KEBAB.get()); // TODO test offer (only works on valid painting)
 
-        final BlockState leverState = BlockTypes.LEVER.get().getDefaultState();
+        final BlockState leverState = BlockTypes.LEVER.get().defaultState();
         this.checkWithData(leverState, Keys.ATTACHMENT_SURFACE, AttachmentSurfaces.WALL.get());
         this.checkWithData(leverState, Keys.ATTACHMENT_SURFACE, AttachmentSurfaces.FLOOR.get());
 
@@ -219,11 +219,11 @@ public final class DataTest  {
         final ItemStack writtenBookStack = ItemStack.of(ItemTypes.WRITTEN_BOOK);
         this.checkOfferData(writtenBookStack, Keys.AUTHOR, Component.text("You"));
 
-        final BlockState logState = BlockTypes.OAK_LOG.get().getDefaultState();
+        final BlockState logState = BlockTypes.OAK_LOG.get().defaultState();
         this.checkWithData(logState, Keys.AXIS, Axis.Y);
         this.checkWithData(logState, Keys.AXIS, Axis.X);
 
-        this.checkOfferData(sheep, Keys.BABY_TICKS, Ticks.ofWallClockSeconds(Sponge.getServer(), 1));
+        this.checkOfferData(sheep, Keys.BABY_TICKS, Ticks.ofWallClockSeconds(Sponge.server(), 1));
         this.checkOfferData(sheep, Keys.BABY_TICKS, Ticks.zero());
 
         final List<BannerPatternLayer> pattern = Arrays.asList(BannerPatternLayer.of(BannerPatternShapes.BASE, DyeColors.BLACK), BannerPatternLayer.of(BannerPatternShapes.RHOMBUS, DyeColors.ORANGE));
@@ -236,8 +236,8 @@ public final class DataTest  {
         this.checkGetListData(bannerStack, Keys.BANNER_PATTERN_LAYERS,  Collections.emptyList());
         this.checkOfferListData(bannerStack, Keys.BANNER_PATTERN_LAYERS, pattern);
 
-        world.setBlock(blockPos, BlockTypes.RED_BANNER.get().getDefaultState());
-        final BlockEntity bannerEntity = world.getBlockEntity(blockPos).get();
+        world.setBlock(blockPos, BlockTypes.RED_BANNER.get().defaultState());
+        final BlockEntity bannerEntity = world.blockEntity(blockPos).get();
         this.checkOfferListData(bannerEntity, Keys.BANNER_PATTERN_LAYERS, pattern);
 
         // Keys.BASE_COLOR
@@ -258,19 +258,19 @@ public final class DataTest  {
         this.checkOfferData(guardian, Keys.BEAM_TARGET_ENTITY, player);
 
 // TODO LocationBasedDataHolder get(int,int,int,key) is abstract
-//        this.checkGetData(location, Keys.BIOME_TEMPERATURE, world.getBiome(blockPos).getTemperature());
+//        this.checkGetData(location, Keys.BIOME_TEMPERATURE, world.biome(blockPos).getTemperature());
 
-        final BlockState obisidanState = BlockTypes.OBSIDIAN.get().getDefaultState();
+        final BlockState obisidanState = BlockTypes.OBSIDIAN.get().defaultState();
         this.checkGetData(obisidanState, Keys.BLAST_RESISTANCE, 1200.0);
-        final BlockState dirtState = BlockTypes.DIRT.get().getDefaultState();
+        final BlockState dirtState = BlockTypes.DIRT.get().defaultState();
         this.checkGetData(dirtState, Keys.BLAST_RESISTANCE, 0.5);
-        final BlockState bricksState = BlockTypes.BRICKS.get().getDefaultState();
+        final BlockState bricksState = BlockTypes.BRICKS.get().defaultState();
         this.checkGetData(bricksState, Keys.BLAST_RESISTANCE, 6.0);
 
         // TODO Keys.BLOCK_LIGHT
 
         final Entity fallingBlock = world.createEntity(EntityTypes.FALLING_BLOCK.get(), position.add(0,5,0));
-        final BlockState sandState = BlockTypes.SAND.get().getDefaultState();
+        final BlockState sandState = BlockTypes.SAND.get().defaultState();
         this.checkOfferData(fallingBlock, Keys.BLOCK_STATE, sandState);
         this.checkOfferData(minecartEntity, Keys.BLOCK_STATE, dirtState);
 
@@ -293,7 +293,7 @@ public final class DataTest  {
         this.checkOfferSetData(jungleAxe, Keys.BREAKABLE_BLOCK_TYPES, new HashSet<>(Arrays.asList(BlockTypes.COCOA.get(), BlockTypes.JUNGLE_LEAVES.get())));
 
         this.checkGetData(sheep, Keys.BREEDER, null);
-        this.checkOfferData(sheep, Keys.BREEDER, player.getUniqueId());
+        this.checkOfferData(sheep, Keys.BREEDER, player.uniqueId());
 
         this.checkGetData(sheep, Keys.BREEDING_COOLDOWN, Ticks.zero());
         this.checkOfferData(sheep, Keys.BREEDING_COOLDOWN, Ticks.of(100));
@@ -323,7 +323,7 @@ public final class DataTest  {
 
         // TODO maybe only when actually falling
 //        final Entity fallingAnvil = world.createEntity(EntityTypes.FALLING_BLOCK.get(), position);
-//        fallingAnvil.offer(Keys.BLOCK_STATE, BlockTypes.ANVIL.get().getDefaultState());
+//        fallingAnvil.offer(Keys.BLOCK_STATE, BlockTypes.ANVIL.get().defaultState());
 //        this.checkGetData(fallingAnvil, Keys.CAN_HURT_ENTITIES, true);
 
 
@@ -345,9 +345,9 @@ public final class DataTest  {
         this.checkOfferData(cat, Keys.CAT_TYPE, CatTypes.WHITE.get());
 
         // TODO
-//        world.setBlock(blockPos, BlockTypes.CHEST.get().getDefaultState());
+//        world.setBlock(blockPos, BlockTypes.CHEST.get().defaultState());
 //        final Optional<ChestAttachmentType> chestAttachmentType = world.get(blockPos, Keys.CHEST_ATTACHMENT_TYPE);
-//        world.setBlock(blockPos.add(0, 0, 1), BlockTypes.CHEST.get().getDefaultState());
+//        world.setBlock(blockPos.add(0, 0, 1), BlockTypes.CHEST.get().defaultState());
 
         this.checkOfferData(armorStand, Keys.CHEST_ROTATION, Vector3d.from(0, 90, 0));
 
@@ -361,7 +361,7 @@ public final class DataTest  {
         // TODO COMMAND
 
         // TODO NPE in event?
-//        world.setBlock(blockPos, BlockTypes.COMPARATOR.get().getDefaultState());
+//        world.setBlock(blockPos, BlockTypes.COMPARATOR.get().defaultState());
 //        BlockState comparator = world.getBlock(blockPos);
 //        this.checkGetData(comparator, Keys.COMPARATOR_MODE, ComparatorModes.COMPARE.get());
 //        comparator = comparator.with(Keys.COMPARATOR_MODE, ComparatorModes.SUBTRACT.get()).get();
@@ -372,12 +372,12 @@ public final class DataTest  {
         final ItemStack waterBucket = ItemStack.of(ItemTypes.WATER_BUCKET);
         this.checkGetData(waterBucket, Keys.CONTAINER_ITEM, ItemTypes.BUCKET.get());
 
-        world.setBlock(blockPos, BlockTypes.HOPPER.get().getDefaultState());
-        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.zero());
-        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.of(10));
-        world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().getDefaultState());
-        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.zero());
-        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.of(15));
+        world.setBlock(blockPos, BlockTypes.HOPPER.get().defaultState());
+        this.checkGetData(world.blockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.zero());
+        this.checkOfferData(world.blockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.of(10));
+        world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().defaultState());
+        this.checkGetData(world.blockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.zero());
+        this.checkOfferData(world.blockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.of(15));
 
         // TODO Keys.CREATOR
 
@@ -395,7 +395,7 @@ public final class DataTest  {
         checkOfferData(redFlard, Keys.CUSTOM_MODEL_DATA, 123456);
         redFlard.offer(Keys.CUSTOM_NAME, Component.text("Red FLARD", NamedTextColor.DARK_RED));
         redFlard.offer(Keys.LORE, Arrays.asList(Component.text("May ignite holder! Handle with care", NamedTextColor.GOLD)));
-        player.getInventory().offer(redFlard);
+        player.inventory().offer(redFlard);
 
         // TODO Keys.CUSTOM_ATTACK_DAMAGE
 
@@ -405,7 +405,7 @@ public final class DataTest  {
         this.checkGetData(fallingBlock, Keys.DAMAGE_PER_BLOCK, 2.0);
         this.checkOfferData(fallingBlock, Keys.DAMAGE_PER_BLOCK, 5.0);
 
-        final BlockState leavesState = BlockTypes.ACACIA_LEAVES.get().getDefaultState();
+        final BlockState leavesState = BlockTypes.ACACIA_LEAVES.get().defaultState();
         this.checkGetData(leavesState, Keys.DECAY_DISTANCE, 7);
         this.checkWithData(leavesState, Keys.DECAY_DISTANCE, 2);
 
@@ -433,7 +433,7 @@ public final class DataTest  {
         this.checkOfferData(shulkerBullet, Keys.DIRECTION, Direction.NORTH);
         this.checkOfferData(shulkerBullet, Keys.DIRECTION, Direction.UP);
 
-        final BlockState acaciaStairs = BlockTypes.ACACIA_STAIRS.get().getDefaultState();
+        final BlockState acaciaStairs = BlockTypes.ACACIA_STAIRS.get().defaultState();
         this.checkGetData(acaciaStairs, Keys.DIRECTION, Direction.NORTH);
         this.checkWithData(acaciaStairs, Keys.DIRECTION, Direction.WEST);
 
@@ -443,12 +443,12 @@ public final class DataTest  {
                 Component.translatable("chat.square_brackets").args(Component.empty().append(Component.text("Jungle Axe")).decorate(TextDecoration.ITALIC))
                         .color(NamedTextColor.WHITE).hoverEvent(jungleAxe.createSnapshot().asHoverEvent()));
         this.checkGetData(shulkerBullet, Keys.DISPLAY_NAME, Component.text("Angry Shulker Bullet")
-                .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("shulker_bullet"), shulkerBullet.getUniqueId(), Component.text("Angry Shulker Bullet")))
-                .insertion(shulkerBullet.getUniqueId().toString()));
+                .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("shulker_bullet"), shulkerBullet.uniqueId(), Component.text("Angry Shulker Bullet")))
+                .insertion(shulkerBullet.uniqueId().toString()));
         this.checkGetData(sheep, Keys.DISPLAY_NAME, Component.text("A sheep")
-                .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("sheep"), sheep.getUniqueId(), Component.text("A sheep")))
-                .insertion(sheep.getUniqueId().toString())); // Set with CUSTOM_NAME
-        world.setBlock(blockPos, BlockTypes.CHEST.get().getDefaultState());
+                .hoverEvent(HoverEvent.showEntity(ResourceKey.minecraft("sheep"), sheep.uniqueId(), Component.text("A sheep")))
+                .insertion(sheep.uniqueId().toString())); // Set with CUSTOM_NAME
+        world.setBlock(blockPos, BlockTypes.CHEST.get().defaultState());
         this.checkGetData(location, Keys.CUSTOM_NAME, null);
         this.checkGetData(location, Keys.DISPLAY_NAME, Component.translatable("container.chest"));
         this.checkOfferData(location, Keys.CUSTOM_NAME, Component.text("Just a Chest"));
@@ -467,15 +467,15 @@ public final class DataTest  {
         this.checkOfferData(cat, Keys.DYE_COLOR, DyeColors.LIME.get());
         this.checkGetData(ItemStack.of(ItemTypes.RED_WOOL), Keys.DYE_COLOR, DyeColors.RED.get());
         this.checkGetData(bannerStack, Keys.DYE_COLOR, DyeColors.RED.get());
-        this.checkGetData(BlockTypes.RED_BED.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.RED.get());
-        this.checkGetData(BlockTypes.BLUE_CONCRETE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
-        this.checkGetData(BlockTypes.BLUE_CONCRETE_POWDER.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
-        this.checkGetData(BlockTypes.BLUE_TERRACOTTA.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
-        this.checkGetData(BlockTypes.BLUE_GLAZED_TERRACOTTA.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
-        this.checkGetData(BlockTypes.BLUE_STAINED_GLASS.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
-        this.checkGetData(BlockTypes.BLUE_STAINED_GLASS_PANE.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
-        this.checkGetData(BlockTypes.BLUE_BANNER.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
-        this.checkGetData(BlockTypes.BLUE_WALL_BANNER.get().getDefaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.RED_BED.get().defaultState(), Keys.DYE_COLOR, DyeColors.RED.get());
+        this.checkGetData(BlockTypes.BLUE_CONCRETE.get().defaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_CONCRETE_POWDER.get().defaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_TERRACOTTA.get().defaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_GLAZED_TERRACOTTA.get().defaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_STAINED_GLASS.get().defaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_STAINED_GLASS_PANE.get().defaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_BANNER.get().defaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
+        this.checkGetData(BlockTypes.BLUE_WALL_BANNER.get().defaultState(), Keys.DYE_COLOR, DyeColors.BLUE.get());
         this.checkOfferData(bannerEntity, Keys.DYE_COLOR, DyeColors.PINK.get());
 
         final Entity tropicalFish = world.createEntity(EntityTypes.TROPICAL_FISH.get(), position);
@@ -490,9 +490,9 @@ public final class DataTest  {
         this.checkOfferData(chicken, Keys.EGG_TIME, Ticks.of(0));
         this.checkOfferData(chicken, Keys.EGG_TIME, Ticks.of(5000));
 
-        world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().getDefaultState());
-        this.checkGetData(world.getBlockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, Ticks.of(0L));
-        this.checkOfferData(world.getBlockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, Ticks.of(100L));
+        world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().defaultState());
+        this.checkGetData(world.blockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, Ticks.of(0L));
+        this.checkOfferData(world.blockEntity(blockPos).get(), Keys.END_GATEWAY_AGE, Ticks.of(100L));
 
         // Keys.EQUIPMENT_TYPE is for inventories
         this.checkOfferData(player, Keys.EXHAUSTION, 1.0);
@@ -539,12 +539,12 @@ public final class DataTest  {
         this.checkOfferData(player, Keys.FIRST_DATE_JOINED, Instant.now().minus(1, ChronoUnit.DAYS));
 
         final Entity fox = world.createEntity(EntityTypes.FOX.get(), position);
-        this.checkOfferData(fox, Keys.FIRST_TRUSTED, player.getUniqueId());
+        this.checkOfferData(fox, Keys.FIRST_TRUSTED, player.uniqueId());
 
 // TODO missing dataprovider
 //        this.checkGetData(waterBucket, Keys.FLUID_ITEM_STACK, FluidStackSnapshot.builder().fluid(FluidTypes.WATER).build());
 
-        final BlockState waterBlockState = BlockTypes.WATER.get().getDefaultState();
+        final BlockState waterBlockState = BlockTypes.WATER.get().defaultState();
         this.checkGetData(waterBlockState, Keys.FLUID_LEVEL, 8);
 
         // TODO Keys.FLUID_TANK_CONTENTS
@@ -570,14 +570,14 @@ public final class DataTest  {
         player.offer(Keys.GAME_MODE, gameMode);
 
         final ItemStack playerHeadStack = ItemStack.of(ItemTypes.PLAYER_HEAD);
-        this.checkOfferData(playerHeadStack, Keys.GAME_PROFILE, player.getProfile());
+        this.checkOfferData(playerHeadStack, Keys.GAME_PROFILE, player.profile());
         // TODO Block Keys.GAME_PROFILE
 
         this.checkGetData(writtenBookStack, Keys.GENERATION, 0);
         this.checkOfferData(writtenBookStack, Keys.GENERATION, 2);
 
-        final BlockState melonStemState = BlockTypes.MELON_STEM.get().getDefaultState();
-        final BlockState cactusState = BlockTypes.CACTUS.get().getDefaultState();
+        final BlockState melonStemState = BlockTypes.MELON_STEM.get().defaultState();
+        final BlockState cactusState = BlockTypes.CACTUS.get().defaultState();
         this.checkGetData(melonStemState, Keys.GROWTH_STAGE, 0);
         this.checkWithData(melonStemState, Keys.GROWTH_STAGE, 4);
         this.checkGetData(cactusState, Keys.GROWTH_STAGE, 0);
@@ -606,7 +606,7 @@ public final class DataTest  {
         this.checkOfferData(armorStand, Keys.HAS_MARKER, true);
         this.checkOfferData(armorStand, Keys.HAS_MARKER, false);
 
-        final BlockState mushroomBlockState = BlockTypes.BROWN_MUSHROOM_BLOCK.get().getDefaultState();
+        final BlockState mushroomBlockState = BlockTypes.BROWN_MUSHROOM_BLOCK.get().defaultState();
         this.checkGetData(mushroomBlockState, Keys.HAS_PORES_DOWN, true);
         this.checkGetData(mushroomBlockState, Keys.HAS_PORES_EAST, true);
         this.checkGetData(mushroomBlockState, Keys.HAS_PORES_NORTH, true);
@@ -662,11 +662,11 @@ public final class DataTest  {
         this.checkOfferData(itemEntity, Keys.INFINITE_PICKUP_DELAY, true);
         world.spawnEntity(itemEntity);
 
-        final BlockState noteBlockState = BlockTypes.NOTE_BLOCK.get().getDefaultState();
+        final BlockState noteBlockState = BlockTypes.NOTE_BLOCK.get().defaultState();
         this.checkGetData(noteBlockState, Keys.INSTRUMENT_TYPE, InstrumentTypes.HARP.get());
         this.checkWithData(noteBlockState, Keys.INSTRUMENT_TYPE, InstrumentTypes.COW_BELL.get());
 
-        final BlockState daylightDetectorState = BlockTypes.DAYLIGHT_DETECTOR.get().getDefaultState();
+        final BlockState daylightDetectorState = BlockTypes.DAYLIGHT_DETECTOR.get().defaultState();
         this.checkGetData(daylightDetectorState, Keys.INVERTED, false);
         this.checkWithData(daylightDetectorState, Keys.INVERTED, true);
 
@@ -675,7 +675,7 @@ public final class DataTest  {
         this.checkOfferData(sheep, Keys.INVULNERABLE, true);
         this.checkOfferData(sheep, Keys.INVULNERABLE, false);
 
-        final BlockState fenceGateState = BlockTypes.ACACIA_FENCE_GATE.get().getDefaultState();
+        final BlockState fenceGateState = BlockTypes.ACACIA_FENCE_GATE.get().defaultState();
         this.checkGetData(fenceGateState, Keys.IN_WALL, false);
         this.checkWithData(fenceGateState, Keys.IN_WALL, true);
 
@@ -695,7 +695,7 @@ public final class DataTest  {
 //        this.checkOfferData(zombiePigman, Keys.IS_ANGRY, true);
 //        this.checkOfferData(zombiePigman, Keys.IS_ANGRY, false);
 
-        final BlockState torchState = BlockTypes.TORCH.get().getDefaultState();
+        final BlockState torchState = BlockTypes.TORCH.get().defaultState();
         this.checkGetData(torchState, Keys.IS_ATTACHED, false);
         this.checkGetData(dirtState, Keys.IS_ATTACHED, null);
 
@@ -717,21 +717,21 @@ public final class DataTest  {
         final Entity spider = world.createEntity(EntityTypes.SPIDER.get(), position);
         this.checkOfferData(spider, Keys.IS_CLIMBING, true);
 
-        final BlockState fenceState = BlockTypes.ACACIA_FENCE.get().getDefaultState();
+        final BlockState fenceState = BlockTypes.ACACIA_FENCE.get().defaultState();
 
         this.checkWithData(fenceState, Keys.IS_CONNECTED_EAST, true);
         this.checkWithData(fenceState, Keys.IS_CONNECTED_NORTH, false);
         this.checkWithData(fenceState, Keys.IS_CONNECTED_SOUTH, true);
         this.checkWithData(fenceState, Keys.IS_CONNECTED_WEST, false);
 
-        final BlockState wallState = BlockTypes.ANDESITE_WALL.get().getDefaultState();
+        final BlockState wallState = BlockTypes.ANDESITE_WALL.get().defaultState();
         this.checkWithData(wallState, Keys.IS_CONNECTED_EAST, true);
         this.checkWithData(wallState, Keys.IS_CONNECTED_NORTH, false);
         this.checkWithData(wallState, Keys.IS_CONNECTED_SOUTH, true);
         this.checkWithData(wallState, Keys.IS_CONNECTED_WEST, false);
         this.checkWithData(wallState, Keys.IS_CONNECTED_UP, true);
 
-        final BlockState vineState = BlockTypes.VINE.get().getDefaultState();
+        final BlockState vineState = BlockTypes.VINE.get().defaultState();
         this.checkWithData(vineState, Keys.IS_CONNECTED_UP, false);
         this.checkWithData(vineState, Keys.IS_CONNECTED_UP, true);
 
@@ -743,7 +743,7 @@ public final class DataTest  {
 
         this.checkOfferData(fox, Keys.IS_DEFENDING, true);
 
-        final BlockState tripWireState = BlockTypes.TRIPWIRE.get().getDefaultState();
+        final BlockState tripWireState = BlockTypes.TRIPWIRE.get().defaultState();
         this.checkWithData(tripWireState, Keys.IS_DISARMED, true);
 
         this.checkOfferData(panda, Keys.IS_EATING, true);
@@ -753,13 +753,13 @@ public final class DataTest  {
         this.checkOfferData(player, Keys.IS_ELYTRA_FLYING, true);
         this.checkOfferData(player, Keys.IS_ELYTRA_FLYING, false);
 
-        final BlockState pistonState = BlockTypes.PISTON.get().getDefaultState();
+        final BlockState pistonState = BlockTypes.PISTON.get().defaultState();
         this.checkWithData(pistonState, Keys.IS_EXTENDED, true);
 
         this.checkOfferData(fox, Keys.IS_FACEPLANTED, false);
         this.checkOfferData(fox, Keys.IS_FACEPLANTED, true);
 
-        final BlockState portalFrameState = BlockTypes.END_PORTAL_FRAME.get().getDefaultState();
+        final BlockState portalFrameState = BlockTypes.END_PORTAL_FRAME.get().defaultState();
         this.checkWithData(portalFrameState, Keys.IS_FILLED, true);
         this.checkWithData(portalFrameState, Keys.IS_FILLED, false);
 
@@ -801,9 +801,9 @@ public final class DataTest  {
 
         this.checkOfferData(vindicator, Keys.IS_LEADER, true);
 
-        final BlockState furnaceState = BlockTypes.FURNACE.get().getDefaultState();
-        final BlockState campfireState = BlockTypes.CAMPFIRE.get().getDefaultState();
-        final BlockState redstoneTorchState = BlockTypes.REDSTONE_TORCH.get().getDefaultState();
+        final BlockState furnaceState = BlockTypes.FURNACE.get().defaultState();
+        final BlockState campfireState = BlockTypes.CAMPFIRE.get().defaultState();
+        final BlockState redstoneTorchState = BlockTypes.REDSTONE_TORCH.get().defaultState();
         this.checkWithData(furnaceState, Keys.IS_LIT, false);
         this.checkWithData(furnaceState, Keys.IS_LIT, true);
         this.checkWithData(campfireState, Keys.IS_LIT, false);
@@ -813,7 +813,7 @@ public final class DataTest  {
 
         this.checkOfferData(cat, Keys.IS_LYING_DOWN, true);
 
-        final BlockState bedState = BlockTypes.BLACK_BED.get().getDefaultState();
+        final BlockState bedState = BlockTypes.BLACK_BED.get().defaultState();
         this.checkWithData(bedState, Keys.IS_OCCUPIED, true);
         this.checkWithData(bedState, Keys.IS_OCCUPIED, false);
 
@@ -909,7 +909,7 @@ public final class DataTest  {
 
         this.checkOfferData(jungleAxe, Keys.IS_UNBREAKABLE, true);
         this.checkGetData(obisidanState, Keys.IS_UNBREAKABLE, false);
-        final BlockState bedrockState = BlockTypes.BEDROCK.get().getDefaultState();
+        final BlockState bedrockState = BlockTypes.BEDROCK.get().defaultState();
         this.checkGetData(bedrockState, Keys.IS_UNBREAKABLE, true);
 
 //        this.checkOfferData(panda, Keys.IS_UNHAPPY, true);
@@ -940,12 +940,12 @@ public final class DataTest  {
 
 //        this.checkOfferData(player, Keys.LAST_DATE_JOINED, Instant.now().minus(1, TemporalUnits.DAYS));
 //        this.checkOfferData(player, Keys.LAST_DATE_PLAYED, Instant.now().minus(1, TemporalUnits.DAYS));
-        final User user = Sponge.getServer().getUserManager().get(player.getUniqueId()).get();
+        final User user = Sponge.server().userManager().find(player.uniqueId()).get();
 //        this.checkOfferData(user, Keys.LAST_DATE_JOINED, Instant.now().minus(1, TemporalUnits.DAYS));
 //        this.checkOfferData(user, Keys.LAST_DATE_PLAYED, Instant.now().minus(1, TemporalUnits.DAYS));
 
-        final BlockState snowState = BlockTypes.SNOW.get().getDefaultState();
-        final BlockState cakeState = BlockTypes.CAKE.get().getDefaultState();
+        final BlockState snowState = BlockTypes.SNOW.get().defaultState();
+        final BlockState cakeState = BlockTypes.CAKE.get().defaultState();
         this.checkWithData(snowState, Keys.LAYER, 4);
         this.checkWithData(cakeState, Keys.LAYER, 4);
 
@@ -958,7 +958,7 @@ public final class DataTest  {
         this.checkOfferData(vex, Keys.LIFE_TICKS, Ticks.of(10));
 
         this.checkGetData(dirtState, Keys.LIGHT_EMISSION, 0);
-        final BlockState glowstoneState = BlockTypes.GLOWSTONE.get().getDefaultState();
+        final BlockState glowstoneState = BlockTypes.GLOWSTONE.get().defaultState();
         this.checkGetData(glowstoneState, Keys.LIGHT_EMISSION, 15);
 
         final Entity llama = world.createEntity(EntityTypes.LLAMA.get(), position);
@@ -970,7 +970,7 @@ public final class DataTest  {
 
         this.checkGetData(dirtState, Keys.MATTER_TYPE, MatterTypes.SOLID.get());
         this.checkGetData(waterBlockState, Keys.MATTER_TYPE, MatterTypes.LIQUID.get());
-        this.checkGetData(BlockTypes.AIR.get().getDefaultState(), Keys.MATTER_TYPE, MatterTypes.GAS.get());
+        this.checkGetData(BlockTypes.AIR.get().defaultState(), Keys.MATTER_TYPE, MatterTypes.GAS.get());
 
 //        this.checkOfferData(player, Keys.MAX_AIR, 20);
 
@@ -997,7 +997,7 @@ public final class DataTest  {
 
         // TODO Keys.MIN_SPAWN_DELAY
 
-        final BlockState farmlandState = BlockTypes.FARMLAND.get().getDefaultState();
+        final BlockState farmlandState = BlockTypes.FARMLAND.get().defaultState();
         this.checkWithData(farmlandState, Keys.MOISTURE, 1);
 
         final Entity mooshroom = world.createEntity(EntityTypes.MOOSHROOM.get(), position);
@@ -1012,7 +1012,7 @@ public final class DataTest  {
 // TODO missing supplier
 //        this.checkWithData(noteBlockState, Keys.NOTE_PITCH, NotePitches.E1.get());
 
-//        this.checkOfferData(sheep, Keys.NOTIFIER, player.getUniqueId());
+//        this.checkOfferData(sheep, Keys.NOTIFIER, player.uniqueId());
 
         this.checkOfferData(boat, Keys.OCCUPIED_DECELERATION, 2.0);
 
@@ -1056,7 +1056,7 @@ public final class DataTest  {
 
         this.checkWithData(bedState, Keys.PORTION_TYPE, PortionTypes.BOTTOM.get());
         this.checkWithData(bedState, Keys.PORTION_TYPE, PortionTypes.TOP.get());
-        final BlockState doorState = BlockTypes.ACACIA_DOOR.get().getDefaultState();
+        final BlockState doorState = BlockTypes.ACACIA_DOOR.get().defaultState();
         this.checkWithData(doorState, Keys.PORTION_TYPE, PortionTypes.TOP.get());
 
         this.checkOfferData(minecartEntity, Keys.POTENTIAL_MAX_SPEED, 20.0);
@@ -1070,7 +1070,7 @@ public final class DataTest  {
 //        this.checkOfferData(potion, Keys.POTION_TYPE, PotionTypes.AWKWARD.get());
 //        this.checkOfferData(splashPotion, Keys.POTION_TYPE, PotionTypes.MUNDANE.get());
 
-        final BlockState redstoneWireState = BlockTypes.REDSTONE_WIRE.get().getDefaultState();
+        final BlockState redstoneWireState = BlockTypes.REDSTONE_WIRE.get().defaultState();
         this.checkWithData(redstoneWireState, Keys.POWER, 10);
 
         // TODO Keys.PRIMARY_POTION_EFFECT_TYPE
@@ -1091,12 +1091,12 @@ public final class DataTest  {
 
         // TODO this.checkOfferData(ravager, Keys.RAID_WAVE, );
 
-        final BlockState railState = BlockTypes.RAIL.get().getDefaultState();
+        final BlockState railState = BlockTypes.RAIL.get().defaultState();
         this.checkWithData(railState, Keys.RAIL_DIRECTION, RailDirections.ASCENDING_EAST.get());
 
         this.checkOfferData(areaEffectCloud, Keys.REAPPLICATION_DELAY, Ticks.single());
 
-        final BlockState repeaterState = BlockTypes.REPEATER.get().getDefaultState();
+        final BlockState repeaterState = BlockTypes.REPEATER.get().defaultState();
         this.checkWithData(repeaterState, Keys.REDSTONE_DELAY, 2);
 
         this.checkOfferData(sheep, Keys.REMAINING_AIR, 1);
@@ -1129,14 +1129,14 @@ public final class DataTest  {
 
         // Keys.SECONDARY_POTION_EFFECT_TYPE
 
-        this.checkOfferData(fox, Keys.SECOND_TRUSTED, player.getUniqueId());
+        this.checkOfferData(fox, Keys.SECOND_TRUSTED, player.uniqueId());
 
         // Keys.SHOOTER
 
         final Entity endCrystal = world.createEntity(EntityTypes.END_CRYSTAL.get(), position);
         this.checkOfferData(endCrystal, Keys.SHOW_BOTTOM, true);
 
-        final BlockState signState = BlockTypes.SPRUCE_SIGN.get().getDefaultState();
+        final BlockState signState = BlockTypes.SPRUCE_SIGN.get().defaultState();
         world.setBlock(blockPos, signState);
         final Component emptyText = Component.empty().style(Style.empty());
         // TODO signlines component contain font
@@ -1154,7 +1154,7 @@ public final class DataTest  {
 
         // Keys.SKY_LIGHT
 
-        final BlockState slabState = BlockTypes.BIRCH_SLAB.get().getDefaultState();
+        final BlockState slabState = BlockTypes.BIRCH_SLAB.get().defaultState();
         this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.BOTTOM.get());
         this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.DOUBLE.get());
         this.checkWithData(slabState, Keys.SLAB_PORTION, SlabPortions.TOP.get());
@@ -1210,9 +1210,9 @@ public final class DataTest  {
         this.checkOfferData(minecartEntity, Keys.VELOCITY, Vector3d.FORWARD);
         this.checkOfferData(minecartEntity, Keys.SWIFTNESS, 2.0);
 
-        this.checkOfferData(horse, Keys.TAMER, player.getUniqueId());
-        this.checkOfferData(wolf, Keys.TAMER, player.getUniqueId());
-        this.checkOfferData(parrot, Keys.TAMER, player.getUniqueId());
+        this.checkOfferData(horse, Keys.TAMER, player.uniqueId());
+        this.checkOfferData(wolf, Keys.TAMER, player.uniqueId());
+        this.checkOfferData(parrot, Keys.TAMER, player.uniqueId());
         this.checkOfferData(parrot, Keys.TAMER, null);
 
         this.checkOfferData(zombifiedPiglin, Keys.TARGET_ENTITY, player);
@@ -1253,7 +1253,7 @@ public final class DataTest  {
 
         this.checkOfferData(boat, Keys.UNOCCUPIED_DECELERATION, 2.0);
 
-        final BlockState tntState = BlockTypes.TNT.get().getDefaultState();
+        final BlockState tntState = BlockTypes.TNT.get().defaultState();
         this.checkWithData(tntState, Keys.UNSTABLE, true);
 
         // Keys.UPDATE_GAME_PROFILE
@@ -1303,7 +1303,7 @@ public final class DataTest  {
         // Check data holder delegation
         // serverworld -> serverlocation -> blockstate -> blocktype
         // blocksnapshot -> blockstate -> blocktype
-        final BlockState dioriteState = BlockTypes.DIORITE.get().getDefaultState();
+        final BlockState dioriteState = BlockTypes.DIORITE.get().defaultState();
         world.setBlock(blockPos, dioriteState);
         final Double destroySpeed = world.get(blockPos, Keys.DESTROY_SPEED).get();
         this.checkGetData(location, Keys.DESTROY_SPEED, destroySpeed);
@@ -1344,7 +1344,7 @@ public final class DataTest  {
 
     private <V extends Value<?>> boolean checkResult(final DataHolder.Mutable holder, final Key<V> key, final Object value, final DataTransactionResult result) {
         if (!result.isSuccessful()) {
-            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.getKey()
+            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.key()
                     .asString(), value);
             return true;
         }
@@ -1357,28 +1357,28 @@ public final class DataTest  {
             final List<T> actual = gotValue.get().get(new Random());
             if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
                 this.plugin.getLogger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
-                        key.getKey().asString(), expected, actual);
+                        key.key().asString(), expected, actual);
             }
         } else {
             this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder),
-                    key.getKey().asString(), expected);
+                    key.key().asString(), expected);
         }
     }
 
     private <T> void checkGetListData(final DataHolder holder, final Key<ListValue<T>> key, final List<T> expected) {
-        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
+        this.checkData(holder, key.key().asString(), expected, holder.get(key).orElse(null));
     }
 
     private <T> void checkGetSetData(final DataHolder holder, final Key<SetValue<T>> key, final Set<T> expected) {
-        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
+        this.checkData(holder, key.key().asString(), expected, holder.get(key).orElse(null));
     }
 
     private <K, V> void checkGetMapData(final DataHolder holder, final Key<MapValue<K, V>> key, final Map<K, V> expected) {
-        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
+        this.checkData(holder, key.key().asString(), expected, holder.get(key).orElse(null));
     }
 
     private <T> void checkGetData(final DataHolder holder, final Key<Value<T>> key, final T expected) {
-        this.checkData(holder, key.getKey().asString(), expected, holder.get(key).orElse(null));
+        this.checkData(holder, key.key().asString(), expected, holder.get(key).orElse(null));
     }
 
     private <T> void checkData(final DataHolder holder, final String key, final T expectedValue, @Nullable final T actualValue) {
@@ -1395,9 +1395,9 @@ public final class DataTest  {
     private static String getHolderName(final DataHolder holder) {
         String value = "";
         if (holder instanceof BlockState) {
-            value = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.getGame().registries(), ((BlockState) holder).getType()).getValue();
+            value = RegistryTypes.BLOCK_TYPE.keyFor(Sponge.game().registries(), ((BlockState) holder).type()).value();
         } else if (holder instanceof ItemStack) {
-            value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.getGame().registries(), ((ItemStack) holder).getType()).getValue();
+            value = RegistryTypes.ITEM_TYPE.keyFor(Sponge.game().registries(), ((ItemStack) holder).type()).value();
         }
         return String.format("%s[%s]", holder.getClass().getSimpleName(), value);
     }

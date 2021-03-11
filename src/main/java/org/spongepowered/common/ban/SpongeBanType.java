@@ -36,7 +36,7 @@ public final class SpongeBanType implements BanType {
     }
 
     @Override
-    public Class<? extends Ban> getBanClass() {
+    public Class<? extends Ban> banClass() {
         return this.banClass;
     }
 }

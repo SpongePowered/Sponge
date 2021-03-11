@@ -47,7 +47,7 @@ public final class SpongeSwimGoalBuilder implements SwimGoal.Builder {
     @Override
     public SwimGoal.Builder from(SwimGoal value) {
         checkNotNull(value);
-        return this.swimChance(value.getSwimChance());
+        return this.swimChance(value.swimChance());
     }
 
     @Override

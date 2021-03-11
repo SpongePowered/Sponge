@@ -43,7 +43,7 @@ public abstract class ShulkerBulletMixin_API extends EntityMixin_API implements 
         // EntityTargettingProjectile
         this.targetEntity().map(Value::asImmutable).ifPresent(values::add);
 
-        values.add(this.direction().asImmutable());
+        values.add(this.hangingDirection().asImmutable());
 
         return values;
     }

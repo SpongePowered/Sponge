@@ -68,17 +68,17 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
 
             for (final Entity currentEntity : capturedEntities) {
                 if (currentEntity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((ServerPlayer) playerMP).getUser());
+                    ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((ServerPlayer) playerMP).user());
                 } else {
                     currentEntity.offer(Keys.CREATOR, playerMP.getUUID());
                 }
             }
             if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {
-                return SpongeEventFactory.createClickContainerEventDropOutsidePrimary(frame.getCurrentCause(),
+                return SpongeEventFactory.createClickContainerEventDropOutsidePrimary(frame.currentCause(),
                     openContainer, transaction, capturedEntities,
                     Optional.ofNullable(slot), slotTransactions);
             } else {
-                return SpongeEventFactory.createClickContainerEventDropOutsideSecondary(frame.getCurrentCause(),
+                return SpongeEventFactory.createClickContainerEventDropOutsideSecondary(frame.currentCause(),
                     openContainer, transaction, capturedEntities,
                     Optional.ofNullable(slot), slotTransactions);
             }

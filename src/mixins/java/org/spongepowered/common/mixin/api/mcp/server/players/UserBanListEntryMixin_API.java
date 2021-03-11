@@ -36,12 +36,12 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 public abstract class UserBanListEntryMixin_API extends BanListEntryMixin_API<com.mojang.authlib.GameProfile> implements Ban.Profile {
 
     @Override
-    public BanType getType() {
+    public BanType type() {
         return BanTypes.PROFILE.get();
     }
 
     @Override
-    public GameProfile getProfile() {
+    public GameProfile profile() {
         return SpongeGameProfile.of(this.shadow$getUser());
     }
 }

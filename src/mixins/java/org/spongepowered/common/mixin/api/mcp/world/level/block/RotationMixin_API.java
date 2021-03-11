@@ -43,7 +43,7 @@ public abstract class RotationMixin_API implements org.spongepowered.api.util.ro
 
     @SuppressWarnings({"ConstantConditions", "RedundantCast"})
     @Override
-    public int getAngle() {
+    public int angle() {
         if ((Rotation) (Object) this == Rotation.NONE) {
             return 0;
         } else if ((Rotation) (Object) this == Rotation.CLOCKWISE_90) {

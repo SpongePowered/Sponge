@@ -78,7 +78,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         // We have to check if there is a player, because command blocks can be triggered
         // without player interaction.
         // Fixes https://github.com/SpongePowered/SpongeForge/issues/2442
-        PhaseTracker.getCauseStackManager().getCurrentCause().first(User.class).ifPresent(user -> {
+        PhaseTracker.getCauseStackManager().currentCause().first(User.class).ifPresent(user -> {
             TrackingUtil.associateTrackerToTarget(blockChange, transaction, user);
         });
    }
@@ -88,7 +88,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         final BlockPos notifyPos, final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         context.getSource(Player.class)
             .ifPresent(player -> ((LevelChunkBridge) minecraftWorld.getChunkAt(notifyPos))
-                .bridge$addTrackedBlockPosition(block, notifyPos, ((ServerPlayer) player).getUser(), PlayerTracker.Type.NOTIFIER));
+                .bridge$addTrackedBlockPosition(block, notifyPos, ((ServerPlayer) player).user(), PlayerTracker.Type.NOTIFIER));
     }
 
     @Override
@@ -100,7 +100,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
             ((TrackedInventoryBridge) playerSource.get().inventory).bridge$setCaptureInventory(false);
             final List<SlotTransaction> list = ((TrackedInventoryBridge) playerSource.get().inventory).bridge$getCapturedSlotTransactions();
             if (!list.isEmpty()) {
-                final ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.getCurrentCause(),
+                final ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.currentCause(),
                         ((Inventory) playerSource.get().inventory), list);
                 SpongeCommon.postEvent(event);
                 PacketPhaseUtil.handleSlotRestore(playerSource.get(), null, list, event.isCancelled());

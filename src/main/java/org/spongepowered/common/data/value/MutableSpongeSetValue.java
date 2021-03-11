@@ -43,18 +43,18 @@ public final class MutableSpongeSetValue<E> extends MutableSpongeCollectionValue
 
     @Override
     @SuppressWarnings("unchecked")
-    public SpongeKey<? extends SetValue<E>, Set<E>> getKey() {
-        return (SpongeKey<? extends SetValue<E>, Set<E>>) super.getKey();
+    public SpongeKey<? extends SetValue<E>, Set<E>> key() {
+        return (SpongeKey<? extends SetValue<E>, Set<E>>) super.key();
     }
 
     @Override
     public SetValue.Immutable<E> asImmutable() {
-        return this.getKey().getValueConstructor().getImmutable(this.element).asImmutable();
+        return this.key().getValueConstructor().getImmutable(this.element).asImmutable();
     }
 
     @Override
     public SetValue.Mutable<E> copy() {
-        return new MutableSpongeSetValue<>(this.getKey(), CopyHelper.copy(this.element));
+        return new MutableSpongeSetValue<>(this.key(), CopyHelper.copy(this.element));
     }
 
     @Override

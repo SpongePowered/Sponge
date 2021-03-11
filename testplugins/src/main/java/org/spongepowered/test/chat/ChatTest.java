@@ -93,19 +93,19 @@ public class ChatTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
-        this.game.getEventManager().registerListeners(this.container, new Listeners());
+        this.game.eventManager().registerListeners(this.container, new Listeners());
     }
 
     @Listener
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         // /togglebossbar
         event.register(this.container, Command.builder()
-                .setPermission("chattest.togglebossbar")
-                .setExecutor(ctx -> {
+                .permission("chattest.togglebossbar")
+                .executor(ctx -> {
                     if (this.barVisible) {
-                        this.game.getServer().hideBossBar(ChatTest.INFO_BAR);
+                        this.game.server().hideBossBar(ChatTest.INFO_BAR);
                     } else {
-                        this.game.getServer().showBossBar(ChatTest.INFO_BAR);
+                        this.game.server().showBossBar(ChatTest.INFO_BAR);
                     }
                     this.barVisible = !this.barVisible;
                     return CommandResult.success();
@@ -113,9 +113,9 @@ public class ChatTest implements LoadableModule {
                 .build(), "togglebossbar");
 
         event.register(this.container, Command.builder()
-                      .setPermission("chattest.sendbook")
-                      .setExecutor(ctx -> {
-                          ctx.getCause().getAudience().openBook(Book.builder()
+                      .permission("chattest.sendbook")
+                      .executor(ctx -> {
+                          ctx.cause().audience().openBook(Book.builder()
                                                                         .title(Component.text("A story"))
                                                                         .author(Component.text("You"))
                                                                         .pages(Component.translatable("chattest.book.1"),
@@ -123,17 +123,17 @@ public class ChatTest implements LoadableModule {
                           return CommandResult.success();
                       }).build(), "sendbook");
 
-        final Parameter.Value<ServerPlayer> targetArg = Parameter.player().setKey("target").build();
-        final Parameter.Value<Component> messageArg = Parameter.jsonText().setKey("message").build();
+        final Parameter.Value<ServerPlayer> targetArg = Parameter.player().key("target").build();
+        final Parameter.Value<Component> messageArg = Parameter.jsonText().key("message").build();
 
         event.register(this.container, Command.builder()
-        .setPermission("chatttest.tell-resolve")
-            .parameters(targetArg, messageArg)
-        .setExecutor(ctx -> {
+        .permission("chatttest.tell-resolve")
+            .addParameters(targetArg, messageArg)
+        .executor(ctx -> {
             final ServerPlayer target = ctx.requireOne(targetArg);
             final Component message = ctx.requireOne(messageArg);
-            final Component resolvedMessage = SpongeComponents.resolve(message, ctx.getCause(), target, ResolveOperations.CONTEXTUAL_COMPONENTS);
-            target.sendMessage(ctx.getCause().first(Identified.class).map(Identified::identity).orElse(Identity.nil()), resolvedMessage);
+            final Component resolvedMessage = SpongeComponents.resolve(message, ctx.cause(), target, ResolveOperations.CONTEXTUAL_COMPONENTS);
+            target.sendMessage(ctx.cause().first(Identified.class).map(Identified::identity).orElse(Identity.nil()), resolvedMessage);
             return CommandResult.success();
         })
         .build(), "tellresolve");
@@ -143,13 +143,13 @@ public class ChatTest implements LoadableModule {
 
         @Listener
         public void onLogin(final ServerSideConnectionEvent.Join event) {
-            event.getPlayer().sendMessage(Component.translatable("chattest.response"));
+            event.player().sendMessage(Component.translatable("chattest.response"));
         }
 
         @Listener(order = Order.LAST)
         public void onChat(final PlayerChatEvent event, final @Root ServerPlayer player) {
             ChatTest.LOGGER.info(Component.translatable("chattest.response.chat",
-                                                                              event.getMessage(),
+                                                                              event.message(),
                                                                               player.require(Keys.DISPLAY_NAME)
                                                                                       .decorate(TextDecoration.BOLD)
                                                                                       .colorIfAbsent(NamedTextColor.AQUA))

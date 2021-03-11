@@ -37,13 +37,13 @@ public abstract class CampfireBlockEntityMixin_Carried_Inventory_API<T extends B
 
     @Override
     @SuppressWarnings("unchecked")
-    public Optional<T> getCarrier() {
+    public Optional<T> carrier() {
         return Optional.of((T) this);
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public Optional<T> getBlockEntity() {
+    public Optional<T> blockEntity() {
         return Optional.of((T) this);
     }
 

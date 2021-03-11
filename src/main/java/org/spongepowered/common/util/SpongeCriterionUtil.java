@@ -67,7 +67,7 @@ public final class SpongeCriterionUtil {
         }
         checkNotNull(criterion, "criterion");
         if (type.isInstance(criterion)) {
-            criteria.addAll(((OperatorCriterion) criterion).getCriteria());
+            criteria.addAll(((OperatorCriterion) criterion).criteria());
         } else {
             criteria.add(criterion);
         }
@@ -92,10 +92,10 @@ public final class SpongeCriterionUtil {
 
         List<List<String>> requirements = new ArrayList<>();
         if (criterion instanceof SpongeAndCriterion) {
-            ((SpongeOperatorCriterion) criterion).getCriteria().forEach(c -> requirements.addAll(SpongeCriterionUtil.collectCriteria(c, criteria)));
+            ((SpongeOperatorCriterion) criterion).criteria().forEach(c -> requirements.addAll(SpongeCriterionUtil.collectCriteria(c, criteria)));
         } else if (criterion instanceof SpongeOrCriterion) {
             // OR List of AND Criteria of OR Criteria
-            final List<List<List<String>>> andRequirementsList = ((SpongeOperatorCriterion) criterion).getCriteria().stream().map(c -> SpongeCriterionUtil
+            final List<List<List<String>>> andRequirementsList = ((SpongeOperatorCriterion) criterion).criteria().stream().map(c -> SpongeCriterionUtil
                     .collectCriteria(c, criteria)).collect(Collectors.toList());
             List<List<String>> finalList = new ArrayList<>();
             // For every AND Criteria
@@ -122,14 +122,14 @@ public final class SpongeCriterionUtil {
             requirements.addAll(finalList);
         } else if (criterion instanceof SpongeScoreCriterion) {
             final SpongeScoreCriterion scoreCriterion = (SpongeScoreCriterion) criterion;
-            for (int i = 0; i < scoreCriterion.getGoal(); i++) {
+            for (int i = 0; i < scoreCriterion.goal(); i++) {
                 final DefaultedAdvancementCriterion internalCriterion = scoreCriterion.internalCriteria.get(i);
-                criteria.put(internalCriterion.getName(), ((Criterion) internalCriterion));
-                requirements.add(Collections.singletonList(internalCriterion.getName()));
+                criteria.put(internalCriterion.name(), ((Criterion) internalCriterion));
+                requirements.add(Collections.singletonList(internalCriterion.name()));
             }
         } else {
-            criteria.put(criterion.getName(), (Criterion) criterion);
-            requirements.add(Collections.singletonList(criterion.getName()));
+            criteria.put(criterion.name(), (Criterion) criterion);
+            requirements.add(Collections.singletonList(criterion.name()));
         }
 
         return requirements;

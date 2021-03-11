@@ -70,7 +70,7 @@ public abstract class PlayerDataStorageMixin {
             target = "Lnet/minecraft/nbt/NbtIo;writeCompressed(Lnet/minecraft/nbt/CompoundTag;Ljava/io/File;)V",
             shift = At.Shift.AFTER))
     private void impl$saveSpongePlayerData(final Player player, final CallbackInfo callbackInfo) {
-        ((SpongeServer) Sponge.getServer()).getPlayerDataManager().saveSpongePlayerData(player.getUUID());
+        ((SpongeServer) Sponge.server()).getPlayerDataManager().saveSpongePlayerData(player.getUUID());
     }
 
     @Inject(

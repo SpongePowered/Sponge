@@ -56,17 +56,17 @@ public class MutableArrayBasedBlockEntityArchetypeBuffer extends AbstractMutable
     }
 
     @Override
-    public Optional<BlockEntityArchetype> getBlockEntityArchetype(int x, int y, int z) {
+    public Optional<BlockEntityArchetype> blockEntityArchetype(int x, int y, int z) {
         return Optional.empty();
     }
 
     @Override
-    public Map<Vector3i, BlockEntityArchetype> getBlockEntityArchetypes() {
+    public Map<Vector3i, BlockEntityArchetype> blockEntityArchetypes() {
         return null;
     }
 
     @Override
-    public VolumeStream<MutableArrayBasedBlockEntityArchetypeBuffer, BlockEntityArchetype> getBlockEntityArchetypeStream(Vector3i min,
+    public VolumeStream<MutableArrayBasedBlockEntityArchetypeBuffer, BlockEntityArchetype> blockEntityArchetypeStream(Vector3i min,
         Vector3i max, StreamOptions options
     ) {
         return null;

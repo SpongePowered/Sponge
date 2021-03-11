@@ -33,14 +33,14 @@ public final class EngineUtil {
     @Nullable
     public static Engine determineEngine() {
         if (Sponge.isServerAvailable()) {
-            if (Sponge.getServer().onMainThread()) {
-                return Sponge.getServer();
+            if (Sponge.server().onMainThread()) {
+                return Sponge.server();
             }
         }
 
         if (Sponge.isClientAvailable()) {
-            if (Sponge.getClient().onMainThread()) {
-                return Sponge.getClient();
+            if (Sponge.client().onMainThread()) {
+                return Sponge.client();
             }
         }
 

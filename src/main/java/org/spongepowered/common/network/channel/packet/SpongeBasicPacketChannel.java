@@ -76,7 +76,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
 
             final ChannelBuf payload;
             try {
-                payload = SpongeBasicPacketChannel.this.encodeLoginPayload(binding.getOpcode(), request);
+                payload = SpongeBasicPacketChannel.this.encodeLoginPayload(binding.opcode(), request);
             } catch (final Throwable ex) {
                 SpongeBasicPacketChannel.this.handleException(connection, ex, future);
                 return;
@@ -106,7 +106,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
 
             final ChannelBuf payload;
             try {
-                payload = SpongeBasicPacketChannel.this.encodePayload(binding.getOpcode(), packet);
+                payload = SpongeBasicPacketChannel.this.encodePayload(binding.opcode(), packet);
             } catch (final Throwable ex) {
                 SpongeBasicPacketChannel.this.handleException(connection, ChannelExceptionUtil.of(ex), future);
                 return future;
@@ -115,7 +115,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
             final TransactionStore transactionStore = ConnectionUtil.getTransactionStore(connection);
             final int transactionId = transactionStore.nextId();
 
-            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(SpongeBasicPacketChannel.this.getKey(), payload, transactionId);
+            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadRequest(SpongeBasicPacketChannel.this.key(), payload, transactionId);
             PacketSender.sendTo(connection, mcPacket, future);
             return future;
         }
@@ -154,7 +154,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
 
         @Override
         public boolean isSupportedBy(final EngineConnection connection) {
-            return ConnectionUtil.getRegisteredChannels(connection).contains(SpongeBasicPacketChannel.this.getKey());
+            return ConnectionUtil.getRegisteredChannels(connection).contains(SpongeBasicPacketChannel.this.key());
         }
 
         @Override
@@ -170,13 +170,13 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
 
             final ChannelBuf payload;
             try {
-                payload = SpongeBasicPacketChannel.this.encodePayload(binding.getOpcode(), packet);
+                payload = SpongeBasicPacketChannel.this.encodePayload(binding.opcode(), packet);
             } catch (final Throwable ex) {
                 SpongeBasicPacketChannel.this.handleException(connection, ex, future);
                 return future;
             }
 
-            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createPlayPayload(SpongeBasicPacketChannel.this.getKey(), payload, connection.getSide());
+            final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createPlayPayload(SpongeBasicPacketChannel.this.key(), payload, connection.side());
             PacketSender.sendTo(connection, mcPacket, future);
             return future;
         }
@@ -197,7 +197,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
     }
 
     private ChannelBuf encodePayload(final int opcode, final Packet packet) {
-        final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
+        final ChannelBuf payload = this.registry().getBufferAllocator().buffer();
         payload.writeByte((byte) opcode);
         this.encodePayload(payload, packet);
         return payload;
@@ -205,11 +205,11 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
 
     // This only exists for forge compatibility
     private ChannelBuf encodeLoginPayload(final int opcode, final Packet packet) {
-        final ChannelBuf loginPayload = this.getRegistry().getBufferAllocator().buffer();
-        final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
+        final ChannelBuf loginPayload = this.registry().getBufferAllocator().buffer();
+        final ChannelBuf payload = this.registry().getBufferAllocator().buffer();
         try {
             this.encodePayloadUnsafe(payload, packet);
-            loginPayload.writeString(this.getKey().getFormatted());
+            loginPayload.writeString(this.key().formatted());
             loginPayload.writeVarInt(payload.available() + 1);
             loginPayload.writeByte((byte) opcode);
             ChannelBuffers.write(loginPayload, payload);
@@ -268,7 +268,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
                     @Override
                     protected void success0(final Packet response) {
                         try {
-                            final ChannelBuf responsePayload = SpongeBasicPacketChannel.this.encodeLoginPayload(transactionalBinding.getOpcode(), response);
+                            final ChannelBuf responsePayload = SpongeBasicPacketChannel.this.encodeLoginPayload(transactionalBinding.opcode(), response);
                             final net.minecraft.network.protocol.Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);
                             PacketSender.sendTo(connection, mcPacket);
                         } catch (final Throwable ex) {

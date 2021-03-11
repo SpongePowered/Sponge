@@ -100,7 +100,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
                 return;
             }if (inventoryEvent != null) {
                 // Don't fire inventory drop events when there are no entities
-                if (inventoryEvent instanceof AffectEntityEvent && ((AffectEntityEvent) inventoryEvent).getEntities().isEmpty()) {
+                if (inventoryEvent instanceof AffectEntityEvent && ((AffectEntityEvent) inventoryEvent).entities().isEmpty()) {
                     slotTransactions.clear();
                     trackedInventory.bridge$setCaptureInventory(false);
                     return;
@@ -112,28 +112,28 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
                 // Therefore, we never add any 'fake' transactions, as the final
                 // packet has everything we want.
                 if (!(inventoryEvent instanceof ClickContainerEvent.Drag)) {
-                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getContainerId(), openContainer, inventoryEvent.getTransactions());
+                    PacketPhaseUtil.validateCapturedTransactions(packetIn.getContainerId(), openContainer, inventoryEvent.transactions());
                 }
 
                 SpongeCommon.postEvent(inventoryEvent);
-                if (inventoryEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(inventoryEvent.getTransactions())) {
+                if (inventoryEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(inventoryEvent.transactions())) {
                     if (inventoryEvent instanceof ClickContainerEvent.Drop) {
                         capturedItems.clear();
                     }
 
                     // Restore cursor
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
+                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.cursorTransaction().original());
 
                     // Restore target slots
-                    PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), true);
+                    PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.transactions(), true);
                 } else {
-                    PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.getTransactions(), false);
+                    PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.transactions(), false);
 
                     // Handle cursor
-                    if (!inventoryEvent.getCursorTransaction().isValid()) {
-                        PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getOriginal());
-                    } else if (inventoryEvent.getCursorTransaction().getCustom().isPresent()) {
-                        PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.getCursorTransaction().getFinal());
+                    if (!inventoryEvent.cursorTransaction().isValid()) {
+                        PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.cursorTransaction().original());
+                    } else if (inventoryEvent.cursorTransaction().custom().isPresent()) {
+                        PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.cursorTransaction().finalReplacement());
                     }
                     if (inventoryEvent instanceof SpawnEntityEvent) {
                         PacketState.processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);

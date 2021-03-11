@@ -43,26 +43,26 @@ public final class SpongeDynamicChoicesBuilder<T> implements VariableValueParame
     private boolean showInUsage = false;
 
     @Override
-    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> setChoicesAndResults(@NonNull final Supplier<Map<String, ? extends T>> choices) {
+    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> choicesAndResults(@NonNull final Supplier<Map<String, ? extends T>> choices) {
         this.choices = () -> choices.get().keySet();
         this.results = x -> choices.get().get(x);
         return this;
     }
 
     @Override
-    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> setChoices(final Supplier<? extends Collection<String>> choices) {
+    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> choices(final Supplier<? extends Collection<String>> choices) {
         this.choices = choices;
         return this;
     }
 
     @Override
-    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> setResults(@NonNull final Function<String, ? extends T> results) {
+    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> results(@NonNull final Function<String, ? extends T> results) {
         this.results = results;
         return this;
     }
 
     @Override
-    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> setShowInUsage(final boolean showInUsage) {
+    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> showInUsage(final boolean showInUsage) {
         this.showInUsage = showInUsage;
         return this;
     }

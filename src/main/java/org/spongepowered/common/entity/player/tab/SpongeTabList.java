@@ -33,7 +33,6 @@ import com.google.common.collect.Maps;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket.PlayerUpdate;
 import net.minecraft.network.protocol.game.ClientboundTabListPacket;
 import net.minecraft.world.level.GameType;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -65,12 +64,12 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public ServerPlayer getPlayer() {
+    public ServerPlayer player() {
         return (ServerPlayer) this.player;
     }
 
     @Override
-    public Optional<Component> getHeader() {
+    public Optional<Component> header() {
         return Optional.ofNullable(this.header);
     }
 
@@ -84,7 +83,7 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public Optional<Component> getFooter() {
+    public Optional<Component> footer() {
         return Optional.ofNullable(this.footer);
     }
 
@@ -118,12 +117,12 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public Collection<TabListEntry> getEntries() {
+    public Collection<TabListEntry> entries() {
         return Collections.unmodifiableCollection(this.entries.values());
     }
 
     @Override
-    public Optional<TabListEntry> getEntry(final UUID uniqueId) {
+    public Optional<TabListEntry> entry(final UUID uniqueId) {
         checkNotNull(uniqueId, "unique id");
         return Optional.ofNullable(this.entries.get(uniqueId));
     }
@@ -131,7 +130,7 @@ public final class SpongeTabList implements TabList {
     @Override
     public TabList addEntry(final TabListEntry entry) throws IllegalArgumentException {
         checkNotNull(entry, "builder");
-        checkState(entry.getList().equals(this), "the provided tab list entry was not created for this tab list");
+        checkState(entry.list().equals(this), "the provided tab list entry was not created for this tab list");
 
         this.addEntry(entry, true);
 
@@ -151,7 +150,7 @@ public final class SpongeTabList implements TabList {
     }
 
     private void addEntry(final TabListEntry entry, final boolean exceptionOnDuplicate) {
-        final UUID uniqueId = entry.getProfile().getUniqueId();
+        final UUID uniqueId = entry.profile().uniqueId();
 
         if (exceptionOnDuplicate) {
             checkArgument(!this.entries.containsKey(uniqueId), "cannot add duplicate entry");
@@ -161,7 +160,7 @@ public final class SpongeTabList implements TabList {
             this.entries.put(uniqueId, entry);
 
             this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.ADD_PLAYER);
-            entry.getDisplayName().ifPresent(text -> this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME));
+            entry.displayName().ifPresent(text -> this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME));
             this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.UPDATE_LATENCY);
             this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.UPDATE_GAME_MODE);
         }
@@ -189,9 +188,9 @@ public final class SpongeTabList implements TabList {
     void sendUpdate(final TabListEntry entry, final ClientboundPlayerInfoPacket.Action action) {
         final ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket();
         ((ClientboundPlayerInfoPacketAccessor) packet).accessor$action(action);
-        final ClientboundPlayerInfoPacket.PlayerUpdate data = packet.new PlayerUpdate(SpongeGameProfile.toMcProfile(entry.getProfile()),
-            entry.getLatency(), (GameType) (Object) entry.getGameMode(),
-            entry.getDisplayName().isPresent() ? SpongeAdventure.asVanilla(entry.getDisplayName().get()) : null);
+        final ClientboundPlayerInfoPacket.PlayerUpdate data = packet.new PlayerUpdate(SpongeGameProfile.toMcProfile(entry.profile()),
+            entry.latency(), (GameType) (Object) entry.gameMode(),
+            entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null);
         ((ClientboundPlayerInfoPacketAccessor) packet).accessor$entries().add(data);
         this.player.connection.send(packet);
     }
@@ -214,7 +213,7 @@ public final class SpongeTabList implements TabList {
             } else if (action == ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER) {
                 this.removeEntry(data.getProfile().getId());
             } else {
-                this.getEntry(data.getProfile().getId()).ifPresent(entry -> {
+                this.entry(data.getProfile().getId()).ifPresent(entry -> {
                     if (action == ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
                         entry.setDisplayName(data.getDisplayName() == null ? null : SpongeAdventure.asAdventure(data.getDisplayName()));

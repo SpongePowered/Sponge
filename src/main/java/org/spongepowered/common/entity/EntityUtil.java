@@ -150,7 +150,7 @@ public final class EntityUtil {
 
     public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<User>> entityCreatorSupplier) {
         boolean spawnedAny = false;
-        for (final org.spongepowered.api.entity.Entity entity : event.getEntities()) {
+        for (final org.spongepowered.api.entity.Entity entity : event.entities()) {
             // Here is where we need to handle the custom items potentially having custom entities
             spawnedAny = EntityUtil.processEntitySpawn(entity, entityCreatorSupplier);
         }
@@ -196,7 +196,7 @@ public final class EntityUtil {
                 }
             });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((net.minecraft.world.level.Level) entity.getWorld()).addFreshEntity((Entity) entity);
+        ((net.minecraft.world.level.Level) entity.world()).addFreshEntity((Entity) entity);
         return true;
     }
 

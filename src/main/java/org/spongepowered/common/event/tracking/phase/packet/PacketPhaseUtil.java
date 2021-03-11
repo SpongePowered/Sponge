@@ -80,12 +80,12 @@ public final class PacketPhaseUtil {
         boolean restoredAny = false;
         for (final SlotTransaction slotTransaction : slotTransactions) {
 
-            if ((!slotTransaction.getCustom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
+            if ((!slotTransaction.custom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
                 continue;
             }
             restoredAny = true;
-            final SlotAdapter slot = (SlotAdapter) slotTransaction.getSlot();
-            final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.getOriginal() : slotTransaction.getCustom().get();
+            final SlotAdapter slot = (SlotAdapter) slotTransaction.slot();
+            final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.original() : slotTransaction.custom().get();
             if (containerMenu == null) {
                 slot.set(snapshot.createStack());
             } else {
@@ -214,8 +214,8 @@ public final class PacketPhaseUtil {
                             .cursor(cursor);
 
                         PacketPhase.getInstance().populateContext(packetIn, packetPlayer, packetState, context);
-                        context.creator(((ServerPlayer) packetPlayer).getUser());
-                        context.notifier(((ServerPlayer) packetPlayer).getUser());
+                        context.creator(((ServerPlayer) packetPlayer).user());
+                        context.notifier(((ServerPlayer) packetPlayer).user());
                     }
                     try (final PhaseContext<?> packetContext = context) {
                         packetContext.buildAndSwitch();

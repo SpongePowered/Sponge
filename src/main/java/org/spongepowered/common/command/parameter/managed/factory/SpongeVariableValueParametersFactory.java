@@ -75,7 +75,7 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public <T> VariableValueParameters.@NonNull CatalogedTypeBuilder<T> createRegistryEntryBuilder(
+    public <T> VariableValueParameters.@NonNull RegistryEntryBuilder<T> createRegistryEntryBuilder(
             @NonNull final Function<CommandContext, @Nullable RegistryHolder> holderProvider,
             final RegistryType<T> registryKey) {
         return new SpongeRegistryEntryParameterBuilder<>(in -> {
@@ -88,13 +88,13 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public <T> VariableValueParameters.@NonNull CatalogedTypeBuilder<T> createRegistryEntryBuilder(
+    public <T> VariableValueParameters.@NonNull RegistryEntryBuilder<T> createRegistryEntryBuilder(
             @NonNull final Function<CommandContext, ? extends Registry<? extends T>> returnType) {
         return new SpongeRegistryEntryParameterBuilder<>(returnType);
     }
 
     @Override
-    public <T> VariableValueParameters.CatalogedTypeBuilder<T> createRegistryEntryBuilder(final DefaultedRegistryType<T> type) {
+    public <T> VariableValueParameters.RegistryEntryBuilder<T> createRegistryEntryBuilder(final DefaultedRegistryType<T> type) {
         return new SpongeRegistryEntryParameterBuilder<>(in -> type.get());
     }
 

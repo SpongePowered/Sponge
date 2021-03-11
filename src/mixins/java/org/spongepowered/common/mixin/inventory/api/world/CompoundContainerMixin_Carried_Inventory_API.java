@@ -35,7 +35,7 @@ import net.minecraft.world.CompoundContainer;
 public abstract class CompoundContainerMixin_Carried_Inventory_API implements CarriedInventory<MultiBlockCarrier> {
 
     @Override
-    public Optional<MultiBlockCarrier> getCarrier() {
+    public Optional<MultiBlockCarrier> carrier() {
         return Optional.of((MultiBlockCarrier) this);
     }
 

@@ -53,7 +53,7 @@ public final class SpongePacketHandler {
         SpongePacketHandler.channel = registry.createChannel(ResourceKey.sponge("default"), PacketChannel.class);
         SpongePacketHandler.channel.registerTransactional(RequestBlockTrackerDataPacket.class, TrackerDataResponsePacket.class, 0)
                 .setRequestHandler(EngineConnectionTypes.SERVER_PLAYER, (requestPacket, connection, response) -> {
-                    final ServerPlayer player = connection.getPlayer();
+                    final ServerPlayer player = connection.player();
                     if (!player.hasPermission("sponge.debug.block-tracking")) {
                         return;
                     }
@@ -72,7 +72,7 @@ public final class SpongePacketHandler {
                 });
         SpongePacketHandler.channel.registerTransactional(RequestEntityTrackerDataPacket.class, TrackerDataResponsePacket.class, 1)
                 .setRequestHandler(EngineConnectionTypes.SERVER_PLAYER, (requestPacket, connection, response) -> {
-                    final ServerPlayer player = connection.getPlayer();
+                    final ServerPlayer player = connection.player();
                     if (!player.hasPermission("sponge.debug.entity-tracking")) {
                         return;
                     }
@@ -106,8 +106,8 @@ public final class SpongePacketHandler {
             final Optional<User> owner,
             final Optional<User> notifier
     ) {
-        final String ownerName = owner.map(User::getName).orElse("");
-        final String notifierName = notifier.map(User::getName).orElse("");
+        final String ownerName = owner.map(User::name).orElse("");
+        final String notifierName = notifier.map(User::name).orElse("");
         return new TrackerDataResponsePacket(ownerName, notifierName);
     }
 

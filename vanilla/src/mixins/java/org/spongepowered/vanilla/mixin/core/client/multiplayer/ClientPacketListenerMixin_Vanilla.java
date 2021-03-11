@@ -41,7 +41,7 @@ public abstract class ClientPacketListenerMixin_Vanilla implements ClientGamePac
     @Inject(method = "handleCustomPayload", cancellable = true, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getIdentifier()Lnet/minecraft/resources/ResourceLocation;"))
     private void vanilla$handleCustomPayload(final ClientboundCustomPayloadPacket packet, final CallbackInfo ci) {
-        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.getChannelRegistry();
+        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.channelRegistry();
         if (channelRegistry.handlePlayPayload((EngineConnection) this, packet)) {
             ci.cancel();
         }

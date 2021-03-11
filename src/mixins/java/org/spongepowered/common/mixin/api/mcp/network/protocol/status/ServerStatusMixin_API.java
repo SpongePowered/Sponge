@@ -51,7 +51,7 @@ public abstract class ServerStatusMixin_API implements ClientPingServerEvent.Res
 
 
     @Override
-    public Component getDescription() {
+    public Component description() {
         return ((ServerStatusBridge) this).bridge$getDescription();
     }
 
@@ -62,7 +62,7 @@ public abstract class ServerStatusMixin_API implements ClientPingServerEvent.Res
     }
 
     @Override
-    public Optional<org.spongepowered.api.event.server.ClientPingServerEvent.Response.Players> getPlayers() {
+    public Optional<org.spongepowered.api.event.server.ClientPingServerEvent.Response.Players> players() {
         return Optional.ofNullable((org.spongepowered.api.event.server.ClientPingServerEvent.Response.Players) this.players);
     }
 
@@ -80,12 +80,12 @@ public abstract class ServerStatusMixin_API implements ClientPingServerEvent.Res
     }
 
     @Override
-    public MinecraftVersion getVersion() {
+    public MinecraftVersion version() {
         return (MinecraftVersion) this.version;
     }
 
     @Override
-    public Optional<Favicon> getFavicon() {
+    public Optional<Favicon> favicon() {
         return Optional.ofNullable(((ServerStatusBridge) this).bridge$getFavicon());
     }
 

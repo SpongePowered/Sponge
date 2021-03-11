@@ -55,13 +55,13 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
     // @formatter:on
 
     @Override
-    public MapDecorationType getType() {
+    public MapDecorationType type() {
         return SpongeMapDecorationType.toSpongeType(this.type)
                 .orElseThrow(() -> new IllegalStateException("Tried to get MapDecoration type but it didn't exist in Sponge's registries! Have MC Decoration types been missed?"));
     }
 
     @Override
-    public Vector2i getPosition() {
+    public Vector2i position() {
         return new Vector2i(this.x, this.y);
     }
 
@@ -81,7 +81,7 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
     }
 
     @Override
-    public MapDecorationOrientation getRotation() {
+    public MapDecorationOrientation rotation() {
         int rot = MapUtil.normalizeDecorationOrientation(this.rot);
         return MapUtil.getMapRotById(rot);
     }
@@ -92,7 +92,7 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 

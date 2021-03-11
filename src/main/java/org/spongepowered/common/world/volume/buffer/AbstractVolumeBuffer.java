@@ -61,17 +61,17 @@ public class AbstractVolumeBuffer implements Volume {
     }
 
     @Override
-    public Vector3i getBlockMax() {
+    public Vector3i blockMax() {
         return this.end;
     }
 
     @Override
-    public Vector3i getBlockMin() {
+    public Vector3i blockMin() {
         return this.start;
     }
 
     @Override
-    public Vector3i getBlockSize() {
+    public Vector3i blockSize() {
         return this.size;
     }
 

@@ -86,7 +86,7 @@ public final class SpongePermissionService implements PermissionService {
 //                ,
 //                s -> {
 //                    if (s.equals("Server")) {
-//                        return SpongeImpl.getGame().getServer().getConsole();
+//                        return SpongeImpl.game().getServer().getConsole();
 //                    } /*else if (s.equals("RCON")) {
 //                        TODO: Implement RCON API?
 //                    }*/
@@ -106,16 +106,16 @@ public final class SpongePermissionService implements PermissionService {
     }
 
     public Subject getGroupForOpLevel(final int level) {
-        return this.getGroupSubjects().get("op_" + level);
+        return this.groupSubjects().get("op_" + level);
     }
 
     @Override
-    public SpongeSubjectCollection getUserSubjects() {
+    public SpongeSubjectCollection userSubjects() {
         return this.get(PermissionService.SUBJECTS_USER);
     }
 
     @Override
-    public SpongeSubjectCollection getGroupSubjects() {
+    public SpongeSubjectCollection groupSubjects() {
         return this.get(PermissionService.SUBJECTS_GROUP);
     }
 
@@ -135,12 +135,12 @@ public final class SpongePermissionService implements PermissionService {
     }
 
     @Override
-    public SpongeSubject getDefaults() {
+    public SpongeSubject defaults() {
         return this.defaultData;
     }
 
     @Override
-    public Predicate<String> getIdentifierValidityPredicate() {
+    public Predicate<String> identifierValidityPredicate() {
         return s -> true;
     }
 
@@ -157,7 +157,7 @@ public final class SpongePermissionService implements PermissionService {
     }
 
     @Override
-    public Optional<SubjectCollection> getCollection(final String identifier) {
+    public Optional<SubjectCollection> collection(final String identifier) {
         return Optional.of(this.get(identifier));
     }
 
@@ -167,13 +167,13 @@ public final class SpongePermissionService implements PermissionService {
     }
 
     @Override
-    public Map<String, SubjectCollection> getLoadedCollections() {
+    public Map<String, SubjectCollection> loadedCollections() {
         return ImmutableMap.copyOf(this.subjects);
     }
 
     @Override
-    public CompletableFuture<Set<String>> getAllIdentifiers() {
-        return CompletableFuture.completedFuture(this.getLoadedCollections().keySet());
+    public CompletableFuture<Set<String>> allIdentifiers() {
+        return CompletableFuture.completedFuture(this.loadedCollections().keySet());
     }
 
     @Override
@@ -188,18 +188,18 @@ public final class SpongePermissionService implements PermissionService {
 
     public void addDescription(final PermissionDescription permissionDescription) {
         checkNotNull(permissionDescription, "permissionDescription");
-        checkNotNull(permissionDescription.getId(), "permissionId");
-        this.descriptionMap.put(permissionDescription.getId().toLowerCase(), permissionDescription);
+        checkNotNull(permissionDescription.id(), "permissionId");
+        this.descriptionMap.put(permissionDescription.id().toLowerCase(), permissionDescription);
         this.descriptions = null;
     }
 
     @Override
-    public Optional<PermissionDescription> getDescription(final String permissionId) {
+    public Optional<PermissionDescription> description(final String permissionId) {
         return Optional.ofNullable(this.descriptionMap.get(checkNotNull(permissionId, "permissionId").toLowerCase()));
     }
 
     @Override
-    public Collection<PermissionDescription> getDescriptions() {
+    public Collection<PermissionDescription> descriptions() {
         Collection<PermissionDescription> descriptions = this.descriptions;
         if (descriptions == null) {
             descriptions = ImmutableList.copyOf(this.descriptionMap.values());

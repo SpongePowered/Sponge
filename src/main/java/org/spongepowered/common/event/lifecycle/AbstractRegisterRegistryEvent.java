@@ -95,7 +95,7 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
         }
 
         @Override
-        public TypeToken<E> getParamType() {
+        public TypeToken<E> paramType() {
             return this.token;
         }
 
@@ -115,13 +115,13 @@ public abstract class AbstractRegisterRegistryEvent extends AbstractLifecycleEve
         }
 
         @Override
-        public ResourceKey getWorldKey() {
+        public ResourceKey worldKey() {
             return this.worldKey;
         }
 
         @Override
         protected SpongeRegistryHolder getHolder() {
-            return (SpongeRegistryHolder) this.game.getServer().getWorldManager().world(this.worldKey).get().registries();
+            return (SpongeRegistryHolder) this.game.server().worldManager().world(this.worldKey).get().registries();
         }
     }
 }

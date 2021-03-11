@@ -59,12 +59,12 @@ public final class MemoryDataContainer extends MemoryDataView implements DataCon
     }
 
     @Override
-    public Optional<DataView> getParent() {
+    public Optional<DataView> parent() {
         return Optional.empty();
     }
 
     @Override
-    public final DataContainer getContainer() {
+    public final DataContainer container() {
         return this;
     }
 

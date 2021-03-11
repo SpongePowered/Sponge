@@ -51,7 +51,7 @@ public abstract class AbstractBlockMixin_API implements BlockType {
     }
 
     @Override
-    public BlockSoundGroup getSoundGroup() {
+    public BlockSoundGroup soundGroup() {
         return (BlockSoundGroup) this.soundType;
     }
 

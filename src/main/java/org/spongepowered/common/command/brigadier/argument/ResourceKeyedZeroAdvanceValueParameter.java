@@ -57,7 +57,7 @@ public abstract class ResourceKeyedZeroAdvanceValueParameter<T> extends Resource
 
     @Override
     @NonNull
-    public final Optional<? extends T> getValue(
+    public final Optional<? extends T> parseValue(
             final Parameter.@NonNull Key<? super T> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context)
@@ -70,7 +70,7 @@ public abstract class ResourceKeyedZeroAdvanceValueParameter<T> extends Resource
 
     @Override
     @NonNull
-    public final List<ClientCompletionType> getClientCompletionType() {
+    public final List<ClientCompletionType> clientCompletionType() {
         return ResourceKeyedZeroAdvanceValueParameter.NONE_KEY;
     }
 

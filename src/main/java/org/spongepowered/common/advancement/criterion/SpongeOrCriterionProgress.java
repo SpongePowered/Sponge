@@ -26,8 +26,6 @@ package org.spongepowered.common.advancement.criterion;
 
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
-import org.spongepowered.common.advancement.criterion.SpongeOperatorCriterionProgress;
-import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
 
 import java.time.Instant;
 import java.util.Optional;
@@ -39,13 +37,13 @@ public class SpongeOrCriterionProgress extends SpongeOperatorCriterionProgress {
     }
 
     @Override
-    public SpongeOrCriterion getCriterion() {
-        return (SpongeOrCriterion) super.getCriterion();
+    public SpongeOrCriterion criterion() {
+        return (SpongeOrCriterion) super.criterion();
     }
 
     @Override
     public boolean achieved() {
-        for (final AdvancementCriterion criterion : this.getCriterion().getCriteria()) {
+        for (final AdvancementCriterion criterion : this.criterion().criteria()) {
             final Optional<Instant> time = this.progress.get(criterion).get().get();
             if (time.isPresent()) {
                 return true;
@@ -57,7 +55,7 @@ public class SpongeOrCriterionProgress extends SpongeOperatorCriterionProgress {
     @Override
     public Optional<Instant> get0() {
         Optional<Instant> time = Optional.empty();
-        for (final AdvancementCriterion criterion : this.getCriterion().getCriteria()) {
+        for (final AdvancementCriterion criterion : this.criterion().criteria()) {
             final Optional<Instant> time1 = this.progress.get(criterion).get().get();
             if (time1.isPresent() && (!time.isPresent() || time1.get().isAfter(time.get()))) {
                 time = time1;

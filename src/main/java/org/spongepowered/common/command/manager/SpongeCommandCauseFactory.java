@@ -56,9 +56,9 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
     @NonNull
     public CommandCause create() {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final Cause cause = frame.getCurrentCause();
+            final Cause cause = frame.currentCause();
             final CommandSource iCommandSource =
-                    cause.first(CommandSource.class).orElseGet(() -> SpongeCommon.getGame().getSystemSubject());
+                    cause.first(CommandSource.class).orElseGet(() -> SpongeCommon.getGame().systemSubject());
             final CommandSourceStack commandSource;
             if (iCommandSource instanceof CommandSourceProviderBridge) {
                 // We know about this one so we can create it using the factory method on the source.
@@ -66,30 +66,30 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
             } else {
                 // try to create a command cause from the given ICommandSource, but as Mojang did not see fit to
                 // put any identifying characteristics on the object, we have to go it alone...
-                final EventContext context = cause.getContext();
+                final EventContext context = cause.context();
                 final @Nullable Locatable locatable = iCommandSource instanceof Locatable ? (Locatable) iCommandSource : null;
                 final Component displayName;
                 if (iCommandSource instanceof Entity) {
                     displayName = ((Entity) iCommandSource).get(Keys.DISPLAY_NAME).map(SpongeAdventure::asVanilla)
                             .orElseGet(() -> new TextComponent(
-                                    iCommandSource instanceof Nameable ? ((Nameable) iCommandSource).getName() :
+                                    iCommandSource instanceof Nameable ? ((Nameable) iCommandSource).name() :
                                             iCommandSource.getClass().getSimpleName()));
                 } else {
                     displayName = new TextComponent(
-                            iCommandSource instanceof Nameable ? ((Nameable) iCommandSource).getName() :
+                            iCommandSource instanceof Nameable ? ((Nameable) iCommandSource).name() :
                                     iCommandSource.getClass().getSimpleName());
                 }
                 final String name = displayName.getString();
                 commandSource = new CommandSourceStack(
                         iCommandSource,
-                        context.get(EventContextKeys.LOCATION).map(x -> VecHelper.toVanillaVector3d(x.getPosition()))
-                                .orElseGet(() -> locatable == null ? Vec3.ZERO : VecHelper.toVanillaVector3d(locatable.getLocation().getPosition())),
+                        context.get(EventContextKeys.LOCATION).map(x -> VecHelper.toVanillaVector3d(x.position()))
+                                .orElseGet(() -> locatable == null ? Vec3.ZERO : VecHelper.toVanillaVector3d(locatable.location().position())),
                         context.get(EventContextKeys.ROTATION)
                                 .map(x -> new Vec2((float) x.getX(), (float) x.getY()))
                                 .orElse(Vec2.ZERO),
-                        context.get(EventContextKeys.LOCATION).map(x -> (ServerLevel) x.getWorld())
+                        context.get(EventContextKeys.LOCATION).map(x -> (ServerLevel) x.world())
                                 .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getLevel(Level.OVERWORLD) :
-                                        (ServerLevel) locatable.getServerLocation().getWorld()),
+                                        (ServerLevel) locatable.serverLocation().world()),
                         4,
                         name,
                         displayName,
@@ -101,7 +101,7 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
             // We don't want the command source to have altered the cause here (unless there is the special case of the
             // server), so we reset it back to what it was (in the ctor of CommandSource, it will add the current source
             // to the cause - that's for if the source is created elsewhere, not here)
-            ((CommandSourceStackBridge) commandSource).bridge$setCause(frame.getCurrentCause());
+            ((CommandSourceStackBridge) commandSource).bridge$setCause(frame.currentCause());
             return (CommandCause) commandSource;
         }
     }

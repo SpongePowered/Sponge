@@ -60,7 +60,7 @@ public final class SpongeDisplaySlot implements DisplaySlot {
     }
 
     @Override
-    public Optional<NamedTextColor> getTeamColor() {
+    public Optional<NamedTextColor> teamColor() {
         if (this.color == null) {
             this.color = SpongeAdventure.asAdventureNamed(this.formatting);
         }

@@ -41,19 +41,19 @@ public final class SpongeTextParameterBuilder implements VariableValueParameters
     private boolean consumeAllArguments;
 
     @Override
-    public VariableValueParameters.@NonNull TextBuilder setSerializer(@NonNull final ComponentSerializer<Component, ? extends Component, String> serializer) {
+    public VariableValueParameters.@NonNull TextBuilder serializer(@NonNull final ComponentSerializer<Component, ? extends Component, String> serializer) {
         Preconditions.checkNotNull(serializer, "The serializer cannot be null");
-        return this.setSerializerSupplier(() -> serializer);
+        return this.serializerSupplier(() -> serializer);
     }
 
     @Override
-    public VariableValueParameters.@NonNull TextBuilder setSerializerSupplier(@NonNull final Supplier<ComponentSerializer<Component, ? extends Component, String>> serializerSupplier) {
+    public VariableValueParameters.@NonNull TextBuilder serializerSupplier(@NonNull final Supplier<ComponentSerializer<Component, ? extends Component, String>> serializerSupplier) {
         this.textSerializer = serializerSupplier.get();
         return this;
     }
 
     @Override
-    public VariableValueParameters.@NonNull TextBuilder setConsumeAllArguments(final boolean allArguments) {
+    public VariableValueParameters.@NonNull TextBuilder consumeAllArguments(final boolean allArguments) {
         this.consumeAllArguments = allArguments;
         return this;
     }

@@ -59,7 +59,7 @@ public class Inventory2DAdapter extends BasicInventoryAdapter implements Invento
         }
     }
 
-    public Optional<Slot> getSlot(Vector2i pos) {
+    public Optional<Slot> slot(Vector2i pos) {
         return BasicInventoryAdapter.forSlot(this.inventoryAdapter$getFabric(), this.getSlotLens(pos), this);
     }
 

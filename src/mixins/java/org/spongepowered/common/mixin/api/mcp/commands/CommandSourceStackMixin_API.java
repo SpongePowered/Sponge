@@ -50,65 +50,65 @@ import java.util.Optional;
 public abstract class CommandSourceStackMixin_API implements CommandCause {
 
     @Override
-    public Cause getCause() {
+    public Cause cause() {
         return ((CommandSourceStackBridge) this).bridge$getCause();
     }
 
     @Override
-    public Subject getSubject() {
-        return this.getCause().getContext()
+    public Subject subject() {
+        return this.cause().context()
                 .get(EventContextKeys.SUBJECT)
-                .orElseGet(() -> this.getCause().first(Subject.class).orElseGet(Sponge::getSystemSubject));
+                .orElseGet(() -> this.cause().first(Subject.class).orElseGet(Sponge::systemSubject));
     }
 
     @Override
-    public Audience getAudience() {
-        return this.getCause().getContext()
+    public Audience audience() {
+        return this.cause().context()
                 .get(EventContextKeys.AUDIENCE)
-                .orElseGet(() -> this.getCause().first(Audience.class).orElseGet(Sponge::getSystemSubject));
+                .orElseGet(() -> this.cause().first(Audience.class).orElseGet(Sponge::systemSubject));
     }
 
     @Override
-    public Optional<ServerLocation> getLocation() {
-        final Cause cause = this.getCause();
-        final EventContext eventContext = cause.getContext();
+    public Optional<ServerLocation> location() {
+        final Cause cause = this.cause();
+        final EventContext eventContext = cause.context();
         if (eventContext.containsKey(EventContextKeys.LOCATION)) {
             return eventContext.get(EventContextKeys.LOCATION);
         }
 
-        final Optional<ServerLocation> optionalLocation = this.getTargetBlock().flatMap(BlockSnapshot::getLocation);
+        final Optional<ServerLocation> optionalLocation = this.targetBlock().flatMap(BlockSnapshot::location);
         if (optionalLocation.isPresent()) {
             return optionalLocation;
         }
 
-        return cause.first(Locatable.class).map(Locatable::getServerLocation);
+        return cause.first(Locatable.class).map(Locatable::serverLocation);
     }
 
     @Override
-    public Optional<Vector3d> getRotation() {
-        final Cause cause = this.getCause();
-        final EventContext eventContext = cause.getContext();
+    public Optional<Vector3d> rotation() {
+        final Cause cause = this.cause();
+        final EventContext eventContext = cause.context();
         if (eventContext.containsKey(EventContextKeys.ROTATION)) {
             return eventContext.get(EventContextKeys.ROTATION);
         }
 
-        return cause.first(Entity.class).map(Entity::getRotation);
+        return cause.first(Entity.class).map(Entity::rotation);
     }
 
     @Override
-    public Optional<BlockSnapshot> getTargetBlock() {
-        return Optional.ofNullable(this.getCause().getContext().get(EventContextKeys.BLOCK_TARGET)
-                .orElseGet(() -> this.getCause().first(BlockSnapshot.class).orElse(null)));
+    public Optional<BlockSnapshot> targetBlock() {
+        return Optional.ofNullable(this.cause().context().get(EventContextKeys.BLOCK_TARGET)
+                .orElseGet(() -> this.cause().first(BlockSnapshot.class).orElse(null)));
     }
 
     @Override
     public void sendMessage(@NonNull final Identified identity, @NonNull final Component message) {
-        this.getAudience().sendMessage(identity, message);
+        this.audience().sendMessage(identity, message);
     }
 
     @Override
     public void sendMessage(@NonNull final Identity identity, @NonNull final Component message) {
-        this.getAudience().sendMessage(identity, message);
+        this.audience().sendMessage(identity, message);
     }
 
 }

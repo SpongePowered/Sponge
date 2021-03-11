@@ -53,25 +53,25 @@ public final class SpongeCommandMapping implements CommandMapping {
 
     @Override
     @NonNull
-    public String getPrimaryAlias() {
+    public String primaryAlias() {
         return this.alias;
     }
 
     @Override
     @NonNull
-    public Set<String> getAllAliases() {
+    public Set<String> allAliases() {
         return this.allAliases;
     }
 
     @Override
     @NonNull
-    public PluginContainer getPlugin() {
+    public PluginContainer plugin() {
         return this.container;
     }
 
     @Override
     @NonNull
-    public CommandRegistrar<?> getRegistrar() {
+    public CommandRegistrar<?> registrar() {
         return this.registrar;
     }
 

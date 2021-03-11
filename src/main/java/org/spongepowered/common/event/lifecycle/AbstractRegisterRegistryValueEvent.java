@@ -97,7 +97,7 @@ public abstract class AbstractRegisterRegistryValueEvent extends AbstractLifecyc
         }
 
         @Override
-        public TypeToken<E> getParamType() {
+        public TypeToken<E> paramType() {
             return this.token;
         }
 
@@ -117,13 +117,13 @@ public abstract class AbstractRegisterRegistryValueEvent extends AbstractLifecyc
         }
 
         @Override
-        public ResourceKey getWorldKey() {
+        public ResourceKey worldKey() {
             return this.worldKey;
         }
 
         @Override
         protected RegistryHolder getHolder() {
-            return Sponge.getServer().getWorldManager().world(this.worldKey).orElse(null).registries();
+            return Sponge.server().worldManager().world(this.worldKey).orElse(null).registries();
         }
     }
 }

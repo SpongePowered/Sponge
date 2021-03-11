@@ -42,7 +42,7 @@ public abstract class EnderDragonPhaseManagerMixin_API implements DragonPhaseMan
     // @formatter:on
 
     @Override
-    public DragonPhase getPhase() {
+    public DragonPhase phase() {
         return (DragonPhase) this.currentPhase;
     }
 

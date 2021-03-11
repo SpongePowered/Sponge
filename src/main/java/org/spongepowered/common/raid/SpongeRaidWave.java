@@ -44,7 +44,7 @@ public final class SpongeRaidWave implements RaidWave {
     }
 
     @Override
-    public Raid getRaid() {
+    public Raid raid() {
         return (Raid) this.raid;
     }
 
@@ -70,7 +70,7 @@ public final class SpongeRaidWave implements RaidWave {
     }
 
     @Override
-    public Optional<Raider> getLeader() {
+    public Optional<Raider> leader() {
         return Optional.ofNullable((Raider) this.raid.getLeader(this.waveId));
     }
 

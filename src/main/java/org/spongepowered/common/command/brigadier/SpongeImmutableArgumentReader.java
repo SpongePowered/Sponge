@@ -51,19 +51,13 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
     }
 
     @Override
-    @NonNull
-    public String getInput() {
-        return this.input;
-    }
-
-    @Override
     public int getRemainingLength() {
-        return this.remaining;
+        return this.remainingLength();
     }
 
     @Override
     public int getTotalLength() {
-        return this.length;
+        return this.totalLength();
     }
 
     @Override
@@ -72,8 +66,39 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
     }
 
     @Override
-    @NonNull
     public String getRead() {
+        return this.parsed();
+    }
+
+    @Override
+    public String getRemaining() {
+        return this.remaining();
+    }
+
+    @Override
+    @NonNull
+    public String input() {
+        return this.input;
+    }
+
+    @Override
+    public int remainingLength() {
+        return this.remaining;
+    }
+
+    @Override
+    public int totalLength() {
+        return this.length;
+    }
+
+    @Override
+    public int cursor() {
+        return this.cursor;
+    }
+
+    @Override
+    @NonNull
+    public String parsed() {
         if (this.cursor == 0) {
             return "";
         }
@@ -82,7 +107,7 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
 
     @Override
     @NonNull
-    public String getRemaining() {
+    public String remaining() {
         return this.input.substring(this.cursor);
     }
 
@@ -107,7 +132,7 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
     @Override
     @NonNull
     public ArgumentParseException createException(@NonNull final Component errorMessage) {
-        return new ArgumentParseException(errorMessage, this.getInput(), this.getCursor());
+        return new ArgumentParseException(errorMessage, this.input(), this.cursor());
     }
 
     @Override
@@ -122,7 +147,7 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
 
     @Override
     @SuppressWarnings("ConstantConditions") // suppressed due to ArgumentReader.Mutable being mixed into StringReader.
-    public ArgumentReader.@NonNull Mutable getMutable() {
+    public ArgumentReader.@NonNull Mutable mutable() {
         final StringReader reader = new StringReader(this.input);
         reader.setCursor(this.cursor);
         return (ArgumentReader.Mutable) reader;

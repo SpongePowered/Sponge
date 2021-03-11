@@ -66,7 +66,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
     }
 
     @Override
-    public GameProfileCache getCache() {
+    public GameProfileCache cache() {
         return this.cache;
     }
 
@@ -76,7 +76,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
     }
 
     @Override
-    public CompletableFuture<GameProfile> getBasicProfile(final UUID uniqueId) {
+    public CompletableFuture<GameProfile> basicProfile(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         final Optional<GameProfileCache_GameProfileInfoBridge> entry = this.cache.bridge$getEntry(uniqueId);
         if (entry.isPresent()) {
@@ -88,22 +88,22 @@ public final class SpongeGameProfileManager implements GameProfileManager {
             this.cache.bridge$addBasic(profile);
             return CompletableFuture.completedFuture(profile);
         }
-        return this.uncached().getBasicProfile(uniqueId).thenApply(profile -> {
+        return this.uncached().basicProfile(uniqueId).thenApply(profile -> {
             this.cache.bridge$addBasic(profile);
             return profile;
         });
     }
 
     @Override
-    public CompletableFuture<GameProfile> getBasicProfile(final String name, final @Nullable Instant time) {
+    public CompletableFuture<GameProfile> basicProfile(final String name, final @Nullable Instant time) {
         Objects.requireNonNull(name, "name");
         if (time != null) {
-            return this.uncached().getBasicProfile(name, time);
+            return this.uncached().basicProfile(name, time);
         }
         return this.cache.bridge$getEntry(name)
                 .flatMap(entry -> Optional.ofNullable(entry.bridge$getBasic()))
                 .map(CompletableFuture::completedFuture)
-                .orElseGet(() -> this.uncached().getBasicProfile(name)
+                .orElseGet(() -> this.uncached().basicProfile(name)
                         .thenApply(profile -> {
                             this.cache.bridge$addBasic(profile);
                             return profile;
@@ -111,10 +111,10 @@ public final class SpongeGameProfileManager implements GameProfileManager {
     }
 
     @Override
-    public CompletableFuture<Map<String, GameProfile>> getBasicProfiles(final Iterable<String> names, final @Nullable Instant time) {
+    public CompletableFuture<Map<String, GameProfile>> basicProfiles(final Iterable<String> names, final @Nullable Instant time) {
         Objects.requireNonNull(names, "names");
         if (time != null) {
-            return this.uncached().getBasicProfiles(names, time);
+            return this.uncached().basicProfiles(names, time);
         }
         final Map<String, GameProfile> result = new HashMap<>();
         final List<String> toLookup = new ArrayList<>();
@@ -130,7 +130,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
         if (toLookup.isEmpty()) {
             return CompletableFuture.completedFuture(result);
         }
-        return this.uncached().getBasicProfiles(toLookup).thenApply(lookedUp -> {
+        return this.uncached().basicProfiles(toLookup).thenApply(lookedUp -> {
             for (final GameProfile profile : lookedUp.values()) {
                 this.cache.bridge$addBasic(profile);
             }
@@ -140,24 +140,24 @@ public final class SpongeGameProfileManager implements GameProfileManager {
     }
 
     @Override
-    public CompletableFuture<GameProfile> getProfile(final String name, final boolean signed) {
+    public CompletableFuture<GameProfile> profile(final String name, final boolean signed) {
         Objects.requireNonNull(name, "name");
         return this.cache.bridge$getEntry(name)
                 .flatMap(entry -> Optional.ofNullable(entry.bridge$getFull(signed)))
                 .map(CompletableFuture::completedFuture)
-                .orElseGet(() -> this.uncached().getProfile(name, signed).thenApply(profile -> {
+                .orElseGet(() -> this.uncached().profile(name, signed).thenApply(profile -> {
                     this.cache.bridge$add(profile, true, signed);
                     return profile;
                 }));
     }
 
     @Override
-    public CompletableFuture<GameProfile> getProfile(final UUID uniqueId, final boolean signed) {
+    public CompletableFuture<GameProfile> profile(final UUID uniqueId, final boolean signed) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         return this.cache.bridge$getEntry(uniqueId)
                 .flatMap(entry -> Optional.ofNullable(entry.bridge$getFull(signed)))
                 .map(CompletableFuture::completedFuture)
-                .orElseGet(() -> this.uncached().getProfile(uniqueId, signed).thenApply(profile -> {
+                .orElseGet(() -> this.uncached().profile(uniqueId, signed).thenApply(profile -> {
                     this.cache.bridge$add(profile, true, signed);
                     return profile;
                 }));
@@ -167,7 +167,7 @@ public final class SpongeGameProfileManager implements GameProfileManager {
         Objects.requireNonNull(uniqueId, "uniqueId");
         this.gameLookupExecutorService.execute(() -> {
             try {
-                this.getBasicProfile(uniqueId).get();
+                this.basicProfile(uniqueId).get();
             } catch (final InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }

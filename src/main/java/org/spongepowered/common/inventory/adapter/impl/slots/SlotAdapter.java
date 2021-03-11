@@ -96,7 +96,7 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
             final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
 
             final int maxStackSize = this.slot.getMaxStackSize(this.inventoryAdapter$getFabric());
-            int remaining = stack.getQuantity();
+            int remaining = stack.quantity();
 
             final net.minecraft.world.item.ItemStack old = this.slot.getStack(this.inventoryAdapter$getFabric());
             ItemStackSnapshot oldStack = ItemStackUtil.snapshotOf(old);
@@ -114,7 +114,7 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
             }
 
             result.transaction(new SlotTransaction(this, oldStack, newStack));
-            if (remaining == stack.getQuantity()) {
+            if (remaining == stack.quantity()) {
                 // No items were consumed
                 result.reject(ItemStackUtil.cloneDefensive(nativeStack));
                 result.type(InventoryTransactionResult.Type.FAILURE);
@@ -132,9 +132,9 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
         int maxStackSize = this.inventoryAdapter$getFabric().fabric$getMaxStackSize();
         final net.minecraft.world.item.ItemStack old = this.slot.getStack(this.inventoryAdapter$getFabric());
         if (old.isEmpty()) {
-            return maxStackSize >= stack.getQuantity();
+            return maxStackSize >= stack.quantity();
         }
-        return ItemStackUtil.compareIgnoreQuantity(old, stack) && maxStackSize - old.getCount() >= stack.getQuantity();
+        return ItemStackUtil.compareIgnoreQuantity(old, stack) && maxStackSize - old.getCount() >= stack.quantity();
     }
 
     @Override
@@ -149,7 +149,7 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
             SlotTransaction trans = new SlotTransaction(this, oldSnap, ItemStackSnapshot.empty());
             return result.transaction(trans).build();
         }
-        int remaining = stack.getQuantity();
+        int remaining = stack.quantity();
         final int push = Math.min(remaining, this.slot.getMaxStackSize(this.inventoryAdapter$getFabric()));
         net.minecraft.world.item.ItemStack newStack = ItemStackUtil.cloneDefensiveNative(nativeStack, push);
         if (this.slot.setStack(this.inventoryAdapter$getFabric(), newStack)) {
@@ -193,7 +193,7 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
     public boolean contains(final ItemStack stack) {
         final net.minecraft.world.item.ItemStack slotStack = this.slot.getStack(this.inventoryAdapter$getFabric());
         return slotStack.isEmpty() ? ItemStackUtil.toNative(stack).isEmpty() :
-                ItemStackUtil.compareIgnoreQuantity(slotStack, stack) && slotStack.getCount() >= stack.getQuantity();
+                ItemStackUtil.compareIgnoreQuantity(slotStack, stack) && slotStack.getCount() >= stack.quantity();
     }
 
     @Override

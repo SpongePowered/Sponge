@@ -39,7 +39,7 @@ public abstract class ClassInstanceMultiMapMixin_ConcurrentCheck {
     @Inject(method = "add", at = @At("HEAD"), cancellable = true)
     private void concurrentCheck$checkThreadOnAdd(final Object entity, final CallbackInfoReturnable<Boolean> cir) {
         // This class gets used on the client, but we only care about the server
-        if (SpongeCommon.getGame().getPlatform().getExecutionType() != Platform.Type.CLIENT && !PlatformHooks.INSTANCE
+        if (SpongeCommon.getGame().platform().executionType() != Platform.Type.CLIENT && !PlatformHooks.INSTANCE
             .getGeneralHooks()
             .onServerThread()) {
             Thread.dumpStack();
@@ -52,7 +52,7 @@ public abstract class ClassInstanceMultiMapMixin_ConcurrentCheck {
 
     @Inject(method = "remove", at = @At("HEAD"), cancellable = true)
     private void concurrentCheck$checkServerThreadSide(final Object entity, final CallbackInfoReturnable<Boolean> cir) {
-        if (SpongeCommon.getGame().getPlatform().getExecutionType() != Platform.Type.CLIENT && !PlatformHooks.INSTANCE
+        if (SpongeCommon.getGame().platform().executionType() != Platform.Type.CLIENT && !PlatformHooks.INSTANCE
             .getGeneralHooks()
             .onServerThread()) {
             Thread.dumpStack();

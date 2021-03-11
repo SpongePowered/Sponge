@@ -84,7 +84,7 @@ public abstract class AbstractProvideServiceEventImpl<T> extends AbstractLifecyc
         }
 
         @Override
-        public Engine getEngine() {
+        public Engine engine() {
             return this.engine;
         }
 

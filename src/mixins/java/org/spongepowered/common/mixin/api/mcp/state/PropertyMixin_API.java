@@ -39,12 +39,11 @@ import net.minecraft.world.level.block.state.properties.Property;
 
 /**
  * This is retained solely for simplification not having to perform any
- * lookups to the {@link BlockPropertyIdProvider#getIdFor(IProperty)}.
+ * lookups to the {@link BlockPropertyIdProvider#idFor(IProperty)}.
  *
  * @param <T> The type of comparable
  */
 @Mixin(value = Property.class)
-@Implements(@Interface(iface = StateProperty.class, prefix = "stateProperty$"))
 public abstract class PropertyMixin_API<T extends Comparable<T>> implements StateProperty<T> {
 
     // @formatter:off
@@ -53,24 +52,24 @@ public abstract class PropertyMixin_API<T extends Comparable<T>> implements Stat
     @Shadow public abstract String shadow$getName();
     // @formatter:on
 
-    @Intrinsic
-    public String stateProperty$getName() {
+    @Override
+    public String name() {
         return this.shadow$getName();
     }
 
-    @Intrinsic
-    public Collection<T> stateProperty$getPossibleValues() {
+    @Override
+    public Collection<T> possibleValues() {
         return this.shadow$getPossibleValues();
     }
 
-    @Intrinsic
-    public Class<T> stateProperty$getValueClass() {
+    @Override
+    public Class<T> valueClass() {
         return this.shadow$getValueClass();
     }
 
     @Override
-    public Predicate<T> getPredicate() {
-        return Functional.predicateIn(this.getPossibleValues());
+    public Predicate<T> predicate() {
+        return Functional.predicateIn(this.possibleValues());
     }
 
     @SuppressWarnings("unchecked")

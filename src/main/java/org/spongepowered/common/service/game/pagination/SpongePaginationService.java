@@ -124,30 +124,30 @@ public final class SpongePaginationService implements PaginationService {
 
     @Nullable
     private SourcePaginations getPaginationStateForPlayer(final Player source, final boolean create) {
-        return this.playerActivePaginations.get(source.getUniqueId(), k -> create ? new SourcePaginations() : null);
+        return this.playerActivePaginations.get(source.uniqueId(), k -> create ? new SourcePaginations() : null);
     }
 
     public Command.Parameterized createPaginationCommand() {
         final Parameter.Value<ActivePagination> paginationIdParameter = Parameter.builder(ActivePagination.class)
-                .parser(new ActivePaginationParameter())
-                .setKey("pagination-id")
+                .addParser(new ActivePaginationParameter())
+                .key("pagination-id")
                 .build();
 
         final Command.Parameterized next = Command.builder()
-                .setShortDescription(Component.text("Go to the next page"))
-                .setExecutor((context) -> {
+                .shortDescription(Component.text("Go to the next page"))
+                .executor((context) -> {
                     context.requireOne(paginationIdParameter).nextPage();
                     return CommandResult.success();
                 }).build();
 
         final Command.Parameterized prev = Command.builder()
-                .setShortDescription(Component.text("Go to the previous page"))
-                .setExecutor((context) -> {
+                .shortDescription(Component.text("Go to the previous page"))
+                .executor((context) -> {
                     context.requireOne(paginationIdParameter).previousPage();
                     return CommandResult.success();
                 }).build();
 
-        final Parameter.Value<Integer> pageParameter = Parameter.integerNumber().setKey("page").build();
+        final Parameter.Value<Integer> pageParameter = Parameter.integerNumber().key("page").build();
 
         final CommandExecutor pageExecutor = (context) -> {
             context.requireOne(paginationIdParameter).specificPage(context.requireOne(pageParameter));
@@ -155,38 +155,38 @@ public final class SpongePaginationService implements PaginationService {
         };
 
         final Command.Parameterized page = Command.builder()
-                .setShortDescription(Component.text("Go to a specific page"))
-                .parameter(pageParameter)
-                .setExecutor(pageExecutor)
+                .shortDescription(Component.text("Go to a specific page"))
+                .addParameter(pageParameter)
+                .executor(pageExecutor)
                 .build();
 
         return Command.builder()
-                .parameters(paginationIdParameter, Parameter.firstOf(pageParameter,
+                .addParameters(paginationIdParameter, Parameter.firstOf(pageParameter,
                         Parameter.subcommand(next, "next", "n"),
                         Parameter.subcommand(prev, "prev", "p", "previous"),
                         Parameter.subcommand(page, "page")))
-                .child(page, "page")
-                .setShortDescription(Component.text("Helper command for paginations occurring"))
-                .setExecutor(pageExecutor)
+                .addChild(page, "page")
+                .shortDescription(Component.text("Helper command for paginations occurring"))
+                .executor(pageExecutor)
                 .build();
     }
 
     private final class ActivePaginationParameter implements ValueParameter<ActivePagination>, ValueCompleter {
 
         @Override
-        public Optional<? extends ActivePagination> getValue(final Parameter.Key<? super ActivePagination> parameterKey,
+        public Optional<? extends ActivePagination> parseValue(final Parameter.Key<? super ActivePagination> parameterKey,
                 final ArgumentReader.Mutable reader,
                 final CommandContext.Builder context) throws ArgumentParseException {
-            final Audience source = context.getCause().getAudience();
+            final Audience source = context.cause().audience();
 
             final SourcePaginations paginations = SpongePaginationService.this.getPaginationState(source, false);
             if (paginations == null) {
-                final String name = source instanceof Nameable ? ((Nameable) source).getName() : source.toString();
+                final String name = source instanceof Nameable ? ((Nameable) source).name() : source.toString();
                 throw reader.createException(Component.text(String.format("Source %s has no paginations!", name)));
             }
 
             final UUID id;
-            final ArgumentReader.Immutable state = reader.getImmutable();
+            final ArgumentReader.Immutable state = reader.immutable();
             try {
                 id = UUID.fromString(reader.parseString());
             } catch (final IllegalArgumentException ex) {
@@ -205,7 +205,7 @@ public final class SpongePaginationService implements PaginationService {
 
         @Override
         public List<String> complete(final CommandContext context, final String input) {
-            final Audience audience = context.getCause().getAudience();
+            final Audience audience = context.cause().audience();
             final SourcePaginations paginations = SpongePaginationService.this.getPaginationState(audience, false);
             if (paginations != null) {
                 return paginations.keys().stream().map(Object::toString).filter(x -> x.startsWith(input)).collect(Collectors.toList());

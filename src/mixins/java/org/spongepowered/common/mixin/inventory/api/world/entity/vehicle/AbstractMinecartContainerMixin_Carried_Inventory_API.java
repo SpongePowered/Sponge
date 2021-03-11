@@ -36,7 +36,7 @@ public abstract class AbstractMinecartContainerMixin_Carried_Inventory_API<M ext
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<M> getCarrier() {
+    public Optional<M> carrier() {
         return Optional.of((M) this);
     }
 }

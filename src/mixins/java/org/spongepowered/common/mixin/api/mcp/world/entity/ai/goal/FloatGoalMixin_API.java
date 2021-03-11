@@ -40,7 +40,7 @@ public abstract class FloatGoalMixin_API implements SwimGoal {
     }
 
     @Override
-    public float getSwimChance() {
+    public float swimChance() {
         return this.api$swimChance;
     }
 

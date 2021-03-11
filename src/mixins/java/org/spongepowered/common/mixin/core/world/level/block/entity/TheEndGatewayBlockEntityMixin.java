@@ -43,7 +43,7 @@ public abstract class TheEndGatewayBlockEntityMixin extends TheEndPortalBlockEnt
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             // We'll already have the entity in the cause if they are a player and threw their pearl into it. We do not
             // want to re-arrange the cause
-            if (!frame.getCurrentCause().containsType(entity.getClass())) {
+            if (!frame.currentCause().containsType(entity.getClass())) {
                 frame.pushCause(entity);
             }
             frame.pushCause(this);

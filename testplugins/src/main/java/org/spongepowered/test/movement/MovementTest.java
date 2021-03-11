@@ -68,10 +68,10 @@ public final class MovementTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.plugin, new MoveEntityListener());
-        Sponge.getEventManager().registerListeners(this.plugin, new RotationEventListener());
-        Sponge.getEventManager().registerListeners(this.plugin, new MoveEntityTeleportListener());
-        Sponge.getEventManager().registerListeners(this.plugin, new MoveEntityCancellation());
+        Sponge.eventManager().registerListeners(this.plugin, new MoveEntityListener());
+        Sponge.eventManager().registerListeners(this.plugin, new RotationEventListener());
+        Sponge.eventManager().registerListeners(this.plugin, new MoveEntityTeleportListener());
+        Sponge.eventManager().registerListeners(this.plugin, new MoveEntityCancellation());
     }
 
     @Listener
@@ -79,7 +79,7 @@ public final class MovementTest implements LoadableModule {
 
 
         event.register(this.plugin, Command.builder()
-            .setExecutor(context -> {
+            .executor(context -> {
                 this.cancelMovement = !this.cancelMovement;
                 final Component newState = Component.text(this.cancelMovement ? "OFF" : "ON", this.cancelMovement ? NamedTextColor.RED : NamedTextColor.GREEN);
                 context.sendMessage(Identity.nil(), Component.text("Cancel Entity Movement : ").append(newState));
@@ -88,7 +88,7 @@ public final class MovementTest implements LoadableModule {
             .build(), "toggleMovement"
         );
         event.register(this.plugin, Command.builder()
-            .setExecutor(context -> {
+            .executor(context -> {
                 this.teleportOnMove = !this.teleportOnMove;
                 final Component newState = Component.text(this.teleportOnMove ? "ON" : "OFF", this.teleportOnMove ? NamedTextColor.GREEN : NamedTextColor.RED);
                 context.sendMessage(Identity.nil(), Component.text("Teleport Entity on Movement : ").append(newState));
@@ -109,7 +109,7 @@ public final class MovementTest implements LoadableModule {
             pluginLogger.log(Level.INFO, MovementTest.marker, "/* RotateEntityEvent");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/ Cause:");
-            for (final Object o : event.getCause()) {
+            for (final Object o : event.cause()) {
                 pluginLogger.log(Level.INFO, MovementTest.marker, "/ - " + o);
             }
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");
@@ -127,13 +127,13 @@ public final class MovementTest implements LoadableModule {
             pluginLogger.log(Level.INFO, MovementTest.marker, "/* MoveEntityEvent testing with teleport");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/ Cause:");
-            for (final Object o : event.getCause()) {
+            for (final Object o : event.cause()) {
                 pluginLogger.log(Level.INFO, MovementTest.marker, "/ - " + o);
             }
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");
-            final Vector3d sub = event.getOriginalDestinationPosition().sub(event.getOriginalPosition());
+            final Vector3d sub = event.originalDestinationPosition().sub(event.originalPosition());
             final Vector3d mul = sub.mul(5);
-            event.setDestinationPosition(event.getOriginalDestinationPosition().add(mul));
+            event.setDestinationPosition(event.originalDestinationPosition().add(mul));
             MovementTest.this.teleportOnMove = false;
         }
     }
@@ -159,11 +159,11 @@ public final class MovementTest implements LoadableModule {
             pluginLogger.log(Level.INFO, MovementTest.marker, "/* MoveEntityEvent");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/ Cause:");
-            for (final Object o : post.getCause()) {
+            for (final Object o : post.cause()) {
                 pluginLogger.log(Level.INFO, MovementTest.marker, "/ - " + o);
             }
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");
-            if (MovementTest.this.cancelAll && post.getCause().containsType(BlockSnapshot.class)) {
+            if (MovementTest.this.cancelAll && post.cause().containsType(BlockSnapshot.class)) {
                 post.setCancelled(true);
             }
             if (MovementTest.this.waterProofRedstone) {

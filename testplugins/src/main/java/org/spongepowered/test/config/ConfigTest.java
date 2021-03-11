@@ -70,7 +70,7 @@ public final class ConfigTest implements LoadableModule {
             return;
         }
 
-        event.getPlayer().sendMessage(Identity.nil(), motd);
+        event.player().sendMessage(Identity.nil(), motd);
     }
 
 

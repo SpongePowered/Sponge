@@ -53,7 +53,7 @@ public final class SpongeFluidStateMatcher extends AbstractSpongeStateMatcher<Fl
 
     @Override
     @NonNull
-    public List<FluidState> getCompatibleStates() {
+    public List<FluidState> compatibleStates() {
         if (this.compatibleStates == null) {
             final Block blockType = (Block) this.type;
             this.compatibleStates = blockType.getStateDefinition().getPossibleStates()

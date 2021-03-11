@@ -38,12 +38,12 @@ final class SpongeAABBTest {
     @Test
     void testConstructor() {
         final AABB aabb1 = new SpongeAABB(new Vector3d(1, 2, 3), new Vector3d(7, 10, 13));
-        Assertions.assertEquals(new Vector3d(1, 2, 3), aabb1.getMin());
-        Assertions.assertEquals(new Vector3d(7, 10, 13), aabb1.getMax());
+        Assertions.assertEquals(new Vector3d(1, 2, 3), aabb1.min());
+        Assertions.assertEquals(new Vector3d(7, 10, 13), aabb1.max());
 
         final AABB aabb2 = new SpongeAABB(new Vector3d(11, 2, 3), new Vector3d(7, -10, 13));
-        Assertions.assertEquals(new Vector3d(7, -10, 3), aabb2.getMin());
-        Assertions.assertEquals(new Vector3d(11, 2, 13), aabb2.getMax());
+        Assertions.assertEquals(new Vector3d(7, -10, 3), aabb2.min());
+        Assertions.assertEquals(new Vector3d(11, 2, 13), aabb2.max());
 
         try {
             new SpongeAABB(new Vector3d(1, 2, 3), new Vector3d(1, 10, 13));
@@ -70,13 +70,13 @@ final class SpongeAABBTest {
     @Test
     void testSize() {
         final AABB aabb = new SpongeAABB(new Vector3d(1, 2, 3), new Vector3d(7, 10, 13));
-        Assertions.assertEquals(new Vector3d(6, 8, 10), aabb.getSize());
+        Assertions.assertEquals(new Vector3d(6, 8, 10), aabb.size());
     }
 
     @Test
     void testCenter() {
         final AABB aabb = new SpongeAABB(new Vector3d(1, 2, 3), new Vector3d(7, 10, 13));
-        Assertions.assertEquals(new Vector3d(4, 6, 8), aabb.getCenter());
+        Assertions.assertEquals(new Vector3d(4, 6, 8), aabb.center());
     }
 
     @Test
@@ -114,7 +114,7 @@ final class SpongeAABBTest {
         for (int i = 0; i < 1000; i++) {
             final AABB aabb1 = newAABB();
             final AABB aabb2 = newIntersectingAABB(aabb1);
-            final AABB aabb3 = aabb2.offset(aabb1.getSize().add(aabb2.getSize()));
+            final AABB aabb3 = aabb2.offset(aabb1.size().add(aabb2.size()));
             Assertions.assertTrue(aabb1.intersects(aabb2));
             Assertions.assertTrue(aabb2.intersects(aabb1));
             Assertions.assertFalse(aabb1.intersects(aabb3));
@@ -198,8 +198,8 @@ final class SpongeAABBTest {
     }
 
     private static AABB newIntersectingAABB(AABB with) {
-        final Vector3d wMin = with.getMin();
-        final Vector3d wSize = with.getSize();
+        final Vector3d wMin = with.min();
+        final Vector3d wSize = with.size();
         final double iSizeX = RANDOM.nextDouble() * wSize.getX();
         final double iSizeY = RANDOM.nextDouble() * wSize.getY();
         final double iSizeZ = RANDOM.nextDouble() * wSize.getZ();

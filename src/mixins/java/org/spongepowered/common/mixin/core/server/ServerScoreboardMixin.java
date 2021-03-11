@@ -88,10 +88,10 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public void bridge$updateDisplaySlot(@Nullable final Objective objective, final DisplaySlot displaySlot) throws IllegalStateException {
-        if (objective != null && !objective.getScoreboards().contains(this)) {
+        if (objective != null && !objective.scoreboards().contains(this)) {
             throw new IllegalStateException("Attempting to set an objective's display slot that does not exist on this scoreboard!");
         }
-        final MappedRegistry<DisplaySlot> registry = (MappedRegistry<DisplaySlot>) (Object) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT);
+        final MappedRegistry<DisplaySlot> registry = (MappedRegistry<DisplaySlot>) (Object) Sponge.game().registries().registry(RegistryTypes.DISPLAY_SLOT);
         final int index = registry.getId(displaySlot);
         ((ScoreboardAccessor) this).accessor$displayObjectives()[index] = objective == null ? null: ((SpongeObjective) objective).getObjectiveFor(this);
         ((ServerScoreboardBridge) this).bridge$sendToPlayers(new ClientboundSetDisplayObjectivePacket(index, ((ScoreboardAccessor) this).accessor$displayObjectives()[index]));
@@ -101,20 +101,20 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public void bridge$addObjective(final Objective objective) {
-        final net.minecraft.world.scores.Objective nmsObjective = this.getObjective(objective.getName());
+        final net.minecraft.world.scores.Objective nmsObjective = this.getObjective(objective.name());
 
         if (nmsObjective != null) {
-            throw new IllegalArgumentException(String.format("An objective with the name '%s' already exists!", objective.getName()));
+            throw new IllegalArgumentException(String.format("An objective with the name '%s' already exists!", objective.name()));
         }
         final net.minecraft.world.scores.Objective scoreObjective = ((SpongeObjective) objective).getObjectiveFor(this);
-        List<net.minecraft.world.scores.Objective> objectives = ((ScoreboardAccessor) this).accessor$objectivesByCriteria().get(objective.getCriterion());
+        List<net.minecraft.world.scores.Objective> objectives = ((ScoreboardAccessor) this).accessor$objectivesByCriteria().get(objective.criterion());
         if (objectives == null) {
             objectives = new ArrayList<>();
-            ((ScoreboardAccessor) this).accessor$objectivesByCriteria().put((ObjectiveCriteria) objective.getCriterion(), objectives);
+            ((ScoreboardAccessor) this).accessor$objectivesByCriteria().put((ObjectiveCriteria) objective.criterion(), objectives);
         }
 
         objectives.add(scoreObjective);
-        ((ScoreboardAccessor) this).accessor$objectivesByName().put(objective.getName(), scoreObjective);
+        ((ScoreboardAccessor) this).accessor$objectivesByName().put(objective.name(), scoreObjective);
         this.onObjectiveAdded(scoreObjective);
 
         ((SpongeObjective) objective).updateScores(this);
@@ -128,7 +128,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Optional<Objective> bridge$getObjective(final DisplaySlot slot) {
-        final MappedRegistry<DisplaySlot> registry = (MappedRegistry<DisplaySlot>) (Object) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT);
+        final MappedRegistry<DisplaySlot> registry = (MappedRegistry<DisplaySlot>) (Object) Sponge.game().registries().registry(RegistryTypes.DISPLAY_SLOT);
         final net.minecraft.world.scores.Objective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[registry.getId(slot)];
         if (objective != null) {
             return Optional.of(((ObjectiveBridge) objective).bridge$getSpongeObjective());
@@ -182,8 +182,8 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Override
     public void bridge$registerTeam(final Team spongeTeam) {
         final PlayerTeam team = (PlayerTeam) spongeTeam;
-        if (this.getPlayerTeam(spongeTeam.getName()) != null) {
-            throw new IllegalArgumentException(String.format("A team with the name '%s' already exists!", spongeTeam.getName()));
+        if (this.getPlayerTeam(spongeTeam.name()) != null) {
+            throw new IllegalArgumentException(String.format("A team with the name '%s' already exists!", spongeTeam.name()));
         }
 
         if (((PlayerTeamAccessor) team).accessor$scoreboard() != null) {
@@ -264,7 +264,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Score getOrCreatePlayerScore(final String name, final net.minecraft.world.scores.Objective objective) {
-        return ((SpongeScore) ((ObjectiveBridge) objective).bridge$getSpongeObjective().getOrCreateScore(SpongeAdventure.legacySection(name)))
+        return ((SpongeScore) ((ObjectiveBridge) objective).bridge$getSpongeObjective().orCreateScore(SpongeAdventure.legacySection(name)))
                 .getScoreFor(objective);
     }
 
@@ -272,7 +272,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     public void resetPlayerScore(final String name, final net.minecraft.world.scores.Objective objective) {
         if (objective != null) {
             final SpongeObjective spongeObjective = ((ObjectiveBridge) objective).bridge$getSpongeObjective();
-            final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.getScore(SpongeAdventure.legacySection(name));
+            final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.score(SpongeAdventure.legacySection(name));
             if (score.isPresent()) {
                 spongeObjective.removeScore(score.get());
             } else {
@@ -330,7 +330,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     @Overwrite
     public void setDisplayObjective(final int slot, @Nullable final net.minecraft.world.scores.Objective objective) {
         final Objective apiObjective = objective == null ? null : ((ObjectiveBridge) objective).bridge$getSpongeObjective();
-        final DisplaySlot displaySlot = (DisplaySlot) ((Registry) Sponge.getGame().registries().registry(RegistryTypes.DISPLAY_SLOT)).byId(slot);
+        final DisplaySlot displaySlot = (DisplaySlot) ((Registry) Sponge.game().registries().registry(RegistryTypes.DISPLAY_SLOT)).byId(slot);
         this.bridge$updateDisplaySlot(apiObjective, displaySlot);
     }
 

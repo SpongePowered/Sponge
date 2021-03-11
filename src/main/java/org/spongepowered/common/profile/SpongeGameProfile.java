@@ -72,11 +72,11 @@ public final class SpongeGameProfile implements GameProfile {
     }
 
     public static GameProfile unsignedOf(final GameProfile profile) {
-        if (profile.getProperties().isEmpty()) {
+        if (profile.properties().isEmpty()) {
             return profile;
         }
-        return new SpongeGameProfile(profile.getUniqueId(), profile.getName().orElse(null),
-                profile.getProperties().stream().map(SpongeGameProfile::withoutSignature).collect(ImmutableList.toImmutableList()));
+        return new SpongeGameProfile(profile.uniqueId(), profile.name().orElse(null),
+                profile.properties().stream().map(SpongeGameProfile::withoutSignature).collect(ImmutableList.toImmutableList()));
     }
 
     private static String decodeBase64(final String value) {
@@ -91,7 +91,7 @@ public final class SpongeGameProfile implements GameProfile {
         if (!property.hasSignature()) {
             return property;
         }
-        final String decoded = SpongeGameProfile.decodeBase64(property.getValue());
+        final String decoded = SpongeGameProfile.decodeBase64(property.value());
         final JsonObject json;
         try {
             json = SpongeGameProfile.GSON.fromJson(decoded, JsonObject.class);
@@ -104,7 +104,7 @@ public final class SpongeGameProfile implements GameProfile {
         }
         json.remove("signatureRequired");
         final String encoded = SpongeGameProfile.encodeBase64(SpongeGameProfile.GSON.toJson(json));
-        return ProfileProperty.of(property.getName(), encoded);
+        return ProfileProperty.of(property.name(), encoded);
     }
 
     private final UUID uniqueId;
@@ -131,18 +131,18 @@ public final class SpongeGameProfile implements GameProfile {
         final String name = this.name;
         final com.mojang.authlib.GameProfile mcProfile = new com.mojang.authlib.GameProfile(uniqueId, name);
         for (final ProfileProperty property : this.properties) {
-            mcProfile.getProperties().put(property.getName(), (Property) property);
+            mcProfile.getProperties().put(property.name(), (Property) property);
         }
         return mcProfile;
     }
 
     @Override
-    public UUID getUniqueId() {
+    public UUID uniqueId() {
         return this.uniqueId;
     }
 
     @Override
-    public Optional<String> getName() {
+    public Optional<String> name() {
         return Optional.ofNullable(this.name);
     }
 
@@ -152,7 +152,7 @@ public final class SpongeGameProfile implements GameProfile {
     }
 
     @Override
-    public List<ProfileProperty> getProperties() {
+    public List<ProfileProperty> properties() {
         return this.properties;
     }
 
@@ -197,15 +197,15 @@ public final class SpongeGameProfile implements GameProfile {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.Profile.UUID, this.getUniqueId().toString());
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
+                .set(Constants.Profile.UUID, this.uniqueId().toString());
         if (this.name != null) {
             container.set(Constants.Profile.NAME, this.name);
         }
@@ -213,9 +213,9 @@ public final class SpongeGameProfile implements GameProfile {
             final List<DataContainer> entries = new ArrayList<>(this.properties.size());
             for (final ProfileProperty property : this.properties) {
                 final DataContainer entry = DataContainer.createNew()
-                        .set(Constants.Profile.NAME, property.getName())
-                        .set(Constants.Profile.VALUE, property.getValue());
-                property.getSignature().ifPresent(signature -> entry.set(Constants.Profile.SIGNATURE, signature));
+                        .set(Constants.Profile.NAME, property.name())
+                        .set(Constants.Profile.VALUE, property.value());
+                property.signature().ifPresent(signature -> entry.set(Constants.Profile.SIGNATURE, signature));
                 entries.add(entry);
             }
             container.set(Constants.Profile.PROPERTIES, entries);

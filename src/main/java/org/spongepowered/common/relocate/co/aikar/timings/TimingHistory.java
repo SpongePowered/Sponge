@@ -32,12 +32,6 @@ import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.Counter;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.MinuteReport;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.PingRecord;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.RegionData;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.RegionData.RegionId;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory.TicksRecord;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
 import org.spongepowered.common.relocate.co.aikar.util.MRUMapCache;
@@ -93,12 +87,12 @@ public class TimingHistory {
         }
 
         // Information about all loaded chunks/entities
-//        this.worlds = JSONUtil.mapArrayToObject(SpongeImpl.getGame().getServer().getWorldManager().getWorlds(), (world) -> {
+//        this.worlds = JSONUtil.mapArrayToObject(SpongeImpl.game().getServer().worldManager().getWorlds(), (world) -> {
 //            Map<RegionId, RegionData> regions = LoadingMap.newHashMap(RegionData.LOADER);
-//            return JSONUtil.singleObjectPair(String.valueOf(worldMap.get(world.getProperties().getDirectoryName())), JSONUtil.mapArray(world.getLoadedChunks(), (chunk) -> {
-//                RegionData data = regions.get(new RegionId(chunk.getChunkPosition().getX(), chunk.getChunkPosition().getZ()));
+//            return JSONUtil.singleObjectPair(String.valueOf(worldMap.get(world.getProperties().getDirectoryName())), JSONUtil.mapArray(world.loadedChunks(), (chunk) -> {
+//                RegionData data = regions.get(new RegionId(chunk.chunkPosition().getX(), chunk.chunkPosition().getZ()));
 //
-//                for (Entity entity : chunk.getEntities()) {
+//                for (Entity entity : chunk.entities()) {
 //                    if (entity.getType() == null) {
 //                        continue;
 //                    }
@@ -116,8 +110,8 @@ public class TimingHistory {
 //                    return null;
 //                }
 //                return JSONUtil.arrayOf(
-//                        chunk.getChunkPosition().getX(),
-//                        chunk.getChunkPosition().getZ(),
+//                        chunk.chunkPosition().getX(),
+//                        chunk.chunkPosition().getZ(),
 //                        JSONUtil.mapArrayToObject(data.entityCounts.entrySet(), (entry) -> {
 //                            this.entityTypeSet.add(entry.getKey());
 //                            return JSONUtil.singleObjectPair(TimingsPls.getEntityId(entry.getKey()), entry.getValue().count());
@@ -268,10 +262,10 @@ public class TimingHistory {
         final double avg;
 
         PingRecord() {
-            final Collection<ServerPlayer> onlinePlayers = SpongeCommon.getGame().getServer().getOnlinePlayers();
+            final Collection<ServerPlayer> onlinePlayers = SpongeCommon.getGame().server().onlinePlayers();
             int totalPing = 0;
             for (ServerPlayer player : onlinePlayers) {
-                totalPing += player.getConnection().getLatency();
+                totalPing += player.connection().latency();
             }
             this.avg = onlinePlayers.isEmpty() ? 0 : totalPing / onlinePlayers.size();
         }

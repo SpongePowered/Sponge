@@ -278,18 +278,18 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
 
     @Override
     @NonNull
-    public Optional<org.spongepowered.api.command.Command.Parameterized> getExecutedCommand() {
+    public Optional<org.spongepowered.api.command.Command.Parameterized> executedCommand() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
-            return this.transaction.peek().getCopyBuilder().getExecutedCommand();
+            return this.transaction.peek().getCopyBuilder().executedCommand();
         }
         return Optional.ofNullable(this.currentTargetCommand);
     }
 
     @Override
     @NonNull
-    public CommandCause getCause() {
+    public CommandCause cause() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
-            return this.transaction.peek().getCopyBuilder().getCause();
+            return this.transaction.peek().getCopyBuilder().cause();
         }
         return (CommandCause) this.getSource();
     }
@@ -301,17 +301,17 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
 
     @Override
     public boolean hasFlag(@NonNull final Flag flag) {
-        return this.flagMap.containsKey(flag.getUnprefixedAliases().iterator().next());
+        return this.flagMap.containsKey(flag.unprefixedAliases().iterator().next());
     }
 
     @Override
-    public int getFlagInvocationCount(@NonNull final String flagKey) {
+    public int flagInvocationCount(@NonNull final String flagKey) {
         return this.flagMap.getOrDefault(flagKey, 0);
     }
 
     @Override
-    public int getFlagInvocationCount(@NonNull final Flag flag) {
-        return this.flagMap.getOrDefault(flag.getUnprefixedAliases().iterator().next(), 0);
+    public int flagInvocationCount(@NonNull final Flag flag) {
+        return this.flagMap.getOrDefault(flag.unprefixedAliases().iterator().next(), 0);
     }
 
     @Override
@@ -325,7 +325,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     @Override
     @NonNull
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> getOne(final Parameter.@NonNull Key<T> key) {
+    public <T> Optional<T> one(final Parameter.@NonNull Key<T> key) {
         final SpongeParameterKey<T> spongeParameterKey = SpongeParameterKey.getSpongeKey(key);
         final Collection<?> collection = this.getFrom(spongeParameterKey);
         if (collection.size() > 1) {
@@ -355,38 +355,38 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     @Override
     @NonNull
     @SuppressWarnings("unchecked")
-    public <T> Collection<? extends T> getAll(final Parameter.@NonNull Key<T> key) {
+    public <T> Collection<? extends T> all(final Parameter.@NonNull Key<T> key) {
         return (Collection<? extends T>) this.getFrom(SpongeParameterKey.getSpongeKey(key));
     }
 
     @Override
     public boolean hasAny(Parameter.Value<?> parameter) {
-        return this.hasAny(parameter.getKey());
+        return this.hasAny(parameter.key());
     }
 
     @Override
-    public <T> Optional<T> getOne(Parameter.Value<T> parameter) throws IllegalArgumentException {
-        return this.getOne(parameter.getKey());
+    public <T> Optional<T> one(Parameter.Value<T> parameter) throws IllegalArgumentException {
+        return this.one(parameter.key());
     }
 
     @Override
     public <T> T requireOne(Parameter.Value<T> parameter) throws NoSuchElementException, IllegalArgumentException {
-        return this.requireOne(parameter.getKey());
+        return this.requireOne(parameter.key());
     }
 
     @Override
-    public <T> Collection<? extends T> getAll(Parameter.Value<T> parameter) {
-        return this.getAll(parameter.getKey());
+    public <T> Collection<? extends T> all(Parameter.Value<T> parameter) {
+        return this.all(parameter.key());
     }
 
     @Override
     public void sendMessage(@NonNull final Identified identity, @NonNull final Component message) {
-        this.getCause().sendMessage(identity, message);
+        this.cause().sendMessage(identity, message);
     }
 
     @Override
     public void sendMessage(@NonNull final Identity identity, @NonNull final Component message) {
-        this.getCause().sendMessage(identity, message);
+        this.cause().sendMessage(identity, message);
     }
 
     Collection<?> getFrom(final SpongeParameterKey<?> key) {
@@ -410,7 +410,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         if (this.transaction != null && !this.transaction.isEmpty()) {
             this.transaction.peek().addFlagInvocation(flag);
         } else {
-            flag.getUnprefixedAliases().forEach(x -> this.flagMap.addTo(x, 1));
+            flag.unprefixedAliases().forEach(x -> this.flagMap.addTo(x, 1));
         }
     }
 
@@ -509,8 +509,8 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public Subject getSubject() {
-        return this.getCause().getSubject();
+    public Subject subject() {
+        return this.cause().subject();
     }
 
 }

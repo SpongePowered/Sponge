@@ -41,7 +41,7 @@ public final class VexData {
                 .asMutable(Vex.class)
                     .create(Keys.LIFE_TICKS)
                         .get(h -> Ticks.of(((VexAccessor) h).accessor$limitedLifeTicks()))
-                        .set((h, v) -> h.setLimitedLife((int) v.getTicks()));
+                        .set((h, v) -> h.setLimitedLife((int) v.ticks()));
     }
     // @formatter:on
 }

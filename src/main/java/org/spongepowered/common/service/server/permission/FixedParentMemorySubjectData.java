@@ -49,8 +49,8 @@ public class FixedParentMemorySubjectData extends GlobalMemorySubjectData {
     }
 
     @Override
-    public List<SubjectReference> getParents(Set<Context> contexts) {
-        return ImmutableList.<SubjectReference>builder().add(this.forcedParent).addAll(super.getParents(contexts)).build();
+    public List<SubjectReference> parents(Set<Context> contexts) {
+        return ImmutableList.<SubjectReference>builder().add(this.forcedParent).addAll(super.parents(contexts)).build();
     }
 
     @Override

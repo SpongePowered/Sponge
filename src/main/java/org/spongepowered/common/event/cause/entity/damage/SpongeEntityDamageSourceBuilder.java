@@ -48,7 +48,7 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
     public EntityDamageSource build() throws IllegalStateException {
         checkState(this.damageType != null, "Damage type cannot be null!");
         checkState(this.reference.get() != null);
-        final net.minecraft.world.damagesource.EntityDamageSource damageSource = new net.minecraft.world.damagesource.EntityDamageSource(this.damageType.getName(),
+        final net.minecraft.world.damagesource.EntityDamageSource damageSource = new net.minecraft.world.damagesource.EntityDamageSource(this.damageType.name(),
                 (net.minecraft.world.entity.Entity) this.reference.get());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
         if (this.creative) {
@@ -78,7 +78,7 @@ public class SpongeEntityDamageSourceBuilder extends AbstractDamageSourceBuilder
     @Override
     public EntityDamageSource.Builder from(final EntityDamageSource value) {
         super.from(value);
-        this.reference = new WeakReference<>(value.getSource());
+        this.reference = new WeakReference<>(value.source());
         return this;
     }
 

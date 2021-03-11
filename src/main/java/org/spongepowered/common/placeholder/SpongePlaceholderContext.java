@@ -42,7 +42,7 @@ public final class SpongePlaceholderContext implements PlaceholderContext {
     }
 
     @Override
-    public Optional<Object> getAssociatedObject() {
+    public Optional<Object> associatedObject() {
         if (this.associatedObjectSupplier == null) {
             return Optional.empty();
         }
@@ -50,7 +50,7 @@ public final class SpongePlaceholderContext implements PlaceholderContext {
     }
 
     @Override
-    public Optional<String> getArgumentString() {
+    public Optional<String> argumentString() {
         return Optional.ofNullable(this.argument);
     }
 

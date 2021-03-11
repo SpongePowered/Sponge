@@ -86,8 +86,8 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
     }
 
     @Override
-    public ItemType getCurrentItem() {
-        return this.type == null ? BlockTypes.AIR.get().getItem().get() : this.type;
+    public ItemType currentItem() {
+        return this.type == null ? BlockTypes.AIR.get().item().get() : this.type;
     }
 
     @Override
@@ -110,8 +110,8 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
     public ItemStack.Builder fromItemStack(final ItemStack itemStack) {
         checkNotNull(itemStack, "Item stack cannot be null");
         // Assumes the item stack's values don't need to be validated
-        this.type = itemStack.getType();
-        this.quantity = itemStack.getQuantity();
+        this.type = itemStack.type();
+        this.quantity = itemStack.quantity();
         if ((Object) itemStack instanceof net.minecraft.world.item.ItemStack) {
             final CompoundTag itemCompound = ((net.minecraft.world.item.ItemStack) (Object) itemStack).getTag();
             if (itemCompound != null && !itemCompound.isEmpty()) {
@@ -209,8 +209,8 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
     @Override
     public ItemStack.Builder fromSnapshot(final ItemStackSnapshot snapshot) {
         checkNotNull(snapshot, "The snapshot was null!");
-        this.itemType(snapshot.getType());
-        this.quantity(snapshot.getQuantity());
+        this.itemType(snapshot.type());
+        this.quantity(snapshot.quantity());
 
         for (Value.Immutable<?> value : snapshot.getValues()) {
             this.add(value);
@@ -227,9 +227,9 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
     public ItemStack.Builder fromBlockSnapshot(final BlockSnapshot blockSnapshot) {
         checkNotNull(blockSnapshot, "The snapshot was null!");
         this.reset();
-        final BlockType blockType = blockSnapshot.getState().getType();
+        final BlockType blockType = blockSnapshot.state().type();
         final ResourceLocation blockTypeKey = Registry.BLOCK.getKey((Block) blockType);
-        final Optional<ItemType> itemType = blockType.getItem();
+        final Optional<ItemType> itemType = blockType.item();
         this.itemType(itemType.orElseThrow(() -> new IllegalArgumentException("ItemType not found for block type: " + blockTypeKey)));
         this.quantity(1);
         if (blockSnapshot instanceof SpongeBlockSnapshot) {
@@ -255,9 +255,9 @@ public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack>
     @Override
     public ItemStack.Builder fromBlockState(final BlockState blockState) {
         Objects.requireNonNull(blockState, "blockState");
-        final BlockType blockType = blockState.getType();
+        final BlockType blockType = blockState.type();
         final ResourceLocation blockTypeKey = Registry.BLOCK.getKey((Block) blockType);
-        this.itemType(blockType.getItem().orElseThrow(() -> new IllegalArgumentException("Missing valid ItemType for BlockType: " + blockTypeKey)));
+        this.itemType(blockType.item().orElseThrow(() -> new IllegalArgumentException("Missing valid ItemType for BlockType: " + blockTypeKey)));
         blockState.getValues().forEach(this::add);
         return this;
     }

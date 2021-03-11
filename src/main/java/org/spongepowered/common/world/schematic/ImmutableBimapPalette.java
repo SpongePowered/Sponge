@@ -73,12 +73,12 @@ public class ImmutableBimapPalette<T, R> implements Palette.Immutable<T, R> {
     }
 
     @Override
-    public PaletteType<T, R> getType() {
+    public PaletteType<T, R> type() {
         return this.paletteType;
     }
 
     @Override
-    public int getHighestId() {
+    public int highestId() {
         return this.maxId;
     }
 
@@ -100,7 +100,7 @@ public class ImmutableBimapPalette<T, R> implements Palette.Immutable<T, R> {
     @Override
     public Stream<T> stream() {
         return this.idsr.keySet().stream()
-            .map(ref -> this.paletteType.getResolver().apply(ref.value(), this.registry))
+            .map(ref -> this.paletteType.resolver().apply(ref.value(), this.registry))
             .filter(Optional::isPresent)
             .map(Optional::get);
     }
@@ -109,7 +109,7 @@ public class ImmutableBimapPalette<T, R> implements Palette.Immutable<T, R> {
     public Stream<Map.Entry<T, Integer>> streamWithIds() {
         return this.ids.entrySet().stream()
             .map(entry -> {
-                final Optional<T> apply = this.paletteType.getResolver().apply(entry.getValue()
+                final Optional<T> apply = this.paletteType.resolver().apply(entry.getValue()
                     .value(), this.registry);
                 return apply.map(value -> new AbstractMap.SimpleEntry<>(value, entry.getKey()));
             })

@@ -43,7 +43,6 @@ import java.util.Collections;
 import java.util.Optional;
 
 @Mixin(BlockGetter.class)
-@Implements(@Interface(iface = PrimitiveGameVolume.class, prefix = "primitive$"))
 public interface BlockGetterMixin_API extends PrimitiveGameVolume {
 
     //@formatter:off
@@ -56,62 +55,62 @@ public interface BlockGetterMixin_API extends PrimitiveGameVolume {
     //@formatter:on
 
     @Override
-    default int getMaximumLight() {
+    default int maximumLight() {
         return this.shadow$getMaxLightLevel();
     }
 
     @Override
-    default int getEmittedLight(final Vector3i position) {
+    default int emittedLight(final Vector3i position) {
         return this.shadow$getLightEmission(new BlockPos(position.getX(), position.getY(), position.getZ()));
     }
 
     @Override
-    default int getEmittedLight(final int x, final int y, final int z) {
+    default int emittedLight(final int x, final int y, final int z) {
         return this.shadow$getLightEmission(new BlockPos(x, y, z));
     }
 
-    @Intrinsic
-    default int primitive$getHeight() {
+    @Override
+    default int height() {
         return this.shadow$getMaxBuildHeight();
     }
 
     @Override
-    default Collection<? extends BlockEntity> getBlockEntities() {
+    default Collection<? extends BlockEntity> blockEntities() {
         return Collections.emptyList();
     }
 
     @Override
-    default Optional<? extends BlockEntity> getBlockEntity(final int x, final int y, final int z) {
+    default Optional<? extends BlockEntity> blockEntity(final int x, final int y, final int z) {
         return Optional.ofNullable((BlockEntity) this.shadow$getBlockEntity(new BlockPos(x, y, z)));
     }
 
     @Override
-    default org.spongepowered.api.block.BlockState getBlock(final int x, final int y, final int z) {
+    default org.spongepowered.api.block.BlockState block(final int x, final int y, final int z) {
         return (org.spongepowered.api.block.BlockState) this.shadow$getBlockState(new BlockPos(x, y, z));
     }
 
     @Override
-    default FluidState getFluid(final int x, final int y, final int z) {
+    default FluidState fluid(final int x, final int y, final int z) {
         return (FluidState) (Object) this.shadow$getFluidState(new BlockPos(x, y, z));
     }
 
     @Override
-    default int getHighestYAt(final int x, final int z) {
+    default int highestYAt(final int x, final int z) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IBlockReader that isn't part of Sponge API");
     }
 
     @Override
-    default Vector3i getBlockMin() {
+    default Vector3i blockMin() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IBlockReader that isn't part of Sponge API");
     }
 
     @Override
-    default Vector3i getBlockMax() {
+    default Vector3i blockMax() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IBlockReader that isn't part of Sponge API");
     }
 
     @Override
-    default Vector3i getBlockSize() {
+    default Vector3i blockSize() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IBlockReader that isn't part of Sponge API");
     }
 

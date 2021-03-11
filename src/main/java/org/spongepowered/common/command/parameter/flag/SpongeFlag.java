@@ -56,25 +56,25 @@ public final class SpongeFlag implements Flag {
 
     @Override
     @NonNull
-    public Collection<String> getUnprefixedAliases() {
+    public Collection<String> unprefixedAliases() {
         return ImmutableSet.copyOf(this.keys);
     }
 
     @Override
     @NonNull
-    public Collection<String> getAliases() {
+    public Collection<String> aliases() {
         return ImmutableSet.copyOf(this.aliases);
     }
 
     @Override
     @NonNull
-    public Predicate<CommandCause> getRequirement() {
+    public Predicate<CommandCause> requirement() {
         return this.requirement;
     }
 
     @Override
     @NonNull
-    public Optional<Parameter> getAssociatedParameter() {
+    public Optional<Parameter> associatedParameter() {
         return Optional.ofNullable(this.associatedParameter);
     }
 

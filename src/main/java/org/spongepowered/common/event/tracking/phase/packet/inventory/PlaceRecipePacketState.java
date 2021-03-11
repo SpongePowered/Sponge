@@ -81,7 +81,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
 
         final List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) player.containerMenu).bridge$getPreviewTransactions();
         if (previewTransactions.isEmpty()) {
-            final CraftingOutput slot = ((CraftingInventory) craftInv).getResult();
+            final CraftingOutput slot = ((CraftingInventory) craftInv).result();
             final SlotTransaction st = new SlotTransaction(slot, ItemStackSnapshot.empty(), slot.peek().createSnapshot());
             previewTransactions.add(st);
         }
@@ -100,20 +100,20 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
             final ClickContainerEvent event;
 
             if (shift) {
-                event = SpongeEventFactory.createClickContainerEventRecipeAll(frame.getCurrentCause(),((Container) player.containerMenu),
+                event = SpongeEventFactory.createClickContainerEventRecipeAll(frame.currentCause(),((Container) player.containerMenu),
                         cursorTransaction, (Recipe) recipe, Optional.empty(), transactions);
             } else {
-                event = SpongeEventFactory.createClickContainerEventRecipeSingle(frame.getCurrentCause(), ((Container) player.containerMenu),
+                event = SpongeEventFactory.createClickContainerEventRecipeSingle(frame.currentCause(), ((Container) player.containerMenu),
                         cursorTransaction, (Recipe) recipe, Optional.empty(), transactions);
             }
             SpongeCommon.postEvent(event);
-            if (event.isCancelled() || !event.getCursorTransaction().isValid()) {
-                PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getOriginal());
+            if (event.isCancelled() || !event.cursorTransaction().isValid()) {
+                PacketPhaseUtil.handleCustomCursor(player, event.cursorTransaction().original());
             } else {
-                PacketPhaseUtil.handleCustomCursor(player, event.getCursorTransaction().getFinal());
+                PacketPhaseUtil.handleCustomCursor(player, event.cursorTransaction().finalReplacement());
             }
-            PacketPhaseUtil.handleSlotRestore(player, player.containerMenu, event.getTransactions(), event.isCancelled());
-            event.getTransactions().clear();
+            PacketPhaseUtil.handleSlotRestore(player, player.containerMenu, event.transactions(), event.isCancelled());
+            event.transactions().clear();
         }
     }
 }

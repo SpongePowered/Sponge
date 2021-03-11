@@ -78,7 +78,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Override
-    public EntityType<?> getType() {
+    public EntityType<?> type() {
         return this.type;
     }
 
@@ -113,7 +113,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @Override
     public DataContainer data$getDataContainer() {
-        return this.getEntityData();
+        return this.entityData();
     }
 
     @Override
@@ -122,7 +122,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Override
-    public DataContainer getEntityData() {
+    public DataContainer entityData() {
         return NBTTranslator.INSTANCE.translateFrom(this.data);
     }
 
@@ -131,14 +131,14 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         if (!PlatformHooks.INSTANCE.getGeneralHooks().onServerThread()) {
             return Optional.empty();
         }
-        final org.spongepowered.api.world.server.ServerWorld spongeWorld = location.getWorld();
+        final org.spongepowered.api.world.server.ServerWorld spongeWorld = location.world();
         final ServerLevel worldServer = (ServerLevel) spongeWorld;
 
         final Entity entity = ((net.minecraft.world.entity.EntityType<?>) this.type).create(worldServer);
         if (entity == null) {
             return Optional.empty();
         }
-        entity.setPos(location.getX(), location.getY(), location.getZ()); // Set initial position
+        entity.setPos(location.x(), location.y(), location.z()); // Set initial position
 
         final boolean requiresInitialSpawn;
         if (this.data.contains(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
@@ -164,10 +164,10 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
         mergedNbt.merge(this.data);
         mergedNbt.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
-        mergedNbt.putString(Constants.Sponge.World.WORLD_KEY, location.getWorldKey().getFormatted());
+        mergedNbt.putString(Constants.Sponge.World.WORLD_KEY, location.worldKey().formatted());
         mergedNbt.putUUID(Constants.Entity.ENTITY_UUID, uniqueID); // TODO can we avoid this when the entity is only spawned once?
         entity.load(mergedNbt); // Read in all data
-        entity.setPos(location.getX(), location.getY(), location.getZ());
+        entity.setPos(location.x(), location.y(), location.z());
 
         // Finished building the entity. Now spawn it if not cancelled.
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
@@ -175,8 +175,8 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         entities.add(spongeEntity);
 
         // We require spawn types. This is more of a sanity check to throw an IllegalStateException otherwise for the plugin developer to properly associate the type.
-        final SpawnType require = PhaseTracker.getCauseStackManager().getCurrentContext().require(EventContextKeys.SPAWN_TYPE);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().getCurrentCause(), entities);
+        final SpawnType require = PhaseTracker.getCauseStackManager().currentContext().require(EventContextKeys.SPAWN_TYPE);
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().currentCause(), entities);
         if (!event.isCancelled()) {
             worldServer.addFreshEntity(entity);
             return Optional.of(spongeEntity);
@@ -189,11 +189,11 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
         final CompoundTag newCompound = this.data.copy();
-        final Vector3d pos = location.getPosition();
+        final Vector3d pos = location.position();
         newCompound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(pos.getX(), pos.getY(), pos.getZ()));
-        newCompound.putString(Constants.Sponge.World.WORLD_KEY, location.getWorldKey().getFormatted());
+        newCompound.putString(Constants.Sponge.World.WORLD_KEY, location.worldKey().formatted());
         builder.compound = newCompound;
-        builder.worldKey = location.getWorld().getProperties().getKey();
+        builder.worldKey = location.world().properties().key();
         builder.position = pos;
         builder.rotation = this.getRotation();
         builder.scale = Vector3d.ONE;
@@ -208,7 +208,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return Constants.Sponge.EntityArchetype.BASE_VERSION;
     }
 
@@ -216,7 +216,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     public DataContainer toContainer() {
         return DataContainer.createNew()
                 .set(Constants.Sponge.EntityArchetype.ENTITY_TYPE, this.type)
-                .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, this.getEntityData());
+                .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, this.entityData());
     }
 
     @Override

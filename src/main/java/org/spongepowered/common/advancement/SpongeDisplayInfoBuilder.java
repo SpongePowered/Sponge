@@ -110,13 +110,13 @@ public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
 
     @Override
     public DisplayInfo.Builder from(final DisplayInfo value) {
-        this.icon = value.getIcon();
-        this.description = value.getDescription();
-        this.advancementType = value.getType();
+        this.icon = value.icon();
+        this.description = value.description();
+        this.advancementType = value.type();
         this.announceToChat = value.doesAnnounceToChat();
         this.hidden = value.isHidden();
         this.showToast = value.doesShowToast();
-        this.title = value.getTitle();
+        this.title = value.title();
         return this;
     }
 

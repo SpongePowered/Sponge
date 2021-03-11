@@ -44,9 +44,4 @@ public abstract class SoundEventMixin_API implements SoundType {
         return (ResourceKey) (Object) this.location;
     }
 
-    @Override
-    public ResourceKey getKey() {
-        return (ResourceKey) (Object) this.location;
-    }
-
 }

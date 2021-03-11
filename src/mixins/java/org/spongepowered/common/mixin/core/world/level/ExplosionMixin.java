@@ -204,7 +204,7 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                     entities.add((org.spongepowered.api.entity.Entity) entity);
                 }
             }
-            final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
             final ExplosionEvent.Detonate detonate = SpongeEventFactory.createExplosionEventDetonate(cause, blockPositions, entities,
                     (Explosion) this, (org.spongepowered.api.world.server.ServerWorld) this.level);
             SpongeCommon.postEvent(detonate);
@@ -214,14 +214,14 @@ public abstract class ExplosionMixin implements ExplosionBridge {
                 return;
             }
             if (this.impl$shouldBreakBlocks) {
-                for (final ServerLocation worldLocation : detonate.getAffectedLocations()) {
+                for (final ServerLocation worldLocation : detonate.affectedLocations()) {
                     this.toBlow.add(VecHelper.toBlockPos(worldLocation));
                 }
             }
             // Clear the list of entities so they can be pulled from the event.
             list.clear();
             if (this.impl$shouldDamageEntities) {
-                for (final org.spongepowered.api.entity.Entity entity : detonate.getEntities()) {
+                for (final org.spongepowered.api.entity.Entity entity : detonate.entities()) {
                     try {
                         list.add((Entity) entity);
                     } catch (final Exception e) {

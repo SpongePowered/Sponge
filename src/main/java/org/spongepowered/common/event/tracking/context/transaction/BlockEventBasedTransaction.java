@@ -72,7 +72,7 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
         final Cause currentCause,
         final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
-        final Optional<ServerWorld> o = ((SpongeServer) SpongeCommon.getServer()).getWorldManager().world(this.worldKey);
+        final Optional<ServerWorld> o = ((SpongeServer) SpongeCommon.getServer()).worldManager().world(this.worldKey);
         if (!o.isPresent()) {
             return Optional.empty();
         }
@@ -133,12 +133,12 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
         final ImmutableList<? extends GameTransaction<ChangeBlockEvent.All>> blockTransactions
     ) {
         boolean cancelledAny = false;
-        for (final Transaction<BlockSnapshot> transaction : event.getTransactions()) {
+        for (final Transaction<BlockSnapshot> transaction : event.transactions()) {
             if (!transaction.isValid()) {
                 cancelledAny = true;
                 for (final GameTransaction<ChangeBlockEvent.All> gameTransaction : blockTransactions) {
                     final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) gameTransaction;
-                    final Vector3i position = transaction.getOriginal().getPosition();
+                    final Vector3i position = transaction.original().position();
                     final BlockPos affectedPosition = blockTransaction.affectedPosition;
                     if (position.getX() == affectedPosition.getX()
                         && position.getY() == affectedPosition.getY()

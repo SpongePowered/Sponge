@@ -57,7 +57,7 @@ public abstract class ClientboundResourcePackPacketMixin implements ClientboundR
     public void bridge$setSpongePack(final ResourcePack pack) {
         this.impl$pack = pack;
         this.url = ((SpongeResourcePack) pack).getUrlString();
-        this.hash = pack.getHash().orElse("");
+        this.hash = pack.hash().orElse("");
     }
 
     @Override

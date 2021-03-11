@@ -40,7 +40,7 @@ public abstract class ParticleTypeMixin_API implements org.spongepowered.api.eff
 
     @SuppressWarnings("unchecked")
     @Override
-    public <V> Optional<V> getDefaultOption(ParticleOption<V> option) {
+    public <V> Optional<V> defaultOption(ParticleOption<V> option) {
         if (this.api$defaultOptions == null) {
             this.api$defaultOptions = ParticleOptionUtil.generateDefaultsForNamed((ParticleType<?>) (Object) this);
         }
@@ -48,7 +48,7 @@ public abstract class ParticleTypeMixin_API implements org.spongepowered.api.eff
     }
 
     @Override
-    public Map<ParticleOption<?>, Object> getDefaultOptions() {
+    public Map<ParticleOption<?>, Object> defaultOptions() {
         if (this.api$defaultOptions == null) {
             this.api$defaultOptions = ParticleOptionUtil.generateDefaultsForNamed((ParticleType<?>) (Object) this);
         }

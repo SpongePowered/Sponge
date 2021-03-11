@@ -56,7 +56,7 @@ public abstract class ChunkMapMixin_Tracker {
         at = @At(value = "NEW", args = "class=java/lang/IllegalStateException", remap = false))
     private IllegalStateException tracker$reportEntityAlreadyTrackedWithWorld(final String string, final Entity entityIn) {
         final IllegalStateException exception = new IllegalStateException(String.format("Entity %s is already tracked for world: %s", entityIn,
-                ((org.spongepowered.api.world.server.ServerWorld) this.level).getKey()));
+                ((org.spongepowered.api.world.server.ServerWorld) this.level).key()));
         if (SpongeConfigs.getCommon().get().phaseTracker.verboseErrors) {
             PhasePrinter.printMessageWithCaughtException(PhaseTracker.getInstance(), "Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
         }

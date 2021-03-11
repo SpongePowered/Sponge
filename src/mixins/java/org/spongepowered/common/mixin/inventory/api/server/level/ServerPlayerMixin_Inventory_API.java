@@ -51,7 +51,7 @@ import java.util.Optional;
 public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Inventory_API implements ServerPlayer {
 
     @Override
-    public Optional<Container> getOpenInventory() {
+    public Optional<Container> openInventory() {
         return Optional.ofNullable((Container) this.containerMenu);
     }
 
@@ -65,17 +65,17 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
     public Optional<Container> openInventory(final Inventory inventory, final Component displayName) {
         final ContainerBridge openContainer = (ContainerBridge) this.containerMenu;
         if (openContainer.bridge$isInUse()) {
-            final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Task.builder().delay(Ticks.zero()).execute(() -> {
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
-                    cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
+                    cause.context().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
                     this.closeInventory(); // Cause close event first. So cursor item is not lost.
                     this.openInventory(inventory); // Then open the inventory
                 }
             }).plugin(Launch.getInstance().getCommonPlugin()).build();
-            return this.getOpenInventory();
+            return this.openInventory();
         }
         return Optional.ofNullable((Container) InventoryEventFactory.displayContainer((net.minecraft.server.level.ServerPlayer) (Object) this, inventory, displayName));
     }
@@ -85,12 +85,12 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
     public boolean closeInventory() throws IllegalArgumentException {
         final net.minecraft.world.inventory.AbstractContainerMenu openContainer = this.containerMenu;
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
-            final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
             SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
             Task.builder().delay(Ticks.zero()).execute(() -> {
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
-                    cause.getContext().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
+                    cause.context().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
                     this.closeInventory();
                 }
             }).plugin(Launch.getInstance().getCommonPlugin()).build();

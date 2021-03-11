@@ -36,12 +36,12 @@ import org.spongepowered.common.adventure.AdventureRegistryImpl;
 public final class SpongeGameRegistry implements GameRegistry {
 
     @Override
-    public AdventureRegistry getAdventureRegistry() {
+    public AdventureRegistry adventureRegistry() {
         return AdventureRegistryImpl.INSTANCE;
     }
 
     @Override
-    public RecipeRegistry getRecipeRegistry() {
-        return ((RecipeRegistry) ((MinecraftServer) Sponge.getServer()).getRecipeManager());
+    public RecipeRegistry recipeRegistry() {
+        return ((RecipeRegistry) ((MinecraftServer) Sponge.server()).getRecipeManager());
     }
 }

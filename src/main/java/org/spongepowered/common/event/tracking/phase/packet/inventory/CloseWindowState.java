@@ -78,7 +78,7 @@ public final class CloseWindowState extends BasicPacketState {
 //                    .map(entity -> (Entity) entity)
 //                    .collect(Collectors.toList());
 //                if (!entities.isEmpty()) {
-//                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(((ServerPlayer) player).getUser()));
+//                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(((ServerPlayer) player).user()));
 //                }
 //            });
         }

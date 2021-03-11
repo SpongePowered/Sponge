@@ -88,7 +88,7 @@ public abstract class SpongeScheduler implements Scheduler {
      */
     protected void addTask(final SpongeScheduledTask task) {
         task.setTimestamp(this.getTimestamp(task));
-        this.taskMap.put(task.getUniqueId(), task);
+        this.taskMap.put(task.uniqueId(), task);
     }
 
     /**
@@ -97,11 +97,11 @@ public abstract class SpongeScheduler implements Scheduler {
      * @param task The task to remove
      */
     private void removeTask(final SpongeScheduledTask task) {
-        this.taskMap.remove(task.getUniqueId());
+        this.taskMap.remove(task.uniqueId());
     }
 
     @Override
-    public Optional<ScheduledTask> getTaskById(UUID id) {
+    public Optional<ScheduledTask> taskById(UUID id) {
         checkNotNull(id, "id");
         synchronized (this.taskMap) {
             return Optional.ofNullable(this.taskMap.get(id));
@@ -109,14 +109,14 @@ public abstract class SpongeScheduler implements Scheduler {
     }
 
     @Override
-    public Set<ScheduledTask> getTasksByName(String pattern) {
+    public Set<ScheduledTask> tasksByName(String pattern) {
         checkNotNull(pattern, "pattern");
         final Pattern searchPattern = Pattern.compile(pattern);
-        final Set<ScheduledTask> matchingTasks = this.getTasks();
+        final Set<ScheduledTask> matchingTasks = this.tasks();
 
         final Iterator<ScheduledTask> it = matchingTasks.iterator();
         while (it.hasNext()) {
-            final Matcher matcher = searchPattern.matcher(it.next().getName());
+            final Matcher matcher = searchPattern.matcher(it.next().name());
             if (!matcher.matches()) {
                 it.remove();
             }
@@ -126,22 +126,22 @@ public abstract class SpongeScheduler implements Scheduler {
     }
 
     @Override
-    public Set<ScheduledTask> getTasks() {
+    public Set<ScheduledTask> tasks() {
         synchronized (this.taskMap) {
             return Sets.newHashSet(this.taskMap.values());
         }
     }
 
     @Override
-    public Set<ScheduledTask> getTasksByPlugin(PluginContainer plugin) {
+    public Set<ScheduledTask> tasksByPlugin(PluginContainer plugin) {
         checkNotNull(plugin, "plugin");
         final String testOwnerId = plugin.getMetadata().getId();
 
-        final Set<ScheduledTask> allTasks = this.getTasks();
+        final Set<ScheduledTask> allTasks = this.tasks();
         final Iterator<ScheduledTask> it = allTasks.iterator();
 
         while (it.hasNext()) {
-            final String taskOwnerId = it.next().getOwner().getMetadata().getId();
+            final String taskOwnerId = it.next().owner().getMetadata().getId();
             if (!testOwnerId.equals(taskOwnerId)) {
                 it.remove();
             }
@@ -160,7 +160,7 @@ public abstract class SpongeScheduler implements Scheduler {
     public SpongeScheduledTask submit(Task task) {
         checkNotNull(task, "task");
         final SpongeScheduledTask scheduledTask = new SpongeScheduledTask(this, (SpongeTask) task,
-                task.getName() + "-" + this.tag + "-#" + this.sequenceNumber++);
+                task.name() + "-" + this.tag + "-#" + this.sequenceNumber++);
         this.addTask(scheduledTask);
         return scheduledTask;
     }
@@ -250,18 +250,18 @@ public abstract class SpongeScheduler implements Scheduler {
     private void startTask(final SpongeScheduledTask task) {
         this.executeTaskRunnable(task, () -> {
             task.setState(SpongeScheduledTask.ScheduledTaskState.EXECUTING);
-            try (@Nullable final PhaseContext<?> context = this.createContext(task, task.getOwner());
+            try (@Nullable final PhaseContext<?> context = this.createContext(task, task.owner());
                     final Timing timings = task.task.getTimingsHandler()) {
                 timings.startTimingIfSync();
                 if (context != null) {
                     context.buildAndSwitch();
                 }
                 try {
-                    SpongeCommon.setActivePlugin(task.getOwner());
-                    task.task.getConsumer().accept(task);
+                    SpongeCommon.setActivePlugin(task.owner());
+                    task.task.consumer().accept(task);
                 } catch (Throwable t) {
                     SpongeCommon.getLogger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
-                            task.getName(), task.getOwner().getMetadata().getId(), t);
+                            task.name(), task.owner().getMetadata().getId(), t);
                 }
             } finally {
                 if (!task.isCancelled()) {

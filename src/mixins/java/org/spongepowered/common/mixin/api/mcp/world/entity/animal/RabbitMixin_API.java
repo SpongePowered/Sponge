@@ -37,7 +37,7 @@ public abstract class RabbitMixin_API extends AnimalMixin_API implements Rabbit 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.type().asImmutable());
+        values.add(this.rabbitType().asImmutable());
 
         return values;
     }

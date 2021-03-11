@@ -114,18 +114,18 @@ class TimingsExport extends Thread {
         listeners.send(Component.text("Preparing Timings Report...", NamedTextColor.GREEN));
         TimingsExport.lastReport = now;
 
-        Platform platform = SpongeCommon.getGame().getPlatform();
+        Platform platform = SpongeCommon.getGame().platform();
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
-                .add("version", platform.getContainer(IMPLEMENTATION).getMetadata().getVersion())
-                .add("maxplayers", SpongeCommon.getGame().getServer().getMaxPlayers())
+                .add("version", platform.container(IMPLEMENTATION).getMetadata().getVersion())
+                .add("maxplayers", SpongeCommon.getGame().server().maxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
             builder.add("server", TimingsExport.getServerName())
-                    .add("motd", SpongeAdventure.plain(Sponge.getServer().getMOTD()))
-                    .add("online-mode", Sponge.getServer().isOnlineModeEnabled())
+                    .add("motd", SpongeAdventure.plain(Sponge.server().motd()))
+                    .add("online-mode", Sponge.server().isOnlineModeEnabled())
                     .add("icon", SpongeCommon.getServer().getStatus().getFavicon());
         }
 
@@ -182,7 +182,7 @@ class TimingsExport extends Thread {
                 .add("blockentity", JSONUtil.mapArrayToObject(blockEntityTypeSet, (blockEntityType) ->
                     {
                         final ResourceKey resourceKey =
-                                Sponge.getGame().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(blockEntityType);
+                                Sponge.game().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(blockEntityType);
                         return JSONUtil.singleObjectPair(TimingsPls.getBlockEntityId(blockEntityType), resourceKey);
                     })
                 )
@@ -196,7 +196,7 @@ class TimingsExport extends Thread {
 
         // Information about loaded plugins
 
-        builder.add("plugins", JSONUtil.mapArrayToObject(SpongeCommon.getGame().getPluginManager().getPlugins(), (plugin) -> {
+        builder.add("plugins", JSONUtil.mapArrayToObject(SpongeCommon.getGame().pluginManager().plugins(), (plugin) -> {
             return JSONUtil.objectBuilder().add(plugin.getMetadata().getId(), JSONUtil.objectBuilder()
                     .add("version", plugin.getMetadata().getVersion())
                     .add("description", plugin.getMetadata().getDescription().orElse(""))

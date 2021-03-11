@@ -44,19 +44,19 @@ public final class SpongeBlockEntityCarrier implements DefaultSingleBlockCarrier
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return (World<?, ?>) this.inventory.getLevel();
     }
 
     @Override
-    public ServerLocation getLocation() {
+    public ServerLocation location() {
         final BlockPos pos = this.inventory.getBlockPos();
         return ServerLocation.of(((ServerWorld) this.inventory.getLevel()), pos.getX(), pos.getY(), pos.getZ());
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public CarriedInventory<? extends Carrier> getInventory() {
+    public CarriedInventory<? extends Carrier> inventory() {
         return (CarriedInventory) this.container;
     }
 }

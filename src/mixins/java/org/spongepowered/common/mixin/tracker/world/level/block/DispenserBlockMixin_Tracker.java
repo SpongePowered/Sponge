@@ -114,7 +114,7 @@ public class DispenserBlockMixin_Tracker {
         original.add(snapshot);
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(dispenserTileEntity);
-            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.getCurrentCause(), ImmutableList.of(snapshot), original);
+            final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.currentCause(), ImmutableList.of(snapshot), original);
             SpongeCommon.postEvent(dropEvent);
             if (dropEvent.isCancelled()) {
                 dispenserTileEntity.setItem(index, this.tracker$originalItem);

@@ -43,7 +43,7 @@ public abstract class SpongeMultiParameter implements Parameter.Multi {
     }
 
     @Override
-    public List<Parameter> getChildParameters() {
+    public List<Parameter> childParameters() {
         // put subcommands first.
         return this.parameterCandidates.stream().sorted((x1, x2) -> {
             final boolean firstIs = x1 instanceof Parameter.Subcommand;

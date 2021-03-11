@@ -30,5 +30,5 @@ import org.spongepowered.vanilla.world.VanillaWorldManager;
 public interface VanillaServer extends VanillaEngine, SpongeServer {
 
     @Override
-    VanillaWorldManager getWorldManager();
+    VanillaWorldManager worldManager();
 }

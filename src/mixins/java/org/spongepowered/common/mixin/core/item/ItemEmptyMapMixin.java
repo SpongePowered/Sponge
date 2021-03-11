@@ -69,11 +69,11 @@ public abstract class ItemEmptyMapMixin {
             frame.addContext(EventContextKeys.PLAYER, player);
             final HandType handType = (HandType) (Object) usedHand;
             frame.addContext(EventContextKeys.USED_HAND, handType);
-            frame.addContext(EventContextKeys.USED_ITEM, player.getItemInHand(handType).createSnapshot());
+            frame.addContext(EventContextKeys.USED_ITEM, player.itemInHand(handType).createSnapshot());
 
             final Set<Value<?>> mapValues = Sets.newHashSet(
                     Value.immutableOf(Keys.MAP_LOCATION, Vector2i.from((int)playerIn.getX(), (int)playerIn.getZ())),
-                    Value.immutableOf(Keys.MAP_WORLD, ((ServerWorld)level).getKey()),
+                    Value.immutableOf(Keys.MAP_WORLD, ((ServerWorld)level).key()),
                     Value.immutableOf(Keys.MAP_TRACKS_PLAYERS, trackingPosition),
                     Value.immutableOf(Keys.MAP_UNLIMITED_TRACKING, unlimitedTracking),
                     Value.immutableOf(Keys.MAP_SCALE, (int)scale)
@@ -83,7 +83,7 @@ public abstract class ItemEmptyMapMixin {
                     //Value.immutableOf(Keys.MAP_DECORATIONS, Sets.newHashSet())
             );
 
-            final Optional<MapInfo> optMapInfo = SpongeCommonEventFactory.fireCreateMapEvent(frame.getCurrentCause(), mapValues);
+            final Optional<MapInfo> optMapInfo = SpongeCommonEventFactory.fireCreateMapEvent(frame.currentCause(), mapValues);
             if (!optMapInfo.isPresent()) {
                 return ItemStack.EMPTY;
             }

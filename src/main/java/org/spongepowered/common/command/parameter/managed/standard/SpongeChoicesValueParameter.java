@@ -79,7 +79,7 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
 
     @Override
     @NonNull
-    public Optional<? extends T> getValue(
+    public Optional<? extends T> parseValue(
             final Parameter.@NonNull Key<? super T> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {

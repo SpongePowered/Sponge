@@ -45,7 +45,7 @@ class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> 
     }
 
     @Override
-    public Key<V> getKey() {
+    public Key<V> key() {
         return this.key;
     }
 
@@ -76,7 +76,7 @@ class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> 
     public DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
         return this.providers.stream()
                 .map(provider -> provider.offer(dataHolder, element))
-                .filter(result -> result.getType() != DataTransactionResult.Type.FAILURE)
+                .filter(result -> result.type() != DataTransactionResult.Type.FAILURE)
                 .findFirst()
                 .orElseGet(() -> DataTransactionResult.errorResult(Value.immutableOf(this.key, element)));
     }
@@ -85,7 +85,7 @@ class DelegateDataProvider<V extends Value<E>, E> implements DataProvider<V, E> 
     public DataTransactionResult remove(DataHolder.Mutable dataHolder) {
         return this.providers.stream()
                 .map(provider -> provider.remove(dataHolder))
-                .filter(result -> result.getType() != DataTransactionResult.Type.FAILURE)
+                .filter(result -> result.type() != DataTransactionResult.Type.FAILURE)
                 .findFirst()
                 .orElseGet(DataTransactionResult::failNoData);
     }

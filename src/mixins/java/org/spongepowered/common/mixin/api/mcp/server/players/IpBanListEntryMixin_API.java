@@ -37,12 +37,12 @@ import net.minecraft.server.players.IpBanListEntry;
 public abstract class IpBanListEntryMixin_API extends BanListEntryMixin_API<String> implements Ban.IP {
 
     @Override
-    public BanType getType() {
+    public BanType type() {
         return BanTypes.IP.get();
     }
 
     @Override
-    public InetAddress getAddress() {
+    public InetAddress address() {
         return ((IpBanListEntryBridge) this).bridge$getAddress();
     }
 }

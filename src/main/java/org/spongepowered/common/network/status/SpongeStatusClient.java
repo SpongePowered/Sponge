@@ -43,17 +43,17 @@ public class SpongeStatusClient implements StatusClient {
     }
 
     @Override
-    public InetSocketAddress getAddress() {
+    public InetSocketAddress address() {
         return this.connection.bridge$getAddress();
     }
 
     @Override
-    public MinecraftVersion getVersion() {
+    public MinecraftVersion version() {
         return this.connection.bridge$getVersion();
     }
 
     @Override
-    public Optional<InetSocketAddress> getVirtualHost() {
+    public Optional<InetSocketAddress> virtualHost() {
         return Optional.ofNullable(this.connection.bridge$getVirtualHost());
     }
 

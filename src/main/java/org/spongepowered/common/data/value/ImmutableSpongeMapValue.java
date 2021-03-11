@@ -49,8 +49,8 @@ public final class ImmutableSpongeMapValue<K, V> extends AbstractImmutableSponge
 
     @Override
     @SuppressWarnings("unchecked")
-    public SpongeKey<? extends MapValue<K, V>, Map<K, V>> getKey() {
-        return (SpongeKey<? extends MapValue<K, V>, Map<K, V>>) super.getKey();
+    public SpongeKey<? extends MapValue<K, V>, Map<K, V>> key() {
+        return (SpongeKey<? extends MapValue<K, V>, Map<K, V>>) super.key();
     }
 
     @Override
@@ -90,7 +90,7 @@ public final class ImmutableSpongeMapValue<K, V> extends AbstractImmutableSponge
 
     @Override
     public MapValue.Immutable<K, V> with(Map<K, V> value) {
-        return this.getKey().getValueConstructor().getImmutable(value).asImmutable();
+        return this.key().getValueConstructor().getImmutable(value).asImmutable();
     }
 
     @Override
@@ -111,7 +111,7 @@ public final class ImmutableSpongeMapValue<K, V> extends AbstractImmutableSponge
             map = new HashMap<>(this.element);
             consumer.accept(map);
         }
-        return this.getKey().getValueConstructor().getRawImmutable(map).asImmutable();
+        return this.key().getValueConstructor().getRawImmutable(map).asImmutable();
     }
 
     @Override
@@ -142,6 +142,6 @@ public final class ImmutableSpongeMapValue<K, V> extends AbstractImmutableSponge
 
     @Override
     public MapValue.Mutable<K, V> asMutable() {
-        return new MutableSpongeMapValue<>(this.getKey(), this.get());
+        return new MutableSpongeMapValue<>(this.key(), this.get());
     }
 }

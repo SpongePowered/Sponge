@@ -56,7 +56,7 @@ public final class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamag
         checkState(this.damageType != null);
 
         final net.minecraft.world.damagesource.IndirectEntityDamageSource damageSource =
-            new net.minecraft.world.damagesource.IndirectEntityDamageSource(this.damageType.getName(),
+            new net.minecraft.world.damagesource.IndirectEntityDamageSource(this.damageType.name(),
                 (net.minecraft.world.entity.Entity) this.reference.get(),
                 (net.minecraft.world.entity.Entity) this.proxy.get());
         final DamageSourceAccessor accessor = (DamageSourceAccessor) damageSource;
@@ -87,8 +87,8 @@ public final class SpongeIndirectEntityDamageSourceBuilder extends AbstractDamag
     @Override
     public IndirectEntityDamageSource.Builder from(final IndirectEntityDamageSource value) {
         super.from(value);
-        this.reference = new WeakReference<>(value.getSource());
-        this.proxy = new WeakReference<>(value.getIndirectSource());
+        this.reference = new WeakReference<>(value.source());
+        this.proxy = new WeakReference<>(value.indirectSource());
         return this;
     }
 

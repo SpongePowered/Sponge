@@ -66,12 +66,12 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
 
     @Override
     @NonNull
-    public FluidType getFluid() {
+    public FluidType fluid() {
         return this.fluidType;
     }
 
     @Override
-    public int getVolume() {
+    public int volume() {
         return this.volume;
     }
 
@@ -82,16 +82,16 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     @NonNull
     public DataContainer toContainer() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).valueKey(this.fluidType);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.FLUID_TYPE).valueKey(this.fluidType);
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.contentVersion())
             .set(Constants.Fluids.FLUID_TYPE, resourceKey)
             .set(Constants.Fluids.FLUID_VOLUME, this.volume);
         if (this.extraData != null) {

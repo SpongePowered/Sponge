@@ -86,7 +86,7 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
 
     private static ConfigurationOptions defaultOptions() {
         return ConfigurationOptions.defaults()
-                .serializers(SpongeCommon.getGame().getConfigManager().getSerializers());
+                .serializers(SpongeCommon.getGame().configManager().serializers());
     }
 
     @Override
@@ -178,7 +178,7 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
 
     @Override
     public Trigger.Builder<C> from(final Trigger<C> value) {
-        this.configType = value.getConfigurationType();
+        this.configType = value.configurationType();
         if (value instanceof SpongeCriterionTrigger) {
             this.constructor = (Function<JsonObject, C>) ((SpongeCriterionTrigger) value).constructor;
             this.eventHandler = (Consumer) ((SpongeCriterionTrigger) value).getEventHandler();
@@ -223,7 +223,7 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
 
         @Override
         public C apply(final JsonObject jsonObject) {
-            final DataBuilder<C> builder = Sponge.getDataManager().getBuilder(this.dataConfigClass).get();
+            final DataBuilder<C> builder = Sponge.dataManager().builder(this.dataConfigClass).get();
             try {
                 final DataView dataView = JsonDataFormat.serialize(SpongeTriggerBuilder.GSON, jsonObject);
                 return builder.build(dataView).get();

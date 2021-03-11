@@ -64,27 +64,27 @@ public final class SpongeTask implements Task {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public PluginContainer getOwner() {
+    public PluginContainer owner() {
         return this.owner;
     }
 
     @Override
-    public Duration getDelay() {
+    public Duration delay() {
         return Duration.ofNanos(this.delay);
     }
 
     @Override
-    public Duration getInterval() {
+    public Duration interval() {
         return Duration.ofNanos(this.interval);
     }
 
     @Override
-    public Consumer<ScheduledTask> getConsumer() {
+    public Consumer<ScheduledTask> consumer() {
         return this.consumer;
     }
 
@@ -149,10 +149,10 @@ public final class SpongeTask implements Task {
         @Override
         public Task.Builder delay(final Ticks delay) {
             Objects.requireNonNull(delay);
-            if (delay.getTicks() < 0) {
+            if (delay.ticks() < 0) {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
             }
-            this.delay = delay.getTicks() * SpongeScheduler.TICK_DURATION_NS;
+            this.delay = delay.ticks() * SpongeScheduler.TICK_DURATION_NS;
             this.tickBasedDelay = true;
             return this;
         }
@@ -194,10 +194,10 @@ public final class SpongeTask implements Task {
         @Override
         public Task.Builder interval(final Ticks interval) {
             Objects.requireNonNull(interval);
-            if (interval.getTicks() < 0) {
+            if (interval.ticks() < 0) {
                 throw new IllegalArgumentException("Interval must be equal to or greater than zero!");
             }
-            this.interval = interval.getTicks() * SpongeScheduler.TICK_DURATION_NS;
+            this.interval = interval.ticks() * SpongeScheduler.TICK_DURATION_NS;
             this.tickBasedInterval = true;
             return this;
         }
@@ -222,8 +222,8 @@ public final class SpongeTask implements Task {
             Objects.requireNonNull(value);
 
             final SpongeTask task = (SpongeTask) value;
-            this.consumer = value.getConsumer();
-            this.plugin = task.getOwner();
+            this.consumer = value.consumer();
+            this.plugin = task.owner();
             this.interval = task.interval;
             this.delay = task.delay;
             this.tickBasedDelay = task.tickBased;

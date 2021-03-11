@@ -40,7 +40,7 @@ public final class SpongeStaticChoicesBuilder<T> implements VariableValueParamet
     private boolean showInUsage = false;
 
     @Override
-    public VariableValueParameters.@NonNull StaticChoicesBuilder<T> choices(
+    public VariableValueParameters.@NonNull StaticChoicesBuilder<T> addChoices(
             @NonNull final Iterable<String> choices,
             @NonNull final Supplier<? extends T> returnedObjectSupplier) {
 
@@ -51,7 +51,7 @@ public final class SpongeStaticChoicesBuilder<T> implements VariableValueParamet
     }
 
     @Override
-    public VariableValueParameters.@NonNull StaticChoicesBuilder<T> setShowInUsage(final boolean showInUsage) {
+    public VariableValueParameters.@NonNull StaticChoicesBuilder<T> showInUsage(final boolean showInUsage) {
         this.showInUsage = showInUsage;
         return this;
     }

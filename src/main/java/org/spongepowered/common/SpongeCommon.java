@@ -69,7 +69,7 @@ public final class SpongeCommon {
             final @Nullable SpongeGame game = SpongeCommon.game;
             if (game != null) {
                 try {
-                    game.getConfigManager().close();
+                    game.configManager().close();
                 } catch (final IOException e) {
                     SpongeCommon.getLogger().error("Failed to shut down configuration watch service", e);
                 }
@@ -95,19 +95,19 @@ public final class SpongeCommon {
     }
 
     public static MinecraftServer getServer() {
-        return (MinecraftServer) Sponge.getServer();
+        return (MinecraftServer) Sponge.server();
     }
 
     public static SpongeGameRegistry getRegistry() {
-        return (SpongeGameRegistry) Sponge.getRegistry();
+        return (SpongeGameRegistry) Sponge.registry();
     }
 
     public static ServerScheduler getServerScheduler() {
-        return (ServerScheduler) Sponge.getServer().getScheduler();
+        return (ServerScheduler) Sponge.server().scheduler();
     }
 
     public static AsyncScheduler getAsyncScheduler() {
-        return SpongeCommon.getGame().getAsyncScheduler();
+        return SpongeCommon.getGame().asyncScheduler();
     }
 
     public static Path getGameDirectory() {
@@ -157,12 +157,12 @@ public final class SpongeCommon {
      * @return True if the event is cancellable and is cancelled, false if not cancelled
      */
     public static boolean postEvent(Event event) {
-        return Sponge.getEventManager().post(event);
+        return Sponge.eventManager().post(event);
     }
 
     @Deprecated
     public static boolean postEvent(Event event, boolean allowClientThread) {
-        return Sponge.getEventManager().post(event);
+        return Sponge.eventManager().post(event);
     }
 
     public static int directionToIndex(Direction direction) {

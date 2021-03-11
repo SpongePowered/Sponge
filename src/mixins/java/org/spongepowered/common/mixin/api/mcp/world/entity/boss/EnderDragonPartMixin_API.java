@@ -39,7 +39,7 @@ public abstract class EnderDragonPartMixin_API extends EntityMixin_API implement
     // @formatter:on
 
     @Override
-    public EnderDragon getParent() {
+    public EnderDragon parent() {
         return (EnderDragon) this.parentMob;
     }
 

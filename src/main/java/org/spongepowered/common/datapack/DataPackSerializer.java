@@ -59,8 +59,8 @@ public class DataPackSerializer<T extends DataPackSerializedObject> {
 
         // Write our objects
         for (final T object : objects) {
-            final Path namespacedDataDirectory = datapackDir.resolve("data").resolve(object.getKey().getNamespace());
-            final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(object.getKey().getValue() + ".json");
+            final Path namespacedDataDirectory = datapackDir.resolve("data").resolve(object.getKey().namespace());
+            final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(object.getKey().value() + ".json");
             Files.createDirectories(objectFile.getParent());
 
             DataPackSerializer.writeFile(objectFile, object.getObject());

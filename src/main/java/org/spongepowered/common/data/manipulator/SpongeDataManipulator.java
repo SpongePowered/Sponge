@@ -85,7 +85,7 @@ abstract class SpongeDataManipulator implements DataManipulator {
     public String toString() {
         final MoreObjects.ToStringHelper builder = MoreObjects.toStringHelper(this);
         for (final Map.Entry<Key<?>, Object> entry : this.values.entrySet()) {
-            builder.add(entry.getKey().getKey().toString(), entry.getValue());
+            builder.add(entry.getKey().key().toString(), entry.getValue());
         }
         return builder.toString();
     }

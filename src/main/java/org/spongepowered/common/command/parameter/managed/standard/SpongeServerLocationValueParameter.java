@@ -74,36 +74,36 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     private List<String> complete(final String currentInput) {
-        return SpongeCommon.getGame().getServer().getWorldManager().worlds()
+        return SpongeCommon.getGame().server().worldManager().worlds()
                 .stream()
-                .map(ServerWorld::getKey)
-                .map(ResourceKey::getFormatted)
+                .map(ServerWorld::key)
+                .map(ResourceKey::formatted)
                 .filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
     }
 
     @Override
     @NonNull
-    public Optional<? extends ServerLocation> getValue(
+    public Optional<? extends ServerLocation> parseValue(
             final Parameter.@NonNull Key<? super ServerLocation> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
-        final ArgumentReader.Immutable state = reader.getImmutable();
+        final ArgumentReader.Immutable state = reader.immutable();
         ServerWorld serverWorld;
         try {
             final ResourceKey resourceLocation = reader.parseResourceKey("minecraft");
-            serverWorld = SpongeCommon.getGame().getServer().getWorldManager()
+            serverWorld = SpongeCommon.getGame().server().worldManager()
                     .world(resourceLocation)
                     .orElseThrow(() -> reader.createException(
                             Component.text("Could not get world with key \"" + resourceLocation.toString() + "\"")));
         } catch (final ArgumentParseException e) {
-            final Optional<ServerLocation> location = context.getCause().getLocation();
+            final Optional<ServerLocation> location = context.cause().location();
             if (location.isPresent()) {
                 // do this as late as possible to prevent expense of regex.
-                if (!SpongeServerLocationValueParameter.STARTS_WITH_NUMBER.matcher(state.getRemaining()).find()) {
+                if (!SpongeServerLocationValueParameter.STARTS_WITH_NUMBER.matcher(state.remaining()).find()) {
                     throw e;
                 }
-                serverWorld = location.get().getWorld();
+                serverWorld = location.get().world();
             } else {
                 throw e;
             }
@@ -112,8 +112,8 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
 
         try {
             reader.skipWhitespace();
-            final Vec3 vec3d = SpongeServerLocationValueParameter.VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSourceStack) context.getCause());
-            return Optional.of(serverWorld.getLocation(VecHelper.toVector3d(vec3d)));
+            final Vec3 vec3d = SpongeServerLocationValueParameter.VEC_3_ARGUMENT.parse((StringReader) reader).getPosition((CommandSourceStack) context.cause());
+            return Optional.of(serverWorld.location(VecHelper.toVector3d(vec3d)));
         } catch (final CommandSyntaxException e) {
             throw reader.createException(Component.text(e.getMessage()));
         }

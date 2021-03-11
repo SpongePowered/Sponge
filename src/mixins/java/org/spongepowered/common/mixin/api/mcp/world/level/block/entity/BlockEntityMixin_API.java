@@ -69,13 +69,12 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
 
     @Nullable private LocatableBlock api$LocatableBlock;
 
-    @Override
-    public ServerLocation getLocation() {
+    public ServerLocation location() {
         return ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3i(this.shadow$getBlockPos()));
     }
 
     @Override
-    public ServerLocation getServerLocation() {
+    public ServerLocation serverLocation() {
         if (this.level == null) {
             throw new RuntimeException("The TileEntity has not been spawned in a world yet!");
         }
@@ -89,17 +88,17 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return (World<?, ?>) this.level;
     }
 
     @Override
-    public Vector3i getBlockPosition() {
+    public Vector3i blockPosition() {
         return VecHelper.toVector3i(this.shadow$getBlockPos());
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
@@ -108,8 +107,8 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
         final ResourceKey key = (ResourceKey) (Object) Registry.BLOCK_ENTITY_TYPE.getKey(this.type);
 
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Queries.WORLD_KEY, ((ServerWorld) this.level).getKey())
+            .set(Queries.CONTENT_VERSION, this.contentVersion())
+            .set(Queries.WORLD_KEY, ((ServerWorld) this.level).key())
             .set(Queries.POSITION_X, this.shadow$getBlockPos().getX())
             .set(Queries.POSITION_Y, this.shadow$getBlockPos().getY())
             .set(Queries.POSITION_Z, this.shadow$getBlockPos().getZ())
@@ -146,12 +145,12 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     }
 
     @Override
-    public final BlockEntityType getType() {
+    public final BlockEntityType type() {
         return (BlockEntityType) this.type;
     }
 
     @Override
-    public BlockState getBlock() {
+    public BlockState block() {
         return (BlockState) this.level.getBlockState(this.shadow$getBlockPos());
     }
 
@@ -164,9 +163,9 @@ public abstract class BlockEntityMixin_API implements BlockEntity {
     }
 
     @Override
-    public LocatableBlock getLocatableBlock() {
+    public LocatableBlock locatableBlock() {
         if (this.api$LocatableBlock == null) {
-            final BlockState blockState = this.getBlock();
+            final BlockState blockState = this.block();
             this.api$LocatableBlock = new SpongeLocatableBlockBuilder()
                 .world((ServerWorld) this.level)
                 .position(this.shadow$getBlockPos().getX(), this.shadow$getBlockPos().getY(), this.shadow$getBlockPos().getZ())

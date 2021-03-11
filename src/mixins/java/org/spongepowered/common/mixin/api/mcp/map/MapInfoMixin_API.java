@@ -60,27 +60,27 @@ public abstract class MapInfoMixin_API extends SavedData implements MapInfo, Spo
 
     @Override
     public boolean isLinked(final ItemStack itemStack) {
-        return itemStack.getType() == ItemTypes.FILLED_MAP.get()
+        return itemStack.type() == ItemTypes.FILLED_MAP.get()
                 && itemStack.get(Keys.MAP_INFO).isPresent() && itemStack.get(Keys.MAP_INFO).get() == this;
     }
 
     @Override
     public void addBannerDecoration(final ServerLocation bannerLocation) throws IllegalArgumentException {
-        final BlockType bannerType = bannerLocation.getBlock().getType();
+        final BlockType bannerType = bannerLocation.block().type();
 
         Preconditions.checkArgument(bannerType instanceof BannerBlock, "Location must have a banner!");
-        this.toggleBanner((LevelAccessor) bannerLocation.getWorld(), new BlockPos(bannerLocation.getBlockX(), bannerLocation.getBlockY(), bannerLocation.getBlockZ()));
+        this.toggleBanner((LevelAccessor) bannerLocation.world(), new BlockPos(bannerLocation.blockX(), bannerLocation.blockY(), bannerLocation.blockZ()));
 
         this.setDirty();
     }
 
     @Override
-    public UUID getUniqueId() {
+    public UUID uniqueId() {
         return ((MapItemSavedDataBridge) this).bridge$getUniqueId();
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 

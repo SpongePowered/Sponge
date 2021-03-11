@@ -61,12 +61,12 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
     //@formatter:on
 
     @Override
-    public ServerWorld getWorld() {
+    public ServerWorld world() {
         return (ServerWorld) this.shadow$getLevel();
     }
 
     @Override
-    public BossBar getBossBar() {
+    public BossBar bossBar() {
         return SpongeAdventure.asAdventure(this.raidEvent);
     }
 
@@ -77,27 +77,27 @@ public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {
     }
 
     @Override
-    public RaidStatus getStatus() {
+    public RaidStatus status() {
         return (RaidStatus) (Object) this.status;
     }
 
     @Override
-    public Optional<RaidWave> getCurrentWave() {
+    public Optional<RaidWave> currentWave() {
         return Optional.ofNullable(((RaidBridge) this).bridge$getWaves().get(this.shadow$getGroupsSpawned()));
     }
 
     @Override
-    public List<RaidWave> getWaves() {
+    public List<RaidWave> waves() {
         return new ArrayList<>(((RaidBridge) this).bridge$getWaves().values());
     }
 
     @Override
-    public int getTotalWaveAmount() {
+    public int totalWaveAmount() {
         return this.groupRaiderMap.size();
     }
 
     @Override
-    public double getHealth() {
+    public double health() {
         return this.shadow$getHealthOfLivingRaiders();
     }
 }

@@ -64,7 +64,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
         return context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over a TileEntity!", context))
-                .getLocatableBlock();
+                .locatableBlock();
     }
 
     @SuppressWarnings("unchecked")
@@ -73,7 +73,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         final BlockEntity tickingTile = context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(tickingTile.getLocatableBlock());
+            frame.pushCause(tickingTile.locatableBlock());
             TrackingUtil.processBlockCaptures(context);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
         }
@@ -86,7 +86,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         final BlockEntity tickingTile = context.getSource(BlockEntity.class)
             .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
 
-        blockEvent.bridge$setTickingLocatable(tickingTile.getLocatableBlock());
+        blockEvent.bridge$setTickingLocatable(tickingTile.locatableBlock());
         blockEvent.bridge$setTileEntity(tickingTile);
     }
 

@@ -75,9 +75,9 @@ public final class DataUtil {
         final ResourceKey world = view.getResourceKey(Queries.WORLD_KEY).orElseThrow(DataUtil.dataNotFound());
         final Vector3d pos = DataUtil.getPosition3d(view, null);
         if (castToInt) {
-            return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().world(world).orElseThrow(DataUtil.dataNotFound()), pos.toInt());
+            return ServerLocation.of(SpongeCommon.getGame().server().worldManager().world(world).orElseThrow(DataUtil.dataNotFound()), pos.toInt());
         }
-        return ServerLocation.of(SpongeCommon.getGame().getServer().getWorldManager().world(world).orElseThrow(DataUtil.dataNotFound()), pos);
+        return ServerLocation.of(SpongeCommon.getGame().server().worldManager().world(world).orElseThrow(DataUtil.dataNotFound()), pos);
     }
 
     public static Vector3i getPosition3i(final DataView view) {
@@ -120,7 +120,7 @@ public final class DataUtil {
         if (type == WeightedTable.class) {
             return table;
         }
-        final WeightedTable<T> copy = new WeightedTable<>(table.getRolls());
+        final WeightedTable<T> copy = new WeightedTable<>(table.rolls());
         copy.addAll(table);
         return copy;
     }

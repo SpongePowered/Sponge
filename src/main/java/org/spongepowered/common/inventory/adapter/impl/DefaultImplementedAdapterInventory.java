@@ -188,7 +188,7 @@ public interface DefaultImplementedAdapterInventory extends InventoryDataHolder 
     }
 
     @Override
-    default Optional<Slot> getSlot(int index) {
+    default Optional<Slot> slot(int index) {
         return ((InventoryBridge) this).bridge$getAdapter().inventoryAdapter$getSlot(index);
     }
 

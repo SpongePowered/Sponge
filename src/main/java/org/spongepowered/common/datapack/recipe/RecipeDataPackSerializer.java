@@ -39,7 +39,7 @@ public final class RecipeDataPackSerializer extends DataPackSerializer<RecipeSer
     @Override
     protected void serializeAdditional(final Path dataDirectory, final RecipeSerializedObject object) throws IOException {
         if (object.getAdvancementObject() != null) {
-            final Path advancementFile = dataDirectory.resolve("advancements").resolve(object.getAdvancementObject().getKey().getValue() + ".json");
+            final Path advancementFile = dataDirectory.resolve("advancements").resolve(object.getAdvancementObject().getKey().value() + ".json");
             Files.createDirectories(advancementFile.getParent());
             this.writeFile(advancementFile, object.getAdvancementObject().getObject());
         }

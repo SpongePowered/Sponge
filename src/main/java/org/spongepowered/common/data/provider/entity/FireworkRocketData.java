@@ -59,7 +59,7 @@ public final class FireworkRocketData {
                             return null;
                         })
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0 || ticks > Byte.MAX_VALUE) {
                                 return false;
                             }

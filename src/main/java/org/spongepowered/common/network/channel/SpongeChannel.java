@@ -65,7 +65,7 @@ public abstract class SpongeChannel implements Channel {
         this.type = type;
         this.key = key;
         this.registry = registry;
-        this.logger = LogManager.getLogger("channel/" + key.getFormatted());
+        this.logger = LogManager.getLogger("channel/" + key.formatted());
     }
 
     public int getType() {
@@ -77,12 +77,12 @@ public abstract class SpongeChannel implements Channel {
     }
 
     @Override
-    public SpongeChannelRegistry getRegistry() {
+    public SpongeChannelRegistry registry() {
         return this.registry;
     }
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return this.key;
     }
 
@@ -100,8 +100,8 @@ public abstract class SpongeChannel implements Channel {
     }
 
     public boolean checkSupported(final EngineConnection connection, final CompletableFuture<?> future) {
-        if (!ConnectionUtil.getRegisteredChannels(connection).contains(this.getKey())) {
-            this.handleException(connection, new ChannelNotSupportedException("The channel \"" + this.getKey() + "\" isn't supported."), future);
+        if (!ConnectionUtil.getRegisteredChannels(connection).contains(this.key())) {
+            this.handleException(connection, new ChannelNotSupportedException("The channel \"" + this.key() + "\" isn't supported."), future);
             return false;
         }
         return true;
@@ -137,7 +137,7 @@ public abstract class SpongeChannel implements Channel {
         try {
             this.exceptionHandler.handle(connection, this, ChannelExceptionUtil.of(cause), future);
         } catch (final Throwable ex) {
-            SpongeCommon.getLogger().error("The exception handler of the channel " + this.getKey() + " failed to handle an exception.", ex);
+            SpongeCommon.getLogger().error("The exception handler of the channel " + this.key() + " failed to handle an exception.", ex);
         }
     }
 

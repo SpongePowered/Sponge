@@ -389,7 +389,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 eventWithTransactions.markCancelled();
                 continue;
             }
-            Sponge.getEventManager().post(event);
+            Sponge.eventManager().post(event);
             if (event instanceof Cancellable && ((Cancellable) event).isCancelled()) {
                 eventWithTransactions.markCancelled();
                 cancelledAny = true;
@@ -498,7 +498,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 })
                 .orElse(null)
         ) {
-            final Optional<E> event = pointer.generateEvent(context, parent, transactions, instance.getCurrentCause(), transactionPostEventBuilder);
+            final Optional<E> event = pointer.generateEvent(context, parent, transactions, instance.currentCause(), transactionPostEventBuilder);
             if (!event.isPresent()) {
                 transactions.forEach(GameTransaction::markCancelled);
                 return;

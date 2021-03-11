@@ -41,7 +41,7 @@ public abstract class CatMixin_API extends TamableAnimalMixin_API implements Cat
         values.add(this.sitting().asImmutable());
 
         // Meow
-        values.add(this.type().asImmutable());
+        values.add(this.catType().asImmutable());
         values.add(this.lyingDown().asImmutable());
         values.add(this.relaxed().asImmutable());
         values.add(this.collarColor().asImmutable());

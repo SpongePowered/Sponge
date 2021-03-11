@@ -161,7 +161,7 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
             snapshot,
             currentBlock
         );
-        if (((BlockStateBridge) snapshot.getState()).bridge$hasTileEntity()
+        if (((BlockStateBridge) snapshot.state()).bridge$hasTileEntity()
             && (snapshot.blockChange == BlockChange.BREAK || snapshot.blockChange == BlockChange.MODIFY)) {
             transaction.queuedRemoval = existing;
         }

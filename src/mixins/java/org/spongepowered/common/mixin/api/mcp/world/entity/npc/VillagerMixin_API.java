@@ -36,7 +36,7 @@ public abstract class VillagerMixin_API extends AbstractVillagerMixin_API implem
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.type().asImmutable());
+        values.add(this.villagerType().asImmutable());
         values.add(this.profession().asImmutable());
         values.add(this.professionLevel().asImmutable());
 

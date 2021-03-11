@@ -51,7 +51,7 @@ public final class PluginConfigRoot implements ConfigRoot {
     }
 
     @Override
-    public Path getConfigPath() {
+    public Path configPath() {
         final Path configFile = this.baseDir.resolve(this.pluginName + ".conf");
         try {
             Files.createDirectories(this.baseDir);
@@ -62,20 +62,20 @@ public final class PluginConfigRoot implements ConfigRoot {
     }
 
     @Override
-    public ConfigurationLoader<CommentedConfigurationNode> getConfig() {
-        return this.getConfig(PluginConfigManager.getOptions(this.serializers));
+    public ConfigurationLoader<CommentedConfigurationNode> config() {
+        return this.config(PluginConfigManager.getOptions(this.serializers));
     }
 
     @Override
-    public ConfigurationLoader<CommentedConfigurationNode> getConfig(final ConfigurationOptions options) {
+    public ConfigurationLoader<CommentedConfigurationNode> config(final ConfigurationOptions options) {
         return HoconConfigurationLoader.builder()
-                .path(this.getConfigPath())
+                .path(this.configPath())
                 .defaultOptions(options)
                 .build();
     }
 
     @Override
-    public Path getDirectory() {
+    public Path directory() {
         return this.baseDir;
     }
 }

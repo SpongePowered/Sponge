@@ -51,16 +51,16 @@ public final class NotifyNeighborTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.plugin, new NotifyNeighborListener());
+        Sponge.eventManager().registerListeners(this.plugin, new NotifyNeighborListener());
     }
 
     public static class NotifyNeighborListener {
         @Listener
         public void onChangeBlock(final NotifyNeighborBlockEvent event) {
-            final LocatableBlock causeBlock = event.getCause().first(LocatableBlock.class).get();
-            for (Map.Entry<Direction, BlockState> entry : event.getNeighbors().entrySet()) {
-                Sponge.getGame().getSystemSubject().sendMessage(
-                        Component.text(causeBlock.getBlockPosition() + " " + causeBlock.getBlockState() + " notified " + entry.getValue() + " in direction " + entry.getKey()));
+            final LocatableBlock causeBlock = event.cause().first(LocatableBlock.class).get();
+            for (Map.Entry<Direction, BlockState> entry : event.neighbors().entrySet()) {
+                Sponge.game().systemSubject().sendMessage(
+                        Component.text(causeBlock.blockPosition() + " " + causeBlock.blockState() + " notified " + entry.getValue() + " in direction " + entry.getKey()));
             }
         }
     }

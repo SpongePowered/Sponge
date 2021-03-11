@@ -38,7 +38,7 @@ public abstract class InventoryMixin_Carried_Inventory_API implements CarriedInv
     @Final @Shadow public net.minecraft.world.entity.player.Player player;
 
     @Override
-    public Optional<Player> getCarrier() {
+    public Optional<Player> carrier() {
         return Optional.ofNullable((Player) this.player);
     }
 

@@ -244,7 +244,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             DamageEventHandler.generateCauseFor(damageSource, frame);
 
             final DamageEntityEvent event = SpongeEventFactory
-                    .createDamageEntityEvent(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this, originalFunctions,
+                    .createDamageEntityEvent(frame.currentCause(), (org.spongepowered.api.entity.Entity) this, originalFunctions,
                             originalDamage);
             if (damageSource
                     != SpongeDamageSources.IGNORED) { // Basically, don't throw an event if it's our own damage source
@@ -254,7 +254,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 return false;
             }
 
-            damage = (float) event.getFinalDamage();
+            damage = (float) event.finalDamage();
 
             // Sponge Start - Allow the platform to adjust damage before applying armor/etc
             damage = this.bridge$applyModDamageBeforeFunctions((LivingEntity) (Object) this, damageSource, damage);
@@ -266,7 +266,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             // without using our mixin redirects in EntityFallingBlockMixin.
             if ((damageSource instanceof FallingBlockDamageSource) || damageSource == DamageSource.ANVIL
                     || damageSource == DamageSource.FALLING_BLOCK && !helmet.isEmpty()) {
-                helmet.hurtAndBreak((int) (event.getBaseDamage() * 4.0F + this.random.nextFloat() * event.getBaseDamage() * 2.0F),
+                helmet.hurtAndBreak((int) (event.baseDamage() * 4.0F + this.random.nextFloat() * event.baseDamage() * 2.0F),
                         (LivingEntity) (Object) this, (entity) -> {
                             entity.broadcastBreakEvent(EquipmentSlot.HEAD);
                         });
@@ -274,7 +274,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
             // Shield
             if (shieldFunction.isPresent()) {
-                this.shadow$hurtCurrentlyUsedShield((float) event.getBaseDamage());
+                this.shadow$hurtCurrentlyUsedShield((float) event.baseDamage());
                 if (!damageSource.isProjectile()) {
                     final Entity entity = damageSource.getDirectEntity();
 
@@ -286,11 +286,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
             // Armor
             if (!damageSource.isBypassArmor() && armorFunction.isPresent()) {
-                this.shadow$hurtArmor(damageSource, (float) event.getBaseDamage());
+                this.shadow$hurtArmor(damageSource, (float) event.baseDamage());
             }
             // Resistance modifier post calculation
             if (resistanceFunction.isPresent()) {
-                final float f2 = (float) event.getDamage(resistanceFunction.get().getModifier()) - damage;
+                final float f2 = (float) event.damage(resistanceFunction.get().modifier()) - damage;
                 if (f2 > 0.0F && f2 < 3.4028235E37F) {
                     if (((LivingEntity) (Object) this) instanceof net.minecraft.server.level.ServerPlayer) {
                         ((net.minecraft.server.level.ServerPlayer) ((LivingEntity) (Object) this)).awardStat(Stats.DAMAGE_RESISTED, Math.round(f2 * 10.0F));
@@ -301,13 +301,13 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             }
 
 
-            double absorptionModifier = absorptionFunction.map(function -> event.getDamage(function.getModifier())).orElse(0d);
+            double absorptionModifier = absorptionFunction.map(function -> event.damage(function.modifier())).orElse(0d);
             if (absorptionFunction.isPresent()) {
-                absorptionModifier = event.getDamage(absorptionFunction.get().getModifier());
+                absorptionModifier = event.damage(absorptionFunction.get().modifier());
 
             }
 
-            final float f = (float) event.getFinalDamage() - (float) absorptionModifier;
+            final float f = (float) event.finalDamage() - (float) absorptionModifier;
             this.shadow$setAbsorptionAmount(Math.max(this.shadow$getAbsorptionAmount() + (float) absorptionModifier, 0.0F));
             if (f > 0.0F && f < 3.4028235E37F && damageSource.getEntity() instanceof net.minecraft.server.level.ServerPlayer) {
                 ((net.minecraft.server.level.ServerPlayer) damageSource.getEntity()).awardStat(Stats.DAMAGE_DEALT_ABSORBED, Math.round(f * 10.0F));
@@ -363,7 +363,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Inject(method = "die", at = @At("HEAD"), cancellable = true)
     private void impl$throwDestructEntityDeath(DamageSource cause, CallbackInfo ci) {
-        final boolean throwEvent = !((WorldBridge) this.level).bridge$isFake() && Sponge.isServerAvailable() && Sponge.getServer().onMainThread();
+        final boolean throwEvent = !((WorldBridge) this.level).bridge$isFake() && Sponge.isServerAvailable() && Sponge.server().onMainThread();
         if (!this.dead) { // isDead should be set later on in this method so we aren't re-throwing the events.
             if (throwEvent && this.impl$deathEventsPosted <= Constants.Sponge.MAX_DEATH_EVENTS_BEFORE_GIVING_UP) {
                 // ignore because some moron is not resetting the entity.
@@ -657,11 +657,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             frame.pushCause(this);
 
             // ENTITY_TELEPORT is our fallback context
-            if (!frame.getCurrentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
+            if (!frame.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENTITY_TELEPORT);
             }
 
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
                     (org.spongepowered.api.entity.Entity) this, this.impl$preTeleportPosition, new Vector3d(this.shadow$getX(), this.shadow$getY(),
                             this.shadow$getZ()),
                     new Vector3d(x, y, z));
@@ -673,8 +673,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 return;
             }
 
-            this.shadow$teleportTo(event.getDestinationPosition().getX(), event.getDestinationPosition().getY(),
-                    event.getDestinationPosition().getZ());
+            this.shadow$teleportTo(event.destinationPosition().getX(), event.destinationPosition().getY(),
+                    event.destinationPosition().getZ());
         }
     }
 
@@ -729,14 +729,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) hand;
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            event = SpongeEventFactory.createUseItemStackEventStart(PhaseTracker.getCauseStackManager().getCurrentCause(),
+            event = SpongeEventFactory.createUseItemStackEventStart(PhaseTracker.getCauseStackManager().currentCause(),
                 stack.getUseDuration(), stack.getUseDuration(), snapshot);
         }
 
         if (SpongeCommon.postEvent(event)) {
             ci.cancel();
         } else {
-            this.useItemRemaining = event.getRemainingDuration();
+            this.useItemRemaining = event.remainingDuration();
         }
     }
 
@@ -763,8 +763,8 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         frame.pushCause(this);
         frame.addContext(EventContextKeys.USED_ITEM, snapshot);
         if (this instanceof ServerPlayer) {
-            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayer) this).getUser());
-            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayer) this).getUser());
+            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayer) this).user());
+            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayer) this).user());
         }
     }
 
@@ -782,12 +782,12 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.useItem);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            event = SpongeEventFactory.createUseItemStackEventTick(PhaseTracker.getCauseStackManager().getCurrentCause(),
+            event = SpongeEventFactory.createUseItemStackEventTick(PhaseTracker.getCauseStackManager().currentCause(),
                 this.useItemRemaining, this.useItemRemaining, snapshot);
             SpongeCommon.postEvent(event);
         }
         // Because the item usage will only finish if useItemRemaining == 0 and decrements it first, it should be >= 1
-        this.useItemRemaining = Math.max(event.getRemainingDuration(), 1);
+        this.useItemRemaining = Math.max(event.remainingDuration(), 1);
 
         if (event.isCancelled()) {
             // Get prepared for some cool hacks: We're within the condition for updateItemUse
@@ -815,12 +815,12 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(this.useItem);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            event = SpongeEventFactory.createUseItemStackEventFinish(PhaseTracker.getCauseStackManager().getCurrentCause(),
+            event = SpongeEventFactory.createUseItemStackEventFinish(PhaseTracker.getCauseStackManager().currentCause(),
                 this.useItemRemaining, this.useItemRemaining, snapshot);
         }
         SpongeCommon.postEvent(event);
-        if (event.getRemainingDuration() > 0) {
-            this.useItemRemaining = event.getRemainingDuration();
+        if (event.remainingDuration() > 0) {
+            this.useItemRemaining = event.remainingDuration();
             ci.cancel();
         } else if (event.isCancelled()) {
             this.shadow$stopUsingItem();
@@ -854,7 +854,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack == null ? ItemStack.EMPTY : stack);
             final HandType handType = (HandType) (Object) hand;
             this.impl$addSelfToFrame(frame, activeItemStackSnapshot, handType);
-            event = SpongeEventFactory.createUseItemStackEventReplace(PhaseTracker.getCauseStackManager().getCurrentCause(),
+            event = SpongeEventFactory.createUseItemStackEventReplace(PhaseTracker.getCauseStackManager().currentCause(),
                 this.useItemRemaining, this.useItemRemaining, activeItemStackSnapshot,
                 new Transaction<>(ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy), snapshot));
         }
@@ -864,12 +864,12 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             return;
         }
 
-        if (!event.getItemStackResult().isValid()) {
+        if (!event.itemStackResult().isValid()) {
             this.shadow$setItemInHand(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
 
-        this.shadow$setItemInHand(hand, ItemStackUtil.fromSnapshotToNative(event.getItemStackResult().getFinal()));
+        this.shadow$setItemInHand(hand, ItemStackUtil.fromSnapshotToNative(event.itemStackResult().finalReplacement()));
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -886,7 +886,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            if (!SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().getCurrentCause(),
+            if (!SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().currentCause(),
                 duration, duration, snapshot))) {
                 stack.releaseUsing(world, self, duration);
             }
@@ -906,7 +906,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             this.impl$addSelfToFrame(frame, snapshot);
-            SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventReset(PhaseTracker.getCauseStackManager().getCurrentCause(),
+            SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventReset(PhaseTracker.getCauseStackManager().currentCause(),
                 this.useItemRemaining, this.useItemRemaining, snapshot));
         }
         this.impl$activeItemStackCopy = null;

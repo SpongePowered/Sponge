@@ -69,7 +69,7 @@ public final class FireworkUtil {
         }
         if (compound.contains(Constants.Item.Fireworks.SHAPE_TYPE)) {
             final byte type = compound.getByte(Constants.Item.Fireworks.SHAPE_TYPE);
-            final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE);
+            final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.game().registries().registry(RegistryTypes.FIREWORK_SHAPE);
             @Nullable final FireworkShape shape = registry.byId(type);
             if (shape != null) {
                 builder.shape(shape);
@@ -96,18 +96,18 @@ public final class FireworkUtil {
     }
 
     public static CompoundTag toCompound(final FireworkEffect effect) {
-        final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.getGame().registries().registry(RegistryTypes.FIREWORK_SHAPE);
+        final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.game().registries().registry(RegistryTypes.FIREWORK_SHAPE);
 
         final CompoundTag tag = new CompoundTag();
         tag.putBoolean(Constants.Item.Fireworks.FLICKER, effect.flickers());
         tag.putBoolean(Constants.Item.Fireworks.TRAIL, effect.hasTrail());
-        tag.putByte(Constants.Item.Fireworks.SHAPE_TYPE, (byte) registry.getId(effect.getShape()));
-        final int[] colorsArray = effect.getColors().stream()
-                .mapToInt(Color::getRgb)
+        tag.putByte(Constants.Item.Fireworks.SHAPE_TYPE, (byte) registry.getId(effect.shape()));
+        final int[] colorsArray = effect.colors().stream()
+                .mapToInt(Color::rgb)
                 .toArray();
         tag.putIntArray(Constants.Item.Fireworks.COLORS, colorsArray);
-        final int[] fadeArray = effect.getFadeColors().stream()
-                .mapToInt(Color::getRgb)
+        final int[] fadeArray = effect.fadeColors().stream()
+                .mapToInt(Color::rgb)
                 .toArray();
         tag.putIntArray(Constants.Item.Fireworks.FADE_COLORS, fadeArray);
         return tag;

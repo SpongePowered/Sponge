@@ -139,17 +139,17 @@ public final class SpongeTeamBuilder implements Team.Builder {
 
     @Override
     public Team.Builder from(final Team value) {
-        this.name(value.getName())
-            .displayName(value.getDisplayName())
-            .prefix(value.getPrefix())
-            .color(value.getColor())
+        this.name(value.name())
+            .displayName(value.displayName())
+            .prefix(value.prefix())
+            .color(value.color())
             .allowFriendlyFire(value.allowFriendlyFire())
             .canSeeFriendlyInvisibles(value.canSeeFriendlyInvisibles())
-            .suffix(value.getSuffix())
-            .nameTagVisibility(value.getNameTagVisibility())
-            .deathTextVisibility(value.getDeathMessageVisibility())
-            .collisionRule(value.getCollisionRule())
-            .members(value.getMembers());
+            .suffix(value.suffix())
+            .nameTagVisibility(value.nameTagVisibility())
+            .deathTextVisibility(value.deathMessageVisibility())
+            .collisionRule(value.collisionRule())
+            .members(value.members());
         return this;
     }
 

@@ -487,20 +487,20 @@ public final class PhaseTracker implements CauseStackManager {
     }
 
     @Override
-    public Cause getCurrentCause() {
+    public Cause currentCause() {
         this.enforceMainThread();
         if (this.cached_cause == null || this.cached_ctx == null) {
             if (this.cause.isEmpty()) {
-                this.cached_cause = Cause.of(this.getCurrentContext(), SpongeCommon.getGame());
+                this.cached_cause = Cause.of(this.currentContext(), SpongeCommon.getGame());
             } else {
-                this.cached_cause = Cause.of(this.getCurrentContext(), this.cause);
+                this.cached_cause = Cause.of(this.currentContext(), this.cause);
             }
         }
         return this.cached_cause;
     }
 
     @Override
-    public EventContext getCurrentContext() {
+    public EventContext currentContext() {
         this.enforceMainThread();
         if (this.cached_ctx == null) {
             this.cached_ctx = EventContext.of(this.ctx);
@@ -720,7 +720,7 @@ public final class PhaseTracker implements CauseStackManager {
     }
 
     @Override
-    public <T> Optional<T> getContext(final EventContextKey<T> key) {
+    public <T> Optional<T> context(final EventContextKey<T> key) {
         checkNotNull(key, "key");
         this.enforceMainThread();
         return Optional.ofNullable((T) this.ctx.get(key));

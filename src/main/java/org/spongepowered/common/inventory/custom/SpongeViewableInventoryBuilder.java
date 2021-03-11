@@ -128,7 +128,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     private Slot newDummySlot() {
         Container dummyInv = new net.minecraft.world.SimpleContainer(1);
-        return ((Inventory) dummyInv).getSlot(0).get();
+        return ((Inventory) dummyInv).slot(0).get();
     }
 
     // Slot definition Impl:
@@ -384,9 +384,9 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         // create the internal MerchantInventory (3 slots)
         // create the MerchantResultSlot
         // used to check if player is customer
-        // trigger sound (casted to Entity when !getWorld().isClientSide) !!!
+        // trigger sound (casted to Entity when !world().isClientSide) !!!
         // reset customer on close
-        // when closing and !getWorld().isClientSide drop items back into world !!!
+        // when closing and !world().isClientSide drop items back into world !!!
         // getOffers
         Merchant merchant = null;
         ContainerTypeInfo.of(0, 0,

@@ -50,7 +50,7 @@ public abstract class ServerStatus_PlayersMixin_API implements ClientPingServerE
     @Nullable private List<org.spongepowered.api.profile.GameProfile> profiles;
 
     @Override
-    public int getOnline() {
+    public int online() {
         return this.numPlayers;
     }
 
@@ -60,7 +60,7 @@ public abstract class ServerStatus_PlayersMixin_API implements ClientPingServerE
     }
 
     @Override
-    public int getMax() {
+    public int max() {
         return this.maxPlayers;
     }
 
@@ -70,7 +70,7 @@ public abstract class ServerStatus_PlayersMixin_API implements ClientPingServerE
     }
 
     @Override
-    public List<org.spongepowered.api.profile.GameProfile> getProfiles() {
+    public List<org.spongepowered.api.profile.GameProfile> profiles() {
         if (this.profiles == null) {
             this.profiles = new ArrayList<>();
         }

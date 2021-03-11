@@ -38,7 +38,6 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.VecHelper;
-import org.spongepowered.common.util.raytrace.AbstractSpongeRayTrace.TData;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -71,7 +70,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     @Override
     @NonNull
     public final RayTrace<@NonNull T> world(@NonNull final ServerWorld serverWorld) {
-        this.world = serverWorld.getKey();
+        this.world = serverWorld.key();
         return this;
     }
 
@@ -80,7 +79,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     public RayTrace<@NonNull T> sourceEyePosition(@NonNull final Living entity) {
         this.sourcePosition(entity.get(Keys.EYE_POSITION)
                 .orElseThrow(() -> new IllegalArgumentException("Entity does not have an eye position key")));
-        return this.world(entity.getServerLocation().getWorld());
+        return this.world(entity.serverLocation().world());
     }
 
     @Override
@@ -170,8 +169,8 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
             throw new IllegalStateException("The start and end must be two different vectors");
         }
 
-        final ServerWorld serverWorld = Sponge.getServer().getWorldManager().world(this.world)
-                .orElseThrow(() -> new IllegalStateException("World with key " + this.world.getFormatted() + " is not loaded!"));
+        final ServerWorld serverWorld = Sponge.server().worldManager().world(this.world)
+                .orElseThrow(() -> new IllegalStateException("World with key " + this.world.formatted() + " is not loaded!"));
 
         Vector3i currentBlock = this.initialBlock(direction);
         final Vector3i steps = this.createSteps(direction);
@@ -223,7 +222,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
             if (requiresEntityTracking && this.continueWhileEntity != null) {
                 final double resultDistance;
                 if (result.isPresent()) {
-                    resultDistance = result.get().getHitPosition().distanceSquared(currentLocation);
+                    resultDistance = result.get().hitPosition().distanceSquared(currentLocation);
                 } else {
                     resultDistance = Double.MAX_VALUE;
                 }
@@ -312,7 +311,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
                 Math.min(in.y, out.y),
                 Math.min(in.z, out.z)
         );
-        return world.getLocatableBlock(coord);
+        return world.locatableBlock(coord);
     }
 
     private boolean shouldAdvanceThroughBlock(final ServerWorld serverWorld,

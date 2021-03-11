@@ -40,7 +40,7 @@ public abstract class ParrotMixin_API extends TamableAnimalMixin_API implements 
         // Sittable
         values.add(this.sitting().asImmutable());
 
-        values.add(this.type().asImmutable());
+        values.add(this.parrotType().asImmutable());
 
         return values;
     }

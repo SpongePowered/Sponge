@@ -129,7 +129,7 @@ public final class KeyValueMatcherQuery<T> extends SpongeQuery {
     }
 
     public boolean matches(final Lens lens, final Lens parent, final Inventory inventory) {
-        final Key<? extends Value<T>> key = this.matcher.getKey();
+        final Key<? extends Value<T>> key = this.matcher.key();
         if (this.matcher.matches(inventory.get(key).orElse(null))) {
             return true;
         }

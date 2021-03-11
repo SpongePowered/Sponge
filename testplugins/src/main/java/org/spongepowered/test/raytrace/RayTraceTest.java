@@ -52,22 +52,22 @@ public final class RayTraceTest {
     @Listener
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ServerLocation> serverLocationParameter = Parameter.builder(ServerLocation.class)
-                .setKey("target_location")
-                .parser(ResourceKeyedValueParameters.TARGET_BLOCK)
+                .key("target_location")
+                .addParser(ResourceKeyedValueParameters.TARGET_BLOCK)
                 .build();
         final Parameter.Value<Entity> entityParameter = Parameter.builder(Entity.class)
-                .setKey("target_entity")
-                .parser(ResourceKeyedValueParameters.TARGET_ENTITY)
+                .key("target_entity")
+                .addParser(ResourceKeyedValueParameters.TARGET_ENTITY)
                 .build();
 
         event.register(
                 this.pluginContainer,
                 Command.builder()
-                        .parameter(serverLocationParameter)
-                        .setExecutor(context -> {
+                        .addParameter(serverLocationParameter)
+                        .executor(context -> {
                             final ServerLocation serverLocation = context.requireOne(serverLocationParameter);
                             context.sendMessage(Identity.nil(), Component.text("Location: " + serverLocation.toString()));
-                            context.sendMessage(Identity.nil(), Component.text("Block: " + serverLocation.getBlock().toString()));
+                            context.sendMessage(Identity.nil(), Component.text("Block: " + serverLocation.block().toString()));
                             return CommandResult.success();
                         })
                         .build(),
@@ -76,11 +76,11 @@ public final class RayTraceTest {
         event.register(
                 this.pluginContainer,
                 Command.builder()
-                        .parameter(entityParameter)
-                        .setExecutor(context -> {
+                        .addParameter(entityParameter)
+                        .executor(context -> {
                             final Entity entity = context.requireOne(entityParameter);
-                            context.sendMessage(Identity.nil(), Component.text("Location: " + entity.getLocation().toString()));
-                            context.sendMessage(Identity.nil(), Component.text("Entity Type: " + RegistryTypes.ENTITY_TYPE.keyFor(entity.getWorld().registries(), entity.getType()).asString()));
+                            context.sendMessage(Identity.nil(), Component.text("Location: " + entity.location().toString()));
+                            context.sendMessage(Identity.nil(), Component.text("Entity Type: " + RegistryTypes.ENTITY_TYPE.keyFor(entity.world().registries(), entity.type()).asString()));
                             return CommandResult.success();
                         })
                         .build(),

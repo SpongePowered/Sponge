@@ -78,7 +78,7 @@ public final class AsyncScheduler extends SpongeScheduler {
     private void recalibrateMinimumTimeout() {
         this.lock.lock();
         try {
-            final Set<ScheduledTask> tasks = this.getTasks();
+            final Set<ScheduledTask> tasks = this.tasks();
             this.minimumTimeout = Long.MAX_VALUE;
             final long now = System.nanoTime();
             for (final ScheduledTask tmpTask : tasks) {
@@ -182,7 +182,7 @@ public final class AsyncScheduler extends SpongeScheduler {
     public void close() {
         this.running = false;
         // Cancel all tasks
-        final Set<ScheduledTask> tasks = this.getTasks();
+        final Set<ScheduledTask> tasks = this.tasks();
         tasks.forEach(ScheduledTask::cancel);
 
         // Shut down the executor

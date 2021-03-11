@@ -39,7 +39,7 @@ public class SlotLensCollection implements SlotLensProvider {
     public static class Builder {
 
         private List<Tuple<Class<? extends SlotAdapter>, SlotLensProvider>> slotTypes = new ArrayList<>();
-        private final SlotLensProvider defaultProvider = (i) -> new BasicSlotLens(i, this.slotTypes.get(i).getFirst());
+        private final SlotLensProvider defaultProvider = (i) -> new BasicSlotLens(i, this.slotTypes.get(i).first());
 
         public SlotLensCollection.Builder add() {
             return this.add(SlotAdapter.class);
@@ -75,7 +75,7 @@ public class SlotLensCollection implements SlotLensProvider {
             final List<SlotLens> lenses = new ArrayList<>();
 
             for (int i = 0; i < this.slotTypes.size(); i++) {
-                lenses.add(this.slotTypes.get(i).getSecond().getSlotLens(i));
+                lenses.add(this.slotTypes.get(i).second().getSlotLens(i));
             }
 
             return new SlotLensCollection(lenses);

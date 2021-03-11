@@ -90,7 +90,7 @@ public abstract class FishingHookMixin extends EntityMixin {
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
     private void onSetHookedEntity(CallbackInfo ci) {
         if (SpongeCommon
-            .postEvent(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().getCurrentCause(), (Entity) this.hookedIn, (FishingBobber) this))) {
+            .postEvent(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) this.hookedIn, (FishingBobber) this))) {
             this.hookedIn = null;
             ci.cancel();
         }
@@ -130,7 +130,7 @@ public abstract class FishingHookMixin extends EntityMixin {
             }
             PhaseTracker.getCauseStackManager().pushCause(playerEntity);
 
-            if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStop(PhaseTracker.getCauseStackManager().getCurrentCause(), ((FishingBobber) this), transactions))) {
+            if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStop(PhaseTracker.getCauseStackManager().currentCause(), ((FishingBobber) this), transactions))) {
                 // Event is cancelled
                 return 0;
             }
@@ -153,7 +153,7 @@ public abstract class FishingHookMixin extends EntityMixin {
                     if (!transaction.isValid()) {
                         continue;
                     }
-                    ItemStack itemstack = (ItemStack) (Object) transaction.getFinal().createStack();
+                    ItemStack itemstack = (ItemStack) (Object) transaction.finalReplacement().createStack();
                     // Sponge end
 
                     ItemEntity entityitem = new ItemEntity(this.level, this.shadow$getX(), this.shadow$getY(), this.shadow$getZ(), itemstack);

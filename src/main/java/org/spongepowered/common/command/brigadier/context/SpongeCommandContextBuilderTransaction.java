@@ -35,7 +35,6 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilderTransaction.ArgumentCapture;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 
 import java.lang.ref.WeakReference;
@@ -153,7 +152,7 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
     }
 
     public void addFlagInvocation(final Flag flag) {
-        flag.getUnprefixedAliases().forEach(x -> this.flagCapture.addTo(x, 1));
+        flag.unprefixedAliases().forEach(x -> this.flagCapture.addTo(x, 1));
         this.copyBuilder.addFlagInvocation(flag);
     }
 
@@ -180,10 +179,10 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
         if (builderRef != null) {
             this.withArgumentCapture.forEach(x -> builderRef.withArgumentInternal(x.name, x.parsedArgument, x.addToSponge));
             this.withSourceCapture.forEach(builderRef::withSource);
-            this.withNodeCapture.forEach(x -> builderRef.withNode(x.getFirst(), x.getSecond()));
+            this.withNodeCapture.forEach(x -> builderRef.withNode(x.first(), x.second()));
             this.withChildCapture.forEach(builderRef::withChild);
             this.withCommandCapture.forEach(builderRef::withCommand);
-            this.putEntryCapture.forEach(x -> this.putEntryAbusingGenerics(builderRef, x.getFirst(), x.getSecond()));
+            this.putEntryCapture.forEach(x -> this.putEntryAbusingGenerics(builderRef, x.first(), x.second()));
             this.flagCapture.forEach(builderRef::addFlagInvocation);
             if (this.currentTargetCommandCapture != null) {
                 builderRef.setCurrentTargetCommand(this.currentTargetCommandCapture);

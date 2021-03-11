@@ -71,11 +71,11 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
         }
         builder.sellingItem(this.sellingItemGenerator.apply(random));
         if (random.nextDouble() < this.experience) {
-            builder.merchantExperienceGranted(this.grantedExperience.getFlooredAmount(random));
+            builder.merchantExperienceGranted(this.grantedExperience.flooredAmount(random));
         }
 
-        builder.uses(this.baseUses.getFlooredAmount(random));
-        builder.maxUses(this.maxUses.getFlooredAmount(random));
+        builder.uses(this.baseUses.flooredAmount(random));
+        builder.maxUses(this.maxUses.flooredAmount(random));
         return builder.build();
     }
 

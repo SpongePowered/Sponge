@@ -34,14 +34,15 @@ import org.spongepowered.common.world.storage.SpongePlayerDataManager;
 public interface SpongeServer extends SpongeEngine, Server {
 
     @Override
-    ServerScheduler getScheduler();
+    ServerScheduler scheduler();
     
     @Override
-    SpongeWorldManager getWorldManager();
+    SpongeWorldManager worldManager();
 
     SpongePlayerDataManager getPlayerDataManager();
 
     UsernameCache getUsernameCache();
 
-    SpongeCommandManager getCommandManager();
+    @Override
+    SpongeCommandManager commandManager();
 }

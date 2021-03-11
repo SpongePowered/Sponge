@@ -49,23 +49,23 @@ public final class SpongeParticleEffect implements ParticleEffect {
     }
 
     @Override
-    public ParticleType getType() {
+    public ParticleType type() {
         return this.type;
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public <V> Optional<V> getOption(ParticleOption<V> option) {
+    public <V> Optional<V> option(ParticleOption<V> option) {
         return Optional.ofNullable((V) this.options.get(option));
     }
 
     @Override
-    public Map<ParticleOption<?>, Object> getOptions() {
+    public Map<ParticleOption<?>, Object> options() {
         return this.options;
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 

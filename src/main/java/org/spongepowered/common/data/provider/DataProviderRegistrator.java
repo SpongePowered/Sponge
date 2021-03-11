@@ -53,9 +53,6 @@ import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
 import java.util.Arrays;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
@@ -102,7 +99,7 @@ public class DataProviderRegistrator {
         builder.updater(contentUpdater);
         builder.holder(dataHolder);
         for (Key dataKey : dataKeys) {
-            builder.key(dataKey, dataKey.getKey().getValue());
+            builder.key(dataKey, dataKey.key().value());
         }
         SpongeDataManager.getDatastoreRegistry().register(builder.build(), Arrays.asList(dataKeys));
     }
@@ -167,7 +164,7 @@ public class DataProviderRegistrator {
         if (!this.dataStoreBuilder.isEmpty()) {
             this.registrationBuilder.store(this.dataStoreBuilder.buildVanillaDataStore());
         }
-        ((SpongeDataManager) Sponge.getGame().getDataManager()).registerDataRegistration((SpongeDataRegistration) this.registrationBuilder.build());
+        ((SpongeDataManager) Sponge.game().dataManager()).registerDataRegistration((SpongeDataRegistration) this.registrationBuilder.build());
     }
 
 
@@ -205,7 +202,7 @@ public class DataProviderRegistrator {
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
         protected <K, V extends Value<K>> MutableRegistrator<T> register(final MutableRegistration<T, K> registration) {
             final DataProvider<?, ?> provider = registration.build(this.target);
-            this.registrationBuilder.dataKey(provider.getKey()).provider(provider);
+            this.registrationBuilder.dataKey(provider.key()).provider(provider);
             return this;
         }
     }
@@ -244,7 +241,7 @@ public class DataProviderRegistrator {
         @SuppressWarnings({"unchecked", "UnstableApiUsage"})
         protected <K, V> ImmutableRegistrator<T> register(final ImmutableRegistration<T, K> registration) {
             final DataProvider<?, ?> provider = registration.build(this.target);
-            this.registrationBuilder.dataKey(provider.getKey()).provider(provider);
+            this.registrationBuilder.dataKey(provider.key()).provider(provider);
             return this;
         }
     }
@@ -329,7 +326,7 @@ public class DataProviderRegistrator {
         public DataProvider<?, ?> build(Class<H> target) {
             final MutableRegistrationBase<H, E, R> registration = this;
             return new GenericMutableDataProvider<H, E>(registration.key, target) {
-                final boolean isBooleanKey = registration.key.getElementType() == Boolean.class;
+                final boolean isBooleanKey = registration.key.elementType() == Boolean.class;
 
                 @Override
                 protected Value<E> constructValue(final H dataHolder, final E element) {
@@ -478,7 +475,7 @@ public class DataProviderRegistrator {
         public DataProvider<?, ?> build(final Class<H> target) {
             final ImmutableRegistrationBase<H, E, R> registration = this;
             return new GenericImmutableDataProvider<H, E>(registration.key, target) {
-                final boolean isBooleanKey = GenericTypeReflector.erase(registration.key.getElementType())== Boolean.class;
+                final boolean isBooleanKey = GenericTypeReflector.erase(registration.key.elementType())== Boolean.class;
 
                 @Override
                 protected Value<E> constructValue(final H dataHolder, final E element) {

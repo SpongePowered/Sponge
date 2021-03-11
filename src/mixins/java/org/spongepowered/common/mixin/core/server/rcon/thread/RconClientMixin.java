@@ -81,7 +81,7 @@ public abstract class RconClientMixin extends GenericThread implements RconClien
                 causeStackManager.pushCause(this);
                 causeStackManager.pushCause(this.impl$source);
                 final RconConnectionEvent.Disconnect event = SpongeEventFactory.createRconConnectionEventDisconnect(
-                        causeStackManager.getCurrentCause(), (RconConnection) this.impl$source);
+                        causeStackManager.currentCause(), (RconConnection) this.impl$source);
                 SpongeCommon.postEvent(event);
                 causeStackManager.popCauses(2);
                 return event;
@@ -110,7 +110,7 @@ public abstract class RconClientMixin extends GenericThread implements RconClien
                 causeStackManager.pushCause(this);
                 causeStackManager.pushCause(this.impl$source);
                 final RconConnectionEvent.Connect event = SpongeEventFactory.createRconConnectionEventConnect(
-                        causeStackManager.getCurrentCause(), (RconConnection) this.impl$source);
+                        causeStackManager.currentCause(), (RconConnection) this.impl$source);
                 SpongeCommon.postEvent(event);
                 causeStackManager.popCauses(2);
                 return event;
@@ -192,7 +192,7 @@ public abstract class RconClientMixin extends GenericThread implements RconClien
                                     causeStackManager.pushCause(this);
                                     causeStackManager.pushCause(this.impl$source);
                                     final RconConnectionEvent.Auth event1 = SpongeEventFactory.createRconConnectionEventAuth(
-                                            causeStackManager.getCurrentCause(), (RconConnection) this.impl$source);
+                                            causeStackManager.currentCause(), (RconConnection) this.impl$source);
                                     SpongeCommon.postEvent(event1);
                                     causeStackManager.popCauses(2);
                                     return event1;

@@ -133,7 +133,7 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
 
     @Override
     public boolean bridge$isReadonlyMenu(Slot slot) {
-        return this.impl$menu != null && this.impl$menu.isReadOnly() && slot.container == this.impl$menu.getInventory();
+        return this.impl$menu != null && this.impl$menu.isReadOnly() && slot.container == this.impl$menu.inventory();
     }
 
     @Override

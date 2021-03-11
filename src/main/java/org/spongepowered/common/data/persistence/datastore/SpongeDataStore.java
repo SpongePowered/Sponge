@@ -67,11 +67,11 @@ public final class SpongeDataStore extends VanillaDataStore {
         ImmutableList.Builder<DataContentUpdater> builder = ImmutableList.builder();
         int version = fromVersion;
         for (DataContentUpdater updater : this.updaters) {
-            if (updater.getInputVersion() == version) {
-                if (updater.getOutputVersion() > toVersion) {
+            if (updater.inputVersion() == version) {
+                if (updater.outputVersion() > toVersion) {
                     continue;
                 }
-                version = updater.getOutputVersion();
+                version = updater.outputVersion();
                 builder.add(updater);
             }
         }

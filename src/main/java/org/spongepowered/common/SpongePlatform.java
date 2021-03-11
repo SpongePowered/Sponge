@@ -67,27 +67,27 @@ public final class SpongePlatform implements Platform {
         this.minecraftPlugin = Launch.getInstance().getMinecraftPlugin();
 
         final PluginContainer common = Launch.getInstance().getCommonPlugin();
-        this.platformMap.put("Type", this.getType());
+        this.platformMap.put("Type", this.type());
         this.platformMap.put("ApiName", this.apiPlugin.getMetadata().getName());
         this.platformMap.put("ApiVersion", this.apiPlugin.getMetadata().getVersion());
         this.platformMap.put("CommonName", common.getMetadata().getName());
         this.platformMap.put("CommonVersion", common.getMetadata().getVersion());
         this.platformMap.put("ImplementationName", this.platformPlugin.getMetadata().getName());
         this.platformMap.put("ImplementationVersion", this.platformPlugin.getMetadata().getVersion());
-        this.platformMap.put("MinecraftVersion", this.getMinecraftVersion());
+        this.platformMap.put("MinecraftVersion", this.minecraftVersion());
     }
 
     @Override
-    public Type getType() {
+    public Type type() {
         return !Launch.getInstance().isDedicatedServer() ? Type.CLIENT : Type.SERVER;
     }
 
     @Override
-    public Type getExecutionType() {
-        if (Sponge.isServerAvailable() && Sponge.getServer().onMainThread()) {
+    public Type executionType() {
+        if (Sponge.isServerAvailable() && Sponge.server().onMainThread()) {
             return Type.SERVER;
         }
-        if (Sponge.isClientAvailable() && Sponge.getClient().onMainThread()) {
+        if (Sponge.isClientAvailable() && Sponge.client().onMainThread()) {
             return Type.CLIENT;
         }
 
@@ -95,7 +95,7 @@ public final class SpongePlatform implements Platform {
     }
 
     @Override
-    public PluginContainer getContainer(Component component) {
+    public PluginContainer container(Component component) {
         switch (component) {
             case API:
                 return this.apiPlugin;
@@ -109,7 +109,7 @@ public final class SpongePlatform implements Platform {
     }
 
     @Override
-    public final MinecraftVersion getMinecraftVersion() {
+    public final MinecraftVersion minecraftVersion() {
         return this.minecraftVersion;
     }
 
@@ -121,11 +121,11 @@ public final class SpongePlatform implements Platform {
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("type", this.getType())
-                .add("executionType", this.getExecutionType())
+                .add("type", this.type())
+                .add("executionType", this.executionType())
                 .add("api", this.apiPlugin.getMetadata().getId())
                 .add("implementation", this.platformPlugin.getMetadata().getId())
-                .add("minecraftVersion", this.getMinecraftVersion())
+                .add("minecraftVersion", this.minecraftVersion())
                 .toString();
     }
 }

@@ -83,33 +83,33 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public BlockState getBlock(final int x, final int y, final int z) {
-        return this.blockBuffer.getBlock(x, y, z);
+    public BlockState block(final int x, final int y, final int z) {
+        return this.blockBuffer.block(x, y, z);
     }
 
     @Override
-    public FluidState getFluid(final int x, final int y, final int z) {
-        return this.blockBuffer.getFluid(x, y, z);
+    public FluidState fluid(final int x, final int y, final int z) {
+        return this.blockBuffer.fluid(x, y, z);
     }
 
     @Override
-    public int getHighestYAt(final int x, final int z) {
-        return this.blockBuffer.getHighestYAt(x, z);
+    public int highestYAt(final int x, final int z) {
+        return this.blockBuffer.highestYAt(x, z);
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableEntityBuffer, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<ObjectArrayMutableEntityBuffer, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
         final StreamOptions options
     ) {
         final Stream<VolumeElement<ObjectArrayMutableEntityBuffer, BlockState>> stateStream = IntStream.range(
-            this.getBlockMin().getX(),
-            this.getBlockMax().getX() + 1
+            this.blockMin().getX(),
+            this.blockMax().getX() + 1
         )
-            .mapToObj(x -> IntStream.range(this.getBlockMin().getZ(), this.getBlockMax().getZ() + 1)
-                .mapToObj(z -> IntStream.range(this.getBlockMin().getY(), this.getBlockMax().getY() + 1)
+            .mapToObj(x -> IntStream.range(this.blockMin().getZ(), this.blockMax().getZ() + 1)
+                .mapToObj(z -> IntStream.range(this.blockMin().getY(), this.blockMax().getY() + 1)
                     .mapToObj(y -> VolumeElement.of(
                         this,
-                        () -> this.blockBuffer.getBlock(x, y, z),
+                        () -> this.blockBuffer.block(x, y, z),
                         new Vector3i(x, y, z)
                     ))
                 ).flatMap(Function.identity())
@@ -153,8 +153,8 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
         if (entity == null) {
             throw new IllegalArgumentException("Entity cannot be null!");
         }
-        if (!this.containsBlock(entity.getPosition().toInt())) {
-            throw new IllegalArgumentException(String.format("Entity is out of bounds! {min: %s, max: %s} does not contain %s", this.getBlockMin(), this.getBlockMax(), entity.getPosition()));
+        if (!this.containsBlock(entity.position().toInt())) {
+            throw new IllegalArgumentException(String.format("Entity is out of bounds! {min: %s, max: %s} does not contain %s", this.blockMin(), this.blockMax(), entity.position()));
         }
         return this.entities.add(entity);
     }
@@ -167,7 +167,7 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public Collection<? extends Player> getPlayers() {
+    public Collection<? extends Player> players() {
         return this.entities.stream()
             .filter(entity -> entity instanceof Player)
             .map(entity -> (Player) entity)
@@ -175,31 +175,31 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public Optional<Entity> getEntity(final UUID uuid) {
+    public Optional<Entity> entity(final UUID uuid) {
         if (uuid == null) {
             throw new IllegalArgumentException("UUID cannot be null!");
         }
         return this.entities.stream()
-            .filter(entity -> uuid.equals(entity.getUniqueId()))
+            .filter(entity -> uuid.equals(entity.uniqueId()))
             .findFirst();
     }
 
     @Override
-    public <T extends Entity> Collection<? extends T> getEntities(final Class<? extends T> entityClass, final AABB box,
+    public <T extends Entity> Collection<? extends T> entities(final Class<? extends T> entityClass, final AABB box,
         @Nullable final Predicate<? super T> predicate
     ) {
         Objects.requireNonNull(entityClass);
         Objects.requireNonNull(box);
-        if (!this.containsBlock(box.getMin().toInt())) {
+        if (!this.containsBlock(box.min().toInt())) {
             throw new IllegalArgumentException("Box is larger than volume allowed");
         }
-        if (!this.containsBlock(box.getMax().toInt())) {
+        if (!this.containsBlock(box.max().toInt())) {
             throw new IllegalArgumentException("Box is larger than volume allowed!");
         }
         Stream<T> tStream = this.entities.stream()
             .filter(entityClass::isInstance)
             .map(entity -> (T) entity)
-            .filter(entity -> box.contains(entity.getPosition()));
+            .filter(entity -> box.contains(entity.position()));
         if (predicate != null) {
             tStream = tStream.filter(predicate);
         }
@@ -209,28 +209,28 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
+    public Collection<? extends Entity> entities(final AABB box, final Predicate<? super Entity> filter) {
         Objects.requireNonNull(filter, "Filter cannot be null");
         Objects.requireNonNull(box, "Bounding box cannot be null");
-        if (!this.containsBlock(box.getMin().toInt())) {
+        if (!this.containsBlock(box.min().toInt())) {
             throw new IllegalArgumentException("Box is larger than volume allowed");
         }
-        if (!this.containsBlock(box.getMax().toInt())) {
+        if (!this.containsBlock(box.max().toInt())) {
             throw new IllegalArgumentException("Box is larger than volume allowed!");
         }
         return this.entities.stream()
-            .filter(entity -> box.contains(entity.getPosition()))
+            .filter(entity -> box.contains(entity.position()))
             .filter(filter)
             .collect(Collectors.toList());
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableEntityBuffer, Entity> getEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<ObjectArrayMutableEntityBuffer, Entity> entityStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        VolumeStreamUtils.validateStreamArgs(min, max, this.getBlockMin(), this.getBlockMax(), options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
         // Normally, we'd be able to shadow-copy, but we can't copy entities, and we're only using a list, so we can iterate only on the list.
         final Stream<VolumeElement<ObjectArrayMutableEntityBuffer, Entity>> backingStream = this.entities.stream()
-            .map(entity -> VolumeElement.of(this, entity, entity.getBlockPosition()));
+            .map(entity -> VolumeElement.of(this, entity, entity.blockPosition()));
         return new SpongeVolumeStream<>(backingStream, () -> this);
     }
 

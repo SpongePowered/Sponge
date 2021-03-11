@@ -92,7 +92,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
             return progress.isDone();
         }
 
-        final AdvancementCriterion criterion = ((org.spongepowered.api.advancement.criteria.CriterionProgress) progress).getCriterion();
+        final AdvancementCriterion criterion = ((org.spongepowered.api.advancement.criteria.CriterionProgress) progress).criterion();
         final CriterionBridge mixinCriterion = (CriterionBridge) criterion;
         // Only remove the trigger once the goal is reached
         if (mixinCriterion.bridge$getScoreCriterion() != null) {
@@ -116,7 +116,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
         }
 
         final org.spongepowered.api.advancement.Advancement advancement =
-                ((org.spongepowered.api.advancement.AdvancementProgress) advancementProgress).getAdvancement();
+                ((org.spongepowered.api.advancement.AdvancementProgress) advancementProgress).advancement();
         final AdvancementCriterion advancementCriterion = (AdvancementCriterion) ((Advancement) advancement).getCriteria().get(criterion);
         final CriterionBridge criterionBridge = (CriterionBridge) advancementCriterion;
         // Only remove the trigger once the goal is reached
@@ -132,8 +132,8 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
         final ImmutableSet.Builder<AdvancementTree> builder = ImmutableSet.builder();
         for (final Map.Entry<Advancement, AdvancementProgress> entry : this.advancements.entrySet()) {
             final org.spongepowered.api.advancement.Advancement advancement = (org.spongepowered.api.advancement.Advancement) entry.getKey();
-            if (!advancement.getParent().isPresent()) {
-                advancement.getTree().ifPresent(builder::add);
+            if (!advancement.parent().isPresent()) {
+                advancement.tree().ifPresent(builder::add);
             }
         }
         return builder.build();
@@ -181,13 +181,13 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
 
         final Audience channel;
         if (this.impl$message != null) {
-            channel = Sponge.getServer().getBroadcastAudience();
+            channel = Sponge.server().broadcastAudience();
         } else {
             channel = Audience.empty();
         }
 
         final AdvancementEvent.Grant event = SpongeEventFactory.createAdvancementEventGrant(
-                Sponge.getServer().getCauseStackManager().getCurrentCause(),
+                Sponge.server().causeStackManager().currentCause(),
                 channel,
                 Optional.of(channel),
                 this.impl$message == null ? Component.empty() : this.impl$message,
@@ -198,7 +198,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
         );
         SpongeCommon.postEvent(event);
         if (!event.isMessageCancelled()) {
-            event.getAudience().ifPresent(eventChannel -> eventChannel.sendMessage(Identity.nil(), event.getMessage()));
+            event.audience().ifPresent(eventChannel -> eventChannel.sendMessage(Identity.nil(), event.message()));
         }
 
         this.impl$message = null;

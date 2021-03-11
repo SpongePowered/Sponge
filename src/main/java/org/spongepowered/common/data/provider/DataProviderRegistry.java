@@ -104,7 +104,7 @@ public final class DataProviderRegistry {
         final Stream<DataProvider> stream = this.dataProviders.keySet().stream()
                 .map(key -> this.getProvider((Key) key, holderType))
                 .filter(provider -> !(provider instanceof EmptyDataProvider));
-        final Map<Key<?>, DataProvider<?, ?>> map = stream.collect(Collectors.toMap(p -> (Key<?>) p.getKey(), p -> (DataProvider<?, ?>) p));
+        final Map<Key<?>, DataProvider<?, ?>> map = stream.collect(Collectors.toMap(p -> (Key<?>) p.key(), p -> (DataProvider<?, ?>) p));
         return new DataProviderLookup(map);
     }
 
@@ -148,7 +148,7 @@ public final class DataProviderRegistry {
     public DataProviderLookup buildLookup(final Predicate<DataProvider<?,?>> predicate) {
         final Stream<DataProvider> stream = this.dataProviders.keySet().stream()
                 .map(key -> DataProviderRegistry.buildDelegateProvider((Key) key, (List) this.dataProviders.get(key).stream().filter(predicate)));
-        final Map<Key<?>, DataProvider<?, ?>> map = stream.collect(Collectors.toMap(p -> (Key<?>) p.getKey(), p -> (DataProvider<?, ?>) p));
+        final Map<Key<?>, DataProvider<?, ?>> map = stream.collect(Collectors.toMap(p -> (Key<?>) p.key(), p -> (DataProvider<?, ?>) p));
         return new DataProviderLookup(map);
     }
 
@@ -200,7 +200,7 @@ public final class DataProviderRegistry {
      * @param provider The data provider
      */
     public void register(final DataProvider<?,?> provider) {
-        this.dataProviders.put(provider.getKey(), provider);
+        this.dataProviders.put(provider.key(), provider);
         this.dataProviderCache.clear();
         this.dataProviderLookupCache.clear();
     }

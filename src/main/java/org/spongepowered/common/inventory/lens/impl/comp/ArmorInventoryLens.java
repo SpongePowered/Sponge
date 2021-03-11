@@ -76,7 +76,7 @@ public class ArmorInventoryLens extends SlotBasedLens {
     public Inventory getAdapter(Fabric fabric, Inventory parent) {
         ArmorEquipable carrier = null;
         if (parent instanceof CarriedInventory) {
-            Optional opt = ((CarriedInventory) parent).getCarrier();
+            Optional opt = ((CarriedInventory) parent).carrier();
             if (opt.isPresent() && opt.get() instanceof ArmorEquipable) {
                 carrier = ((ArmorEquipable) opt.get());
             }

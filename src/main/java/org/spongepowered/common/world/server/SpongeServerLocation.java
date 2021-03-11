@@ -31,13 +31,8 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.value.CollectionValue;
-import org.spongepowered.api.data.value.MapValue;
-import org.spongepowered.api.data.value.MergeFunction;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.fluid.FluidType;
@@ -60,13 +55,10 @@ import java.time.temporal.TemporalUnit;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
-import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.Set;
 import java.util.StringJoiner;
 import java.util.function.BiFunction;
-import java.util.function.Function;
 
 @DefaultQualifier(NonNull.class)
 public final class SpongeServerLocation extends SpongeLocation<ServerWorld, ServerLocation> implements ServerLocation, SpongeMutableDataHolder {
@@ -81,49 +73,49 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
 
     @Override
     public ServerLocation withWorld(final ServerWorld world) {
-        return new SpongeServerLocation(world, this.getPosition(), this.getChunkPosition(), this.getBiomePosition());
+        return new SpongeServerLocation(world, this.position(), this.chunkPosition(), this.biomePosition());
     }
 
     @Override
     public ServerLocation withPosition(final Vector3d position) {
-        final ChunkLayout chunkLayout = this.getWorld().getEngine().getChunkLayout();
-        return new SpongeServerLocation(this.getWorld(), chunkLayout, position);
+        final ChunkLayout chunkLayout = this.world().engine().chunkLayout();
+        return new SpongeServerLocation(this.world(), chunkLayout, position);
     }
 
     @Override
     public ServerLocation withBlockPosition(final Vector3i position) {
-        final ChunkLayout chunkLayout = this.getWorld().getEngine().getChunkLayout();
-        return new SpongeServerLocation(this.getWorld(), chunkLayout, position.toDouble());
+        final ChunkLayout chunkLayout = this.world().engine().chunkLayout();
+        return new SpongeServerLocation(this.world(), chunkLayout, position.toDouble());
     }
 
     @Override
     public ServerLocation sub(final Vector3d v) {
-        return this.withPosition(this.getPosition().sub(v));
+        return this.withPosition(this.position().sub(v));
     }
 
     @Override
     public ServerLocation sub(final Vector3i v) {
-        return this.withBlockPosition(this.getBlockPosition().sub(v));
+        return this.withBlockPosition(this.blockPosition().sub(v));
     }
 
     @Override
     public ServerLocation sub(final double x, final double y, final double z) {
-        return this.withPosition(this.getPosition().sub(x, y, z));
+        return this.withPosition(this.position().sub(x, y, z));
     }
 
     @Override
     public ServerLocation add(final Vector3d v) {
-        return this.withPosition(this.getPosition().add(v));
+        return this.withPosition(this.position().add(v));
     }
 
     @Override
     public ServerLocation add(final Vector3i v) {
-        return this.withBlockPosition(this.getBlockPosition().add(v));
+        return this.withBlockPosition(this.blockPosition().add(v));
     }
 
     @Override
     public ServerLocation add(final double x, final double y, final double z) {
-        return this.withPosition(this.getPosition().add(x, y, z));
+        return this.withPosition(this.position().add(x, y, z));
     }
 
     @Override
@@ -137,8 +129,8 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
     }
 
     @Override
-    public ResourceKey getWorldKey() {
-        return this.getWorld().getKey();
+    public ResourceKey worldKey() {
+        return this.world().key();
     }
 
     @Override
@@ -175,37 +167,37 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
 
     @Override
     public boolean removeBlock() {
-        return this.getWorld().removeBlock(this.getBlockPosition());
+        return this.world().removeBlock(this.blockPosition());
     }
 
     @Override
     public <E extends Entity> E createEntity(final EntityType<E> type) {
-        return this.getWorld().createEntity(type, this.getPosition());
+        return this.world().createEntity(type, this.position());
     }
 
     @Override
     public boolean spawnEntity(final Entity entity) {
-        return this.getWorld().spawnEntity(entity);
+        return this.world().spawnEntity(entity);
     }
 
     @Override
     public Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
-        return this.getWorld().spawnEntities(entities);
+        return this.world().spawnEntities(entities);
     }
 
     @Override
     public ServerLocation asHighestLocation() {
-        return this.withBlockPosition(this.getWorld().getHighestPositionAt(this.getBlockPosition()));
+        return this.withBlockPosition(this.world().highestPositionAt(this.blockPosition()));
     }
 
     @Override
     public BlockSnapshot createSnapshot() {
-        return this.getWorld().createSnapshot(this.getBlockPosition());
+        return this.world().createSnapshot(this.blockPosition());
     }
 
     @Override
-    public Collection<? extends ScheduledUpdate<BlockType>> getScheduledBlockUpdates() {
-        return this.getWorld().getScheduledBlockUpdates().getScheduledAt(this.getBlockPosition());
+    public Collection<? extends ScheduledUpdate<BlockType>> scheduledBlockUpdates() {
+        return this.world().scheduledBlockUpdates().scheduledAt(this.blockPosition());
     }
 
     @Override
@@ -229,8 +221,8 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
     }
 
     @Override
-    public Collection<? extends ScheduledUpdate<FluidType>> getScheduledFluidUpdates() {
-        return this.getWorld().getScheduledFluidUpdates().getScheduledAt(this.getBlockPosition());
+    public Collection<? extends ScheduledUpdate<FluidType>> scheduledFluidUpdates() {
+        return this.world().scheduledFluidUpdates().scheduledAt(this.blockPosition());
     }
 
     @Override
@@ -262,7 +254,7 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
 
     @Override
     public List<DataHolder> impl$delegateDataHolder() {
-        return Arrays.asList(this, this.getBlock());
+        return Arrays.asList(this, this.block());
     }
 
     @Override
@@ -275,20 +267,20 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
         }
         final SpongeServerLocation that = (SpongeServerLocation) o;
         return this.worldRef.get().equals(that.worldRef.get()) &&
-                   this.getPosition().equals(that.getPosition()) &&
-                   this.getBlockPosition().equals(that.getBlockPosition());
+                   this.position().equals(that.position()) &&
+                   this.blockPosition().equals(that.blockPosition());
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.worldRef.get(), this.getPosition(), this.getBlockPosition());
+        return Objects.hash(this.worldRef.get(), this.position(), this.blockPosition());
     }
 
     @Override
     public String toString() {
         return new StringJoiner(", ", SpongeServerLocation.class.getSimpleName() + "[", "]")
-                   .add("worldRef=" + this.getWorldKey())
-                   .add("position=" + this.getPosition())
+                   .add("worldRef=" + this.worldKey())
+                   .add("position=" + this.position())
                    .toString();
     }
 
@@ -299,7 +291,7 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
             Objects.requireNonNull(world);
             Objects.requireNonNull(position);
 
-            return new SpongeServerLocation(world, world.getEngine().getChunkLayout(), position);
+            return new SpongeServerLocation(world, world.engine().chunkLayout(), position);
         }
 
         @Override
@@ -307,7 +299,7 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
             Objects.requireNonNull(world);
             Objects.requireNonNull(blockPosition);
 
-            final ChunkLayout chunkLayout = world.getEngine().getChunkLayout();
+            final ChunkLayout chunkLayout = world.engine().chunkLayout();
             final Vector3d position = blockPosition.toDouble();
             return new SpongeServerLocation(world, chunkLayout, position);
         }
@@ -317,11 +309,11 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
             Objects.requireNonNull(worldKey);
             Objects.requireNonNull(position);
 
-            final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().world(worldKey);
+            final Optional<ServerWorld> world = Sponge.server().worldManager().world(worldKey);
             if (!world.isPresent()) {
                 throw new IllegalStateException("Unknown world for key: " + worldKey.toString());
             }
-            return new SpongeServerLocation(world.get(), world.get().getEngine().getChunkLayout(), position);
+            return new SpongeServerLocation(world.get(), world.get().engine().chunkLayout(), position);
         }
 
         @Override
@@ -329,11 +321,11 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
             Objects.requireNonNull(worldKey);
             Objects.requireNonNull(blockPosition);
 
-            final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().world(worldKey);
+            final Optional<ServerWorld> world = Sponge.server().worldManager().world(worldKey);
             if (!world.isPresent()) {
                 throw new IllegalStateException("Unknown world for key: " + worldKey.toString());
             }
-            return new SpongeServerLocation(world.get(), world.get().getEngine().getChunkLayout(), blockPosition.toDouble());
+            return new SpongeServerLocation(world.get(), world.get().engine().chunkLayout(), blockPosition.toDouble());
         }
     }
 }

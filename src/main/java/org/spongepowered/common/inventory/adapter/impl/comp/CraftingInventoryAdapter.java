@@ -45,7 +45,7 @@ public class CraftingInventoryAdapter extends BasicInventoryAdapter implements C
     }
 
     @Override
-    public CraftingGridInventory getCraftingGrid() {
+    public CraftingGridInventory craftingGrid() {
         if (this.craftingGrid == null) {
             this.craftingGrid = (CraftingGridInventory) this.craftingLens.getCraftingGrid().getAdapter(this.inventoryAdapter$getFabric(), this);
         }
@@ -53,7 +53,7 @@ public class CraftingInventoryAdapter extends BasicInventoryAdapter implements C
     }
 
     @Override
-    public CraftingOutput getResult() {
+    public CraftingOutput result() {
         if (this.result == null) {
             this.result = (CraftingOutput) this.craftingLens.getOutputSlot().getAdapter(this.inventoryAdapter$getFabric(), this);
         }

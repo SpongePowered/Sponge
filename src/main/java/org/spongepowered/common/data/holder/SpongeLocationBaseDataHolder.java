@@ -50,7 +50,7 @@ public interface SpongeLocationBaseDataHolder extends LocationBaseDataHolder.Mut
     }
 
     @Override
-    default boolean supports(int x, int y, int z, Key<?> key) {
+    default boolean supports(final int x, final int y, final int z, final Key<?> key) {
         return this.impl$dataholder(x, y, z).supports(key);
     }
 
@@ -61,17 +61,17 @@ public interface SpongeLocationBaseDataHolder extends LocationBaseDataHolder.Mut
 
 
     @Override
-    default <E, V extends Value<E>> Optional<V> getValue(int x, int y, int z, Key<V> key) {
+    default <E, V extends Value<E>> Optional<V> getValue(final int x, final int y, final int z, final Key<V> key) {
         return this.impl$dataholder(x, y, z).getValue(key);
     }
 
     @Override
-    default Set<Key<?>> getKeys(int x, int y, int z) {
+    default Set<Key<?>> keys(final int x, final int y, final int z) {
         return this.impl$dataholder(x, y, z).getKeys();
     }
 
     @Override
-    default Set<Value.Immutable<?>> getValues(int x, int y, int z) {
+    default Set<Value.Immutable<?>> getValues(final int x, final int y, final int z) {
         return this.impl$dataholder(x, y, z).getValues();
     }
 

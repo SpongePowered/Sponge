@@ -95,7 +95,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
     public List<String> suggestions(final CommandCause cause, final CommandMapping mapping, final String command, final String arguments) throws CommandException {
         final Command.Raw commandToExecute = this.commands.get(mapping);
         if (commandToExecute.canExecute(cause)) {
-            return commandToExecute.getSuggestions(cause, new SpongeStringReader(arguments));
+            return commandToExecute.suggestions(cause, new SpongeStringReader(arguments));
         }
         return Collections.emptyList();
     }
@@ -104,7 +104,7 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
     public Optional<Component> help(final CommandCause cause, final CommandMapping mapping) {
         final Command.Raw commandToExecute = this.commands.get(mapping);
         if (commandToExecute.canExecute(cause)) {
-            return commandToExecute.getHelp(cause);
+            return commandToExecute.help(cause);
         }
         return Optional.empty();
     }

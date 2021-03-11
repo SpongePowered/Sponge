@@ -79,12 +79,12 @@ public abstract class DamageSourceMixin_API implements DamageSource {
     }
 
     @Override
-    public double getExhaustion() {
+    public double exhaustion() {
         return this.shadow$getFoodExhaustion();
     }
 
     @Override
-    public DamageType getType() {
+    public DamageType type() {
         return ((DamageSourceBridge) this).bridge$getDamageType();
     }
 

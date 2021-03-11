@@ -35,7 +35,7 @@ public final class ItemTypeQuery extends ItemStackQuery<ItemType> {
 
     @Override
     protected boolean matches(ItemStack itemStack, ItemType arg) {
-        return itemStack.getType().equals(arg);
+        return itemStack.type().equals(arg);
     }
 
 }

@@ -45,8 +45,8 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
 
     @Override
     @SuppressWarnings("unchecked")
-    public SpongeKey<? extends SetValue<E>, Set<E>> getKey() {
-        return (SpongeKey<? extends SetValue<E>, Set<E>>) super.getKey();
+    public SpongeKey<? extends SetValue<E>, Set<E>> key() {
+        return (SpongeKey<? extends SetValue<E>, Set<E>>) super.key();
     }
 
     @Override
@@ -63,16 +63,16 @@ public class ImmutableSpongeSetValue<E> extends ImmutableSpongeCollectionValue<E
             set = new HashSet<>(this.element);
             consumer.accept(set);
         }
-        return this.getKey().getValueConstructor().getRawImmutable(set).asImmutable();
+        return this.key().getValueConstructor().getRawImmutable(set).asImmutable();
     }
 
     @Override
     public SetValue.Immutable<E> with(Set<E> value) {
-        return this.getKey().getValueConstructor().getImmutable(value).asImmutable();
+        return this.key().getValueConstructor().getImmutable(value).asImmutable();
     }
 
     @Override
     public SetValue.Mutable<E> asMutable() {
-        return new MutableSpongeSetValue<>(this.getKey(), this.get());
+        return new MutableSpongeSetValue<>(this.key(), this.get());
     }
 }

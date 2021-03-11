@@ -39,7 +39,7 @@ public abstract class ClientPacketListenerMixin_API implements LocalPlayerConnec
     // @formatter:on
 
     @Override
-    public LocalPlayer getPlayer() {
+    public LocalPlayer player() {
         return (LocalPlayer) this.minecraft.player;
     }
 }

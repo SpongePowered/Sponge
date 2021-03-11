@@ -99,8 +99,8 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         if (event.isCancelled()) {
             return InteractionResult.FAIL;
         }
-        final Tristate useItem = event.getUseItemResult();
-        final Tristate useBlock = event.getUseBlockResult();
+        final Tristate useItem = event.useItemResult();
+        final Tristate useBlock = event.useBlockResult();
         // Sponge end
         if (this.gameModeForPlayer == GameType.SPECTATOR) {
             final MenuProvider inamedcontainerprovider = blockstate.getMenuProvider(worldIn, blockpos);

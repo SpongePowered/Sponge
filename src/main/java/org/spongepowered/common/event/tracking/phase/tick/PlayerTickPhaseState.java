@@ -75,8 +75,8 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final PlayerTickContext context) {
         final Player player = context.getSource(Player.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
-        explosionContext.creator(((ServerPlayer) player).getUser());
-        explosionContext.notifier(((ServerPlayer) player).getUser());
+        explosionContext.creator(((ServerPlayer) player).user());
+        explosionContext.notifier(((ServerPlayer) player).user());
         explosionContext.source(player);
     }
 

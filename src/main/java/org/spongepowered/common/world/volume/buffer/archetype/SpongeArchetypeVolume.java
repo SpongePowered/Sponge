@@ -79,54 +79,54 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     }
 
     @Override
-    public Optional<BlockEntityArchetype> getBlockEntityArchetype(final int x, final int y, final int z) {
+    public Optional<BlockEntityArchetype> blockEntityArchetype(final int x, final int y, final int z) {
         return Optional.empty();
     }
 
     @Override
-    public Map<Vector3i, BlockEntityArchetype> getBlockEntityArchetypes() {
-        return this.blockEntities.getBlockEntityArchetypes();
+    public Map<Vector3i, BlockEntityArchetype> blockEntityArchetypes() {
+        return this.blockEntities.blockEntityArchetypes();
     }
 
     @Override
-    public VolumeStream<ArchetypeVolume, BlockEntityArchetype> getBlockEntityArchetypeStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<ArchetypeVolume, BlockEntityArchetype> blockEntityArchetypeStream(final Vector3i min, final Vector3i max,
         final StreamOptions options
     ) {
 
-        final Vector3i blockMin = this.getBlockMin();
-        final Vector3i blockMax = this.getBlockMax();
+        final Vector3i blockMin = this.blockMin();
+        final Vector3i blockMax = this.blockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
-        final Stream<VolumeElement<ArchetypeVolume, BlockEntityArchetype>> stateStream = this.blockEntities.getBlockEntityArchetypeStream(min, max, options)
+        final Stream<VolumeElement<ArchetypeVolume, BlockEntityArchetype>> stateStream = this.blockEntities.blockEntityArchetypeStream(min, max, options)
             .toStream()
-            .map(element -> VolumeElement.of(this, element::getType, element.getPosition()));
+            .map(element -> VolumeElement.of(this, element::type, element.position()));
         return new SpongeVolumeStream<>(stateStream, () -> this);
     }
 
     @Override
-    public Collection<EntityArchetype> getEntityArchetypes() {
-        return this.entities.getEntityArchetypes();
+    public Collection<EntityArchetype> entityArchetypes() {
+        return this.entities.entityArchetypes();
     }
 
     @Override
-    public Collection<EntityArchetype> getEntityArchetypes(final Predicate<EntityArchetype> filter) {
-        return this.entities.getEntityArchetypes(filter);
+    public Collection<EntityArchetype> entityArchetypes(final Predicate<EntityArchetype> filter) {
+        return this.entities.entityArchetypes(filter);
     }
 
     @Override
-    public VolumeStream<ArchetypeVolume, EntityArchetype> getEntityArchetypeStream(
+    public VolumeStream<ArchetypeVolume, EntityArchetype> entityArchetypeStream(
         final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        final Vector3i blockMin = this.getBlockMin();
-        final Vector3i blockMax = this.getBlockMax();
+        final Vector3i blockMin = this.blockMin();
+        final Vector3i blockMax = this.blockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
-        final Stream<VolumeElement<ArchetypeVolume, EntityArchetype>> stateStream = this.entities.getEntityArchetypeStream(min, max, options).toStream()
-            .map(element -> VolumeElement.of(this, element::getType, element.getPosition()));
+        final Stream<VolumeElement<ArchetypeVolume, EntityArchetype>> stateStream = this.entities.entityArchetypeStream(min, max, options).toStream()
+            .map(element -> VolumeElement.of(this, element::type, element.position()));
         return new SpongeVolumeStream<>(stateStream, () -> this);
     }
 
     @Override
-    public Stream<EntityArchetypeEntry> getEntitiesByPosition() {
-        return this.entities.getEntitiesByPosition();
+    public Stream<EntityArchetypeEntry> entitiesByPosition() {
+        return this.entities.entitiesByPosition();
     }
 
     @Override
@@ -140,25 +140,25 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     }
 
     @Override
-    public BlockState getBlock(final int x, final int y, final int z) {
-        return this.blocks.getBlock(x, y, z);
+    public BlockState block(final int x, final int y, final int z) {
+        return this.blocks.block(x, y, z);
     }
 
     @Override
-    public FluidState getFluid(final int x, final int y, final int z) {
-        return this.blocks.getFluid(x, y, z);
+    public FluidState fluid(final int x, final int y, final int z) {
+        return this.blocks.fluid(x, y, z);
     }
 
     @Override
-    public int getHighestYAt(final int x, final int z) {
-        return this.blocks.getHighestYAt(x, z);
+    public int highestYAt(final int x, final int z) {
+        return this.blocks.highestYAt(x, z);
     }
 
     @Override
-    public VolumeStream<ArchetypeVolume, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<ArchetypeVolume, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        final Vector3i blockMin = this.getBlockMin();
-        final Vector3i blockMax = this.getBlockMax();
+        final Vector3i blockMin = this.blockMin();
+        final Vector3i blockMax = this.blockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final ArrayMutableBlockBuffer buffer;
         if (options.carbonCopy()) {
@@ -169,7 +169,7 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         final Stream<VolumeElement<ArchetypeVolume, BlockState>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
             .mapToObj(x -> IntStream.range(blockMin.getZ(), blockMax.getZ() + 1)
                 .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
-                    .mapToObj(y -> VolumeElement.of((ArchetypeVolume) this, () -> buffer.getBlock(x, y, z), new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.of((ArchetypeVolume) this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);
@@ -199,22 +199,22 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     }
 
     @Override
-    public Biome getBiome(final int x, final int y, final int z) {
-        return this.biomes.getBiome(x, y, z);
+    public Biome biome(final int x, final int y, final int z) {
+        return this.biomes.biome(x, y, z);
     }
 
     @Override
-    public VolumeStream<ArchetypeVolume, Biome> getBiomeStream(
+    public VolumeStream<ArchetypeVolume, Biome> biomeStream(
         final Vector3i min,
         final Vector3i max,
         final StreamOptions options
     ) {
-        final Vector3i blockMin = this.getBlockMin();
-        final Vector3i blockMax = this.getBlockMax();
+        final Vector3i blockMin = this.blockMin();
+        final Vector3i blockMax = this.blockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
-        final Stream<VolumeElement<ArchetypeVolume, Biome>> stateStream = this.biomes.getBiomeStream(min, max, options)
+        final Stream<VolumeElement<ArchetypeVolume, Biome>> stateStream = this.biomes.biomeStream(min, max, options)
             .toStream()
-            .map(element -> VolumeElement.of(this, element::getType, element.getPosition()));
+            .map(element -> VolumeElement.of(this, element::type, element.position()));
         return new SpongeVolumeStream<>(stateStream, () -> this);
     }
 

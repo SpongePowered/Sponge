@@ -41,27 +41,27 @@ public final class SpongeChunkLayout implements ChunkLayout {
     }
 
     @Override
-    public Vector3i getChunkSize() {
+    public Vector3i chunkSize() {
         return SpongeChunkLayout.CHUNK_SIZE;
     }
 
     @Override
-    public Vector3i getSpaceMax() {
+    public Vector3i spaceMax() {
         return SpongeChunkLayout.SPACE_MAX;
     }
 
     @Override
-    public Vector3i getSpaceMin() {
+    public Vector3i spaceMin() {
         return SpongeChunkLayout.SPACE_MIN;
     }
 
     @Override
-    public Vector3i getSpaceSize() {
+    public Vector3i spaceSize() {
         return SpongeChunkLayout.SPACE_SIZE;
     }
 
     @Override
-    public Vector3i getSpaceOrigin() {
+    public Vector3i spaceOrigin() {
         return Vector3i.ZERO;
     }
 

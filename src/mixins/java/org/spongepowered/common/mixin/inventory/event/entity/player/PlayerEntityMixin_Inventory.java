@@ -63,15 +63,15 @@ public class PlayerEntityMixin_Inventory {
             List<SlotTransaction> slotTransactions = ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions();
             if (slotIn == EquipmentSlot.MAINHAND) {
                 final ItemStack orig = this.inventory.items.get(this.inventory.selected);
-                final Slot slot = ((PlayerInventory) this.inventory).getPrimary().getHotbar().getSlot(this.inventory.selected).get();
+                final Slot slot = ((PlayerInventory) this.inventory).primary().hotbar().slot(this.inventory.selected).get();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn == EquipmentSlot.OFFHAND) {
                 final ItemStack orig = this.inventory.offhand.get(0);
-                final Slot slot = ((PlayerInventory) this.inventory).getOffhand();
+                final Slot slot = ((PlayerInventory) this.inventory).offhand();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
                 final ItemStack orig = this.inventory.armor.get(slotIn.getIndex());
-                final Slot slot = ((PlayerInventory) this.inventory).getEquipment().getSlot(slotIn.getIndex()).get();
+                final Slot slot = ((PlayerInventory) this.inventory).equipment().slot(slotIn.getIndex()).get();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             }
         }

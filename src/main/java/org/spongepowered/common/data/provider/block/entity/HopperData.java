@@ -41,7 +41,7 @@ public final class HopperData {
                     .create(Keys.COOLDOWN)
                         .get(h -> new SpongeTicks(Math.max(h.accessor$cooldownTime(), 0)))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0) {
                                 return false;
                             }

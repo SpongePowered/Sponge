@@ -41,12 +41,12 @@ public abstract class CriterionMixin_API implements DefaultedAdvancementCriterio
     @Shadow @Final private CriterionTriggerInstance trigger;
 
     @Override
-    public String getName() {
+    public String name() {
         return ((CriterionBridge) this).bridge$getName();
     }
 
     @Override
-    public Optional<FilteredTrigger<?>> getTrigger() {
+    public Optional<FilteredTrigger<?>> trigger() {
         return Optional.ofNullable((FilteredTrigger<?>) this.trigger);
     }
 }

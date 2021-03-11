@@ -113,16 +113,16 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
 
     @Override
     public Explosion.Builder from(Explosion value) {
-        this.location = value.getServerLocation();
-        this.sourceExplosive = value.getSourceExplosive().orElse(null);
-        this.radius = value.getRadius();
+        this.location = value.serverLocation();
+        this.sourceExplosive = value.sourceExplosive().orElse(null);
+        this.radius = value.radius();
         this.canCauseFire = value.canCauseFire();
         this.shouldBreakBlocks = value.shouldBreakBlocks();
         this.shouldSmoke = value.shouldPlaySmoke();
         this.shouldDamageEntities = value.shouldDamageEntities();
-        this.resolution = value.getResolution();
-        this.randomness = value.getRandomness();
-        this.knockback = value.getKnockback();
+        this.resolution = value.resolution();
+        this.randomness = value.randomness();
+        this.knockback = value.knockback();
         return this;
     }
 
@@ -146,8 +146,8 @@ public class SpongeExplosionBuilder implements Explosion.Builder {
         // TODO Check coordinates and if world is loaded here.
         Preconditions.checkState(this.location != null, "Location is null!");
 
-        final World<?, ?> world = this.location.getWorld();
-        final Vector3d origin = this.location.getPosition();
+        final World<?, ?> world = this.location.world();
+        final Vector3d origin = this.location.position();
         final net.minecraft.world.level.Explosion explosion = new net.minecraft.world.level.Explosion((net.minecraft.world.level.Level) world,
                 (Entity) this.sourceExplosive, null, null, origin.getX(), origin.getY(), origin.getZ(), this.radius,
                 this.canCauseFire, this.shouldSmoke ? net.minecraft.world.level.Explosion.BlockInteraction.DESTROY : net.minecraft.world.level.Explosion.BlockInteraction.NONE);

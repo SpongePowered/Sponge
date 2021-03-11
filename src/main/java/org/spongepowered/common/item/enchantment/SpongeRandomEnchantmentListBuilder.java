@@ -141,7 +141,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
 
     public static List<EnchantmentInstance> toNative(List<Enchantment> list) {
         return list.stream().map(ench ->
-                new EnchantmentInstance(((net.minecraft.world.item.enchantment.Enchantment) ench.getType()), ench.getLevel())
+                new EnchantmentInstance(((net.minecraft.world.item.enchantment.Enchantment) ench.type()), ench.level())
         ).collect(Collectors.toList());
     }
 

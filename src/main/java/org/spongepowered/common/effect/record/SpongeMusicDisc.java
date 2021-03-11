@@ -58,7 +58,7 @@ public final class SpongeMusicDisc implements MusicDisc {
     }
 
     @Override
-    public SoundType getSound() {
+    public SoundType sound() {
         return (SoundType) ((RecordItemAccessor) this.item).accessor$sound();
     }
 

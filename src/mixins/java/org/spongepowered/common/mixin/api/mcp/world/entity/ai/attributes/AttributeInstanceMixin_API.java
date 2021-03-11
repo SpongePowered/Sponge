@@ -60,17 +60,17 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
     // @formatter:on
 
     @Override
-    public AttributeType getType() {
+    public AttributeType type() {
         return (AttributeType) this.shadow$getAttribute();
     }
 
-    @Intrinsic
-    public double attribute$getBaseValue() {
+    @Override
+    public double baseValue() {
         return this.shadow$getBaseValue();
     }
 
-    @Intrinsic
-    public double attribute$getValue() {
+    @Override
+    public double value() {
         return this.shadow$getValue();
     }
 
@@ -80,12 +80,12 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
     }
 
     @Override
-    public Collection<AttributeModifier> getModifiers() {
+    public Collection<AttributeModifier> modifiers() {
         return (Collection) this.shadow$getModifiers();
     }
 
     @Override
-    public Collection<AttributeModifier> getModifiers(final AttributeOperation operation) {
+    public Collection<AttributeModifier> modifiers(final AttributeOperation operation) {
         return (Collection) this.shadow$getModifiers((net.minecraft.world.entity.ai.attributes.AttributeModifier.Operation) (Object) Objects.requireNonNull(operation, "operation"));
     }
 
@@ -95,7 +95,7 @@ public abstract class AttributeInstanceMixin_API implements Attribute {
     }
 
     @Override
-    public Optional<AttributeModifier> getModifier(final UUID uniqueId) {
+    public Optional<AttributeModifier> modifier(final UUID uniqueId) {
         return Optional.ofNullable((AttributeModifier) this.shadow$getModifier(Objects.requireNonNull(uniqueId, "uniqueId")));
     }
 

@@ -44,35 +44,35 @@ public final class SpongeTreeLayout implements TreeLayout {
     }
 
     @Override
-    public AdvancementTree getTree() {
+    public AdvancementTree tree() {
         return this.tree;
     }
 
     @Override
-    public Collection<TreeLayoutElement> getElements() {
+    public Collection<TreeLayoutElement> elements() {
         final ImmutableSet.Builder<TreeLayoutElement> elements = ImmutableSet.builder();
-        SpongeTreeLayout.collectElements(this.tree.getRootAdvancement(), elements);
+        SpongeTreeLayout.collectElements(this.tree.rootAdvancement(), elements);
         return elements.build();
     }
 
     private static void collectElements(final Advancement advancement, final ImmutableSet.Builder<TreeLayoutElement> elements) {
-        advancement.getDisplayInfo().ifPresent(displayInfo -> elements.add((TreeLayoutElement) displayInfo));
-        advancement.getChildren().forEach(child -> SpongeTreeLayout.collectElements(child, elements));
+        advancement.displayInfo().ifPresent(displayInfo -> elements.add((TreeLayoutElement) displayInfo));
+        advancement.children().forEach(child -> SpongeTreeLayout.collectElements(child, elements));
     }
     @Override
-    public Optional<TreeLayoutElement> getElement(final Advancement advancement) {
-        final Optional<AdvancementTree> tree = advancement.getTree();
-        if (!tree.isPresent() || !advancement.getDisplayInfo().isPresent() || !tree.get().equals(this.tree)) {
+    public Optional<TreeLayoutElement> element(final Advancement advancement) {
+        final Optional<AdvancementTree> tree = advancement.tree();
+        if (!tree.isPresent() || !advancement.displayInfo().isPresent() || !tree.get().equals(this.tree)) {
             return Optional.empty();
         }
-        return SpongeTreeLayout.findElementInfo(this.tree.getRootAdvancement(), advancement.getKey()).map(TreeLayoutElement.class::cast);
+        return SpongeTreeLayout.findElementInfo(this.tree.rootAdvancement(), advancement.key()).map(TreeLayoutElement.class::cast);
     }
 
     private static Optional<DisplayInfo> findElementInfo(Advancement advancement, ResourceKey key) {
-        if (advancement.getKey().equals(key)) {
-            return advancement.getDisplayInfo();
+        if (advancement.key().equals(key)) {
+            return advancement.displayInfo();
         }
-        for (Advancement child : advancement.getChildren()) {
+        for (Advancement child : advancement.children()) {
             final Optional<DisplayInfo> info = SpongeTreeLayout.findElementInfo(child, key);
             if (info.isPresent()) {
                 return info;

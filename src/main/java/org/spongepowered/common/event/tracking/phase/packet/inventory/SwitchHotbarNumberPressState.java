@@ -52,7 +52,7 @@ public final class SwitchHotbarNumberPressState extends BasicInventoryPacketStat
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {
         return SpongeEventFactory.createClickContainerEventNumberPress(
-            PhaseTracker.getCauseStackManager().getCurrentCause(),
+            PhaseTracker.getCauseStackManager().currentCause(),
             openContainer, transaction, Optional.ofNullable(slot), slotTransactions, usedButton);
     }
 

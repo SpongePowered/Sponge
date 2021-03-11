@@ -43,7 +43,7 @@ public abstract class AbstractGoalMixin_API<O extends Agent> implements Goal<O> 
      */
     @Override
     @Overwrite
-    public final Optional<GoalExecutor<O>> getExecutor() {
+    public final Optional<GoalExecutor<O>> executor() {
         return (Optional<GoalExecutor<O>>) (Optional<?>) ((GoalBridge) this).bridge$getGoalExecutor();
     }
 

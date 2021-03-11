@@ -43,14 +43,14 @@ public interface CriterionTriggerInstanceMixin_API extends FilteredTrigger {
     @Shadow ResourceLocation shadow$getCriterion();
 
     @Override
-    default Trigger getType() {
+    default Trigger type() {
         final CriterionTrigger triggerType = CriteriaTriggers.getCriterion(this.shadow$getCriterion());
         Preconditions.checkNotNull(triggerType, "triggerType");
         return (Trigger) triggerType;
     }
 
     @Override
-    default FilteredTriggerConfiguration getConfiguration() {
+    default FilteredTriggerConfiguration configuration() {
         return UnknownFilteredTriggerConfiguration.INSTANCE;
     }
 }

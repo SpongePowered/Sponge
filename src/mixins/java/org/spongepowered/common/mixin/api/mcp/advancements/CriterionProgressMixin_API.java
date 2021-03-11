@@ -45,7 +45,7 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
     @Shadow @Nullable private Date obtained;
 
     @Override
-    public AdvancementCriterion getCriterion() {
+    public AdvancementCriterion criterion() {
         return ((CriterionProgressBridge) this).bridge$getCriterion();
     }
 
@@ -65,8 +65,8 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
             return this.obtained.toInstant();
         }
         final AdvancementProgress advancementProgress = ((CriterionProgressBridge) this).bridge$getAdvancementProgress();
-        final org.spongepowered.api.advancement.Advancement advancement = advancementProgress.getAdvancement();
-        ((AdvancementProgressBridge) advancementProgress).bridge$getPlayerAdvancements().award((Advancement) advancement, this.getCriterion().getName());
+        final org.spongepowered.api.advancement.Advancement advancement = advancementProgress.advancement();
+        ((AdvancementProgressBridge) advancementProgress).bridge$getPlayerAdvancements().award((Advancement) advancement, this.criterion().name());
         return this.obtained.toInstant();
     }
 
@@ -77,8 +77,8 @@ public abstract class CriterionProgressMixin_API implements org.spongepowered.ap
         }
         final Instant instant = this.obtained.toInstant();
         final AdvancementProgress advancementProgress = ((CriterionProgressBridge) this).bridge$getAdvancementProgress();
-        final org.spongepowered.api.advancement.Advancement advancement = advancementProgress.getAdvancement();
-        ((AdvancementProgressBridge) advancementProgress).bridge$getPlayerAdvancements().revoke((Advancement) advancement, this.getCriterion().getName());
+        final org.spongepowered.api.advancement.Advancement advancement = advancementProgress.advancement();
+        ((AdvancementProgressBridge) advancementProgress).bridge$getPlayerAdvancements().revoke((Advancement) advancement, this.criterion().name());
         return Optional.of(instant);
     }
 

@@ -46,7 +46,6 @@ import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Collection;
-import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.NoSuchElementException;
@@ -91,13 +90,13 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
 
     @Override
     @NonNull
-    public Optional<org.spongepowered.api.command.Command.Parameterized> getExecutedCommand() {
+    public Optional<org.spongepowered.api.command.Command.Parameterized> executedCommand() {
         return Optional.ofNullable(this.targetCommand);
     }
 
     @Override
     @NonNull
-    public CommandCause getCause() {
+    public CommandCause cause() {
         return (CommandCause) this.getSource();
     }
 
@@ -108,17 +107,17 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
 
     @Override
     public boolean hasFlag(@NonNull final Flag flag) {
-        return this.flagMap.containsKey(flag.getUnprefixedAliases().iterator().next());
+        return this.flagMap.containsKey(flag.unprefixedAliases().iterator().next());
     }
 
     @Override
-    public int getFlagInvocationCount(@NonNull final String flagKey) {
+    public int flagInvocationCount(@NonNull final String flagKey) {
         return this.flagMap.getOrDefault(flagKey, 0);
     }
 
     @Override
-    public int getFlagInvocationCount(@NonNull final Flag flag) {
-        return this.flagMap.getOrDefault(flag.getUnprefixedAliases().iterator().next(), 0);
+    public int flagInvocationCount(@NonNull final Flag flag) {
+        return this.flagMap.getOrDefault(flag.unprefixedAliases().iterator().next(), 0);
     }
 
     @Override
@@ -132,7 +131,7 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
 
     @Override
     @NonNull
-    public <T> Optional<T> getOne(final Parameter.@NonNull Key<T> key) {
+    public <T> Optional<T> one(final Parameter.@NonNull Key<T> key) {
         return Optional.ofNullable(this.getValue(key));
     }
 
@@ -150,7 +149,7 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
     @Override
     @NonNull
     @SuppressWarnings("unchecked")
-    public <T> Collection<? extends T> getAll(final Parameter.@NonNull Key<T> key) {
+    public <T> Collection<? extends T> all(final Parameter.@NonNull Key<T> key) {
         final Collection<? extends T> values = (Collection<? extends T>) this.argumentMap.get(key);
         if (values == null) {
             return ImmutableList.of();
@@ -161,32 +160,32 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
 
     @Override
     public boolean hasAny(Parameter.Value<?> parameter) {
-        return this.hasAny(parameter.getKey());
+        return this.hasAny(parameter.key());
     }
 
     @Override
-    public <T> Optional<T> getOne(Parameter.Value<T> parameter) throws IllegalArgumentException {
-        return this.getOne(parameter.getKey());
+    public <T> Optional<T> one(Parameter.Value<T> parameter) throws IllegalArgumentException {
+        return this.one(parameter.key());
     }
 
     @Override
     public <T> T requireOne(Parameter.Value<T> parameter) throws NoSuchElementException, IllegalArgumentException {
-        return this.requireOne(parameter.getKey());
+        return this.requireOne(parameter.key());
     }
 
     @Override
-    public <T> Collection<? extends T> getAll(Parameter.Value<T> parameter) {
-        return this.getAll(parameter.getKey());
+    public <T> Collection<? extends T> all(Parameter.Value<T> parameter) {
+        return this.all(parameter.key());
     }
 
     @Override
     public void sendMessage(@NonNull final Identified identity, @NonNull final Component message) {
-        this.getCause().sendMessage(identity, message);
+        this.cause().sendMessage(identity, message);
     }
 
     @Override
     public void sendMessage(@NonNull final Identity identity, @NonNull final Component message) {
-        this.getCause().sendMessage(identity, message);
+        this.cause().sendMessage(identity, message);
     }
 
     @Override
@@ -224,8 +223,8 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
     }
 
     @Override
-    public Subject getSubject() {
-        return this.getCause().getSubject();
+    public Subject subject() {
+        return this.cause().subject();
     }
 
 }

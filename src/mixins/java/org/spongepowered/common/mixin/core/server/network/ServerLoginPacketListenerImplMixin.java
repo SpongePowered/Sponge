@@ -96,7 +96,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                 cause, disconnectMessage, disconnectMessage, (ServerSideConnection) this);
         SpongeCommon.postEvent(event);
         if (event.isCancelled()) {
-            this.impl$disconnectClient(event.getMessage());
+            this.impl$disconnectClient(event.message());
         }
         return event.isCancelled();
     }

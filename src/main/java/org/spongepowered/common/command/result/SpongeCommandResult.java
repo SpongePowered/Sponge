@@ -52,13 +52,13 @@ public final class SpongeCommandResult implements CommandResult {
     }
 
     @Override
-    public int getResult() {
+    public int result() {
         return this.result;
     }
 
     @Override
     @NonNull
-    public Optional<Component> getErrorMessage() {
+    public Optional<Component> errorMessage() {
         return Optional.ofNullable(this.errorMessage);
     }
 

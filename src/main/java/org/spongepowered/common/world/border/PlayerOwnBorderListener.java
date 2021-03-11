@@ -76,7 +76,7 @@ public final class PlayerOwnBorderListener implements BorderChangeListener {
      * This method is for cleaning up the player reference once they disconnect.
      */
     public void onPlayerDisconnect() {
-        ((ServerPlayer) this.player).getWorldBorder().ifPresent(border -> ((WorldBorderAccessor) border).accessor$listeners().remove(this));
+        ((ServerPlayer) this.player).worldBorder().ifPresent(border -> ((WorldBorderAccessor) border).accessor$listeners().remove(this));
     }
 
     private void sendBorderPacket(final Packet<?> packet) {

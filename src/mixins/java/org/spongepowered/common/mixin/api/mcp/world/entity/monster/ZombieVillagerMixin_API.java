@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.monster;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.zombie.ZombieVillager;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Set;
 
@@ -38,7 +37,7 @@ public abstract class ZombieVillagerMixin_API extends ZombieMixin_API implements
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.type().asImmutable());
+        values.add(this.villagerType().asImmutable());
         values.add(this.profession().asImmutable());
 
         return values;

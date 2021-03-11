@@ -52,7 +52,7 @@ public final class SpongeNoneValueParameter extends ResourceKeyedArgumentValuePa
 
     @Override
     @NonNull
-    public Optional<? extends Void> getValue(
+    public Optional<? extends Void> parseValue(
             final Parameter.@NonNull Key<? super Void> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
@@ -61,13 +61,13 @@ public final class SpongeNoneValueParameter extends ResourceKeyedArgumentValuePa
 
     @Override
     @NonNull
-    public String getUsage(@NonNull final String key) {
+    public String usage(@NonNull final String key) {
         return "";
     }
 
     @Override
     @NonNull
-    public List<ClientCompletionType> getClientCompletionType() {
+    public List<ClientCompletionType> clientCompletionType() {
         return ImmutableList.of(ClientCompletionTypes.NONE.get());
     }
 

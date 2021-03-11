@@ -61,7 +61,7 @@ public abstract class MinecraftServerMixin_Vanilla_API implements VanillaServer 
     }
 
     @Override
-    public VanillaWorldManager getWorldManager() {
+    public VanillaWorldManager worldManager() {
         return this.vanilla_api$worldManager;
     }
 }

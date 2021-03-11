@@ -39,6 +39,6 @@ public abstract class BlockEntityTypeMixin_API implements BlockEntityType {
 
     @Override
     public boolean isValidBlock(final BlockState block) {
-        return this.shadow$isValid((Block) block.getType());
+        return this.shadow$isValid((Block) block.type());
     }
 }

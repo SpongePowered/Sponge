@@ -47,26 +47,26 @@ public class SpongePlaceholderContextBuilder implements PlaceholderContext.Build
 
     @Override
     @SuppressWarnings("unchecked")
-    public PlaceholderContext.Builder setAssociatedObject(@Nullable final Object associatedObject) {
+    public PlaceholderContext.Builder associatedObject(@Nullable final Object associatedObject) {
         if (associatedObject == null) {
             this.associatedObjectSupplier = null;
         } else if (associatedObject instanceof Supplier) {
-            return this.setAssociatedObject((Supplier<Object>) associatedObject);
+            return this.associatedObject((Supplier<Object>) associatedObject);
         } else if (associatedObject instanceof SystemSubject) {
-            this.associatedObjectSupplier = Sponge::getSystemSubject;
+            this.associatedObjectSupplier = Sponge::systemSubject;
         } else if (associatedObject instanceof Server) {
-            this.associatedObjectSupplier = Sponge::getServer;
+            this.associatedObjectSupplier = Sponge::server;
         } else if (associatedObject instanceof Player) {
-            return this.setAssociatedObject((Player) associatedObject);
+            return this.associatedObject((Player) associatedObject);
         } else if (associatedObject instanceof ServerWorld) {
-            final ResourceKey key = ((ServerWorld) associatedObject).getKey();
-            this.associatedObjectSupplier = () -> SpongeCommon.getGame().getServer().getWorldManager().world(key).orElse(null);
+            final ResourceKey key = ((ServerWorld) associatedObject).key();
+            this.associatedObjectSupplier = () -> SpongeCommon.getGame().server().worldManager().world(key).orElse(null);
         } else if (associatedObject instanceof Entity) {
             final Entity entity = ((Entity) associatedObject);
-            final ResourceKey key = entity.getServerLocation().getWorld().getKey();
-            final UUID entityUuid = ((Entity) associatedObject).getUniqueId();
+            final ResourceKey key = entity.serverLocation().world().key();
+            final UUID entityUuid = ((Entity) associatedObject).uniqueId();
             this.associatedObjectSupplier =
-                    () -> SpongeCommon.getGame().getServer().getWorldManager().world(key).flatMap(x -> x.getEntity(entityUuid)).orElse(null);
+                    () -> SpongeCommon.getGame().server().worldManager().world(key).flatMap(x -> x.entity(entityUuid)).orElse(null);
         } else {
             // We create a weak reference here so we don't hold on to game objects.
             final WeakReference<Object> objectWeakReference = new WeakReference<>(associatedObject);
@@ -76,13 +76,13 @@ public class SpongePlaceholderContextBuilder implements PlaceholderContext.Build
     }
 
     @Override
-    public PlaceholderContext.Builder setAssociatedObject(@Nullable final Supplier<Object> associatedObjectSupplier) {
+    public PlaceholderContext.Builder associatedObject(@Nullable final Supplier<Object> associatedObjectSupplier) {
         this.associatedObjectSupplier = associatedObjectSupplier;
         return this;
     }
 
     @Override
-    public PlaceholderContext.Builder setArgumentString(@Nullable final String argument) {
+    public PlaceholderContext.Builder argumentString(@Nullable final String argument) {
         this.argument = argument == null || argument.isEmpty() ? null : argument;
         return this;
     }

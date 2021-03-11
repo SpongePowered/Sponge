@@ -75,7 +75,7 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     @Nullable private Context api$context;
 
     @Override
-    public Context getContext() {
+    public Context context() {
         if (this.api$context == null) {
             final ResourceLocation key = SpongeCommon.getServer().registryAccess().dimensionTypes().getKey((DimensionType) (Object) this);
             this.api$context = new Context(Context.DIMENSION_KEY, key.getPath());

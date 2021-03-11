@@ -163,7 +163,7 @@ public final class ServerUserProvider {
 
     Optional<User> getUser(@Nullable final GameProfile profile) {
         this.pollFilesystemWatcher();
-        if (profile != null && this.knownUUIDs.contains(profile.getUniqueId())) {
+        if (profile != null && this.knownUUIDs.contains(profile.uniqueId())) {
             // This is okay, the file exists.
             return Optional.of(this.getOrCreateUser(profile, false));
         }
@@ -173,7 +173,7 @@ public final class ServerUserProvider {
     User getOrCreateUser(final GameProfile profile, final boolean force) {
         final com.mojang.authlib.GameProfile resolvedProfile;
         if (!force) {
-            final UUID userID = profile.getUniqueId();
+            final UUID userID = profile.uniqueId();
             final User currentUser = this.userCache.getIfPresent(userID);
             if (currentUser != null) {
                 return currentUser;
@@ -183,7 +183,7 @@ public final class ServerUserProvider {
             resolvedProfile = p == null ? SpongeGameProfile.toMcProfile(profile) : p;
         } else {
             resolvedProfile = SpongeGameProfile.toMcProfile(profile);
-            final User currentUser = this.userCache.getIfPresent(profile.getUniqueId());
+            final User currentUser = this.userCache.getIfPresent(profile.uniqueId());
             if (currentUser != null) {
                 if (SpongeUser.dirtyUsers.contains(currentUser)) {
                     ((SpongeUser) currentUser).save();
@@ -194,8 +194,8 @@ public final class ServerUserProvider {
 
         this.pollFilesystemWatcher();
         final User user = new SpongeUser(resolvedProfile);
-        this.userCache.put(profile.getUniqueId(), user);
-        this.knownUUIDs.add(profile.getUniqueId());
+        this.userCache.put(profile.uniqueId(), user);
+        this.knownUUIDs.add(profile.uniqueId());
         return user;
     }
 
@@ -209,13 +209,13 @@ public final class ServerUserProvider {
     }
 
     Stream<GameProfile> matchKnownProfiles(final String lowercaseName) {
-        return ((Server) this.server).getGameProfileManager().getCache().streamOfMatches(lowercaseName)
-                .filter(gameProfile -> this.knownUUIDs.contains(gameProfile.getUniqueId()));
+        return ((Server) this.server).gameProfileManager().cache().streamOfMatches(lowercaseName)
+                .filter(gameProfile -> this.knownUUIDs.contains(gameProfile.uniqueId()));
     }
 
     Stream<GameProfile> streamAll() {
-        final GameProfileCache cache = ((Server) this.server).getGameProfileManager().getCache();
-        return this.knownUUIDs.stream().map(x -> cache.getById(x).orElseGet(() -> GameProfile.of(x)));
+        final GameProfileCache cache = ((Server) this.server).gameProfileManager().cache();
+        return this.knownUUIDs.stream().map(x -> cache.byId(x).orElseGet(() -> GameProfile.of(x)));
     }
 
     private Path getPlayerDataFile(final UUID uniqueId) {

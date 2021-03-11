@@ -66,10 +66,10 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @Override
-    public Biome getBiome(final int x, final int y, final int z) {
+    public Biome biome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        return this.palette.get(this.biomes[this.getIndex(x, y, z)], Sponge.getServer().registries())
-            .orElseGet(Sponge.getServer().registries()
+        return this.palette.get(this.biomes[this.getIndex(x, y, z)], Sponge.server().registries())
+            .orElseGet(Sponge.server().registries()
                 .registry(RegistryTypes.BIOME)
                 .value(Biomes.OCEAN)
             );
@@ -112,10 +112,10 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @Override
-    public VolumeStream<Immutable, Biome> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<Immutable, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        final Vector3i blockMin = this.getBlockMin();
-        final Vector3i blockMax = this.getBlockMax();
+        final Vector3i blockMin = this.blockMin();
+        final Vector3i blockMax = this.blockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
 
         final Stream<VolumeElement<Immutable, Biome>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
@@ -123,8 +123,8 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
                 .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
                     .mapToObj(y -> VolumeElement.<Immutable, Biome>of(this, () -> {
                         final byte biomeId = this.biomes[this.getIndex(x, y, z)];
-                        return this.palette.get(biomeId & 255, Sponge.getServer().registries())
-                            .orElseGet(Sponge.getServer().registries()
+                        return this.palette.get(biomeId & 255, Sponge.server().registries())
+                            .orElseGet(Sponge.server().registries()
                                 .registry(RegistryTypes.BIOME)
                                 .value(Biomes.OCEAN)
                             );

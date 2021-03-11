@@ -86,7 +86,7 @@ public interface LevelDataMixin_API extends WorldProperties {
     }
 
     @Override
-    default  <V> V getGameRule(final GameRule<V> gameRule) {
+    default  <V> V gameRule(final GameRule<V> gameRule) {
         final GameRules.Value<?> value = this.shadow$getGameRules().getRule((GameRules.Key<?>) (Object) Objects.requireNonNull(gameRule,
                 "gameRule"));
         if (value instanceof GameRules.BooleanValue) {
@@ -106,8 +106,8 @@ public interface LevelDataMixin_API extends WorldProperties {
         ((GameRules_ValueAccessor) mValue).invoker$deserialize(value.toString());
     }
 
-    @Intrinsic
-    default Map<GameRule<?>, ?> worldProperties$getGameRules() {
+    @Override
+    default Map<GameRule<?>, ?> gameRules() {
         final Map<GameRules.Key<?>, GameRules.Value<?>> rules =
                 ((GameRulesAccessor) this.shadow$getGameRules()).accessor$rules();
 

@@ -50,14 +50,14 @@ public final class PacketSender {
         final Connection networkManager = ((ConnectionHolderBridge) connection).bridge$getConnection();
         GenericFutureListener<? extends Future<? super Void>> asyncListener = null;
         if (listener != null) {
-            final EngineConnectionSide<?> side = connection.getSide();
+            final EngineConnectionSide<?> side = connection.side();
             // Complete the netty callback on the sync thread
             asyncListener = future -> {
                 final BlockableEventLoop<?> executor;
                 if (side == EngineConnectionSide.CLIENT) {
-                    executor = (BlockableEventLoop<?>) Sponge.getClient();
+                    executor = (BlockableEventLoop<?>) Sponge.client();
                 } else {
-                    executor = (BlockableEventLoop<?>) Sponge.getServer();
+                    executor = (BlockableEventLoop<?>) Sponge.server();
                 }
                 executor.execute(() -> listener.accept(future));
             };

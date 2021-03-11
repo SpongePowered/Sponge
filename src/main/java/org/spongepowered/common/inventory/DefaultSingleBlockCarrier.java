@@ -42,37 +42,36 @@ import net.minecraft.world.WorldlyContainer;
 public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
 
     @Override
-    default Inventory getInventory(Direction from) {
-        return DefaultSingleBlockCarrier.getInventory(from, this);
+    default Inventory inventory(final Direction from) {
+        return DefaultSingleBlockCarrier.inventory(from, this);
     }
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Override
-    default CarriedInventory<? extends Carrier> getInventory() {
+    default CarriedInventory<? extends Carrier> inventory() {
         if (this instanceof CarriedInventory) {
             return (CarriedInventory) this;
         }
         // override for non CarriedInventory
-        throw new MissingImplementationException("SingleBlockCarrier", "getInventory");
+        throw new MissingImplementationException("SingleBlockCarrier", "inventory");
     }
 
-    @SuppressWarnings("deprecation")
-    static Inventory getInventory(Direction from, BlockCarrier thisThing) {
+    static Inventory inventory(final Direction from, final BlockCarrier thisThing) {
         if (thisThing instanceof WorldlyContainer) {
-            net.minecraft.core.Direction facing = DirectionFacingProvider.INSTANCE.get(from).get();
-            int[] slots = ((WorldlyContainer) thisThing).getSlotsForFace(facing);
+            final net.minecraft.core.Direction facing = DirectionFacingProvider.INSTANCE.get(from).get();
+            final int[] slots = ((WorldlyContainer) thisThing).getSlotsForFace(facing);
 
             if (slots.length == 0) {
-                return new EmptyInventoryImpl(thisThing.getInventory());
+                return new EmptyInventoryImpl(thisThing.inventory());
             }
 
             // build query for each slot
-            Query.Builder builder = Query.builder();
+            final Query.Builder builder = Query.builder();
             Arrays.stream(slots).mapToObj(slot -> QueryTypes.KEY_VALUE.get().of(SlotMatchers.index(slot)))
                     .forEach(builder::and);
-            Query query = builder.build();
+            final Query query = builder.build();
 
-            return thisThing.getInventory().query(query);
+            return thisThing.inventory().query(query);
         }
-        return thisThing.getInventory();
+        return thisThing.inventory();
     }
 }

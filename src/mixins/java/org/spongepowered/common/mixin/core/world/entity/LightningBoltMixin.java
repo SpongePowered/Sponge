@@ -105,14 +105,14 @@ public abstract class LightningBoltMixin extends EntityMixin {
             return;
         }
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(frame.getCurrentCause(), this.impl$struckEntities);
-            Sponge.getEventManager().post(strike);
+            final LightningEvent.Strike strike = SpongeEventFactory.createLightningEventStrike(frame.currentCause(), this.impl$struckEntities);
+            Sponge.eventManager().post(strike);
 
             if (!strike.isCancelled()) {
-                for (final Entity e : strike.getEntities()) {
+                for (final Entity e : strike.entities()) {
                     ((net.minecraft.world.entity.Entity) e).thunderHit((ServerLevel) this.level, (LightningBolt) (Object) this);
                 }
-                SpongeCommon.postEvent(SpongeEventFactory.createLightningEventPost(frame.getCurrentCause()));
+                SpongeCommon.postEvent(SpongeEventFactory.createLightningEventPost(frame.currentCause()));
             }
         }
     }

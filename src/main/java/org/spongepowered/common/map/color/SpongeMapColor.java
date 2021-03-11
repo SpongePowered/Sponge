@@ -49,19 +49,19 @@ public class SpongeMapColor implements MapColor {
     }
 
     @Override
-    public MapShade getShade() {
+    public MapShade shade() {
         return this.shade;
     }
 
     @Override
-    public MapColorType getType() {return this.type;}
+    public MapColorType type() {return this.type;}
 
     @Override
-    public Color getColor() {
-        Color color = getType().getColor();
-        int r = addShade(color.getRed());
-        int g = addShade(color.getGreen());
-        int b = addShade(color.getBlue());
+    public Color color() {
+        Color color = type().color();
+        int r = addShade(color.red());
+        int g = addShade(color.green());
+        int b = addShade(color.blue());
         return Color.ofRgb(r,g,b);
     }
 
@@ -70,7 +70,7 @@ public class SpongeMapColor implements MapColor {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 

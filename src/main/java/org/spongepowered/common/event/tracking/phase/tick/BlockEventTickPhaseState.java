@@ -85,8 +85,8 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     @Override
     public void postBlockTransactionApplication(final BlockChange blockChange,
         final Transaction<? extends BlockSnapshot> snapshotTransaction, final BlockEventTickContext context) {
-        final Block block = (Block) snapshotTransaction.getOriginal().getState().getType();
-        final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
+        final Block block = (Block) snapshotTransaction.original().state().type();
+        final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.original();
         final BlockPos changedBlockPos = original.getBlockPos();
         original.getServerWorld().ifPresent(worldServer -> {
             final LevelChunkBridge changedMixinChunk = (LevelChunkBridge) worldServer.getChunkAt(changedBlockPos);

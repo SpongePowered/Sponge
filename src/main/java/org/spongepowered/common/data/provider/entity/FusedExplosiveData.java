@@ -42,7 +42,7 @@ public final class FusedExplosiveData {
                     .create(Keys.FUSE_DURATION)
                         .get(h -> new SpongeTicks(((FusedExplosiveBridge) h).bridge$getFuseDuration()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0) {
                                 return false;
                             }
@@ -52,7 +52,7 @@ public final class FusedExplosiveData {
                     .create(Keys.TICKS_REMAINING)
                         .get(h -> new SpongeTicks(((FusedExplosiveBridge) h).bridge$getFuseTicksRemaining()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0) {
                                 return false;
                             }

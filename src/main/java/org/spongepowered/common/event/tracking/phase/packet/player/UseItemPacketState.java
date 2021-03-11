@@ -60,12 +60,12 @@ public final class UseItemPacketState extends BasicPacketState {
     private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER =
             ((BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER)
                     .andThen((frame, ctx) -> {
-                        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().getWorld());
+                        frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().world());
                         frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
                         frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
                         final ItemStack itemStack = ctx.getItemUsed();
                         frame.addContext(EventContextKeys.SPAWN_TYPE,
-                                itemStack.getType() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
+                                itemStack.type() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
                         frame.pushCause(ctx.getSpongePlayer());
                     });
 
@@ -93,13 +93,13 @@ public final class UseItemPacketState extends BasicPacketState {
     public void postBlockTransactionApplication(BlockChange blockChange, Transaction<? extends BlockSnapshot> transaction,
         BasicPacketContext context) {
         ServerPlayer player = context.getSpongePlayer();
-        BlockPos pos = VecHelper.toBlockPos(transaction.getFinal().getLocation().get());
-        LevelChunkBridge spongeChunk = (LevelChunkBridge) ((ServerLevel) player.getWorld()).getChunkAt(pos);
+        BlockPos pos = VecHelper.toBlockPos(transaction.finalReplacement().location().get());
+        LevelChunkBridge spongeChunk = (LevelChunkBridge) ((ServerLevel) player.world()).getChunkAt(pos);
         if (blockChange == BlockChange.PLACE) {
-            spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player.getUser(), PlayerTracker.Type.CREATOR);
+            spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.finalReplacement().state().type(), pos, player.user(), PlayerTracker.Type.CREATOR);
         }
 
-        spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.getFinal().getState().getType(), pos, player.getUser(), PlayerTracker.Type.NOTIFIER);
+        spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.finalReplacement().state().type(), pos, player.user(), PlayerTracker.Type.NOTIFIER);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -111,7 +111,7 @@ public final class UseItemPacketState extends BasicPacketState {
         final HandType hand = context.getHandUsed();
         try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE,
-                itemStack.getType() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
+                itemStack.type() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
 //            context.getCapturedEntitySupplier()
 //                .acceptAndClearIfNotEmpty(entities -> {
 //                    SpongeCommonEventFactory.callSpawnEntity(entities, context);

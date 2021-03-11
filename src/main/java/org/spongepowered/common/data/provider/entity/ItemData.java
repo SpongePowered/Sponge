@@ -60,7 +60,7 @@ public final class ItemData {
                     .create(Keys.DESPAWN_DELAY)
                         .get(h -> new SpongeTicks(h.bridge$getDespawnDelay()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0) {
                                 return false;
                             }
@@ -75,7 +75,7 @@ public final class ItemData {
                         .set((h, v) -> h.bridge$setPickupDelay(h.bridge$getPickupDelay(), v))
                     .create(Keys.PICKUP_DELAY)
                         .get(h -> new SpongeTicks(h.bridge$getPickupDelay()))
-                        .set((h, v) -> h.bridge$setPickupDelay((int) v.getTicks(), false))
+                        .set((h, v) -> h.bridge$setPickupDelay((int) v.ticks(), false))
                     // Only for internal use
                     .create(ItemData.PREVIOUS_PICKUP_DELAY)
                         .get(v -> -1)

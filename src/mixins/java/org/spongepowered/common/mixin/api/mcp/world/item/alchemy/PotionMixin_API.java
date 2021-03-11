@@ -42,7 +42,7 @@ public abstract class PotionMixin_API implements PotionType {
 
     @Override
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
-    public List<PotionEffect> getEffects() {
+    public List<PotionEffect> effects() {
         return ((List) this.effects); // PotionEffect is mixed into
     }
 

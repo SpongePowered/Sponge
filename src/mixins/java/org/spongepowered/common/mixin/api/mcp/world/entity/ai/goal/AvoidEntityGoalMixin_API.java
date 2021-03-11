@@ -50,7 +50,7 @@ public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<Creature> i
     // @formatter:on
 
     @Override
-    public Predicate<Living> getTargetSelector() {
+    public Predicate<Living> targetSelector() {
         final Predicate<LivingEntity> predicate = ((TargetingConditionsAccessor) this.avoidEntityTargeting).accessor$selector();
         return (Predicate<Living>) (Object) (predicate == null ? AvoidEntityGoalMixin_API.ALWAYS_TRUE : predicate);
     }
@@ -62,7 +62,7 @@ public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<Creature> i
     }
 
     @Override
-    public float getSearchDistance() {
+    public float searchDistance() {
         return this.maxDist;
     }
 
@@ -73,7 +73,7 @@ public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<Creature> i
     }
 
     @Override
-    public double getCloseRangeSpeed() {
+    public double closeRangeSpeed() {
         return this.sprintSpeedModifier;
     }
 
@@ -84,7 +84,7 @@ public abstract class AvoidEntityGoalMixin_API extends GoalMixin_API<Creature> i
     }
 
     @Override
-    public double getFarRangeSpeed() {
+    public double farRangeSpeed() {
         return this.walkSpeedModifier;
     }
 

@@ -40,7 +40,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
 @Mixin(net.minecraft.world.effect.MobEffectInstance.class)
-@Implements(@Interface(iface = PotionEffect.class, prefix = "potionEffect$"))
 public abstract class MobEffectInstanceMixin_API implements PotionEffect {
 
     // @formatter:off
@@ -52,17 +51,17 @@ public abstract class MobEffectInstanceMixin_API implements PotionEffect {
     // @formatter:on
 
     @Override
-    public PotionEffectType getType() {
+    public PotionEffectType type() {
         return (PotionEffectType) this.effect;
     }
 
-    @Intrinsic
-    public int potionEffect$getDuration() {
+    @Override
+    public int duration() {
         return this.duration;
     }
 
-    @Intrinsic
-    public int potionEffect$getAmplifier() {
+    @Override
+    public int amplifier() {
         return this.amplifier;
     }
 
@@ -77,16 +76,16 @@ public abstract class MobEffectInstanceMixin_API implements PotionEffect {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return Constants.Sponge.Potion.CURRENT_VERSION;
     }
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey key = (ResourceKey) (Object) Registry.MOB_EFFECT.getKey((MobEffect) this.getType());
+        final ResourceKey key = (ResourceKey) (Object) Registry.MOB_EFFECT.getKey((MobEffect) this.type());
         
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Item.Potions.POTION_TYPE, key)
                 .set(Constants.Item.Potions.POTION_DURATION, this.duration)
                 .set(Constants.Item.Potions.POTION_AMPLIFIER, this.amplifier)

@@ -67,19 +67,19 @@ public class SpongeScoreCriterion implements ScoreAdvancementCriterion, Defaulte
     }
 
     @Override
-    public int getGoal() {
+    public int goal() {
         return this.internalCriteria.size();
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public Optional<FilteredTrigger<?>> getTrigger() {
+    public Optional<FilteredTrigger<?>> trigger() {
         // The first internal criterion holds the trigger
-        return this.internalCriteria.get(0).getTrigger();
+        return this.internalCriteria.get(0).trigger();
     }
 
     @Override

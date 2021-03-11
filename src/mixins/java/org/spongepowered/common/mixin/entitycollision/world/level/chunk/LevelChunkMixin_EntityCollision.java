@@ -108,7 +108,7 @@ public abstract class LevelChunkMixin_EntityCollision {
 
         if (source instanceof LocatableBlock) {
             final LocatableBlock locatable = (LocatableBlock) source;
-            final BlockType blockType = locatable.getLocation().getBlock().getType();
+            final BlockType blockType = locatable.location().block().type();
             collisionBridge = (CollisionCapabilityBridge) blockType;
         } else if (source instanceof CollisionCapabilityBridge) {
             collisionBridge = (CollisionCapabilityBridge) source;

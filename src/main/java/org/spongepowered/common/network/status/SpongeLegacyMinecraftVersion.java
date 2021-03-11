@@ -48,7 +48,7 @@ public class SpongeLegacyMinecraftVersion implements MinecraftVersion {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
@@ -58,7 +58,7 @@ public class SpongeLegacyMinecraftVersion implements MinecraftVersion {
     }
 
     @Override
-    public OptionalInt getDataVersion() {
+    public OptionalInt dataVersion() {
         return OptionalInt.empty();
     }
 

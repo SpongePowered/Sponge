@@ -69,7 +69,7 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
     private void impl$canCook(final CallbackInfo ci, final int i, final ItemStack itemStack) {
         final boolean isEmpty = itemStack.isEmpty();
         if (!isEmpty) {
-            final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
             final ItemStackSnapshot stack = ItemStackUtil.snapshotOf(this.items.get(i));
             final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (Campfire) this, Optional.empty(),
                     Optional.ofNullable((CookingRecipe) impl$cookingRecipe[i]), Collections.singletonList(new Transaction<>(stack, stack)));
@@ -91,7 +91,7 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
     @Surrogate
     private void impl$assembleCampfireResult(final CallbackInfo ci, final int i, final ItemStack itemStack,
             final Container iInventory, final ItemStack itemStack1, final BlockPos blockPos) {
-        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack1);
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, (Campfire) this,
                 Collections.singletonList(snapshot), Optional.empty(), Optional.ofNullable((CookingRecipe) this.impl$cookingRecipe[i]));

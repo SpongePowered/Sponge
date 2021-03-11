@@ -42,7 +42,7 @@ import net.minecraft.server.level.ServerPlayer;
 public final class SwapHandItemsState extends BasicInventoryPacketState {
 
     public ChangeInventoryEvent.SwapHand createInventoryEvent(final Inventory inventory, final List<SlotTransaction> slotTransactions) {
-        return SpongeEventFactory.createChangeInventoryEventSwapHand(PhaseTracker.getCauseStackManager().getCurrentCause(), inventory, slotTransactions);
+        return SpongeEventFactory.createChangeInventoryEventSwapHand(PhaseTracker.getCauseStackManager().currentCause(), inventory, slotTransactions);
     }
 
     @Override
@@ -60,7 +60,7 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
             final List<SlotTransaction> trans = mixinInventory.bridge$getCapturedSlotTransactions();
             final ChangeInventoryEvent.SwapHand swapItemEvent = this.createInventoryEvent(((Inventory) player.inventory), trans);
             SpongeCommon.postEvent(swapItemEvent);
-            PacketPhaseUtil.handleSlotRestore(player, null, swapItemEvent.getTransactions(), swapItemEvent.isCancelled());
+            PacketPhaseUtil.handleSlotRestore(player, null, swapItemEvent.transactions(), swapItemEvent.isCancelled());
             mixinInventory.bridge$setCaptureInventory(false);
             mixinInventory.bridge$getCapturedSlotTransactions().clear();
         }

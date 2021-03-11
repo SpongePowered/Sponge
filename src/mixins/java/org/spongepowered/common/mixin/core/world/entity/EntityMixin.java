@@ -220,7 +220,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public boolean bridge$setLocation(final ServerLocation location) {
-        if (this.removed || ((WorldBridge) location.getWorld()).bridge$isFake()) {
+        if (this.removed || ((WorldBridge) location.world()).bridge$isFake()) {
             return false;
         }
 
@@ -230,42 +230,42 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
             final net.minecraft.world.phys.Vec3 originalPosition = this.shadow$position();
 
-            net.minecraft.server.level.ServerLevel destinationWorld = (net.minecraft.server.level.ServerLevel) location.getWorld();
+            net.minecraft.server.level.ServerLevel destinationWorld = (net.minecraft.server.level.ServerLevel) location.world();
 
             if (this.shadow$getCommandSenderWorld() != destinationWorld) {
-                final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.getCurrentCause(),
-                        (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getCommandSenderWorld(), location.getWorld(),
-                        location.getWorld());
-                if (SpongeCommon.postEvent(event) && ((WorldBridge) event.getDestinationWorld()).bridge$isFake()) {
+                final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.currentCause(),
+                        (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getCommandSenderWorld(), location.world(),
+                        location.world());
+                if (SpongeCommon.postEvent(event) && ((WorldBridge) event.destinationWorld()).bridge$isFake()) {
                     return false;
                 }
 
                 final ChangeEntityWorldEvent.Reposition repositionEvent =
-                        SpongeEventFactory.createChangeEntityWorldEventReposition(frame.getCurrentCause(),
+                        SpongeEventFactory.createChangeEntityWorldEventReposition(frame.currentCause(),
                                 (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getCommandSenderWorld(),
-                                VecHelper.toVector3d(this.shadow$position()), location.getPosition(), event.getOriginalDestinationWorld(),
-                                location.getPosition(), event.getDestinationWorld());
+                                VecHelper.toVector3d(this.shadow$position()), location.position(), event.originalDestinationWorld(),
+                                location.position(), event.destinationWorld());
 
                 if (SpongeCommon.postEvent(repositionEvent)) {
                     return false;
                 }
 
-                destinationWorld = (net.minecraft.server.level.ServerLevel) event.getDestinationWorld();
+                destinationWorld = (net.minecraft.server.level.ServerLevel) event.destinationWorld();
 
-                this.shadow$setPos(repositionEvent.getDestinationPosition().getX(),
-                        repositionEvent.getDestinationPosition().getY(), repositionEvent.getDestinationPosition().getZ());
+                this.shadow$setPos(repositionEvent.destinationPosition().getX(),
+                        repositionEvent.destinationPosition().getY(), repositionEvent.destinationPosition().getZ());
             } else {
                 final Vector3d destination;
                 if (ShouldFire.MOVE_ENTITY_EVENT) {
-                    final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+                    final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
                             (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
-                            location.getPosition(), location.getPosition());
+                            location.position(), location.position());
                     if (SpongeCommon.postEvent(event)) {
                         return false;
                     }
-                    destination = event.getDestinationPosition();
+                    destination = event.destinationPosition();
                 } else {
-                    destination = location.getPosition();
+                    destination = location.position();
                 }
                 this.shadow$setPos(destination.getX(), destination.getY(), destination.getZ());
             }
@@ -301,7 +301,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
                 if (SpongeCommon.postEvent(SpongeEventFactory.
-                        createRideEntityEventDismount(frame.getCurrentCause(), (org.spongepowered.api.entity.Entity) this.shadow$getVehicle()))) {
+                        createRideEntityEventDismount(frame.currentCause(), (org.spongepowered.api.entity.Entity) this.shadow$getVehicle()))) {
                     return false;
                 }
             }
@@ -411,8 +411,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public void bridge$setTransform(final Transform transform) {
-        this.shadow$setPos(transform.getPosition().getX(), transform.getPosition().getY(), transform.getPosition().getZ());
-        this.shadow$setRot((float) transform.getYaw(), (float) transform.getPitch());
+        this.shadow$setPos(transform.position().getX(), transform.position().getY(), transform.position().getZ());
+        this.shadow$setRot((float) transform.yaw(), (float) transform.pitch());
     }
 
     @Redirect(method = "findDimensionEntryPoint", at = @At(value = "INVOKE",
@@ -497,7 +497,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             if (preChangeEvent.isCancelled()) {
                 return null;
             }
-            final net.minecraft.server.level.ServerLevel targetWorld = (net.minecraft.server.level.ServerLevel) preChangeEvent.getDestinationWorld();
+            final net.minecraft.server.level.ServerLevel targetWorld = (net.minecraft.server.level.ServerLevel) preChangeEvent.destinationWorld();
             final Vector3d currentPosition = VecHelper.toVector3d(this.shadow$position());
 
             // If a player, set the fact they are changing dimensions
@@ -536,7 +536,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                         if (transportedEntity != null && this.impl$shouldFireRepositionEvent) {
                             final Vector3d destination = VecHelper.toVector3d(this.shadow$position());
                             final ChangeEntityWorldEvent.Reposition reposition = SpongeEventFactory.createChangeEntityWorldEventReposition(
-                                    PhaseTracker.getCauseStackManager().getCurrentCause(),
+                                    PhaseTracker.getCauseStackManager().currentCause(),
                                     (org.spongepowered.api.entity.Entity) transportedEntity,
                                     (org.spongepowered.api.world.server.ServerWorld) serverworld,
                                     currentPosition,
@@ -549,8 +549,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                             if (reposition.isCancelled()) {
                                 // send them back to the original destination
                                 finalPosition = originalDestination;
-                            } else if (reposition.getDestinationPosition() != destination) {
-                                finalPosition = reposition.getDestinationPosition();
+                            } else if (reposition.destinationPosition() != destination) {
+                                finalPosition = reposition.destinationPosition();
                             } else {
                                 finalPosition = null;
                             }
@@ -635,12 +635,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     (ServerWorld) targetWorld,
                     destinationPosition
             );
-            if (!reposition.isCancelled() && reposition.getDestinationPosition() != destinationPosition) {
+            if (!reposition.isCancelled() && reposition.destinationPosition() != destinationPosition) {
                 this.impl$dontCreateExitPortal = true;
                 // Something changed so we want to re-rerun this loop.
                 // TODO: There is an open question here about whether we want to force the creation of a portal in this
                 //  scenario, or whether we're happy if the repositioning will put someone in a nearby portal.
-                cir.setReturnValue(this.shadow$getExitPortal(targetWorld, VecHelper.toBlockPos(reposition.getDestinationPosition()), targetIsNether));
+                cir.setReturnValue(this.shadow$getExitPortal(targetWorld, VecHelper.toBlockPos(reposition.destinationPosition()), targetIsNether));
             }
         }
     }
@@ -652,7 +652,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
         this.impl$shouldFireRepositionEvent = false;
         final ChangeEntityWorldEvent.Reposition reposition = SpongeEventFactory.createChangeEntityWorldEventReposition(
-                PhaseTracker.getCauseStackManager().getCurrentCause(),
+                PhaseTracker.getCauseStackManager().currentCause(),
                 (org.spongepowered.api.entity.Entity) this,
                 (ServerWorld) this.level,
                 VecHelper.toVector3d(this.position),
@@ -694,13 +694,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             final Vector3d destinationPosition;
             boolean hasMovementContext = true;
             if (ShouldFire.MOVE_ENTITY_EVENT) {
-                if (!server.getCurrentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
+                if (!server.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
                     hasMovementContext = false;
                     server.pushCause(SpongeCommon.getActivePlugin());
                     server.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
                 }
 
-                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(server.getCurrentCause(),
+                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(server.currentCause(),
                         (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()), new Vector3d(x, y, z),
                         new Vector3d(x, y, z));
 
@@ -713,7 +713,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     return;
                 }
 
-                destinationPosition = event.getDestinationPosition();
+                destinationPosition = event.destinationPosition();
             } else {
                 destinationPosition = new Vector3d(x, y, z);
             }
@@ -738,7 +738,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         final CallbackInfoReturnable<Boolean> ci) {
         if (!this.level.isClientSide && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
             PhaseTracker.getCauseStackManager().pushCause(this);
-            if (SpongeCommon.postEvent(SpongeEventFactory.createRideEntityEventMount(PhaseTracker.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
+            if (SpongeCommon.postEvent(SpongeEventFactory.createRideEntityEventMount(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
                 ci.cancel();
             }
             PhaseTracker.getCauseStackManager().popCause();
@@ -826,7 +826,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 } else {
                     this.impl$visibilityTicks = 1;
                     this.impl$pendingVisibilityUpdate = false;
-                    for (final ServerPlayerEntity entityPlayerMP : SpongeCommon.getServer().getPlayerList().getPlayers()) {
+                    for (final ServerPlayerEntity entityPlayerMP : SpongeCommon.getServer().getPlayerList().players()) {
                         if ((Entity) (Object) this == entityPlayerMP) {
                             continue;
                         }
@@ -1025,7 +1025,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         if (this.fire < 1 && !this.impl$isImmuneToFireForIgniteEvent()) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
 
-                frame.pushCause(((org.spongepowered.api.entity.Entity) this).getLocation().getWorld());
+                frame.pushCause(((org.spongepowered.api.entity.Entity) this).location().world());
                 final IgniteEntityEvent event = SpongeEventFactory.
                     createIgniteEntityEvent(frame.getCurrentCause(), ticks, ticks, (org.spongepowered.api.entity.Entity) this);
 
@@ -1033,7 +1033,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     this.fire = 0;
                     return; // set fire ticks to 0
                 }
-                this.fire = event.getFireTicks();
+                this.fire = event.fireTicks();
             }
         }
     }

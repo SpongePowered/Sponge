@@ -98,29 +98,34 @@ public abstract class LevelChunkMixin_API implements Chunk {
     }
 
     @Override
-    public Vector3i getChunkPosition() {
+    public long inhabitedTime() {
+        return this.inhabitedTime;
+    }
+
+    @Override
+    public Vector3i chunkPosition() {
         return new Vector3i(this.chunkPos.x, 0, this.chunkPos.z);
     }
 
     @Override
-    public double getRegionalDifficultyFactor() {
+    public double regionalDifficultyFactor() {
         return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(),
-                this.getInhabitedTime(), this.level.getMoonBrightness()).getEffectiveDifficulty();
+                this.inhabitedTime(), this.level.getMoonBrightness()).getEffectiveDifficulty();
     }
 
     @Override
-    public double getRegionalDifficultyPercentage() {
+    public double regionalDifficultyPercentage() {
         return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(),
-                this.getInhabitedTime(), this.level.getMoonBrightness()).getSpecialMultiplier();
+                this.inhabitedTime(), this.level.getMoonBrightness()).getSpecialMultiplier();
     }
 
     @Override
-    public org.spongepowered.api.world.World<?, ?> getWorld() {
+    public org.spongepowered.api.world.World<?, ?> world() {
         return ((org.spongepowered.api.world.World<?, ?>) this.level);
     }
 
     @Override
-    public VolumeStream<Chunk, Entity> getEntityStream(
+    public VolumeStream<Chunk, Entity> entityStream(
         Vector3i min, Vector3i max, StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(
@@ -148,8 +153,8 @@ public abstract class LevelChunkMixin_API implements Chunk {
             // Filtered Position Entity Accessor
             (entityUuid, chunk) -> {
                 final net.minecraft.world.entity.@Nullable Entity entity = shouldCarbonCopy
-                    ? (net.minecraft.world.entity.Entity) backingVolume.getEntity(entityUuid).orElse(null)
-                    : (net.minecraft.world.entity.Entity) chunk.getWorld().getEntity(entityUuid).orElse(null);
+                    ? (net.minecraft.world.entity.Entity) backingVolume.entity(entityUuid).orElse(null)
+                    : (net.minecraft.world.entity.Entity) chunk.world().entity(entityUuid).orElse(null);
                 if (entity == null) {
                     return null;
                 }
@@ -159,7 +164,7 @@ public abstract class LevelChunkMixin_API implements Chunk {
     }
 
     @Override
-    public VolumeStream<Chunk, BlockState> getBlockStateStream(
+    public VolumeStream<Chunk, BlockState> blockStateStream(
         Vector3i min, Vector3i max, StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
@@ -200,7 +205,7 @@ public abstract class LevelChunkMixin_API implements Chunk {
     }
 
     @Override
-    public VolumeStream<Chunk, BlockEntity> getBlockEntityStream(
+    public VolumeStream<Chunk, BlockEntity> blockEntityStream(
         Vector3i min, Vector3i max, StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
@@ -229,7 +234,7 @@ public abstract class LevelChunkMixin_API implements Chunk {
             // Filtered Position Entity Accessor
             (blockPos, world) -> {
                 final net.minecraft.world.level.block.entity.@Nullable BlockEntity tileEntity = shouldCarbonCopy
-                    ? (net.minecraft.world.level.block.entity.BlockEntity) backingVolume.getBlockEntity(blockPos.getX(), blockPos.getY(), blockPos.getZ())
+                    ? (net.minecraft.world.level.block.entity.BlockEntity) backingVolume.blockEntity(blockPos.getX(), blockPos.getY(), blockPos.getZ())
                     .orElse(null)
                     : ((LevelReader) world).getBlockEntity(blockPos);
                 return new Tuple<>(blockPos, tileEntity);
@@ -242,7 +247,7 @@ public abstract class LevelChunkMixin_API implements Chunk {
     }
 
     @Override
-    public VolumeStream<Chunk, Biome> getBiomeStream(
+    public VolumeStream<Chunk, Biome> biomeStream(
         Vector3i min, Vector3i max, StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
@@ -274,7 +279,7 @@ public abstract class LevelChunkMixin_API implements Chunk {
             (blockPos, world) -> {
                 final net.minecraft.world.level.biome.Biome biome = shouldCarbonCopy
                     ? backingVolume.getNativeBiome(blockPos.getX(), blockPos.getY(), blockPos.getZ())
-                    : ((LevelReader) world.getWorld()).getBiome(blockPos);
+                    : ((LevelReader) world.world()).getBiome(blockPos);
                 return new Tuple<>(blockPos, biome);
             }
         );

@@ -49,42 +49,42 @@ public final class AdventureRegistryImpl implements AdventureRegistry {
     private final OfType<Sound.Source> soundSources = new ForIndex<>(Sound.Source.NAMES);
 
     @Override
-    public OfType<TextDecoration> getDecorations() {
+    public OfType<TextDecoration> decorations() {
         return this.decorations;
     }
 
     @Override
-    public OfType<NamedTextColor> getNamedColors() {
+    public OfType<NamedTextColor> namedColors() {
         return this.namedColors;
     }
 
     @Override
-    public OfType<ClickEvent.Action> getClickEventActions() {
+    public OfType<ClickEvent.Action> clickEventActions() {
         return this.clickEventActions;
     }
 
     @Override
-    public OfType<HoverEvent.Action<?>> getHoverEventActions() {
+    public OfType<HoverEvent.Action<?>> hoverEventActions() {
         return this.hoverEventActions;
     }
 
     @Override
-    public OfType<BossBar.Color> getBossBarColors() {
+    public OfType<BossBar.Color> bossBarColors() {
         return this.bossBarColors;
     }
 
     @Override
-    public OfType<BossBar.Overlay> getBossBarOverlays() {
+    public OfType<BossBar.Overlay> bossBarOverlays() {
         return this.bossBarOverlays;
     }
 
     @Override
-    public OfType<BossBar.Flag> getBossBarFlags() {
+    public OfType<BossBar.Flag> bossBarFlags() {
         return this.bossBarFlags;
     }
 
     @Override
-    public OfType<Sound.Source> getSoundSources() {
+    public OfType<Sound.Source> soundSources() {
         return this.soundSources;
     }
 
@@ -96,12 +96,12 @@ public final class AdventureRegistryImpl implements AdventureRegistry {
         }
 
         @Override
-        public String getKey(final T value) {
+        public String key(final T value) {
             return this.registry.key(value);
         }
 
         @Override
-        public Optional<T> getValue(final String key) {
+        public Optional<T> value(final String key) {
             return Optional.ofNullable(this.registry.value(key));
         }
 

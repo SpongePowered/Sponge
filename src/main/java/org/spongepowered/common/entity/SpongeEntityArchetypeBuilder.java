@@ -66,8 +66,8 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
 
     @Override
     public EntityArchetype.Builder from(final EntityArchetype value) {
-        this.entityType = value.getType();
-        this.entityData = value.getEntityData();
+        this.entityType = value.type();
+        this.entityData = value.entityData();
         this.manipulator = null;
         return this;
     }
@@ -76,7 +76,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     protected Optional<EntityArchetype> buildContent(final DataView container) throws InvalidDataException {
         final SpongeEntityArchetypeBuilder builder = new SpongeEntityArchetypeBuilder();
         if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_TYPE)) {
-            builder.type(container.getRegistryValue(Constants.Sponge.EntityArchetype.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE, Sponge.getGame().registries())
+            builder.type(container.getRegistryValue(Constants.Sponge.EntityArchetype.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE, Sponge.game().registries())
                     .orElseThrow(() -> new InvalidDataException("Could not deserialize an EntityType!")));
         } else {
             throw new InvalidDataException("Missing the EntityType! Cannot re-construct an EntityArchetype!");
@@ -103,7 +103,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     @Override
     public EntityArchetype.Builder from(final Entity entity) {
         Objects.requireNonNull(entity, "Cannot build an EntityArchetype for a null entity!");
-        this.entityType = Objects.requireNonNull(entity.getType(), "Entity is returning a null EntityType!");
+        this.entityType = Objects.requireNonNull(entity.type(), "Entity is returning a null EntityType!");
         final net.minecraft.world.entity.Entity minecraftEntity = (net.minecraft.world.entity.Entity) entity;
         final CompoundTag compound = new CompoundTag();
         minecraftEntity.saveAsPassenger(compound);

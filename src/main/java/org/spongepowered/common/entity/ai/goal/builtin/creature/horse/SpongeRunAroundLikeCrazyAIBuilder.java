@@ -48,7 +48,7 @@ public final class SpongeRunAroundLikeCrazyAIBuilder implements RunAroundLikeCra
     public RunAroundLikeCrazyGoal.Builder from(RunAroundLikeCrazyGoal value) {
         checkNotNull(value);
 
-        return this.speed(value.getSpeed());
+        return this.speed(value.speed());
     }
 
     @Override

@@ -33,7 +33,7 @@ public final class SpongeChannelExceptionHandlerFactory implements ChannelExcept
 
     public SpongeChannelExceptionHandlerFactory() {
         this.logEverything = (connection, channel, exception, future) -> {
-            ((SpongeChannel) channel).getLogger().error("An error occurred on the {} channel.", channel.getKey(), exception);
+            ((SpongeChannel) channel).getLogger().error("An error occurred on the {} channel.", channel.key(), exception);
             if (future != null) {
                 future.completeExceptionally(exception);
             }

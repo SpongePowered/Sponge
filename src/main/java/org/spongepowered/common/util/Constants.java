@@ -1288,8 +1288,8 @@ public final class Constants {
 
         public static final Comparator<DataContentUpdater> DATA_CONTENT_UPDATER_COMPARATOR =
             (o1, o2) -> ComparisonChain.start()
-                .compare(o2.getInputVersion(), o1.getInputVersion())
-                .compare(o2.getOutputVersion(), o1.getOutputVersion())
+                .compare(o2.inputVersion(), o1.inputVersion())
+                .compare(o2.outputVersion(), o1.outputVersion())
                 .result();
 
         public static Comparator<Integer> intComparator() {

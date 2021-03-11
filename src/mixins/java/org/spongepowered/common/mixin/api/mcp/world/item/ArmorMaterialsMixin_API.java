@@ -42,7 +42,7 @@ public abstract class ArmorMaterialsMixin_API implements ArmorMaterial {
     // @formatter:on
 
     @Override
-    public Optional<Ingredient> getRepairIngredient() {
+    public Optional<Ingredient> repairIngredient() {
         final net.minecraft.world.item.crafting.Ingredient repairMaterial = this.shadow$getRepairIngredient();
         return Optional.ofNullable(((Ingredient) (Object) repairMaterial));
     }

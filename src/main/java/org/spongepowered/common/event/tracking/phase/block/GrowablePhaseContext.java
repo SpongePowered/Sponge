@@ -87,8 +87,8 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
             .position(VecHelper.toVector3i(this.pos))
             .blockState(this.blockState)
             .flag(BlockChangeFlags.PHYSICS_OBSERVER);
-        this.priorContext.applyOwnerIfAvailable((owner) -> builder.creator(owner.getUniqueId()));
-        this.priorContext.applyNotifierIfAvailable((notifier) -> builder.notifier(notifier.getUniqueId()));
+        this.priorContext.applyOwnerIfAvailable((owner) -> builder.creator(owner.uniqueId()));
+        this.priorContext.applyNotifierIfAvailable((notifier) -> builder.notifier(notifier.uniqueId()));
         this.snapshot = builder.build();
         return super.buildAndSwitch();
     }

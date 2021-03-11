@@ -69,7 +69,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
         // method of its class, only applicable to this packet, so just retain here.
         ((ServerboundCustomPayloadPacketAccessor) packet).accessor$data().retain();
 
-        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.getChannelRegistry();
+        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.channelRegistry();
         this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet));
     }
 
@@ -81,18 +81,18 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
             locals = LocalCapture.CAPTURE_FAILHARD)
     private void vanilla$onProcessChatMessage(String p_244548_1_, CallbackInfo ci, net.minecraft.network.chat.Component component) {
         ChatFormatter.formatChatComponent((net.minecraft.network.chat.TranslatableComponent) component);
-        final PlayerChatRouter chatRouter = ((ServerPlayer) this.player).getChatRouter();
+        final PlayerChatRouter chatRouter = ((ServerPlayer) this.player).chatRouter();
         Component adventure = SpongeAdventure.asAdventure(component);
         adventure = ((TranslatableComponent) adventure).args().get(1);
 
         try (CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
             frame.pushCause(this.player);
             final PlayerChatEvent event = SpongeEventFactory
-                    .createPlayerChatEvent(PhaseTracker.SERVER.getCurrentCause(), chatRouter, Optional.of(chatRouter), adventure, adventure);
+                    .createPlayerChatEvent(PhaseTracker.SERVER.currentCause(), chatRouter, Optional.of(chatRouter), adventure, adventure);
             if (SpongeCommon.postEvent(event)) {
                 ci.cancel();
             } else {
-                event.getChatRouter().ifPresent(router -> router.chat((ServerPlayer) this.player, event.getMessage()));
+                event.chatRouter().ifPresent(router -> router.chat((ServerPlayer) this.player, event.message()));
             }
         }
     }

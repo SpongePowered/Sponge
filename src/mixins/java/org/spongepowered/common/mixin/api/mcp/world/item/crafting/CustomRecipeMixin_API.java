@@ -38,7 +38,7 @@ public abstract class CustomRecipeMixin_API implements SpecialCraftingRecipe {
     @Shadow @Final private ResourceLocation id;
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return (ResourceKey) (Object) this.id;
     }
 }

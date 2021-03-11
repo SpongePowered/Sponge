@@ -44,12 +44,12 @@ public abstract class SpongePacketBinding<P extends Packet> implements PacketBin
     }
 
     @Override
-    public int getOpcode() {
+    public int opcode() {
         return this.opcode;
     }
 
     @Override
-    public Class<P> getPacketType() {
+    public Class<P> packetType() {
         return this.packetType;
     }
 

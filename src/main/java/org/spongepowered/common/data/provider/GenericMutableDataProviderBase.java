@@ -119,7 +119,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     protected DataTransactionResult setAndGetResult(final H dataHolder, final E value) {
         final Optional<Value.Immutable<E>> originalValue = this.getFrom(dataHolder)
                 .map(e -> this.constructValue(dataHolder, e).asImmutable());
-        final Value.Immutable<E> replacementValue = Value.immutableOf(this.getKey(), value);
+        final Value.Immutable<E> replacementValue = Value.immutableOf(this.key(), value);
         try {
             if (this.set(dataHolder, value)) {
                 final DataTransactionResult.Builder builder = DataTransactionResult.builder();
@@ -141,7 +141,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
      * @return The value
      */
     protected V constructValue(final H dataHolder, final E element) {
-        return Value.genericImmutableOf(this.getKey(), element);
+        return Value.genericImmutableOf(this.key(), element);
     }
 
     /**
@@ -183,7 +183,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     }
 
     @Override
-    public final Optional<V> getValue(final DataHolder dataHolder) {
+    public final Optional<V> value(final DataHolder dataHolder) {
         if (!this.isSupported(dataHolder)) {
             return Optional.empty();
         }
@@ -223,7 +223,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
     @Override
     public final DataTransactionResult offer(final DataHolder.Mutable dataHolder, final E element) {
         if (!this.isSupported(dataHolder)) {
-            return DataTransactionResult.failResult(Value.immutableOf(this.getKey(), element));
+            return DataTransactionResult.failResult(Value.immutableOf(this.key(), element));
         }
         return this.setAndGetResult((H) dataHolder, element);
     }

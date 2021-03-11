@@ -40,7 +40,7 @@ public abstract class Boat_TypeMixin_API implements BoatType {
     // @formatter:on
 
     @Override
-    public BlockType getRepresentedBlock() {
+    public BlockType representedBlock() {
         return (BlockType) this.planks;
     }
 }

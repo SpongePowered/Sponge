@@ -51,7 +51,7 @@ public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, M
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
@@ -66,7 +66,7 @@ public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, M
     }
 
     @Override
-    public OptionalInt getDataVersion() {
+    public OptionalInt dataVersion() {
         return OptionalInt.of(Constants.MINECRAFT_DATA_VERSION);
     }
 

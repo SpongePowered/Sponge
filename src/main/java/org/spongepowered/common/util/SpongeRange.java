@@ -43,13 +43,13 @@ public final class SpongeRange<T extends Number> implements Range<T> {
 
     @Override
     @Nullable
-    public T getMin() {
+    public T min() {
         return this.min;
     }
 
     @Override
     @Nullable
-    public T getMax() {
+    public T max() {
         return this.max;
     }
 

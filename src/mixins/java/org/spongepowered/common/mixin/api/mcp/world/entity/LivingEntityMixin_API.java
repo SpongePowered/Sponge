@@ -57,12 +57,12 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     @Shadow public abstract boolean addEffect(MobEffectInstance p_195064_1_);
 
     @Override
-    public Component getTeamRepresentation() {
+    public Component teamRepresentation() {
         return Component.text(this.shadow$getUUID().toString());
     }
 
     @Override
-    public Optional<Attribute> getAttribute(final AttributeType type) {
+    public Optional<Attribute> attribute(final AttributeType type) {
         Preconditions.checkNotNull(type, "AttributeType cannot be null");
         return Optional.ofNullable((Attribute) this.shadow$getAttribute((net.minecraft.world.entity.ai.attributes.Attribute) type));
     }

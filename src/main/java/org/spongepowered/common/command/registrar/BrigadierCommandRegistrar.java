@@ -84,14 +84,14 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     // TODO: Make sure this is valid. For Forge, I suspect we'll have done this in a context of some sort.
     public LiteralCommandNode<CommandSourceStack> register(final LiteralArgumentBuilder<CommandSourceStack> command) {
         // Get the plugin container
-        final PluginContainer container = PhaseTracker.getCauseStackManager().getCurrentCause().first(PluginContainer.class)
+        final PluginContainer container = PhaseTracker.getCauseStackManager().currentCause().first(PluginContainer.class)
                 .orElseThrow(() -> new IllegalStateException("Cannot register command without knowing its origin."));
 
         return this.registerInternal(this,
                 container,
                 this.applyNamespace(container, command, false),
                 new String[0],
-                true).getSecond();
+                true).second();
     }
 
     @Override
@@ -107,7 +107,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             @NonNull final String primaryAlias,
             final String @NonNull... secondaryAliases) throws CommandFailedRegistrationException {
 
-        return this.register(container, command, secondaryAliases).getFirst();
+        return this.register(container, command, secondaryAliases).first();
     }
 
     /**
@@ -136,7 +136,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
 
         // Get the builder and the first literal.
         final String requestedAlias = namespacedCommand.getLiteral();
-        final Optional<CommandMapping> existingMapping = this.manager.getCommandMapping(requestedAlias);
+        final Optional<CommandMapping> existingMapping = this.manager.commandMapping(requestedAlias);
         if (allowDuplicates && existingMapping.isPresent()) {
             // then we just let it go, the requirements will be of the old node.
             this.dispatcher.register(namespacedCommand);
@@ -155,7 +155,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         this.dispatcher.register(namespacedCommand);
 
         // Redirect aliases
-        for (final String alias : mapping.getAllAliases()) {
+        for (final String alias : mapping.allAliases()) {
             if (!alias.equals(namespacedCommand.getLiteral())) {
                 final LiteralArgumentBuilder<CommandSourceStack> redirecting = LiteralArgumentBuilder.<CommandSourceStack>literal(alias)
                         .executes(namespacedCommand.getCommand())
@@ -182,7 +182,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             @NonNull final String arguments) throws CommandException {
         try {
             final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause));
-            return CommandResult.builder().setResult(result).build();
+            return CommandResult.builder().result(result).build();
         } catch (final CommandSyntaxException e) {
             throw new CommandException(Component.text(e.getMessage()), e);
         }
@@ -205,7 +205,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     @Override
     @NonNull
     public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final CommandMapping mapping) {
-        final CommandNode<CommandSourceStack> node = this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias()));
+        final CommandNode<CommandSourceStack> node = this.dispatcher.findNode(Collections.singletonList(mapping.primaryAlias()));
         if (node != null) {
             return Optional.of(Component.text(this.dispatcher.getSmartUsage(node, (CommandSourceStack) cause).toString()));
         }
@@ -215,7 +215,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
 
     @Override
     public boolean canExecute(final CommandCause cause, final CommandMapping mapping) {
-        return this.dispatcher.findNode(Collections.singletonList(mapping.getPrimaryAlias())).getRequirement().test((CommandSourceStack) cause);
+        return this.dispatcher.findNode(Collections.singletonList(mapping.primaryAlias())).getRequirement().test((CommandSourceStack) cause);
     }
 
     public SpongeCommandDispatcher getDispatcher() {

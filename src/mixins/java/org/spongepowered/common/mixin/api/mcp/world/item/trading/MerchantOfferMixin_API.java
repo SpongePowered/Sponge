@@ -42,7 +42,6 @@ import javax.annotation.Nullable;
 import net.minecraft.world.item.trading.MerchantOffer;
 
 @Mixin(MerchantOffer.class)
-@Implements(@Interface(iface = TradeOffer.class, prefix = "tradeOffer$"))
 public abstract class MerchantOfferMixin_API implements TradeOffer {
 
     // @formatter:off
@@ -59,7 +58,7 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
     // @formatter:on
 
     @Override
-    public ItemStackSnapshot getFirstBuyingItem() {
+    public ItemStackSnapshot firstBuyingItem() {
         return ((ItemStack) (Object) this.shadow$getCostA()).createSnapshot();
     }
 
@@ -69,7 +68,7 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
     }
 
     @Override
-    public Optional<ItemStackSnapshot> getSecondBuyingItem() {
+    public Optional<ItemStackSnapshot> secondBuyingItem() {
         if (this.shadow$getCostB() == null) {
             return Optional.empty();
         }
@@ -77,17 +76,17 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
     }
 
     @Override
-    public ItemStackSnapshot getSellingItem() {
+    public ItemStackSnapshot sellingItem() {
         return ((ItemStack) (Object) this.shadow$getResult()).createSnapshot();
     }
 
-    @Intrinsic
-    public int tradeOffer$getUses() {
+    @Override
+    public int uses() {
         return this.shadow$getUses();
     }
 
-    @Intrinsic
-    public int tradeOffer$getMaxUses() {
+    @Override
+    public int maxUses() {
         return this.shadow$getMaxUses();
     }
 
@@ -102,35 +101,35 @@ public abstract class MerchantOfferMixin_API implements TradeOffer {
     }
 
     @Override
-    public int getExperienceGrantedToMerchant() {
+    public int experienceGrantedToMerchant() {
         return this.shadow$getXp();
     }
 
     @Override
-    public double getPriceGrowthMultiplier() {
+    public double priceGrowthMultiplier() {
         return this.shadow$getPriceMultiplier();
     }
 
     @Override
-    public int getDemandBonus() {
+    public int demandBonus() {
         return this.shadow$getDemand();
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
-            .set(Constants.Item.TradeOffer.FIRST_QUERY, this.getFirstBuyingItem())
-            .set(Constants.Item.TradeOffer.SECOND_QUERY, this.hasSecondItem() ? this.getSecondBuyingItem().get() : "none")
+            .set(Queries.CONTENT_VERSION, this.contentVersion())
+            .set(Constants.Item.TradeOffer.FIRST_QUERY, this.firstBuyingItem())
+            .set(Constants.Item.TradeOffer.SECOND_QUERY, this.hasSecondItem() ? this.secondBuyingItem().get() : "none")
             .set(Constants.Item.TradeOffer.BUYING_QUERY, this.shadow$getCostA())
             .set(Constants.Item.TradeOffer.EXPERIENCE_QUERY, this.doesGrantExperience())
             .set(Constants.Item.TradeOffer.MAX_QUERY, this.shadow$getMaxUses())
-            .set(Constants.Item.TradeOffer.USES_QUERY, this.getUses())
+            .set(Constants.Item.TradeOffer.USES_QUERY, this.uses())
             .set(Constants.Item.TradeOffer.EXPERIENCE_GRANTED_TO_MERCHANT_QUERY, this.shadow$getXp())
             .set(Constants.Item.TradeOffer.PRICE_GROWTH_MULTIPLIER_QUERY, this.shadow$getPriceMultiplier())
             .set(Constants.Item.TradeOffer.DEMAND_BONUS_QUERY, this.shadow$getDemand());

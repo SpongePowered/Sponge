@@ -44,9 +44,9 @@ public abstract class TreeNodePositionMixin {
 
     @Inject(method = "run", at = @At("RETURN"))
     private static void impl$onLayout(Advancement root, CallbackInfo ci) {
-        final AdvancementTree advancementTree = ((org.spongepowered.api.advancement.Advancement) root).getTree().get();
+        final AdvancementTree advancementTree = ((org.spongepowered.api.advancement.Advancement) root).tree().get();
         final TreeLayout layout = new SpongeTreeLayout(advancementTree);
-        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final AdvancementTreeEvent.GenerateLayout event = SpongeEventFactory.createAdvancementTreeEventGenerateLayout(cause, layout, advancementTree);
         SpongeCommon.postEvent(event);
     }

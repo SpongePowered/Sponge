@@ -48,9 +48,9 @@ public interface IWorldGenerationBaseReaderMixin_API extends GenerationVolume {
         return this.shadow$isStateAtPosition(new BlockPos(x, y, z), state -> predicate.test((BlockState) state));
     }
 
-// TODO this conflicts with IWorldReaderMixin_API#getHeight
+// TODO this conflicts with IWorldReaderMixin_API#height
 //    @Override
-//    default int getHeight(final HeightType type, final int x, final int z) {
+//    default int height(final HeightType type, final int x, final int z) {
 //        return this.shadow$getHeightmapPos((Heightmap.Type) (Object) type, new BlockPos(x, 0, z)).getY();
 //    }
 }

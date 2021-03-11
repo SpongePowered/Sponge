@@ -112,100 +112,100 @@ public class MapTest implements LoadableModule {
     @Listener
     public void onGameInit(final RegisterCommandEvent<Command.Parameterized> event) {
         final Command.Builder builder = Command.builder();
-        builder.child(Command.builder().setExecutor((this::printMapData)).build(), "printMapData");
-        builder.child(Command.builder().setExecutor((this::setMapNether)).build(), "setmapnether");
-        builder.child(Command.builder().setExecutor((this::setColorAndLocked)).build(), "setColorAndLocked");
-        builder.child(Command.builder().setExecutor((this::saveToFile)).build(), "saveMapToFile");
-        builder.child(Command.builder().setExecutor((this::savePallete)).build(), "savePalleteToFile");
-        builder.child(Command.builder().setExecutor((this::loadMapFromFile)).build(), "loadMapFromFile");
-        builder.child(Command.builder().setExecutor((this::listMaps)).build(), "listMaps");
-        builder.child(Command.builder().setExecutor((this::randomDecorations)).build(), "randomDecorations");
-        builder.child(Command.builder().setExecutor((this::orientDecorationsDown)).build(), "orientDecorationsDown");
-        builder.child(Command.builder().setExecutor((this::getMapUUID)).build(), "getmapuuid");
-        builder.child(Command.builder().setExecutor((this::testMapSerialization)).build(), "testmapserialization");
-        builder.child(Command.builder().setExecutor((this::create)).build(), "create");
-        final Parameter.Value<UUID> uuidParameter = Parameter.uuid().setKey("uuid").build();
-        builder.child(Command.builder().parameter(Parameter.uuid().setKey("uuid").build()).setExecutor(ctx -> {
+        builder.addChild(Command.builder().executor((this::printMapData)).build(), "printMapData");
+        builder.addChild(Command.builder().executor((this::setMapNether)).build(), "setmapnether");
+        builder.addChild(Command.builder().executor((this::setColorAndLocked)).build(), "setColorAndLocked");
+        builder.addChild(Command.builder().executor((this::saveToFile)).build(), "saveMapToFile");
+        builder.addChild(Command.builder().executor((this::savePallete)).build(), "savePalleteToFile");
+        builder.addChild(Command.builder().executor((this::loadMapFromFile)).build(), "loadMapFromFile");
+        builder.addChild(Command.builder().executor((this::listMaps)).build(), "listMaps");
+        builder.addChild(Command.builder().executor((this::randomDecorations)).build(), "randomDecorations");
+        builder.addChild(Command.builder().executor((this::orientDecorationsDown)).build(), "orientDecorationsDown");
+        builder.addChild(Command.builder().executor((this::getMapUUID)).build(), "getmapuuid");
+        builder.addChild(Command.builder().executor((this::testMapSerialization)).build(), "testmapserialization");
+        builder.addChild(Command.builder().executor((this::create)).build(), "create");
+        final Parameter.Value<UUID> uuidParameter = Parameter.uuid().key("uuid").build();
+        builder.addChild(Command.builder().addParameter(Parameter.uuid().key("uuid").build()).executor(ctx -> {
             return this.getMapFromUUID(uuidParameter, ctx);
         }).build(), "getmapfromuuid");
 
-        builder.child(Command.builder().setExecutor((this::testMapShades)).build(), "testmapshades");
-        builder.child(Command.builder().setExecutor((this::enableUnlimitedTracking)).build(), "enableunlimitedtracking");
-        builder.child(Command.builder().setExecutor((this::addNamedDecoration)).build(), "addnameddecoration");
-        builder.child(Command.builder().setExecutor((this::addWorldBanner)).build(), "addworldbanner");
-        builder.child(Command.builder().setExecutor((this::recenterMap)).build(), "recentermap");
-        builder.child(Command.builder().setExecutor((this::setMapWorld)).build(), "setmapworld");
+        builder.addChild(Command.builder().executor((this::testMapShades)).build(), "testmapshades");
+        builder.addChild(Command.builder().executor((this::enableUnlimitedTracking)).build(), "enableunlimitedtracking");
+        builder.addChild(Command.builder().executor((this::addNamedDecoration)).build(), "addnameddecoration");
+        builder.addChild(Command.builder().executor((this::addWorldBanner)).build(), "addworldbanner");
+        builder.addChild(Command.builder().executor((this::recenterMap)).build(), "recentermap");
+        builder.addChild(Command.builder().executor((this::setMapWorld)).build(), "setmapworld");
 
         event.register(this.container, builder.build(), "maptest");
     }
 
-    private CommandResult getMapFromUUID(Parameter.Value<UUID> uuidParameter, CommandContext ctx) throws CommandException {
+    private CommandResult getMapFromUUID(final Parameter.Value<UUID> uuidParameter, final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final UUID uuid = ctx.getOne(uuidParameter).get();
+        final UUID uuid = ctx.one(uuidParameter).get();
         final ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP, 1);
-        final MapInfo mapInfo = Sponge.getServer().getMapStorage().getMapInfo(uuid)
+        final MapInfo mapInfo = Sponge.server().mapStorage().mapInfo(uuid)
                 .orElseThrow(() -> new CommandException(Component.text("UUID " + uuid + " was not a valid map uuid!")));
         itemStack.offer(Keys.MAP_INFO, mapInfo);
-        player.getInventory().offer(itemStack);
+        player.inventory().offer(itemStack);
         return CommandResult.success();
     }
 
-    private CommandResult setMapWorld(CommandContext ctx) throws CommandException {
+    private CommandResult setMapWorld(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack heldMap = player.itemInHand(HandTypes.MAIN_HAND);
+        if (heldMap.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
-        MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
-        ServerWorld serverWorld = (ServerWorld) player.getLocation().getWorld();
-        mapInfo.offer(Keys.MAP_WORLD, serverWorld.getKey());
+        final MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
+        final ServerWorld serverWorld = (ServerWorld) player.location().world();
+        mapInfo.offer(Keys.MAP_WORLD, serverWorld.key());
         player.sendMessage(Component.text("New map world: " + mapInfo.require(Keys.MAP_WORLD)));
 
         return CommandResult.success();
     }
 
-    private CommandResult recenterMap(CommandContext ctx) throws CommandException {
+    private CommandResult recenterMap(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack heldMap = player.itemInHand(HandTypes.MAIN_HAND);
+        if (heldMap.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
-        MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
-        mapInfo.offer(Keys.MAP_LOCATION, player.getLocation().getBlockPosition().toVector2(true));
+        final MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
+        mapInfo.offer(Keys.MAP_LOCATION, player.location().blockPosition().toVector2(true));
         player.sendMessage(Component.text("New center " + mapInfo.require(Keys.MAP_LOCATION)));
 
         return CommandResult.success();
     }
 
-    private CommandResult addWorldBanner(CommandContext ctx) throws CommandException {
+    private CommandResult addWorldBanner(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack heldMap = player.itemInHand(HandTypes.MAIN_HAND);
+        if (heldMap.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
-        MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
-        RayTraceResult<LocatableBlock> hit = RayTrace.block()
+        final MapInfo mapInfo = heldMap.require(Keys.MAP_INFO);
+        final RayTraceResult<LocatableBlock> hit = RayTrace.block()
                 .sourcePosition(player)
                 .direction(player)
-                .world(player.getServerLocation().getWorld())
+                .world(player.serverLocation().world())
                 .continueWhileBlock(RayTrace.onlyAir())
                 .limit(100)
-                .select(a -> a.getLocation().getBlockEntity().filter(entity -> entity instanceof Banner).isPresent())
+                .select(a -> a.location().blockEntity().filter(entity -> entity instanceof Banner).isPresent())
                 .execute()
                 .orElseThrow(() -> new CommandException(Component.text("You must look at a banner")));
 
-        mapInfo.addBannerDecoration(hit.getSelectedObject().getServerLocation());
+        mapInfo.addBannerDecoration(hit.selectedObject().serverLocation());
 
         return CommandResult.success();
     }
 
-    private CommandResult addNamedDecoration(CommandContext ctx) throws CommandException {
+    private CommandResult addNamedDecoration(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack heldMap = player.itemInHand(HandTypes.MAIN_HAND);
+        if (heldMap.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
-        MapDecoration decoration = MapDecoration.builder()
+        final MapDecoration decoration = MapDecoration.builder()
                 .type(MapDecorationTypes.BANNER_BLUE)
                 .customName(Component.text("I AM A ").color(NamedTextColor.BLUE).append(BlockTypes.BLUE_BANNER.get()))
                 .rotation(MapDecorationOrientations.NORTH)
@@ -214,39 +214,39 @@ public class MapTest implements LoadableModule {
         return CommandResult.success();
     }
 
-    private CommandResult enableUnlimitedTracking(CommandContext ctx) throws CommandException {
+    private CommandResult enableUnlimitedTracking(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
+        final ItemStack heldMap = player.itemInHand(HandTypes.MAIN_HAND);
 
-        if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
+        if (heldMap.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
         heldMap.require(Keys.MAP_INFO).offer(Keys.MAP_UNLIMITED_TRACKING, true);
         return CommandResult.success();
     }
 
-    private CommandResult testMapShades(CommandContext ctx) throws CommandException {
+    private CommandResult testMapShades(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        for (RegistryEntry<MapShade> entry : Sponge.getGame().registries().registry(RegistryTypes.MAP_SHADE)) {
+        for (final RegistryEntry<MapShade> entry : Sponge.game().registries().registry(RegistryTypes.MAP_SHADE)) {
             final MapColor mapColor = MapColor.of(MapColorTypes.COLOR_GREEN.get(), entry.value());
             final MapCanvas mapCanvas = MapCanvas.builder().paintAll(mapColor).build();
-            final MapInfo mapInfo = Sponge.getServer().getMapStorage()
+            final MapInfo mapInfo = Sponge.server().mapStorage()
                     .createNewMapInfo()
                     .orElseThrow(() -> new CommandException(Component.text("Unable to create new map!")));
             mapInfo.offer(Keys.MAP_LOCKED, true);
             mapInfo.offer(Keys.MAP_CANVAS, mapCanvas);
-            ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP);
+            final ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP);
             itemStack.offer(Keys.MAP_INFO, mapInfo);
-            itemStack.offer(Keys.DISPLAY_NAME, Component.text(entry.key().getFormatted()));
+            itemStack.offer(Keys.DISPLAY_NAME, Component.text(entry.key().formatted()));
 
-            player.getInventory().getPrimary().offer(itemStack);
+            player.inventory().primary().offer(itemStack);
         }
         return CommandResult.success();
     }
 
-    private CommandResult create(CommandContext ctx) throws CommandException {
+    private CommandResult create(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final MapInfo mapInfo = Sponge.getServer().getMapStorage()
+        final MapInfo mapInfo = Sponge.server().mapStorage()
                 .createNewMapInfo()
                 .orElseThrow(() -> new CommandException(Component.text("Map creation was cancelled!")));
         final ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP, 1);
@@ -255,23 +255,23 @@ public class MapTest implements LoadableModule {
                 .build();
         mapInfo.offer(Keys.MAP_CANVAS, canvas);
         mapInfo.offer(Keys.MAP_LOCKED, true);
-        mapInfo.offer(Keys.MAP_LOCATION, player.getPosition().toInt().toVector2(true));
+        mapInfo.offer(Keys.MAP_LOCATION, player.position().toInt().toVector2(true));
         itemStack.offer(Keys.MAP_INFO, mapInfo);
-        player.getInventory().offer(itemStack);
+        player.inventory().offer(itemStack);
         return CommandResult.success();
     }
 
-    private CommandResult testMapSerialization(CommandContext ctx) {
+    private CommandResult testMapSerialization(final CommandContext ctx) {
         MapInfo mapInfo = null;
-        Audience audience = ctx.getCause().getAudience();
+        final Audience audience = ctx.cause().audience();
         if (audience instanceof Player) {
             final Player player = (Player) audience;
-            mapInfo = player.getItemInHand(HandTypes.MAIN_HAND).get(Keys.MAP_INFO)
+            mapInfo = player.itemInHand(HandTypes.MAIN_HAND).get(Keys.MAP_INFO)
                     .orElse(null);
         }
-        final MapStorage mapStorage = Sponge.getServer().getMapStorage();
+        final MapStorage mapStorage = Sponge.server().mapStorage();
         if (mapInfo == null) {
-            mapInfo = mapStorage.getAllMapInfos()
+            mapInfo = mapStorage.allMapInfos()
                     .stream().findAny()
                     .orElse(mapStorage.createNewMapInfo().get());
         }
@@ -309,32 +309,32 @@ public class MapTest implements LoadableModule {
         return CommandResult.success();
     }
 
-    private CommandResult getMapUUID(CommandContext ctx) throws CommandException {
+    private CommandResult getMapUUID(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack map = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (map.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack map = player.itemInHand(HandTypes.MAIN_HAND);
+        if (map.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand!"));
         }
-        final Component uuid = Component.text(map.require(Keys.MAP_INFO).getUniqueId().toString());
+        final Component uuid = Component.text(map.require(Keys.MAP_INFO).uniqueId().toString());
         player.sendMessage(uuid);
         this.logger.info("map uuid: " + uuid);
         return CommandResult.success();
     }
 
-    private CommandResult orientDecorationsDown(CommandContext ctx) throws CommandException {
+    private CommandResult orientDecorationsDown(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack heldMap = player.itemInHand(HandTypes.MAIN_HAND);
+        if (heldMap.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
         heldMap.require(Keys.MAP_INFO).require(Keys.MAP_DECORATIONS).forEach(decoration -> decoration.setRotation(MapDecorationOrientations.SOUTH));
         return CommandResult.success();
     }
 
-    private CommandResult randomDecorations(CommandContext ctx) throws CommandException {
+    private CommandResult randomDecorations(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack heldMap = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (heldMap.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack heldMap = player.itemInHand(HandTypes.MAIN_HAND);
+        if (heldMap.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
         player.sendMessage(Component.text("Getting mapInfo"));
@@ -345,17 +345,17 @@ public class MapTest implements LoadableModule {
         int y = Byte.MIN_VALUE;
 
         final List<MapDecorationType> types = RegistryTypes.MAP_DECORATION_TYPE.get().stream().collect(Collectors.toList());
-        Collection<MapDecorationOrientation> orientations = Sponge.getGame().registries().registry(RegistryTypes.MAP_DECORATION_ORIENTATION).stream().collect(Collectors.toList());
+        final Collection<MapDecorationOrientation> orientations = Sponge.game().registries().registry(RegistryTypes.MAP_DECORATION_ORIENTATION).stream().collect(Collectors.toList());
         player.sendMessage(Component.text("Number of orientations: " + orientations.size()));
         player.sendMessage(Component.text("EAST: " + MapDecorationOrientations.EAST.get().key(RegistryTypes.MAP_DECORATION_ORIENTATION).toString()));
         for (final MapDecorationOrientation dir : orientations) {
             decorations.add(
                     MapDecoration.builder()
-                            .type(types.get(player.getRandom().nextInt(types.size())))
+                            .type(types.get(player.random().nextInt(types.size())))
                             .rotation(dir)
                             .position(Vector2i.from(x, y))
                             .build());
-            player.sendMessage(Component.text(dir.key(RegistryTypes.MAP_DECORATION_ORIENTATION).getValue()).append(Component.text("x: " + x)).append(Component.text("y: " + y)));
+            player.sendMessage(Component.text(dir.key(RegistryTypes.MAP_DECORATION_ORIENTATION).value()).append(Component.text("x: " + x)).append(Component.text("y: " + y)));
             x += 16;
             if (x > Byte.MAX_VALUE) {
                 y += 16;
@@ -371,8 +371,8 @@ public class MapTest implements LoadableModule {
         return CommandResult.success();
     }
 
-    private CommandResult listMaps(CommandContext ctx) {
-        final Collection<MapInfo> mapInfos = Sponge.getServer().getMapStorage().getAllMapInfos();
+    private CommandResult listMaps(final CommandContext ctx) {
+        final Collection<MapInfo> mapInfos = Sponge.server().mapStorage().allMapInfos();
         ctx.sendMessage(Identity.nil(), Component.text(mapInfos.size()));
         final List<MapInfo> list = new ArrayList<>(mapInfos);
         list.sort(Comparator.comparingInt(info -> info.toContainer().getInt(DataQuery.of("UnsafeMapId")).get()));
@@ -382,10 +382,10 @@ public class MapTest implements LoadableModule {
         return CommandResult.success();
     }
 
-    private CommandResult loadMapFromFile(CommandContext ctx) throws CommandException {
+    private CommandResult loadMapFromFile(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack map = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (map.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack map = player.itemInHand(HandTypes.MAIN_HAND);
+        if (map.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
         final File file = new File("map.png");
@@ -415,7 +415,7 @@ public class MapTest implements LoadableModule {
         return CommandResult.success();
     }
 
-    private CommandResult savePallete(CommandContext ctx) {
+    private CommandResult savePallete(final CommandContext ctx) {
         final File file = new File("pallete.png");
         try {
             if (!file.isFile()) {
@@ -424,7 +424,7 @@ public class MapTest implements LoadableModule {
             final MapCanvas.Builder builder = MapCanvas.builder();
 
             final List<MapColor[]> mapColors = new ArrayList<>();
-            for (MapColorType mapColorType : Sponge.getGame().registries().registry(RegistryTypes.MAP_COLOR_TYPE).stream().collect(Collectors.toList())) {
+            for (final MapColorType mapColorType : Sponge.game().registries().registry(RegistryTypes.MAP_COLOR_TYPE).stream().collect(Collectors.toList())) {
                 final MapColor[] colors = new MapColor[] {
                         MapColor.of(mapColorType),
                         MapColor.builder().baseColor(mapColorType).darkest().build(),
@@ -449,15 +449,15 @@ public class MapTest implements LoadableModule {
             final Color color = new Color(0,0,0,0);
             ImageIO.write((BufferedImage) canvas.toImage(color),"png", file);
         } catch (final IOException e) {
-            Sponge.getServer().sendMessage(Component.text("IOException"));
+            Sponge.server().sendMessage(Component.text("IOException"));
         }
         return CommandResult.success();
     }
 
-    private CommandResult saveToFile(CommandContext ctx) throws CommandException {
+    private CommandResult saveToFile(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack map = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (map.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack map = player.itemInHand(HandTypes.MAIN_HAND);
+        if (map.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
         final Image image = map.require(Keys.MAP_INFO).require(Keys.MAP_CANVAS).toImage();
@@ -479,10 +479,10 @@ public class MapTest implements LoadableModule {
         return CommandResult.success();
     }
 
-    private CommandResult setColorAndLocked(CommandContext ctx) throws CommandException {
+    private CommandResult setColorAndLocked(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack map = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (map.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack map = player.itemInHand(HandTypes.MAIN_HAND);
+        if (map.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
         //map.offer(Keys.MAP_LOCATION, new Vector2i(10000,10000));
@@ -490,21 +490,21 @@ public class MapTest implements LoadableModule {
         final MapInfo mapInfo = map.require(Keys.MAP_INFO);
         mapInfo.offer(Keys.MAP_LOCKED, true);
         mapInfo.offer(Keys.MAP_CANVAS, MapCanvas.builder().paintAll(color).build());
-        player.sendMessage(Component.text(mapInfo.require(Keys.MAP_CANVAS).getColor(0,0).toContainer().toString()));
+        player.sendMessage(Component.text(mapInfo.require(Keys.MAP_CANVAS).color(0,0).toContainer().toString()));
         return CommandResult.success();
     }
 
-    private CommandResult setMapNether(CommandContext ctx) throws CommandException {
-        Audience audience = ctx.getCause().getAudience();
+    private CommandResult setMapNether(final CommandContext ctx) throws CommandException {
+        final Audience audience = ctx.cause().audience();
         final Player player = this.requirePlayer(ctx);
-        final ItemStack map = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (map.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack map = player.itemInHand(HandTypes.MAIN_HAND);
+        if (map.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
         final ResourceKey netherKey = ResourceKey.minecraft("the_nether");
-        Optional<ServerWorld> nether = Sponge.getServer().getWorldManager().world(netherKey);
+        final Optional<ServerWorld> nether = Sponge.server().worldManager().world(netherKey);
         if (!nether.isPresent()) {
-            final CompletableFuture<ServerWorld> loadedNether = Sponge.getServer().getWorldManager().loadWorld(netherKey);
+            final CompletableFuture<ServerWorld> loadedNether = Sponge.server().worldManager().loadWorld(netherKey);
             loadedNether.whenComplete((v, e) -> {
                 if (e != null) {
                     audience.sendMessage(Component.text("Failed to load nether world!", NamedTextColor.GREEN));
@@ -517,18 +517,18 @@ public class MapTest implements LoadableModule {
             });
             throw new CommandException(Component.text("No nether loaded, trying to load now, please wait"));
         }
-        map.require(Keys.MAP_INFO).offer(Keys.MAP_WORLD, nether.get().getKey());
+        map.require(Keys.MAP_INFO).offer(Keys.MAP_WORLD, nether.get().key());
         return CommandResult.success();
     }
 
-    private CommandResult printMapData(CommandContext ctx) throws CommandException {
+    private CommandResult printMapData(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        final ItemStack itemStack = player.getItemInHand(HandTypes.MAIN_HAND);
-        if (itemStack.getType() != ItemTypes.FILLED_MAP.get()) {
+        final ItemStack itemStack = player.itemInHand(HandTypes.MAIN_HAND);
+        if (itemStack.type() != ItemTypes.FILLED_MAP.get()) {
             throw new CommandException(Component.text("You must hold a map in your hand"));
         }
         final MapInfo mapInfo = itemStack.require(Keys.MAP_INFO);
-        final Audience console = Sponge.getSystemSubject();
+        final Audience console = Sponge.systemSubject();
 
         console.sendMessage(Component.text("the mapdata contains: " + mapInfo.toContainer()));
         console.sendMessage(Component.text("the map contains nbt: " + itemStack.toContainer()));
@@ -536,10 +536,10 @@ public class MapTest implements LoadableModule {
         return CommandResult.success();
     }
 
-    private void checkSerialization(CommandContext ctx, String testName, String expected, String after) {
-        final Audience audience = ctx.getCause().getAudience();
-        boolean success = expected.equals(after);
-        Component text = Component.text("Test of ").append(Component.text(testName, NamedTextColor.BLUE))
+    private void checkSerialization(final CommandContext ctx, final String testName, final String expected, final String after) {
+        final Audience audience = ctx.cause().audience();
+        final boolean success = expected.equals(after);
+        final Component text = Component.text("Test of ").append(Component.text(testName, NamedTextColor.BLUE))
                 .append(success ? Component.text(" SUCCEEDED", NamedTextColor.GREEN) : Component.text(" FAILED", NamedTextColor.RED));
         audience.sendMessage(text);
         if (!success) {
@@ -559,9 +559,9 @@ public class MapTest implements LoadableModule {
 
     /*@Listener
     public void onGameStart(GameStartedServerEvent e) {
-        Sponge.getScheduler()
+        Sponge.scheduler()
                 .createSyncExecutor(this)
-                .scheduleAtFixedRate(() -> Sponge.getServer().getPlayer("tyhdefu").ifPresent(player -> player.getItemInHand(HandTypes.MAIN_HAND).filter(itemStack -> itemStack.getType() == ItemTypes.FILLED_MAP)
+                .scheduleAtFixedRate(() -> Sponge.getServer().player("tyhdefu").ifPresent(player -> player.getItemInHand(HandTypes.MAIN_HAND).filter(itemStack -> itemStack.getType() == ItemTypes.FILLED_MAP)
                         .map(itemStack -> itemStack.require(Keys.MAP_INFO))
                         .map(mapInfo -> mapInfo.require(Keys.MAP_DECORATIONS))
                         .ifPresent(mapDecorations -> mapDecorations.forEach(dec -> player.sendMessage(Text.of(dec.toContainer()))))
@@ -569,27 +569,27 @@ public class MapTest implements LoadableModule {
     }*/
 
     private Player requirePlayer(final CommandContext source) throws CommandException {
-        Audience audience = source.getCause().getAudience();
+        final Audience audience = source.cause().audience();
         if (audience instanceof Player) {
             return (Player) audience;
         }
         throw new CommandException(Component.text("Must be called from player!"));
     }
 
-    private void createDefaultCommand(final String name, final CommandExecutor executor, RegisterCommandEvent<Command.Parameterized> event) {
+    private void createDefaultCommand(final String name, final CommandExecutor executor, final RegisterCommandEvent<Command.Parameterized> event) {
         final Command.Parameterized command = Command.builder()
-                .setExecutor(executor)
+                .executor(executor)
                 .build();
 
         event.register(this.container, command, name);
     }
 
     @Override
-    public void enable(CommandContext ctx) {
-        Audience audience = ctx.getCause().getAudience();
+    public void enable(final CommandContext ctx) {
+        final Audience audience = ctx.cause().audience();
         if (!this.isEnabled) {
             this.isEnabled = true;
-            Sponge.getEventManager().registerListeners(this.container, this.listeners);
+            Sponge.eventManager().registerListeners(this.container, this.listeners);
             audience.sendMessage(Component.text("Map listeners are enabled. Created maps will now start blue.", NamedTextColor.GREEN));
         } else {
             audience.sendMessage(Component.text("Map listeners are already enabled.", NamedTextColor.YELLOW));
@@ -600,14 +600,14 @@ public class MapTest implements LoadableModule {
 
         private final Logger logger;
 
-        public Listeners(Logger logger) {
+        public Listeners(final Logger logger) {
             this.logger = logger;
         }
 
         @Listener
         public void onMapCreate(final CreateMapEvent event) {
             logger.info("ON MAP CREATE EVENT");
-            final MapInfo mapInfo = event.getMapInfo();
+            final MapInfo mapInfo = event.mapInfo();
             mapInfo.offer(Keys.MAP_CANVAS, MapCanvas.builder()
                     .paintAll(MapColor.of(MapColorTypes.COLOR_BLUE))
                     .build());

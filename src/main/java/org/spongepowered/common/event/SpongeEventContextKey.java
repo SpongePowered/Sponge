@@ -41,12 +41,12 @@ public final class SpongeEventContextKey<T> implements EventContextKey<T> {
     }
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return this.key;
     }
 
     @Override
-    public Type getAllowedType() {
+    public Type allowedType() {
         return this.allowed;
     }
 

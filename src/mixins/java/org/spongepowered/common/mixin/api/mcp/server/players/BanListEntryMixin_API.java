@@ -45,22 +45,22 @@ public abstract class BanListEntryMixin_API<T> extends StoredUserEntryMixin_API<
     // @formatter:on
 
     @Override
-    public Optional<Component> getReason() {
+    public Optional<Component> reason() {
         return ((BanListEntryBridge) this).bridge$getReason();
     }
 
     @Override
-    public Instant getCreationDate() {
+    public Instant creationDate() {
         return this.created.toInstant();
     }
 
     @Override
-    public Optional<Component> getBanSource() {
+    public Optional<Component> banSource() {
         return ((BanListEntryBridge) this).bridge$getSource();
     }
 
     @Override
-    public Optional<Instant> getExpirationDate() {
+    public Optional<Instant> expirationDate() {
         return Optional.ofNullable(this.expires == null ? null : this.expires.toInstant());
     }
 }

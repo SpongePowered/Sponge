@@ -40,7 +40,7 @@ public final class RavagerData {
                 .asMutable(RavagerAccessor.class)
                     .create(Keys.ATTACK_TIME)
                         .get(x -> new SpongeTicks(x.accessor$attackTick()))
-                        .set((h, v) -> h.accessor$attackTick((int) v.getTicks()))
+                        .set((h, v) -> h.accessor$attackTick((int) v.ticks()))
                     .create(Keys.IS_IMMOBILIZED)
                         .get(h -> h.accessor$attackTick() > 0 || h.accessor$stunnedTick() > 0 || h.accessor$roarTick() > 0)
                     .create(Keys.IS_ROARING)
@@ -49,10 +49,10 @@ public final class RavagerData {
                         .get(h -> h.accessor$stunnedTick() > 0)
                     .create(Keys.ROARING_TIME)
                         .get(x -> new SpongeTicks(x.accessor$roarTick()))
-                        .set((h, v) -> h.accessor$roarTick((int) v.getTicks()))
+                        .set((h, v) -> h.accessor$roarTick((int) v.ticks()))
                     .create(Keys.STUNNED_TIME)
                         .get(x -> new SpongeTicks(x.accessor$stunnedTick()))
-                        .set((h, v) -> h.accessor$stunnedTick((int) v.getTicks()));
+                        .set((h, v) -> h.accessor$stunnedTick((int) v.ticks()));
     }
     // @formatter:on
 }

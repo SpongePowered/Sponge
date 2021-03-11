@@ -47,12 +47,12 @@ public final class TerracottaData {
                     .create(Keys.DYE_COLOR)
                         .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_TERRACOTTA.get(h.getBlock()))
                         .supports(h -> {
-                            final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey(((BlockType)h.getBlock()));
-                            if (!key.getNamespace().equals(PluginManager.MINECRAFT_PLUGIN_ID)) {
+                            final ResourceKey key = Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey(((BlockType)h.getBlock()));
+                            if (!key.namespace().equals(PluginManager.MINECRAFT_PLUGIN_ID)) {
                                 return false;
                             }
 
-                            return key.getValue().endsWith("_terracotta");
+                            return key.value().endsWith("_terracotta");
                         });
     }
     // @formatter:on

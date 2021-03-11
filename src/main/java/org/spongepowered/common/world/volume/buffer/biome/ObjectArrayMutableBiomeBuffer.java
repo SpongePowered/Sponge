@@ -75,7 +75,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @Override
-    public Biome getBiome(final int x, final int y, final int z) {
+    public Biome biome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
         return this.biomes[this.getIndex(x, y, z)];
     }
@@ -136,13 +136,13 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableBiomeBuffer, Biome> getBiomeStream(
+    public VolumeStream<ObjectArrayMutableBiomeBuffer, Biome> biomeStream(
         final Vector3i min,
         final Vector3i max,
         final StreamOptions options
     ) {
-        final Vector3i blockMin = this.getBlockMin();
-        final Vector3i blockMax = this.getBlockMax();
+        final Vector3i blockMin = this.blockMin();
+        final Vector3i blockMax = this.blockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final Biome[] buffer;
         if (options.carbonCopy()) {

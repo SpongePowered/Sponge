@@ -98,7 +98,7 @@ public final class VolumeStreamUtils {
     }
 
     public static Predicate<org.spongepowered.api.util.Tuple<Vector3d, EntityArchetype>> entityArchetypePositionFilter(final Vector3i min, final Vector3i max) {
-        return VolumeStreamUtils.filterPositions(tuple -> tuple.getFirst().toInt(), min, max);
+        return VolumeStreamUtils.filterPositions(tuple -> tuple.first().toInt(), min, max);
     }
 
     public static Predicate<Map.Entry<Vector3i, BlockEntityArchetype>> blockEntityArchetypePositionFilter(final Vector3i min, final Vector3i max) {

@@ -65,7 +65,7 @@ public abstract class PrimaryLevelDataMixin_API implements ServerWorldProperties
     // @formatter:on
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return ((ResourceKeyBridge) this).bridge$getKey();
     }
 
@@ -120,7 +120,7 @@ public abstract class PrimaryLevelDataMixin_API implements ServerWorldProperties
     }
 
     @Override
-    public UUID getUniqueId() {
+    public UUID uniqueId() {
         return ((PrimaryLevelDataBridge) this).bridge$uniqueId();
     }
 

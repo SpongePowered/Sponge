@@ -30,25 +30,12 @@ import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.map.MapInfo;
-import org.spongepowered.api.map.decoration.MapDecoration;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.entity.SpongeEntityArchetype;
-import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.map.canvas.SpongeMapByteCanvas;
 import org.spongepowered.common.map.canvas.SpongeMapCanvas;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector2i;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class MapInfoData {
 
@@ -99,14 +86,14 @@ public final class MapInfoData {
 					.get(mapData -> {
 						final int id = ((MapItemSavedDataBridge)mapData).bridge$getMapId();
 						if (mapData.dimension == null) {
-							LogManager.getLogger().error("Map with id: {}, uuid: {} has an null world. This will probably cause more errors later/on save", id, ((MapInfo)mapData).getUniqueId());
+							LogManager.getLogger().error("Map with id: {}, uuid: {} has an null world. This will probably cause more errors later/on save", id, ((MapInfo)mapData).uniqueId());
 							return null;
 						}
 
 						return (ResourceKey) (Object) mapData.dimension.location();
 					})
 					.set((mapData, key) -> {
-						mapData.dimension = ((Level) Sponge.getServer().getWorldManager().world(key).get()).dimension();
+						mapData.dimension = ((Level) Sponge.server().worldManager().world(key).get()).dimension();
 						mapData.setDirty();
 					})
 				.asMutable(MapItemSavedDataBridge.class)

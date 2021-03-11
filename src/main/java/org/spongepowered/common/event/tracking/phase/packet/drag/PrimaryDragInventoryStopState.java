@@ -50,7 +50,7 @@ public final class PrimaryDragInventoryStopState extends DragInventoryStopState 
     public ClickContainerEvent createInventoryEvent(ServerPlayer playerMP, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
         return SpongeEventFactory.createClickContainerEventDragPrimary(
-            PhaseTracker.getCauseStackManager().getCurrentCause(), openContainer, transaction,
+            PhaseTracker.getCauseStackManager().currentCause(), openContainer, transaction,
                 Optional.ofNullable(slot), slotTransactions);
     }
 

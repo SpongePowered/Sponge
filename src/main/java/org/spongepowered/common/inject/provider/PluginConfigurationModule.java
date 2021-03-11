@@ -34,17 +34,6 @@ import com.google.inject.TypeLiteral;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.common.config.PluginConfigManager;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.CommentedConfigurationNodeProvider;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.CommentedConfigurationNodeReferenceProvider;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.IHateGuiceInjectorProvider;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.NonSharedDirAsPath;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.NonSharedPathAsPath;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.PrivateCommentedConfigurationNode;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.PrivateCommentedConfigurationNodeReference;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.SharedCommentedConfigurationNode;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.SharedCommentedConfigurationNodeReference;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.SharedDirAsPath;
-import org.spongepowered.common.inject.provider.PluginConfigurationModule.TypeSerializers;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.ConfigurationNode;
@@ -154,7 +143,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return this.mgr.getPluginConfig(this.container).getDirectory();
+            return this.mgr.pluginConfig(this.container).directory();
         }
 
     }
@@ -177,7 +166,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return this.mgr.getPluginConfig(this.container).getConfigPath();
+            return this.mgr.pluginConfig(this.container).configPath();
         }
 
     }
@@ -200,7 +189,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public Path get() {
-            return this.mgr.getSharedConfig(this.container).getConfigPath();
+            return this.mgr.sharedConfig(this.container).configPath();
         }
 
     }
@@ -231,7 +220,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return this.mgr.getSharedConfig(this.container).getConfig(PluginConfigManager.getOptions(this.serializers.get()));
+            return this.mgr.sharedConfig(this.container).config(PluginConfigManager.getOptions(this.serializers.get()));
         }
 
     }
@@ -246,7 +235,7 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public ConfigurationLoader<CommentedConfigurationNode> get() {
-            return this.mgr.getPluginConfig(this.container).getConfig(PluginConfigManager.getOptions(this.serializers.get()));
+            return this.mgr.pluginConfig(this.container).config(PluginConfigManager.getOptions(this.serializers.get()));
         }
 
     }
@@ -296,10 +285,10 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public ConfigurationReference<CommentedConfigurationNode> get() {
-            final ConfigRoot shared = this.mgr.getSharedConfig(this.container);
+            final ConfigRoot shared = this.mgr.sharedConfig(this.container);
             try {
-                return this.<CommentedConfigurationNode>configureLogging(shared.getConfigPath(), this.mgr.getWatchServiceListener()
-                         .listenToConfiguration(path -> shared.getConfig(PluginConfigManager.getOptions(this.serializers.get())), shared.getConfigPath()));
+                return this.<CommentedConfigurationNode>configureLogging(shared.configPath(), this.mgr.watchServiceListener()
+                         .listenToConfiguration(path -> shared.config(PluginConfigManager.getOptions(this.serializers.get())), shared.configPath()));
             } catch (final ConfigurateException ex) {
                 throw new ProvisionException("Unable to load configuration reference", ex);
             }
@@ -317,11 +306,11 @@ public final class PluginConfigurationModule extends AbstractModule {
 
         @Override
         public ConfigurationReference<CommentedConfigurationNode> get() {
-            final ConfigRoot privateRoot = this.mgr.getPluginConfig(this.container);
+            final ConfigRoot privateRoot = this.mgr.pluginConfig(this.container);
             try {
-                return this.<CommentedConfigurationNode>configureLogging(privateRoot.getConfigPath(), this.mgr.getWatchServiceListener()
-                        .listenToConfiguration(path -> privateRoot.getConfig(PluginConfigManager.getOptions(this.serializers.get())),
-                                               privateRoot.getConfigPath()));
+                return this.<CommentedConfigurationNode>configureLogging(privateRoot.configPath(), this.mgr.watchServiceListener()
+                        .listenToConfiguration(path -> privateRoot.config(PluginConfigManager.getOptions(this.serializers.get())),
+                                               privateRoot.configPath()));
             } catch (final ConfigurateException ex) {
                 throw new ProvisionException("Unable to load configuration reference", ex);
             }
@@ -344,9 +333,9 @@ public final class PluginConfigurationModule extends AbstractModule {
         public TypeSerializerCollection get() {
             final @Nullable Injector injector = IHateGuiceInjectorProvider.get(this.container);
             if (injector == null) {
-                return this.mgr.getSerializers();
+                return this.mgr.serializers();
             } else {
-                return this.mgr.getSerializers().childBuilder()
+                return this.mgr.serializers().childBuilder()
                         .registerAnnotatedObjects(ObjectMapper.factoryBuilder()
                               .addDiscoverer(GuiceObjectMapperProvider.injectedObjectDiscoverer(injector))
                               .build())

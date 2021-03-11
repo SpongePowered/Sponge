@@ -81,7 +81,7 @@ public final class RecipeTest implements LoadableModule {
     public void enable(CommandContext ctx) {
         this.enabled = true;
         try {
-            Sponge.getServer().getCommandManager().process("reload");
+            Sponge.server().commandManager().process("reload");
         } catch (CommandException e) {
             e.printStackTrace();
         }
@@ -91,7 +91,7 @@ public final class RecipeTest implements LoadableModule {
     public void disable(CommandContext ctx) {
         this.enabled = false;
         try {
-            Sponge.getServer().getCommandManager().process("reload");
+            Sponge.server().commandManager().process("reload");
         } catch (CommandException e) {
             e.printStackTrace();
         }
@@ -253,7 +253,7 @@ public final class RecipeTest implements LoadableModule {
 
         // Predicate Ingredients
 
-        final Predicate<ItemStack> hardnessPredicate = stack -> stack.getType().getBlock().map(b -> b.getDefaultState().get(Keys.DESTROY_SPEED).orElse(0d) > 20).orElse(false); // e.g. obsidian
+        final Predicate<ItemStack> hardnessPredicate = stack -> stack.type().block().map(b -> b.defaultState().get(Keys.DESTROY_SPEED).orElse(0d) > 20).orElse(false); // e.g. obsidian
         final Ingredient hardBlock = Ingredient.of(ResourceKey.of(this.plugin, "hardblock"), hardnessPredicate, ItemStack.of(ItemTypes.BEDROCK));
         final RecipeRegistration hardblockToWool =
                 ShapelessCraftingRecipe.builder().addIngredients(hardBlock).result(ItemStack.of(ItemTypes.WHITE_WOOL))
@@ -270,8 +270,8 @@ public final class RecipeTest implements LoadableModule {
                 .where('v', Ingredient.of(ItemTypes.BOOK))
                 .where('e', Ingredient.of(ItemTypes.EMERALD_BLOCK))
                 .result(grid -> {
-                    final Optional<ServerPlayer> player = Sponge.getServer().getCauseStackManager().getCurrentCause().first(ServerPlayer.class);
-                    final String name = player.map(ServerPlayer::getName).orElse("Steve");
+                    final Optional<ServerPlayer> player = Sponge.server().causeStackManager().currentCause().first(ServerPlayer.class);
+                    final String name = player.map(ServerPlayer::name).orElse("Steve");
                     villagerEgg.offer(Keys.CUSTOM_NAME, Component.text(name));
                     return villagerEgg.copy();
                 }, villagerEgg.copy())
@@ -288,16 +288,16 @@ public final class RecipeTest implements LoadableModule {
                 .where('d', Ingredient.of(ItemTypes.DAYLIGHT_DETECTOR))
                 .where('b', Ingredient.of(ItemTypes.BOOK))
                 .result(grid -> {
-                    final Optional<ServerPlayer> player = Sponge.getServer().getCauseStackManager().getCurrentCause().first(ServerPlayer.class);
-                    final Optional<Biome> biome = player.map(p -> p.getWorld().getBiome(p.getBlockPosition()));
-                    final String name = biome.map(present -> RegistryTypes.BIOME.keyFor(player.get().getWorld().registries(), present)).map(ResourceKey::toString).orElse("Unknown");
-                    final Integer biomeTemperature = biome.map(Biome::getTemperature).map(d -> (int) (d*10)).orElse(0);
-                    final Integer biomeHumidity = biome.map(Biome::getHumidity).map(d -> (int) (d*10)).orElse(0);
+                    final Optional<ServerPlayer> player = Sponge.server().causeStackManager().currentCause().first(ServerPlayer.class);
+                    final Optional<Biome> biome = player.map(p -> p.world().biome(p.blockPosition()));
+                    final String name = biome.map(present -> RegistryTypes.BIOME.keyFor(player.get().world().registries(), present)).map(ResourceKey::toString).orElse("Unknown");
+                    final Integer biomeTemperature = biome.map(Biome::temperature).map(d -> (int) (d*10)).orElse(0);
+                    final Integer biomeHumidity = biome.map(Biome::humidity).map(d -> (int) (d*10)).orElse(0);
                     final TextComponent temperature = Component.text("Temperature: ").append(Component.text(biomeTemperature));
                     final TextComponent humidity = Component.text("Humidity: ").append(Component.text(biomeHumidity));
                     writtenBook.offer(Keys.DISPLAY_NAME, Component.text("Biome Data: " + name));
                     writtenBook.offer(Keys.PAGES, Arrays.asList(temperature, humidity));
-                    writtenBook.offer(Keys.AUTHOR, Component.text(player.map(ServerPlayer::getName).orElse("Herobrine")));
+                    writtenBook.offer(Keys.AUTHOR, Component.text(player.map(ServerPlayer::name).orElse("Herobrine")));
                     return writtenBook.copy();
                 }, writtenBook.copy())
                 .key(ResourceKey.of(this.plugin, "biome_detector"))
@@ -346,20 +346,20 @@ public final class RecipeTest implements LoadableModule {
                     if (inv.capacity() != 9) {
                         return false;
                     }
-                    final ItemType stick = inv.asGrid().peek(2,1).get().getType();
+                    final ItemType stick = inv.asGrid().peek(2,1).get().type();
                     if (!stick.isAnyOf(ItemTypes.STICK)) {
                         return false;
                     }
 
                     final ItemStack middleItem = inv.peekAt(1).get();
 
-                    final ItemType type00 = inv.asGrid().peek(0,0).get().getType();
-                    final ItemType type10 = inv.asGrid().peek(0,1).get().getType();
-                    final ItemType type20 = inv.asGrid().peek(0,2).get().getType();
+                    final ItemType type00 = inv.asGrid().peek(0,0).get().type();
+                    final ItemType type10 = inv.asGrid().peek(0,1).get().type();
+                    final ItemType type20 = inv.asGrid().peek(0,2).get().type();
 
-                    final ItemType type01 = inv.asGrid().peek(1,0).get().getType();
-                    final ItemType type11 = inv.asGrid().peek(1,1).get().getType();
-                    final ItemType type21 = inv.asGrid().peek(1,2).get().getType();
+                    final ItemType type01 = inv.asGrid().peek(1,0).get().type();
+                    final ItemType type11 = inv.asGrid().peek(1,1).get().type();
+                    final ItemType type21 = inv.asGrid().peek(1,2).get().type();
 
                     if (type00 == type01 && type01 == type20 && type20 == type21 && type10 == type11) {
                         if (type00.isAnyOf(ItemTypes.WHITE_WOOL)) {
@@ -385,7 +385,7 @@ public final class RecipeTest implements LoadableModule {
         final RecipeRegistration squeezeSpongeRecipe = ShapelessCraftingRecipe.builder()
                 .addIngredients(ItemTypes.WET_SPONGE, ItemTypes.BUCKET)
                 .remainingItems(inv -> inv.slots().stream().map(Slot::peek)
-                        .map(item -> (item.getType().isAnyOf(ItemTypes.WET_SPONGE) ? ItemTypes.SPONGE : ItemTypes.AIR).get())
+                        .map(item -> (item.type().isAnyOf(ItemTypes.WET_SPONGE) ? ItemTypes.SPONGE : ItemTypes.AIR).get())
                         .map(ItemStack::of)
                         .collect(Collectors.toList()))
                 .result(ItemStack.of(ItemTypes.WATER_BUCKET))

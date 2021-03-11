@@ -85,7 +85,7 @@ public final class InventoryTest implements LoadableModule {
 
         @Listener
         public void onInteractContainerOpen(final InteractContainerEvent.Open event) {
-            final Container container = event.getContainer();
+            final Container container = event.container();
             final Hotbar hotbarFromContain = container.query(Hotbar.class).orElse(null);
             final Hotbar hotbarFromPrimary = container.query(PrimaryPlayerInventory.class).get().query(Hotbar.class).orElse(null);
             final Inventory stoneFromContain = hotbarFromContain.query(QueryTypes.ITEM_TYPE, ItemTypes.STONE.get());
@@ -114,13 +114,13 @@ public final class InventoryTest implements LoadableModule {
         @Listener
         public void onInteractContainer(final InteractContainerEvent event) {
             if (event instanceof EnchantItemEvent) {
-                this.plugin.getLogger().info("{} [{}] S:{}", event.getClass().getSimpleName(), ((EnchantItemEvent) event).getOption(),
-                        ((EnchantItemEvent) event).getSeed());
+                this.plugin.getLogger().info("{} [{}] S:{}", event.getClass().getSimpleName(), ((EnchantItemEvent) event).option(),
+                        ((EnchantItemEvent) event).seed());
             }
-            final Optional<Component> component = event.getContainer().get(Keys.DISPLAY_NAME);
+            final Optional<Component> component = event.container().get(Keys.DISPLAY_NAME);
             final String title = component.map(c -> PlainComponentSerializer.plain().serialize(c)).orElse("No Title");
             if (title.equals("Foobar")) {
-                InventoryTest.doFancyStuff(event.getCause().first(Player.class).get());
+                InventoryTest.doFancyStuff(event.cause().first(Player.class).get());
             }
         }
 
@@ -128,29 +128,29 @@ public final class InventoryTest implements LoadableModule {
         public void onInteract(final ChangeInventoryEvent event) {
 
             if (event instanceof ClickContainerEvent) {
-                this.plugin.getLogger().info("{} {}", event.getClass().getSimpleName(), ((ClickContainerEvent) event).getContainer().getClass().getSimpleName());
-                final Transaction<ItemStackSnapshot> cursor = ((ClickContainerEvent) event).getCursorTransaction();
-                this.plugin.getLogger().info("  Cursor: {}x{}->{}x{}", cursor.getOriginal().getType(), cursor.getOriginal().getQuantity(),
-                        cursor.getFinal().getType(), cursor.getFinal().getQuantity());
+                this.plugin.getLogger().info("{} {}", event.getClass().getSimpleName(), ((ClickContainerEvent) event).container().getClass().getSimpleName());
+                final Transaction<ItemStackSnapshot> cursor = ((ClickContainerEvent) event).cursorTransaction();
+                this.plugin.getLogger().info("  Cursor: {}x{}->{}x{}", cursor.original().type(), cursor.original().quantity(),
+                        cursor.finalReplacement().type(), cursor.finalReplacement().quantity());
             } else {
-                this.plugin.getLogger().info("{} {}", event.getClass().getSimpleName(), event.getInventory().getClass().getSimpleName());
+                this.plugin.getLogger().info("{} {}", event.getClass().getSimpleName(), event.inventory().getClass().getSimpleName());
             }
-            for (final SlotTransaction slotTrans : event.getTransactions()) {
-                final Optional<Integer> integer = slotTrans.getSlot().get(Keys.SLOT_INDEX);
-                this.plugin.getLogger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.getOriginal().getType(), slotTrans.getOriginal().getQuantity(),
-                        slotTrans.getFinal().getType(), slotTrans.getFinal().getQuantity(), integer.get());
+            for (final SlotTransaction slotTrans : event.transactions()) {
+                final Optional<Integer> integer = slotTrans.slot().get(Keys.SLOT_INDEX);
+                this.plugin.getLogger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.original().type(), slotTrans.original().quantity(),
+                        slotTrans.finalReplacement().type(), slotTrans.finalReplacement().quantity(), integer.get());
             }
         }
 
         @Listener
         public void onTransfer(final TransferInventoryEvent event) {
             if (event instanceof TransferInventoryEvent.Post) {
-                this.plugin.getLogger().info("{} {}=>{}", event.getClass().getSimpleName(), event.getSourceInventory().getClass().getSimpleName(), event.getTargetInventory()
+                this.plugin.getLogger().info("{} {}=>{}", event.getClass().getSimpleName(), event.sourceInventory().getClass().getSimpleName(), event.targetInventory()
                         .getClass().getSimpleName());
-                final Integer sourceIdx = ((TransferInventoryEvent.Post) event).getSourceSlot().get(Keys.SLOT_INDEX).get();
-                final Integer targetIdx = ((TransferInventoryEvent.Post) event).getTargetSlot().get(Keys.SLOT_INDEX).get();
-                final ItemStackSnapshot item = ((TransferInventoryEvent.Post) event).getTransferredItem();
-                this.plugin.getLogger().info("[{}] -> [{}] {}x{}", sourceIdx, targetIdx, item.getType(), item.getQuantity());
+                final Integer sourceIdx = ((TransferInventoryEvent.Post) event).sourceSlot().get(Keys.SLOT_INDEX).get();
+                final Integer targetIdx = ((TransferInventoryEvent.Post) event).targetSlot().get(Keys.SLOT_INDEX).get();
+                final ItemStackSnapshot item = ((TransferInventoryEvent.Post) event).transferredItem();
+                this.plugin.getLogger().info("[{}] -> [{}] {}x{}", sourceIdx, targetIdx, item.type(), item.quantity());
             }
         }
 
@@ -158,19 +158,19 @@ public final class InventoryTest implements LoadableModule {
         public void onCraft(CraftItemEvent event) {
 //            this.plugin.getLogger().info("{} size: {} recipe: {} ",
 //                    event.getClass().getSimpleName(),
-//                    event.getCraftingInventory().capacity(),
-//                    event.getRecipe().map(Recipe::getKey).map(ResourceKey::asString).orElse("no recipe"));
+//                    event.craftingInventory().capacity(),
+//                    event.recipe().map(Recipe::getKey).map(ResourceKey::asString).orElse("no recipe"));
         }
     }
 
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.plugin, new InventoryTestListener(this.plugin));
+        Sponge.eventManager().registerListeners(this.plugin, new InventoryTestListener(this.plugin));
     }
 
     private static void doFancyStuff(final Player player) {
 
-        final GridInventory inv27Grid = player.getInventory().query(PrimaryPlayerInventory.class).get().getStorage();
+        final GridInventory inv27Grid = player.inventory().query(PrimaryPlayerInventory.class).get().storage();
         final Inventory inv27Slots = Inventory.builder().slots(27).completeStructure().build();
         final Inventory inv27Slots2 = Inventory.builder().slots(27).completeStructure().build();
         final ViewableInventory doubleMyInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9X6.get())
@@ -267,7 +267,7 @@ public final class InventoryTest implements LoadableModule {
     //            Inventory mixedComposite = Inventory.builder().inventory(grids).slots(1).inventory(container).completeStructure().build();
     //        }
     //        if (container instanceof DispenserContainer) {
-    //            final GridInventory inv27Grid = ((PlayerInventory)player.inventory).query(PrimaryPlayerInventory.class).get().getStorage();
+    //            final GridInventory inv27Grid = ((PlayerInventory)player.inventory).query(PrimaryPlayerInventory.class).get().storage();
     //            final Inventory inv27Slots = Inventory.builder().slots(27).completeStructure().build();
     //            final Inventory inv27Slots2 = Inventory.builder().slots(27).completeStructure().build();
     //            final ViewableInventory doubleMyInventory = ViewableInventory.builder().type(ContainerTypes.GENERIC_9x6.get())

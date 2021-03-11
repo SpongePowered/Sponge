@@ -50,11 +50,11 @@ import net.minecraft.world.level.material.FluidState;
 
 public final class SpongeFluidStateBuilder implements org.spongepowered.api.fluid.FluidState.Builder {
 
-    private org.spongepowered.api.fluid.FluidState state = FluidTypes.EMPTY.get().getDefaultState();
+    private org.spongepowered.api.fluid.FluidState state = FluidTypes.EMPTY.get().defaultState();
 
     @Override
     public org.spongepowered.api.fluid.FluidState.@NonNull Builder fluid(@NonNull final FluidType fluidType) {
-        this.state = Objects.requireNonNull(fluidType).getDefaultState();
+        this.state = Objects.requireNonNull(fluidType).defaultState();
         return this;
     }
 

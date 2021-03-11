@@ -38,7 +38,7 @@ public abstract class ObjectiveCriteriaMixin_API implements Criterion {
     // @formatter:on
 
     @Override
-    public ObjectiveDisplayMode getDisplayMode() {
+    public ObjectiveDisplayMode displayMode() {
         return (ObjectiveDisplayMode) (Object) this.shadow$getDefaultRenderType();
     }
 }

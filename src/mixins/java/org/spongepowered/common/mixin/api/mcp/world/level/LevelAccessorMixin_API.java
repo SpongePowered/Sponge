@@ -108,15 +108,15 @@ public interface LevelAccessorMixin_API {
 
     // Volume
 
-    default Vector3i protoWorld$getBlockMin() {
+    default Vector3i protoWorld$blockMin() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
-    default Vector3i protoWorld$getBlockMax() {
+    default Vector3i protoWorld$blockMax() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
-    default Vector3i protoWorld$getBlockSize() {
+    default Vector3i protoWorld$blockSize() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
@@ -130,20 +130,20 @@ public interface LevelAccessorMixin_API {
 
     // EntityVolume
 
-    default Optional<Entity> protoWorld$getEntity(final UUID uuid) {
+    default Optional<Entity> protoWorld$entity(final UUID uuid) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IWorld that isn't part of Sponge API: " + this.getClass());
     }
 
     // RandomProvider
 
     @Intrinsic
-    default Random protoWorld$getRandom() {
+    default Random protoWorld$random() {
         return this.shadow$getRandom();
     }
 
     // ProtoWorld
 
-    default Difficulty protoWorld$getDifficulty() {
+    default Difficulty protoWorld$difficulty() {
         return (Difficulty) (Object) this.shadow$getLevelData().getDifficulty();
     }
 
@@ -152,14 +152,14 @@ public interface LevelAccessorMixin_API {
 
         final List<Entity> entitiesToSpawn = new ArrayList<>();
         entities.forEach(entitiesToSpawn::add);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().getCurrentCause(), entitiesToSpawn);
-        if (Sponge.getEventManager().post(event)) {
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().currentCause(), entitiesToSpawn);
+        if (Sponge.eventManager().post(event)) {
             return Collections.emptyList();
         }
-        for (final Entity entity : event.getEntities()) {
+        for (final Entity entity : event.entities()) {
             EntityUtil.processEntitySpawn(entity, Optional::empty);
         }
-        return Collections.unmodifiableCollection(new ArrayList<>(event.getEntities()));
+        return Collections.unmodifiableCollection(new ArrayList<>(event.entities()));
     }
 
     default boolean protoWorld$spawnEntity(final Entity entity) {

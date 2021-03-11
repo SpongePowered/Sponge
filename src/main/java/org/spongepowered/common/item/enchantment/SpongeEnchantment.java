@@ -44,26 +44,26 @@ public final class SpongeEnchantment implements Enchantment {
     }
 
     @Override
-    public EnchantmentType getType() {
+    public EnchantmentType type() {
         return this.enchantmentType;
     }
 
     @Override
-    public int getLevel() {
+    public int level() {
         return this.level;
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ENCHANTMENT_TYPE).valueKey(this.enchantmentType);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.ENCHANTMENT_TYPE).valueKey(this.enchantmentType);
 
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Queries.ENCHANTMENT_ID, resourceKey)
                 .set(Queries.LEVEL, this.level);
     }

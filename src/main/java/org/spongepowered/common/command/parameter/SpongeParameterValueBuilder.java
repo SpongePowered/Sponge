@@ -59,45 +59,45 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> setKey(@NonNull final String key) {
-        return this.setKey(new SpongeParameterKey<>(key, this.typeToken));
+    public Parameter.Value.@NonNull Builder<T> key(@NonNull final String key) {
+        return this.key(new SpongeParameterKey<>(key, this.typeToken));
     }
 
-    @Override public Parameter.Value.@NonNull Builder<T> setKey(final Parameter.@NonNull Key<T> key) {
+    @Override public Parameter.Value.@NonNull Builder<T> key(final Parameter.@NonNull Key<T> key) {
         Objects.requireNonNull(key, "The key cannot be null");
         this.key = key;
         return this;
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> parser(@NonNull final ValueParser<? extends T> parser) {
+    public Parameter.Value.@NonNull Builder<T> addParser(@NonNull final ValueParser<? extends T> parser) {
         this.parsers.add(Objects.requireNonNull(parser, "The ValueParser may not be null"));
         return this;
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> setSuggestions(@Nullable final ValueCompleter completer) {
+    public Parameter.Value.@NonNull Builder<T> suggestions(@Nullable final ValueCompleter completer) {
         this.completer = completer;
         return this;
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> setUsage(@Nullable final ValueUsage usage) {
+    public Parameter.Value.@NonNull Builder<T> usage(@Nullable final ValueUsage usage) {
         this.usage = usage;
         return this;
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> setRequiredPermission(@Nullable final String permission) {
+    public Parameter.Value.@NonNull Builder<T> requiredPermission(@Nullable final String permission) {
         if (permission == null) {
-            return this.setRequirements(null);
+            return this.requirements(null);
         } else {
-            return this.setRequirements(commandCause -> commandCause.getSubject().hasPermission(permission));
+            return this.requirements(commandCause -> commandCause.subject().hasPermission(permission));
         }
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> setRequirements(@Nullable final Predicate<CommandCause> executionRequirements) {
+    public Parameter.Value.@NonNull Builder<T> requirements(@Nullable final Predicate<CommandCause> executionRequirements) {
         this.executionRequirements = executionRequirements;
         return this;
     }

@@ -39,7 +39,7 @@ public class HotbarAdapter extends InventoryRowAdapter implements Hotbar {
     }
 
     @Override
-    public int getSelectedSlotIndex() {
+    public int selectedSlotIndex() {
         return this.hotbarLens.getSelectedSlotIndex(this.inventoryAdapter$getFabric());
     }
 

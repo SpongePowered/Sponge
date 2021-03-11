@@ -59,7 +59,6 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
-import org.spongepowered.api.event.lifecycle.RegisterRegistryEvent;
 import org.spongepowered.api.event.lifecycle.RegisterRegistryValueEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.BlockCarrier;
@@ -91,21 +90,21 @@ public final class AdvancementTest implements LoadableModule {
     @Override
     public void enable(final CommandContext ctx) {
         this.enabled = true;
-        Sponge.getEventManager().registerListeners(this.plugin, this.listeners);
+        Sponge.eventManager().registerListeners(this.plugin, this.listeners);
         try {
-            Sponge.getServer().getCommandManager().process("reload");
+            Sponge.server().commandManager().process("reload");
         } catch (final CommandException e) {
             e.printStackTrace();
         }
-        ctx.getCause().first(ServerPlayer.class).map(player -> player.getProgress(this.rootAdvancement).grant());
+        ctx.cause().first(ServerPlayer.class).map(player -> player.progress(this.rootAdvancement).grant());
     }
 
     @Override
     public void disable(final CommandContext ctx) {
         this.enabled = false;
-        Sponge.getEventManager().unregisterListeners(this.listeners);
+        Sponge.eventManager().unregisterListeners(this.listeners);
         try {
-            Sponge.getServer().getCommandManager().process("reload");
+            Sponge.server().commandManager().process("reload");
         } catch (final CommandException e) {
             e.printStackTrace();
         }
@@ -113,39 +112,39 @@ public final class AdvancementTest implements LoadableModule {
 
     @Listener
     public void onTreeAdjust(final AdvancementTreeEvent.GenerateLayout event) {
-        final AdvancementTree tree = event.getTree();
+        final AdvancementTree tree = event.tree();
         if (tree.equals(this.rootAdvancement)) {
-            final TreeLayoutElement layoutElement1 = event.getLayout().getElement(this.counterAdvancement1).get();
-            final TreeLayoutElement layoutElement2 = event.getLayout().getElement(this.counterAdvancement2).get();
-            layoutElement1.setPosition(layoutElement2.getPosition());
-            layoutElement2.setPosition(layoutElement2.getPosition().add(-1,2));
+            final TreeLayoutElement layoutElement1 = event.layout().element(this.counterAdvancement1).get();
+            final TreeLayoutElement layoutElement2 = event.layout().element(this.counterAdvancement2).get();
+            layoutElement1.setPosition(layoutElement2.position());
+            layoutElement2.setPosition(layoutElement2.position().add(-1,2));
         }
     }
 
     @Listener
     public void onGranted(final AdvancementEvent.Grant event) {
-        this.logger.info("{} was granted", event.getAdvancement().getKey());
+        this.logger.info("{} was granted", event.advancement().key());
     }
 
     @Listener
     public void onGranted(final AdvancementEvent.Revoke event) {
-        this.logger.info("{} was revoked", event.getAdvancement().getKey());
+        this.logger.info("{} was revoked", event.advancement().key());
     }
 
     @Listener
     public void onTrigger(final CriterionEvent.Trigger<?> event) {
-        this.logger.info("{} for {} was triggered", event.getTrigger().getType().getKey(), event.getAdvancement().getKey());
+        this.logger.info("{} for {} was triggered", event.trigger().type().key(), event.advancement().key());
     }
 
     @Listener
     public void onTriggerRegistry(final RegisterRegistryValueEvent.GameScoped event) {
-        Sponge.getDataManager().registerBuilder(InventoryChangeTriggerConfig.class, new InventoryChangeTriggerConfig.Builder());
+        Sponge.dataManager().registerBuilder(InventoryChangeTriggerConfig.class, new InventoryChangeTriggerConfig.Builder());
         this.inventoryChangeTrigger = Trigger.builder()
                 .dataSerializableConfig(InventoryChangeTriggerConfig.class)
                 .listener(triggerEvent -> {
-                    final ItemStack stack = triggerEvent.getTrigger().getConfiguration().stack;
-                    final int found = triggerEvent.getPlayer().getInventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, stack).totalQuantity();
-                    triggerEvent.setResult(stack.getQuantity() <= found);
+                    final ItemStack stack = triggerEvent.trigger().configuration().stack;
+                    final int found = triggerEvent.player().inventory().query(QueryTypes.ITEM_STACK_IGNORE_QUANTITY, stack).totalQuantity();
+                    triggerEvent.setResult(stack.quantity() <= found);
                 })
                 .key(ResourceKey.of(this.plugin, "my_inventory_trigger"))
                 .name("my_inventory_trigger")
@@ -289,16 +288,16 @@ public final class AdvancementTest implements LoadableModule {
         @Listener
         public void onConainterEvent(final InteractContainerEvent.Open event, @First final ServerPlayer player) {
 
-            final AdvancementProgress progress1 = player.getProgress(AdvancementTest.this.counterAdvancement1);
+            final AdvancementProgress progress1 = player.progress(AdvancementTest.this.counterAdvancement1);
             if (progress1.achieved()) {
-                final AdvancementProgress progress2 = player.getProgress(AdvancementTest.this.counterAdvancement2);
+                final AdvancementProgress progress2 = player.progress(AdvancementTest.this.counterAdvancement2);
                 progress2.require(AdvancementTest.this.counter2).add(1);
 
             } else {
                 progress1.require(AdvancementTest.this.counter1).add(1);
-                final Object carrier = ((CarriedInventory) event.getContainer()).getCarrier().orElse(null);
+                final Object carrier = ((CarriedInventory) event.container()).carrier().orElse(null);
                 if (carrier instanceof BlockCarrier) {
-                    if (((BlockCarrier) carrier).getLocation().getBlockType().isAnyOf(BlockTypes.TRAPPED_CHEST)) {
+                    if (((BlockCarrier) carrier).location().blockType().isAnyOf(BlockTypes.TRAPPED_CHEST)) {
                         progress1.require(AdvancementTest.this.counter1Bypass).grant();
                     }
                 }
@@ -319,7 +318,7 @@ public final class AdvancementTest implements LoadableModule {
         }
 
         @Override
-        public int getContentVersion() {
+        public int contentVersion() {
             return 1;
         }
 

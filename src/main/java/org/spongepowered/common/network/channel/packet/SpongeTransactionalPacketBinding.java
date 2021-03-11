@@ -129,8 +129,8 @@ public class SpongeTransactionalPacketBinding<P extends RequestPacket<R>, R exte
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("opcode", this.getOpcode())
-                .add("requestPacketType", this.getPacketType())
+                .add("opcode", this.opcode())
+                .add("requestPacketType", this.packetType())
                 .toString();
     }
 }

@@ -43,12 +43,12 @@ public interface DragonPhaseInstanceMixin_API extends DragonPhase {
     // @formatter:on
 
     @Override
-    default DragonPhaseType getType() {
+    default DragonPhaseType type() {
         return (DragonPhaseType) this.shadow$getPhase();
     }
 
     @Override
-    default Optional<Vector3d> getTargetPosition() {
+    default Optional<Vector3d> targetPosition() {
         final net.minecraft.world.phys.Vec3 vec = this.shadow$getFlyTargetLocation();
         return vec == null ? Optional.empty() : Optional.of(VecHelper.toVector3d(vec));
     }

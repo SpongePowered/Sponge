@@ -125,10 +125,10 @@ public final class DamageEventHandler {
             final EventContext.Builder contextBuilder = EventContext.builder();
             if (entityLivingBase instanceof ArmorEquipable) {
                 // TODO - Add the event context keys for these armor pieces
-                final ItemStackSnapshot helmet = ((ArmorEquipable) entityLivingBase).getHead().createSnapshot();
-                final ItemStackSnapshot chest = ((ArmorEquipable) entityLivingBase).getChest().createSnapshot();
-                final ItemStackSnapshot legs = ((ArmorEquipable) entityLivingBase).getLegs().createSnapshot();
-                final ItemStackSnapshot feet = ((ArmorEquipable) entityLivingBase).getFeet().createSnapshot();
+                final ItemStackSnapshot helmet = ((ArmorEquipable) entityLivingBase).head().createSnapshot();
+                final ItemStackSnapshot chest = ((ArmorEquipable) entityLivingBase).chest().createSnapshot();
+                final ItemStackSnapshot legs = ((ArmorEquipable) entityLivingBase).legs().createSnapshot();
+                final ItemStackSnapshot feet = ((ArmorEquipable) entityLivingBase).feet().createSnapshot();
             }
             final DamageFunction armorModifier = DamageFunction.of(DamageModifier.builder()
                 .cause(Cause.of(EventContext.empty(), attribute, entityLivingBase))
@@ -145,7 +145,7 @@ public final class DamageEventHandler {
             return Optional.of(new DamageFunction(DamageModifier.builder()
                 .cause(Cause.of(EventContext.empty(), effect))
                 .type(DamageModifierTypes.DEFENSIVE_POTION_EFFECT)
-                .build(), DamageEventHandler.createResistanceFunction(effect.getAmplifier())));
+                .build(), DamageEventHandler.createResistanceFunction(effect.amplifier())));
         }
         return Optional.empty();
     }
@@ -284,7 +284,7 @@ public final class DamageEventHandler {
         }
 
         // Entity is source of fire
-        return ((org.spongepowered.api.entity.Entity) entity).getServerLocation();
+        return ((org.spongepowered.api.entity.Entity) entity).serverLocation();
     }
 
     /**
@@ -311,9 +311,9 @@ public final class DamageEventHandler {
                 creatorBridge.tracked$getNotifierReference().ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
             }
         } else if (damageSource instanceof BlockDamageSource) {
-            final ServerLocation location = ((BlockDamageSource) damageSource).getLocation();
+            final ServerLocation location = ((BlockDamageSource) damageSource).location();
             final BlockPos blockPos = VecHelper.toBlockPos(location);
-            final LevelChunkBridge mixinChunk = (LevelChunkBridge) ((net.minecraft.world.level.Level) location.getWorld()).getChunkAt(blockPos);
+            final LevelChunkBridge mixinChunk = (LevelChunkBridge) ((net.minecraft.world.level.Level) location.world()).getChunkAt(blockPos);
             mixinChunk.bridge$getBlockCreator(blockPos).ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
             mixinChunk.bridge$getBlockNotifier(blockPos).ifPresent(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
         }

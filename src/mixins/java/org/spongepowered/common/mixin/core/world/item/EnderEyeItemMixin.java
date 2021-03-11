@@ -93,7 +93,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, final ItemStack used, final HitResult rayTraceResult, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
-                    SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                    SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                             ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
                                     .getPose()).height / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.postEvent(event)) {
@@ -111,7 +111,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
         final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
         if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
-                    SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().getCurrentCause(),
+                    SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                             ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
                                     .getPose()).height / 2.0F), playerIn.getZ()), new Vector3d(0, 0, 0), EntityTypes.EYE_OF_ENDER.get());
             if (SpongeCommon.postEvent(event)) {

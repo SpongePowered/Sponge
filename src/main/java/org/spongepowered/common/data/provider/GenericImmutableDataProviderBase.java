@@ -94,7 +94,7 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
      * @return The value
      */
     protected V constructValue(final H dataHolder, final E element) {
-        return Value.genericImmutableOf(this.getKey(), element);
+        return Value.genericImmutableOf(this.key(), element);
     }
 
     /**
@@ -116,7 +116,7 @@ public abstract class GenericImmutableDataProviderBase<H, V extends Value<E>, E>
     }
 
     @Override
-    public Optional<V> getValue(final DataHolder dataHolder) {
+    public Optional<V> value(final DataHolder dataHolder) {
         return this.get(dataHolder).map(e -> this.constructValue((H) dataHolder, e));
     }
 

@@ -126,6 +126,6 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
     public BiomeProvider fixed(final RegistryReference<Biome> biome) {
         Objects.requireNonNull(biome, "biome");
 
-        return (BiomeProvider) new FixedBiomeSource(() -> (net.minecraft.world.level.biome.Biome) (Object) biome.get(Sponge.getServer().registries()));
+        return (BiomeProvider) new FixedBiomeSource(() -> (net.minecraft.world.level.biome.Biome) (Object) biome.get(Sponge.server().registries()));
     }
 }

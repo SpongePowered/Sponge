@@ -293,9 +293,9 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<TransactionType<@NonNull ?>> blockTransactionTypes() {
         return RegistryLoader.of(l -> {
             l.add(TransactionTypes.BLOCK, k -> new BlockTransactionType());
-            l.add(TransactionTypes.ENTITY_DEATH_DROPS, k -> new NoOpTransactionType<>(false, k.getValue().toUpperCase(Locale.ROOT)));
-            l.add(TransactionTypes.NEIGHBOR_NOTIFICATION, k -> new NoOpTransactionType<>(false, k.getValue().toUpperCase(Locale.ROOT)));
-            l.add(TransactionTypes.SPAWN_ENTITY, k -> new NoOpTransactionType<>(false, k.getValue().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.ENTITY_DEATH_DROPS, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.NEIGHBOR_NOTIFICATION, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.SPAWN_ENTITY, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
         });
     }
 
@@ -376,7 +376,7 @@ public final class SpongeRegistryLoaders {
             l.add(ResourceKeyedValueParameters.VECTOR3D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition(cause.getSource()))));
             l.add(ResourceKeyedValueParameters.WORLD, k -> StandardCatalogedArgumentParser.createConverter(k,
                     DimensionArgument.dimension(),
-                    (reader, cause, result) -> Sponge.getServer().getWorldManager().world((ResourceKey) (Object) result)
+                    (reader, cause, result) -> Sponge.server().worldManager().world((ResourceKey) (Object) result)
                             .orElseThrow(() -> DimensionArgumentAccessor.accessor$ERROR_INVALID_VALUE().createWithContext(reader, result))
                     ));
         });
@@ -725,14 +725,14 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<PlaceholderParser> placeholderParser() {
         return RegistryLoader.of(l -> {
             l.add(PlaceholderParsers.CURRENT_WORLD, k -> new SpongePlaceholderParserBuilder()
-                    .parser(placeholderText -> Component.text(placeholderText.getAssociatedObject().filter(x -> x instanceof Locatable)
-                            .map(x -> ((Locatable) x).getServerLocation().getWorldKey())
-                            .orElseGet(() -> Sponge.getServer().getWorldManager().defaultWorld().getKey()).toString()))
+                    .parser(placeholderText -> Component.text(placeholderText.associatedObject().filter(x -> x instanceof Locatable)
+                            .map(x -> ((Locatable) x).serverLocation().worldKey())
+                            .orElseGet(() -> Sponge.server().worldManager().defaultWorld().key()).toString()))
                     .build());
             l.add(PlaceholderParsers.NAME, k -> new SpongePlaceholderParserBuilder()
-                    .parser(placeholderText -> placeholderText.getAssociatedObject()
+                    .parser(placeholderText -> placeholderText.associatedObject()
                             .filter(x -> x instanceof Nameable)
-                            .map(x -> Component.text(((Nameable) x).getName()))
+                            .map(x -> Component.text(((Nameable) x).name()))
                             .orElse(Component.empty()))
                     .build());
         });

@@ -52,7 +52,7 @@ public final class EndermiteData {
                             if (h.isPersistenceRequired()) {
                                 return false;
                             }
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0 || ticks > EndermiteData.DESPAWN_DELAY_MAX) {
                                 return false;
                             }

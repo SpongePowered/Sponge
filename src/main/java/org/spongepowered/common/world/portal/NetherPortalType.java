@@ -55,8 +55,8 @@ import net.minecraft.world.level.portal.PortalShape;
 public final class NetherPortalType extends VanillaPortalType {
 
     static Optional<BlockUtil.FoundRectangle> findPortalInternal(final ServerLocation location) {
-        final ServerLevel serverWorld = (ServerLevel) location.getWorld();
-        final BlockPos position = VecHelper.toBlockPos(location.getBlockPosition());
+        final ServerLevel serverWorld = (ServerLevel) location.world();
+        final BlockPos position = VecHelper.toBlockPos(location.blockPosition());
         return serverWorld.getPortalForcer()
                 .findPortalAround(position, serverWorld.dimension() == Level.NETHER);
     }
@@ -68,7 +68,7 @@ public final class NetherPortalType extends VanillaPortalType {
         if (mcAxis == Direction.Axis.Y) {
             mcAxis = Direction.Axis.X;
         }
-        PortalHelper.generateNetherPortal((ServerLevel) location.getWorld(), location.getBlockX(), location.getBlockY(), location.getBlockZ(), mcAxis, true);
+        PortalHelper.generateNetherPortal((ServerLevel) location.world(), location.blockX(), location.blockY(), location.blockZ(), mcAxis, true);
     }
 
     @Override
@@ -91,8 +91,8 @@ public final class NetherPortalType extends VanillaPortalType {
 
         final PlatformTeleporter teleporter = new Teleporter(destination, generateDestinationPortal, this);
 
-        ((EntityAccessor) entity).accessor$portalEntrancePos(VecHelper.toBlockPos(entity.getBlockPosition()));
-        return ((EntityBridge) entity).bridge$changeDimension((ServerLevel) destination.getWorld(), teleporter) != null;
+        ((EntityAccessor) entity).accessor$portalEntrancePos(VecHelper.toBlockPos(entity.blockPosition()));
+        return ((EntityBridge) entity).bridge$changeDimension((ServerLevel) destination.world(), teleporter) != null;
 
     }
 
@@ -117,15 +117,15 @@ public final class NetherPortalType extends VanillaPortalType {
             Optional<PortalInfo> portal = NetherPortalType.findPortalInternal(this.originalDestination)
                     .map(x -> this.createNetherPortalInfo(entity, targetWorld, x.minCorner, x));
 
-            final Vector3d originalDestination = portal.map(x -> VecHelper.toVector3d(x.pos)).orElseGet(this.originalDestination::getPosition);
+            final Vector3d originalDestination = portal.map(x -> VecHelper.toVector3d(x.pos)).orElseGet(this.originalDestination::position);
             final ChangeEntityWorldEvent.Reposition reposition = ((EntityBridge) entity).bridge$fireRepositionEvent(
-                    this.originalDestination.getWorld(),
+                    this.originalDestination.world(),
                     (org.spongepowered.api.world.server.ServerWorld) targetWorld,
                     originalDestination
             );
-            if (!reposition.isCancelled() && reposition.getDestinationPosition() != originalDestination) {
+            if (!reposition.isCancelled() && reposition.destinationPosition() != originalDestination) {
                 // find another portal
-                portal = NetherPortalType.findPortalInternal(this.originalDestination.withPosition(reposition.getDestinationPosition()))
+                portal = NetherPortalType.findPortalInternal(this.originalDestination.withPosition(reposition.destinationPosition()))
                         .map(x -> this.createNetherPortalInfo(entity, targetWorld, x.minCorner, x));
             }
 

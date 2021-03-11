@@ -65,7 +65,7 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
         final List<Entity> capturedEntities,
         final int usedButton, @Nullable final org.spongepowered.api.item.inventory.Slot slot) {
         return SpongeEventFactory.createClickContainerEventNumberPress(
-            PhaseTracker.getCauseStackManager().getCurrentCause(),
+            PhaseTracker.getCauseStackManager().currentCause(),
             openContainer, transaction,
             Optional.ofNullable(slot), slotTransactions, usedButton);
     }
@@ -93,16 +93,16 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
             final ImmutableList<SlotTransaction> transactions =
                 new ImmutableList.Builder<SlotTransaction>().add(sourceTransaction).add(targetTransaction).build();
             final ChangeInventoryEvent.Held changeInventoryEventHeld = SpongeEventFactory
-                .createChangeInventoryEventHeld(frame.getCurrentCause(), slotNew, (Inventory) inventoryContainer,
+                .createChangeInventoryEventHeld(frame.currentCause(), slotNew, (Inventory) inventoryContainer,
                     slotPrev, transactions);
             final net.minecraft.world.inventory.AbstractContainerMenu openContainer = player.containerMenu;
             SpongeCommon.postEvent(changeInventoryEventHeld);
             if (changeInventoryEventHeld.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
-                changeInventoryEventHeld.getTransactions())) {
+                changeInventoryEventHeld.transactions())) {
                 player.connection.send(new ClientboundSetCarriedItemPacket(previousSlot));
                 inventory.selected = previousSlot;
             } else {
-                PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.getTransactions(),
+                PacketPhaseUtil.handleSlotRestore(player, openContainer, changeInventoryEventHeld.transactions(),
                     false);
                 inventory.selected = itemChange.getSlot();
                 player.resetLastActionTime();

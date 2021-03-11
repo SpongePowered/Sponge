@@ -96,24 +96,24 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     }
 
     @Override
-    public Optional<UUID> getUniqueId() {
+    public Optional<UUID> uniqueId() {
         return Optional.ofNullable(this.uniqueId);
     }
 
     @Override
-    public Optional<Transform> getTransform() {
+    public Optional<Transform> transform() {
         final Transform transform = Transform.of(this.position, this.rotation);
         return Optional.of(transform);
     }
 
     @Override
-    public EntityType<?> getType() {
+    public EntityType<?> type() {
         return this.entityType;
     }
 
     @Override
-    public Optional<ServerLocation> getLocation() {
-        final Optional<ServerWorld> optional = SpongeCommon.getGame().getServer().getWorldManager().world(this.worldKey);
+    public Optional<ServerLocation> location() {
+        final Optional<ServerWorld> optional = SpongeCommon.getGame().server().worldManager().world(this.worldKey);
         if (optional.isPresent()) {
             final ServerLocation location = ServerLocation.of(optional.get(), this.position);
             return Optional.of(location);
@@ -122,7 +122,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
@@ -130,23 +130,23 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     public DataContainer toContainer() {
         final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(this.compound == null ? new CompoundTag() : this.compound);
         final DataContainer container = DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Queries.WORLD_KEY, this.worldKey.getFormatted())
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
+                .set(Queries.WORLD_KEY, this.worldKey.formatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.position.getX())
                 .set(Queries.POSITION_Y, this.position.getY())
                 .set(Queries.POSITION_Z, this.position.getZ())
-                .getContainer()
+                .container()
                 .createView(Constants.Entity.ROTATION)
                 .set(Queries.POSITION_X, this.rotation.getX())
                 .set(Queries.POSITION_Y, this.rotation.getY())
                 .set(Queries.POSITION_Z, this.rotation.getZ())
-                .getContainer()
+                .container()
                 .createView(Constants.Entity.SCALE)
                 .set(Queries.POSITION_X, this.scale.getX())
                 .set(Queries.POSITION_Y, this.scale.getY())
                 .set(Queries.POSITION_Z, this.scale.getZ())
-                .getContainer()
+                .container()
                 .set(Constants.Entity.TYPE, net.minecraft.world.entity.EntityType.getKey((net.minecraft.world.entity.EntityType<?>) this.entityType))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
 
@@ -173,12 +173,12 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     }
 
     @Override
-    public ResourceKey getWorld() {
+    public ResourceKey world() {
         return this.worldKey;
     }
 
     @Override
-    public Vector3i getPosition() {
+    public Vector3i position() {
         return this.position.toInt();
     }
 
@@ -186,15 +186,15 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     public EntitySnapshot withLocation(final ServerLocation location) {
         Objects.requireNonNull(location, "location");
         final SpongeEntitySnapshotBuilder builder = this.createBuilder();
-        builder.position = location.getPosition();
-        builder.worldKey = location.getWorld().getKey();
+        builder.position = location.position();
+        builder.worldKey = location.world().key();
         builder.compound = new CompoundTag();
         return builder.build();
     }
 
     private SpongeEntitySnapshotBuilder createBuilder() {
         return new SpongeEntitySnapshotBuilder()
-                .type(this.getType())
+                .type(this.type())
                 .rotation(this.rotation)
                 .scale(this.scale);
     }
@@ -214,19 +214,19 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
                 return Optional.of(entity);
             }
         }
-        final Optional<ServerWorld> world = Sponge.getServer().getWorldManager().world(this.worldKey);
+        final Optional<ServerWorld> world = Sponge.server().worldManager().world(this.worldKey);
         if (!world.isPresent()) {
             return Optional.empty();
         }
         if (this.uniqueId != null) {
-            final Optional<Entity> entity = world.get().getEntity(this.uniqueId);
+            final Optional<Entity> entity = world.get().entity(this.uniqueId);
             if (entity.isPresent()) {
                 return entity;
             }
         }
         try (final StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN);
-            final Entity newEntity = world.get().createEntity(this.getType(), this.position);
+            final Entity newEntity = world.get().createEntity(this.type(), this.position);
             if (newEntity != null) {
                 final net.minecraft.world.entity.Entity nmsEntity = (net.minecraft.world.entity.Entity) newEntity;
                 if (this.compound != null) {

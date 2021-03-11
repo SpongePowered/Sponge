@@ -119,7 +119,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         } else {
             csm.pushCause(entity);
         }
-        final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(csm.getCurrentCause(), (Living) this);
+        final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(csm.currentCause(), (Living) this);
         SpongeCommon.postEvent(event);
         csm.popCause();
         if (event.isCancelled()) {
@@ -151,7 +151,7 @@ public abstract class MobMixin extends LivingEntityMixin {
             if (event.isCancelled()) {
                 ci.cancel();
             } else {
-                this.target = ((LivingEntity) event.getTarget().orElse(null));
+                this.target = ((LivingEntity) event.target().orElse(null));
             }
         }
     }
@@ -223,16 +223,16 @@ public abstract class MobMixin extends LivingEntityMixin {
         // Sponge Start - Throw our event and handle appropriately
         final DamageSource damageSource = DamageSource.mobAttack((Mob) (Object) this);
         PhaseTracker.getCauseStackManager().pushCause(damageSource);
-        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
+        final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
             originalFunctions, knockbackModifier, originalBaseDamage);
         SpongeCommon.postEvent(event);
         PhaseTracker.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             return false;
         }
-        knockbackModifier = event.getKnockbackModifier();
+        knockbackModifier = event.knockbackModifier();
         // boolean attackSucceeded = targetEntity.attackEntityFrom(DamageSource.causeMobDamage(this), baseDamage);
-        final boolean attackSucceeded = targetEntity.hurt(damageSource, (float) event.getFinalOutputDamage());
+        final boolean attackSucceeded = targetEntity.hurt(damageSource, (float) event.finalOutputDamage());
         // Sponge End
         if (attackSucceeded) {
             if (knockbackModifier > 0 && targetEntity instanceof LivingEntity) {

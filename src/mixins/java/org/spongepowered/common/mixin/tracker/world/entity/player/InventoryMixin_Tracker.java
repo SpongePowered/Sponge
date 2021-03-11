@@ -48,10 +48,10 @@ public abstract class InventoryMixin_Tracker implements TrackedInventoryBridge {
     private Slot impl$getSpongeSlotByIndex(int index) {
         final int hotbarSize = net.minecraft.world.entity.player.Inventory.getSelectionSize();
         if (index < hotbarSize) {
-            return ((PlayerInventory) this).getPrimary().getHotbar().getSlot(index).get();
+            return ((PlayerInventory) this).primary().hotbar().slot(index).get();
         }
         index -= hotbarSize;
-        return ((PlayerInventory) this).getPrimary().getStorage().getSlot(index).get();
+        return ((PlayerInventory) this).primary().storage().slot(index).get();
     }
 
     @Inject(method = "add(ILnet/minecraft/world/item/ItemStack;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
@@ -68,7 +68,7 @@ public abstract class InventoryMixin_Tracker implements TrackedInventoryBridge {
     private int impl$ifCaptureDoTransactions(final net.minecraft.world.entity.player.Inventory inv, final int index, final ItemStack stack) {
         if (this.bridge$capturingInventory()) {
             // Capture items getting picked up
-            final Slot slot = index == 40 ? ((PlayerInventory) this).getOffhand() : this.impl$getSpongeSlotByIndex(index);
+            final Slot slot = index == 40 ? ((PlayerInventory) this).offhand() : this.impl$getSpongeSlotByIndex(index);
             final ItemStackSnapshot original = ItemStackUtil.snapshotOf(this.shadow$getItem(index));
             final int result = this.shadow$addResource(index, stack);
             final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(this.shadow$getItem(index));

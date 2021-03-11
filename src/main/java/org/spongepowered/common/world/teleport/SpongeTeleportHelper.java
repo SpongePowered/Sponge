@@ -53,9 +53,9 @@ import net.minecraft.world.level.border.WorldBorder;
 public final class SpongeTeleportHelper implements TeleportHelper {
 
     @Override
-    public Optional<ServerLocation> getSafeLocation(ServerLocation location, int height, int width, int distanceToDrop,
+    public Optional<ServerLocation> findSafeLocation(ServerLocation location, int height, int width, int distanceToDrop,
             TeleportHelperFilter filter, TeleportHelperFilter... additionalFilters) {
-        final ServerWorld world = location.getWorld();
+        final ServerWorld world = location.world();
         final Set<TeleportHelperFilter> filters = Sets.newHashSet(additionalFilters);
         filters.add(filter);
 
@@ -73,16 +73,16 @@ public final class SpongeTeleportHelper implements TeleportHelper {
 
     private Stream<Vector3i> getBlockLocations(ServerLocation worldLocation, int height, int width) {
         // We don't want to warp outside of the world border, so we want to check that we're within it.
-        final WorldBorder worldBorder = (WorldBorder) worldLocation.getWorld().getProperties().worldBorder();
+        final WorldBorder worldBorder = (WorldBorder) worldLocation.world().properties().worldBorder();
         int worldBorderMinX = GenericMath.floor(worldBorder.getMinX());
         int worldBorderMinZ = GenericMath.floor(worldBorder.getMinZ());
         int worldBorderMaxX = GenericMath.floor(worldBorder.getMaxX());
         int worldBorderMaxZ = GenericMath.floor(worldBorder.getMaxZ());
 
         // Get the World and get the maximum Y value.
-        int worldMaxY = worldLocation.getWorld().getBlockMax().getY();
+        int worldMaxY = worldLocation.world().blockMax().getY();
 
-        Vector3i vectorLocation = worldLocation.getBlockPosition();
+        Vector3i vectorLocation = worldLocation.blockPosition();
 
         // We use clamp to remain within the world confines, so we don't waste time checking blocks outside of the
         // world border and the world height.
@@ -190,7 +190,7 @@ public final class SpongeTeleportHelper implements TeleportHelper {
             return cache.get(vector3i);
         }
 
-        BlockData data = new BlockData(world.getBlock(vector3i), filters);
+        BlockData data = new BlockData(world.block(vector3i), filters);
         cache.put(vector3i, data);
         return data;
     }

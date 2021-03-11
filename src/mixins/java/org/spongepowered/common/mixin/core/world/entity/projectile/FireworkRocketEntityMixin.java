@@ -108,7 +108,7 @@ public abstract class FireworkRocketEntityMixin extends EntityMixin implements F
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, this.impl$projectileSource);
             SpongeCommonEventFactory.detonateExplosive(this, Explosion.builder()
                 .sourceExplosive(((FireworkRocket) this))
-                .location(((FireworkRocket) this).getServerLocation())
+                .location(((FireworkRocket) this).serverLocation())
                 .radius(this.impl$explosionRadius))
                 .ifPresent(explosion -> world.broadcastEntityEvent(self, state));
         }

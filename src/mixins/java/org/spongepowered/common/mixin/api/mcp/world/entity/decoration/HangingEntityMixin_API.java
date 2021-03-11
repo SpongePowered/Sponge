@@ -44,7 +44,7 @@ public abstract class HangingEntityMixin_API extends EntityMixin_API implements 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.direction().asImmutable());
+        values.add(this.hangingDirection().asImmutable());
 
         return values;
     }

@@ -229,7 +229,7 @@ public final class TrackingUtil {
 
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(block, pos, BlockChangeFlags.NONE);
-            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().getCurrentCause(), snapshot);
+            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().currentCause(), snapshot);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 return;
@@ -265,7 +265,7 @@ public final class TrackingUtil {
         final net.minecraft.world.level.block.state.BlockState blockState = fluidState.createLegacyBlock();
         if (ShouldFire.TICK_BLOCK_EVENT) {
             final BlockSnapshot snapshot = mixinWorld.bridge$createSnapshot(blockState, pos, BlockChangeFlags.NONE);
-            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().getCurrentCause(), snapshot);
+            final TickBlockEvent event = SpongeEventFactory.createTickBlockEventScheduled(PhaseTracker.getCauseStackManager().currentCause(), snapshot);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 return;
@@ -304,7 +304,7 @@ public final class TrackingUtil {
             final BlockSnapshot currentTickBlock = mixinWorld.bridge$createSnapshot(state, pos, BlockChangeFlags.NONE);
             final TickBlockEvent
                 event =
-                SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getCauseStackManager().getCurrentCause(), currentTickBlock);
+                SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getCauseStackManager().currentCause(), currentTickBlock);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 return;
@@ -340,7 +340,7 @@ public final class TrackingUtil {
             final BlockSnapshot currentTickBlock = mixinWorld.bridge$createSnapshot(state.createLegacyBlock(), pos, BlockChangeFlags.NONE);
             final TickBlockEvent
                 event =
-                SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getCauseStackManager().getCurrentCause(), currentTickBlock);
+                SpongeEventFactory.createTickBlockEventRandom(PhaseTracker.getCauseStackManager().currentCause(), currentTickBlock);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 return;
@@ -457,10 +457,10 @@ public final class TrackingUtil {
     }
 
     public static void associateTrackerToTarget(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction, final User user) {
-        final BlockSnapshot finalSnapshot = transaction.getFinal();
+        final BlockSnapshot finalSnapshot = transaction.finalReplacement();
         final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
         final BlockPos pos = spongeSnapshot.getBlockPos();
-        final Block block = ((net.minecraft.world.level.block.state.BlockState) spongeSnapshot.getState()).getBlock();
+        final Block block = ((net.minecraft.world.level.block.state.BlockState) spongeSnapshot.state()).getBlock();
         spongeSnapshot.getServerWorld()
             .map(world -> world.getChunkAt(pos))
             .map(chunk -> (LevelChunkBridge) chunk)

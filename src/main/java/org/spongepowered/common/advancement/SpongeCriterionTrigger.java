@@ -105,7 +105,7 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
     @Override
     public void bridge$trigger(final ServerPlayer player) {
         final PlayerAdvancements playerAdvancements = ((net.minecraft.server.level.ServerPlayer) player).getAdvancements();
-        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
 
         @SuppressWarnings("unchecked") // correct type verified in builder
         final TypeToken<FilteredTriggerConfiguration> typeToken = (TypeToken<FilteredTriggerConfiguration>) TypeToken.get(this.triggerConfigurationType);
@@ -118,12 +118,12 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
                 typeToken, player, (FilteredTrigger) listener.getTriggerInstance(), this.eventHandler == null);
             if (this.eventHandler != null) {
                 this.eventHandler.accept(event);
-                if (!event.getResult()) {
+                if (!event.result()) {
                     continue;
                 }
             }
             SpongeCommon.postEvent(event);
-            if (event.getResult()) {
+            if (event.result()) {
                 listener.run(playerAdvancements);
             }
         }

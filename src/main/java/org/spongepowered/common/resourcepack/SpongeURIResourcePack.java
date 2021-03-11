@@ -56,12 +56,12 @@ public final class SpongeURIResourcePack extends SpongeResourcePack {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public URI getUri() {
+    public URI uri() {
         return this.uri;
     }
 

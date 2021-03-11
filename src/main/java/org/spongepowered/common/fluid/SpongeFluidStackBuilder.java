@@ -88,8 +88,8 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<@NonNull FluidS
 
     @Override
     public FluidStack.@NonNull Builder from(final FluidStack value) {
-        this.fluidType = value.getFluid();
-        this.volume = value.getVolume();
+        this.fluidType = value.fluid();
+        this.volume = value.volume();
         final DataContainer container = value.toContainer();
         if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
             this.extra = container.getView(Constants.Sponge.UNSAFE_NBT).get().copy();
@@ -106,7 +106,7 @@ public class SpongeFluidStackBuilder extends AbstractDataBuilder<@NonNull FluidS
         this.reset();
         final String rawFluid = container.getString(Constants.Fluids.FLUID_TYPE).get();
 
-        final Optional<FluidType> fluidType = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
+        final Optional<FluidType> fluidType = Sponge.game().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
         if (!fluidType.isPresent()) {
             throw new InvalidDataException("Invalid fluid id found: " + rawFluid);
         }
