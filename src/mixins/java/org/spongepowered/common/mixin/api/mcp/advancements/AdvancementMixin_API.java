@@ -107,11 +107,8 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     }
 
     @Override
-    public String getBackgroundPath() {
-        if (this.display == null) {
-            return null;
-        }
-        return this.display.getBackground().getPath();
+    public Optional<ResourceKey> getBackgroundPath() {
+        return Optional.ofNullable((ResourceKey) (Object) this.display.getBackground());
     }
 
     @Override

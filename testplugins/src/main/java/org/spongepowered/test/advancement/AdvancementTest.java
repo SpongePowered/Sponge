@@ -168,7 +168,7 @@ public final class AdvancementTest implements LoadableModule {
                                 .title(Component.text("Advancement Tests"))
                                 .description(Component.text("Dummy trigger. Granted manually after testplugin is enabled"))
                                 .build())
-                .root().background("textures/gui/advancements/backgrounds/stone.png")
+                .root().background(ResourceKey.minecraft("textures/gui/advancements/backgrounds/stone.png"))
                 .key(ResourceKey.of(this.plugin, "root"))
                 .build();
         event.register(this.rootAdvancement);

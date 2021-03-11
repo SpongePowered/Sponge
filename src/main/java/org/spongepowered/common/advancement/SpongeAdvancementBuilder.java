@@ -31,6 +31,7 @@ import net.minecraft.advancements.Criterion;
 import net.minecraft.advancements.FrameType;
 import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -68,8 +69,8 @@ public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder
     }
 
     @Override
-    public Advancement.Builder background(String backgroundPath) {
-        this.backgroundPath = new ResourceLocation(backgroundPath);
+    public Advancement.Builder background(ResourceKey backgroundPath) {
+        this.backgroundPath = (ResourceLocation) (Object) backgroundPath;
         return this;
     }
 
