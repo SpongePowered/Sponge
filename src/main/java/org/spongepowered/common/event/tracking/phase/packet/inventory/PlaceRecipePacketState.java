@@ -69,7 +69,9 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
         final net.minecraft.world.item.crafting.Recipe recipe = recipeManager.byKey(packet.getRecipe()).orElse(null);
 
         final ServerPlayer player = context.getPacketPlayer();
-        ((TrackedContainerBridge)player.containerMenu).bridge$detectAndSendChanges(true);
+        player.containerMenu.suppressRemoteUpdates();
+        player.containerMenu.broadcastChanges();
+        player.containerMenu.resumeRemoteUpdates();
         ((TrackedInventoryBridge) player.containerMenu).bridge$setCaptureInventory(false);
         ((TrackedContainerBridge) player.containerMenu).bridge$setFirePreview(true);
 

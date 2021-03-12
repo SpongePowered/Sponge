@@ -213,8 +213,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
                     // TODO When this happens a mod probably overrides Container#detectAndSendChanges
                     // We are currently unable to detect changes in this case.
                     if (BasicInventoryPacketState.containersFailedCapture.add(trackedInventory.getClass())) {
-                        SpongeCommon
-                            .getLogger().warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + openContainer.getClass());
+                        SpongeCommon.getLogger().warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + openContainer.getClass());
                     }
                     return;
                 }

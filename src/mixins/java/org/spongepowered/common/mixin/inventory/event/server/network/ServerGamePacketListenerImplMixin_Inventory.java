@@ -87,8 +87,10 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         // We want to treat an 'invalid' click just like a regular click - we still fire events, do restores, etc.
 
         // Vanilla doesn't call detectAndSendChanges for 'invalid' clicks, since it restores the entire inventory
-        // Passing 'captureOnly' as 'true' allows capturing to happen for event firing, but doesn't send any pointless packets
-        ((TrackedContainerBridge) this.player.containerMenu).bridge$detectAndSendChanges(true);
+        // Allows capturing to happen for event firing, but doesn't send any pointless packets
+        this.player.containerMenu.suppressRemoteUpdates();
+        this.player.containerMenu.broadcastChanges();
+        this.player.containerMenu.resumeRemoteUpdates();
     }
 
 }

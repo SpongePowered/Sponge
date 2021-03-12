@@ -53,7 +53,5 @@ public interface TrackedContainerBridge {
 
     void bridge$setCapturePossible();
 
-    void bridge$detectAndSendChanges(boolean captureOnly);
-
     void bridge$trackViewable(Object inventory);
 }

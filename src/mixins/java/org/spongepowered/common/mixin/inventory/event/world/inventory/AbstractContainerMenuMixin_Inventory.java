@@ -40,17 +40,18 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
@@ -63,15 +64,23 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 @Mixin(AbstractContainerMenu.class)
 public abstract class AbstractContainerMenuMixin_Inventory implements TrackedContainerBridge, InventoryAdapter, TrackedInventoryBridge {
 
-    @Shadow private boolean suppressRemoteUpdates;
+    // @formatter: off
+    @Final @Shadow private NonNullList<ItemStack> lastSlots;
+    @Final @Shadow public NonNullList<Slot> slots;
+    @Final @Shadow private List<ContainerListener> containerListeners;
+
     @Shadow public abstract void shadow$sendAllDataToRemote();
+    // @formatter: on
+
     // TrackedContainerBridge
 
     private boolean impl$shiftCraft = false;
@@ -404,110 +413,47 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         }
     }
 
-    // detectAndSendChanges
-
-    /**
-     * @author bloodmc
-     * @reason All player fabric changes that need to be synced to
-     * client flow through this method. Overwrite is used as no mod
-     * should be touching this method.
-     */
-    @Overwrite
-    public void broadcastChanges() {
-        this.bridge$detectAndSendChanges(false);
-        this.bridge$setCapturePossible(); // Detect mod overrides
-    }
-
-    @Final @Shadow private NonNullList<ItemStack> lastSlots;
-    @Final @Shadow public NonNullList<Slot> slots;
-    @Final @Shadow private List<ContainerListener> containerListeners;
-    @Final @Shadow private List<DataSlot> dataSlots;
-
-    @Override
-    public void bridge$detectAndSendChanges(final boolean captureOnly) {
-        // Code-Flow changed from vanilla completely!
-
+    // Before broadcasting check if a InventoryMenu wants to cancel changes
+    @Inject(method = "broadcastChanges", at = @At("HEAD"))
+    public void impl$onBroadcastChanges(CallbackInfo ci) {
+        this.bridge$setCapturePossible();
         SpongeInventoryMenu menu = ((MenuBridge)this).bridge$getMenu();
-        // We first collect all differences and check if cancelled for readonly menu changes
-        List<Integer> changes = new ArrayList<>();
-
+        if (menu == null) {
+            return; // No menu - no callbacks
+        }
         for (int i = 0; i < this.slots.size(); ++i) {
             final Slot slot = this.slots.get(i);
             final ItemStack newStack = slot.getItem();
             ItemStack oldStack = this.lastSlots.get(i);
             if (!ItemStack.matches(oldStack, newStack)) {
-                changes.add(i);
-            }
-        }
-
-        // For each change
-        for (Integer i : changes) {
-            final Slot slot = this.slots.get(i);
-            ItemStack newStack = slot.getItem();
-            ItemStack oldStack = this.lastSlots.get(i);
-
-            // Check for on change menu callbacks
-            if (this.impl$menuCapture != null && menu != null && !menu.onChange(newStack, oldStack, (org.spongepowered.api.item.inventory.Container) this, i, slot)) {
-                this.lastSlots.set(i, oldStack.copy());  // revert changes
-                // Send reverted slots to clients
-                this.impl$sendSlotContents(i, oldStack);
-            } else {
-                // Capture changes for inventory events
-                this.impl$capture(i, newStack, oldStack);
-
-                // This flag is set only when the client sends an invalid CPacketWindowClickItem packet.
-                // We simply capture in order to send the proper changes back to client.
-                if (captureOnly) {
-                    continue;
-                }
-                // Perform vanilla logic - updating inventory stack - notify listeners
-                oldStack = newStack.isEmpty() ? ItemStack.EMPTY : newStack.copy();
-                this.lastSlots.set(i, oldStack);
-                // TODO forge checks !itemstack1.equals(itemstack, true) before doing this
-                for (ContainerListener listener : this.containerListeners) {
-                    listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
+                // Check for menu not allowing change in callback
+                if (!menu.onChange(newStack, oldStack, ((Container) this), i, slot)) {
+                    slot.set(oldStack.copy()); // revert change in slot
+                    // and let vanilla handle the rest
                 }
             }
         }
+    }
 
-        // like vanilla send property changes
-        this.impl$detectAndSendPropertyChanges();
+    // Before setting the last slot stack to the new stack capture that change for our inventory events
+    @Inject(method = "triggerSlotListeners", locals = LocalCapture.CAPTURE_FAILHARD,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
+    public void impl$onBeforeSubmitLastSlot(int var1, ItemStack var2, Supplier<ItemStack> var3, CallbackInfo ci, ItemStack var4) {
+        this.impl$capture(var1, var2, var4);
+    }
 
+    @Inject(method = "broadcastChanges", at = @At("RETURN"))
+    public void impl$afterBroadcastChanges(CallbackInfo ci) {
+        // TODO check if this is still needed see ServerScheduler
         if (this instanceof InventoryMenuBridge) {
             ((InventoryMenuBridge) this).bridge$markClean();
         }
     }
 
-    public void impl$sendSlotContents(Integer i, ItemStack oldStack) {
-
-        for (ContainerListener listener : this.containerListeners) {
-            boolean isChangingQuantityOnly = true;
-            if (listener instanceof ServerPlayer) {
-                isChangingQuantityOnly = this.suppressRemoteUpdates;
-                this.suppressRemoteUpdates = false;
-            }
-            listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
-            if (listener instanceof ServerPlayer) {
-                this.suppressRemoteUpdates = isChangingQuantityOnly;
-            }
-        }
-    }
-
-    private void impl$detectAndSendPropertyChanges() {
-        for(int j = 0; j < this.dataSlots.size(); ++j) {
-            DataSlot intreferenceholder = this.dataSlots.get(j);
-            if (intreferenceholder.checkAndClearUpdateFlag()) {
-                for(ContainerListener icontainerlistener1 : this.containerListeners) {
-                    icontainerlistener1.dataChanged((AbstractContainerMenu) (Object) this, j, intreferenceholder.get());
-                }
-            }
-        }
-    }
-
-    private void impl$capture(Integer index, ItemStack itemstack, ItemStack itemstack1) {
+    private void impl$capture(Integer index, ItemStack newStack, ItemStack oldStack) {
         if (this.bridge$capturingInventory()) {
-            final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(itemstack1);
-            final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(itemstack);
+            final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(oldStack);
+            final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(newStack);
 
             org.spongepowered.api.item.inventory.Slot adapter;
             try {
@@ -532,7 +478,5 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             }
         }
     }
-
-    // TODO check if addListener with existing listener needs to resend
 
 }

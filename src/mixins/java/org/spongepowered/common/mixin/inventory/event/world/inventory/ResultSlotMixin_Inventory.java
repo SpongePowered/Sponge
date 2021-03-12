@@ -39,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
@@ -101,7 +100,9 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
                     thePlayer.level).orElse(null));
         }
         if (((TrackedContainerBridge) thePlayer.containerMenu).bridge$isShiftCrafting()) {
-            ((TrackedContainerBridge) thePlayer.containerMenu).bridge$detectAndSendChanges(true);
+            thePlayer.containerMenu.suppressRemoteUpdates();
+            thePlayer.containerMenu.broadcastChanges();
+            thePlayer.containerMenu.resumeRemoteUpdates();
             ((TrackedContainerBridge) thePlayer.containerMenu).bridge$setShiftCrafting(false);
         }
         ((TrackedContainerBridge) thePlayer.containerMenu).bridge$setFirePreview(false);
@@ -132,8 +133,10 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         if (((WorldBridge) thePlayer.level).bridge$isFake()) {
             return;
         }
-        ((TrackedContainerBridge) thePlayer.containerMenu).bridge$detectAndSendChanges(true);
 
+        thePlayer.containerMenu.suppressRemoteUpdates();
+        thePlayer.containerMenu.broadcastChanges();
+        thePlayer.containerMenu.resumeRemoteUpdates();
         ((TrackedInventoryBridge) thePlayer.containerMenu).bridge$setCaptureInventory(false);
 
         final AbstractContainerMenu container = thePlayer.containerMenu;
