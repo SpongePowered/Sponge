@@ -30,7 +30,6 @@ import com.google.inject.Module;
 import com.google.inject.Provider;
 import com.google.inject.matcher.AbstractMatcher;
 import com.google.inject.spi.Dependency;
-import com.google.inject.spi.DependencyAndSource;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProvisionListener;
 
@@ -45,6 +44,7 @@ import java.util.List;
 /**
  * Allows injecting the {@link SpongeInjectionPoint} in {@link Provider}s.
  */
+@SuppressWarnings("deprecation") // getDependencyChain, DependencyAndSource -- restored in our fork
 public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> implements Module, ProvisionListener, Provider<SpongeInjectionPoint> {
 
     @Nullable private SpongeInjectionPoint injectionPoint;
@@ -71,7 +71,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
     }
 
     @Nullable
-    private static SpongeInjectionPoint findInjectionPoint(List<DependencyAndSource> dependencyChain) {
+    private static SpongeInjectionPoint findInjectionPoint(List<com.google.inject.spi.DependencyAndSource> dependencyChain) {
         if (dependencyChain.size() < 3) {
             throw new AssertionError("Provider is not included in the dependency chain");
         }
