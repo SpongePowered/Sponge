@@ -38,6 +38,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -63,6 +64,8 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
+import java.util.Arrays;
+import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -315,6 +318,11 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     @Override
     public void data$setCompound(CompoundTag nbt) {
         // do nothing this is immutable
+    }
+
+    @Override
+    public List<DataHolder> impl$delegateDataHolder() {
+        return Arrays.asList(this, this.getState());
     }
 
     @Override

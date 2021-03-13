@@ -90,7 +90,7 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
         }
         this.fluidType = Objects.requireNonNull(holder.getFluid(), "Invalid FluidStackSnapshot! FluidType cannot be null!");
         this.container = holder.toContainer();
-        this.keyValues = new LinkedHashMap<>(((SpongeFluidStackSnapshot) holder).getMappedValues());
+        this.keyValues = new LinkedHashMap<>(((SpongeFluidStackSnapshot) holder).impl$getMappedValues());
         return this;
     }
 

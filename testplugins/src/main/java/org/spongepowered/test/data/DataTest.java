@@ -34,6 +34,7 @@ import net.kyori.adventure.text.format.TextDecoration;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
@@ -708,7 +709,7 @@ public final class DataTest  {
         this.checkOfferData(creeper, Keys.IS_CHARGED, false);
         this.checkOfferData(creeper, Keys.IS_CHARGED, true);
 
-        final Pillager pillager = (Pillager) world.createEntity(EntityTypes.PILLAGER.get(), position);
+        final Pillager pillager = world.createEntity(EntityTypes.PILLAGER.get(), position);
         pillager.setItemInHand(HandTypes.MAIN_HAND, ItemStack.of(ItemTypes.CROSSBOW));
         this.checkOfferData(pillager, Keys.IS_CHARGING_CROSSBOW, false);
         this.checkOfferData(pillager, Keys.IS_CHARGING_CROSSBOW, true);
@@ -1299,6 +1300,18 @@ public final class DataTest  {
         final EntityArchetype archetype = sheep.createArchetype();
         this.checkOfferData(archetype, Keys.CUSTOM_NAME, Component.text("Archetype"));
 
+        // Check data holder delegation
+        // serverworld -> serverlocation -> blockstate -> blocktype
+        // blocksnapshot -> blockstate -> blocktype
+        final BlockState dioriteState = BlockTypes.DIORITE.get().getDefaultState();
+        world.setBlock(blockPos, dioriteState);
+        final Double destroySpeed = world.get(blockPos, Keys.DESTROY_SPEED).get();
+        this.checkGetData(location, Keys.DESTROY_SPEED, destroySpeed);
+        this.checkGetData(dioriteState, Keys.DESTROY_SPEED, destroySpeed);
+        final BlockSnapshot dioriteSnapshot = dioriteState.snapshotFor(location);
+        this.checkGetData(dioriteSnapshot, Keys.DESTROY_SPEED, destroySpeed);
+
+        // Reset world block
         world.setBlock(blockPos, oldState);
     }
 

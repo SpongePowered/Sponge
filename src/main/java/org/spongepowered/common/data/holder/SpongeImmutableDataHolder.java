@@ -41,7 +41,7 @@ public interface SpongeImmutableDataHolder<I extends DataHolder.Immutable<I>> ex
 
     @Override
     default <E> Optional<I> transform(Key<? extends Value<E>> key, Function<E, E> function) {
-        final DataProvider<?, E> provider = this.getProviderFor(key);
+        final DataProvider<? extends Value<E>, E> provider = this.impl$getProviderFor(key, this);
         return provider.get(this).flatMap(e -> {
             final E transformed = requireNonNull(function.apply(e));
             return provider.with((I) this, transformed);
@@ -50,18 +50,18 @@ public interface SpongeImmutableDataHolder<I extends DataHolder.Immutable<I>> ex
 
     @Override
     default <E> Optional<I> with(Key<? extends Value<E>> key, E value) {
-        return this.getProviderFor(key).with((I) this, value);
+        return this.impl$getProviderFor(key, this).with((I) this, value);
     }
 
     @Override
     default Optional<I> with(Value<?> value) {
-        return this.getProviderFor((Key<Value<Object>>) value.getKey()).with((I) this, value.get());
+        return this.impl$getProviderFor((Key<Value<Object>>) value.getKey(), this).with((I) this, value.get());
     }
 
     @Override
     @SuppressWarnings("rawtypes")
     default Optional<I> without(Key<?> key) {
-        return this.getProviderFor((Key)key).without((I) this);
+        return this.impl$getProviderFor((Key)key, this).without((I) this);
     }
 
     @Override
@@ -87,7 +87,7 @@ public interface SpongeImmutableDataHolder<I extends DataHolder.Immutable<I>> ex
         } else {
             for (final Value<?> value : that.getValues()) {
                 final Key<Value<Object>> key = (Key<Value<Object>>) value.getKey();
-                final DataProvider<?, Object> provider = this.getProviderFor(key);
+                final DataProvider<?, Object> provider = this.impl$getProviderFor(key, this);
                 @Nullable final Value<Object> original = provider.getValue(this).map(Value::asImmutable).orElse(null);
                 final Value<Object> merged = function.merge(original, (Value<Object>) value);
                 final Optional<I> optionalResult = result.with(merged);

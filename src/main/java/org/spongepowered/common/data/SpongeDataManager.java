@@ -54,7 +54,6 @@ import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.map.MapCanvas;
-import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.decoration.MapDecoration;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;

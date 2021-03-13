@@ -77,6 +77,8 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
@@ -137,8 +139,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public Mutable delegateDataHolder() {
-        return this.getDataHolder(true);
+    public List<DataHolder> impl$delegateDataHolder() {
+        return Collections.singletonList(this.getDataHolder(true));
     }
 
     public DataHolder.Mutable getDataHolder(final boolean markDirty) {
