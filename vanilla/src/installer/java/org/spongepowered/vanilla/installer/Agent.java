@@ -30,7 +30,6 @@ import java.io.IOException;
 import java.lang.instrument.Instrumentation;
 import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
-import java.net.MalformedURLException;
 import java.net.URL;
 import java.net.URLClassLoader;
 import java.nio.file.Path;
@@ -70,7 +69,7 @@ public class Agent {
     static void addJarToClasspath(final Path jar) {
         if (Agent.instrumentation != null) {
             try {
-                Agent.instrumentation.appendToSystemClassLoaderSearch(new JarFile(jar.toFile()));
+                Agent.instrumentation.appendToSystemClassLoaderSearch(new JarFile(jar.toRealPath().toString()));
                 return;
             } catch (final IOException ex) {
                 Logger.error(ex, "Failed to create jar file for archive '{}'!", jar);
@@ -80,9 +79,9 @@ public class Agent {
         final ClassLoader systemLoader = ClassLoader.getSystemClassLoader();
         if (systemLoader instanceof URLClassLoader && Agent.URL_CLASS_LOADER_ADD_URL != null) {
             try {
-                Agent.URL_CLASS_LOADER_ADD_URL.invoke(systemLoader, jar.toUri().toURL());
+                Agent.URL_CLASS_LOADER_ADD_URL.invoke(systemLoader, jar.toRealPath().toUri().toURL());
                 return;
-            } catch (final IllegalAccessException | InvocationTargetException | MalformedURLException ex) {
+            } catch (final IllegalAccessException | InvocationTargetException | IOException ex) {
                 Logger.error(ex, "Failed to add path {} to the system ClassLoader", jar);
             }
         }

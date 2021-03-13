@@ -27,9 +27,10 @@ package org.spongepowered.vanilla.applaunch.handler.test;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
 import org.spongepowered.vanilla.applaunch.Main;
+import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 
-public class ServerTestLaunchHandler extends AbstractVanillaTestLaunchHandler {
+public class ServerTestLaunchHandler extends AbstractVanillaLaunchHandler {
 
     @Override
     public String name() {

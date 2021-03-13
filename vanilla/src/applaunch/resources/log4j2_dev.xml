@@ -16,14 +16,14 @@
         </LoggerNamePatternSelector>
       </PatternLayout>
     </TerminalConsole>
-    <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz">
+    <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false">
       <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level]: %msg%n"/>
       <Policies>
         <TimeBasedTriggeringPolicy/>
         <OnStartupTriggeringPolicy/>
       </Policies>
     </RollingRandomAccessFile>
-    <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%i.log.gz">
+    <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%i.log.gz" immediateFlush="false">
       <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level] [%c{1.3}/%markerSimpleName]: %msg%n"/>
       <Policies>
         <OnStartupTriggeringPolicy/>

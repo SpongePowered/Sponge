@@ -25,11 +25,12 @@
 package org.spongepowered.vanilla.applaunch.handler.dev;
 
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.applaunch.Main;
 import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
 
-public final class ServerDevLaunchHandler extends AbstractVanillaDevLaunchHandler {
+public final class ServerDevLaunchHandler extends AbstractVanillaLaunchHandler {
 
     @Override
     public String name() {

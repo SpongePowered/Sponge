@@ -98,7 +98,7 @@ public abstract class VanillaLaunch extends Launch {
             if (classUrl.getProtocol().equals("jar")) {
                 // Extract the path of the underlying jar file, and parse it as a path to normalize it
                 final String[] classUrlSplit = classUrl.getPath().split("!");
-                final Path expectedFile = Paths.get(new URI(classUrlSplit[0]));
+                final Path expectedFile = Paths.get(new URL(classUrlSplit[0]).toURI());
 
                 // Then go through every possible resource
                 final Enumeration<URL> manifests =
@@ -112,7 +112,7 @@ public abstract class VanillaLaunch extends Launch {
                     // And stop when the normalized jar in that resource matches the URL of the jar that loaded VanillaLaunch?
                     final String[] pathSplit = next.getPath().split("!");
                     if (pathSplit.length == 2) {
-                        if (Paths.get(new URI(pathSplit[0])).equals(expectedFile)) {
+                        if (Paths.get(new URL(pathSplit[0]).toURI()).equals(expectedFile)) {
                             read = PluginMetadataHelper.builder().build().read(next.openStream());
                             break;
                         }
