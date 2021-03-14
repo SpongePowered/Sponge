@@ -171,7 +171,7 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
 
     @Inject(method = "hurt",
         at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/vehicle/MinecartTNT;explode(D)V"))
+            target = "Lnet/minecraft/world/entity/vehicle/MinecartTNT;explode(D)V"), cancellable = true)
     private void impl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
