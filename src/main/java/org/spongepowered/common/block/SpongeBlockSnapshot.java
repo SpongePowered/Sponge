@@ -349,7 +349,8 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
             return false;
         }
         final SpongeBlockSnapshot that = (SpongeBlockSnapshot) o;
-        return this.changeFlag == that.changeFlag &&
+        return this.blockState.equals(that.blockState) &&
+               this.changeFlag == that.changeFlag &&
                Objects.equals(this.worldKey, that.worldKey) &&
                Objects.equals(this.pos, that.pos) &&
                Objects.equals(this.compound, that.compound);
