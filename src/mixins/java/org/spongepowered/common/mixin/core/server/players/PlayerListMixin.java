@@ -41,7 +41,10 @@ import net.minecraft.server.ServerScoreboard;
 import net.minecraft.server.bossevents.CustomBossEvents;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.PlayerList;
+import net.minecraft.server.players.UserBanList;
+import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.border.BorderChangeListener;
@@ -62,6 +65,7 @@ import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -80,6 +84,9 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.PerWorldBorderListener;
+import org.spongepowered.common.service.server.ban.SpongeIPBanList;
+import org.spongepowered.common.service.server.ban.SpongeUserBanList;
+import org.spongepowered.common.service.server.whitelist.SpongeUserWhiteList;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -99,6 +106,9 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     @Shadow @Final private static Logger LOGGER;
     @Shadow @Final private MinecraftServer server;
     @Shadow private int viewDistance;
+    @Shadow @Final @Mutable private UserBanList bans;
+    @Shadow @Final @Mutable private IpBanList ipBans;
+    @Shadow @Final @Mutable private UserWhiteList whitelist;
 
     @Shadow public abstract net.minecraft.network.chat.Component shadow$canPlayerLogin(SocketAddress socketAddress, com.mojang.authlib.GameProfile gameProfile);
     @Shadow public abstract MinecraftServer shadow$getServer();
@@ -108,6 +118,13 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     private boolean impl$isGameMechanicRespawn = false;
     ResourceKey<Level> impl$newDestination = null;
     ResourceKey<Level> impl$originalDestination = null;
+
+    @Inject(method = "<init>", at = @At("RETURN"))
+    private void impl$setSpongeLists(final CallbackInfo callbackInfo) {
+        this.bans = new SpongeUserBanList(PlayerList.USERBANLIST_FILE);
+        this.ipBans = new SpongeIPBanList(PlayerList.IPBANLIST_FILE);
+        this.whitelist = new SpongeUserWhiteList(PlayerList.WHITELIST_FILE);
+    }
 
     @Override
     public void bridge$setOriginalDestinationDimension(final ResourceKey<Level> dimension) {
