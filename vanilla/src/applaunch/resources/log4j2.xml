@@ -41,5 +41,7 @@
   </Loggers>
   <filters>
     <MarkerFilter marker="LAUNCHPLUGIN" onMatch="DENY" onMismatch="NEUTRAL"/>
+    <MarkerFilter marker="PACKET_SENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+    <MarkerFilter marker="PACKET_RECEIVED" onMatch="DENY" onMismatch="NEUTRAL"/>
   </filters>
 </Configuration>
