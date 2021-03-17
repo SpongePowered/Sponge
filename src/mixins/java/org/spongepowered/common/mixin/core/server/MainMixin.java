@@ -58,10 +58,10 @@ public abstract class MainMixin {
         return provider;
     }
 
-    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$RegistryHolder;)Lnet/minecraft/resources/RegistryReadOps;"))
-    private static <T> RegistryReadOps<T> impl$cacheWorldSettingsAdapter(DynamicOps<T> p_244335_0_, ResourceManager p_244335_1_,
-            RegistryAccess.RegistryHolder p_244335_2_) {
-        final RegistryReadOps<T> worldSettingsAdapter = RegistryReadOps.create(p_244335_0_, p_244335_1_, p_244335_2_);
+    @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryReadOps;"))
+    private static <T> RegistryReadOps<T> impl$cacheWorldSettingsAdapter(DynamicOps<T> ops, ResourceManager resourceAccess,
+            RegistryAccess registryAccess) {
+        final RegistryReadOps<T> worldSettingsAdapter = RegistryReadOps.create(ops, resourceAccess, registryAccess);
         BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
         return worldSettingsAdapter;
     }

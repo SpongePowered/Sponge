@@ -22,15 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.levelgen.flat;
+package org.spongepowered.common.mixin.core.world.level.levelgen.flat;
 
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.world.level.levelgen.flat.FlatLayerInfoBridge;
 
 @Mixin(FlatLayerInfo.class)
-public interface FlatLayerInfoAccessor {
+public class FlatLayerInfoMixin implements FlatLayerInfoBridge {
+    private BlockState impl$stateOverride;
 
-    @Accessor("blockState") void accessor$blockState(BlockState block);
+    @Override
+    public void bridge$setBlockState(final BlockState state) {
+        this.impl$stateOverride = state;
+    }
+
+    @Redirect(method = "getBlockState", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;defaultBlockState()Lnet/minecraft/world/level/block/state/BlockState;"))
+    private BlockState impl$blockStateOverride(final Block block) {
+        if (this.impl$stateOverride != null) {
+            return this.impl$stateOverride;
+        }
+        return block.defaultBlockState();
+    }
 }

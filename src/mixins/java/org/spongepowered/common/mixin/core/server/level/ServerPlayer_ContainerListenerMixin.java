@@ -37,7 +37,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 // See also: SubjectMixin_API and SubjectMixin
-@Mixin(targets = "Lnet/minecraft/server/level/ServerPlayer$1")
+@Mixin(targets = "net/minecraft/server/level/ServerPlayer$2")
 public abstract class ServerPlayer_ContainerListenerMixin  implements ContainerListener {
 
     // @formatter:off
