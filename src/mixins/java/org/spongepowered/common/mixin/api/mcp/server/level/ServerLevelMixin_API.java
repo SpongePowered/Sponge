@@ -42,10 +42,12 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.entity.PersistentEntitySectionManager;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
@@ -74,6 +76,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.data.SpongeDataManager;
+import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
 import org.spongepowered.common.mixin.api.mcp.world.level.LevelMixin_API;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.VecHelper;
@@ -85,6 +88,7 @@ import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
+import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
@@ -97,7 +101,7 @@ import java.util.stream.StreamSupport;
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
 @Implements(@Interface(iface = org.spongepowered.api.world.server.ServerWorld.class, prefix = "serverWorld$"))
-public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements org.spongepowered.api.world.server.ServerWorld {
+public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements org.spongepowered.api.world.server.ServerWorld, SpongeLocationBaseDataHolder {
 
     // @formatter:off
     @Shadow @Final private ServerTickList<Block> blockTicks;
@@ -271,26 +275,11 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         return (ScheduledUpdateList<FluidType>) this.liquidTicks;
     }
 
-    @Override
-    public <E> DataTransactionResult offer(final int x, final int y, final int z, final Key<? extends Value<E>> key, final E value) {
-        Objects.requireNonNull(value, "value");
-
-        final DataProvider<? extends Value<E>, E> dataProvider = SpongeDataManager.getProviderRegistry().getProvider(Objects.requireNonNull(key, "key"), ServerLocation.class);
-        return dataProvider.offer(ServerLocation.of(this, new Vector3d(x, y, z)), value);
-    }
+    // LocationBaseDataHolder
 
     @Override
-    public <E> Optional<E> get(final int x, final int y, final int z, final Key<? extends Value<E>> key) {
-        final Optional<E> value = SpongeDataManager.getProviderRegistry().getProvider(Objects.requireNonNull(key, "key"), ServerLocation.class).get(ServerLocation.of(this, new Vector3d(x, y, z)));
-        if (value.isPresent()) {
-            return value;
-        }
-        return this.getBlock(x, y, z).get(key);
-    }
-
-    @Override
-    public DataTransactionResult remove(final int x, final int y, final int z, final Key<?> key) {
-        return SpongeDataManager.getProviderRegistry().getProvider((Key) Objects.requireNonNull(key, "key"), ServerLocation.class).remove(ServerLocation.of(this, new Vector3d(x, y, z)));
+    public ServerLocation impl$dataholder(int x, int y, int z) {
+        return ServerLocation.of(this, x, y, z);
     }
 
     // WeatherUniverse

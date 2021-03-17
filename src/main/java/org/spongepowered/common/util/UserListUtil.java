@@ -33,25 +33,27 @@ import org.spongepowered.common.accessor.server.players.StoredUserListAccessor;
 public final class UserListUtil {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public static void addEntry(final StoredUserList list, final StoredUserEntry entry) {
-        ((StoredUserListAccessor) list).accessor$map().put(((StoredUserListAccessor) list).invoker$getKeyForUser(((StoredUserEntryAccessor) entry).accessor$user()), entry);
+    public static <K, V extends StoredUserEntry<K>> V addEntry(final StoredUserList<K, V> list, final StoredUserEntry entry) {
+        final V prev = ((StoredUserListAccessor<K, V>) list).accessor$map().put(((StoredUserListAccessor<K, V>) list).invoker$getKeyForUser(((StoredUserEntryAccessor<K>) entry).accessor$user()), (V) entry);
 
         try {
             list.save();
         } catch (final IOException e) {
             StoredUserListAccessor.accessor$LOGGER().warn("Could not save the list after adding a user.", e);
         }
+        return prev;
     }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public static void removeEntry(final StoredUserList list, final Object object) {
-        ((StoredUserListAccessor) list).accessor$map().remove(((StoredUserListAccessor) list).invoker$getKeyForUser(object));
+    public static <K, V extends StoredUserEntry<K>> V removeEntry(final StoredUserList<K, V> list, final Object object) {
+        final V prev = ((StoredUserListAccessor<K, V>) list).accessor$map().remove(((StoredUserListAccessor) list).invoker$getKeyForUser(object));
 
         try {
             list.save();
         } catch (final IOException e) {
             StoredUserListAccessor.accessor$LOGGER().warn("Could not save the list after removing a user.", e);
         }
+        return prev;
     }
 
     private UserListUtil() {

@@ -34,28 +34,27 @@ import java.io.File;
 import java.util.ArrayList;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import net.minecraft.server.players.UserWhiteList;
 import net.minecraft.server.players.UserWhiteListEntry;
 
 /**
  * Redirects all calls to whitelist to the {@link WhitelistService}.
  */
-public class SpongeUserListWhitelist extends UserWhiteList {
+public class SpongeUserWhiteList extends UserWhiteList {
 
-    public SpongeUserListWhitelist(final File file) {
+    public SpongeUserWhiteList(final File file) {
         super(file);
     }
 
     @Override
     protected boolean contains(final com.mojang.authlib.GameProfile entry) {
-        return Sponge.getServer().getServiceProvider().whitelistService().isWhitelisted(SpongeGameProfile.of(entry));
+        return Sponge.getServer().getServiceProvider().whitelistService().isWhitelisted(SpongeGameProfile.of(entry)).join();
     }
 
     @Override
     public String[] getUserList() {
         final List<String> names = new ArrayList<>();
-        for (final GameProfile profile : Sponge.getServer().getServiceProvider().whitelistService().getWhitelistedProfiles()) {
+        for (final GameProfile profile : Sponge.getServer().getServiceProvider().whitelistService().getWhitelistedProfiles().join()) {
             profile.getName().ifPresent(names::add);
         }
         return names.toArray(new String[names.size()]);
@@ -64,7 +63,7 @@ public class SpongeUserListWhitelist extends UserWhiteList {
     @SuppressWarnings("unchecked")
     @Override
     public void add(final UserWhiteListEntry entry) {
-        Sponge.getServer().getServiceProvider().whitelistService().addProfile(((StoredUserEntryAccessor<GameProfile>) entry).accessor$user());
+        Sponge.getServer().getServiceProvider().whitelistService().addProfile(SpongeGameProfile.of(((StoredUserEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user()));
     }
 
     @Override
@@ -74,18 +73,7 @@ public class SpongeUserListWhitelist extends UserWhiteList {
 
     @Override
     public boolean isEmpty() {
-        return Sponge.getServer().getServiceProvider().whitelistService().getWhitelistedProfiles().isEmpty();
-    }
-
-    @Nullable
-    public com.mojang.authlib.GameProfile getByName(final String profileName) {
-        for (final GameProfile profile : Sponge.getServer().getServiceProvider().whitelistService().getWhitelistedProfiles()) {
-            if (profile.getName().isPresent() && profile.getName().get().equals(profileName)) {
-                return (com.mojang.authlib.GameProfile) profile;
-            }
-        }
-
-        return null;
+        return Sponge.getServer().getServiceProvider().whitelistService().getWhitelistedProfiles().join().isEmpty();
     }
 
 }

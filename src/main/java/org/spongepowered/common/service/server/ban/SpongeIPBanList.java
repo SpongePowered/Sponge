@@ -59,7 +59,7 @@ public final class SpongeIPBanList extends IpBanList {
         }
 
         try {
-            return Sponge.getServer().getServiceProvider().banService().isBanned(InetAddress.getByName(entry));
+            return Sponge.getServer().getServiceProvider().banService().isBanned(InetAddress.getByName(entry)).join();
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -72,7 +72,7 @@ public final class SpongeIPBanList extends IpBanList {
         }
 
         try {
-            return (IpBanListEntry) Sponge.getServer().getServiceProvider().banService().getBanFor(InetAddress.getByName(obj)).orElse(null);
+            return (IpBanListEntry) Sponge.getServer().getServiceProvider().banService().getBanFor(InetAddress.getByName(obj)).join().orElse(null);
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -94,7 +94,7 @@ public final class SpongeIPBanList extends IpBanList {
     @Override
     public String[] getUserList() {
         final List<String> ips = new ArrayList<>();
-        for (final Ban.IP ban : Sponge.getServer().getServiceProvider().banService().getIpBans()) {
+        for (final Ban.IP ban : Sponge.getServer().getServiceProvider().banService().getIpBans().join()) {
             ips.add(this.getIpFromAddress(new InetSocketAddress(ban.getAddress(), 0)));
         }
         return ips.toArray(new String[0]);
@@ -107,7 +107,7 @@ public final class SpongeIPBanList extends IpBanList {
 
     @Override
     public boolean isEmpty() {
-        return Sponge.getServer().getServiceProvider().banService().getIpBans().isEmpty();
+        return Sponge.getServer().getServiceProvider().banService().getIpBans().join().isEmpty();
     }
 
     /**

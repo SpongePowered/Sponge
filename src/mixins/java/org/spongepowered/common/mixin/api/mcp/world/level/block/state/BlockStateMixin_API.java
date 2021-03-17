@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.world.level.block.state;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
@@ -41,6 +42,8 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Arrays;
+import java.util.List;
 import java.util.Optional;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -106,4 +109,8 @@ public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseM
         return this.api$serializedState;
     }
 
+    @Override
+    public List<DataHolder> impl$delegateDataHolder() {
+        return Arrays.asList(this, this.getType());
+    }
 }

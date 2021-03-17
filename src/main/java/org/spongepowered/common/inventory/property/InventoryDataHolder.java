@@ -36,12 +36,12 @@ public interface InventoryDataHolder extends SpongeDataHolder, Inventory {
 
     @Override
     default <V> Optional<V> get(Inventory child, Key<? extends Value<V>> key) {
-        return this.getProviderFor(key).get((DataHolder) child);
+        return this.impl$getProviderFor(key, this).get((DataHolder) child);
     }
 
     @Override
     default <E> Optional<E> get(Key<? extends Value<E>> key) {
-        return this.getProviderFor(key).get(this);
+        return this.impl$getProviderFor(key, this).get(this);
     }
 
 }

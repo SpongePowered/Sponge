@@ -30,6 +30,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.CollectionValue;
@@ -48,6 +49,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.ChunkLayout;
+import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.world.SpongeLocation;
 import org.spongepowered.math.vector.Vector3d;
@@ -55,7 +57,9 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.time.Duration;
 import java.time.temporal.TemporalUnit;
+import java.util.Arrays;
 import java.util.Collection;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
@@ -65,7 +69,7 @@ import java.util.function.BiFunction;
 import java.util.function.Function;
 
 @DefaultQualifier(NonNull.class)
-public final class SpongeServerLocation extends SpongeLocation<ServerWorld, ServerLocation> implements ServerLocation {
+public final class SpongeServerLocation extends SpongeLocation<ServerWorld, ServerLocation> implements ServerLocation, SpongeMutableDataHolder {
 
     SpongeServerLocation(final ServerWorld world, final ChunkLayout chunkLayout, final Vector3d position) {
         super(world, chunkLayout, position);
@@ -251,165 +255,14 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
     }
 
     @Override
-    public <E> DataTransactionResult transform(final Key<? extends Value<E>> key, final Function<E, E> function) {
-        return this.getWorld().transform(this.getBlockPosition(), key, function);
-    }
-
-    @Override
-    public <E> DataTransactionResult offer(final Key<? extends Value<E>> key, final E value) {
-        return this.getWorld().offer(this.getBlockPosition(), key, value);
-    }
-
-    @Override
-    public DataTransactionResult offer(final Value<?> value) {
-        return this.getWorld().offer(this.getBlockPosition(), value);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public <E> DataTransactionResult offerSingle(final Key<? extends CollectionValue<E, ?>> key, final E element) {
-        return this.getWorld().transform(this.getBlockPosition(), (Key) key, (Function<Collection<E>, Collection<E>>) es -> {
-            es.add(element);
-            return es;
-        });
-    }
-
-    @Override
-    public <K, V> DataTransactionResult offerSingle(final Key<? extends MapValue<K, V>> key, final K valueKey, final V value) {
-        return this.getWorld().transform(this.getBlockPosition(), key, es -> {
-            es.put(valueKey, value);
-            return es;
-        });
-    }
-
-    @Override
-    public <K, V> DataTransactionResult offerAll(final Key<? extends MapValue<K, V>> key, final Map<? extends K, ? extends V> map) {
-        return this.getWorld().transform(this.getBlockPosition(), key, es -> {
-            es.putAll(map);
-            return es;
-        });
-    }
-
-    @Override
-    public DataTransactionResult offerAll(final MapValue<?, ?> value) {
-        return this.getWorld().offer(this.getBlockPosition(), value);
-    }
-
-    @Override
-    public DataTransactionResult offerAll(final CollectionValue<?, ?> value) {
-        return this.getWorld().offer(this.getBlockPosition(), value);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public <E> DataTransactionResult offerAll(final Key<? extends CollectionValue<E, ?>> key, final Collection<? extends E> elements) {
-        return this.getWorld().offer(this.getBlockPosition(), (Key) key, elements);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public <E> DataTransactionResult removeSingle(final Key<? extends CollectionValue<E, ?>> key, final E element) {
-        return this.getWorld().transform(this.getBlockPosition(), (Key) key, (Function<Collection<E>, Collection<E>>) col -> {
-            col.remove(element);
-            return col;
-        });
-    }
-
-    @Override
-    public <K> DataTransactionResult removeKey(final Key<? extends MapValue<K, ?>> key, final K mapKey) {
-        return this.getWorld().transform(this.getBlockPosition(), key, map -> {
-            map.remove(mapKey);
-            return map;
-        });
-    }
-
-    @SuppressWarnings("SuspiciousMethodCalls")
-    @Override
-    public DataTransactionResult removeAll(final CollectionValue<?, ?> value) {
-        return this.getWorld().transform(this.getBlockPosition(), value.getKey(), col -> {
-            col.removeAll(value.getAll());
-            return col;
-        });
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public <E> DataTransactionResult removeAll(final Key<? extends CollectionValue<E, ?>> key, final Collection<? extends E> elements) {
-        return this.getWorld().transform(this.getBlockPosition(), (Key) key, (Function<Collection<E>, Collection<E>>) col -> {
-            col.removeAll(elements);
-            return col;
-        });
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    @Override
-    public DataTransactionResult removeAll(final MapValue<?, ?> value) {
-        return this.getWorld().transform(this.getBlockPosition(), (Key) value.getKey(), (Function<Map<?, ?>, Map<?, ?>>) map -> {
-            value.keySet().forEach(map::remove);
-            return map;
-        });
-    }
-
-    @Override
-    public <K, V> DataTransactionResult removeAll(final Key<? extends MapValue<K, V>> key, final Map<? extends K, ? extends V> map) {
-        return this.getWorld().transform(this.getBlockPosition(), key, ex -> {
-            map.keySet().forEach(ex::remove);
-            return ex;
-        });
-    }
-
-    @Override
-    public <E> DataTransactionResult tryOffer(final Key<? extends Value<E>> key, final E value) {
-        final DataTransactionResult result = this.offer(key, value);
-        if (!result.isSuccessful()) {
-            throw new IllegalArgumentException("Failed offer transaction!");
-        }
-        return result;
-    }
-
-    @Override
-    public DataTransactionResult remove(final Key<?> key) {
-        return this.getWorld().remove(this.getBlockPosition(), key);
-    }
-
-    @Override
-    public DataTransactionResult undo(final DataTransactionResult result) {
-        return this.getWorld().undo(this.getBlockPosition(), result);
-    }
-
-    @Override
-    public DataTransactionResult copyFrom(final ValueContainer that, final MergeFunction function) {
-        return this.getWorld().copyFrom(this.getBlockPosition(), that, function);
-    }
-
-    @Override
     public <E> Optional<E> get(final Direction direction, final Key<? extends Value<E>> key) {
-        return this.getWorld().get(this.getBlockPosition(), key);
+        // TODO direction is ignored?
+        return this.get(key);
     }
 
     @Override
-    public <E> Optional<E> get(final Key<? extends Value<E>> key) {
-        return this.getWorld().get(this.getBlockPosition(), key);
-    }
-
-    @Override
-    public <E, V extends Value<E>> Optional<V> getValue(final Key<V> key) {
-        return this.getWorld().getValue(this.getBlockPosition(), key);
-    }
-
-    @Override
-    public boolean supports(final Key<?> key) {
-        return this.getWorld().supports(this.getBlockPosition(), key);
-    }
-
-    @Override
-    public Set<Key<?>> getKeys() {
-        return this.getWorld().getKeys(this.getBlockPosition());
-    }
-
-    @Override
-    public Set<Value.Immutable<?>> getValues() {
-        return this.getWorld().getValues(this.getBlockPosition());
+    public List<DataHolder> impl$delegateDataHolder() {
+        return Arrays.asList(this, this.getBlock());
     }
 
     @Override

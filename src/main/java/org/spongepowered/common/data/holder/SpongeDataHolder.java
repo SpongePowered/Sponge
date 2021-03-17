@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.data.holder;
 
+import static java.util.Objects.requireNonNull;
+
+import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataProvider;
@@ -32,11 +35,14 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.SpongeDataManager;
 
 import java.util.Collection;
-import java.util.HashMap;
+import java.util.Collections;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.function.BiFunction;
+import java.util.function.Supplier;
 
 public interface SpongeDataHolder extends DataHolder {
 
@@ -51,8 +57,9 @@ public interface SpongeDataHolder extends DataHolder {
      * @param <E> The element type
      * @return The data provider
      */
-    default <V extends Value<E>, E> DataProvider<V, E> getProviderFor(Key<V> key) {
-        return SpongeDataManager.getProviderRegistry().getProvider(key, this.delegateDataHolder().getClass());
+    default <V extends Value<E>, E> DataProvider<V, E> impl$getProviderFor(Key<V> key, DataHolder dataHolder) {
+        requireNonNull(key, "key");
+        return SpongeDataManager.getProviderRegistry().getProvider(key, dataHolder.getClass());
     }
 
     /**
@@ -60,51 +67,64 @@ public interface SpongeDataHolder extends DataHolder {
      *
      * @return the delegate data holder
      */
-    default DataHolder delegateDataHolder() {
-        return this;
+    default List<DataHolder> impl$delegateDataHolder() {
+        return Collections.singletonList(this);
     }
 
-    default Collection<DataProvider<?, ?>> getAllProviders() {
-        return SpongeDataManager.getProviderRegistry().getAllProviders(this.delegateDataHolder().getClass());
+    default Collection<DataProvider<?, ?>> impl$getAllProviders(DataHolder dataHolder) {
+        return SpongeDataManager.getProviderRegistry().getAllProviders(dataHolder.getClass());
+    }
+
+    default <T, E, V extends Value<E>> T impl$apply(Key<V> key, BiFunction<DataProvider, DataHolder, T> function, Supplier<T> defaultResult) {
+        for (DataHolder dataHolder : this.impl$delegateDataHolder()) {
+            final DataProvider<V, E> dataProvider = this.impl$getProviderFor(key, dataHolder);
+            if (dataProvider.isSupported(dataHolder)) {
+                return function.apply(dataProvider, dataHolder);
+            }
+        }
+        return defaultResult.get();
     }
 
     @Override
-    @SuppressWarnings(value = {"unchecked", "rawtypes"})
+    @SuppressWarnings({"rawtypes", "unchecked"})
     default boolean supports(Key<?> key) {
-        return this.getProviderFor((Key) key).isSupported(this.delegateDataHolder());
+        return this.impl$apply((Key) key, (p, d) -> true, () -> false);
     }
 
     @Override
     default <E> Optional<E> get(Key<? extends Value<E>> key) {
-        return this.getProviderFor(key).get(this.delegateDataHolder());
+        return this.impl$apply(key, DataProvider::get, Optional::empty);
     }
 
     @Override
     default <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
-        return this.getProviderFor(key).getValue(this.delegateDataHolder());
+        return this.impl$apply(key, DataProvider::getValue, Optional::empty);
     }
 
-    default Map<Key<?>, Object> getMappedValues() {
-        final Map<Key<?>, Object> map = new HashMap<>();
-        for (final DataProvider<?, ?> provider : this.getAllProviders()) {
-            provider.get(this.delegateDataHolder()).ifPresent(value -> map.put(provider.getKey(), value));
-        }
-        return map;
+    default Map<Key<?>, Object> impl$getMappedValues() {
+        return this.impl$delegateDataHolder().stream()
+                .flatMap(dh -> this.impl$getAllProviders(dh).stream()
+                        .map(provider -> provider.getValue(dh).orElse(null))
+                        .filter(Objects::nonNull)
+                        .map(Value::asImmutable))
+                .collect(ImmutableMap.toImmutableMap(Value::getKey, Value::get));
     }
 
     @Override
     default Set<Key<?>> getKeys() {
-        return this.getAllProviders().stream()
-                .map(provider -> provider.get(this.delegateDataHolder()).map(v -> provider.getKey()).orElse(null))
-                .filter(Objects::nonNull)
+        return this.impl$delegateDataHolder().stream()
+                .flatMap(dh -> this.impl$getAllProviders(dh).stream()
+                        .filter(provider -> provider.get(dh).isPresent()).map(DataProvider::getKey))
                 .collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
     default Set<Value.Immutable<?>> getValues() {
-        return this.getAllProviders().stream()
-                .map(provider -> provider.getValue(this.delegateDataHolder()).map(Value::asImmutable).orElse(null))
-                .filter(Objects::nonNull)
+        return this.impl$delegateDataHolder().stream()
+                .flatMap(dh -> this.impl$getAllProviders(dh).stream()
+                        .map(provider -> provider.getValue(dh).orElse(null))
+                        .filter(Objects::nonNull)
+                        .map(Value::asImmutable))
                 .collect(ImmutableSet.toImmutableSet());
     }
 }

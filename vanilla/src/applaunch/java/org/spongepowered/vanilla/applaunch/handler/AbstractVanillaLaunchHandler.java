@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.applaunch.handler;
 
+import cpw.mods.gross.Java9ClassLoaderUtil;
 import cpw.mods.modlauncher.TransformingClassLoader;
 import cpw.mods.modlauncher.api.ILaunchHandlerService;
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
@@ -35,16 +36,17 @@ import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 import org.spongepowered.plugin.jvm.locator.ResourceType;
 import org.spongepowered.vanilla.applaunch.Main;
 
+import java.io.File;
 import java.io.IOException;
 import java.net.JarURLConnection;
 import java.net.MalformedURLException;
+import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Arrays;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
@@ -56,6 +58,7 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.jar.JarFile;
 import java.util.jar.Manifest;
 
 /**
@@ -65,6 +68,17 @@ import java.util.jar.Manifest;
 public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerService {
 
     protected final Logger logger = LogManager.getLogger("Launch");
+
+    /**
+     * Classes or packages that mark jar files that should be excluded from the transformation path
+     */
+    protected static final String[] NON_TRANSFORMABLE_PATHS = {
+        "org/spongepowered/asm/", // Mixin (for obvious reasons)
+        // because NIO Paths use different normalization than Instrumentation.appendToSystemClassLoaderSearch()
+        // (NIO uses uppercase URL encoding (ex. %2D), Instrumentation does not (ex. %2d)), this cannot appear in the transformer path at all
+        // This suppresses a warning from LoggerFactory.findPossibleStaticLoggerBinderPathSet
+        "org/slf4j/impl/", // slf4j
+    };
 
     /**
      * A list of packages to exclude from the {@link TransformingClassLoader transforming class loader},
@@ -77,7 +91,7 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
      * excluded, classes in {@code "org.neptunepowered"} would also be excluded. The correct usage would
      * be to exclude {@code "org.neptune."}.
      */
-    protected static final List<String> EXCLUDED_PACKAGES = Arrays.asList(
+    private static final String[] EXCLUDED_PACKAGES = {
             "org.spongepowered.plugin.",
             "org.spongepowered.common.applaunch.",
             "org.spongepowered.vanilla.applaunch.",
@@ -90,19 +104,45 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             "net.minecrell.terminalconsole.",
             // Guice (for easier opening to reflection)
             "com.google.inject."
-    );
-
-    /**
-     * Exceptions to the exclusions, because we've reached that point in life.
-     */
-    protected static final List<String> EXCLUDED_EXCEPTIONS = Arrays.asList(
-            "org.spongepowered.configurate.objectmapping.guice."
-    );
+    };
 
     @Override
     public void configureTransformationClassLoader(final ITransformingClassLoaderBuilder builder) {
+        for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
+            try {
+                final URI uri = url.toURI();
+                if (!this.isTransformable(uri)) {
+                    continue;
+                }
+
+                builder.addTransformationPath(Paths.get(uri));
+            } catch (final URISyntaxException | IOException ex) {
+                this.logger.error("Failed to add to transformation path", ex);
+            }
+        }
+
         builder.setResourceEnumeratorLocator(this.getResourceLocator());
         builder.setManifestLocator(this.getManifestLocator());
+    }
+
+    protected boolean isTransformable(final URI uri) throws URISyntaxException, IOException {
+        final File file = new File(uri);
+        if (file.isDirectory()) {
+            for (final String test : AbstractVanillaLaunchHandler.NON_TRANSFORMABLE_PATHS) {
+                if (new File(file, test).exists()) {
+                    return false;
+                }
+            }
+        } else if (file.isFile()) {
+            try (final JarFile jf = new JarFile(new File(uri))) {
+                for (final String test : AbstractVanillaLaunchHandler.NON_TRANSFORMABLE_PATHS) {
+                    if (jf.getEntry(test) != null) {
+                        return false;
+                    }
+                }
+            }
+        }
+        return true;
     }
 
     @Override
@@ -110,13 +150,8 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
         this.logger.info("Transitioning to Sponge launcher, please wait...");
 
         launchClassLoader.addTargetPackageFilter(klass -> {
-            exclusions: for (final String pkg : AbstractVanillaLaunchHandler.EXCLUDED_PACKAGES) {
+            for (final String pkg : AbstractVanillaLaunchHandler.EXCLUDED_PACKAGES) {
                 if (klass.startsWith(pkg)) {
-                    for (final String bypass : AbstractVanillaLaunchHandler.EXCLUDED_EXCEPTIONS) {
-                        if (klass.startsWith(bypass)) {
-                            continue exclusions;
-                        }
-                    }
                     return false;
                 }
             }

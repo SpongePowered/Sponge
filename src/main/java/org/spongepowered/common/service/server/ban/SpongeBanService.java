@@ -43,7 +43,10 @@ import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+
 import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.IpBanListEntry;
 import net.minecraft.server.players.StoredUserEntry;
@@ -63,133 +66,133 @@ import net.minecraft.server.players.UserBanListEntry;
 @Singleton
 public final class SpongeBanService implements BanService {
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Collection<Ban> getBans() {
-        final Collection<? extends Ban> bans = this.getProfileBans();
-        bans.addAll((Collection) this.getIpBans());
-        return (Collection<Ban>) bans;
+    public CompletableFuture<Collection<? extends Ban>> getBans() {
+        final Collection<Ban.Profile> bans = this.getProfileBans().join();
+        final Collection<Ban.IP> ipBans = this.getIpBans().join();
+        final Collection<Ban> list = new ArrayList<>(bans.size() + ipBans.size());
+        list.addAll(bans);
+        list.addAll(ipBans);
+        return CompletableFuture.completedFuture(Collections.unmodifiableCollection(list));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<Ban.Profile> getProfileBans() {
+    public CompletableFuture<Collection<Ban.Profile>> getProfileBans() {
         final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
             (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
         accessor.invoker$removeExpired();
-        return new ArrayList<>((Collection<Ban.Profile>) (Object) accessor.accessor$map().values());
+        return CompletableFuture.completedFuture(Collections.unmodifiableCollection(new ArrayList<>((Collection<Ban.Profile>) (Object) accessor.accessor$map().values())));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<Ban.IP> getIpBans() {
+    public CompletableFuture<Collection<Ban.IP>> getIpBans() {
         final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor = ((StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getIPBanList());
         accessor.invoker$removeExpired();
-        return new ArrayList<>((Collection<Ban.IP>) (Object) accessor.accessor$map().values());
+        return CompletableFuture.completedFuture(Collections.unmodifiableCollection(new ArrayList<>((Collection<Ban.IP>) (Object) accessor.accessor$map().values())));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<Ban.Profile> getBanFor(final GameProfile profile) {
+    public CompletableFuture<Optional<Ban.Profile>> getBanFor(final GameProfile profile) {
         final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
             (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
         accessor.invoker$removeExpired();
-        return Optional.ofNullable((Ban.Profile) accessor.accessor$map().get(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile))));
+        return CompletableFuture.completedFuture(Optional.ofNullable((Ban.Profile) accessor.accessor$map().get(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile)))));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<Ban.IP> getBanFor(final InetAddress address) {
+    public CompletableFuture<Optional<Ban.IP>> getBanFor(final InetAddress address) {
         final StoredUserListAccessor<String, IpBanListEntry> accessor = ((StoredUserListAccessor<String, IpBanListEntry>) this.getIPBanList());
 
         accessor.invoker$removeExpired();
-        return Optional.ofNullable((Ban.IP) accessor.accessor$map().get(accessor.invoker$getKeyForUser(((IpBanListAccessor) accessor).invoker$getIpFromAddress(new InetSocketAddress(address, 0)))));
+        return CompletableFuture.completedFuture(Optional.ofNullable((Ban.IP) accessor.accessor$map().get(accessor.invoker$getKeyForUser(((IpBanListAccessor) accessor).invoker$getIpFromAddress(new InetSocketAddress(address, 0))))));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean isBanned(final GameProfile profile) {
+    public CompletableFuture<Boolean> isBanned(final GameProfile profile) {
         final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
             (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
 
         accessor.invoker$removeExpired();
-        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile)));
+        return CompletableFuture.completedFuture(accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile))));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean isBanned(final InetAddress address) {
+    public CompletableFuture<Boolean> isBanned(final InetAddress address) {
         final StoredUserListAccessor<String, IpBanListEntry> accessor = ((StoredUserListAccessor<String, IpBanListEntry>) this.getIPBanList());
 
         accessor.invoker$removeExpired();
-        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(((IpBanListAccessor) accessor).invoker$getIpFromAddress(new InetSocketAddress(address, 0))));
+        return CompletableFuture.completedFuture(accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(((IpBanListAccessor) accessor).invoker$getIpFromAddress(new InetSocketAddress(address, 0)))));
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean pardon(final GameProfile profile) {
-        final Optional<Ban.Profile> ban = this.getBanFor(profile);
+    public CompletableFuture<Boolean> pardon(final GameProfile profile) {
+        final CompletableFuture<Optional<Ban.Profile>> ban = this.getBanFor(profile);
         final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
             (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
         accessor.invoker$removeExpired();
-        return ban.isPresent() && this.removeBan(ban.get());
+        return CompletableFuture.completedFuture(ban.join().isPresent() && this.removeBan(ban.join().get()).join());
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public boolean pardon(final InetAddress address) {
-        final Optional<Ban.IP> ban = this.getBanFor(address);
+    public CompletableFuture<Boolean> pardon(final InetAddress address) {
+        final CompletableFuture<Optional<Ban.IP>> ban = this.getBanFor(address);
         final StoredUserListAccessor<String, IpBanListEntry> accessor = ((StoredUserListAccessor<String, IpBanListEntry>) this.getIPBanList());
         accessor.invoker$removeExpired();
-        return ban.isPresent() && this.removeBan(ban.get());
+        return CompletableFuture.completedFuture(ban.join().isPresent() && this.removeBan(ban.join().get()).join());
     }
 
     @Override
-    public boolean removeBan(final Ban ban) {
-        if (!this.hasBan(ban)) {
-            return false;
+    public CompletableFuture<Boolean> removeBan(final Ban ban) {
+        if (!this.hasBan(ban).join()) {
+            return CompletableFuture.completedFuture(false);
         }
         if (ban.getType().equals(BanTypes.PROFILE.get())) {
             final User user = Sponge.getServer().getUserManager().getOrCreate(((Ban.Profile) ban).getProfile());
             Sponge.getEventManager().post(SpongeEventFactory.createPardonUserEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
 
-            UserListUtil.removeEntry(this.getUserBanList(), ((Ban.Profile) ban).getProfile());
-            return true;
+            UserListUtil.removeEntry(this.getUserBanList(), SpongeGameProfile.toMcProfile(((Ban.Profile) ban).getProfile()));
+            return CompletableFuture.completedFuture(true);
         } else if (ban.getType().equals(BanTypes.IP.get())) {
             Sponge.getEventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.IP) ban));
 
             final InetSocketAddress inetSocketAddress = new InetSocketAddress(((Ban.IP) ban).getAddress(), 0);
             UserListUtil.removeEntry(this.getIPBanList(), ((IpBanListAccessor) this.getIPBanList()).invoker$getIpFromAddress(inetSocketAddress));
-            return true;
+            return CompletableFuture.completedFuture(true);
         }
         throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
     }
 
     @Override
-    public Optional<? extends Ban> addBan(final Ban ban) {
-        final Optional<? extends Ban> prevBan;
+    public CompletableFuture<Optional<? extends Ban>> addBan(final Ban ban) {
+        final Ban prevBan;
 
         if (ban.getType().equals(BanTypes.PROFILE.get())) {
-            prevBan = this.getBanFor(((Ban.Profile) ban).getProfile());
 
             final User user = Sponge.getServer().getUserManager().getOrCreate(((Ban.Profile) ban).getProfile());
             Sponge.getEventManager().post(SpongeEventFactory.createBanUserEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.Profile) ban, user));
 
-            UserListUtil.addEntry(this.getUserBanList(), (StoredUserEntry<?>) ban);
+            prevBan = (Ban) UserListUtil.addEntry(this.getUserBanList(), (StoredUserEntry<?>) ban);
         } else if (ban.getType().equals(BanTypes.IP.get())) {
-            prevBan = this.getBanFor(((Ban.IP) ban).getAddress());
 
             Sponge.getEventManager().post(SpongeEventFactory.createBanIpEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ban.IP) ban));
 
-            UserListUtil.addEntry(this.getIPBanList(), (StoredUserEntry<?>) ban);
+            prevBan = (Ban) UserListUtil.addEntry(this.getIPBanList(), (StoredUserEntry<?>) ban);
         } else {
             throw new IllegalArgumentException(String.format("Ban %s had unrecognized BanType %s!", ban, ban.getType()));
         }
-        return prevBan;
+        return CompletableFuture.completedFuture(Optional.ofNullable(prevBan));
     }
 
     @Override
-    public boolean hasBan(final Ban ban) {
+    public CompletableFuture<Boolean> hasBan(final Ban ban) {
         if (ban.getType().equals(BanTypes.PROFILE.get())) {
             return this.isBanned(((Ban.Profile) ban).getProfile());
         } else if (ban.getType().equals(BanTypes.IP.get())) {

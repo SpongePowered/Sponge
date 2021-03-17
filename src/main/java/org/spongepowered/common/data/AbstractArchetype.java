@@ -59,16 +59,6 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
 
     public abstract DataProviderLookup getLookup();
 
-    @Override
-    public <V extends Value<E>, E> DataProvider<V, E> getProviderFor(Key<V> key) {
-        return this.getLookup().getProvider(key);
-    }
-
-    @Override
-    public Collection<DataProvider<?, ?>> getAllProviders() {
-        return this.getLookup().getAllProviders();
-    }
-
     protected abstract ValidationType getValidationType();
 
     @Override

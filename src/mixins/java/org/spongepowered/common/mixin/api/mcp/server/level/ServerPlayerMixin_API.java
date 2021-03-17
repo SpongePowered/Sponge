@@ -105,6 +105,7 @@ import java.time.temporal.ChronoUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
@@ -505,6 +506,11 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             return;
         }
         BookUtil.fakeBookView(Objects.requireNonNull(book, "book"), Collections.singletonList(this));
+    }
+
+    @Override
+    public @NonNull Locale getLocale() {
+        return ((ServerPlayerBridge) this).bridge$getLanguage();
     }
 
     private int api$durationToTicks(final Duration duration) {
