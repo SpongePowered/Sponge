@@ -50,12 +50,6 @@ import net.minecraft.world.entity.Entity;
 @Mixin(SynchedEntityData.class)
 public abstract class SynchedEntityDataMixin {
 
-    // This overrides the setter for the entries of the
-    // data manager to use a "faster" map.
-    @SuppressWarnings("unused")
-    @Shadow @Final @Mutable private Map<Integer, SynchedEntityData.DataItem<?>> itemsById = new Int2ObjectOpenHashMap<>();
-
-    // The rest is actually used in the overwrite below.
     @Shadow @Final private Entity entity;
     @Shadow private boolean isDirty;
 
