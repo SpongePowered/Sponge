@@ -41,7 +41,7 @@ public abstract class TileEntityMixin_Optimization_Hopper implements HopperOptim
         this.hopper$shouldCancelDirtyUpdate = canMarkDirty;
     }
 
-    @Inject(method = "setChanged", at = @At("HEAD"), cancellable = true)
+    @Inject(method = "setChanged()V", at = @At("HEAD"), cancellable = true)
     private void hopper$DoNotUpdateIfMarked(final CallbackInfo ci) {
         if (this.hopper$shouldCancelDirtyUpdate) {
             ci.cancel();

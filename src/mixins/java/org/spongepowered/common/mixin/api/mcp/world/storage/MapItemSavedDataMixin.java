@@ -69,9 +69,9 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
      * (but also leave them there)
      */
     // @formatter:off
-    @Final @Shadow public Map<String, MapDecoration> decorations;
+    @Shadow @Final private Map<String, MapDecoration> decorations;
 
-    @Shadow public abstract void shadow$setColorsDirty(int x, int y);
+    @Shadow protected abstract void shadow$setColorsDirty(int x, int y);
     // @formatter:on
 
     private int impl$mapId; // Set in <init>
