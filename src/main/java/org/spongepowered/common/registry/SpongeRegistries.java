@@ -60,7 +60,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.PALETTE_TYPE, SpongeRegistryLoaders.paletteType());
         holder.createRegistry(RegistryTypes.PARROT_TYPE, SpongeRegistryLoaders.parrotType());
         holder.createRegistry(RegistryTypes.PARTICLE_OPTION, SpongeRegistryLoaders.particleOption());
-        holder.createRegistry(RegistryTypes.PLACEHOLDER_PARSER, SpongeRegistryLoaders.placeholderParser());
+        holder.createRegistry(RegistryTypes.PLACEHOLDER_PARSER, SpongeRegistryLoaders.placeholderParser(), true);
         holder.createRegistry(RegistryTypes.PORTAL_TYPE, SpongeRegistryLoaders.portalType());
         holder.createRegistry(RegistryTypes.QUERY_TYPE, SpongeRegistryLoaders.queryType());
         holder.createRegistry(RegistryTypes.RABBIT_TYPE, SpongeRegistryLoaders.rabbitType());
