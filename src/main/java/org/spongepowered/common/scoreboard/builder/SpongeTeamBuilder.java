@@ -41,7 +41,6 @@ import java.util.Set;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
-import org.spongepowered.common.adventure.SpongeAdventure;
 
 public final class SpongeTeamBuilder implements Team.Builder {
 
@@ -80,8 +79,6 @@ public final class SpongeTeamBuilder implements Team.Builder {
 
     @Override
     public Team.Builder displayName(final Component displayName) throws IllegalArgumentException {
-        final int length = SpongeAdventure.legacySection(displayName).length();
-        checkState(length < 33, "DisplayName is " + length + " characters long! It must be at most 32.");
         this.displayName = checkNotNull(displayName, "DisplayName cannot be null!");
         return this;
     }

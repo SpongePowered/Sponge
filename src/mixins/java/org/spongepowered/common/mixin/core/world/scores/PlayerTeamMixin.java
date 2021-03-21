@@ -62,14 +62,12 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
     @Shadow public abstract Collection<String> getPlayers();
     // @formatter:on
 
-    @SuppressWarnings("NullableProblems") @MonotonicNonNull private Component bridge$displayName;
-    @SuppressWarnings("NullableProblems") @MonotonicNonNull private Component bridge$Prefix;
-    @SuppressWarnings("NullableProblems") @MonotonicNonNull private Component bridge$Suffix;
-    @SuppressWarnings("NullableProblems") @MonotonicNonNull private NamedTextColor bridge$Color;
+    private @MonotonicNonNull Component bridge$displayName;
+    private @MonotonicNonNull Component bridge$prefix;
+    private @MonotonicNonNull Component bridge$suffix;
+    private @MonotonicNonNull NamedTextColor bridge$color;
 
-    // Minecraft doesn't do a null check on scoreboard, so we redirect
-    // the call and do it ourselves.
-    private void impl$doTeamUpdate() {
+    private void impl$teamChanged() {
         if (this.scoreboard != null) {
             this.scoreboard.onTeamChanged((PlayerTeam) (Object) this);
         }
@@ -78,56 +76,66 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setUpDisplayNames(final Scoreboard scoreboard, final String name, final CallbackInfo ci) {
         this.bridge$displayName = SpongeAdventure.legacySection(name);
-        this.bridge$Prefix = SpongeAdventure.asAdventure(this.playerPrefix);
-        this.bridge$Suffix = SpongeAdventure.asAdventure(this.playerSuffix);
-        this.bridge$Color = SpongeAdventure.asAdventureNamed(this.color);
+        this.bridge$prefix = SpongeAdventure.asAdventure(this.playerPrefix);
+        this.bridge$suffix = SpongeAdventure.asAdventure(this.playerSuffix);
+        this.bridge$color = SpongeAdventure.asAdventureNamed(this.color);
     }
 
-    @Redirect(method = "*",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/scores/Scoreboard;onTeamChanged(Lnet/minecraft/world/scores/PlayerTeam;)V"))
+    @Redirect(
+        method = "*",
+        at = @At(
+            value = "INVOKE",
+            target = "Lnet/minecraft/world/scores/Scoreboard;onTeamChanged(Lnet/minecraft/world/scores/PlayerTeam;)V"
+        )
+    )
     private void impl$nullCheckScoreboard(@Nullable final Scoreboard scoreboard, final PlayerTeam team) {
         if (scoreboard != null) {
             scoreboard.onTeamChanged(team);
         }
     }
 
-    @Inject(method = "setDisplayName",
+    @Inject(
+        method = "setDisplayName",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/world/scores/PlayerTeam;displayName:Lnet/minecraft/network/chat/Component;",
             opcode = Opcodes.PUTFIELD,
-            shift = At.Shift.AFTER))
-    private void impl$doTeamUpdateForDisplayName(final net.minecraft.network.chat.Component name, final CallbackInfo ci) {
+            shift = At.Shift.AFTER
+        )
+    )
+    private void impl$trackDisplayNameChange(final net.minecraft.network.chat.Component name, final CallbackInfo ci) {
         this.bridge$displayName = SpongeAdventure.asAdventure(name);
     }
 
-    @Inject(method = "setPlayerPrefix",
+    @Inject(
+        method = "setPlayerPrefix",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/world/scores/PlayerTeam;playerPrefix:Lnet/minecraft/network/chat/Component;",
             opcode = Opcodes.PUTFIELD,
-            shift = At.Shift.AFTER))
-    private void impl$doTeamUpdateForPrefix(final net.minecraft.network.chat.Component prefix, final CallbackInfo callbackInfo) {
-        this.bridge$Prefix = SpongeAdventure.asAdventure(prefix);
+            shift = At.Shift.AFTER
+        )
+    )
+    private void impl$trackPrefixChange(final net.minecraft.network.chat.Component prefix, final CallbackInfo callbackInfo) {
+        this.bridge$prefix = SpongeAdventure.asAdventure(prefix);
     }
 
-    @Inject(method = "setPlayerSuffix",
+    @Inject(
+        method = "setPlayerSuffix",
         at = @At(
             value = "FIELD",
             target = "Lnet/minecraft/world/scores/PlayerTeam;playerSuffix:Lnet/minecraft/network/chat/Component;",
             opcode = Opcodes.PUTFIELD,
             shift = At.Shift.AFTER
-        ))
-    private void impl$doTeamUpdateForSuffix(final net.minecraft.network.chat.Component suffix, final CallbackInfo ci) {
-        this.bridge$Suffix = SpongeAdventure.asAdventure(suffix);
+        )
+    )
+    private void impl$trackSuffixChange(final net.minecraft.network.chat.Component suffix, final CallbackInfo ci) {
+        this.bridge$suffix = SpongeAdventure.asAdventure(suffix);
     }
 
     @Inject(method = "setColor", at = @At("RETURN"))
-    private void impl$doTeamUpdateForFormat(final ChatFormatting format, final CallbackInfo ci) {
-        this.bridge$Color = SpongeAdventure.asAdventureNamed(format);
-        // This isn't called by Vanilla, so we inject the call ourselves.
-        this.impl$doTeamUpdate();
+    private void impl$trackColorChange(final ChatFormatting color, final CallbackInfo ci) {
+        this.bridge$color = SpongeAdventure.asAdventureNamed(color);
     }
 
     @Override
@@ -137,57 +145,45 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
 
     @Override
     public void bridge$setDisplayName(final Component text) {
-        final String newText = SpongeAdventure.legacySection(text);
-        if (newText.length() > 32) {
-            throw new IllegalArgumentException(String.format("Display name is %s characters long! It must be at most 32.", newText.length()));
-        }
         this.bridge$displayName = text;
         this.displayName = SpongeAdventure.asVanilla(text);
-        this.impl$doTeamUpdate();
+        this.impl$teamChanged();
     }
 
     @Override
     public Component bridge$getPrefix() {
-        return this.bridge$Prefix;
+        return this.bridge$prefix;
     }
 
     @Override
     public void bridge$setPrefix(final Component text) {
-        final String newPrefix = SpongeAdventure.legacySection(text);
-        if (newPrefix.length() > 16) {
-            throw new IllegalArgumentException(String.format("Prefix is %s characters long! It must be at most 16.", newPrefix.length()));
-        }
-        this.bridge$Prefix = text;
+        this.bridge$prefix = text;
         this.playerPrefix = SpongeAdventure.asVanilla(text);
-        this.impl$doTeamUpdate();
+        this.impl$teamChanged();
     }
 
     @Override
     public Component bridge$getSuffix() {
-        return this.bridge$Suffix;
+        return this.bridge$suffix;
     }
 
     @Override
     public void bridge$setSuffix(final Component suffix) {
-        final String newSuffix = SpongeAdventure.legacySection(suffix);
-        if (newSuffix.length() > 16) {
-            throw new IllegalArgumentException(String.format("Suffix is %s characters long! It must be at most 16.", newSuffix.length()));
-        }
-        this.bridge$Suffix = suffix;
+        this.bridge$suffix = suffix;
         this.playerSuffix = SpongeAdventure.asVanilla(suffix);
-        this.impl$doTeamUpdate();
+        this.impl$teamChanged();
     }
 
     @Override
     public NamedTextColor bridge$getColor() {
-        return this.bridge$Color;
+        return this.bridge$color;
     }
 
     @Override
     public void bridge$setColor(final NamedTextColor color) {
-        this.bridge$Color = color;
+        this.bridge$color = color;
         this.color = SpongeAdventure.asVanilla(color);
-        this.impl$doTeamUpdate();
+        this.impl$teamChanged();
     }
 
     @SuppressWarnings("EqualsBetweenInconvertibleTypes")
