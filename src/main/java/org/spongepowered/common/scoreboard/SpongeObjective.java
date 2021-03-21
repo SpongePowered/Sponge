@@ -132,7 +132,7 @@ public final class SpongeObjective implements Objective {
     }
 
     @Override
-    public Score orCreateScore(final Component name) {
+    public Score scoreOrCreate(final Component name) {
         if (this.scores.containsKey(name)) {
             return this.scores.get(name);
         }

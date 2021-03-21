@@ -264,7 +264,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Score getOrCreatePlayerScore(final String name, final net.minecraft.world.scores.Objective objective) {
-        return ((SpongeScore) ((ObjectiveBridge) objective).bridge$getSpongeObjective().orCreateScore(SpongeAdventure.legacySection(name)))
+        return ((SpongeScore) ((ObjectiveBridge) objective).bridge$getSpongeObjective().scoreOrCreate(SpongeAdventure.legacySection(name)))
                 .getScoreFor(objective);
     }
 
