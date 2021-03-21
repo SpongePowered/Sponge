@@ -30,6 +30,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
@@ -254,6 +255,10 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
 
     @Override
     public List<DataHolder> impl$delegateDataHolder() {
+        final Optional<? extends BlockEntity> be = this.blockEntity();
+        if (be.isPresent()) {
+            return Arrays.asList(this, be.get(), this.block());
+        }
         return Arrays.asList(this, this.block());
     }
 
