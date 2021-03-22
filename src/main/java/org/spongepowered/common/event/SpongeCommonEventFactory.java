@@ -507,45 +507,6 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    @SuppressWarnings("rawtypes")
-    @Nullable
-    public static NotifyNeighborBlockEvent callNotifyNeighborEvent(final World world, final BlockPos sourcePos, final EnumSet<net.minecraft.core.Direction> notifiedSides) {
-        final PhaseContext<?> context = PhaseTracker.getInstance().getPhaseContext();
-        // Don't fire notify events during world gen or while restoring
-        if (context.isWorldGeneration() || context.isRestoring()) {
-            return null;
-        }
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final BlockState blockstate = (BlockState) ((net.minecraft.world.level.Level) world).getBlockState(sourcePos);
-            final LocatableBlock locatable = new SpongeLocatableBlockBuilder().world((org.spongepowered.api.world.server.ServerWorld) world).position(sourcePos.getX(), sourcePos.getY(),
-                    sourcePos.getZ())
-                    .state(blockstate)
-                    .build();
-            if (context.getNotifier().isPresent()) {
-                context.addCreatorAndNotifierToCauseStack(frame);
-            } else {
-
-                final LevelChunkBridge mixinChunk = (LevelChunkBridge) ((ServerLevel) world).getChunkAt(sourcePos);
-                mixinChunk.bridge$getBlockCreator(sourcePos).ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
-                mixinChunk.bridge$getBlockNotifier(sourcePos).ifPresent(user -> frame.addContext(EventContextKeys.NOTIFIER, user));
-            }
-            PhaseTracker.getCauseStackManager().pushCause(locatable);
-
-            final Map<Direction, BlockState> neighbors = new EnumMap<>(Direction.class);
-            for (final net.minecraft.core.Direction notificationSide : notifiedSides) {
-                final BlockPos offset = sourcePos.relative(notificationSide);
-                final Direction direction = DirectionFacingProvider.INSTANCE.getKey(notificationSide).get();
-                final net.minecraft.world.level.block.state.BlockState notificationState = ((ServerLevel) world).getBlockState(offset);
-                neighbors.put(direction, (BlockState) notificationState);
-            }
-
-            final NotifyNeighborBlockEvent event =
-                    SpongeEventFactory.createNotifyNeighborBlockEvent(PhaseTracker.getCauseStackManager().currentCause(), neighbors, neighbors);
-            SpongeCommon.postEvent(event);
-            return event;
-        }
-    }
-
     public static InteractEntityEvent.Primary callInteractEntityEventPrimary(final net.minecraft.server.level.ServerPlayer player, final ItemStack stack, final net.minecraft.world.entity.Entity entity, final InteractionHand hand) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, entity, frame);

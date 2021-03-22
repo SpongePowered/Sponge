@@ -26,6 +26,18 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.CombatEntry;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -39,8 +51,8 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -58,18 +70,6 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.CombatEntry;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
 
 @SuppressWarnings("rawtypes")
 public final class TransactionalCaptureSupplier implements ICaptureSupplier {
@@ -199,7 +199,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final BlockPos immutableTarget, final BlockState targetBlockState,
         @Nullable final BlockEntity existingTile
     ) {
-        final NeighborNotification notificationTransaction = new NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom);
+        final NeighborNotification notificationTransaction = new NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom, existingTile);
         this.logTransaction(notificationTransaction);
     }
 
