@@ -135,8 +135,9 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
             int var7 = Integer.signum(notifyPos.getY() - sourcePos.getY());
             int var8 = Integer.signum(notifyPos.getZ() - sourcePos.getZ());
             final net.minecraft.core.Direction dir = net.minecraft.core.Direction.fromNormal(var6, var7, var8);
-
-            neighbors.put(DirectionUtil.getFor(dir), ((org.spongepowered.api.block.BlockState) neighborNotification.originalState));
+            if (dir != null) {
+                neighbors.put(DirectionUtil.getFor(dir), ((org.spongepowered.api.block.BlockState) neighborNotification.originalState));
+            }
         }
 
         return Optional.of(SpongeEventFactory.createNotifyNeighborBlockEvent(currentCause, neighbors, neighbors));
