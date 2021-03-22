@@ -59,7 +59,7 @@ public final class SpongeNotificationTicket implements NotificationTicket {
     }
 
     @Override
-    public void valid(final boolean valid) {
+    public void setValid(final boolean valid) {
         this.valid = valid;
     }
 
