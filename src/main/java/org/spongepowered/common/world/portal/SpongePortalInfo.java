@@ -24,38 +24,21 @@
  */
 package org.spongepowered.common.world.portal;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.world.portal.Portal;
-import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.api.world.server.ServerLocation;
 
-import java.util.Optional;
+public final class SpongePortalInfo extends PortalInfo {
 
-public class VanillaPortal implements Portal {
+    private final Portal portal;
 
-    private final PortalType type;
-    private final ServerLocation minCorner;
-    private final @Nullable ServerLocation destination;
-
-    public VanillaPortal(final PortalType type, final ServerLocation minCorner, final @Nullable ServerLocation destination) {
-        this.type = type;
-        this.minCorner = minCorner;
-        this.destination = destination;
+    public SpongePortalInfo(final Vec3 var1, final Vec3 var2, final float var3, final float var4, final Portal portal) {
+        super(var1, var2, var3, var4);
+        this.portal = portal;
     }
 
-    @Override
-    public PortalType type() {
-        return this.type;
+    public Portal portal() {
+        return this.portal;
     }
 
-    @Override
-    public ServerLocation origin() {
-        return this.minCorner;
-    }
-
-    // Vanilla has no knowledge of where portals go to until you try, best we can do...
-    @Override
-    public Optional<ServerLocation> destination() {
-        return Optional.ofNullable(this.destination);
-    }
 }

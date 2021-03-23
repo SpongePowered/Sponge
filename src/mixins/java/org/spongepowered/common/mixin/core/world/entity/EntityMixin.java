@@ -34,6 +34,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.SynchedEntityData;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.sounds.SoundEvent;
@@ -73,6 +74,8 @@ import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
+import org.spongepowered.api.world.portal.Portal;
+import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -114,6 +117,8 @@ import org.spongepowered.common.util.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.NetherPortalType;
 import org.spongepowered.common.world.portal.PlatformTeleporter;
+import org.spongepowered.common.world.portal.SpongePortalInfo;
+import org.spongepowered.common.world.portal.VanillaPortal;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
@@ -445,6 +450,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
+    @Redirect(method = "findDimensionEntryPoint", at = @At(value = "NEW", target = "net/minecraft/world/level/portal/PortalInfo"))
+    private PortalInfo impl$addPortalToPortalInfoForEnd(final Vec3 var1, final Vec3 var2, final float var3, final float var4, final ServerLevel serverLevel) {
+        final Portal portal = new VanillaPortal(PortalTypes.END.get(), ((ServerWorld) serverLevel).location(VecHelper.toVector3d(var1)), null);
+        return new SpongePortalInfo(var1, var2, var3, var4, portal);
+    }
+
     @Override
     public Entity bridge$portalRepositioning(final boolean createEndPlatform,
             final net.minecraft.server.level.ServerLevel serverworld,
@@ -530,6 +541,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 final PortalInfo portalinfo = platformTeleporter.getPortalInfo((Entity) (Object) this, serverworld, targetWorld, currentPosition);
                 // Sponge End
                 if (portalinfo != null) {
+                    if (portalinfo instanceof SpongePortalInfo) {
+                        frame.addContext(EventContextKeys.PORTAL, ((SpongePortalInfo) portalinfo).portal());
+                    }
                     // Only start teleporting if we have somewhere to go.
                     this.bridge$playerPrepareForPortalTeleport(serverworld, targetWorld);
                     try {
@@ -607,7 +621,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     /**
-     * This is from Entity#findDimensionEntryPoint, for determning the destination position before
+     * This is from Entity#findDimensionEntryPoint, for determining the destination position before
      * a portal is created (lambda in the return statement after getExitPortal)
      *
      * This is only fired if a portal exists, thus the blockstate checks are okay.

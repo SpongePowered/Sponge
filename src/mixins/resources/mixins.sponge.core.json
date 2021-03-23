@@ -212,6 +212,7 @@
         "world.level.levelgen.structure.LegacyStructureDataHandlerMixin",
         "world.level.levelgen.structure.templatesystem.StructureManagerMixin",
         "world.level.portal.PortalForcerMixin",
+        "world.level.portal.PortalShapeMixin",
         "world.level.saveddata.MapIdTrackerMixin",
         "world.level.storage.DimensionDataStorageMixin",
         "world.level.storage.LevelDataMixin",
