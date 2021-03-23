@@ -171,7 +171,25 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     public boolean markCancelledTransactions(final NotifyNeighborBlockEvent event,
         final ImmutableList<? extends GameTransaction<NotifyNeighborBlockEvent>> blockTransactions
     ) {
-        return false;
+        boolean cancelledAny = false;
+        for (final NotificationTicket transaction : event.tickets()) {
+            if (!transaction.valid()) {
+                cancelledAny = true;
+                for (final GameTransaction<NotifyNeighborBlockEvent> gameTransaction : blockTransactions) {
+                    final NeighborNotification blockTransaction = (NeighborNotification) gameTransaction;
+                    final Vector3i position = transaction.targetPosition();
+                    final BlockPos affectedPosition = blockTransaction.affectedPosition;
+                    if (position.getX() == affectedPosition.getX()
+                            && position.getY() == affectedPosition.getY()
+                            && position.getZ() == affectedPosition.getZ()
+                    ) {
+                        gameTransaction.markCancelled();
+                    }
+                }
+            }
+        }
+
+        return cancelledAny;
     }
 
 }
