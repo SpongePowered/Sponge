@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import org.spongepowered.api.service.permission.MemorySubjectData;
-
 public abstract class SpongeSubject extends SpongeBaseSubject {
 
     @Override

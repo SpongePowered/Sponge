@@ -27,7 +27,6 @@ package org.spongepowered.common.service.server.permission;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;

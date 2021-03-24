@@ -29,7 +29,6 @@ import com.mojang.authlib.GameProfile;
 import net.minecraft.server.players.ServerOpListEntry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectReference;
