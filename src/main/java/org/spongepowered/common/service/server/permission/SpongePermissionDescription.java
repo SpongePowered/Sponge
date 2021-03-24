@@ -115,7 +115,7 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
-    public CompletableFuture<Map<? extends SubjectReference, Boolean>> findAssignedSubjects(final String type) {
+    public CompletableFuture<? extends Map<? extends SubjectReference, Boolean>> findAssignedSubjects(final String type) {
         final SubjectCollection subjects = this.permissionService.get(type);
         return subjects.allWithPermission(this.strippedId);
     }
