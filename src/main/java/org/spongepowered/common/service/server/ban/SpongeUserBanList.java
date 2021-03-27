@@ -27,11 +27,14 @@ package org.spongepowered.common.service.server.ban;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanService;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
@@ -52,7 +55,18 @@ public class SpongeUserBanList extends UserBanList {
 
     @Override
     public UserBanListEntry get(final com.mojang.authlib.GameProfile profile) {
-        return (UserBanListEntry) Sponge.server().serviceProvider().banService().banFor(SpongeGameProfile.of(profile)).join().orElse(null);
+        final Optional<Ban.Profile> ban = Sponge.server().serviceProvider().banService().banFor(SpongeGameProfile.of(profile)).join();
+        return ban.map(x -> {
+            if (x instanceof UserBanListEntry) {
+                return (UserBanListEntry) x;
+            } else {
+                return new UserBanListEntry(SpongeGameProfile.toMcProfile(x.profile()),
+                        Date.from(x.creationDate()),
+                        x.banSource().map(SpongeAdventure::legacySection).orElse(null),
+                        x.expirationDate().map(Date::from).orElse(null),
+                        x.reason().map(SpongeAdventure::legacySection).orElse(null));
+            }
+        }).orElse(null);
     }
 
     @Override

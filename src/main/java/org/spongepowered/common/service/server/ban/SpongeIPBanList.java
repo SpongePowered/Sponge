@@ -29,6 +29,8 @@ import static org.spongepowered.common.util.NetworkUtil.LOCAL_ADDRESS;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.ban.Ban;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.util.BanUtil;
 import org.spongepowered.common.util.NetworkUtil;
 
 import java.io.File;
@@ -37,6 +39,7 @@ import java.net.InetSocketAddress;
 import java.net.SocketAddress;
 import java.net.UnknownHostException;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 import javax.annotation.Nullable;
@@ -72,7 +75,18 @@ public final class SpongeIPBanList extends IpBanList {
         }
 
         try {
-            return (IpBanListEntry) Sponge.server().serviceProvider().banService().banFor(InetAddress.getByName(obj)).join().orElse(null);
+            return Sponge.server().serviceProvider().banService().banFor(InetAddress.getByName(obj)).join()
+                    .map(ban -> {
+                        if (ban instanceof IpBanListEntry) {
+                            return (IpBanListEntry) ban;
+                        }
+                        return new IpBanListEntry(BanUtil.addressToBanCompatibleString(ban.address()),
+                                Date.from(ban.creationDate()),
+                                ban.banSource().map(SpongeAdventure::legacySection).orElse(null),
+                                ban.expirationDate().map(Date::from).orElse(null),
+                                ban.reason().map(SpongeAdventure::legacySection).orElse(null));
+                    })
+                    .orElse(null);
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
