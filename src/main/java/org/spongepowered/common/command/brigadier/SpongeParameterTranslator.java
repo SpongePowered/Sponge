@@ -27,6 +27,7 @@ package org.spongepowered.common.command.brigadier;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.commands.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
@@ -98,11 +99,23 @@ public final class SpongeParameterTranslator {
 
         final List<LiteralCommandNode<CommandSourceStack>> allCommandNodes = new ArrayList<>();
         allCommandNodes.add(commandNode);
+        final Collection<CommandNode<CommandSourceStack>> children = commandNode.getChildren();
         while (aliasIterator.hasNext()) {
             final LiteralArgumentBuilder<CommandSourceStack> redirectedNode = LiteralArgumentBuilder.literal(aliasIterator.next());
             redirectedNode.executes(commandNode.getCommand());
             redirectedNode.requires(commandNode.getRequirement());
-            redirectedNode.redirect(commandNode);
+            // This would be redirectedNode.redirect(commandNode), but because of a bug
+            // in Brigadier that impacts the client we have to do this.
+            //
+            // The problem is a faulty equality check for command nodes - they don't
+            // consider redirects (I suspect because they use redirects to redirect to
+            // a previous node, causing a stack overflow (we'd get this with flags). The
+            // big problem generally comes in when you have two nodes with the same name
+            // and a redirect (or not) - the client tries to be clever and de-duplicates
+            // them but it doesn't account for the redirect...
+            for (final CommandNode<CommandSourceStack> child : children) {
+                redirectedNode.then(child);
+            }
             allCommandNodes.add(new SpongeLiteralCommandNode(redirectedNode));
         }
 
