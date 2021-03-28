@@ -116,6 +116,7 @@ import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -273,21 +274,20 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$hasRot() && ShouldFire.ROTATE_ENTITY_EVENT;
 
         final ServerPlayer player = (ServerPlayer) this.player;
-        final org.spongepowered.math.vector.Vector3d fromRotation = new org.spongepowered.math.vector.Vector3d(packetIn.getYRot(this.player
-                .yRot), packetIn.getXRot(this.player.xRot), 0);
+        final Vector3d fromRotation = new Vector3d(this.player.yRot, this.player.xRot, 0);
 
         // Use the position of the last movement with an event or the current player position if never called
         // We need this because we ignore very small position changes as to not spam as many move events.
-        final org.spongepowered.math.vector.Vector3d fromPosition = player.position();
+        final Vector3d fromPosition = player.position();
 
-        org.spongepowered.math.vector.Vector3d toPosition = new org.spongepowered.math.vector.Vector3d(packetIn.getX(this.player.getX()),
+        Vector3d toPosition = new Vector3d(packetIn.getX(this.player.getX()),
                 packetIn.getY(this.player.getY()), packetIn.getZ(this.player.getZ()));
-        org.spongepowered.math.vector.Vector3d toRotation = new org.spongepowered.math.vector.Vector3d(packetIn.getYRot(this.player.yRot),
+        Vector3d toRotation = new Vector3d(packetIn.getYRot(this.player.yRot),
                 packetIn.getXRot(this.player.xRot), 0);
 
         final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
 
-        final org.spongepowered.math.vector.Vector3d originalToPosition = toPosition;
+        final Vector3d originalToPosition = toPosition;
         boolean cancelMovement = false;
         boolean cancelRotation = false;
         // Call move & rotate event as needed...
@@ -306,6 +306,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
                     toRotation);
             if (SpongeCommon.postEvent(event)) {
                 cancelRotation = true;
+                toRotation = fromRotation;
             } else {
                 toRotation = event.toRotation();
             }
@@ -314,18 +315,19 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         // At this point, we cancel out and let the "confirmed teleport" code run through to update the
         // player position and update the player's relation in the chunk manager.
         if (cancelMovement) {
-            if (packetInAccessor.accessor$hasRot() && !cancelRotation) {
-                // Rest the rotation here
-                ((EntityAccessor) this.player).invoker$setRot((float) toRotation.getX(), (float) toRotation.getY());
+            if (fromPosition.distanceSquared(toPosition) > 0) {
+                // Set the location, as if the player was teleporting
+                this.awaitingTeleportTime = this.tickCount;
+                this.shadow$teleport(fromPosition.getX(), fromPosition.getY(), fromPosition.getZ(), (float) toRotation.getX(), (float) toRotation.getY());
+            } else {
+                // If this is only rotation do not teleport back
+                this.player.absMoveTo(fromPosition.getX(), fromPosition.getY(), fromPosition.getZ(), (float) toRotation.getX(), (float) toRotation.getY());
             }
-            final float yaw = packetInAccessor.accessor$hasRot() && !cancelRotation ? (float) toRotation.getX() : this.player.yRot;
-            final float pitch = packetInAccessor.accessor$hasRot() && !cancelRotation ? (float) toRotation.getY() : this.player.xRot;
-            this.awaitingTeleportTime = this.tickCount;
-            // Then, we set the location, as if the player was teleporting
-            this.shadow$teleport(fromPosition.getX(), fromPosition.getY(), fromPosition.getZ(), yaw, pitch);
             ci.cancel();
             return;
         }
+
+        // TODO handle cancelRotation or rotation change
 
         // Handle event results
         if (!toPosition.equals(originalToPosition)) {
