@@ -71,17 +71,7 @@ public final class BlockChangeFlagManager {
 
     public static final class Factory implements BlockChangeFlag.Factory {
 
-        @Nullable private BlockChangeFlag empty;
         @Nullable private BlockChangeFlag none;
-
-        @Override
-        public BlockChangeFlag empty() {
-            if (this.empty == null) {
-                // By default,
-                this.empty = BlockChangeFlagManager.fromNativeInt(Constants.BlockChangeFlags.NOTIFY_CLIENTS);
-            }
-            return this.empty;
-        }
 
         @Override
         public BlockChangeFlag none() {

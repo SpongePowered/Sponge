@@ -975,8 +975,7 @@ public final class Constants {
             ;
         public static final int DEFAULT = Constants.BlockChangeFlags.BLOCK_UPDATED
             | Constants.BlockChangeFlags.NOTIFY_CLIENTS;
-        public static final int NONE = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.PHYSICS_MASK
+        public static final int NONE = Constants.BlockChangeFlags.PHYSICS_MASK
             | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE
             | Constants.BlockChangeFlags.NEIGHBOR_DROPS
             | Constants.BlockChangeFlags.PATHFINDING_UPDATES
