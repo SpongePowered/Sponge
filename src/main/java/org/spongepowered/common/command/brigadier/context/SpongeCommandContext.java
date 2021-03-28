@@ -43,6 +43,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Collection;
@@ -221,4 +222,8 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
         return this.cause().subject();
     }
 
+    @Override
+    public Cause contextCause() {
+        return this.cause().cause();
+    }
 }

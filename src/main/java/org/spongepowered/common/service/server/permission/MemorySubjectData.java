@@ -147,18 +147,15 @@ public class MemorySubjectData implements SubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> setPermissions(Set<Context> contexts, final @Nullable Map<String, Boolean> permissions, final TransferMethod method) {
+    public CompletableFuture<Boolean> setPermissions(Set<Context> contexts, final Map<String, Boolean> permissions, final TransferMethod method) {
         contexts = ImmutableSet.copyOf(Objects.requireNonNull(contexts, "contexts"));
         Objects.requireNonNull(method, "method");
+        Objects.requireNonNull(permissions, "permissions");
 
         outer: while (true) {
             final NodeTree oldTree = this.permissions.get(contexts);
             switch (method) {
                 case MERGE:
-                    if (permissions == null) {
-                        break outer;
-                    }
-
                     final NodeTree newTree;
                     if (oldTree != null) {
                         newTree = oldTree.withAll(permissions);
@@ -170,7 +167,7 @@ public class MemorySubjectData implements SubjectData {
                     }
                     break;
                 case OVERWRITE:
-                    if (this.updateCollection(this.permissions, contexts, oldTree, NodeTree.of(permissions == null ? ImmutableMap.of() : permissions))) {
+                    if (this.updateCollection(this.permissions, contexts, oldTree, NodeTree.of(permissions))) {
                         break outer;
                     }
 
@@ -277,6 +274,7 @@ public class MemorySubjectData implements SubjectData {
     public CompletableFuture<Boolean> setParents(Set<Context> contexts, final List<? extends SubjectReference> parents, final TransferMethod method) {
         contexts = ImmutableSet.copyOf(Objects.requireNonNull(contexts, "contexts"));
         Objects.requireNonNull(method, "method");
+        Objects.requireNonNull(parents, "parents");
 
         outer: while (true) {
             final List<SubjectReference> oldParents = this.parents.get(contexts);
@@ -426,18 +424,15 @@ public class MemorySubjectData implements SubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> setOptions(Set<Context> contexts, final @Nullable Map<String, String> options, final TransferMethod method) {
+    public CompletableFuture<Boolean> setOptions(Set<Context> contexts, final Map<String, String> options, final TransferMethod method) {
         contexts = ImmutableSet.copyOf(Objects.requireNonNull(contexts, "contexts"));
         Objects.requireNonNull(method, "method");
+        Objects.requireNonNull(options, "options");
 
         outer: while (true) {
             final Map<String, String> oldOptions = this.options.get(contexts);
             switch (method) {
                 case MERGE:
-                    if (options == null) {
-                        break outer;
-                    }
-
                     final Map<String, String> newOptions = oldOptions == null ? new HashMap<>() : new HashMap<>(oldOptions);
                     newOptions.putAll(options);
                     if (this.updateCollection(this.options, contexts, oldOptions, newOptions)) {
@@ -445,7 +440,7 @@ public class MemorySubjectData implements SubjectData {
                     }
                     break;
                 case OVERWRITE:
-                    if (this.updateCollection(this.options, contexts, oldOptions, options == null ? null : ImmutableMap.copyOf(options))) {
+                    if (this.updateCollection(this.options, contexts, oldOptions, ImmutableMap.copyOf(options))) {
                         break outer;
                     }
 
