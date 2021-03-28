@@ -80,7 +80,7 @@ class BlockChangeFlagManagerTest {
     void verifyNoneFlag() {
         final SpongeBlockChangeFlag none = BlockChangeFlagManager.fromNativeInt(Constants.BlockChangeFlags.NONE);
         assertFalse(none.updateNeighbors());
-        assertTrue(none.notifyClients());
+        assertFalse(none.notifyClients());
         assertFalse(none.isIgnoreRender());
         assertFalse(none.isForceReRender());
         assertFalse(none.updateNeighboringShapes());
