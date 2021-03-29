@@ -42,7 +42,7 @@ public class PluginAssetProvider implements Provider<Asset> {
 
     @Override
     public Asset get() {
-        String name = this.point.getAnnotation(AssetId.class).value();
+        final String name = this.point.getAnnotation(AssetId.class).value();
         return this.assetManager.asset(this.container, name)
                 .orElseThrow(() -> new NoSuchElementException("Cannot find asset " + name));
     }
