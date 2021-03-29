@@ -92,6 +92,9 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
         if (registryTypeForValue.isPresent()) {
             return (view, dataQuery)  -> (Optional<T>) registryTypeForValue.flatMap(regType -> view.getRegistryValue(dataQuery, regType));
         }
+        if (ResourceKey.class.isAssignableFrom(rawType)) {
+            return (view, dataQuery) -> (Optional<T>) view.getString(dataQuery).map(ResourceKey::resolve);
+        }
         if (Sponge.game().dataManager().translator(rawType).isPresent()) {
             return (view, dataQuery)  -> (Optional<T>) view.getObject(dataQuery, rawType);
         }
