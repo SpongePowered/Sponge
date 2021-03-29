@@ -46,7 +46,7 @@ public final class BlockAddedEffect implements ProcessingSideEffect {
         final SpongeBlockChangeFlag flag, final int limit
     ) {
         if (flag.performBlockPhysics()) {
-            newState.onPlace(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.isBlockMoving());
+            newState.onPlace(pipeline.getServerWorld(), oldState.pos, oldState.state, flag.movingBlocks());
         }
         return EffectResult.NULL_PASS;
     }
