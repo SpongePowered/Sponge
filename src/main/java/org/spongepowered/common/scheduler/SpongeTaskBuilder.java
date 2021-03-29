@@ -136,8 +136,12 @@ public final class SpongeTaskBuilder implements Task.Builder {
 
     @Override
     public Task build() {
-        Preconditions.checkState(this.consumer != null, "Runnable task not set");
-        Preconditions.checkState(this.plugin != null, "Plugin not set");
+        if (this.consumer == null) {
+            throw new IllegalStateException("Runnable task not set");
+        }
+        if (this.plugin == null) {
+            throw new IllegalStateException("Plugin not set");
+        }
 
         final String name;
         if (this.name == null) {
@@ -145,8 +149,8 @@ public final class SpongeTaskBuilder implements Task.Builder {
         } else {
             name = this.name;
         }
-        return new SpongeTask(this.consumer, name, this.name, this.plugin, this.delay, this.interval, this.tickBasedDelay &&
-                this.tickBasedInterval);
+        return new SpongeTask(this.consumer, name, this.name, this.plugin, this.delay, this.interval,
+                this.tickBasedDelay, this.tickBasedInterval);
     }
 
     @Override
@@ -156,8 +160,8 @@ public final class SpongeTaskBuilder implements Task.Builder {
         this.plugin = task.owner();
         this.interval = task.interval;
         this.delay = task.delay;
-        this.tickBasedDelay = task.tickBased;
-        this.tickBasedInterval = task.tickBased;
+        this.tickBasedDelay = task.tickBasedDelay;
+        this.tickBasedInterval = task.tickBasedInterval;
         this.name = task.customName;
         return this;
     }
