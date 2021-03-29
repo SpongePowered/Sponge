@@ -51,6 +51,8 @@
         "server.players.GameProfileCache_GameProfileInfoAccessor",
         "server.players.IpBanListAccessor",
         "server.players.PlayerListAccessor",
+        "server.players.StoredUserEntryAccessor",
+        "server.players.StoredUserListAccessor",
         "util.WeighedRandom_WeighedRandomItemAccessor",
         "util.datafix.schemas.V100Accessor",
         "world.CompoundContainerAccessor",
@@ -194,8 +196,6 @@
         "world.scores.ScoreboardAccessor"
     ],
     "server": [
-        "server.dedicated.DedicatedServerAccessor",
-        "server.players.StoredUserEntryAccessor",
-        "server.players.StoredUserListAccessor"
+        "server.dedicated.DedicatedServerAccessor"
     ]
 }
