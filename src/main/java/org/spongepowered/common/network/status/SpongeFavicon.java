@@ -155,4 +155,32 @@ public class SpongeFavicon implements Favicon {
             base64.release();
         }
     }
+
+    public static final class FactoryImpl implements Favicon.Factory {
+
+        @Override
+        public Favicon load(final String raw) throws IOException {
+            return SpongeFavicon.load(raw);
+        }
+
+        @Override
+        public Favicon load(final Path path) throws IOException {
+            return SpongeFavicon.load(path);
+        }
+
+        @Override
+        public Favicon load(final URL url) throws IOException {
+            return SpongeFavicon.load(url);
+        }
+
+        @Override
+        public Favicon load(final InputStream in) throws IOException {
+            return SpongeFavicon.load(in);
+        }
+
+        @Override
+        public Favicon load(final BufferedImage image) throws IOException {
+            return SpongeFavicon.load(image);
+        }
+    }
 }
