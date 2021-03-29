@@ -233,8 +233,8 @@ public abstract class EntityPlayerMixin extends EntityLivingBaseMixin implements
             return;
         }
         if (!this.dontRecalculateExperience) {
-            final int newLevel = Math.max(this.experienceLevel + levels, 0);
-            postEventAndUpdateExperience(ExperienceHolderUtils.xpAtLevel(newLevel)
+            final int newLevel = this.experienceLevel + levels;
+            postEventAndUpdateExperience(newLevel < 0 ? 0 : ExperienceHolderUtils.xpAtLevel(newLevel)
                     + (int) (this.experience * ExperienceHolderUtils.getExpBetweenLevels(newLevel)));
             ci.cancel();
         }
