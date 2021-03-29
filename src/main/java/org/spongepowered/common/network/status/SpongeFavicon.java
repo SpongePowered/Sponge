@@ -96,28 +96,6 @@ public class SpongeFavicon implements Favicon {
                 .toString();
     }
 
-    public static Favicon load(String raw) throws IOException {
-        return new SpongeFavicon(raw);
-    }
-
-    public static Favicon load(Path path) throws IOException {
-        try (InputStream in = Files.newInputStream(path)) {
-            return SpongeFavicon.load(in);
-        }
-    }
-
-    public static Favicon load(URL url) throws IOException {
-        return SpongeFavicon.load(ImageIO.read(url));
-    }
-
-    public static Favicon load(InputStream in) throws IOException {
-        return SpongeFavicon.load(ImageIO.read(in));
-    }
-
-    public static Favicon load(BufferedImage image) throws IOException {
-        return new SpongeFavicon(image);
-    }
-
     private static final String FAVICON_PREFIX = "data:image/png;base64,";
 
     private static String encode(BufferedImage favicon) throws IOException {
@@ -160,27 +138,29 @@ public class SpongeFavicon implements Favicon {
 
         @Override
         public Favicon load(final String raw) throws IOException {
-            return SpongeFavicon.load(raw);
+            return new SpongeFavicon(raw);
         }
 
         @Override
         public Favicon load(final Path path) throws IOException {
-            return SpongeFavicon.load(path);
+            try (InputStream in = Files.newInputStream(path)) {
+                return this.load(in);
+            }
         }
 
         @Override
         public Favicon load(final URL url) throws IOException {
-            return SpongeFavicon.load(url);
+            return this.load(ImageIO.read(url));
         }
 
         @Override
         public Favicon load(final InputStream in) throws IOException {
-            return SpongeFavicon.load(in);
+            return this.load(ImageIO.read(in));
         }
 
         @Override
         public Favicon load(final BufferedImage image) throws IOException {
-            return SpongeFavicon.load(image);
+            return new SpongeFavicon(image);
         }
     }
 }
