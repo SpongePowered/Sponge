@@ -67,7 +67,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Inject(method = "stopServer", at = @At("TAIL"))
     private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
-        SpongeCommon.getGame().getAsyncScheduler().close();
+        SpongeCommon.getGame().asyncScheduler().close();
     }
 
     @Override

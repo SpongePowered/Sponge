@@ -52,7 +52,7 @@ public final class EntityCustomNameVisibleConverter extends DataParameterConvert
     @Override
     public Boolean getValueFromEvent(final Boolean originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.IS_CUSTOM_NAME_VISIBLE) {
+            if (immutableValue.key() == Keys.IS_CUSTOM_NAME_VISIBLE) {
                 return (Boolean) immutableValue.get();
             }
         }

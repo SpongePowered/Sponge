@@ -78,12 +78,12 @@ public final class AsyncScheduler extends SpongeScheduler {
     private void recalibrateMinimumTimeout() {
         this.lock.lock();
         try {
-            final Set<ScheduledTask> tasks = this.getTasks();
+            final Set<ScheduledTask> tasks = this.tasks();
             this.minimumTimeout = Long.MAX_VALUE;
             final long now = System.nanoTime();
             for (final ScheduledTask tmpTask : tasks) {
                 final SpongeScheduledTask task = (SpongeScheduledTask) tmpTask;
-                if (task.getState() == SpongeScheduledTask.ScheduledTaskState.EXECUTING) {
+                if (task.state() == SpongeScheduledTask.ScheduledTaskState.EXECUTING) {
                     // bail out for this task. We'll signal when we complete the task.
                     continue;
                 }
@@ -93,13 +93,13 @@ public final class AsyncScheduler extends SpongeScheduler {
                     this.minimumTimeout = 0;
                 }
                 // The time since the task last executed or was added to the map
-                long timeSinceLast = now - task.getTimestamp();
+                final long timeSinceLast = now - task.timestamp();
 
-                if (task.task.delay > 0 && task.getState() == SpongeScheduledTask.ScheduledTaskState.WAITING) {
+                if (task.task.delay > 0 && task.state() == SpongeScheduledTask.ScheduledTaskState.WAITING) {
                     // There is an delay and the task hasn't run yet
                     this.minimumTimeout = Math.min(task.task.delay - timeSinceLast, this.minimumTimeout);
                 }
-                if (task.task.interval > 0 && task.getState().isActive) {
+                if (task.task.interval > 0 && task.state().isActive) {
                     // The task repeats and has run after the initial delay
                     this.minimumTimeout = Math.min(task.task.interval - timeSinceLast, this.minimumTimeout);
                 }
@@ -108,7 +108,7 @@ public final class AsyncScheduler extends SpongeScheduler {
                 }
             }
             if (!tasks.isEmpty()) {
-                long latency = System.nanoTime() - this.lastProcessingTimestamp;
+                final long latency = System.nanoTime() - this.lastProcessingTimestamp;
                 this.minimumTimeout -= (latency <= 0) ? 0 : latency;
                 this.minimumTimeout = (this.minimumTimeout < 0) ? 0 : this.minimumTimeout;
             }
@@ -142,7 +142,7 @@ public final class AsyncScheduler extends SpongeScheduler {
         } catch (final InterruptedException ignored) {
             // The taskMap has been modified; there is work to do.
             // Continue on without handling the Exception.
-        } catch (IllegalMonitorStateException e) {
+        } catch (final IllegalMonitorStateException e) {
             SpongeCommon.getLogger().error("The scheduler internal state machine suffered a catastrophic error", e);
         }
     }
@@ -159,7 +159,7 @@ public final class AsyncScheduler extends SpongeScheduler {
 
     @Override
     protected void onTaskCompletion(final SpongeScheduledTask task) {
-        if (task.getState() == SpongeScheduledTask.ScheduledTaskState.RUNNING) {
+        if (task.state() == SpongeScheduledTask.ScheduledTaskState.RUNNING) {
             this.lock.lock();
             try {
                 this.stateChanged.set(true);
@@ -171,18 +171,18 @@ public final class AsyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    protected void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable) {
+    protected void executeTaskRunnable(final SpongeScheduledTask task, final Runnable runnable) {
         this.executor.submit(runnable);
     }
 
-    public <T> CompletableFuture<T> submit(Callable<T> callable) {
+    public <T> CompletableFuture<T> submit(final Callable<T> callable) {
         return Functional.asyncFailableFuture(callable, this.executor);
     }
 
     public void close() {
         this.running = false;
         // Cancel all tasks
-        final Set<ScheduledTask> tasks = this.getTasks();
+        final Set<ScheduledTask> tasks = this.tasks();
         tasks.forEach(ScheduledTask::cancel);
 
         // Shut down the executor

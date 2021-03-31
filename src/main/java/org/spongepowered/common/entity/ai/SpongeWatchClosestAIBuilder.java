@@ -61,9 +61,9 @@ public final class SpongeWatchClosestAIBuilder implements LookAtGoal.Builder {
 
     @Override
     public LookAtGoal.Builder from(LookAtGoal value) {
-        return this.watch(value.getWatchedClass())
-            .maxDistance(value.getMaxDistance())
-            .chance(value.getChance());
+        return this.watch(value.watchedClass())
+            .maxDistance(value.maxDistance())
+            .chance(value.chance());
     }
 
     @Override

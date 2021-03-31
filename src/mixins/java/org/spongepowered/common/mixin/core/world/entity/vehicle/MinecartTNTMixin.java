@@ -176,7 +176,7 @@ public abstract class MinecartTNTMixin extends AbstractMinecartMixin implements 
     private void impl$postOnAttackEntityFrom(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
-            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.getCurrentCause(),
+            final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(),
                 (TNTMinecart) this, new ArrayList<>(), 0, amount);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {

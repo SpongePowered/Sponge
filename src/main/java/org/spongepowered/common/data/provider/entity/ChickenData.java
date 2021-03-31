@@ -41,7 +41,7 @@ public final class ChickenData {
                     .create(Keys.EGG_TIME)
                         .get(h -> new SpongeTicks(h.eggTime))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0) {
                                 return false;
                             }

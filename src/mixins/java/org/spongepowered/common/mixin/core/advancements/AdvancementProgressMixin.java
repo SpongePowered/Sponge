@@ -131,7 +131,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
         final Optional<Advancement> advancement = this.getOptionalAdvancement();
         if (advancement.isPresent()) {
             this.impl$progressMap = new LinkedHashMap<>();
-            this.impl$processProgressMap(advancement.get().getCriterion(), this.impl$progressMap);
+            this.impl$processProgressMap(advancement.get().criterion(), this.impl$progressMap);
         } else {
             this.impl$progressMap = null;
         }
@@ -171,26 +171,26 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
     private void impl$processProgressMap(AdvancementCriterion criterion, Map<String, ImplementationBackedCriterionProgress> progressMap) {
         if (criterion instanceof OperatorCriterion) {
-            ((OperatorCriterion) criterion).getCriteria().forEach(child -> this.impl$processProgressMap(child, progressMap));
+            ((OperatorCriterion) criterion).criteria().forEach(child -> this.impl$processProgressMap(child, progressMap));
             if (criterion instanceof AndCriterion) {
-                progressMap.put(criterion.getName(), new SpongeAndCriterionProgress((org.spongepowered.api.advancement.AdvancementProgress) this, (SpongeAndCriterion) criterion));
+                progressMap.put(criterion.name(), new SpongeAndCriterionProgress((org.spongepowered.api.advancement.AdvancementProgress) this, (SpongeAndCriterion) criterion));
             } else if (criterion instanceof OrCriterion) {
-                progressMap.put(criterion.getName(), new SpongeOrCriterionProgress((org.spongepowered.api.advancement.AdvancementProgress) this, (SpongeOrCriterion) criterion));
+                progressMap.put(criterion.name(), new SpongeOrCriterionProgress((org.spongepowered.api.advancement.AdvancementProgress) this, (SpongeOrCriterion) criterion));
             }
         } else if (criterion instanceof SpongeScoreCriterion) {
             final SpongeScoreCriterion scoreCriterion = (SpongeScoreCriterion) criterion;
             for (final AdvancementCriterion internalCriterion : scoreCriterion.internalCriteria) {
-                final CriterionProgressBridge progress = (CriterionProgressBridge) this.criteria.get(internalCriterion.getName());
+                final CriterionProgressBridge progress = (CriterionProgressBridge) this.criteria.get(internalCriterion.name());
                 progress.bridge$setCriterion(internalCriterion);
                 progress.bridge$setAdvancementProgress((org.spongepowered.api.advancement.AdvancementProgress) this);
-                progressMap.put(internalCriterion.getName(), (ImplementationBackedCriterionProgress) progress);
+                progressMap.put(internalCriterion.name(), (ImplementationBackedCriterionProgress) progress);
             }
-            progressMap.put(scoreCriterion.getName(), new SpongeScoreCriterionProgress((org.spongepowered.api.advancement.AdvancementProgress) this, scoreCriterion));
+            progressMap.put(scoreCriterion.name(), new SpongeScoreCriterionProgress((org.spongepowered.api.advancement.AdvancementProgress) this, scoreCriterion));
         } else if (!(criterion instanceof SpongeEmptyCriterion)) {
-            final CriterionProgressBridge progress = (CriterionProgressBridge) this.criteria.get(criterion.getName());
+            final CriterionProgressBridge progress = (CriterionProgressBridge) this.criteria.get(criterion.name());
             progress.bridge$setCriterion(criterion);
             progress.bridge$setAdvancementProgress((org.spongepowered.api.advancement.AdvancementProgress) this);
-            progressMap.put(criterion.getName(), (ImplementationBackedCriterionProgress) progress);
+            progressMap.put(criterion.name(), (ImplementationBackedCriterionProgress) progress);
         }
     }
 
@@ -206,7 +206,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
 
         final Advancement advancement = this.getOptionalAdvancement().orElse(null);
         if (advancement != null) {
-            final ImplementationBackedCriterionProgress bridge = this.impl$progressMap.get(advancement.getCriterion().getName());
+            final ImplementationBackedCriterionProgress bridge = this.impl$progressMap.get(advancement.criterion().name());
             ci.setReturnValue(bridge != null && ((CriterionProgress) bridge).achieved());
         }
     }
@@ -233,22 +233,22 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             criterionProgress.grant();
             return true;
         }
-        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final ServerPlayer player = ((PlayerAdvancementsBridge) this.impl$playerAdvancements).bridge$getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
-        final AdvancementCriterion criterion = progress.getCriterion();
+        final AdvancementCriterion criterion = progress.criterion();
         final CriterionBridge criterionBridge = (CriterionBridge) criterion;
         // The score criterion needs special care
         final SpongeScoreCriterion scoreCriterion = criterionBridge.bridge$getScoreCriterion();
         final CriterionEvent event;
         if (scoreCriterion != null) {
-            final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) this.impl$progressMap.get(scoreCriterion.getName());
-            final int lastScore = scoreProgress.getScore();
+            final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) this.impl$progressMap.get(scoreCriterion.name());
+            final int lastScore = scoreProgress.score();
             final int score = lastScore + 1;
-            if (lastScore == scoreCriterion.getGoal()) {
+            if (lastScore == scoreCriterion.goal()) {
                 event = SpongeEventFactory.createCriterionEventScoreRevoke(
                         cause, this.bridge$getAdvancement(), scoreCriterion, player, lastScore, score);
-            } else if (score == scoreCriterion.getGoal()) {
+            } else if (score == scoreCriterion.goal()) {
                 event = SpongeEventFactory.createCriterionEventScoreGrant(
                         cause, this.bridge$getAdvancement(), scoreCriterion, player, Instant.now(), lastScore, score);
             } else {
@@ -288,24 +288,24 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             criterionProgress.revoke();
             return true;
         }
-        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final ServerPlayer player = ((PlayerAdvancementsBridge) this.impl$playerAdvancements).bridge$getPlayer();
         final CriterionProgress progress = (CriterionProgress) criterionProgress;
-        final AdvancementCriterion criterion = progress.getCriterion();
+        final AdvancementCriterion criterion = progress.criterion();
         final CriterionBridge criterionBridge = (CriterionBridge) criterion;
         // The score criterion needs special care
         final SpongeScoreCriterion scoreCriterion = criterionBridge.bridge$getScoreCriterion();
         final CriterionEvent event;
-        final Advancement advancement = ((org.spongepowered.api.advancement.AdvancementProgress) this).getAdvancement();
+        final Advancement advancement = ((org.spongepowered.api.advancement.AdvancementProgress) this).advancement();
         if (scoreCriterion != null) {
-            final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) this.impl$progressMap.get(scoreCriterion.getName());
-            final int lastScore = scoreProgress.getScore();
+            final SpongeScoreCriterionProgress scoreProgress = (SpongeScoreCriterionProgress) this.impl$progressMap.get(scoreCriterion.name());
+            final int lastScore = scoreProgress.score();
             final int score = lastScore + 1;
-            if (lastScore == scoreCriterion.getGoal()) {
+            if (lastScore == scoreCriterion.goal()) {
                 event = SpongeEventFactory.createCriterionEventScoreRevoke(
                         cause, advancement, scoreCriterion, player, lastScore,
                         score);
-            } else if (score == scoreCriterion.getGoal()) {
+            } else if (score == scoreCriterion.goal()) {
                 event = SpongeEventFactory.createCriterionEventScoreGrant(
                         cause, advancement, scoreCriterion, player, Instant.now(),
                         lastScore, score);

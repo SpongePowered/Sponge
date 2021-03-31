@@ -114,7 +114,7 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
             final CommandSourceStackBridge sourceBridge = (CommandSourceStackBridge) source;
             frame.addContext(EventContextKeys.COMMAND, input.getString());
             sourceBridge.bridge$updateFrameFromCommandSource(frame);
-            return this.commandManager.process(sourceBridge.bridge$withCurrentCause(), input.getRemaining()).getResult();
+            return this.commandManager.process(sourceBridge.bridge$withCurrentCause(), input.getRemaining()).result();
         } catch (final CommandException e) {
             throw new net.minecraft.commands.CommandRuntimeException(SpongeAdventure.asVanilla(e.componentMessage()));
         }

@@ -52,8 +52,8 @@ public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantm
     @Override
     public Enchantment.Builder from(final Enchantment value) {
         checkNotNull(value, "The enchantment to create a builder from cannot be null!");
-        this.enchantmentType = value.getType();
-        this.level = value.getLevel();
+        this.enchantmentType = value.type();
+        this.level = value.level();
         return this;
     }
 

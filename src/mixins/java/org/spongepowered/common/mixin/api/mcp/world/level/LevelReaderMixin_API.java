@@ -67,7 +67,6 @@ import java.util.stream.Stream;
 
 @SuppressWarnings({"RedundantTypeArguments", "unchecked", "RedundantCast"})
 @Mixin(LevelReader.class)
-@Implements(@Interface(iface = Region.class, prefix = "region$"))
 public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     // @formatter:off
@@ -86,12 +85,12 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     // Region
 
     @Override
-    default WorldType getWorldType() {
+    default WorldType worldType() {
         return (WorldType) this.shadow$dimensionType();
     }
 
     @Override
-    default WorldBorder getBorder() {
+    default WorldBorder border() {
         return (WorldBorder) ((CollisionGetter) this).getWorldBorder();
     }
 
@@ -112,18 +111,18 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default boolean containsAnyLiquids(final AABB aabb) {
-        final Vector3d max = Objects.requireNonNull(aabb, "aabb").getMax();
-        final Vector3d min = aabb.getMin();
+        final Vector3d max = Objects.requireNonNull(aabb, "aabb").max();
+        final Vector3d min = aabb.min();
         return this.shadow$containsAnyLiquid(new net.minecraft.world.phys.AABB(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ()));
     }
 
     @Override
-    default int getSkylightSubtracted() {
+    default int skylightSubtracted() {
         return this.shadow$getSkyDarken();
     }
 
-    @Intrinsic
-    default int region$getSeaLevel() {
+    @Override
+    default int seaLevel() {
         return this.shadow$getSeaLevel();
     }
 
@@ -136,7 +135,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     // RandomProvider
 
     @Override
-    default Random getRandom() {
+    default Random random() {
         return new Random();
     }
 
@@ -146,7 +145,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    default ProtoChunk<@NonNull ?> getChunk(final int x, final int y, final int z) {
+    default ProtoChunk<@NonNull ?> chunk(final int x, final int y, final int z) {
         return (ProtoChunk<@NonNull ?>) this.shadow$getChunk(x >> 4, z >> 4, ChunkStatus.EMPTY, true);
     }
 
@@ -169,17 +168,17 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     // HeightAwareVolume
 
     @Override
-    default int getHeight(final HeightType type, final int x, final int z) {
+    default int height(final HeightType type, final int x, final int z) {
         return this.shadow$getHeight((Heightmap.Types) (Object) Objects.requireNonNull(type, "type"), x, z);
     }
 
     @Override
-    default Biome getBiome(final int x, final int y, final int z) {
+    default Biome biome(final int x, final int y, final int z) {
         return (Biome) (Object) this.shadow$getBiome(new BlockPos(x, y, z));
     }
 
     @Override
-    default VolumeStream<R, Biome> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+    default VolumeStream<R, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
                 Objects.requireNonNull(options, "options"));
 
@@ -221,7 +220,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     }
 
     @Override
-    default VolumeStream<R, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+    default VolumeStream<R, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
                 Objects.requireNonNull(options, "options"));
 
@@ -262,7 +261,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     }
 
     @Override
-    default VolumeStream<R, BlockEntity> getBlockEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+    default VolumeStream<R, BlockEntity> blockEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
                 Objects.requireNonNull(options, "options"));
 

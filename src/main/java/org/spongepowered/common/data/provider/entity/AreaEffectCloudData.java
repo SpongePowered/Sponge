@@ -44,11 +44,11 @@ public final class AreaEffectCloudData {
                 .asMutable(AreaEffectCloud.class)
                     .create(Keys.COLOR)
                         .get(h -> Color.ofRgb(h.getColor()))
-                        .set((h, v) -> h.setFixedColor(v.getRgb()))
+                        .set((h, v) -> h.setFixedColor(v.rgb()))
                     .create(Keys.DURATION)
                         .get(x -> new SpongeTicks(x.getDuration()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0) {
                                 return false;
                             }
@@ -73,17 +73,17 @@ public final class AreaEffectCloudData {
                         .set((h, v) -> h.setRadiusPerTick(v.floatValue()))
                     .create(Keys.WAIT_TIME)
                         .get(h -> new SpongeTicks(((AreaEffectCloudAccessor) h).accessor$waitTime()))
-                        .set((h, v) -> h.setWaitTime((int) v.getTicks()))
+                        .set((h, v) -> h.setWaitTime((int) v.ticks()))
                 .asMutable(AreaEffectCloudAccessor.class)
                     .create(Keys.DURATION_ON_USE)
                         .get(h -> new SpongeTicks(h.accessor$durationOnUse()))
-                        .set((h, v) -> h.accessor$durationOnUse((int) v.getTicks()))
+                        .set((h, v) -> h.accessor$durationOnUse((int) v.ticks()))
                     .create(Keys.POTION_EFFECTS)
                         .get(h -> PotionEffectUtil.copyAsPotionEffects(h.accessor$effects()))
                         .set((h, v) -> h.accessor$effects(PotionEffectUtil.copyAsEffectInstances(v)))
                     .create(Keys.REAPPLICATION_DELAY)
                         .get(h -> new SpongeTicks(h.accessor$reapplicationDelay()))
-                        .set((h, v) -> h.accessor$reapplicationDelay((int) v.getTicks()));
+                        .set((h, v) -> h.accessor$reapplicationDelay((int) v.ticks()));
     }
     // @formatter:on
 }

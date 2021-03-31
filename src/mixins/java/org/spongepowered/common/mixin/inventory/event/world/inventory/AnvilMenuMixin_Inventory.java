@@ -60,7 +60,7 @@ public abstract class AnvilMenuMixin_Inventory extends ItemCombinerMenuMixin_Inv
                 (AnvilMenu) (Object) this, itemstack, itemstack2, result,
                 this.itemName == null ? "" : this.itemName, this.cost.get(), this.repairItemCountCost);
 
-        final ItemStackSnapshot finalItem = event.getResult().getFinal();
+        final ItemStackSnapshot finalItem = event.result().finalReplacement();
         if (event.isCancelled() || finalItem.isEmpty()) {
             this.resultSlots.setItem(0, ItemStack.EMPTY);
             this.cost.set(0);
@@ -69,9 +69,9 @@ public abstract class AnvilMenuMixin_Inventory extends ItemCombinerMenuMixin_Inv
             return;
         }
 
-        this.resultSlots.setItem(0, ItemStackUtil.fromSnapshotToNative(event.getResult().getFinal()));
-        this.cost.set(event.getCosts().getFinal().getLevelCost());
-        this.repairItemCountCost = event.getCosts().getFinal().getMaterialCost();
+        this.resultSlots.setItem(0, ItemStackUtil.fromSnapshotToNative(event.result().finalReplacement()));
+        this.cost.set(event.costs().finalReplacement().levelCost());
+        this.repairItemCountCost = event.costs().finalReplacement().materialCost();
 
         ((AnvilMenu)(Object) this).broadcastChanges();
     }

@@ -32,7 +32,7 @@ public final class SurfaceOnlyTeleportHelperFilter extends DefaultTeleportHelper
 
     @Override
     public Tristate isValidLocation(ServerWorld world, Vector3i position) {
-        if (world.getHighestYAt(position.getX(), position.getZ()) >= position.getY()) {
+        if (world.highestYAt(position.getX(), position.getZ()) >= position.getY()) {
             // We're below the highest y co-ordinate, so we're not interested in it.
             return Tristate.FALSE;
         }

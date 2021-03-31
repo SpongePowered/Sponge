@@ -94,38 +94,38 @@ public final class CustomDataTest {
 
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<Integer> numberKey = Parameter.integerNumber().setKey("number").optional().build();
-        final Parameter.Value<Type> type = Parameter.enumValue(Type.class).setKey("type").optional().build();
+        final Parameter.Value<Integer> numberKey = Parameter.integerNumber().key("number").optional().build();
+        final Parameter.Value<Type> type = Parameter.enumValue(Type.class).key("type").optional().build();
         final Command.Parameterized myCommand = Command.builder()
-                .parameter(type)
-                .parameter(numberKey)
-                .setExecutor(context -> {
-                    final Integer number = context.getOne(numberKey).orElse(1);
-                    final ServerPlayer player = context.getCause().first(ServerPlayer.class).get();
-                    switch (context.getOne(type).orElse(Type.ITEMSTACK)) {
+                .addParameter(type)
+                .addParameter(numberKey)
+                .executor(context -> {
+                    final Integer number = context.one(numberKey).orElse(1);
+                    final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
+                    switch (context.one(type).orElse(Type.ITEMSTACK)) {
                         case ITEMSTACK:
                             final ItemStack stack = ItemStack.of(ItemTypes.PAPER);
                             stack.offer(this.myDataKey, number);
                             stack.offer(this.mySimpleDataKey, "It works! " + number);
                             stack.offer(this.myItemTypeKey, ItemTypes.PAPER.get());
-                            player.getInventory().offer(stack);
-                            final List<Slot> slots = player.getInventory().query(QueryTypes.ITEM_STACK_CUSTOM.get().of(s -> s.get(this.myDataKey).isPresent())).slots();
+                            player.inventory().offer(stack);
+                            final List<Slot> slots = player.inventory().query(QueryTypes.ITEM_STACK_CUSTOM.get().of(s -> s.get(this.myDataKey).isPresent())).slots();
                             final int itemSum = slots.stream().map(Slot::peek).mapToInt(item -> item.get(this.myDataKey).get()).sum();
                             player.sendActionBar(Component.text(itemSum));
                             slots.stream().map(Slot::peek).map(s -> s.get(this.mySimpleDataKey)).forEach(data -> data.ifPresent(value -> player.sendMessage(Identity.nil(), Component.text(value))));
                             break;
                         case ENTITY:
-                            final Entity entity = player.getWorld().createEntity(EntityTypes.MINECART.get(), player.getPosition().add(0, 3, 0));
+                            final Entity entity = player.world().createEntity(EntityTypes.MINECART.get(), player.position().add(0, 3, 0));
                             entity.offer(this.myDataKey, number);
-                            player.getWorld().spawnEntity(entity);
-                            final int entitySum = player.getNearbyEntities(5).stream().filter(e -> e.get(this.myDataKey).isPresent()).mapToInt(e -> e.get(this.myDataKey).get()).sum();
+                            player.world().spawnEntity(entity);
+                            final int entitySum = player.nearbyEntities(5).stream().filter(e -> e.get(this.myDataKey).isPresent()).mapToInt(e -> e.get(this.myDataKey).get()).sum();
                             player.sendActionBar(Component.text(entitySum));
                             break;
                         case BLOCKENTITY:
-                            player.getWorld().setBlock(player.getBlockPosition(), BlockTypes.DISPENSER.get().getDefaultState());
-                            final BlockEntity blockEntity = player.getWorld().getBlockEntity(player.getBlockPosition()).get();
+                            player.world().setBlock(player.blockPosition(), BlockTypes.DISPENSER.get().defaultState());
+                            final BlockEntity blockEntity = player.world().blockEntity(player.blockPosition()).get();
                             blockEntity.offer(this.myDataKey, number);
-                            final int blockEntitySum = player.getWorld().getBlockEntities().stream().filter(e -> e.get(this.myDataKey).isPresent())
+                            final int blockEntitySum = player.world().blockEntities().stream().filter(e -> e.get(this.myDataKey).isPresent())
                                     .mapToInt(e -> e.get(this.myDataKey).get()).sum();
                             player.sendActionBar(Component.text(blockEntitySum));
                             break;
@@ -136,17 +136,17 @@ public final class CustomDataTest {
                             break;
                         case USER:
                             // delegate to player
-                            this.customUserData(player.getUniqueId(), number);
+                            this.customUserData(player.uniqueId(), number);
                             player.kick(Component.text("Setting User data..."));
-                            final Scheduler scheduler = Sponge.getServer().getScheduler();
-                            scheduler.submit(Task.builder().delay(Ticks.single()).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
-                            scheduler.submit(Task.builder().delay(Ticks.of(2)).execute(() -> this.customUserData(player.getUniqueId(), number)).plugin(this.plugin).build());
+                            final Scheduler scheduler = Sponge.server().scheduler();
+                            scheduler.submit(Task.builder().delay(Ticks.single()).execute(() -> this.customUserData(player.uniqueId(), number)).plugin(this.plugin).build());
+                            scheduler.submit(Task.builder().delay(Ticks.of(2)).execute(() -> this.customUserData(player.uniqueId(), number)).plugin(this.plugin).build());
                             break;
                         case BLOCK:
                             // try out custom data-stores
-                            final Integer oldNumber = player.getWorld().get(player.getBlockPosition(), this.myDataKey).orElse(0);
+                            final Integer oldNumber = player.world().get(player.blockPosition(), this.myDataKey).orElse(0);
                             player.sendActionBar(Component.text(oldNumber));
-                            player.getWorld().offer(player.getBlockPosition(), this.myDataKey, oldNumber + number);
+                            player.world().offer(player.blockPosition(), this.myDataKey, oldNumber + number);
                     }
                     return CommandResult.success();
                 })
@@ -187,7 +187,7 @@ public final class CustomDataTest {
     private Map<ResourceKey, Map<Vector3i, Integer>> myCustomData = new HashMap<>();
 
     private DataTransactionResult removeData(ServerLocation serverLocation) {
-        final Integer removed = this.myCustomData.getOrDefault(serverLocation.getWorldKey(), Collections.emptyMap()).remove(serverLocation.getBlockPosition());
+        final Integer removed = this.myCustomData.getOrDefault(serverLocation.worldKey(), Collections.emptyMap()).remove(serverLocation.blockPosition());
         if (removed == null) {
             return DataTransactionResult.failNoData();
         }
@@ -195,26 +195,26 @@ public final class CustomDataTest {
     }
 
     private DataTransactionResult setData(ServerLocation serverLocation, Integer value) {
-        final Map<Vector3i, Integer> worldData = this.myCustomData.computeIfAbsent(serverLocation.getWorldKey(), k -> new HashMap<>());
-        worldData.put(serverLocation.getBlockPosition(), value);
+        final Map<Vector3i, Integer> worldData = this.myCustomData.computeIfAbsent(serverLocation.worldKey(), k -> new HashMap<>());
+        worldData.put(serverLocation.blockPosition(), value);
         return DataTransactionResult.successResult(Value.immutableOf(this.myDataKey, value));
     }
 
     private Integer getData(ServerLocation serverLocation) {
-        return this.myCustomData.getOrDefault(serverLocation.getWorldKey(), Collections.emptyMap()).get(serverLocation.getBlockPosition());
+        return this.myCustomData.getOrDefault(serverLocation.worldKey(), Collections.emptyMap()).get(serverLocation.blockPosition());
     }
 
     @Listener
     public void onJoin(final ServerSideConnectionEvent.Join event) {
-        final Optional<Integer> myValue = event.getPlayer().get(this.myDataKey);
+        final Optional<Integer> myValue = event.player().get(this.myDataKey);
         myValue.ifPresent(integer -> this.plugin.getLogger().info("CustomData: {}", integer));
     }
 
     private void customUserData(final UUID playerUUID, final int number) {
-        final Optional<User> user = Sponge.getServer().getUserManager().get(playerUUID);
+        final Optional<User> user = Sponge.server().userManager().find(playerUUID);
         if (user.isPresent()) {
             final Integer integer = user.get().get(this.myDataKey).orElse(0);
-            this.plugin.getLogger().info("Custom data on user {}: {}", user.get().getName(), integer);
+            this.plugin.getLogger().info("Custom data on user {}: {}", user.get().name(), integer);
             user.get().offer(this.myDataKey, number);
         }
     }

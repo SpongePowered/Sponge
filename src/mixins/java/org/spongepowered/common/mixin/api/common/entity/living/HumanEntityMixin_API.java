@@ -39,7 +39,7 @@ public abstract class HumanEntityMixin_API extends PathfinderMobMixin_API implem
     @Shadow private GameProfile fakeProfile;
 
     @Override
-    public String getName() {
+    public String name() {
         return this.fakeProfile.getName();
     }
 

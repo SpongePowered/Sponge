@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Attribute.class)
-@Implements(@Interface(iface = AttributeType.class, prefix = "attributeType$"))
 public abstract class AttributeMixin_API implements AttributeType {
 
     // @formatter:off
@@ -41,8 +40,8 @@ public abstract class AttributeMixin_API implements AttributeType {
     @Shadow public abstract double shadow$sanitizeValue(double value);
     // @formatter:on
 
-    @Intrinsic
-    public double attributeType$getDefaultValue() {
+    @Override
+    public double defaultValue() {
         return this.shadow$getDefaultValue();
     }
 

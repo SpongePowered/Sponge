@@ -50,7 +50,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     public Optional<E> get(DataHolder dataHolder) {
         if (this.isSupported(dataHolder)) {
             final SpongeDataHolderBridge customDataHolder = CustomDataProvider.getCustomDataHolder(dataHolder);
-            return customDataHolder.bridge$get(this.getKey());
+            return customDataHolder.bridge$get(this.key());
         }
         return Optional.empty();
     }
@@ -58,7 +58,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     private static SpongeDataHolderBridge getCustomDataHolder(DataHolder dataHolder) {
         final SpongeDataHolderBridge customDataHolder;
         if (dataHolder instanceof ServerLocation) {
-            customDataHolder = (SpongeDataHolderBridge) ((ServerLocation) dataHolder).getBlockEntity().get();
+            customDataHolder = (SpongeDataHolderBridge) ((ServerLocation) dataHolder).blockEntity().get();
         } else {
             customDataHolder = (SpongeDataHolderBridge) dataHolder;
         }
@@ -105,7 +105,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     @Override
     public DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
         if (this.isSupported(dataHolder)) {
-            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$offer(this.getKey(),  element);
+            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$offer(this.key(),  element);
         }
         return DataTransactionResult.failNoData();
     }
@@ -113,7 +113,7 @@ public class CustomDataProvider<V extends Value<E>, E> extends MutableDataProvid
     @Override
     public DataTransactionResult remove(DataHolder.Mutable dataHolder) {
         if (this.isSupported(dataHolder)) {
-            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$remove(this.getKey());
+            return CustomDataProvider.getCustomDataHolder(dataHolder).bridge$remove(this.key());
         }
         return DataTransactionResult.failNoData();
     }

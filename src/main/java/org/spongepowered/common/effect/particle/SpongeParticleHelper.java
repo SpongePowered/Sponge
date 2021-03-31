@@ -84,7 +84,7 @@ public final class SpongeParticleHelper {
     }
 
     public static CachedParticlePacket getCachedPacket(final SpongeParticleEffect effect) {
-        final ParticleType type = effect.getType();
+        final ParticleType type = effect.type();
 
         if (type instanceof NumericalParticleType) {
             // Special cased particle types with numerical IDs.
@@ -104,9 +104,9 @@ public final class SpongeParticleHelper {
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     private static CachedParticlePacket getNamedPacket(final ParticleEffect effect, final net.minecraft.core.particles.ParticleType<?> internalType) {
         // Named particles always support OFFSET and QUANTITY.
-        final Vector3f offset = effect.getOptionOrDefault(ParticleOptions.OFFSET).get().toFloat();
-        final int quantity = effect.getOptionOrDefault(ParticleOptions.QUANTITY).get();
-        final Vector3f velocity = effect.getOptionOrDefault(ParticleOptions.VELOCITY).orElse(Vector3d.ZERO).toFloat();
+        final Vector3f offset = effect.optionOrDefault(ParticleOptions.OFFSET).get().toFloat();
+        final int quantity = effect.optionOrDefault(ParticleOptions.QUANTITY).get();
+        final Vector3f velocity = effect.optionOrDefault(ParticleOptions.VELOCITY).orElse(Vector3d.ZERO).toFloat();
 
         if (internalType instanceof SimpleParticleType) {
             // Simple named particle without any additional supported options.
@@ -118,26 +118,26 @@ public final class SpongeParticleHelper {
         // If only mojang had some type akin to our ParticleEffect...
         if (internalType.getDeserializer() == BlockParticleOption.DESERIALIZER) {
             // This particle type supports a block state option.
-            final BlockState state = effect.getOptionOrDefault(ParticleOptions.BLOCK_STATE).get();
+            final BlockState state = effect.optionOrDefault(ParticleOptions.BLOCK_STATE).get();
             final BlockParticleOption particleData = new BlockParticleOption(
                     (net.minecraft.core.particles.ParticleType<BlockParticleOption>) internalType,
                     (net.minecraft.world.level.block.state.BlockState) state);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         } else if (internalType.getDeserializer() == ItemParticleOption.DESERIALIZER) {
             // This particle type supports an item option.
-            final ItemStackSnapshot snapshot = effect.getOptionOrDefault(ParticleOptions.ITEM_STACK_SNAPSHOT).get();
+            final ItemStackSnapshot snapshot = effect.optionOrDefault(ParticleOptions.ITEM_STACK_SNAPSHOT).get();
             final ItemParticleOption particleData = new ItemParticleOption(
                     (net.minecraft.core.particles.ParticleType<ItemParticleOption>) internalType,
                     (net.minecraft.world.item.ItemStack) (Object) snapshot.createStack());
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         } else if (internalType.getDeserializer() == DustParticleOptions.DESERIALIZER) {
             // This particle type supports a color option.
-            final Color color = effect.getOptionOrDefault(ParticleOptions.COLOR).get();
+            final Color color = effect.optionOrDefault(ParticleOptions.COLOR).get();
             final DustParticleOptions particleData = new DustParticleOptions(new com.mojang.math.Vector3f(
-                    (float) color.getRed() / 255,
-                    (float) color.getGreen() / 255,
-                    (float) color.getBlue() / 255)
-                    , 1.0f);
+                    (float) color.red() / 255,
+                    (float) color.green() / 255,
+                    (float) color.blue() / 255),
+                    1.0f);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         }
 
@@ -147,7 +147,7 @@ public final class SpongeParticleHelper {
 
     public static int getDirectionId(Direction direction) {
         if (direction.isSecondaryOrdinal()) {
-            direction = Direction.getClosest(direction.asOffset(), Direction.Division.ORDINAL);
+            direction = Direction.closest(direction.asOffset(), Direction.Division.ORDINAL);
         }
         switch (direction) {
             case SOUTHEAST:
@@ -172,18 +172,18 @@ public final class SpongeParticleHelper {
     }
 
     public static int getBlockStateId(final ParticleEffect effect, final Optional<BlockState> defaultBlockState) {
-        final Optional<BlockState> blockState = effect.getOption(ParticleOptions.BLOCK_STATE);
+        final Optional<BlockState> blockState = effect.option(ParticleOptions.BLOCK_STATE);
         if (blockState.isPresent()) {
             // Use the provided block state option.
             return Block.getId((net.minecraft.world.level.block.state.BlockState) blockState.get());
         }
 
-        final Optional<ItemStackSnapshot> itemSnapshot = effect.getOption(ParticleOptions.ITEM_STACK_SNAPSHOT);
+        final Optional<ItemStackSnapshot> itemSnapshot = effect.option(ParticleOptions.ITEM_STACK_SNAPSHOT);
         if (itemSnapshot.isPresent()) {
             // Try to convert the item into a usable block state.
-            final Optional<BlockType> blockType = itemSnapshot.get().getType().getBlock();
+            final Optional<BlockType> blockType = itemSnapshot.get().type().block();
             // TODO: correct behavior?
-            return blockType.map(type -> Block.getId((net.minecraft.world.level.block.state.BlockState) type.getDefaultState()))
+            return blockType.map(type -> Block.getId((net.minecraft.world.level.block.state.BlockState) type.defaultState()))
                     .orElse(0);
         }
 

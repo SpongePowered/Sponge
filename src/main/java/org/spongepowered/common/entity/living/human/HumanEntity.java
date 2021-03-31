@@ -161,7 +161,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    public Component getTeamRepresentation() {
+    public Component teamRepresentation() {
         return Component.text(this.fakeProfile.getName());
     }
 
@@ -385,7 +385,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         if (delay == 0) {
             removeTask.run();
         } else {
-            Sponge.getServer().getScheduler().submit(Task.builder()
+            Sponge.server().scheduler().submit(Task.builder()
                     .execute(removeTask)
                     .delay(new SpongeTicks(delay))
                     .plugin(Launch.getInstance().getCommonPlugin())

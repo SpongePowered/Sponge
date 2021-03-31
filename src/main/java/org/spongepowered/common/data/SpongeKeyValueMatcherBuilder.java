@@ -70,9 +70,9 @@ public final class SpongeKeyValueMatcherBuilder<V> implements KeyValueMatcher.Bu
 
     @Override
     public KeyValueMatcher.Builder<V> from(final KeyValueMatcher<V> value) {
-        this.key = value.getKey();
-        this.value = value.getValue().orElse(null);
-        this.operator = value.getOperator();
+        this.key = value.key();
+        this.value = value.value().orElse(null);
+        this.operator = value.operator();
         return this;
     }
 
@@ -102,7 +102,7 @@ public final class SpongeKeyValueMatcherBuilder<V> implements KeyValueMatcher.Bu
         if (!operator.isPresent()) {
             return Optional.empty();
         }
-        final Optional<V> value = (Optional<V>) container.getObject(Constants.KeyValueMatcher.VALUE, GenericTypeReflector.erase(key.getElementType()));
+        final Optional<V> value = (Optional<V>) container.getObject(Constants.KeyValueMatcher.VALUE, GenericTypeReflector.erase(key.elementType()));
         if (!value.isPresent()) {
             return Optional.empty();
         }

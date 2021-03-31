@@ -35,7 +35,7 @@ public final class SpongeOrientation implements Orientation {
     }
 
     @Override
-    public int getAngle() {
+    public int angle() {
         return this.angle;
     }
 }

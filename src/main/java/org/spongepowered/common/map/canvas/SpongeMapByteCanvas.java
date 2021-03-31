@@ -52,7 +52,7 @@ public final class SpongeMapByteCanvas implements SpongeMapCanvas {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
@@ -62,7 +62,7 @@ public final class SpongeMapByteCanvas implements SpongeMapCanvas {
     }
 
     @Override
-    public MapColor getColor(final int x, final int y) {
+    public MapColor color(final int x, final int y) {
         if (!MapUtil.isInCanvasBounds(x)) {
             throw new IllegalStateException("x (" + x + ") is out of bounds");
         }
@@ -83,7 +83,7 @@ public final class SpongeMapByteCanvas implements SpongeMapCanvas {
         int pos = 0;
         for (int y = 0; y < Constants.Map.MAP_PIXELS; y++, pos += Constants.Map.MAP_PIXELS) {
             for (int x = 0; x < Constants.Map.MAP_PIXELS; x++, pos++) {
-                image.setRGB(x, y, this.getColor(x,y).getColor().getRgb());
+                image.setRGB(x, y, this.color(x,y).color().rgb());
             }
         }
         return image;
@@ -95,9 +95,9 @@ public final class SpongeMapByteCanvas implements SpongeMapCanvas {
         int pos = 0;
         for (int y = 0; y < Constants.Map.MAP_PIXELS; y++, pos += Constants.Map.MAP_PIXELS) {
             for (int x = 0; x < Constants.Map.MAP_PIXELS; x++, pos++) {
-                final MapColor foundColor = this.getColor(x,y);
-                final Color paintColor = foundColor.getType() == MapColorTypes.NONE.get() ? color
-                        : foundColor.getColor().asJavaColor();
+                final MapColor foundColor = this.color(x,y);
+                final Color paintColor = foundColor.type() == MapColorTypes.NONE.get() ? color
+                        : foundColor.color().asJavaColor();
                 image.setRGB(x, y, paintColor.getRGB());
             }
         }

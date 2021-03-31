@@ -37,7 +37,7 @@ public abstract class LlamaMixin_API extends AbstractChestedHorseMixin_API imple
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.type().asImmutable());
+        values.add(this.llamaType().asImmutable());
         values.add(this.strength().asImmutable());
 
         this.tamer().map(Value::asImmutable).ifPresent(values::add);

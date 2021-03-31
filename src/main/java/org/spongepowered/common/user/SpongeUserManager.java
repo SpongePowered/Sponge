@@ -57,24 +57,24 @@ public final class SpongeUserManager implements UserManager {
     }
 
     @Override
-    public Optional<User> get(final UUID uniqueId) {
+    public Optional<User> find(final UUID uniqueId) {
         return this.serverUserProvider.getUser(uniqueId);
     }
 
     @Override
-    public Optional<User> get(final String lastKnownName) {
+    public Optional<User> find(final String lastKnownName) {
         checkNotNull(lastKnownName, "lastKnownName");
         checkArgument(!lastKnownName.isEmpty() && lastKnownName.length() <= 16, "Invalid username %s", lastKnownName);
         return this.serverUserProvider.getUser(lastKnownName);
     }
 
     @Override
-    public Optional<User> get(final GameProfile profile) {
+    public Optional<User> find(final GameProfile profile) {
         return this.serverUserProvider.getUser(profile);
     }
 
     @Override
-    public User getOrCreate(final GameProfile profile) {
+    public User findOrCreate(final GameProfile profile) {
         return this.serverUserProvider.getOrCreateUser(this.ensureNonEmptyUUID(profile), false);
     }
 
@@ -83,7 +83,7 @@ public final class SpongeUserManager implements UserManager {
     }
 
     @Override
-    public Collection<GameProfile> getAll() {
+    public Collection<GameProfile> all() {
         return this.streamAll().collect(Collectors.toList());
     }
 
@@ -94,12 +94,12 @@ public final class SpongeUserManager implements UserManager {
 
     @Override
     public boolean delete(final GameProfile profile) {
-        return this.serverUserProvider.deleteUser(checkNotNull(profile, "profile").getUniqueId());
+        return this.serverUserProvider.deleteUser(checkNotNull(profile, "profile").uniqueId());
     }
 
     @Override
     public boolean delete(final User user) {
-        return this.delete(user.getProfile());
+        return this.delete(user.profile());
     }
 
     @Override
@@ -108,8 +108,8 @@ public final class SpongeUserManager implements UserManager {
     }
 
     private GameProfile ensureNonEmptyUUID(final GameProfile profile) {
-        if (profile.getUniqueId().equals(SpongeGameProfile.EMPTY_UUID)) {
-            final String name = profile.getName().orElse(null);
+        if (profile.uniqueId().equals(SpongeGameProfile.EMPTY_UUID)) {
+            final String name = profile.name().orElse(null);
             // Use Forge's FakePlayer UUID
             return new SpongeGameProfile(SpongeUserManager.FAKEPLAYER_UUID, name);
         }

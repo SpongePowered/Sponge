@@ -46,7 +46,7 @@ public abstract class EnderDragonMixin_API extends MobMixin_API implements Ender
     // @formatter:on
 
     @Override
-    public Set<EnderDragonPart> getParts() {
+    public Set<EnderDragonPart> parts() {
         Builder<EnderDragonPart> builder = ImmutableSet.builder();
 
         for (net.minecraft.world.entity.boss.EnderDragonPart part : this.subEntities) {
@@ -57,7 +57,7 @@ public abstract class EnderDragonMixin_API extends MobMixin_API implements Ender
     }
 
     @Override
-    public DragonPhaseManager getPhaseManager() {
+    public DragonPhaseManager phaseManager() {
         return (DragonPhaseManager) this.phaseManager;
     }
 

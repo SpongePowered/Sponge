@@ -41,12 +41,12 @@ public final class DataUpdaterDelegate implements DataContentUpdater {
     }
 
     @Override
-    public int getInputVersion() {
+    public int inputVersion() {
         return this.from;
     }
 
     @Override
-    public int getOutputVersion() {
+    public int outputVersion() {
         return this.to;
     }
 

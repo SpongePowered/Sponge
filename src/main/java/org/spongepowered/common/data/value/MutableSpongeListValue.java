@@ -43,8 +43,8 @@ public final class MutableSpongeListValue<E> extends MutableSpongeCollectionValu
 
     @Override
     @SuppressWarnings("unchecked")
-    public SpongeKey<? extends ListValue<E>, List<E>> getKey() {
-        return (SpongeKey<? extends ListValue<E>, List<E>>) super.getKey();
+    public SpongeKey<? extends ListValue<E>, List<E>> key() {
+        return (SpongeKey<? extends ListValue<E>, List<E>>) super.key();
     }
 
     @Override
@@ -84,12 +84,12 @@ public final class MutableSpongeListValue<E> extends MutableSpongeCollectionValu
 
     @Override
     public ListValue.Immutable<E> asImmutable() {
-        return this.getKey().getValueConstructor().getImmutable(this.element).asImmutable();
+        return this.key().getValueConstructor().getImmutable(this.element).asImmutable();
     }
 
     @Override
     public ListValue.Mutable<E> copy() {
-        return new MutableSpongeListValue<>(this.getKey(), CopyHelper.copy(this.element));
+        return new MutableSpongeListValue<>(this.key(), CopyHelper.copy(this.element));
     }
 
     @Override

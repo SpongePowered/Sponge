@@ -64,7 +64,7 @@ final class CompassItemData {
                     .set((stack, location) -> {
                         final CompoundTag tag = stack.getOrCreateTag();
                         tag.put("LodestonePos", NbtUtils.writeBlockPos(VecHelper.toBlockPos(location)));
-                        Level.RESOURCE_KEY_CODEC.encodeStart(NbtOps.INSTANCE, ((net.minecraft.server.level.ServerLevel) location.getWorld()).dimension())
+                        Level.RESOURCE_KEY_CODEC.encodeStart(NbtOps.INSTANCE, ((net.minecraft.server.level.ServerLevel) location.world()).dimension())
                             .resultOrPartial(SpongeCommon.getLogger()::error).ifPresent(dimension -> tag.put("LodestoneDimension", dimension));
                         tag.putBoolean("LodestoneTracked", true);
                     })

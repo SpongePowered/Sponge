@@ -45,7 +45,7 @@ public final class SpongeFixedTransactionalPacketBinding<P extends RequestPacket
     }
 
     @Override
-    public Class<R> getResponsePacketType() {
+    public Class<R> responsePacketType() {
         return this.responsePacketType;
     }
 
@@ -56,8 +56,8 @@ public final class SpongeFixedTransactionalPacketBinding<P extends RequestPacket
     @Override
     public String toString() {
         return MoreObjects.toStringHelper(this)
-                .add("opcode", this.getOpcode())
-                .add("requestPacketType", this.getPacketType())
+                .add("opcode", this.opcode())
+                .add("requestPacketType", this.packetType())
                 .add("responsePacketType", this.responsePacketType)
                 .toString();
     }

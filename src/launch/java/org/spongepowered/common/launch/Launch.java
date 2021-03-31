@@ -89,7 +89,7 @@ public abstract class Launch {
 
     public final PluginContainer getMinecraftPlugin() {
         if (this.minecraftPlugin == null) {
-            this.minecraftPlugin = this.pluginManager.getPlugin("minecraft").orElse(null);
+            this.minecraftPlugin = this.pluginManager.plugin("minecraft").orElse(null);
 
             if (this.minecraftPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing Minecraft, this is a serious issue!");
@@ -101,7 +101,7 @@ public abstract class Launch {
 
     public final PluginContainer getApiPlugin() {
         if (this.apiPlugin == null) {
-            this.apiPlugin = this.pluginManager.getPlugin("spongeapi").orElse(null);
+            this.apiPlugin = this.pluginManager.plugin("spongeapi").orElse(null);
 
             if (this.apiPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing SpongeAPI, this is a serious issue!");
@@ -113,7 +113,7 @@ public abstract class Launch {
 
     public final PluginContainer getCommonPlugin() {
         if (this.commonPlugin == null) {
-            this.commonPlugin = this.pluginManager.getPlugin("sponge").orElse(null);
+            this.commonPlugin = this.pluginManager.plugin("sponge").orElse(null);
 
             if (this.commonPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing Sponge, this is a serious issue!");

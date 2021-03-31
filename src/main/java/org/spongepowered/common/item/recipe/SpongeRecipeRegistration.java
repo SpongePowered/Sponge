@@ -106,7 +106,7 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     }
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return (ResourceKey) (Object) this.key;
     }
 
@@ -141,7 +141,7 @@ public abstract class SpongeRecipeRegistration implements RecipeRegistration, Fi
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 

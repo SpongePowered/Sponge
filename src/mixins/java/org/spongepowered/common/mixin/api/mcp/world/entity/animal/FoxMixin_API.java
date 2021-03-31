@@ -26,7 +26,6 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.animal;
 
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Fox;
-import org.spongepowered.api.entity.living.monster.Patroller;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
@@ -53,7 +52,7 @@ public abstract class FoxMixin_API extends AnimalMixin_API implements Fox {
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.type().asImmutable());
+        values.add(this.foxType().asImmutable());
         values.add(this.sitting().asImmutable());
         values.add(this.faceplanted().asImmutable());
         values.add(this.defending().asImmutable());

@@ -383,7 +383,7 @@ public final class SpongeEventManager implements EventManager {
         final Class<? extends Event> eventClass = event.getClass();
         final EventType<? extends Event> eventType;
         if (event instanceof GenericEvent) {
-            eventType = new EventType(eventClass, checkNotNull(((GenericEvent) event).getParamType().getType()));
+            eventType = new EventType(eventClass, checkNotNull(((GenericEvent) event).paramType().getType()));
         } else {
             eventType = new EventType(eventClass, null);
         }
@@ -455,7 +455,7 @@ public final class SpongeEventManager implements EventManager {
     public boolean post(final Event event) {
         try {
             if (event instanceof InteractContainerEvent) { // Track usage of Containers
-                ((ContainerBridge) ((InteractContainerEvent) event).getContainer()).bridge$setInUse(true);
+                ((ContainerBridge) ((InteractContainerEvent) event).container()).bridge$setInUse(true);
             }
             // Allow the client thread by default so devs can actually
             // call their own events inside the init events. Only allowing
@@ -463,7 +463,7 @@ public final class SpongeEventManager implements EventManager {
             return this.post(event, this.getHandlerCache(event).getListeners());
         } finally {
             if (event instanceof InteractContainerEvent) { // Finished using Container
-                ((ContainerBridge) ((InteractContainerEvent) event).getContainer()).bridge$setInUse(false);
+                ((ContainerBridge) ((InteractContainerEvent) event).container()).bridge$setInUse(false);
             }
         }
     }

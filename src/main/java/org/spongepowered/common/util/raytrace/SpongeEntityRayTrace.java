@@ -61,7 +61,7 @@ public final class SpongeEntityRayTrace extends AbstractSpongeRayTrace<@NonNull 
         double currentSqDist = Double.MAX_VALUE;
         RayTraceResult<@NonNull Entity> returnedEntity = null;
         final LocatableBlock locatableBlock = this.getBlock(serverWorld, vec3din, vec3dend);
-        for (final net.minecraft.world.entity.Entity entity : this.selectEntities(serverWorld, this.getBlockAABB(locatableBlock.getBlockPosition()))) {
+        for (final net.minecraft.world.entity.Entity entity : this.selectEntities(serverWorld, this.getBlockAABB(locatableBlock.blockPosition()))) {
             final Optional<Vec3> vec3d = entity.getBoundingBox().clip(vec3din, vec3dend);
             if (vec3d.isPresent()) {
                 final Vec3 hitPosition = vec3d.get();

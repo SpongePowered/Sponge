@@ -101,25 +101,25 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final int transactionId = transactionStore.nextId();
 
         final boolean isLoginPhase = ConnectionUtil.isLoginPhase(connection);
-        final EngineConnectionSide<?> side = connection.getSide();
+        final EngineConnectionSide<?> side = connection.side();
 
-        final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
+        final ChannelBuf payload = this.registry().getBufferAllocator().buffer();
         final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (isLoginPhase) {
             if (side == EngineConnectionSide.CLIENT) {
-                payload.writeString(this.getKey().getFormatted());
+                payload.writeString(this.key().formatted());
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, transactionId));
-                payload.writeVarInt(binding.getOpcode());
+                payload.writeVarInt(binding.opcode());
                 mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
             } else {
-                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, binding.getOpcode()));
-                mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(this.getKey(), payload, transactionId);
+                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, binding.opcode()));
+                mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(this.key(), payload, transactionId);
             }
         } else {
             payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_REQUEST, transactionId));
-            payload.writeVarInt(binding.getOpcode());
-            mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.getKey(), payload, side);
+            payload.writeVarInt(binding.opcode());
+            mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.key(), payload, side);
         }
 
         try {
@@ -152,9 +152,9 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
     private <P extends RequestPacket<R>, R extends Packet> void sendResponsePacketTo(final EngineConnection connection,
             final @Nullable SpongeTransactionalPacketBinding<P, R> requestBinding, final @Nullable R packet, final int transactionId) {
         final boolean isLoginPhase = ConnectionUtil.isLoginPhase(connection);
-        final EngineConnectionSide<?> side = connection.getSide();
+        final EngineConnectionSide<?> side = connection.side();
 
-        final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
+        final ChannelBuf payload = this.registry().getBufferAllocator().buffer();
         final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (packet == null || requestBinding instanceof SpongeFixedTransactionalPacketBinding) {
@@ -166,15 +166,15 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                 } else {
                     payload.writeVarLong(SpongePacketChannel.packTypeAndValue(type, transactionId));
                     mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(
-                            this.getKey(), payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
+                            this.key(), payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
                 }
             } else {
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(type, transactionId));
-                mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.getKey(), payload, side);
+                mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.key(), payload, side);
             }
         } else {
             // Dynamic opcode
-            final int opcode = this.requireBinding(packet.getClass()).getOpcode();
+            final int opcode = this.requireBinding(packet.getClass()).opcode();
             if (isLoginPhase) {
                 if (side == EngineConnectionSide.CLIENT) {
                     payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_DYNAMIC_RESPONSE, opcode));
@@ -183,12 +183,12 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                     payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_DYNAMIC_RESPONSE, transactionId));
                     payload.writeVarInt(opcode);
                     mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(
-                            this.getKey(), payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
+                            this.key(), payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
                 }
             } else {
                 payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_DYNAMIC_RESPONSE, transactionId));
                 payload.writeVarInt(opcode);
-                mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.getKey(), payload, side);
+                mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.key(), payload, side);
             }
         }
 
@@ -208,24 +208,24 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
                 (SpongePacketBinding) this.requireBinding(packet.getClass());
 
         final boolean isLoginPhase = ConnectionUtil.isLoginPhase(connection);
-        final EngineConnectionSide<?> side = connection.getSide();
+        final EngineConnectionSide<?> side = connection.side();
 
-        final ChannelBuf payload = this.getRegistry().getBufferAllocator().buffer();
+        final ChannelBuf payload = this.registry().getBufferAllocator().buffer();
         final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (isLoginPhase) {
             if (side == EngineConnectionSide.CLIENT) {
-                payload.writeString(this.getKey().getFormatted());
-                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.getOpcode()));
+                payload.writeString(this.key().formatted());
+                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.opcode()));
                 mcPacketSupplier = () -> PacketUtil.createLoginPayloadResponse(payload, Constants.Channels.LOGIN_PAYLOAD_TRANSACTION_ID);
             } else {
-                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.getOpcode()));
+                payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.opcode()));
                 final int transactionId = ConnectionUtil.getTransactionStore(connection).nextId();
-                mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(this.getKey(), payload, transactionId);
+                mcPacketSupplier = () -> PacketUtil.createLoginPayloadRequest(this.key(), payload, transactionId);
             }
         } else {
-            payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.getOpcode()));
-            mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.getKey(), payload, side);
+            payload.writeVarLong(SpongePacketChannel.packTypeAndValue(SpongePacketChannel.TYPE_NORMAL, binding.opcode()));
+            mcPacketSupplier = () -> PacketUtil.createPlayPayload(this.key(), payload, side);
         }
 
         try {
@@ -252,7 +252,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
     @Override
     public boolean isSupportedBy(final EngineConnection connection) {
         Objects.requireNonNull(connection, "connection");
-        return ConnectionUtil.getRegisteredChannels(connection).contains(this.getKey());
+        return ConnectionUtil.getRegisteredChannels(connection).contains(this.key());
     }
 
     @Override

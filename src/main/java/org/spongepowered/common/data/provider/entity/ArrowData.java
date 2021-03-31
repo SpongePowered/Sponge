@@ -57,8 +57,8 @@ public final class ArrowData {
                         .set((h, v) -> {
                             ((ArrowAccessor) h).accessor$effects().clear();
                             for (final PotionEffect effect : v) {
-                                final MobEffectInstance mcEffect = new MobEffectInstance(((MobEffectInstance) effect).getEffect(), effect.getDuration(),
-                                        effect.getAmplifier(), effect.isAmbient(), effect.showsParticles());
+                                final MobEffectInstance mcEffect = new MobEffectInstance(((MobEffectInstance) effect).getEffect(), effect.duration(),
+                                        effect.amplifier(), effect.isAmbient(), effect.showsParticles());
                                 h.addEffect(mcEffect);
                             }
                         });

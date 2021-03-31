@@ -48,19 +48,19 @@ public final class SpongePluginContainerValueParameter extends ResourceKeyedArgu
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
-        return Launch.getInstance().getPluginManager().getPlugins().stream().map(x -> x.getMetadata().getId()).filter(x -> x.startsWith(currentInput))
+        return Launch.getInstance().getPluginManager().plugins().stream().map(x -> x.getMetadata().getId()).filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
     }
 
     @Override
     @NonNull
-    public Optional<? extends PluginContainer> getValue(
+    public Optional<? extends PluginContainer> parseValue(
             final Parameter.@NonNull Key<? super PluginContainer> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 
         final String id = reader.parseString();
-        final Optional<PluginContainer> container = Launch.getInstance().getPluginManager().getPlugin(id);
+        final Optional<PluginContainer> container = Launch.getInstance().getPluginManager().plugin(id);
         if (container.isPresent()) {
             return container;
         }

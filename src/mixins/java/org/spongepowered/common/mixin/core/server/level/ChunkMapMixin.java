@@ -96,14 +96,14 @@ public abstract class ChunkMapMixin {
     private void impl$onSetUnloaded(final ServerLevel level, final LevelChunk chunk) {
         level.unload(chunk);
         final Vector3i chunkPos = new Vector3i(chunk.getPos().x, 0, chunk.getPos().z);
-        final ChunkEvent.Unload event = SpongeEventFactory.createChunkEventUnload(PhaseTracker.getInstance().getCurrentCause(), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
+        final ChunkEvent.Unload event = SpongeEventFactory.createChunkEventUnload(PhaseTracker.getInstance().currentCause(), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
         SpongeCommon.postEvent(event);
     }
 
     @Inject(method = "save", at = @At(value = "RETURN"))
     private void impl$onSaved(final ChunkAccess var1, final CallbackInfoReturnable<Boolean> cir) {
         final Vector3i chunkPos = new Vector3i(var1.getPos().x, 0, var1.getPos().z);
-        final ChunkEvent.Save.Post postSave = SpongeEventFactory.createChunkEventSavePost(PhaseTracker.getInstance().getCurrentCause(), chunkPos,
+        final ChunkEvent.Save.Post postSave = SpongeEventFactory.createChunkEventSavePost(PhaseTracker.getInstance().currentCause(), chunkPos,
                         (ResourceKey) (Object) this.level.dimension().location());
         SpongeCommon.postEvent(postSave);
     }
@@ -112,7 +112,7 @@ public abstract class ChunkMapMixin {
     private void impl$onSave(final ChunkAccess var1, final CallbackInfoReturnable<Boolean> cir) {
         if (var1 instanceof Chunk) {
             final Vector3i chunkPos = new Vector3i(var1.getPos().x, 0, var1.getPos().z);
-            final ChunkEvent.Save.Pre postSave = SpongeEventFactory.createChunkEventSavePre(PhaseTracker.getInstance().getCurrentCause(),
+            final ChunkEvent.Save.Pre postSave = SpongeEventFactory.createChunkEventSavePre(PhaseTracker.getInstance().currentCause(),
                     chunkPos, (ResourceKey) (Object) this.level.dimension().location(), ((Chunk) var1));
             SpongeCommon.postEvent(postSave);
             if (postSave.isCancelled()) {
@@ -132,7 +132,7 @@ public abstract class ChunkMapMixin {
     private void impl$onLoad(final LevelChunk levelChunk, final boolean loaded) {
         levelChunk.setLoaded(true);
         final Vector3i chunkPos = new Vector3i(levelChunk.getPos().x, 0, levelChunk.getPos().z);
-        final ChunkEvent.Load loadEvent = SpongeEventFactory.createChunkEventLoad(PhaseTracker.getInstance().getCurrentCause(),
+        final ChunkEvent.Load loadEvent = SpongeEventFactory.createChunkEventLoad(PhaseTracker.getInstance().currentCause(),
                 chunkPos, (ResourceKey) (Object) this.level.dimension().location(), ((Chunk) levelChunk));
         SpongeCommon.postEvent(loadEvent);
     }

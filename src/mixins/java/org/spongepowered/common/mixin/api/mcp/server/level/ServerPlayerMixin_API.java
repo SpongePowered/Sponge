@@ -129,7 +129,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Nullable private WorldBorder api$worldBorder;
 
     @Override
-    public ServerWorld getWorld() {
+    public ServerWorld world() {
         return (ServerWorld) this.shadow$getLevel();
     }
 
@@ -155,7 +155,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public User getUser() {
+    public User user() {
         return ((ServerPlayerBridge) this).bridge$getUser();
     }
 
@@ -168,8 +168,8 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public GameProfile getProfile() {
-        return ((ServerPlayerBridge) this).bridge$getUser().getProfile();
+    public GameProfile profile() {
+        return ((ServerPlayerBridge) this).bridge$getUser().profile();
     }
 
     @Override
@@ -190,7 +190,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public ServerPlayerConnection getConnection() {
+    public ServerPlayerConnection connection() {
         return (ServerPlayerConnection) this.connection;
     }
 
@@ -205,8 +205,8 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public String getIdentifier() {
-        return ((ServerPlayerBridge) this).bridge$getUser().getIdentifier();
+    public String identifier() {
+        return ((ServerPlayerBridge) this).bridge$getUser().identifier();
     }
 
     @Override
@@ -219,12 +219,12 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public Component getTeamRepresentation() {
+    public Component teamRepresentation() {
         return SpongeAdventure.asAdventure(this.shadow$getName());
     }
 
     @Override
-    public Scoreboard getScoreboard() {
+    public Scoreboard scoreboard() {
         return ((ServerPlayerBridge) this).bridge$getScoreboard();
     }
 
@@ -250,17 +250,17 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public void sendResourcePack(final ResourcePack pack) {
-        this.connection.send(new ClientboundResourcePackPacket(((SpongeResourcePack) Objects.requireNonNull(pack, "pack")).getUrlString(), pack.getHash().orElse(""), false));
+        this.connection.send(new ClientboundResourcePackPacket(((SpongeResourcePack) Objects.requireNonNull(pack, "pack")).getUrlString(), pack.hash().orElse(""), false));
     }
 
     @Override
-    public TabList getTabList() {
+    public TabList tabList() {
         return this.api$tabList;
     }
 
     @Override
     public boolean hasPlayedBefore() {
-        final Instant instant = ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().getFirstJoined(this.getUniqueId()).get();
+        final Instant instant = ((SpongeServer) this.shadow$getServer()).getPlayerDataManager().getFirstJoined(this.uniqueId()).get();
         final Instant toTheMinute = instant.truncatedTo(ChronoUnit.MINUTES);
         final Instant now = Instant.now().truncatedTo(ChronoUnit.MINUTES);
         final Duration timeSinceFirstJoined = Duration.of(now.minusMillis(toTheMinute.toEpochMilli()).toEpochMilli(), ChronoUnit.MINUTES);
@@ -290,7 +290,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public PlayerChatRouter getChatRouter() {
+    public PlayerChatRouter chatRouter() {
         if (this.api$chatRouter == null) {
             this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(player,
                     Component.translatable("chat.type.text", SpongeAdventure.asAdventure(this.shadow$getDisplayName()), message));
@@ -308,31 +308,31 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(cause, "cause");
 
-        final PlayerChatRouter originalRouter = this.getChatRouter();
+        final PlayerChatRouter originalRouter = this.chatRouter();
         final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(cause, originalRouter, Optional.of(originalRouter), message, message);
         if (!SpongeCommon.postEvent(event)) {
-            event.getChatRouter().ifPresent(channel -> channel.chat(this, event.getMessage()));
+            event.chatRouter().ifPresent(channel -> channel.chat(this, event.message()));
         }
         return event;
     }
 
     @Override
-    public Optional<WorldBorder> getWorldBorder() {
+    public Optional<WorldBorder> worldBorder() {
         return Optional.ofNullable(this.api$worldBorder);
     }
 
     @Override
-    public CooldownTracker getCooldownTracker() {
+    public CooldownTracker cooldownTracker() {
         return (CooldownTracker) this.shadow$getCooldowns();
     }
 
     @Override
-    public AdvancementProgress getProgress(final Advancement advancement) {
+    public AdvancementProgress progress(final Advancement advancement) {
         return (AdvancementProgress) this.advancements.getOrStartProgress((net.minecraft.advancements.Advancement) Objects.requireNonNull(advancement, "advancement"));
     }
 
     @Override
-    public Collection<AdvancementTree> getUnlockedAdvancementTrees() {
+    public Collection<AdvancementTree> unlockedAdvancementTrees() {
         if (this.impl$isFake) {
             return Collections.emptyList();
         }
@@ -347,7 +347,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         if (this.api$worldBorder == border) {
             return; //do not fire an event since nothing would have changed
         }
-        if (!SpongeCommon.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(PhaseTracker.getCauseStackManager().getCurrentCause(),
+        if (!SpongeCommon.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(PhaseTracker.getCauseStackManager().currentCause(),
                 Optional.ofNullable(this.api$worldBorder), this, Optional.ofNullable(border)))) {
             if (this.api$worldBorder != null) { //is the world border about to be unset?
                 ((WorldBorderAccessor) this.api$worldBorder).accessor$listeners().remove(
@@ -509,7 +509,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public @NonNull Locale getLocale() {
+    public @NonNull Locale locale() {
         return ((ServerPlayerBridge) this).bridge$getLanguage();
     }
 

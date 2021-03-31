@@ -277,14 +277,14 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     @Override
     public String getUsageText() {
         if (this.usage != null) {
-            return this.usage.getUsage(this.key.key());
+            return this.usage.usage(this.key.key());
         }
         return super.getUsageText();
     }
 
     private String getUsageTextForClient() {
         if (this.usage != null) {
-            return this.usage.getUsage(this.key.key());
+            return this.usage.usage(this.key.key());
         }
         return this.getName();
     }

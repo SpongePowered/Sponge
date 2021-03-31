@@ -81,7 +81,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public SpongeItemStackSnapshot(final ItemStack itemStack) {
         checkNotNull(itemStack);
         if (ItemStackUtil.toNative(itemStack) == net.minecraft.world.item.ItemStack.EMPTY) {
-            this.itemType = itemStack.getType();
+            this.itemType = itemStack.type();
             this.quantity = 0;
             this.damageValue = 0;
             this.manipulators = ImmutableList.of();
@@ -91,8 +91,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
             this.compound = null;
             return;
         }
-        this.itemType = itemStack.getType();
-        this.quantity = itemStack.getQuantity();
+        this.itemType = itemStack.type();
+        this.quantity = itemStack.quantity();
         final ImmutableList.Builder<DataManipulator.Immutable> builder = ImmutableList.builder();
         final ImmutableSet.Builder<Key<?>> keyBuilder = ImmutableSet.builder();
         final ImmutableSet.Builder<org.spongepowered.api.data.value.Value.Immutable<?>> valueBuilder = ImmutableSet.builder();
@@ -150,12 +150,12 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public ItemType getType() {
+    public ItemType type() {
         return this.itemType == null ? (ItemType) net.minecraft.world.item.ItemStack.EMPTY.getItem() : this.itemType;
     }
 
     @Override
-    public int getQuantity() {
+    public int quantity() {
         return this.quantity;
     }
 
@@ -181,15 +181,15 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return Constants.Sponge.ItemStackSnapshot.CURRENT_VERSION;
     }
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.contentVersion())
             .set(Constants.ItemStack.TYPE, resourceKey)
             .set(Constants.ItemStack.COUNT, this.quantity)
             .set(Constants.ItemStack.DAMAGE_VALUE, this.damageValue);
@@ -206,7 +206,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public <E> Optional<ItemStackSnapshot> transform(final Key<? extends Value<E>> key, final Function<E, E> function) {
         final ItemStack copy = this.privateStack.copy();
         final DataTransactionResult result = copy.transform(key, function);
-        if (result.getType() != DataTransactionResult.Type.SUCCESS) {
+        if (result.type() != DataTransactionResult.Type.SUCCESS) {
             return Optional.empty();
         }
         return Optional.of(copy.createSnapshot());
@@ -216,7 +216,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public <E> Optional<ItemStackSnapshot> with(final Key<? extends Value<E>> key, final E value) {
         final ItemStack copy = this.privateStack.copy();
         final DataTransactionResult result = copy.offer(key, value);
-        if (result.getType() != DataTransactionResult.Type.SUCCESS) {
+        if (result.type() != DataTransactionResult.Type.SUCCESS) {
             return Optional.empty();
         }
         return Optional.of(copy.createSnapshot());
@@ -224,7 +224,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public Optional<ItemStackSnapshot> with(final Value<?> value) {
-        return this.with((Key<Value<Object>>) value.getKey(), (Object) value.get());
+        return this.with((Key<Value<Object>>) value.key(), (Object) value.get());
     }
 
 
@@ -260,7 +260,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public String toString() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
 
         return MoreObjects.toStringHelper(this)
                 .add("itemType", resourceKey)
@@ -301,7 +301,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public Optional<ItemStackSnapshot> without(Key<?> key) {
         final ItemStack copy = this.privateStack.copy();
         final DataTransactionResult result = copy.remove(key);
-        if (result.getType() != DataTransactionResult.Type.SUCCESS) {
+        if (result.type() != DataTransactionResult.Type.SUCCESS) {
             return Optional.empty();
         }
         return Optional.of(copy.createSnapshot());
@@ -343,8 +343,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
 
     @Override
     public HoverEvent<HoverEvent.ShowItem> asHoverEvent(final UnaryOperator<HoverEvent.ShowItem> op) {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.ITEM_TYPE).valueKey(this.itemType);
         final CompoundTag tag = this.getCompound().orElse(null);
-        return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.of(resourceKey, this.getQuantity(), SpongeAdventure.asBinaryTagHolder(tag))));
+        return HoverEvent.showItem(op.apply(HoverEvent.ShowItem.of(resourceKey, this.quantity(), SpongeAdventure.asBinaryTagHolder(tag))));
     }
 }

@@ -57,32 +57,32 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     @Shadow @Final private Advancement parent;
 
     @Override
-    public Optional<AdvancementTree> getTree() {
+    public Optional<AdvancementTree> tree() {
         if (this.parent == null) {
             return Optional.of(this);
         }
-        return ((org.spongepowered.api.advancement.Advancement) this.parent).getTree();
+        return ((org.spongepowered.api.advancement.Advancement) this.parent).tree();
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Collection<org.spongepowered.api.advancement.Advancement> getChildren() {
+    public Collection<org.spongepowered.api.advancement.Advancement> children() {
         return ImmutableList.copyOf((Collection) this.children);
     }
 
     @Override
-    public AdvancementCriterion getCriterion() {
+    public AdvancementCriterion criterion() {
         return ((AdvancementBridge) this).bridge$getCriterion();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Optional<org.spongepowered.api.advancement.Advancement> getParent() {
+    public Optional<org.spongepowered.api.advancement.Advancement> parent() {
         return (Optional<org.spongepowered.api.advancement.Advancement>) (Optional<?>) ((AdvancementBridge) this).bridge$getParent();
     }
 
     @Override
-    public Optional<org.spongepowered.api.advancement.DisplayInfo> getDisplayInfo() {
+    public Optional<org.spongepowered.api.advancement.DisplayInfo> displayInfo() {
         return Optional.ofNullable((org.spongepowered.api.advancement.DisplayInfo) this.display);
     }
 
@@ -92,7 +92,7 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     }
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return (ResourceKey) (Object) this.id;
     }
 
@@ -102,12 +102,12 @@ public abstract class AdvancementMixin_API implements org.spongepowered.api.adva
     }
 
     @Override
-    public org.spongepowered.api.advancement.Advancement getRootAdvancement() {
+    public org.spongepowered.api.advancement.Advancement rootAdvancement() {
         return this;
     }
 
     @Override
-    public Optional<ResourceKey> getBackgroundPath() {
+    public Optional<ResourceKey> backgroundPath() {
         return Optional.ofNullable((ResourceKey) (Object) this.display.getBackground());
     }
 

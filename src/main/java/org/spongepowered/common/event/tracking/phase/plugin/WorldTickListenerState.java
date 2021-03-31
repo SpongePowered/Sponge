@@ -52,7 +52,7 @@ final class WorldTickListenerState extends ListenerPhaseState<WorldTickListenerC
 //                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 //                    final LocatableBlock
 //                        block =
-//                        new SpongeLocatableBlockBuilder().world((ServerWorld) phaseContext.getWorld()).position(key.getX(), key.getY(),
+//                        new SpongeLocatableBlockBuilder().world((ServerWorld) phaseContext.world()).position(key.getX(), key.getY(),
 //                            key.getZ()).build();
 //                    frame.pushCause(container);
 //                    frame.pushCause(block);

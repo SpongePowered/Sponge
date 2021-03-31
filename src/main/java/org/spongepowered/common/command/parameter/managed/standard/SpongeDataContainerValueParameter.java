@@ -61,7 +61,7 @@ public final class SpongeDataContainerValueParameter extends ResourceKeyedArgume
 
     @Override
     @NonNull
-    public Optional<? extends DataContainer> getValue(final Parameter.@NonNull Key<? super DataContainer> parameterKey,
+    public Optional<? extends DataContainer> parseValue(final Parameter.@NonNull Key<? super DataContainer> parameterKey,
                                                       final ArgumentReader.@NonNull Mutable reader,
                                                       final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         return Optional.of(reader.parseDataContainer());

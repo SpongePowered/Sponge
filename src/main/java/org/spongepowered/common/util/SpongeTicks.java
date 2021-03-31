@@ -44,7 +44,7 @@ public final class SpongeTicks implements Ticks {
     }
 
     @Override
-    public long getMinecraftSeconds(@NonNull final Engine engine) {
+    public long minecraftSeconds(@NonNull final Engine engine) {
         // We do this to try to ensure we get the most accurate number of seconds we can.
         // We know the hour rate is 1000 ticks, we can get an accurate hour count. This reduces the potential
         // for error.
@@ -56,18 +56,18 @@ public final class SpongeTicks implements Ticks {
 
     @Override
     @NonNull
-    public Duration getMinecraftDayTimeDuration(@NonNull final Engine engine) {
-        return Duration.of(this.getMinecraftSeconds(engine), ChronoUnit.SECONDS);
+    public Duration minecraftDayTimeDuration(@NonNull final Engine engine) {
+        return Duration.of(this.minecraftSeconds(engine), ChronoUnit.SECONDS);
     }
 
     @Override
     @NonNull
-    public Duration getExpectedDuration(@NonNull final Engine engine) {
+    public Duration expectedDuration(@NonNull final Engine engine) {
         return this.effectiveMinimumDuration;
     }
 
     @Override
-    public long getTicks() {
+    public long ticks() {
         return this.ticks;
     }
 

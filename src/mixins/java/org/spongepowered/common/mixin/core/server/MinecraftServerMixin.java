@@ -110,8 +110,8 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Nullable private ResourcePack impl$resourcePack;
 
     @Override
-    public Subject getSubject() {
-        return SpongeCommon.getGame().getSystemSubject();
+    public Subject subject() {
+        return SpongeCommon.getGame().systemSubject();
     }
 
     @Inject(method = "spin", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
@@ -149,7 +149,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "tickServer", at = @At("TAIL"))
     private void impl$tickServerScheduler(final BooleanSupplier hasTimeLeft, final CallbackInfo ci) {
-        this.getScheduler().tick();
+        this.scheduler().tick();
     }
 
     @Override
@@ -163,7 +163,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     // system subject
     @Override
     public void bridge$addToCauseStack(final CauseStackManager.StackFrame frame) {
-        frame.pushCause(Sponge.getSystemSubject());
+        frame.pushCause(Sponge.systemSubject());
     }
 
     // We want to save the username cache json, as we normally bypass it.
@@ -282,15 +282,15 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
                 if (log) {
                     if (this.bridge$performAutosaveChecks()) {
-                        MinecraftServerMixin.LOGGER.info("Auto-saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+                        MinecraftServerMixin.LOGGER.info("Auto-saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).key());
                     } else {
-                        MinecraftServerMixin.LOGGER.info("Saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+                        MinecraftServerMixin.LOGGER.info("Saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).key());
                     }
                 }
             // Forced happens during command
             } else {
                 if (log) {
-                    MinecraftServerMixin.LOGGER.info("Manually saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).getKey());
+                    MinecraftServerMixin.LOGGER.info("Manually saving data for world '{}'", ((org.spongepowered.api.world.server.ServerWorld) world).key());
                 }
 
                 ((PrimaryLevelDataBridge) world.getLevelData()).bridge$configAdapter().save();

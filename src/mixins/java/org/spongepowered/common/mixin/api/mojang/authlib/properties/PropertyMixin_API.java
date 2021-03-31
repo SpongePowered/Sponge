@@ -43,7 +43,17 @@ public abstract class PropertyMixin_API implements ProfileProperty {
     @Shadow @Final private @Nullable String signature;
 
     @Override
-    public Optional<String> getSignature() { // We don't need to make this @Implements because the signature difference
+    public String name() {
+        return this.name;
+    }
+
+    @Override
+    public String value() {
+        return this.value;
+    }
+
+    @Override
+    public Optional<String> signature() { // We don't need to make this @Implements because the signature difference
         return Optional.ofNullable(this.signature);
     }
 
@@ -58,9 +68,9 @@ public abstract class PropertyMixin_API implements ProfileProperty {
             return false;
         }
         final ProfileProperty other = (ProfileProperty) obj;
-        return other.getName().equals(this.name) &&
-                other.getValue().equals(this.value) &&
-                Objects.equals(other.getSignature().orElse(null), this.signature);
+        return other.name().equals(this.name) &&
+                other.value().equals(this.value) &&
+                Objects.equals(other.signature().orElse(null), this.signature);
     }
 
     @Override

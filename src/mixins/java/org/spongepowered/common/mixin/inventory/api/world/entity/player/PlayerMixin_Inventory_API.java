@@ -43,17 +43,17 @@ public abstract class PlayerMixin_Inventory_API implements Player, InventoryBrid
     @Shadow public abstract net.minecraft.world.entity.player.Inventory shadow$getInventory();
 
     @Override
-    public org.spongepowered.api.item.inventory.entity.PlayerInventory getInventory() {
+    public org.spongepowered.api.item.inventory.entity.PlayerInventory inventory() {
         return (org.spongepowered.api.item.inventory.entity.PlayerInventory) this.shadow$getInventory();
     }
 
     @Override
-    public EquipmentInventory getEquipment() {
-        return this.getInventory().getEquipment();
+    public EquipmentInventory equipment() {
+        return this.inventory().equipment();
     }
 
     @Override
-    public Inventory getEnderChestInventory() {
+    public Inventory enderChestInventory() {
         return (Inventory) this.shadow$getEnderChestInventory();
     }
 

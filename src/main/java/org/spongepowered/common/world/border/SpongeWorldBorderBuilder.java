@@ -40,12 +40,12 @@ public class SpongeWorldBorderBuilder implements WorldBorder.Builder {
 
     @Override
     public WorldBorder.Builder from(final WorldBorder border) {
-        this.diameter = border.getDiameter();
-        this.center = border.getCenter();
-        this.warningTime = border.getWarningTime();
-        this.warningDistance = border.getWarningDistance();
-        this.damageThreshold = border.getDamageThreshold();
-        this.damageAmount = border.getDamageAmount();
+        this.diameter = border.diameter();
+        this.center = border.center();
+        this.warningTime = border.warningTime();
+        this.warningDistance = border.warningDistance();
+        this.damageThreshold = border.damageThreshold();
+        this.damageAmount = border.damageAmount();
         return this;
     }
 

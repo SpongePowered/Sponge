@@ -97,13 +97,13 @@ public final class SpongeCauseStackFrame implements CauseStackManager.StackFrame
     }
 
     @Override
-    public Cause getCurrentCause() {
-        return this.tracker.getCurrentCause();
+    public Cause currentCause() {
+        return this.tracker.currentCause();
     }
 
     @Override
-    public EventContext getCurrentContext() {
-        return this.tracker.getCurrentContext();
+    public EventContext currentContext() {
+        return this.tracker.currentContext();
     }
 
     @Override

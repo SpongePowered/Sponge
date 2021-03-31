@@ -96,12 +96,10 @@ public class Agent {
         Agent.instrumentation.redefineModule(
             Manifest.class.getModule(),
             Set.of(),
-            Map.of("sun.security.util", systemUnnamed),
+            Map.of("sun.security.util", systemUnnamed), // ModLauncher
             Map.of(
                 // ModLauncher -- needs Manifest.jv, and various JarVerifier methods
-                "java.util.jar", systemUnnamed,
-                // Guice (cglib) -- needs java.lang.ClassLoader.defineClass
-                "java.lang", systemUnnamed
+                "java.util.jar", systemUnnamed
             ),
             Set.of(),
             Map.of()

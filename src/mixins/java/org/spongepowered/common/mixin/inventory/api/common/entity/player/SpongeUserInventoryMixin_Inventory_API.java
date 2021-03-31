@@ -53,12 +53,12 @@ public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInve
     @Nullable private SlotAdapter impl$offhand;
 
     @Override
-    public Optional<User> getCarrier() {
+    public Optional<User> carrier() {
         return Optional.ofNullable(this.user);
     }
 
     @Override
-    public PrimaryPlayerInventory getPrimary() {
+    public PrimaryPlayerInventory primary() {
         if (this.impl$grid == null) {
             this.impl$grid = (PrimaryPlayerInventoryAdapter) ((PlayerInventoryLens) this.inventoryAdapter$getRootLens()).getPrimaryInventoryLens().getAdapter(this.inventoryAdapter$getFabric(), this);
         }
@@ -66,7 +66,7 @@ public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInve
     }
 
     @Override
-    public EquipmentInventory getArmor() {
+    public EquipmentInventory armor() {
         if (this.impl$armor == null) {
             this.impl$armor = (EquipmentInventoryAdapter) ((PlayerInventoryLens) this.inventoryAdapter$getRootLens()).getArmorLens().getAdapter(this.inventoryAdapter$getFabric(), this);
         }
@@ -74,7 +74,7 @@ public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInve
     }
 
     @Override
-    public EquipmentInventory getEquipment() {
+    public EquipmentInventory equipment() {
         if (this.impl$equipment == null) {
             this.impl$equipment = (EquipmentInventoryAdapter) ((PlayerInventoryLens) this.inventoryAdapter$getRootLens()).getEquipmentLens().getAdapter(this.inventoryAdapter$getFabric(), this);
         }
@@ -82,7 +82,7 @@ public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInve
     }
 
     @Override
-    public Slot getOffhand() {
+    public Slot offhand() {
         if (this.impl$offhand == null) {
             this.impl$offhand = (SlotAdapter) ((PlayerInventoryLens) this.inventoryAdapter$getRootLens()).getOffhandLens().getAdapter(this.inventoryAdapter$getFabric(), this);
         }

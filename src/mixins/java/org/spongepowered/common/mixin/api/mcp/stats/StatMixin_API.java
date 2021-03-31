@@ -44,12 +44,12 @@ public abstract class StatMixin_API implements Statistic {
     // @formatter:on
 
     @Override
-    public Optional<Criterion> getCriterion() {
+    public Optional<Criterion> criterion() {
         return Optional.empty();
     }
 
     @Override
-    public NumberFormat getFormat() {
+    public NumberFormat format() {
         return ((StatFormatterBridge) this.formatter).bridge$getFormat();
     }
 }

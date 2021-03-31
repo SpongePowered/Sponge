@@ -45,7 +45,7 @@ public abstract class ShulkerMixin_API extends AbstractGolemMixin_API implements
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         values.add(this.color().asImmutable());
-        values.add(this.direction().asImmutable());
+        values.add(this.hangingDirection().asImmutable());
 
         return values;
     }

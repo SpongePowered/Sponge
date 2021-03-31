@@ -65,7 +65,7 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     }
 
     @Override
-    public Biome getBiome(final int x, final int y, final int z) {
+    public Biome biome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
         return this.biomes[this.getIndex(x, y, z)];
     }
@@ -109,12 +109,12 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     }
 
     @Override
-    public VolumeStream<Immutable, Biome> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<Immutable, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(min, max, options);
-        final Stream<VolumeElement<Immutable, Biome>> stateStream = IntStream.range(this.getBlockMin().getX(), this.getBlockMax().getX() + 1)
-            .mapToObj(x -> IntStream.range(this.getBlockMin().getZ(), this.getBlockMax().getZ() + 1)
-                .mapToObj(z -> IntStream.range(this.getBlockMin().getY(), this.getBlockMax().getY() + 1)
+        final Stream<VolumeElement<Immutable, Biome>> stateStream = IntStream.range(this.blockMin().getX(), this.blockMax().getX() + 1)
+            .mapToObj(x -> IntStream.range(this.blockMin().getZ(), this.blockMax().getZ() + 1)
+                .mapToObj(z -> IntStream.range(this.blockMin().getY(), this.blockMax().getY() + 1)
                     .mapToObj(y -> VolumeElement.<Immutable, Biome>of(this, () -> this.biomes[this.getIndex(x, y, z)], new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());

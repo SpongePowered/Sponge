@@ -50,53 +50,53 @@ public final class ServerLocationData {
                 .asMutable(ServerLocation.class)
                     .create(Keys.BIOME_TEMPERATURE)
                         .get(h -> {
-                            final Level world = (Level) h.getWorld();
+                            final Level world = (Level) h.world();
                             final BlockPos pos = VecHelper.toBlockPos(h);
                             final Biome biome = world.getBiome(pos);
                             return (double) biome.getBaseTemperature();
                         })
                     .create(Keys.BLOCK_LIGHT)
                         .get(h -> {
-                            final Level world = (Level) h.getWorld();
+                            final Level world = (Level) h.world();
                             return world.getBrightness(LightLayer.BLOCK, VecHelper.toBlockPos(h));
                         })
                     .create(Keys.BLOCK_TEMPERATURE)
                         .get(h -> {
-                            final Level world = (Level) h.getWorld();
+                            final Level world = (Level) h.world();
                             final BlockPos pos = VecHelper.toBlockPos(h);
                             final Biome biome = world.getBiome(pos);
                             return (double) biome.getTemperature(pos);
                         })
                     .create(Keys.SKY_LIGHT)
                         .get(h -> {
-                            final Level world = (Level) h.getWorld();
+                            final Level world = (Level) h.world();
                             final BlockPos pos = VecHelper.toBlockPos(h);
                             return world.getBrightness(LightLayer.SKY, pos);
                         })
                     .create(Keys.IS_FULL_BLOCK)
                         .get(h -> {
-                            final BlockState block = (BlockState) h.getBlock();
-                            final Level world = (Level) h.getWorld();
-                            final BlockPos pos = VecHelper.toBlockPos(h.getPosition());
+                            final BlockState block = (BlockState) h.block();
+                            final Level world = (Level) h.world();
+                            final BlockPos pos = VecHelper.toBlockPos(h.position());
                             return block.isSolidRender(world, pos);
                         })
                     .create(Keys.IS_INDIRECTLY_POWERED)
                         .get(h -> {
-                            final Level world = (Level) h.getWorld();
+                            final Level world = (Level) h.world();
                             final BlockPos pos = VecHelper.toBlockPos(h);
                             return world.getBestNeighborSignal(pos) > 0;
                         })
                     .create(Keys.DISPLAY_NAME)
-                        .get(h -> SpongeAdventure.asAdventure(((Nameable)h.getBlockEntity().get()).getDisplayName()))
-                        .supports(h -> h.getBlockEntity().isPresent() && h.getBlockEntity().get() instanceof NameableBlockEntity)
+                        .get(h -> SpongeAdventure.asAdventure(((Nameable)h.blockEntity().get()).getDisplayName()))
+                        .supports(h -> h.blockEntity().isPresent() && h.blockEntity().get() instanceof NameableBlockEntity)
                     .create(Keys.CUSTOM_NAME)
                         .get(h -> {
-                            final BlockEntity blockEntity = h.getBlockEntity().get();
+                            final BlockEntity blockEntity = h.blockEntity().get();
                             return ((Nameable) blockEntity).hasCustomName() ? SpongeAdventure.asAdventure(((Nameable)blockEntity).getCustomName()) : null;
                         })
-                        .set((h, v) -> (((CustomNameableBridge)h.getBlockEntity().get())).bridge$setCustomDisplayName(SpongeAdventure.asVanilla(v)))
-                        .delete(h -> (((CustomNameableBridge)h.getBlockEntity().get())).bridge$setCustomDisplayName(null))
-                        .supports(h -> h.getBlockEntity().isPresent() && h.getBlockEntity().get() instanceof NameableBlockEntity);
+                        .set((h, v) -> (((CustomNameableBridge)h.blockEntity().get())).bridge$setCustomDisplayName(SpongeAdventure.asVanilla(v)))
+                        .delete(h -> (((CustomNameableBridge)h.blockEntity().get())).bridge$setCustomDisplayName(null))
+                        .supports(h -> h.blockEntity().isPresent() && h.blockEntity().get() instanceof NameableBlockEntity);
                     ;
     }
     // @formatter:on

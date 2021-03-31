@@ -100,7 +100,7 @@ public final class PhasePrinter {
                         + "issue tracker on GitHub. Please provide the following information: ")
             .add()
             .add(" %s : %s", "Source position", pos)
-            .add(" %s : %s", "World", ((org.spongepowered.api.world.server.ServerWorld) worldServer).getKey())
+            .add(" %s : %s", "World", ((org.spongepowered.api.world.server.ServerWorld) worldServer).key())
             .add(" %s : %s", "Source Block Recovered", blockIn)
             .add(" %s : %s", "Notified Position", otherPos).add();
 
@@ -351,8 +351,8 @@ public final class PhasePrinter {
     static void printIncorrectPhaseCompletion(final PhaseStack stack, final IPhaseState<@NonNull ?> prevState, final IPhaseState<@NonNull ?> state) {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && !PhasePrinter.completedIncorrectStates.isEmpty()) {
             for (final Tuple<IPhaseState<@NonNull ?>, IPhaseState<@NonNull ?>> tuple : PhasePrinter.completedIncorrectStates) {
-                if ((tuple.getFirst().equals(prevState)
-                        && tuple.getSecond().equals(state))) {
+                if ((tuple.first().equals(prevState)
+                        && tuple.second().equals(state))) {
                     // we've already printed once about the previous state and the current state
                     // being completed incorrectly. only print it once.
                     return;

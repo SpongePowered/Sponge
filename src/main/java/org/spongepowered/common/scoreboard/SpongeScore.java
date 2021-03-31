@@ -57,12 +57,12 @@ public final class SpongeScore implements Score {
     }
 
     @Override
-    public Component getName() {
+    public Component name() {
         return this.name;
     }
 
     @Override
-    public int getScore() {
+    public int score() {
         return this.score;
     }
 
@@ -96,7 +96,7 @@ public final class SpongeScore implements Score {
     }
 
     @Override
-    public Set<Objective> getObjectives() {
+    public Set<Objective> objectives() {
         final Set<Objective> objectives = new HashSet<>();
         for (final net.minecraft.world.scores.Objective objective: this.scores.keySet()) {
             objectives.add(((ObjectiveBridge) objective).bridge$getSpongeObjective());

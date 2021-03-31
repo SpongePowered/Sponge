@@ -48,7 +48,7 @@ public abstract class InventoryMixin_Inventory_API implements PlayerInventory {
     @Nullable private SlotAdapter api$offhand;
 
     @Override
-    public PrimaryPlayerInventory getPrimary() {
+    public PrimaryPlayerInventory primary() {
         if (this.api$primary == null && ((InventoryAdapter) this).inventoryAdapter$getRootLens() instanceof PlayerInventoryLens) {
             final Lens lens = ((InventoryAdapter) this).inventoryAdapter$getRootLens();
             final Fabric fabric = ((InventoryAdapter) this).inventoryAdapter$getFabric();
@@ -58,7 +58,7 @@ public abstract class InventoryMixin_Inventory_API implements PlayerInventory {
     }
 
     @Override
-    public EquipmentInventory getArmor() {
+    public EquipmentInventory armor() {
         if (this.api$armor == null && ((InventoryAdapter) this).inventoryAdapter$getRootLens() instanceof PlayerInventoryLens) {
             final Lens lens = ((InventoryAdapter) this).inventoryAdapter$getRootLens();
             final Fabric fabric = ((InventoryAdapter) this).inventoryAdapter$getFabric();
@@ -68,7 +68,7 @@ public abstract class InventoryMixin_Inventory_API implements PlayerInventory {
     }
 
     @Override
-    public EquipmentInventory getEquipment() {
+    public EquipmentInventory equipment() {
         if (this.api$equipment == null && ((InventoryAdapter) this).inventoryAdapter$getRootLens() instanceof PlayerInventoryLens) {
             final Lens lens = ((InventoryAdapter) this).inventoryAdapter$getRootLens();
             final Fabric fabric = ((InventoryAdapter) this).inventoryAdapter$getFabric();
@@ -78,7 +78,7 @@ public abstract class InventoryMixin_Inventory_API implements PlayerInventory {
     }
 
     @Override
-    public Slot getOffhand() {
+    public Slot offhand() {
         if (this.api$offhand == null && ((InventoryAdapter) this).inventoryAdapter$getRootLens() instanceof PlayerInventoryLens) {
             final Lens lens = ((InventoryAdapter) this).inventoryAdapter$getRootLens();
             final Fabric fabric = ((InventoryAdapter) this).inventoryAdapter$getFabric();

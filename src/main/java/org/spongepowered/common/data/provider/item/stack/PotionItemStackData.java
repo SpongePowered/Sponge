@@ -57,7 +57,7 @@ public final class PotionItemStackData {
                         .get(h -> Color.ofRgb(PotionUtils.getColor(h)))
                         .set((h, v) -> {
                             final CompoundTag tag = h.getOrCreateTag();
-                            tag.putInt(Constants.Item.CUSTOM_POTION_COLOR, v.getRgb());
+                            tag.putInt(Constants.Item.CUSTOM_POTION_COLOR, v.rgb());
                         })
                         .delete(h -> h.removeTagKey(Constants.Item.CUSTOM_POTION_COLOR))
                         .supports(h -> h.getItem() == Items.POTION || h.getItem() == Items.SPLASH_POTION || h.getItem() == Items.LINGERING_POTION)

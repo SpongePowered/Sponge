@@ -39,7 +39,7 @@ public abstract class AbstractVillagerMixin_Carrier_Inventory_API implements Car
     @Shadow @Final private SimpleContainer inventory;
 
     @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
+    public CarriedInventory<? extends Carrier> inventory() {
         return InventoryUtil.carriedWrapperInventory(this.inventory, this);
     }
 

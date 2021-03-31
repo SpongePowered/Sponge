@@ -54,14 +54,14 @@ public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseM
     private String api$serializedState;
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return Constants.Sponge.BlockState.STATE_AS_CATALOG_ID;
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.contentVersion())
             .set(Constants.Block.BLOCK_STATE, this.impl$getSerializedString());
     }
 
@@ -69,10 +69,10 @@ public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseM
     public BlockSnapshot snapshotFor(final ServerLocation location) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
                 .blockState((net.minecraft.world.level.block.state.BlockState) (Object) this)
-                .position(location.getBlockPosition())
-                .world((ServerLevel) location.getWorld());
-        if (this.shadow$hasBlockEntity() && location.getBlock().getType().equals(this.shadow$getBlock())) {
-            final BlockEntity blockEntity = location.getBlockEntity()
+                .position(location.blockPosition())
+                .world((ServerLevel) location.world());
+        if (this.shadow$hasBlockEntity() && location.block().type().equals(this.shadow$getBlock())) {
+            final BlockEntity blockEntity = location.blockEntity()
                     .orElseThrow(() -> new IllegalStateException("Unable to retrieve a TileEntity for location: " + location));
             builder.add(((SpongeDataHolderBridge) blockEntity).bridge$getManipulator());
             final CompoundTag compound = new CompoundTag();

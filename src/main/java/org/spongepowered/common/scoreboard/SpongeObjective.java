@@ -70,12 +70,12 @@ public final class SpongeObjective implements Objective {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public Component getDisplayName() {
+    public Component displayName() {
         return this.displayName;
     }
 
@@ -86,12 +86,12 @@ public final class SpongeObjective implements Objective {
     }
 
     @Override
-    public Criterion getCriterion() {
+    public Criterion criterion() {
         return this.criterion;
     }
 
     @Override
-    public ObjectiveDisplayMode getDisplayMode() {
+    public ObjectiveDisplayMode displayMode() {
         return this.displayMode;
     }
 
@@ -103,7 +103,7 @@ public final class SpongeObjective implements Objective {
     }
 
     @Override
-    public Map<Component, Score> getScores() {
+    public Map<Component, Score> scores() {
         return new HashMap<>(this.scores);
     }
 
@@ -114,11 +114,11 @@ public final class SpongeObjective implements Objective {
 
     @Override
     public void addScore(final Score score) throws IllegalArgumentException {
-        if (this.scores.containsKey(score.getName())) {
+        if (this.scores.containsKey(score.name())) {
             throw new IllegalArgumentException(String.format("A score with the name %s already exists!",
-                    SpongeAdventure.legacySection(score.getName())));
+                    SpongeAdventure.legacySection(score.name())));
         }
-        this.scores.put(score.getName(), score);
+        this.scores.put(score.name(), score);
 
         final SpongeScore spongeScore = (SpongeScore) score;
         for (final net.minecraft.world.scores.Objective objective: this.objectives.values()) {
@@ -127,12 +127,12 @@ public final class SpongeObjective implements Objective {
     }
 
     @Override
-    public Optional<Score> getScore(final Component name) {
+    public Optional<Score> score(final Component name) {
         return Optional.ofNullable(this.scores.get(name));
     }
 
     @Override
-    public Score getOrCreateScore(final Component name) {
+    public Score scoreOrCreate(final Component name) {
         if (this.scores.containsKey(name)) {
             return this.scores.get(name);
         }
@@ -146,7 +146,7 @@ public final class SpongeObjective implements Objective {
     public boolean removeScore(final Score spongeScore) {
         final String name = ((SpongeScore) spongeScore).legacyName;
 
-        if (!this.scores.containsKey(spongeScore.getName())) {
+        if (!this.scores.containsKey(spongeScore.name())) {
             return false;
         }
 
@@ -173,18 +173,18 @@ public final class SpongeObjective implements Objective {
             ((SpongeScore) spongeScore).removeScoreFor(objective);
         }
 
-        this.scores.remove(spongeScore.getName());
+        this.scores.remove(spongeScore.name());
         return true;
     }
 
     @Override
     public boolean removeScore(final Component name) {
-        final Optional<Score> score = this.getScore(name);
+        final Optional<Score> score = this.score(name);
         return score.filter(this::removeScore).isPresent();
     }
 
     @Override
-    public Set<Scoreboard> getScoreboards() {
+    public Set<Scoreboard> scoreboards() {
         return (Set<Scoreboard>) (Set<?>) new HashSet<>(this.objectives.keySet());
     }
 
@@ -203,7 +203,7 @@ public final class SpongeObjective implements Objective {
     public void updateScores(final net.minecraft.world.scores.Scoreboard scoreboard) {
         final net.minecraft.world.scores.Objective objective = this.getObjectiveFor(scoreboard);
 
-        for (final Score score: this.getScores().values()) {
+        for (final Score score: this.scores().values()) {
             final SpongeScore spongeScore = (SpongeScore) score;
             this.addScoreToScoreboard(scoreboard, spongeScore.getScoreFor(objective));
         }
@@ -283,10 +283,10 @@ public final class SpongeObjective implements Objective {
         public Objective.Builder from(final Objective value) {
             Objects.requireNonNull(value);
 
-            this.name = value.getName();
-            this.displayName = value.getDisplayName();
-            this.criterion = value.getCriterion();
-            this.objectiveDisplayMode = value.getDisplayMode();
+            this.name = value.name();
+            this.displayName = value.displayName();
+            this.criterion = value.criterion();
+            this.objectiveDisplayMode = value.displayMode();
             return this;
         }
 

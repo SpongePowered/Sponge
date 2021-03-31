@@ -81,7 +81,7 @@ public abstract class SpongeCommonDamageSource extends DamageSource implements o
 
     @Override
     public float getFoodExhaustion() {
-        return (float) this.getExhaustion();
+        return (float) this.exhaustion();
     }
 
 

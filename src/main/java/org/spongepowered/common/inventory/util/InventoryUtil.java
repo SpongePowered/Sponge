@@ -81,7 +81,7 @@ public final class InventoryUtil {
     }
 
     public static Optional<Inventory> getDoubleChestInventory(final ChestBlockEntity chest) {
-        final Optional<Chest> connectedChestOptional = ((Chest) chest).getConnectedChest();
+        final Optional<Chest> connectedChestOptional = ((Chest) chest).connectedChest();
         if (!connectedChestOptional.isPresent()) {
             return Optional.empty();
         }
@@ -139,7 +139,7 @@ public final class InventoryUtil {
         }
 
         if (inventory instanceof CarriedInventory) {
-            final Optional<?> carrier = ((CarriedInventory<?>) inventory).getCarrier();
+            final Optional<?> carrier = ((CarriedInventory<?>) inventory).carrier();
             if (carrier.isPresent()) {
                 inventory = carrier.get();
             }
@@ -148,21 +148,21 @@ public final class InventoryUtil {
         final Object base = inventory;
 
         if (base instanceof BlockEntity) {
-            final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(((BlockEntity) base).getType());
-            final String pluginId = key.getNamespace();
-            container = Sponge.getPluginManager().getPlugin(pluginId)
-                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + key.getNamespace() + ":" + key.getValue()));
+            final ResourceKey key = Sponge.game().registries().registry(RegistryTypes.BLOCK_ENTITY_TYPE).valueKey(((BlockEntity) base).type());
+            final String pluginId = key.namespace();
+            container = Sponge.pluginManager().plugin(pluginId)
+                    .orElseThrow(() -> new AssertionError("Missing plugin " + pluginId + " for block " + key.namespace() + ":" + key.value()));
         } else if (base instanceof Entity) {
-            final ResourceKey key = (ResourceKey) (Object) EntityType.getKey((EntityType<?>) ((Entity) base).getType());
-            final String pluginId = key.getNamespace();
-            container = Sponge.getPluginManager().getPlugin(pluginId).orElseGet(() -> {
+            final ResourceKey key = (ResourceKey) (Object) EntityType.getKey((EntityType<?>) ((Entity) base).type());
+            final String pluginId = key.namespace();
+            container = Sponge.pluginManager().plugin(pluginId).orElseGet(() -> {
                 SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
                 return Launch.getInstance().getMinecraftPlugin();
             });
         } else if (base instanceof SpongeUser) {
             container = Launch.getInstance().getMinecraftPlugin();
         } else {
-            container = Sponge.getPluginManager().getPlugin(PlatformHooks.INSTANCE
+            container = Sponge.pluginManager().plugin(PlatformHooks.INSTANCE
                 .getInventoryHooks()
                 .getModIdFromInventory(base.getClass()))
                 .orElseGet(() -> {

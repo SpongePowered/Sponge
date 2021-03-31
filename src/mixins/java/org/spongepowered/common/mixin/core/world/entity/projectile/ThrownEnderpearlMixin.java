@@ -34,17 +34,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.PlatformTeleporter;
 import org.spongepowered.math.vector.Vector3d;
 
 import javax.annotation.Nullable;
-import net.minecraft.nbt.CompoundTag;
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
@@ -79,7 +77,7 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
             frame.pushCause(this);
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.ENDER_PEARL);
 
-            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.getCurrentCause(),
+            final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
                     (org.spongepowered.api.entity.Entity) entity, VecHelper.toVector3d(entity.position()),
                     VecHelper.toVector3d(this.shadow$position()), VecHelper.toVector3d(this.shadow$position()));
             if (SpongeCommon.postEvent(event)) {
@@ -89,7 +87,7 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
             }
 
             // This seems odd but we move the pearl so that the pearl's logic will move the living entity later in the impact method
-            final Vector3d destinationPosition = event.getDestinationPosition();
+            final Vector3d destinationPosition = event.destinationPosition();
             this.shadow$setPos(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ());
         }
     }

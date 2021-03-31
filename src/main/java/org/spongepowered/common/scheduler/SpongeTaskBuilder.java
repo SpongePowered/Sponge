@@ -77,8 +77,8 @@ public final class SpongeTaskBuilder implements Task.Builder {
 
     @Override
     public Task.Builder delay(final Ticks delay) {
-        Preconditions.checkArgument(delay.getTicks() >= 0, "Delay cannot be negative");
-        this.delay = delay.getTicks() * SpongeScheduler.TICK_DURATION_NS;
+        Preconditions.checkArgument(delay.ticks() >= 0, "Delay cannot be negative");
+        this.delay = delay.ticks() * SpongeScheduler.TICK_DURATION_NS;
         this.tickBasedDelay = true;
         return this;
     }
@@ -115,8 +115,8 @@ public final class SpongeTaskBuilder implements Task.Builder {
 
     @Override
     public Task.Builder interval(final Ticks interval) {
-        Preconditions.checkArgument(interval.getTicks() >= 0, "Interval cannot be negative");
-        this.interval = interval.getTicks() * SpongeScheduler.TICK_DURATION_NS;
+        Preconditions.checkArgument(interval.ticks() >= 0, "Interval cannot be negative");
+        this.interval = interval.ticks() * SpongeScheduler.TICK_DURATION_NS;
         this.tickBasedInterval = true;
         return this;
     }
@@ -136,8 +136,12 @@ public final class SpongeTaskBuilder implements Task.Builder {
 
     @Override
     public Task build() {
-        Preconditions.checkState(this.consumer != null, "Runnable task not set");
-        Preconditions.checkState(this.plugin != null, "Plugin not set");
+        if (this.consumer == null) {
+            throw new IllegalStateException("Runnable task not set");
+        }
+        if (this.plugin == null) {
+            throw new IllegalStateException("Plugin not set");
+        }
 
         final String name;
         if (this.name == null) {
@@ -145,19 +149,19 @@ public final class SpongeTaskBuilder implements Task.Builder {
         } else {
             name = this.name;
         }
-        return new SpongeTask(this.consumer, name, this.name, this.plugin, this.delay, this.interval, this.tickBasedDelay &&
-                this.tickBasedInterval);
+        return new SpongeTask(this.consumer, name, this.name, this.plugin, this.delay, this.interval,
+                this.tickBasedDelay, this.tickBasedInterval);
     }
 
     @Override
     public Task.Builder from(final Task value) {
         final SpongeTask task = (SpongeTask) value;
-        this.consumer = value.getConsumer();
-        this.plugin = task.getOwner();
+        this.consumer = value.consumer();
+        this.plugin = task.owner();
         this.interval = task.interval;
         this.delay = task.delay;
-        this.tickBasedDelay = task.tickBased;
-        this.tickBasedInterval = task.tickBased;
+        this.tickBasedDelay = task.tickBasedDelay;
+        this.tickBasedInterval = task.tickBasedInterval;
         this.name = task.customName;
         return this;
     }

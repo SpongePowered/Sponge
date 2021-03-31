@@ -53,8 +53,8 @@ public abstract class CraftingContainerMixin_Inventory_API implements CraftingGr
     private GridInventory gridAdapter;
 
     @Override
-    public Optional<CraftingRecipe> getRecipe(ServerWorld world) {
-        return Sponge.getRegistry().getRecipeRegistry().findMatchingRecipe((Inventory) this.menu, checkNotNull(world, "world")).map(CraftingRecipe.class::cast);
+    public Optional<CraftingRecipe> recipe(ServerWorld world) {
+        return Sponge.registry().recipeRegistry().findMatchingRecipe((Inventory) this.menu, checkNotNull(world, "world")).map(CraftingRecipe.class::cast);
     }
 
     @Override

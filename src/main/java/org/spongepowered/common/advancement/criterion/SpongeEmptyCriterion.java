@@ -31,12 +31,12 @@ import java.util.Optional;
 public final class SpongeEmptyCriterion implements DefaultedAdvancementCriterion {
 
     @Override
-    public String getName() {
+    public String name() {
         return "empty";
     }
 
     @Override
-    public Optional<FilteredTrigger<?>> getTrigger() {
+    public Optional<FilteredTrigger<?>> trigger() {
         return Optional.empty();
     }
 }

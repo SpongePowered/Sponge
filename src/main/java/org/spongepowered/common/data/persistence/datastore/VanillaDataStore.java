@@ -49,7 +49,7 @@ public class VanillaDataStore implements DataStore {
     }
 
     @Override
-    public Collection<Type> getSupportedTypes() {
+    public Collection<Type> supportedTypes() {
         return this.tokens;
     }
 
@@ -57,7 +57,7 @@ public class VanillaDataStore implements DataStore {
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public DataView serialize(DataManipulator dataManipulator, DataView view) {
         for (Map.Entry<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> entry : this.queriesByKey.entrySet()) {
-            final BiConsumer serializer = entry.getValue().getFirst();
+            final BiConsumer serializer = entry.getValue().first();
             dataManipulator.get((Key) entry.getKey()).ifPresent(value -> serializer.accept(view, value));
         }
         return view;
@@ -67,7 +67,7 @@ public class VanillaDataStore implements DataStore {
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     public void deserialize(DataManipulator.Mutable dataManipulator, DataView view) {
         for (Map.Entry<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> entry : this.queriesByKey.entrySet()) {
-            final Function<DataView, Optional<?>> deserializer = entry.getValue().getSecond();
+            final Function<DataView, Optional<?>> deserializer = entry.getValue().second();
             deserializer.apply(view).ifPresent(value -> dataManipulator.set((Key) entry.getKey(), value));
         }
     }

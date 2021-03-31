@@ -72,8 +72,8 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
 
     @Override
     public FluidStackSnapshot.@NonNull Builder from(@NonNull final FluidStack fluidStack) {
-        this.fluidType = fluidStack.getFluid();
-        this.volume = fluidStack.getVolume();
+        this.fluidType = fluidStack.fluid();
+        this.volume = fluidStack.volume();
         final DataContainer datacontainer = fluidStack.toContainer();
         this.container = null;
         if (datacontainer.contains(Constants.Sponge.UNSAFE_NBT)) {
@@ -88,7 +88,7 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
         if (!(holder instanceof SpongeFluidStackSnapshot)) {
             throw new IllegalArgumentException("Must be a SpongeFluidStackSnapshot");
         }
-        this.fluidType = Objects.requireNonNull(holder.getFluid(), "Invalid FluidStackSnapshot! FluidType cannot be null!");
+        this.fluidType = Objects.requireNonNull(holder.fluid(), "Invalid FluidStackSnapshot! FluidType cannot be null!");
         this.container = holder.toContainer();
         this.keyValues = new LinkedHashMap<>(((SpongeFluidStackSnapshot) holder).impl$getMappedValues());
         return this;
@@ -118,7 +118,7 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
         try {
             if (container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
                 final String rawFluid = container.getString(Constants.Fluids.FLUID_TYPE).get();
-                final Optional<FluidType> type = Sponge.getGame().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
+                final Optional<FluidType> type = Sponge.game().registries().registry(RegistryTypes.FLUID_TYPE).findValue(ResourceKey.resolve(rawFluid));
                 if (!type.isPresent()) {
                     throw new InvalidDataException("Unknown fluid id found: " + rawFluid);
                 }

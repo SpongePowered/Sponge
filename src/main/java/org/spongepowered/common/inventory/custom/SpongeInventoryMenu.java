@@ -49,11 +49,12 @@ import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
+
+import javax.annotation.Nullable;
 
 public class SpongeInventoryMenu implements InventoryMenu {
 
@@ -75,7 +76,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     }
 
     @Override
-    public ViewableInventory getInventory() {
+    public ViewableInventory inventory() {
         return this.inventory;
     }
 
@@ -83,7 +84,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
     public void setCurrentInventory(final ViewableInventory inventory) {
         if (inventory.getClass().equals(this.inventory.getClass()) && inventory instanceof ViewableCustomInventory && inventory.capacity() == this.inventory.capacity()) {
             this.inventory = inventory;
-            for (final Map.Entry<Container, ServerPlayer> entry : this.tracked.entrySet()) {
+            for (Map.Entry<Container, ServerPlayer> entry : this.tracked.entrySet()) {
                 final net.minecraft.world.inventory.AbstractContainerMenu container = (net.minecraft.world.inventory.AbstractContainerMenu) entry.getKey();
                 final ServerPlayer player = entry.getValue();
                 // create a new container for the viewable inventory
@@ -197,7 +198,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         if (this.closeHandler != null) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
-                final Cause cause = frame.getCurrentCause();
+                final Cause cause = frame.currentCause();
                 this.closeHandler.handle(cause, container);
             }
         }
@@ -208,17 +209,17 @@ public class SpongeInventoryMenu implements InventoryMenu {
         final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final Container container) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
-            final Cause cause = frame.getCurrentCause();
+            final Cause cause = frame.currentCause();
             if (clickTypeIn == ClickType.QUICK_CRAFT) {
                 return this.onClickDrag(cause, slotId, dragType, container);
             }
-            final Optional<org.spongepowered.api.item.inventory.Slot> slot = container.getSlot(slotId);
+            final Optional<org.spongepowered.api.item.inventory.Slot> slot = container.slot(slotId);
 
             if (slot.isPresent()) {
                 switch (clickTypeIn) {
                     case SWAP:
                         if (dragType >= 0 && dragType < 9) {
-                            final Optional<org.spongepowered.api.item.inventory.Slot> slot2 = container.getSlot(dragType);
+                            final Optional<org.spongepowered.api.item.inventory.Slot> slot2 = container.slot(dragType);
                             if (slot2.isPresent() && this.keySwapHandler != null) {
                                 return this.keySwapHandler.handle(cause, container, slot.get(), slotId, ClickTypes.KEY_SWAP.get(), slot2.get());
                             }
@@ -288,7 +289,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
                 }
                 break;
             case 1: // add drag
-                final Optional<org.spongepowered.api.item.inventory.Slot> slot = container.getSlot(slotId);
+                final Optional<org.spongepowered.api.item.inventory.Slot> slot = container.slot(slotId);
                 if (slot.isPresent() && this.slotClickHandler != null) {
                     switch (dragMode) {
                         case 0:
@@ -348,7 +349,7 @@ public class SpongeInventoryMenu implements InventoryMenu {
         }
 
         if (this.changeHandler != null) {
-            final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
             return this.changeHandler.handle(cause, container, ((org.spongepowered.api.item.inventory.Slot) slot), slotIndex,
                     ItemStackUtil.snapshotOf(oldStack), ItemStackUtil.snapshotOf(newStack));
         }

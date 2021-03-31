@@ -58,14 +58,14 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
 
     @NonNull
     @Override
-    public Optional<? extends T> getValue(final Parameter.@NonNull Key<? super T> parameterKey,
+    public Optional<? extends T> parseValue(final Parameter.@NonNull Key<? super T> parameterKey,
                                           final ArgumentReader.@NonNull Mutable reader,
                                           final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         final Registry<? extends T> registry = this.registryFunction.apply(context);
         if (registry == null) {
             throw reader.createException(Component.text("The registry associated with this parameter is not currently active."));
         }
-        final ArgumentReader.Immutable snapshot = reader.getImmutable();
+        final ArgumentReader.Immutable snapshot = reader.immutable();
         try {
             final ResourceKey resourceKey = reader.parseResourceKey();
             final Optional<? extends T> result = registry.findValue(resourceKey);
@@ -107,8 +107,8 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
                 .map(x -> {
                     if (x.asString().startsWith(lowerCase)) {
                         return x.asString();
-                    } else if (this.prefixes.contains(x.getNamespace()) && x.getValue().startsWith(lowerCase)) {
-                        return x.getValue();
+                    } else if (this.prefixes.contains(x.namespace()) && x.value().startsWith(lowerCase)) {
+                        return x.value();
                     }
                     return null;
                 }).filter(Objects::nonNull).collect(Collectors.toList());

@@ -75,7 +75,7 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
     }
 
     @Override
-    public W getWorld() {
+    public W world() {
         final W world = this.worldRef.get();
         if (world == null) {
             throw new IllegalStateException("World Reference is no longer valid!");
@@ -84,7 +84,7 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
     }
 
     @Override
-    public Optional<W> getWorldIfAvailable() {
+    public Optional<W> worldIfAvailable() {
         return Optional.ofNullable(this.worldRef.get());
     }
 
@@ -99,52 +99,52 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
     }
 
     @Override
-    public Vector3d getPosition() {
+    public Vector3d position() {
         return this.position;
     }
 
     @Override
-    public Vector3i getBlockPosition() {
+    public Vector3i blockPosition() {
         return this.blockPosition;
     }
 
     @Override
-    public Vector3i getChunkPosition() {
+    public Vector3i chunkPosition() {
         return this.chunkPosition;
     }
 
     @Override
-    public Vector3i getBiomePosition() {
+    public Vector3i biomePosition() {
         return this.biomePosition;
     }
 
     @Override
-    public double getX() {
+    public double x() {
         return this.position.getX();
     }
 
     @Override
-    public double getY() {
+    public double y() {
         return this.position.getY();
     }
 
     @Override
-    public double getZ() {
-        return this.getPosition().getZ();
+    public double z() {
+        return this.position().getZ();
     }
 
     @Override
-    public int getBlockX() {
+    public int blockX() {
         return this.blockPosition.getX();
     }
 
     @Override
-    public int getBlockY() {
+    public int blockY() {
         return this.blockPosition.getY();
     }
 
     @Override
-    public int getBlockZ() {
+    public int blockZ() {
         return this.blockPosition.getZ();
     }
 
@@ -167,7 +167,7 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
             throw new IllegalStateException("World Reference is null!");
         }
         // TODO - for now, we make the assumption we always have a server object if we're creating locations
-        final ChunkLayout chunkLayout = Sponge.getServer().getChunkLayout();
+        final ChunkLayout chunkLayout = Sponge.server().chunkLayout();
         return (L) new SpongeLocation<>(world, chunkLayout, position);
     }
 
@@ -179,7 +179,7 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
             throw new IllegalStateException("World Reference is null!");
         }
         // TODO - for now, we make the assumption we always have a server object if we're creating locations
-        final ChunkLayout chunkLayout = Sponge.getServer().getChunkLayout();
+        final ChunkLayout chunkLayout = Sponge.server().chunkLayout();
         return (L) new SpongeLocation<>(world, chunkLayout, position.toDouble());
     }
 
@@ -224,53 +224,53 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
     }
 
     @Override
-    public Biome getBiome() {
-        return this.getWorld().getBiome(this.blockPosition);
+    public Biome biome() {
+        return this.world().biome(this.blockPosition);
     }
 
     @Override
     public boolean hasBlock() {
-        return this.isValid() && this.getWorld().hasBlockState(this.blockPosition);
+        return this.isValid() && this.world().hasBlockState(this.blockPosition);
     }
 
     @Override
-    public BlockState getBlock() {
-        return this.getWorld().getBlock(this.blockPosition);
+    public BlockState block() {
+        return this.world().block(this.blockPosition);
     }
 
     @Override
-    public FluidState getFluid() {
-        return this.getWorld().getFluid(this.blockPosition);
+    public FluidState fluid() {
+        return this.world().fluid(this.blockPosition);
     }
 
     @Override
     public boolean hasBlockEntity() {
-        return this.isValid() && this.getWorld().getBlockEntity(this.blockPosition).isPresent();
+        return this.isValid() && this.world().blockEntity(this.blockPosition).isPresent();
     }
 
     @Override
-    public Optional<? extends BlockEntity> getBlockEntity() {
-        return this.getWorld().getBlockEntity(this.blockPosition);
+    public Optional<? extends BlockEntity> blockEntity() {
+        return this.world().blockEntity(this.blockPosition);
     }
 
     @Override
     public boolean setBlock(final BlockState state) {
-        return this.getWorld().setBlock(this.blockPosition, state);
+        return this.world().setBlock(this.blockPosition, state);
     }
 
     @Override
     public boolean setBlock(final BlockState state, final BlockChangeFlag flag) {
-        return this.getWorld().setBlock(this.blockPosition, state, flag);
+        return this.world().setBlock(this.blockPosition, state, flag);
     }
 
     @Override
     public boolean setBlockType(final BlockType type) {
-        return this.getWorld().setBlock(this.blockPosition, type.getDefaultState());
+        return this.world().setBlock(this.blockPosition, type.defaultState());
     }
 
     @Override
     public boolean setBlockType(final BlockType type, final BlockChangeFlag flag) {
-        return this.getWorld().setBlock(this.blockPosition, type.getDefaultState(), flag);
+        return this.world().setBlock(this.blockPosition, type.defaultState(), flag);
     }
 
     public BlockPos asBlockPos() {

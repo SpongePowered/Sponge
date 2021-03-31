@@ -65,19 +65,19 @@ public final class HumanTest {
 
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<String> nameParameter = Parameter.string().setKey("name").optional().build();
-        final Parameter.Value<String> mimicParameter = Parameter.string().setKey("mimic_username").optional().build();
+        final Parameter.Value<String> nameParameter = Parameter.string().key("name").optional().build();
+        final Parameter.Value<String> mimicParameter = Parameter.string().key("mimic_username").optional().build();
 
         event.register(this.plugin, Command
                     .builder()
-                    .parameter(nameParameter)
-                    .parameter(mimicParameter)
-                    .setPermission(this.plugin.getMetadata().getId() + ".command.human.create")
-                    .setExecutor(context -> {
-                        final ServerPlayer player = context.getCause().first(ServerPlayer.class).get();
-                        final Optional<String> optName = context.getOne(nameParameter);
-                        final String mimicUsername = context.getOne(mimicParameter).orElse(optName.orElse(player.getName()));
-                        final boolean result = this.spawnHuman(player.getServerLocation(), optName.orElse("Human " + player.getName()), mimicUsername);
+                    .addParameter(nameParameter)
+                    .addParameter(mimicParameter)
+                    .permission(this.plugin.getMetadata().getId() + ".command.human.create")
+                    .executor(context -> {
+                        final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
+                        final Optional<String> optName = context.one(nameParameter);
+                        final String mimicUsername = context.one(mimicParameter).orElse(optName.orElse(player.name()));
+                        final boolean result = this.spawnHuman(player.serverLocation(), optName.orElse("Human " + player.name()), mimicUsername);
                         return result ? CommandResult.success() : CommandResult.error(Component.text("Failed to spawn the human!"));
                     })
                     .build()
@@ -86,10 +86,10 @@ public final class HumanTest {
     }
 
     public boolean spawnHuman(ServerLocation at, String name, String mimicUsername) {
-        final Human human = at.getWorld().createEntity(EntityTypes.HUMAN.get(), at.getPosition());
+        final Human human = at.world().createEntity(EntityTypes.HUMAN.get(), at.position());
         human.offer(Keys.CUSTOM_NAME, Component.text(name));
         human.useSkinFor(mimicUsername);
-        final boolean result = at.getWorld().spawnEntity(human);
+        final boolean result = at.world().spawnEntity(human);
 
         this.initHumanEquipment(human);
         this.initHumanGoals(human);
@@ -98,12 +98,12 @@ public final class HumanTest {
     }
 
     public void initHumanGoals(Human human) {
-        final GoalExecutor<Agent> targetGoal = human.getGoal(GoalExecutorTypes.TARGET.get()).orElse(null);
+        final GoalExecutor<Agent> targetGoal = human.goal(GoalExecutorTypes.TARGET.get()).orElse(null);
 //        targetGoal.addGoal(0, FindNearestAttackableTargetGoal.builder().chance(1).target(ServerPlayer.class).build(human));
 //        targetGoal.addGoal(0, FindNearestAttackableTargetGoal.builder().chance(1).target(Monster.class).build(human));
         targetGoal.addGoal(1, FindNearestAttackableTargetGoal.builder().chance(1).target(Human.class).build(human));
 
-        final GoalExecutor<Agent> normalGoal = human.getGoal(GoalExecutorTypes.NORMAL.get()).orElse(null);
+        final GoalExecutor<Agent> normalGoal = human.goal(GoalExecutorTypes.NORMAL.get()).orElse(null);
         normalGoal.addGoal(0, SwimGoal.builder().swimChance(0.8f).build(human));
 //        normalGoal.addGoal(0, AvoidLivingGoal.builder().targetSelector(l -> l instanceof Creeper).searchDistance(5).closeRangeSpeed(7).farRangeSpeed(2).build(human));
         normalGoal.addGoal(1, AttackLivingGoal.builder().longMemory().speed(4).build(human));

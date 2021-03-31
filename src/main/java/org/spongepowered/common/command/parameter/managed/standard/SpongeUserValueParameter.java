@@ -69,13 +69,13 @@ public final class SpongeUserValueParameter extends ResourceKeyedArgumentValuePa
     @Override
     @NonNull
     public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
-        return Sponge.getServer().getUserManager().streamOfMatches(currentInput).filter(GameProfile::hasName)
-                .map(x -> x.getName().orElse("")).collect(Collectors.toList());
+        return Sponge.server().userManager().streamOfMatches(currentInput).filter(GameProfile::hasName)
+                .map(x -> x.name().orElse("")).collect(Collectors.toList());
     }
 
     @Override
     @NonNull
-    public Optional<? extends User> getValue(
+    public Optional<? extends User> parseValue(
             final Parameter.@NonNull Key<? super User> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context)
@@ -86,20 +86,20 @@ public final class SpongeUserValueParameter extends ResourceKeyedArgumentValuePa
                 final ServerPlayer entity =
                         (ServerPlayer) (this.selectorArgumentType.parse((StringReader) reader)
                                 .findSingleEntity(((SpongeCommandContextBuilder) context).getSource()));
-                return Optional.of(entity.getUser());
+                return Optional.of(entity.user());
             } catch (final CommandSyntaxException e) {
                 throw reader.createException(Component.text(e.getContext()));
             }
         }
 
-        final UserManager userManager = SpongeCommon.getGame().getServer().getUserManager();
+        final UserManager userManager = SpongeCommon.getGame().server().userManager();
         Optional<User> user;
         try {
             final UUID uuid = UUID.fromString(reader.parseString());
-            user = userManager.get(uuid);
+            user = userManager.find(uuid);
         } catch (final Exception e) {
             // if no UUID, get the name. We've already advanced the reader at this point.
-            user = userManager.get(peek);
+            user = userManager.find(peek);
         }
 
         if (user.isPresent()) {

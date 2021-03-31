@@ -57,7 +57,7 @@ public final class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBu
         checkState(this.location != null);
         checkState(this.blockSnapshot != null);
         checkState(this.damageType != null);
-        final MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.getName(), this.location);
+        final MinecraftBlockDamageSource damageSource = new MinecraftBlockDamageSource(this.damageType.name(), this.location);
         final DamageSourceAccessor accessor = (DamageSourceAccessor) (Object) damageSource;
         if (this.absolute) {
             accessor.invoker$bypassMagic();

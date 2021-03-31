@@ -51,7 +51,7 @@ public final class BrewingStandData {
                         .get(h -> BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$items()) ? new SpongeTicks(h.accessor$brewTime()) : null)
                         .set((h, v) -> {
                             if (BrewingStandBlockEntityAccessor.invoker$isBrewable(h.accessor$items())) {
-                                h.accessor$brewTime((int) v.getTicks());
+                                h.accessor$brewTime((int) v.ticks());
                             }
                         });
     }

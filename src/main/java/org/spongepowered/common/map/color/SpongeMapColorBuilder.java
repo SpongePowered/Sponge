@@ -25,14 +25,12 @@
 package org.spongepowered.common.map.color;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.core.MappedRegistry;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorType;
 import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.color.MapShades;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
 
@@ -99,8 +97,8 @@ public class SpongeMapColorBuilder implements MapColor.Builder {
     @Override
     public MapColor.Builder from(MapColor value) {
         SpongeMapColor mapColorBridge = (SpongeMapColor)value;
-        this.color = mapColorBridge.getType();
-        this.shade = mapColorBridge.getShade();
+        this.color = mapColorBridge.type();
+        this.shade = mapColorBridge.shade();
         return this;
     }
 

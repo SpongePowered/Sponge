@@ -125,7 +125,7 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
     public void bridge$add(final GameProfile profile, final boolean full, final boolean signed) {
         Objects.requireNonNull(profile, "profile");
 
-        GameProfileCache_GameProfileInfoAccessor accessor = this.profilesByUUID.get(profile.getUniqueId());
+        GameProfileCache_GameProfileInfoAccessor accessor = this.profilesByUUID.get(profile.uniqueId());
         final com.mojang.authlib.GameProfile current = accessor == null ? null : accessor.invoker$getProfile();
         final com.mojang.authlib.GameProfile mcProfile = SpongeGameProfile.toMcProfile(profile);
         // Don't allow basic game profiles to overwrite the contents if already
@@ -136,7 +136,7 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
         }
 
         this.shadow$add(mcProfile);
-        accessor = this.profilesByUUID.get(profile.getUniqueId());
+        accessor = this.profilesByUUID.get(profile.uniqueId());
         if (accessor == null || accessor.invoker$getProfile() != mcProfile) {
             return;
         }
@@ -155,7 +155,7 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
 
     @Inject(method = "add", at = @At(value = "RETURN"))
     private void impl$UpdateCacheUsername(final com.mojang.authlib.GameProfile profile, final CallbackInfo ci) {
-        ((SpongeServer) Sponge.getServer()).getUsernameCache().setUsername(profile.getId(), profile.getName());
+        ((SpongeServer) Sponge.server()).getUsernameCache().setUsername(profile.getId(), profile.getName());
     }
 
     @Redirect(method = "lookupGameProfile",
@@ -167,8 +167,8 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
     )
     private static void impl$LookUpViaSponge(final GameProfileRepository repository, final String[] names,
             final Agent agent, final ProfileLookupCallback callback) {
-        final GameProfileManager profileManager = Sponge.getServer().getGameProfileManager();
-        profileManager.getBasicProfile(names[0])
+        final GameProfileManager profileManager = Sponge.server().gameProfileManager();
+        profileManager.basicProfile(names[0])
                 .whenComplete((profile, ex) -> {
                     if (ex != null) {
                         callback.onProfileLookupFailed(new com.mojang.authlib.GameProfile(null, names[0]),

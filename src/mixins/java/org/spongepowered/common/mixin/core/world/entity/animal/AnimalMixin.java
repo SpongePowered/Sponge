@@ -55,7 +55,7 @@ public abstract class AnimalMixin extends AgableMobMixin {
                 frame.pushCause(this);
                 frame.pushCause(partner);
                 final org.spongepowered.api.event.entity.BreedingEvent.Breed event =
-                        SpongeEventFactory.createBreedingEventBreed(PhaseTracker.getCauseStackManager().getCurrentCause(), (Ageable) offspring);
+                        SpongeEventFactory.createBreedingEventBreed(PhaseTracker.getCauseStackManager().currentCause(), (Ageable) offspring);
 
                 if (!(!SpongeCommon.postEvent(event) && level.addFreshEntity(offspring))) {
                     ci.cancel();

@@ -37,7 +37,6 @@ import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;
-import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.nio.file.Path;
@@ -73,7 +72,7 @@ public abstract class VanillaLaunch extends Launch {
     @Override
     public final PluginContainer getPlatformPlugin() {
         if (this.vanillaPlugin == null) {
-            this.vanillaPlugin = this.getPluginManager().getPlugin("spongevanilla").orElse(null);
+            this.vanillaPlugin = this.getPluginManager().plugin("spongevanilla").orElse(null);
 
             if (this.vanillaPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing SpongeVanilla, this is a serious issue!");

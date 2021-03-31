@@ -53,7 +53,7 @@ public final class PrimaryInventoryShiftClick extends BasicInventoryPacketState 
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {
         return SpongeEventFactory.createClickContainerEventShiftPrimary(
-            PhaseTracker.getCauseStackManager().getCurrentCause(),
+            PhaseTracker.getCauseStackManager().currentCause(),
             openContainer, transaction, Optional.ofNullable(slot), slotTransactions);
     }
 

@@ -50,7 +50,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
     private final Supplier<Task.Builder> taskBuilderProvider;
     private final SpongeScheduler scheduler;
 
-    SpongeTaskExecutorService(Supplier<Task.Builder> taskBuilderProvider, SpongeScheduler scheduler) {
+    SpongeTaskExecutorService(final Supplier<Task.Builder> taskBuilderProvider, final SpongeScheduler scheduler) {
         this.taskBuilderProvider = taskBuilderProvider;
         this.scheduler = scheduler;
     }
@@ -83,74 +83,74 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
     }
 
     @Override
-    public boolean awaitTermination(long timeout, TimeUnit unit) {
+    public boolean awaitTermination(final long timeout, final TimeUnit unit) {
         return false;
     }
 
     @Override
-    public void execute(Runnable command) {
+    public void execute(final Runnable command) {
         this.submitTask(this.createTask(command).build());
     }
 
     @Override
-    public TaskFuture<?> submit(Runnable command) {
+    public TaskFuture<?> submit(final Runnable command) {
         return this.submit(command, null);
     }
 
     @Override
-    public <T> TaskFuture<T> submit(Runnable command, @Nullable T result) {
+    public <T> TaskFuture<T> submit(final Runnable command, @Nullable final T result) {
         final FutureTask<T> runnable = new FutureTask<>(command, result);
         final Task task = this.createTask(runnable)
                 .build();
-        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
-    public <T> TaskFuture<T> submit(Callable<T> command) {
+    public <T> TaskFuture<T> submit(final Callable<T> command) {
         final FutureTask<T> runnable = new FutureTask<>(command);
         final Task task = this.createTask(runnable)
                 .build();
-        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
-    public ScheduledTaskFuture<?> schedule(Runnable command, long delay, TemporalUnit unit) {
+    public ScheduledTaskFuture<?> schedule(final Runnable command, final long delay, final TemporalUnit unit) {
         final FutureTask<?> runnable = new FutureTask<>(command, null);
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
-    public ScheduledTaskFuture<?> schedule(Runnable command, long delay, TimeUnit unit) {
+    public ScheduledTaskFuture<?> schedule(final Runnable command, final long delay, final TimeUnit unit) {
         final FutureTask<?> runnable = new FutureTask<>(command, null);
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
-    public <V> ScheduledTaskFuture<V> schedule(Callable<V> callable, long delay, TemporalUnit unit) {
+    public <V> ScheduledTaskFuture<V> schedule(final Callable<V> callable, final long delay, final TemporalUnit unit) {
         final FutureTask<V> runnable = new FutureTask<>(callable);
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
-    public <V> ScheduledTaskFuture<V> schedule(Callable<V> callable, long delay, TimeUnit unit) {
+    public <V> ScheduledTaskFuture<V> schedule(final Callable<V> callable, final long delay, final TimeUnit unit) {
         final FutureTask<V> runnable = new FutureTask<>(callable);
         final Task task = this.createTask(runnable)
                 .delay(delay, unit)
                 .build();
-        return new LanternScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, this.submitTask(task), this.scheduler);
     }
 
     @Override
-    public ScheduledTaskFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TemporalUnit unit) {
+    public ScheduledTaskFuture<?> scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period, final TemporalUnit unit) {
         final RepeatableFutureTask<?> runnable = new RepeatableFutureTask<>(command);
         final Task task = this.createTask(runnable)
                 .delay(initialDelay, unit)
@@ -159,11 +159,11 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final SpongeScheduledTask scheduledTask = this.submitTask(task);
         // A repeatable task needs to be able to cancel itself
         runnable.setTask(scheduledTask);
-        return new LanternScheduledFuture<>(runnable, scheduledTask, this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, scheduledTask, this.scheduler);
     }
 
     @Override
-    public ScheduledTaskFuture<?> scheduleAtFixedRate(Runnable command, long initialDelay, long period, TimeUnit unit) {
+    public ScheduledTaskFuture<?> scheduleAtFixedRate(final Runnable command, final long initialDelay, final long period, final TimeUnit unit) {
         final RepeatableFutureTask<?> runnable = new RepeatableFutureTask<>(command);
         final Task task = this.createTask(runnable)
                 .delay(initialDelay, unit)
@@ -172,64 +172,64 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         final SpongeScheduledTask scheduledTask = this.submitTask(task);
         // A repeatable task needs to be able to cancel itself
         runnable.setTask(scheduledTask);
-        return new LanternScheduledFuture<>(runnable, scheduledTask, this.scheduler);
+        return new SpongeScheduledFuture<>(runnable, scheduledTask, this.scheduler);
     }
 
     @Override
-    public ScheduledTaskFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TemporalUnit unit) {
+    public ScheduledTaskFuture<?> scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay, final TemporalUnit unit) {
         // Since we don't have full control over the execution, the contract needs to be a little broken
         return this.scheduleAtFixedRate(command, initialDelay, delay, unit);
     }
 
     @Override
-    public ScheduledTaskFuture<?> scheduleWithFixedDelay(Runnable command, long initialDelay, long delay, TimeUnit unit) {
+    public ScheduledTaskFuture<?> scheduleWithFixedDelay(final Runnable command, final long initialDelay, final long delay, final TimeUnit unit) {
         // Since we don't have full control over the execution, the contract needs to be a little broken
         return this.scheduleAtFixedRate(command, initialDelay, delay, unit);
     }
 
-    private Task.Builder createTask(Runnable command) {
+    private Task.Builder createTask(final Runnable command) {
         return this.taskBuilderProvider.get().execute(command);
     }
 
-    private SpongeScheduledTask submitTask(Task task) {
+    private SpongeScheduledTask submitTask(final Task task) {
         return this.scheduler.submit(task);
     }
 
-    private static class LanternScheduledFuture<V> implements org.spongepowered.api.scheduler.ScheduledTaskFuture<V> {
+    private static class SpongeScheduledFuture<V> implements org.spongepowered.api.scheduler.ScheduledTaskFuture<V> {
 
         private final FutureTask<V> runnable;
         private final SpongeScheduledTask task;
         private final SpongeScheduler scheduler;
 
-        LanternScheduledFuture(FutureTask<V> runnable, SpongeScheduledTask task, SpongeScheduler scheduler) {
+        SpongeScheduledFuture(final FutureTask<V> runnable, final SpongeScheduledTask task, final SpongeScheduler scheduler) {
             this.runnable = runnable;
             this.task = task;
             this.scheduler = scheduler;
         }
 
         @Override
-        public ScheduledTask getTask() {
+        public ScheduledTask task() {
             return this.task;
         }
 
         @Override
         public boolean isPeriodic() {
-            final Duration interval = this.task.task.getInterval();
+            final Duration interval = this.task.task.interval();
             return interval.toMillis() > 0;
         }
 
         @Override
-        public long getDelay(TimeUnit unit) {
+        public long getDelay(final TimeUnit unit) {
             // Since these tasks are scheduled through
             // SchedulerExecutionService, they are
             // always nanotime-based, not tick-based.
-            return unit.convert(this.task.nextExecutionTimestamp() - this.scheduler.getTimestamp(this.task), TimeUnit.NANOSECONDS);
+            return unit.convert(this.task.nextExecutionTimestamp() - this.scheduler.timestamp(false), TimeUnit.NANOSECONDS);
         }
 
         @SuppressWarnings("rawtypes")
         @Override
-        public int compareTo(Delayed other) {
-            // Since getDelay may return different values for each call,
+        public int compareTo(final Delayed other) {
+            // Since delay may return different values for each call,
             // this check is required to correctly implement Comparable
             if (other == this) {
                 return 0;
@@ -237,11 +237,11 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
 
             // If we are considering other sponge tasks, we can order by
             // their internal tasks
-            if (other instanceof LanternScheduledFuture) {
-                final SpongeScheduledTask otherTask = ((LanternScheduledFuture) other).task;
+            if (other instanceof SpongeScheduledFuture) {
+                final SpongeScheduledTask otherTask = ((SpongeScheduledFuture) other).task;
                 return ComparisonChain.start()
                         .compare(this.task.nextExecutionTimestamp(), otherTask.nextExecutionTimestamp())
-                        .compare(this.task.getUniqueId(), otherTask.getUniqueId())
+                        .compare(this.task.uniqueId(), otherTask.uniqueId())
                         .result();
             }
 
@@ -254,7 +254,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         }
 
         @Override
-        public boolean cancel(boolean mayInterruptIfRunning) {
+        public boolean cancel(final boolean mayInterruptIfRunning) {
             this.task.cancel(); //Ensure Sponge is not going to try to run a cancelled task.
             return this.runnable.cancel(mayInterruptIfRunning);
         }
@@ -264,7 +264,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
             // It might be externally cancelled, the runnable would never
             // run in that case
             return this.runnable.isCancelled() ||
-                    (this.task.getState() == SpongeScheduledTask.ScheduledTaskState.CANCELED && !this.runnable.isDone());
+                    (this.task.state() == SpongeScheduledTask.ScheduledTaskState.CANCELED && !this.runnable.isDone());
         }
 
         @Override
@@ -278,7 +278,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
         }
 
         @Override
-        public V get(long timeout, TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
+        public V get(final long timeout, final TimeUnit unit) throws InterruptedException, ExecutionException, TimeoutException {
             return this.runnable.get(timeout, unit);
         }
     }
@@ -291,11 +291,11 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
 
         @Nullable private ScheduledTask owningTask = null;
 
-        RepeatableFutureTask(Runnable runnable) {
+        RepeatableFutureTask(final Runnable runnable) {
             super(runnable, null);
         }
 
-        void setTask(ScheduledTask task) {
+        void setTask(final ScheduledTask task) {
             this.owningTask = task;
 
             // Since it is set after being scheduled, it might have thrown

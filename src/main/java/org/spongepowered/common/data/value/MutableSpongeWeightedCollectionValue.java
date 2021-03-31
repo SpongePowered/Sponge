@@ -45,8 +45,8 @@ public final class MutableSpongeWeightedCollectionValue<E> extends MutableSponge
 
     @Override
     @SuppressWarnings("unchecked")
-    public SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>> getKey() {
-        return (SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>>) super.getKey();
+    public SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>> key() {
+        return (SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>>) super.key();
     }
 
     @Override
@@ -56,19 +56,19 @@ public final class MutableSpongeWeightedCollectionValue<E> extends MutableSponge
 
     @Override
     public WeightedCollectionValue.Immutable<E> asImmutable() {
-        return this.getKey().getValueConstructor().getImmutable(this.element).asImmutable();
+        return this.key().getValueConstructor().getImmutable(this.element).asImmutable();
     }
 
     @Override
     public WeightedCollectionValue.Mutable<E> copy() {
-        return new MutableSpongeWeightedCollectionValue<>(this.getKey(), CopyHelper.copy(this.element));
+        return new MutableSpongeWeightedCollectionValue<>(this.key(), CopyHelper.copy(this.element));
     }
 
     @Override
     protected WeightedCollectionValue.Mutable<E> modifyCollection(Consumer<WeightedTable<E>> consumer) {
         final WeightedTable<E> table = this.element;
         if (table instanceof UnmodifiableWeightedTable) {
-            final WeightedTable<E> temp = new WeightedTable<>(table.getRolls());
+            final WeightedTable<E> temp = new WeightedTable<>(table.rolls());
             temp.addAll(table);
             consumer.accept(temp);
             this.set(new UnmodifiableWeightedTable<>(temp));

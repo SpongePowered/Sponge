@@ -41,7 +41,7 @@ public final class BedData {
                         .get(BedLocationHolderBridge::bridge$getBedlocations)
                         .set(BedLocationHolderBridge::bridge$setBedLocations)
                         .delete(BedLocationHolderBridge::bridge$removeAllBeds);
-        registrator.spongeDataStore(Keys.RESPAWN_LOCATIONS.getKey(), BedLocationHolderBridge.class, Keys.RESPAWN_LOCATIONS);
+        registrator.spongeDataStore(Keys.RESPAWN_LOCATIONS.key(), BedLocationHolderBridge.class, Keys.RESPAWN_LOCATIONS);
     }
     // @formatter:on
 }

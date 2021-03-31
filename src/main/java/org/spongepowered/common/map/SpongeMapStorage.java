@@ -59,10 +59,10 @@ public final class SpongeMapStorage implements MapStorage {
 	@Nullable private BiMap<Integer, UUID> mapIdUUIDIndex = null;
 
 	@Override
-	public Collection<MapInfo> getAllMapInfos() {
+	public Collection<MapInfo> allMapInfos() {
 		final Set<MapInfo> mapInfos = new HashSet<>();
 
-		final ServerWorld spongeWorld = Sponge.getServer().getWorldManager().defaultWorld();
+		final ServerWorld spongeWorld = Sponge.server().worldManager().defaultWorld();
 		final ServerLevel defaultWorld = (ServerLevel) spongeWorld;
 
 		final int highestId = ((MapIdTrackerBridge)defaultWorld.getDataStorage()
@@ -80,7 +80,7 @@ public final class SpongeMapStorage implements MapStorage {
 	}
 
 	@Override
-	public Optional<MapInfo> getMapInfo(final UUID uuid) {
+	public Optional<MapInfo> mapInfo(final UUID uuid) {
 		MapInfo mapInfo = this.loadedMapUUIDs.get(uuid);
 		if (mapInfo != null) {
 			return Optional.of(mapInfo);
@@ -89,7 +89,7 @@ public final class SpongeMapStorage implements MapStorage {
 		if (mapId == null) {
 			return Optional.empty();
 		}
-		final ServerWorld spongeWorld = Sponge.getServer().getWorldManager().defaultWorld();
+		final ServerWorld spongeWorld = Sponge.server().worldManager().defaultWorld();
 		final ServerLevel defaultWorld = (ServerLevel) spongeWorld;
 		final MapInfo loadedMapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + mapId);
 		return Optional.ofNullable(loadedMapInfo);
@@ -97,7 +97,7 @@ public final class SpongeMapStorage implements MapStorage {
 
 	@Override
 	public Optional<MapInfo> createNewMapInfo() {
-		return SpongeCommonEventFactory.fireCreateMapEvent(PhaseTracker.getCauseStackManager().getCurrentCause());
+		return SpongeCommonEventFactory.fireCreateMapEvent(PhaseTracker.getCauseStackManager().currentCause());
 	}
 
 	/**
@@ -107,7 +107,7 @@ public final class SpongeMapStorage implements MapStorage {
 	 * @return UUID of the map.
 	 */
 	public UUID requestUUID(final int id) {
-		ensureHasMapUUIDIndex();
+		this.ensureHasMapUUIDIndex();
 		UUID uuid = this.mapIdUUIDIndex.get(id);
 		if (uuid == null) {
 			uuid = UUID.randomUUID();
@@ -117,12 +117,12 @@ public final class SpongeMapStorage implements MapStorage {
 	}
 
 	public void addMapInfo(final MapInfo mapInfo) {
-		this.loadedMapUUIDs.put(mapInfo.getUniqueId(), mapInfo);
+		this.loadedMapUUIDs.put(mapInfo.uniqueId(), mapInfo);
 	}
 
 	private void ensureHasMapUUIDIndex() {
 		if (this.mapIdUUIDIndex == null) {
-			this.mapIdUUIDIndex = ((PrimaryLevelDataBridge) Sponge.getServer().getWorldManager().defaultWorld().getProperties()).bridge$getMapUUIDIndex();
+			this.mapIdUUIDIndex = ((PrimaryLevelDataBridge) Sponge.server().worldManager().defaultWorld().properties()).bridge$getMapUUIDIndex();
 		}
 	}
 }

@@ -79,7 +79,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
     @Override
     public void parse(final ArgumentReader.@NonNull Mutable args, final CommandContext.@NonNull Builder context) throws ArgumentParseException {
-        final ArgumentReader.Immutable readerState = args.getImmutable();
+        final ArgumentReader.Immutable readerState = args.immutable();
         final CommandContext.Builder.Transaction transaction = context.startTransaction();
 
         try {
@@ -105,11 +105,11 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
             final CommandContext.Builder context) throws ArgumentParseException {
 
         List<ArgumentParseException> currentExceptions = null;
-        final ArgumentReader.Immutable state = args.getImmutable();
+        final ArgumentReader.Immutable state = args.immutable();
         final CommandContext.Builder.Transaction transaction = context.startTransaction();
         for (final ValueParser<? extends T> parser : this.parsers) {
             try {
-                parser.getValue(this.key, args, context).ifPresent(t -> context.putEntry(this.key, t));
+                parser.parseValue(this.key, args, context).ifPresent(t -> context.putEntry(this.key, t));
                 context.commit(transaction);
                 return; // something parsed, so we exit.
             } catch (final ArgumentParseException ex) {
@@ -126,33 +126,33 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
         // If we get this far, we failed to parse, return the exceptions
         if (currentExceptions == null) {
             throw new CommandRuntimeException(new TextComponent("Could not parse element"));
-            // throw new ArgumentParseException(t("Could not parse element"), args.getInput(), args.getCursor());
+            // throw new ArgumentParseException(t("Could not parse element"), args.getInput(), args.cursor());
         } else if (currentExceptions.size() == 1) {
             throw currentExceptions.get(0);
         } else {
-            final List<Component> errors = currentExceptions.stream().map(ArgumentParseException::getSuperText).collect(Collectors.toList());
-            throw new ArgumentParseException(Component.join(Component.newline(), errors), args.getInput(), args.getCursor());
+            final List<Component> errors = currentExceptions.stream().map(ArgumentParseException::superText).collect(Collectors.toList());
+            throw new ArgumentParseException(Component.join(Component.newline(), errors), args.input(), args.cursor());
         }
 
     }
 
     @Override
     @NonNull
-    public Key<T> getKey() {
+    public Key<T> key() {
         return this.key;
     }
 
     @Override
     @NonNull
     public List<String> complete(final ArgumentReader.@NonNull Immutable reader, @NonNull final CommandContext context) {
-        return this.completer.complete(context, reader.getRemaining());
+        return this.completer.complete(context, reader.remaining());
     }
 
     @Override
     @NonNull
-    public String getUsage(@NonNull final CommandCause cause) {
+    public String usage(@NonNull final CommandCause cause) {
         if (this.usage != null) {
-            return this.usage.getUsage(this.key.key());
+            return this.usage.usage(this.key.key());
         }
 
         final String usage = this.key.key();
@@ -165,24 +165,24 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
 
     @Override
     @NonNull
-    public Collection<ValueParser<? extends T>> getParsers() {
+    public Collection<ValueParser<? extends T>> parsers() {
         return this.parsers;
     }
 
     @Override
     @NonNull
-    public ValueCompleter getCompleter() {
+    public ValueCompleter completer() {
         return this.completer;
     }
 
     @Override
-    public Optional<ValueUsage> getValueUsage() {
+    public Optional<ValueUsage> valueUsage() {
         return Optional.ofNullable(this.usage);
     }
 
     @Override
     @NonNull
-    public Predicate<CommandCause> getRequirement() {
+    public Predicate<CommandCause> requirement() {
         return this.requirement;
     }
 

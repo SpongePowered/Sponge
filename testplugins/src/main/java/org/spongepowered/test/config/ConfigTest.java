@@ -27,6 +27,8 @@ package org.spongepowered.test.config;
 import com.google.inject.Inject;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import org.spongepowered.api.asset.Asset;
+import org.spongepowered.api.asset.AssetId;
 import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.apache.logging.log4j.Logger;
@@ -47,6 +49,9 @@ public final class ConfigTest implements LoadableModule {
     private final ConfigurationReference<CommentedConfigurationNode> reference;
     private ValueReference<ExampleConfiguration, CommentedConfigurationNode> config;
 
+    @Inject @AssetId("test.txt") private Asset testOne;
+    @Inject @AssetId("test2.txt") private Asset secondTest;
+
     @Inject
     ConfigTest(final Logger logger, final @DefaultConfig(sharedRoot = true) ConfigurationReference<CommentedConfigurationNode> reference) {
         this.logger = logger;
@@ -55,6 +60,7 @@ public final class ConfigTest implements LoadableModule {
 
     @Listener
     public void onConstruction(final ConstructPluginEvent event) {
+        this.logger.info("Asset one: {}, asset two: {}", this.testOne.url(), this.secondTest.url());
         try {
             this.config = this.reference.referenceTo(ExampleConfiguration.class);
             this.reference.save();
@@ -70,7 +76,7 @@ public final class ConfigTest implements LoadableModule {
             return;
         }
 
-        event.getPlayer().sendMessage(Identity.nil(), motd);
+        event.player().sendMessage(Identity.nil(), motd);
     }
 
 

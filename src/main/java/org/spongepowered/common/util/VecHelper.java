@@ -195,8 +195,8 @@ public final class VecHelper {
         if (box == null) {
             return null;
         }
-        final org.spongepowered.math.vector.Vector3d min = box.getMin();
-        final org.spongepowered.math.vector.Vector3d max = box.getMax();
+        final org.spongepowered.math.vector.Vector3d min = box.min();
+        final org.spongepowered.math.vector.Vector3d max = box.max();
         return new net.minecraft.world.phys.AABB(
             min.getX(), min.getY(), min.getZ(),
             max.getX(), max.getY(), max.getZ()

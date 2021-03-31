@@ -83,7 +83,7 @@ public abstract class AbstractSpongeStateMatcher<S extends State<@NonNull S>, T 
     }
 
     private <V> boolean matches(final DataHolder holder, final KeyValueMatcher<V> keyValueMatcher) {
-        return holder.get(keyValueMatcher.getKey()).map(keyValueMatcher::matches).orElse(false);
+        return holder.get(keyValueMatcher.key()).map(keyValueMatcher::matches).orElse(false);
     }
 
 }

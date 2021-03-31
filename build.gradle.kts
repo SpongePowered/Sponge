@@ -153,7 +153,6 @@ dependencies {
     implementation("org.mariadb.jdbc:mariadb-java-client:2.0.3")
     implementation("com.h2database:h2:1.4.196")
     implementation("org.xerial:sqlite-jdbc:3.20.0")
-    implementation("com.google.inject:guice:4.1.0")
     implementation("javax.inject:javax.inject:1")
 
     // ASM - required for generating event listeners
@@ -176,8 +175,6 @@ dependencies {
         exclude(group = "org.codehaus.mojo", module = "animal-sniffer-annotations")
         exclude(group = "com.google.errorprone", module = "error_prone_annotations")
     }
-    launchConfig("com.google.inject:guice:4.1.0")
-    launchConfig("javax.inject:javax.inject:1")
     launchConfig("com.google.code.gson:gson:2.8.0")
     launchConfig("org.ow2.asm:asm-tree:$asmVersion")
     launchConfig("org.ow2.asm:asm-util:$asmVersion")
@@ -255,6 +252,15 @@ license {
 }
 
 allprojects {
+
+    configurations.configureEach {
+        resolutionStrategy.dependencySubstitution {
+            // https://github.com/zml2008/guice/tree/backport/5.0.1
+            substitute(module("com.google.inject:guice:5.0.1"))
+                    .because("We need to run against Guava 21")
+                    .using(module("ca.stellardrift.guice-backport:guice:5.0.1"))
+        }
+    }
 
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
@@ -611,8 +617,7 @@ project("SpongeVanilla") {
                         base + listOf(
                                 "--illegal-access=deny", // enable strict mode in prep for Java 16
                                 "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
-                                "--add-opens=java.base/java.util.jar=ALL-UNNAMED", // ModLauncher
-                                "--add-opens=java.base/java.lang=ALL-UNNAMED" // Guice
+                                "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
                         )
                     } else {
                         base

@@ -55,7 +55,7 @@ public final class SpongeDateTimeValueParameter extends ResourceKeyedArgumentVal
 
     @Override
     @NonNull
-    public Optional<? extends LocalDateTime> getValue(
+    public Optional<? extends LocalDateTime> parseValue(
             final Parameter.@NonNull Key<? super LocalDateTime> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {

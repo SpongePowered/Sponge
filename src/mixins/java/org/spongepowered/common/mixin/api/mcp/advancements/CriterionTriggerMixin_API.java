@@ -42,13 +42,13 @@ public interface CriterionTriggerMixin_API<C extends FilteredTriggerConfiguratio
     @Shadow ResourceLocation shadow$getId();
 
     @Override
-    default ResourceKey getKey() {
+    default ResourceKey key() {
         return (ResourceKey) (Object) this.shadow$getId();
     }
 
     @Override
     default void trigger() {
-        this.trigger(Sponge.getServer().getOnlinePlayers());
+        this.trigger(Sponge.server().onlinePlayers());
     }
 
     @Override

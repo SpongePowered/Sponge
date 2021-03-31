@@ -29,7 +29,7 @@ public abstract class SyncScheduler extends SpongeScheduler {
     // The number of ticks elapsed since this scheduler began.
     private volatile long counter = 0L;
 
-    SyncScheduler(String tag) {
+    SyncScheduler(final String tag) {
         super(tag);
     }
 
@@ -42,13 +42,13 @@ public abstract class SyncScheduler extends SpongeScheduler {
     }
 
     @Override
-    protected long getTimestamp(SpongeScheduledTask task) {
+    protected long timestamp(final boolean tickBased) {
         // The task is based on minecraft ticks, so we generate
         // a timestamp based on the elapsed ticks
-        if (task.task.tickBased) {
+        if (tickBased) {
             return this.counter * SpongeScheduler.TICK_DURATION_NS;
         }
-        return super.getTimestamp(task);
+        return super.timestamp(false);
     }
 
     @Override

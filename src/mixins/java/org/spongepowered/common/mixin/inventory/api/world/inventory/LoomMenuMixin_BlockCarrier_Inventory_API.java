@@ -41,14 +41,14 @@ public abstract class LoomMenuMixin_BlockCarrier_Inventory_API implements Defaul
     @Final @Shadow private ContainerLevelAccess access;
 
     @Override
-    public ServerLocation getLocation() {
+    public ServerLocation location() {
         return this.access.evaluate((world, pos) ->
                 ServerLocation.of(((ServerWorld) world), new Vector3i(pos.getX(), pos.getY(), pos.getZ()))
         ).orElse(null);
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return this.access.evaluate((world, pos) -> (World<?, ?>) world).orElse(null);
     }
 }

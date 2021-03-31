@@ -55,27 +55,27 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
     }
     
     @Override
-    public int getColumns() {
+    public int columns() {
         return this.lens2d.getWidth();
     }
 
     @Override
-    public int getRows() {
+    public int rows() {
         return this.lens2d.getHeight();
     }
 
     @Override
-    public Vector2i getDimensions() {
-        return new Vector2i(this.getColumns(), this.getRows());
+    public Vector2i dimensions() {
+        return new Vector2i(this.columns(), this.rows());
     }
 
     @Override
-    public Optional<Slot> getSlot(int x, int y) {
+    public Optional<Slot> slot(int x, int y) {
         return BasicInventoryAdapter.forSlot(this.inventoryAdapter$getFabric(), this.getSlotLens(x, y), this);
     }
 
     @Override
-    public Optional<InventoryRow> getRow(int y) {
+    public Optional<InventoryRow> row(int y) {
         try {
             InventoryRowLens rowLens = this.gridLens.getRow(y);
             return Optional.<InventoryRow>ofNullable((InventoryRow) rowLens.getAdapter(this.inventoryAdapter$getFabric(), this));
@@ -85,7 +85,7 @@ public class GridInventoryAdapter extends Inventory2DAdapter implements GridInve
     }
 
     @Override
-    public Optional<InventoryColumn> getColumn(int x) {
+    public Optional<InventoryColumn> column(int x) {
         try {
             InventoryColumnLens columnLens = this.gridLens.getColumn(x);
             return Optional.<InventoryColumn>ofNullable((InventoryColumn) columnLens.getAdapter(this.inventoryAdapter$getFabric(), this));

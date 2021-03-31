@@ -63,7 +63,7 @@ public abstract class AbstractPacketChannel extends SpongeChannel implements Tra
     }
 
     @Override
-    public Collection<PacketBinding<?>> getBindings() {
+    public Collection<PacketBinding<?>> bindings() {
         return ImmutableList.copyOf(this.byOpcode.values());
     }
 
@@ -85,7 +85,7 @@ public abstract class AbstractPacketChannel extends SpongeChannel implements Tra
     }
 
     protected void encodePayload(final ChannelBuf payload, final Packet packet) {
-        final ChannelBuf packetContent = this.getRegistry().getBufferAllocator().buffer();
+        final ChannelBuf packetContent = this.registry().getBufferAllocator().buffer();
         try {
             this.encodePayloadUnsafe(packetContent, packet);
             ChannelBuffers.write(payload, packetContent);
@@ -120,7 +120,7 @@ public abstract class AbstractPacketChannel extends SpongeChannel implements Tra
     protected SpongePacketBinding<Packet> requireBinding(final int opcode) {
         final SpongePacketBinding<Packet> binding = (SpongePacketBinding<Packet>) this.byOpcode.get(opcode);
         if (binding == null) {
-            throw new ChannelException("Unknown opcode " + opcode + " for channel " + this.getKey());
+            throw new ChannelException("Unknown opcode " + opcode + " for channel " + this.key());
         }
         return binding;
     }
@@ -128,7 +128,7 @@ public abstract class AbstractPacketChannel extends SpongeChannel implements Tra
     protected SpongePacketBinding<Packet> requireBinding(final Class<? extends Packet> packet) {
         final SpongePacketBinding<Packet> binding = (SpongePacketBinding<Packet>) this.byType.get(packet);
         if (binding == null) {
-            throw new ChannelException("Unknown packet type " + packet + " for channel " + this.getKey());
+            throw new ChannelException("Unknown packet type " + packet + " for channel " + this.key());
         }
         return binding;
     }
@@ -193,20 +193,20 @@ public abstract class AbstractPacketChannel extends SpongeChannel implements Tra
     }
 
     @Override
-    public <P extends RequestPacket<R>, R extends Packet> Optional<TransactionalPacketBinding<P, R>> getTransactionalBinding(
+    public <P extends RequestPacket<R>, R extends Packet> Optional<TransactionalPacketBinding<P, R>> transactionalBinding(
             final Class<P> requestPacketType) {
         Objects.requireNonNull(requestPacketType, "requestPacketType");
         return Optional.ofNullable((TransactionalPacketBinding<P, R>) this.byType.get(requestPacketType));
     }
 
     @Override
-    public <M extends Packet> Optional<PacketBinding<M>> getBinding(final Class<M> packetClass) {
+    public <M extends Packet> Optional<PacketBinding<M>> binding(final Class<M> packetClass) {
         Objects.requireNonNull(packetClass, "packetClass");
         return Optional.ofNullable((PacketBinding<M>) this.byType.get(packetClass));
     }
 
     @Override
-    public Optional<PacketBinding<?>> getBinding(final int opcode) {
+    public Optional<PacketBinding<?>> binding(final int opcode) {
         return Optional.ofNullable(this.byOpcode.get(opcode));
     }
 

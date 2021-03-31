@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.client;
 
-import com.mojang.datafixers.util.Function4;
 import com.mojang.serialization.DynamicOps;
-import io.netty.util.internal.shaded.org.jctools.queues.atomic.LinkedQueueAtomicNode;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
 import net.minecraft.client.server.IntegratedServer;
@@ -40,8 +38,6 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
-import org.checkerframework.checker.units.qual.Area;
-import org.checkerframework.common.value.qual.IntRangeFromGTENegativeOne;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -57,8 +53,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
-import java.util.concurrent.ExecutionException;
-import java.util.function.Function;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
@@ -85,7 +79,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
     @Inject(method = "runTick", at = @At("TAIL"))
     private void impl$tickClientScheduler(final boolean renderWorldIn, final CallbackInfo ci) {
-        this.getScheduler().tick();
+        this.scheduler().tick();
     }
 
     @Override
@@ -105,7 +99,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
     @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
     private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
-        SpongeCommon.getGame().getAsyncScheduler().close();
+        SpongeCommon.getGame().asyncScheduler().close();
     }
 
     @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryReadOps;"))

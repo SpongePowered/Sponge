@@ -24,20 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.storage;
 
-import net.kyori.adventure.text.Component;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.storage.ServerLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.api.world.WorldType;
-import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
@@ -53,7 +47,6 @@ import org.spongepowered.common.world.weather.SpongeWeather;
 import org.spongepowered.common.world.weather.SpongeWeatherType;
 
 import java.util.Objects;
-import java.util.Optional;
 import java.util.UUID;
 
 @SuppressWarnings("ConstantConditions")
@@ -84,7 +77,7 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     @Override
     default void setDayTime(final MinecraftDayTime dayTime) {
-        this.shadow$setDayTime(dayTime.asTicks().getTicks());
+        this.shadow$setDayTime(dayTime.asTicks().ticks());
     }
 
     @Override
@@ -129,7 +122,7 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     @Override
     default void setWanderingTrader(@Nullable final WanderingTrader trader) {
-        this.shadow$setWanderingTraderId(trader == null ? null : trader.getUniqueId());
+        this.shadow$setWanderingTraderId(trader == null ? null : trader.uniqueId());
     }
 
     @Override
@@ -150,7 +143,7 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
     @Override
     default void setWeather(final WeatherType type, final Ticks ticks) {
         Objects.requireNonNull(type, "type");
-        final long time = Objects.requireNonNull(ticks, "ticks").getTicks();
+        final long time = Objects.requireNonNull(ticks, "ticks").ticks();
 
         if (type == WeatherTypes.CLEAR.get()) {
             this.shadow$setClearWeatherTime((int) time);

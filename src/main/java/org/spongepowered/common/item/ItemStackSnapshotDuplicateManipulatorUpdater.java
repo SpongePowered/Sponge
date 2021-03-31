@@ -34,12 +34,12 @@ import org.spongepowered.common.util.Constants;
 public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataContentUpdater {
 
     @Override
-    public int getInputVersion() {
+    public int inputVersion() {
         return Constants.Sponge.ItemStackSnapshot.DUPLICATE_MANIPULATOR_DATA_VERSION;
     }
 
     @Override
-    public int getOutputVersion() {
+    public int outputVersion() {
         return Constants.Sponge.ItemStackSnapshot.REMOVED_DUPLICATE_DATA;
     }
 
@@ -59,7 +59,7 @@ public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataC
                 content.set(Constants.Sponge.UNSAFE_NBT, NBTTranslator.INSTANCE.translate(compound));
             }
         }
-        content.set(Queries.CONTENT_VERSION, this.getOutputVersion());
+        content.set(Queries.CONTENT_VERSION, this.outputVersion());
         return content;
     }
 }

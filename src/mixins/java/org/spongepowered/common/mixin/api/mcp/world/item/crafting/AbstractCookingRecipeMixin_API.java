@@ -43,7 +43,6 @@ import net.minecraft.world.item.crafting.AbstractCookingRecipe;
 import net.minecraft.world.item.crafting.Ingredient;
 
 @Mixin(AbstractCookingRecipe.class)
-@Implements(@Interface(iface = CookingRecipe.class, prefix = "cookingRecipe$"))
 public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
 
     // @formatter:off
@@ -55,12 +54,12 @@ public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
 
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return (ResourceKey) (Object) this.id;
     }
 
     @Override
-    public org.spongepowered.api.item.recipe.crafting.Ingredient getIngredient() {
+    public org.spongepowered.api.item.recipe.crafting.Ingredient ingredient() {
         return IngredientUtil.fromNative(this.ingredient);
     }
 
@@ -70,20 +69,20 @@ public abstract class AbstractCookingRecipeMixin_API implements CookingRecipe {
     }
 
     @Override
-    public Optional<CookingResult> getResult(ItemStackSnapshot ingredient) {
+    public Optional<CookingResult> result(ItemStackSnapshot ingredient) {
         if (this.isValid(ingredient)) {
-            return Optional.of(new CookingResult(this.getExemplaryResult(), this.shadow$getExperience()));
+            return Optional.of(new CookingResult(this.exemplaryResult(), this.shadow$getExperience()));
         }
         return Optional.empty();
     }
 
-    @Intrinsic
-    public int cookingRecipe$getCookingTime() {
+    @Override
+    public int cookingTime() {
         return this.shadow$getCookingTime();
     }
 
-    @Intrinsic
-    public float cookingRecipe$getExperience() {
+    @Override
+    public float experience() {
         return this.shadow$getExperience();
     }
 }

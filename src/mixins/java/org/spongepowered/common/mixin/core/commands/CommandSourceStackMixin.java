@@ -102,12 +102,12 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
             final EntityAnchorArgument.Anchor p_i49553_12_,
             final CallbackInfo ci
     ) {
-        this.impl$cause = PhaseTracker.getCauseStackManager().getCurrentCause();
-        final EventContext context = this.impl$cause.getContext();
+        this.impl$cause = PhaseTracker.getCauseStackManager().currentCause();
+        final EventContext context = this.impl$cause.context();
 
         context.get(EventContextKeys.LOCATION).ifPresent(x ->{
-            this.worldPosition = VecHelper.toVanillaVector3d(x.getPosition());
-            this.level = (ServerLevel) x.getWorld();
+            this.worldPosition = VecHelper.toVanillaVector3d(x.position());
+            this.level = (ServerLevel) x.world();
         });
 
         context.get(EventContextKeys.ROTATION).ifPresent(x -> this.rotation = new Vec2((float) x.getX(), (float) x.getY()));
@@ -164,8 +164,8 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     @Inject(method = "withLevel", at = @At("RETURN"))
     private void impl$updateCauseOnWithWorld(final ServerLevel serverWorld, final CallbackInfoReturnable<CommandSourceStack> cir) {
         if (cir.getReturnValue() != (Object) this) {
-            final ServerLocation location = this.impl$cause.getContext().get(EventContextKeys.LOCATION)
-                    .map(x -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld, x.getPosition()))
+            final ServerLocation location = this.impl$cause.context().get(EventContextKeys.LOCATION)
+                    .map(x -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld, x.position()))
                     .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) serverWorld,
                             VecHelper.toVector3d(cir.getReturnValue().getPosition())));
             ((CommandSourceStackBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION, location));
@@ -176,8 +176,8 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     private void impl$updateCauseOnWithPosition(final Vec3 pos, final CallbackInfoReturnable<CommandSourceStack> cir) {
         if (cir.getReturnValue() != (Object) this) {
             final org.spongepowered.math.vector.Vector3d position = VecHelper.toVector3d(pos);
-            final ServerLocation location = this.impl$cause.getContext().get(EventContextKeys.LOCATION)
-                    .map(x -> ServerLocation.of(x.getWorld(), position))
+            final ServerLocation location = this.impl$cause.context().get(EventContextKeys.LOCATION)
+                    .map(x -> ServerLocation.of(x.world(), position))
                     .orElseGet(() -> ServerLocation.of((org.spongepowered.api.world.server.ServerWorld) cir.getReturnValue().getLevel(), position));
             ((CommandSourceStackBridge) cir.getReturnValue()).bridge$setCause(this.impl$applyToCause(EventContextKeys.LOCATION, location));
         }
@@ -233,7 +233,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
     }
 
     private <T> Cause impl$applyToCause(final EventContextKey<T> key, final T value) {
-        final EventContext.Builder builder = EventContext.builder().from(this.impl$cause.getContext());
+        final EventContext.Builder builder = EventContext.builder().from(this.impl$cause.context());
         builder.add(key, value);
         return Cause.builder().from(this.impl$cause).build(builder.build());
     }

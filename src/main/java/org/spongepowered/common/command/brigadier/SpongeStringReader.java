@@ -40,7 +40,7 @@ import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 
-// ArgumentReader.Mutable specifies a non null getRead() method, StringReader suggests its
+// ArgumentReader.Mutable specifies a non null read() method, StringReader suggests its
 // nullable - but it isn't. So we just need to suppress the warning.
 // With elements from JsonToNBT for allow this to parse Json for users.
 @SuppressWarnings("NullableProblems")
@@ -66,8 +66,37 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
 
     @Override
     @NonNull
-    public String getInput() {
+    public String input() {
         return this.getString();
+    }
+
+    @Override
+    public int remainingLength() {
+        return this.getRemainingLength();
+    }
+
+    @Override
+    public int totalLength() {
+        return this.getTotalLength();
+    }
+
+    @Override
+    public int cursor() {
+        return this.getCursor();
+    }
+
+    @Override
+    public String parsed() {
+        final int cursor = this.getCursor();
+        if (cursor == 0) {
+            return "";
+        }
+        return this.getString().substring(0, cursor);
+    }
+
+    @Override
+    public String remaining() {
+        return this.getRemaining();
     }
 
     @Override
@@ -177,7 +206,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
             );
         }
         final int endCursor = this.getCursor(); // this will be just after a }
-        return this.getInput().substring(startCursor, endCursor);
+        return this.input().substring(startCursor, endCursor);
     }
 
     @Override
@@ -191,14 +220,14 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
 
     @Override
     @NonNull
-    public SpongeImmutableArgumentReader getImmutable() {
+    public SpongeImmutableArgumentReader immutable() {
         return new SpongeImmutableArgumentReader(this.getString(), this.getCursor());
     }
 
     @Override
     public void setState(@NonNull final ArgumentReader state) throws IllegalArgumentException {
-        if (state.getInput().equals(this.getString())) {
-            this.setCursor(state.getCursor());
+        if (state.input().equals(this.getString())) {
+            this.setCursor(state.cursor());
         } else {
             throw new IllegalArgumentException("The provided ArgumentReader does not match this ArgumentReader");
         }
@@ -207,12 +236,12 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     @Override
     @NonNull
     public ArgumentParseException createException(@NonNull final Component errorMessage) {
-        return new ArgumentParseException(errorMessage, this.getInput(), this.getCursor());
+        return new ArgumentParseException(errorMessage, this.input(), this.getCursor());
     }
 
     @NonNull
     public ArgumentParseException createException(@NonNull final Component errorMessage, @NonNull final Throwable inner) {
-        return new ArgumentParseException(errorMessage, inner, this.getInput(), this.getCursor());
+        return new ArgumentParseException(errorMessage, inner, this.input(), this.getCursor());
     }
 
     private ResourceKey readResourceLocation(@Nullable final String defaultNamespace) throws ArgumentParseException {

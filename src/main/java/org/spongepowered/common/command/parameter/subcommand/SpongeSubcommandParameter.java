@@ -53,13 +53,13 @@ public final class SpongeSubcommandParameter implements Parameter.Subcommand {
     }
 
     @Override
-    public Command.@NonNull Parameterized getCommand() {
+    public Command.@NonNull Parameterized command() {
         return this.command;
     }
 
     @Override
     @NonNull
-    public Set<String> getAliases() {
+    public Set<String> aliases() {
         return ImmutableSet.copyOf(this.aliases);
     }
 

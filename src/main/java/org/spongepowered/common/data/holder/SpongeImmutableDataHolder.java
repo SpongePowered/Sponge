@@ -55,7 +55,7 @@ public interface SpongeImmutableDataHolder<I extends DataHolder.Immutable<I>> ex
 
     @Override
     default Optional<I> with(Value<?> value) {
-        return this.impl$getProviderFor((Key<Value<Object>>) value.getKey(), this).with((I) this, value.get());
+        return this.impl$getProviderFor((Key<Value<Object>>) value.key(), this).with((I) this, value.get());
     }
 
     @Override
@@ -76,7 +76,7 @@ public interface SpongeImmutableDataHolder<I extends DataHolder.Immutable<I>> ex
             }
         } else if (function == MergeFunction.ORIGINAL_PREFERRED) {
             for (final Value<?> value : that.getValues()) {
-                if (this.get(value.getKey()).isPresent()) {
+                if (this.get(value.key()).isPresent()) {
                     continue;
                 }
                 final Optional<I> optionalResult = result.with(value);
@@ -86,9 +86,9 @@ public interface SpongeImmutableDataHolder<I extends DataHolder.Immutable<I>> ex
             }
         } else {
             for (final Value<?> value : that.getValues()) {
-                final Key<Value<Object>> key = (Key<Value<Object>>) value.getKey();
+                final Key<Value<Object>> key = (Key<Value<Object>>) value.key();
                 final DataProvider<?, Object> provider = this.impl$getProviderFor(key, this);
-                @Nullable final Value<Object> original = provider.getValue(this).map(Value::asImmutable).orElse(null);
+                @Nullable final Value<Object> original = provider.value(this).map(Value::asImmutable).orElse(null);
                 final Value<Object> merged = function.merge(original, (Value<Object>) value);
                 final Optional<I> optionalResult = result.with(merged);
                 if (optionalResult.isPresent()) {

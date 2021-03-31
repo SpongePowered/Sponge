@@ -110,8 +110,8 @@ public final class SpongeNoiseGeneratorConfig {
         public NoiseGeneratorConfig.Builder reset() {
             this.structureConfig = (StructureGenerationConfig) new StructureSettings(true);
             this.noiseConfig = NoiseConfig.overworld();
-            this.defaultBlock = BlockTypes.STONE.get().getDefaultState();
-            this.defaultFluid = BlockTypes.WATER.get().getDefaultState();
+            this.defaultBlock = BlockTypes.STONE.get().defaultState();
+            this.defaultFluid = BlockTypes.WATER.get().defaultState();
             this.bedrockRoofY = -10;
             this.bedrockFloorY = 0;
             this.seaLevel = 63;

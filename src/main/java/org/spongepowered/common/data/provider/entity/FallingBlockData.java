@@ -59,7 +59,7 @@ public final class FallingBlockData {
                     .create(Keys.FALL_TIME)
                         .get(x -> new SpongeTicks(x.accessor$time()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0) {
                                 return false;
                             }

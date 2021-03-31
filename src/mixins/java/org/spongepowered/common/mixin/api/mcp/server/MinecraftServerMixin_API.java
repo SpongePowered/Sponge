@@ -160,18 +160,18 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     @Override
     public @NonNull Iterable<? extends Audience> audiences() {
         if (this.audiences == null) {
-            this.audiences = Iterables.concat((List) this.shadow$getPlayerList().getPlayers(), Collections.singleton(Sponge.getGame().getSystemSubject()));
+            this.audiences = Iterables.concat((List) this.shadow$getPlayerList().getPlayers(), Collections.singleton(Sponge.game().systemSubject()));
         }
         return this.audiences;
     }
 
     @Override
-    public ChunkLayout getChunkLayout() {
+    public ChunkLayout chunkLayout() {
         return SpongeChunkLayout.INSTANCE;
     }
 
     @Override
-    public Audience getBroadcastAudience() {
+    public Audience broadcastAudience() {
         if (this.api$broadcastAudience == null) {
             this.api$broadcastAudience = this;
         }
@@ -185,7 +185,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public Optional<InetSocketAddress> getBoundAddress() {
+    public Optional<InetSocketAddress> boundAddress() {
         return Optional.empty();
     }
 
@@ -210,12 +210,12 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public Difficulty getDifficulty() {
+    public Difficulty difficulty() {
         return (Difficulty) (Object) this.worldData.getDifficulty();
     }
 
     @Override
-    public GameMode getGameMode() {
+    public GameMode gameMode() {
         return (GameMode) (Object) this.worldData.getGameType();
     }
 
@@ -250,17 +250,17 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public UserManager getUserManager() {
+    public UserManager userManager() {
         return this.api$userManager;
     }
 
-    @Override public TeleportHelper getTeleportHelper() {
+    @Override public TeleportHelper teleportHelper() {
         return this.api$teleportHelper;
     }
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public Collection<ServerPlayer> getOnlinePlayers() {
+    public Collection<ServerPlayer> onlinePlayers() {
         if (this.shadow$getPlayerList() == null || this.shadow$getPlayerList().getPlayers() == null) {
             return ImmutableList.of();
         }
@@ -268,7 +268,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public Optional<ServerPlayer> getPlayer(final UUID uniqueId) {
+    public Optional<ServerPlayer> player(final UUID uniqueId) {
         Preconditions.checkNotNull(uniqueId);
         if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
@@ -277,7 +277,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public Optional<ServerPlayer> getPlayer(final String name) {
+    public Optional<ServerPlayer> player(final String name) {
         if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
         }
@@ -285,12 +285,12 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public Component getMOTD() {
+    public Component motd() {
         return SpongeAdventure.legacySection(this.shadow$getMotd());
     }
 
     @Override
-    public int getMaxPlayers() {
+    public int maxPlayers() {
         if (this.shadow$getPlayerList() == null) {
             return 0;
         }
@@ -298,23 +298,23 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public int getRunningTimeTicks() {
+    public int runningTimeTicks() {
         return this.shadow$getTickCount();
     }
 
     @Override
-    public double getTicksPerSecond() {
+    public double ticksPerSecond() {
         // Cap at 20 TPS
-        return 1000 / Math.max(50, this.getAverageTickTime());
+        return 1000 / Math.max(50, this.averageTickTime());
     }
 
     @Override
-    public double getAverageTickTime() {
+    public double averageTickTime() {
         return Mth.average(this.tickTimes) / 1000000;
     }
 
     @Override
-    public int getTargetTicksPerSecond() {
+    public int targetTicksPerSecond() {
         return 20;
     }
 
@@ -326,7 +326,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     @Override
     public void shutdown(final Component kickMessage) {
         Preconditions.checkNotNull(kickMessage);
-        for (final ServerPlayer player : this.getOnlinePlayers()) {
+        for (final ServerPlayer player : this.onlinePlayers()) {
             player.kick(kickMessage);
         }
 
@@ -334,7 +334,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public GameProfileManager getGameProfileManager() {
+    public GameProfileManager gameProfileManager() {
         if (this.api$profileManager == null) {
             this.api$profileManager = new SpongeGameProfileManager(this);
         }
@@ -343,16 +343,16 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public SpongeCommandManager getCommandManager() {
+    public SpongeCommandManager commandManager() {
         return ((CommandsBridge) this.shadow$getCommands()).bridge$commandManager();
     }
 
-    public Optional<ResourcePack> server$getResourcePack() {
+    public Optional<ResourcePack> server$resourcePack() {
         return Optional.ofNullable(((MinecraftServerBridge) this).bridge$getResourcePack());
     }
 
     @Override
-    public Optional<Scoreboard> getServerScoreboard() {
+    public Optional<Scoreboard> serverScoreboard() {
         if (this.api$scoreboard == null) {
             final ServerLevel world = SpongeCommon.getServer().overworld();
             if (world == null) {
@@ -365,7 +365,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Intrinsic
-    public int server$getPlayerIdleTimeout() {
+    public int server$playerIdleTimeout() {
         return this.shadow$getPlayerIdleTimeout();
     }
 
@@ -375,17 +375,17 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public Game getGame() {
-        return Sponge.getGame();
+    public Game game() {
+        return Sponge.game();
     }
 
     @Override
-    public CauseStackManager getCauseStackManager() {
+    public CauseStackManager causeStackManager() {
         return PhaseTracker.getCauseStackManager();
     }
 
     @Override
-    public ServerScheduler getScheduler() {
+    public ServerScheduler scheduler() {
         return this.api$scheduler;
     }
 
@@ -419,7 +419,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public ServiceProvider.ServerScoped getServiceProvider() {
+    public ServiceProvider.ServerScoped serviceProvider() {
         return ((MinecraftServerBridge) this).bridge$getServiceProvider();
     }
 
@@ -433,7 +433,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
         return this.api$registryHolder;
     }
     @Override
-    public MapStorage getMapStorage() {
+    public MapStorage mapStorage() {
         return this.api$mapStorage;
     }
 }

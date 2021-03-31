@@ -99,7 +99,7 @@ public class TradeTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.pluginContainer, new SpawnListener());
+        Sponge.eventManager().registerListeners(this.pluginContainer, new SpawnListener());
     }
 
     public static final class SpawnListener {
@@ -153,18 +153,18 @@ public class TradeTest implements LoadableModule {
             // Sponge takes inspiration from Entity systems, where any object can have any data.
             // The data we're setting here is then represented as the key.
             // Once we have our data we then offer the data to the entity using the specified key.
-            event.getEntities().stream()
-                .filter(entity1 -> entity1.getType().equals(EntityTypes.VILLAGER.get()) && Math.random() > 0.7)
+            event.entities().stream()
+                .filter(entity1 -> entity1.type().equals(EntityTypes.VILLAGER.get()) && Math.random() > 0.7)
                 .forEach(villager -> {
                     final DataManipulator.Mutable container = DataManipulator.mutableOf()
-                        .set(Keys.PROFESSION_TYPE, ProfessionTypes.CLERIC.get(villager.getWorld().registries()))
+                        .set(Keys.PROFESSION_TYPE, ProfessionTypes.CLERIC.get(villager.world().registries()))
                         .set(Keys.CUSTOM_NAME, TradeTest.FLARDIAN)
                         .set(Keys.INVULNERABILITY_TICKS, Ticks.of(10000))
                         // We have to specify the experience and level because otherwise the villager's brains reset
                         // the job.... because they have a mind of their own...
                         .set(Keys.EXPERIENCE, 1)
                         .set(Keys.EXPERIENCE_LEVEL, 1)
-                        .set(Keys.TRADE_OFFERS, ImmutableList.of(SpawnListener.generateTradeOffer().apply(villager, villager.getRandom())));
+                        .set(Keys.TRADE_OFFERS, ImmutableList.of(SpawnListener.generateTradeOffer().apply(villager, villager.random())));
                     villager.copyFrom(container);
                 });
         }

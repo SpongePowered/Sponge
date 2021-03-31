@@ -26,33 +26,34 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.block.transaction.NotificationTicket;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.block.SpongeNotificationTicket;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
-import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
+import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Collections;
-import java.util.EnumMap;
-import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 
 final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEvent> {
     final BlockState original;
@@ -64,12 +65,16 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     final BlockState originalState;
     private final Supplier<ServerLevel> serverWorld;
     private Supplier<LocatableBlock> locatableBlock;
+    private Supplier<SpongeBlockSnapshot> targetSnapshot;
+    private Supplier<NotificationTicket> ticketSupplier;
 
-    NeighborNotification(final Supplier<ServerLevel> serverWorldSupplier,
+    NeighborNotification(
+        final Supplier<ServerLevel> serverWorldSupplier,
         final BlockState notifyState, final BlockPos notifyPos,
-        final Block sourceBlock, final BlockPos sourcePos
+        final Block sourceBlock, final BlockPos sourcePos,
+        @Nullable final BlockEntity existingTile
     ) {
-        super(TransactionTypes.NEIGHBOR_NOTIFICATION.get(), ((org.spongepowered.api.world.server.ServerWorld) serverWorldSupplier.get()).getKey());
+        super(TransactionTypes.NEIGHBOR_NOTIFICATION.get(), ((org.spongepowered.api.world.server.ServerWorld) serverWorldSupplier.get()).key());
         this.affectedPosition = sourcePos;
         this.originalState = notifyState;
         this.serverWorld = serverWorldSupplier;
@@ -86,6 +91,25 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
                 .build();
             this.locatableBlock = () -> locatableBlock;
             return locatableBlock;
+        };
+        this.targetSnapshot = () -> {
+            final SpongeBlockSnapshotBuilder pooled = SpongeBlockSnapshotBuilder.pooled();
+            pooled.world(this.serverWorld.get())
+                .position(new Vector3i(notifyPos.getX(), notifyPos.getY(), notifyPos.getZ()))
+                .blockState(notifyState);
+            if (existingTile != null) {
+                pooled.tileEntity(existingTile);
+            }
+            final SpongeBlockSnapshot snapshot = pooled.build();
+            this.targetSnapshot = () -> snapshot;
+            return snapshot;
+        };
+        this.ticketSupplier = () -> {
+            final LocatableBlock notifier = this.locatableBlock.get();
+            final SpongeBlockSnapshot target = this.targetSnapshot.get();
+            final SpongeNotificationTicket ticket = new SpongeNotificationTicket(notifier, target);
+            this.ticketSupplier = () -> ticket;
+            return ticket;
         };
     }
 
@@ -106,10 +130,13 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
 
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
-        @Nullable GameTransaction<@NonNull ?> parent
+        @Nullable final GameTransaction<@NonNull ?> parent
     ) {
         return Optional.of((context, frame) -> {
-            frame.pushCause(this.locatableBlock.get());
+            if (parent instanceof ChangeBlock) {
+                frame.pushCause(((ChangeBlock) parent).original);
+            }
+            frame.pushCause(this.ticketSupplier.get());
         });
     }
 
@@ -120,27 +147,19 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
             .add(" %s : %s, %s", "Notification", this.originalState, this.notifyPos);
     }
 
+    @SuppressWarnings("UnstableApiUsage")
     @Override
     public Optional<NotifyNeighborBlockEvent> generateEvent(final PhaseContext<@NonNull ?> context,
         final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<NotifyNeighborBlockEvent>> transactions,
         final Cause currentCause,
-        ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
+        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
-        final Map<Direction, org.spongepowered.api.block.BlockState> neighbors = new EnumMap<Direction, org.spongepowered.api.block.BlockState>(Direction.class);
-        for (GameTransaction<NotifyNeighborBlockEvent> transaction : transactions) {
-            final NeighborNotification neighborNotification = (NeighborNotification) transaction;
-            final BlockPos sourcePos = neighborNotification.sourcePos;
-            final BlockPos notifyPos = neighborNotification.notifyPos;
-            int var6 = Integer.signum(notifyPos.getX() - sourcePos.getX());
-            int var7 = Integer.signum(notifyPos.getY() - sourcePos.getY());
-            int var8 = Integer.signum(notifyPos.getZ() - sourcePos.getZ());
-            final net.minecraft.core.Direction dir = net.minecraft.core.Direction.fromNormal(var6, var7, var8);
+        final ImmutableList<NotificationTicket> tickets = transactions.stream()
+            .map(transaction -> ((NeighborNotification) transaction).ticketSupplier.get())
+            .collect(ImmutableList.toImmutableList());
 
-            neighbors.put(DirectionUtil.getFor(dir), ((org.spongepowered.api.block.BlockState) neighborNotification.originalState));
-        }
-
-        return Optional.of(SpongeEventFactory.createNotifyNeighborBlockEvent(currentCause, neighbors, neighbors));
+        return Optional.of(SpongeEventFactory.createNotifyNeighborBlockEvent(currentCause, tickets));
     }
 
     @Override
@@ -152,7 +171,25 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
     public boolean markCancelledTransactions(final NotifyNeighborBlockEvent event,
         final ImmutableList<? extends GameTransaction<NotifyNeighborBlockEvent>> blockTransactions
     ) {
-        return false;
+        boolean cancelledAny = false;
+        for (final NotificationTicket transaction : event.tickets()) {
+            if (!transaction.valid()) {
+                cancelledAny = true;
+                for (final GameTransaction<NotifyNeighborBlockEvent> gameTransaction : blockTransactions) {
+                    final NeighborNotification blockTransaction = (NeighborNotification) gameTransaction;
+                    final Vector3i position = transaction.targetPosition();
+                    final BlockPos affectedPosition = blockTransaction.affectedPosition;
+                    if (position.getX() == affectedPosition.getX()
+                            && position.getY() == affectedPosition.getY()
+                            && position.getZ() == affectedPosition.getZ()
+                    ) {
+                        gameTransaction.markCancelled();
+                    }
+                }
+            }
+        }
+
+        return cancelledAny;
     }
 
 }

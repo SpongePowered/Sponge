@@ -42,7 +42,7 @@ public abstract class RangedAttackGoalMixin_API implements RangedAttackAgainstAg
     // @formatter:on
 
     @Override
-    public double getMoveSpeed() {
+    public double moveSpeed() {
         return this.speedModifier;
     }
 
@@ -53,7 +53,7 @@ public abstract class RangedAttackGoalMixin_API implements RangedAttackAgainstAg
     }
 
     @Override
-    public int getDelayBetweenAttacks() {
+    public int delayBetweenAttacks() {
         return this.attackIntervalMax;
     }
 
@@ -64,7 +64,7 @@ public abstract class RangedAttackGoalMixin_API implements RangedAttackAgainstAg
     }
 
     @Override
-    public float getAttackRadius() {
+    public float attackRadius() {
         return this.attackRadius;
     }
 

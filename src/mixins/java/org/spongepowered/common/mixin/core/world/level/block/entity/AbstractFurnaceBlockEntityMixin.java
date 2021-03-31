@@ -76,7 +76,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     // Shrink Fuel
     @Redirect(method = "serverTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;shrink(I)V"))
     private static void impl$throwFuelEventIfOrShrink(final ItemStack itemStack, final int quantity, final Level var0, final BlockPos var1, final BlockState var2, final AbstractFurnaceBlockEntity entity) {
-        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
 
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(itemStack);
         final ItemStackSnapshot shrinkedFuel = ItemStackUtil.snapshotOf(ItemStackUtil.cloneDefensive(itemStack, itemStack.getCount() - 1));
@@ -95,8 +95,8 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
             return;
         }
 
-        if (transaction.getCustom().isPresent()) {
-            ((AbstractFurnaceBlockEntityMixin) (Object) entity).items.set(1, ItemStackUtil.fromSnapshotToNative(transaction.getFinal()));
+        if (transaction.custom().isPresent()) {
+            ((AbstractFurnaceBlockEntityMixin) (Object) entity).items.set(1, ItemStackUtil.fromSnapshotToNative(transaction.finalReplacement()));
         } else { // vanilla
             itemStack.shrink(quantity);
         }
@@ -121,7 +121,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
 
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(slots.get(1));
 
-        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         if (((AbstractFurnaceBlockEntityMixin) (Object) (entity)).cookingProgress == 0) { // Start
             final CookingEvent.Start event = SpongeEventFactory.createCookingEventStart(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
                     Optional.of((CookingRecipe) recipe), Collections.emptyList());
@@ -194,7 +194,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
     private void impl$callInteruptSmeltEvent() {
         if (this.cookingProgress > 0) {
             final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(this.items.get(1));
-            final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
             final AbstractCookingRecipe recipe = this.impl$getCurrentRecipe();
             final CookingEvent.Interrupt event = SpongeEventFactory.createCookingEventInterrupt(cause, (FurnaceBlockEntity) this, Optional.of(fuel),
                                                                                             Optional.ofNullable((CookingRecipe) recipe));
@@ -211,7 +211,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         final Recipe<?> recipe, final NonNullList<ItemStack> slots, final int var2, final CallbackInfoReturnable<Boolean> cir
     ) {
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(slots.get(1));
-        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final FurnaceBlockEntity entity = cause.first(FurnaceBlockEntity.class)
             .orElseThrow(() -> new IllegalStateException("Expected to have a FurnaceBlockEntity in the Cause"));
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.getResultItem());

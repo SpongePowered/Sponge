@@ -31,5 +31,5 @@ import org.spongepowered.common.scheduler.ClientScheduler;
 public interface SpongeClient extends SpongeEngine, Client {
 
     @Override
-    ClientScheduler getScheduler();
+    ClientScheduler scheduler();
 }

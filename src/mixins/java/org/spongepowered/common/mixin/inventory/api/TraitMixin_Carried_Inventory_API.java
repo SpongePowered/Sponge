@@ -45,7 +45,7 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 public abstract class TraitMixin_Carried_Inventory_API implements CarriedInventory<Carrier> {
 
     @Override
-    public Optional<Carrier> getCarrier() {
+    public Optional<Carrier> carrier() {
         if (this instanceof CarriedBridge) {
             return ((CarriedBridge) this).bridge$getCarrier();
         }

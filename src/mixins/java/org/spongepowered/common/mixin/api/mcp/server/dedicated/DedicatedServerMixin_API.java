@@ -50,7 +50,7 @@ public abstract class DedicatedServerMixin_API extends MinecraftServerMixin_API 
     }
 
     @Override
-    public Optional<InetSocketAddress> getBoundAddress() {
+    public Optional<InetSocketAddress> boundAddress() {
         if (this.shadow$getServerIp() == null) {
             return Optional.empty();
         }

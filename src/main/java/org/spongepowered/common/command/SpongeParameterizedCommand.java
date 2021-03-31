@@ -93,9 +93,9 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     @Override
     @NonNull
-    public List<String> getSuggestions(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
+    public List<String> suggestions(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
         final SpongeCommandDispatcher dispatcher = this.getCachedDispatcher();
-        final String input = arguments.getRemaining();
+        final String input = arguments.remaining();
         final ParseResults<CommandSourceStack> parseResults = dispatcher.parse((StringReader) arguments, (CommandSourceStack) cause);
         final Suggestions suggestions = dispatcher.getCompletionSuggestions(parseResults).join();
         return suggestions.getList().stream().map(x -> x.apply(input)).collect(Collectors.toList());
@@ -103,23 +103,23 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     @Override
     public boolean canExecute(@NonNull final CommandCause cause) {
-        return this.getExecutionRequirements().test(cause);
+        return this.executionRequirements().test(cause);
     }
 
     @Override
     @NonNull
-    public Optional<Component> getShortDescription(@NonNull final CommandCause cause) {
+    public Optional<Component> shortDescription(@NonNull final CommandCause cause) {
         return this.shortDescription.apply(cause);
     }
 
     @Override
     @NonNull
-    public Optional<Component> getExtendedDescription(@NonNull final CommandCause cause) {
+    public Optional<Component> extendedDescription(@NonNull final CommandCause cause) {
         return this.extendedDescription.apply(cause);
     }
 
     @Override
-    public @NonNull Component getUsage(final @NonNull CommandCause cause) {
+    public @NonNull Component usage(final @NonNull CommandCause cause) {
         final Collection<Component> usage =
                 Arrays.stream(this.getCachedDispatcher().getAllUsage(this.getCachedDispatcher().getRoot(), (CommandSourceStack) cause, true))
                     .map(Component::text).collect(Collectors.toList());
@@ -149,7 +149,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
 
     @Override
     @NonNull
-    public Predicate<CommandCause> getExecutionRequirements() {
+    public Predicate<CommandCause> executionRequirements() {
         return this.executionRequirements;
     }
 
@@ -157,11 +157,11 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     @NonNull
     public CommandContext parseArguments(@NonNull final CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
         final ParseResults<CommandSourceStack> results = this.getCachedDispatcher().parse((SpongeStringReader) arguments, (CommandSourceStack) cause);
-        return (CommandContext) results.getContext().build(arguments.getInput());
+        return (CommandContext) results.getContext().build(arguments.input());
     }
 
     @Override
-    public Optional<CommandExecutor> getExecutor() {
+    public Optional<CommandExecutor> executor() {
         return Optional.ofNullable(this.executor);
     }
 

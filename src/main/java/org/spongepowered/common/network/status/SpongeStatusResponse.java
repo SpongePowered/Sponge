@@ -47,13 +47,13 @@ public final class SpongeStatusResponse {
     }
 
     @Nullable
-    public static ServerStatus post(MinecraftServer server, StatusClient client) {
+    public static ServerStatus post(final MinecraftServer server, final StatusClient client) {
         return SpongeStatusResponse.call(SpongeStatusResponse.create(server), client);
     }
 
     @Nullable
-    public static ServerStatus postLegacy(MinecraftServer server, InetSocketAddress address, MinecraftVersion version,
-            InetSocketAddress virtualHost) {
+    public static ServerStatus postLegacy(final MinecraftServer server, final InetSocketAddress address, final MinecraftVersion version,
+            final InetSocketAddress virtualHost) {
         ServerStatus response = SpongeStatusResponse.create(server);
         response.setVersion(new ServerStatus.Version(response.getVersion().getName(), Byte.MAX_VALUE));
         response = SpongeStatusResponse.call(response, new SpongeLegacyStatusClient(address, version, virtualHost));
@@ -64,23 +64,23 @@ public final class SpongeStatusResponse {
     }
 
     @Nullable
-    private static ServerStatus call(ServerStatus response, StatusClient client) {
-        if (!SpongeCommon.postEvent(SpongeEventFactory.createClientPingServerEvent(Cause.of(EventContext.empty(), Sponge.getServer()), client,
+    private static ServerStatus call(final ServerStatus response, final StatusClient client) {
+        if (!SpongeCommon.postEvent(SpongeEventFactory.createClientPingServerEvent(Cause.of(EventContext.empty(), Sponge.server()), client,
             (ClientPingServerEvent.Response) response))) {
             return response;
         }
         return null;
     }
 
-    public static ServerStatus create(MinecraftServer server) {
+    public static ServerStatus create(final MinecraftServer server) {
         return SpongeStatusResponse.clone(server.getStatus());
     }
 
-    private static ServerStatus clone(ServerStatus original) {
-        ServerStatus clone = new ServerStatus();
+    private static ServerStatus clone(final ServerStatus original) {
+        final ServerStatus clone = new ServerStatus();
         clone.setDescription(original.getDescription());
         if (original.getFavicon() != null) {
-            ((ClientPingServerEvent.Response) clone).setFavicon(((StatusResponse) original).getFavicon().get());
+            ((ClientPingServerEvent.Response) clone).setFavicon(((StatusResponse) original).favicon().get());
         }
 
         clone.setPlayers(SpongeStatusResponse.clone(original.getPlayers()));
@@ -89,9 +89,9 @@ public final class SpongeStatusResponse {
     }
 
     @Nullable
-    private static ServerStatus.Players clone(@Nullable ServerStatus.Players original) {
+    private static ServerStatus.Players clone(@Nullable final ServerStatus.Players original) {
         if (original != null) {
-            ServerStatus.Players clone = new ServerStatus.Players(original.getMaxPlayers(),
+            final ServerStatus.Players clone = new ServerStatus.Players(original.getMaxPlayers(),
                     original.getNumPlayers());
             clone.setSample(original.getSample());
             return clone;
@@ -100,19 +100,19 @@ public final class SpongeStatusResponse {
     }
 
     @Nullable
-    private static ServerStatus.Version clone(@Nullable ServerStatus.Version original) {
+    private static ServerStatus.Version clone(@Nullable final ServerStatus.Version original) {
         return original != null ? new ServerStatus.Version(original.getName(), original.getProtocol()) : null;
     }
 
-    public static String getMotd(ServerStatus response) {
+    public static String getMotd(final ServerStatus response) {
         return SpongeStatusResponse.getFirstLine(SpongeAdventure.legacySection(SpongeAdventure.asAdventure(response.getDescription())));
     }
 
-    public static String getUnformattedMotd(ServerStatus response) {
+    public static String getUnformattedMotd(final ServerStatus response) {
         return SpongeStatusResponse.getFirstLine(SpongeAdventure.plain(SpongeAdventure.asAdventure(response.getDescription())));
     }
 
-    private static String getFirstLine(String s) {
+    private static String getFirstLine(final String s) {
         return NetworkUtil.substringBefore(s, '\n');
     }
 

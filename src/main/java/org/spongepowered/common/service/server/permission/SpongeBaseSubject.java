@@ -41,7 +41,7 @@ public abstract class SpongeBaseSubject implements Subject {
     public abstract PermissionService getService();
 
     @Override
-    public abstract MemorySubjectData getTransientSubjectData();
+    public abstract MemorySubjectData transientSubjectData();
 
     @Override
     public boolean isSubjectDataPersisted() {
@@ -50,25 +50,25 @@ public abstract class SpongeBaseSubject implements Subject {
 
     @Override
     public SubjectReference asSubjectReference() {
-        return this.getService().newSubjectReference(this.getContainingCollection().getIdentifier(), this.getIdentifier());
+        return this.getService().newSubjectReference(this.containingCollection().identifier(), this.identifier());
     }
 
     @Override
     public boolean hasPermission(Set<Context> contexts, String permission) {
-        return this.getPermissionValue(contexts, permission) == Tristate.TRUE;
+        return this.permissionValue(contexts, permission) == Tristate.TRUE;
     }
 
     @Override
-    public Tristate getPermissionValue(Set<Context> contexts, String permission) {
-        return this.getDataPermissionValue(this.getTransientSubjectData(), permission);
+    public Tristate permissionValue(Set<Context> contexts, String permission) {
+        return this.getDataPermissionValue(this.transientSubjectData(), permission);
     }
 
     protected Tristate getDataPermissionValue(MemorySubjectData subject, String permission) {
-        Tristate res = subject.getNodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
+        Tristate res = subject.nodeTree(SubjectData.GLOBAL_CONTEXT).get(permission);
 
         if (res == Tristate.UNDEFINED) {
-            for (SubjectReference parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
-                res = parent.resolve().join().getPermissionValue(SubjectData.GLOBAL_CONTEXT, permission);
+            for (SubjectReference parent : subject.parents(SubjectData.GLOBAL_CONTEXT)) {
+                res = parent.resolve().join().permissionValue(SubjectData.GLOBAL_CONTEXT, permission);
                 if (res != Tristate.UNDEFINED) {
                     return res;
                 }
@@ -80,20 +80,20 @@ public abstract class SpongeBaseSubject implements Subject {
 
     @Override
     public boolean isChildOf(Set<Context> contexts, SubjectReference parent) {
-        return this.getSubjectData().getParents(contexts).contains(parent);
+        return this.subjectData().parents(contexts).contains(parent);
     }
 
     @Override
-    public List<SubjectReference> getParents(Set<Context> contexts) {
-        return this.getSubjectData().getParents(contexts);
+    public List<SubjectReference> parents(Set<Context> contexts) {
+        return this.subjectData().parents(contexts);
     }
 
     protected Optional<String> getDataOptionValue(MemorySubjectData subject, String option) {
-        Optional<String> res = Optional.ofNullable(subject.getOptions(SubjectData.GLOBAL_CONTEXT).get(option));
+        Optional<String> res = Optional.ofNullable(subject.options(SubjectData.GLOBAL_CONTEXT).get(option));
 
         if (!res.isPresent()) {
-            for (SubjectReference parent : subject.getParents(SubjectData.GLOBAL_CONTEXT)) {
-                res = parent.resolve().join().getOption(SubjectData.GLOBAL_CONTEXT, option);
+            for (SubjectReference parent : subject.parents(SubjectData.GLOBAL_CONTEXT)) {
+                res = parent.resolve().join().option(SubjectData.GLOBAL_CONTEXT, option);
                 if (res.isPresent()) {
                     return res;
                 }
@@ -104,12 +104,12 @@ public abstract class SpongeBaseSubject implements Subject {
     }
 
     @Override
-    public Optional<String> getOption(Set<Context> contexts, String key) {
-        return this.getDataOptionValue(this.getTransientSubjectData(), key);
+    public Optional<String> option(Set<Context> contexts, String key) {
+        return this.getDataOptionValue(this.transientSubjectData(), key);
     }
 
     @Override
-    public Set<Context> getActiveContexts() {
+    public Set<Context> activeContexts() {
         return SubjectData.GLOBAL_CONTEXT;
     }
 }

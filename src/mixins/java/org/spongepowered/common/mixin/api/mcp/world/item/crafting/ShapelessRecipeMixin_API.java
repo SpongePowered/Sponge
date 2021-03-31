@@ -40,7 +40,7 @@ public abstract class ShapelessRecipeMixin_API implements ShapelessCraftingRecip
     // @formatter:on
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return (ResourceKey) (Object) this.id;
     }
 }

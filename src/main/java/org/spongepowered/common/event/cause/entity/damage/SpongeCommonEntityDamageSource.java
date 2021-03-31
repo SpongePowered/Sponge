@@ -69,7 +69,7 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
 
     @Override
     public Entity getEntity() {
-        return (Entity) this.getSource();
+        return (Entity) this.source();
     }
 
     @Override
@@ -99,7 +99,7 @@ public abstract class SpongeCommonEntityDamageSource extends EntityDamageSource 
 
     @Override
     public float getFoodExhaustion() {
-        return (float) this.getExhaustion();
+        return (float) this.exhaustion();
     }
 
 }

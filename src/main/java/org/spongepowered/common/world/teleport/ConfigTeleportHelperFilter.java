@@ -70,7 +70,7 @@ public final class ConfigTeleportHelperFilter implements TeleportHelperFilter {
             ConfigTeleportHelperFilter.floorBlockStates = teleportHelperCat.unsafeFloorBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Registry.BLOCK.getOptional((ResourceLocation) (Object) x).map(b -> (BlockType) b)
-                            .map(StateContainer::getDefaultState).orElse(null))
+                            .map(StateContainer::defaultState).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
 
@@ -83,7 +83,7 @@ public final class ConfigTeleportHelperFilter implements TeleportHelperFilter {
             ConfigTeleportHelperFilter.bodyBlockStates = teleportHelperCat.unsafeBlockBlocks.stream()
                     .map(x -> ResourceKey.resolve(x.toLowerCase(Locale.ENGLISH)))
                     .map(x -> Registry.BLOCK.getOptional((ResourceLocation) (Object) x).map(b -> (BlockType) b)
-                            .map(StateContainer::getDefaultState).orElse(null))
+                            .map(StateContainer::defaultState).orElse(null))
                     .filter(Objects::nonNull)
                     .collect(Collectors.toList());
         }
@@ -92,12 +92,12 @@ public final class ConfigTeleportHelperFilter implements TeleportHelperFilter {
     @Override
     public boolean isSafeFloorMaterial(@NonNull final BlockState blockState) {
         ConfigTeleportHelperFilter.updateCacheIfNecessary();
-        return !ConfigTeleportHelperFilter.floorBlockStates.contains(blockState) && !ConfigTeleportHelperFilter.floorBlockTypes.contains(blockState.getType());
+        return !ConfigTeleportHelperFilter.floorBlockStates.contains(blockState) && !ConfigTeleportHelperFilter.floorBlockTypes.contains(blockState.type());
     }
 
     @Override
     public boolean isSafeBodyMaterial(@NonNull final BlockState blockState) {
         ConfigTeleportHelperFilter.updateCacheIfNecessary();
-        return !ConfigTeleportHelperFilter.bodyBlockStates.contains(blockState) && !ConfigTeleportHelperFilter.bodyBlockTypes.contains(blockState.getType());
+        return !ConfigTeleportHelperFilter.bodyBlockStates.contains(blockState) && !ConfigTeleportHelperFilter.bodyBlockTypes.contains(blockState.type());
     }
 }

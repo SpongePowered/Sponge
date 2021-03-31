@@ -51,12 +51,12 @@ public abstract class ClientNetHandlerMixin_API implements ClientSideConnection 
     }
 
     @Override
-    public InetSocketAddress getAddress() {
+    public InetSocketAddress address() {
         return ((ConnectionBridge) ((ConnectionHolderBridge) this).bridge$getConnection()).bridge$getAddress();
     }
 
     @Override
-    public InetSocketAddress getVirtualHost() {
+    public InetSocketAddress virtualHost() {
         return ((ConnectionBridge) ((ConnectionHolderBridge) this).bridge$getConnection()).bridge$getVirtualHost();
     }
 }

@@ -51,14 +51,14 @@ public final class SpongeDefaultValueParser<T> implements ValueParser<T> {
     }
 
     @Override
-    public Optional<? extends T> getValue(
+    public Optional<? extends T> parseValue(
             final Parameter.Key<? super T> parameterKey,
             final ArgumentReader.Mutable reader,
             final CommandContext.Builder context)
             throws ArgumentParseException {
         final T result;
         try {
-            result = this.defaultFunction.apply(context.getCause());
+            result = this.defaultFunction.apply(context.cause());
         } catch (final Exception ex) {
             throw ((SpongeStringReader) reader)
                     .createException(Component.text("An exception was thrown obtaining a default value for " + parameterKey.key()), ex);
@@ -70,7 +70,7 @@ public final class SpongeDefaultValueParser<T> implements ValueParser<T> {
     }
 
     @Override
-    public List<ClientCompletionType> getClientCompletionType() {
+    public List<ClientCompletionType> clientCompletionType() {
         return SpongeDefaultValueParser.CLIENT_COMPLETION_TYPE;
     }
 }

@@ -39,7 +39,7 @@ public abstract class TraitMixin_Equipable_Inventory_API implements Equipable {
     private EquipmentInventory impl$equipmentInventory = null;
 
     @Override
-    public EquipmentInventory getEquipment() {
+    public EquipmentInventory equipment() {
         if (this.impl$equipmentInventory == null) {
             final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
             final EquipmentInventoryLens lens = (EquipmentInventoryLens) inv.inventoryAdapter$getRootLens();

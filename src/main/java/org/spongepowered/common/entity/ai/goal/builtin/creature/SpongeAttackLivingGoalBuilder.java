@@ -53,7 +53,7 @@ public final class SpongeAttackLivingGoalBuilder implements AttackLivingGoal.Bui
 
     @Override
     public AttackLivingGoal.Builder from(AttackLivingGoal value) {
-        return this.speed(value.getSpeed())
+        return this.speed(value.speed())
             .longMemory();
     }
 

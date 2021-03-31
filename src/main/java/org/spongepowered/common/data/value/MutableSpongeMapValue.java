@@ -46,8 +46,8 @@ public final class MutableSpongeMapValue<K, V> extends AbstractMutableSpongeValu
 
     @Override
     @SuppressWarnings("unchecked")
-    public SpongeKey<? extends MapValue<K, V>, Map<K, V>> getKey() {
-        return (SpongeKey<? extends MapValue<K, V>, Map<K, V>>) super.getKey();
+    public SpongeKey<? extends MapValue<K, V>, Map<K, V>> key() {
+        return (SpongeKey<? extends MapValue<K, V>, Map<K, V>>) super.key();
     }
 
     @Override
@@ -134,11 +134,11 @@ public final class MutableSpongeMapValue<K, V> extends AbstractMutableSpongeValu
 
     @Override
     public MapValue.Mutable<K, V> copy() {
-        return new MutableSpongeMapValue<>(this.getKey(), CopyHelper.copy(this.get()));
+        return new MutableSpongeMapValue<>(this.key(), CopyHelper.copy(this.get()));
     }
 
     @Override
     public MapValue.Immutable<K, V> asImmutable() {
-        return this.getKey().getValueConstructor().getImmutable(this.get()).asImmutable();
+        return this.key().getValueConstructor().getImmutable(this.get()).asImmutable();
     }
 }

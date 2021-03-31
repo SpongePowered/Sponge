@@ -44,8 +44,8 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
 
     @Override
     @SuppressWarnings("unchecked")
-    public SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>> getKey() {
-        return (SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>>) super.getKey();
+    public SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>> key() {
+        return (SpongeKey<? extends WeightedCollectionValue<E>, WeightedTable<E>>) super.key();
     }
 
     @Override
@@ -55,19 +55,19 @@ public class ImmutableSpongeWeightedCollectionValue<E> extends ImmutableSpongeCo
 
     @Override
     protected WeightedCollectionValue.Immutable<E> modifyCollection(Consumer<WeightedTable<E>> consumer) {
-        final WeightedTable<E> table = new WeightedTable<>(this.element.getRolls());
+        final WeightedTable<E> table = new WeightedTable<>(this.element.rolls());
         table.addAll(this.element);
         consumer.accept(table);
-        return this.getKey().getValueConstructor().getRawImmutable(table).asImmutable();
+        return this.key().getValueConstructor().getRawImmutable(table).asImmutable();
     }
 
     @Override
     public WeightedCollectionValue.Immutable<E> with(WeightedTable<E> value) {
-        return this.getKey().getValueConstructor().getImmutable(value).asImmutable();
+        return this.key().getValueConstructor().getImmutable(value).asImmutable();
     }
 
     @Override
     public WeightedCollectionValue.Mutable<E> asMutable() {
-        return new MutableSpongeWeightedCollectionValue<>(this.getKey(), this.get());
+        return new MutableSpongeWeightedCollectionValue<>(this.key(), this.get());
     }
 }

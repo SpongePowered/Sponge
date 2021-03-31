@@ -27,6 +27,7 @@ package org.spongepowered.common.command.brigadier;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.commands.CommandSource;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
@@ -73,12 +74,12 @@ public final class SpongeParameterTranslator {
         final Iterator<String> aliasIterator = sortedAliases.iterator();
 
         final String baseAlias = aliasIterator.next();
-        final SpongeCommandExecutorWrapper executor = command.getExecutor().map(SpongeCommandExecutorWrapper::new).orElse(null);
+        final SpongeCommandExecutorWrapper executor = command.executor().map(SpongeCommandExecutorWrapper::new).orElse(null);
 
         // Create the defining characteristics of the node.
         final LiteralArgumentBuilder<CommandSourceStack> basicNode = LiteralArgumentBuilder.literal(baseAlias);
 
-        basicNode.requires((Predicate) command.getExecutionRequirements());
+        basicNode.requires((Predicate) command.executionRequirements());
         if (command.isTerminal() && executor != null) {
             basicNode.executes(executor);
         }
@@ -90,7 +91,7 @@ public final class SpongeParameterTranslator {
 
         for (final Parameter.Subcommand subcommand : command.subcommands()) {
             final Collection<LiteralCommandNode<CommandSourceStack>> builtSubcommand =
-                    this.createCommandTree(subcommand.getCommand(), subcommand.getAliases());
+                    this.createCommandTree(subcommand.command(), subcommand.aliases());
             builtSubcommand.forEach(commandNode::addChild);
         }
 
@@ -98,11 +99,23 @@ public final class SpongeParameterTranslator {
 
         final List<LiteralCommandNode<CommandSourceStack>> allCommandNodes = new ArrayList<>();
         allCommandNodes.add(commandNode);
+        final Collection<CommandNode<CommandSourceStack>> children = commandNode.getChildren();
         while (aliasIterator.hasNext()) {
             final LiteralArgumentBuilder<CommandSourceStack> redirectedNode = LiteralArgumentBuilder.literal(aliasIterator.next());
             redirectedNode.executes(commandNode.getCommand());
             redirectedNode.requires(commandNode.getRequirement());
-            redirectedNode.redirect(commandNode);
+            // This would be redirectedNode.redirect(commandNode), but because of a bug
+            // in Brigadier that impacts the client we have to do this.
+            //
+            // The problem is a faulty equality check for command nodes - they don't
+            // consider redirects (I suspect because they use redirects to redirect to
+            // a previous node, causing a stack overflow (we'd get this with flags). The
+            // big problem generally comes in when you have two nodes with the same name
+            // and a redirect (or not) - the client tries to be clever and de-duplicates
+            // them but it doesn't account for the redirect...
+            for (final CommandNode<CommandSourceStack> child : children) {
+                redirectedNode.then(child);
+            }
             allCommandNodes.add(new SpongeLiteralCommandNode(redirectedNode));
         }
 
@@ -115,15 +128,15 @@ public final class SpongeParameterTranslator {
         final Collection<CommandNode<CommandSourceStack>> nodesToAddChildrenTo = new ArrayList<>();
         for (final Flag flag : flags) {
             // first create the literal.
-            final Iterator<String> aliasIterator = flag.getAliases().iterator();
+            final Iterator<String> aliasIterator = flag.aliases().iterator();
             final LiteralArgumentBuilder<CommandSourceStack> flagLiteral = LiteralArgumentBuilder.literal(aliasIterator.next());
-            flagLiteral.requires((Predicate) flag.getRequirement());
+            flagLiteral.requires((Predicate) flag.requirement());
             final Collection<? extends CommandNode<CommandSourceStack>> toBeRedirected;
             final SpongeFlagLiteralCommandNode flagNode = new SpongeFlagLiteralCommandNode(flagLiteral, flag);
-            if (flag.getAssociatedParameter().isPresent()) {
+            if (flag.associatedParameter().isPresent()) {
                 toBeRedirected = this.createAndAttachNode(
                         Collections.singleton(flagNode),
-                        Collections.singletonList(flag.getAssociatedParameter().get()),
+                        Collections.singletonList(flag.associatedParameter().get()),
                         wrapper,
                         node.getCommand() != null,
                         false
@@ -184,7 +197,7 @@ public final class SpongeParameterTranslator {
                 final Parameter.Subcommand subcommands = ((Parameter.Subcommand) parameter);
                 if (!allowSubcommands) {
                     throw new IllegalStateException("Subcommands are not allowed for this element (subcommands were " +
-                            String.join(", ", subcommands.getAliases() + ")!"));
+                            String.join(", ", subcommands.aliases() + ")!"));
                 }
                 if (hasNext) {
                     // this is a failure condition because there cannot be a parameter after a subcommand.
@@ -193,8 +206,8 @@ public final class SpongeParameterTranslator {
                 // If the child is a subcommand, get the subcommand and attach it. At this point,
                 // we're done with the chain and we break out.
                 final Collection<LiteralCommandNode<CommandSourceStack>> nodes = this.createCommandTree(
-                        subcommands.getCommand(),
-                        subcommands.getAliases()
+                        subcommands.command(),
+                        subcommands.aliases()
                 );
                 for (final LiteralCommandNode<CommandSourceStack> node : nodes) {
                     nodesToAttachTo.forEach(x -> x.addChild(node));
@@ -212,7 +225,7 @@ public final class SpongeParameterTranslator {
                     if (parameter instanceof SpongeFirstOfParameter) {
                         // take each parameter in turn and evaluate it, returns the terminal nodes of each block
                         parametersToAttachTo = new ArrayList<>();
-                        for (final Parameter p : ((SpongeFirstOfParameter) parameter).getChildParameters()) {
+                        for (final Parameter p : ((SpongeFirstOfParameter) parameter).childParameters()) {
                             final Collection<? extends CommandNode<CommandSourceStack>> branchNodesToAttachTo = this.createAndAttachNode(
                                     nodesToAttachTo,
                                     Collections.singletonList(p),
@@ -225,7 +238,7 @@ public final class SpongeParameterTranslator {
                         // not so fancy stuff, it's a sequence, returns the terminal nodes of the block
                         parametersToAttachTo = new ArrayList<>(this.createAndAttachNode(
                                 nodesToAttachTo,
-                                ((SpongeMultiParameter) parameter).getChildParameters(),
+                                ((SpongeMultiParameter) parameter).childParameters(),
                                 executorWrapper,
                                 !hasNext || parameter.isTerminal(),
                                 allowSubcommands));
@@ -250,7 +263,7 @@ public final class SpongeParameterTranslator {
                             .flatMap(x -> x.getChildren().stream())
                             .map(CommandNode::getName)
                             .collect(Collectors.toSet());
-                    String key = valueParameter.getKey().key();
+                    String key = valueParameter.key().key();
                     while (names.contains(key)) {
                         if (suffix == null) {
                             suffix = new StringBuilder(String.valueOf(names.size()));
@@ -311,18 +324,18 @@ public final class SpongeParameterTranslator {
         ArgumentParser<? extends T> type = parameter.getArgumentTypeIfStandard();
 
         if (type == null) {
-            type = new CustomArgumentParser<>(parameter.getParsers(), parameter.getCompleter(), false);
+            type = new CustomArgumentParser<>(parameter.parsers(), parameter.completer(), false);
         }
 
         final SpongeArgumentCommandNodeBuilder<T> argumentBuilder = new SpongeArgumentCommandNodeBuilder<>(
-                SpongeParameterKey.getSpongeKey(parameter.getKey()),
+                SpongeParameterKey.getSpongeKey(parameter.key()),
                 type,
-                parameter.getCompleter(),
-                parameter.getValueUsage().orElse(null),
+                parameter.completer(),
+                parameter.valueUsage().orElse(null),
                 suffix
         );
         // CommandCause is mixed into CommandSource, so this is okay.
-        argumentBuilder.requires((Predicate) parameter.getRequirement());
+        argumentBuilder.requires((Predicate) parameter.requirement());
         return argumentBuilder;
     }
 

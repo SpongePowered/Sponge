@@ -33,12 +33,12 @@ import org.spongepowered.common.util.Constants;
 public final class SchematicUpdater1_to_2 implements DataContentUpdater {
 
     @Override
-    public int getInputVersion() {
+    public int inputVersion() {
         return 1;
     }
 
     @Override
-    public int getOutputVersion() {
+    public int outputVersion() {
         return 2;
     }
 

@@ -42,7 +42,7 @@ import java.util.Set;
 public final class ValueConstructorFactory {
 
     public static <V extends Value<E>, E> ValueConstructor<V, E> getConstructor(final SpongeKey<V, E> key) {
-        final Class<?> valueType = GenericTypeReflector.erase(key.getValueType());
+        final Class<?> valueType = GenericTypeReflector.erase(key.valueType());
         ValueConstructor<V, E> valueConstructor;
         if (ListValue.class.isAssignableFrom(valueType)) {
             valueConstructor = new SimpleValueConstructor(key,
@@ -66,7 +66,7 @@ public final class ValueConstructorFactory {
             valueConstructor = new SimpleValueConstructor(key,
                     (key1, value) -> new MutableSpongeValue((Key<? extends Value>) key1, value),
                     (key1, value) -> new ImmutableSpongeValue((Key<? extends Value>) key1, value));
-            final Class<?> elementType = GenericTypeReflector.erase(key.getElementType());
+            final Class<?> elementType = GenericTypeReflector.erase(key.elementType());
             if (Enum.class.isAssignableFrom(elementType)) {
                 valueConstructor = new CachedEnumValueConstructor(valueConstructor, elementType);
             } else if (elementType == Boolean.class) {

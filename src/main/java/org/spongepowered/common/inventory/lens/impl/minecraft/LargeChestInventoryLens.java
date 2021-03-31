@@ -32,7 +32,7 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 /**
  * This class is only used as an adapter when explicitly requested from the API, trough
- * {@link Chest#getDoubleChestInventory()}
+ * {@link Chest#doubleChestInventory()}
  */
 public class LargeChestInventoryLens extends RealLens {
 

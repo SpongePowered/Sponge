@@ -147,7 +147,7 @@ public final class SpongeDataManager implements DataManager {
     }
 
     @Override
-    public <T extends DataSerializable> Optional<DataContentUpdater> getWrappedContentUpdater(final Class<T> clazz, final int fromVersion,
+    public <T extends DataSerializable> Optional<DataContentUpdater> wrappedContentUpdater(final Class<T> clazz, final int fromVersion,
             final int toVersion) {
         if (fromVersion == toVersion) {
             throw new IllegalArgumentException("Attempting to convert to the same version!");
@@ -170,11 +170,11 @@ public final class SpongeDataManager implements DataManager {
         ImmutableList.Builder<DataContentUpdater> builder = ImmutableList.builder();
         int version = fromVersion;
         for (DataContentUpdater updater : updaters) {
-            if (updater.getInputVersion() == version) {
-                if (updater.getOutputVersion() > toVersion) {
+            if (updater.inputVersion() == version) {
+                if (updater.outputVersion() > toVersion) {
                     continue;
                 }
-                version = updater.getOutputVersion();
+                version = updater.outputVersion();
                 builder.add(updater);
             }
         }
@@ -191,7 +191,7 @@ public final class SpongeDataManager implements DataManager {
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public <T extends DataSerializable> Optional<DataBuilder<T>> getBuilder(final Class<T> clazz) {
+    public <T extends DataSerializable> Optional<DataBuilder<T>> builder(final Class<T> clazz) {
         final DataBuilder<?> dataBuilder = this.builders.get(clazz);
         if (dataBuilder != null) {
             return Optional.of((DataBuilder<T>) dataBuilder);
@@ -203,7 +203,7 @@ public final class SpongeDataManager implements DataManager {
     public <T extends DataSerializable> Optional<T> deserialize(final Class<T> clazz, final DataView dataView) {
         Objects.requireNonNull(dataView);
 
-        return this.getBuilder(clazz).flatMap(builder -> builder.build(dataView));
+        return this.builder(clazz).flatMap(builder -> builder.build(dataView));
     }
 
     @Override
@@ -218,12 +218,12 @@ public final class SpongeDataManager implements DataManager {
 
     @SuppressWarnings("unchecked")
     @Override
-    public <T extends DataHolder.Immutable<T>, B extends DataHolderBuilder.Immutable<T, B>> Optional<B> getImmutableBuilder(final Class<T> holderClass) {
+    public <T extends DataHolder.Immutable<T>, B extends DataHolderBuilder.Immutable<T, B>> Optional<B> immutableBuilder(final Class<T> holderClass) {
         return Optional.ofNullable((B) this.immutableDataBuilderMap.get(Objects.requireNonNull(holderClass)));
     }
 
     @Override
-    public <T> Optional<DataTranslator<T>> getTranslator(final Class<T> objectClass) {
+    public <T> Optional<DataTranslator<T>> translator(final Class<T> objectClass) {
         return DataTranslatorProvider.INSTANCE.getSerializer(objectClass);
     }
 
@@ -233,7 +233,7 @@ public final class SpongeDataManager implements DataManager {
     }
 
     private void registerKeyListener0(final KeyBasedDataListener<?> listener) {
-        Sponge.getEventManager().registerListener(listener.getOwner(), ChangeDataHolderEvent.ValueChange.class, listener);
+        Sponge.eventManager().registerListener(listener.getOwner(), ChangeDataHolderEvent.ValueChange.class, listener);
     }
 
     @Override
@@ -270,19 +270,19 @@ public final class SpongeDataManager implements DataManager {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void registerCustomDataRegistration(final SpongeDataRegistration registration) {
         for (final DataStore dataStore : registration.getDataStores()) {
-            this.dataStoreRegistry.register(dataStore, registration.getKeys());
+            this.dataStoreRegistry.register(dataStore, registration.keys());
         }
 
-        for (final Key key : registration.getKeys()) {
+        for (final Key key : registration.keys()) {
             this.registerCustomDataProviderForKey(registration, key);
         }
     }
 
     private <V extends Value<E>, E> void registerCustomDataProviderForKey(final SpongeDataRegistration registration, final Key<V> key) {
-        final Collection<DataProvider<V, E>> providers = registration.getProvidersFor(key);
+        final Collection<DataProvider<V, E>> providers = registration.providersFor(key);
 
         final Set<Type> dataStoreSupportedTokens = new HashSet<>();
-        this.dataStoreRegistry.getDataStores(key).stream().map(DataStore::getSupportedTypes).forEach(dataStoreSupportedTokens::addAll);
+        this.dataStoreRegistry.getDataStores(key).stream().map(DataStore::supportedTypes).forEach(dataStoreSupportedTokens::addAll);
 
         for (final DataProvider<V, E> provider : providers) {
             this.dataProviderRegistry.register(provider);
@@ -298,10 +298,10 @@ public final class SpongeDataManager implements DataManager {
     @SuppressWarnings({"unchecked", "rawtypes"})
     public void registerDataRegistration(final SpongeDataRegistration registration) {
         for (final DataStore dataStore : registration.getDataStores()) {
-            this.dataStoreRegistry.register(dataStore, registration.getKeys());
+            this.dataStoreRegistry.register(dataStore, registration.keys());
         }
-        for (final Key key : registration.getKeys()) {
-            final Collection<DataProvider<?, ?>> providers = registration.getProvidersFor(key);
+        for (final Key key : registration.keys()) {
+            final Collection<DataProvider<?, ?>> providers = registration.providersFor(key);
             for (DataProvider<?, ?> provider : providers) {
                 this.dataProviderRegistry.register(provider);
             }
@@ -361,8 +361,8 @@ public final class SpongeDataManager implements DataManager {
     }
 
     public void registerLegacySpongeData(String nbtKey, ResourceKey dataStoreKey, Key<? extends Value<?>> dataKey) {
-        this.legacySpongeData.put(nbtKey, DataQuery.of(dataStoreKey.getNamespace(), dataStoreKey.getValue()).then(Constants.Sponge.Data.V3.CONTENT)
-                .then(dataKey.getKey().getValue()));
+        this.legacySpongeData.put(nbtKey, DataQuery.of(dataStoreKey.namespace(), dataStoreKey.value()).then(Constants.Sponge.Data.V3.CONTENT)
+                .then(dataKey.key().value()));
     }
 
     public @Nullable DataQuery legacySpongeDataQuery(String nbtKey) {

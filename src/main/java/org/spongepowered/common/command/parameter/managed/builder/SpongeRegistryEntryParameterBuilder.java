@@ -38,7 +38,7 @@ import java.util.Objects;
 import java.util.function.Function;
 
 public final class SpongeRegistryEntryParameterBuilder<T>
-        implements VariableValueParameters.CatalogedTypeBuilder<T> {
+        implements VariableValueParameters.RegistryEntryBuilder<T> {
 
     private final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction;
     private final List<String> prefixes = new ArrayList<>();
@@ -48,7 +48,7 @@ public final class SpongeRegistryEntryParameterBuilder<T>
     }
 
     @Override
-    public VariableValueParameters.@NonNull CatalogedTypeBuilder<T> defaultNamespace(@NonNull final String prefix) {
+    public VariableValueParameters.@NonNull RegistryEntryBuilder<T> defaultNamespace(@NonNull final String prefix) {
         this.prefixes.add(Objects.requireNonNull(prefix, "Prefix cannot be null!"));
         return this;
     }
@@ -60,7 +60,7 @@ public final class SpongeRegistryEntryParameterBuilder<T>
     }
 
     @Override
-    public VariableValueParameters.@NonNull CatalogedTypeBuilder<T> reset() {
+    public VariableValueParameters.@NonNull RegistryEntryBuilder<T> reset() {
         this.prefixes.clear();
         return this;
     }

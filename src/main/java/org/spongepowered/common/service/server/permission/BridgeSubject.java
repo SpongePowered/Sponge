@@ -57,37 +57,37 @@ public interface BridgeSubject extends Subject {
     }
 
     @Override
-    default Set<Context> getActiveContexts() {
+    default Set<Context> activeContexts() {
         return ((SubjectBridge) this).bridge$resolveOptional()
-                .map(Subject::getActiveContexts)
+                .map(Subject::activeContexts)
                 .orElseGet(Collections::emptySet);
     }
 
     @Override
-    default Optional<String> getFriendlyIdentifier() {
+    default Optional<String> friendlyIdentifier() {
         return ((SubjectBridge) this).bridge$resolveOptional()
-                .flatMap(Contextual::getFriendlyIdentifier);
+                .flatMap(Contextual::friendlyIdentifier);
     }
 
     @Override
-    default SubjectCollection getContainingCollection() {
-        return ((SubjectBridge) this).bridge$resolve().getContainingCollection();
+    default SubjectCollection containingCollection() {
+        return ((SubjectBridge) this).bridge$resolve().containingCollection();
     }
 
     @Override
-    default SubjectData getSubjectData() {
-        return ((SubjectBridge) this).bridge$resolve().getSubjectData();
+    default SubjectData subjectData() {
+        return ((SubjectBridge) this).bridge$resolve().subjectData();
     }
 
     @Override
-    default SubjectData getTransientSubjectData() {
-        return ((SubjectBridge) this).bridge$resolve().getTransientSubjectData();
+    default SubjectData transientSubjectData() {
+        return ((SubjectBridge) this).bridge$resolve().transientSubjectData();
     }
 
     @Override
-    default Tristate getPermissionValue(final Set<Context> contexts, final String permission) {
+    default Tristate permissionValue(final Set<Context> contexts, final String permission) {
         return ((SubjectBridge) this).bridge$resolveOptional()
-                .map(subject -> subject.getPermissionValue(contexts, permission))
+                .map(subject -> subject.permissionValue(contexts, permission))
                 .orElseGet(() -> ((SubjectBridge) this).bridge$permDefault(permission));
     }
 
@@ -95,7 +95,7 @@ public interface BridgeSubject extends Subject {
     default boolean hasPermission(final Set<Context> contexts, final String permission) {
         return ((SubjectBridge) this).bridge$resolveOptional()
                 .map(subject -> {
-                    final Tristate ret = subject.getPermissionValue(contexts, permission);
+                    final Tristate ret = subject.permissionValue(contexts, permission);
                     if (ret == Tristate.UNDEFINED) {
                         return ((SubjectBridge) this).bridge$permDefault(permission).asBoolean();
                     }
@@ -108,7 +108,7 @@ public interface BridgeSubject extends Subject {
     default boolean hasPermission(final String permission) {
         // forwarded to the implementation in this class, and not the default
         // in the Subject interface so permission defaults can be applied
-        return this.hasPermission(this.getActiveContexts(), permission);
+        return this.hasPermission(this.activeContexts(), permission);
     }
 
     @Override
@@ -122,22 +122,22 @@ public interface BridgeSubject extends Subject {
     }
 
     @Override
-    default List<SubjectReference> getParents(final Set<Context> contexts) {
-        return ((SubjectBridge) this).bridge$resolve().getParents(contexts);
+    default List<SubjectReference> parents(final Set<Context> contexts) {
+        return ((SubjectBridge) this).bridge$resolve().parents(contexts);
     }
 
     @Override
-    default List<SubjectReference> getParents() {
-        return ((SubjectBridge) this).bridge$resolve().getParents();
+    default List<SubjectReference> parents() {
+        return ((SubjectBridge) this).bridge$resolve().parents();
     }
 
     @Override
-    default Optional<String> getOption(final Set<Context> contexts, final String key) {
-        return ((SubjectBridge) this).bridge$resolve().getOption(contexts, key);
+    default Optional<String> option(final Set<Context> contexts, final String key) {
+        return ((SubjectBridge) this).bridge$resolve().option(contexts, key);
     }
 
     @Override
-    default Optional<String> getOption(final String key) {
-        return ((SubjectBridge) this).bridge$resolve().getOption(key);
+    default Optional<String> option(final String key) {
+        return ((SubjectBridge) this).bridge$resolve().option(key);
     }
 }

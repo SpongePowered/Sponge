@@ -50,8 +50,7 @@ import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
 
 @Mixin(net.minecraft.world.item.crafting.Recipe.class)
-@Implements(@Interface(iface = Recipe.class, prefix = "recipe$"))
-public interface RecipeMixin_API<C extends Container> {
+public interface RecipeMixin_API<C extends Container> extends Recipe {
 
     // @formatter:off
     @Shadow ItemStack shadow$assemble(C inv);
@@ -65,37 +64,42 @@ public interface RecipeMixin_API<C extends Container> {
     // @formatter:on
 
     @Nonnull
-    default ItemStackSnapshot recipe$getExemplaryResult() {
+    @Override
+    default ItemStackSnapshot exemplaryResult() {
         return ItemStackUtil.snapshotOf(this.shadow$getResultItem());
     }
 
-    default boolean recipe$isValid(@Nonnull Inventory inv, @Nonnull ServerWorld world) {
+    @Override
+    default boolean isValid(@Nonnull final Inventory inv, @Nonnull final ServerWorld world) {
         return this.shadow$matches(toNativeInventory(inv), (net.minecraft.world.level.Level) world);
     }
 
     @Nonnull
-    default ItemStackSnapshot recipe$getResult(@Nonnull Inventory inv) {
+    @Override
+    default ItemStackSnapshot result(@Nonnull final Inventory inv) {
         return ItemStackUtil.snapshotOf(this.shadow$assemble(toNativeInventory(inv)));
     }
 
     @Nonnull
-    default List<ItemStackSnapshot> recipe$getRemainingItems(@Nonnull Inventory inv) {
+    @Override
+    default List<ItemStackSnapshot> remainingItems(@Nonnull final Inventory inv) {
         return this.shadow$getRemainingItems(toNativeInventory(inv)).stream()
                 .map(ItemStackUtil::snapshotOf)
                 .collect(Collectors.toList());
     }
 
-    @Intrinsic
-    default List<Ingredient> recipe$getIngredients() {
+    @Override
+    default List<Ingredient> ingredients() {
         return this.shadow$getIngredients().stream().map(IngredientUtil::fromNative).collect(Collectors.toList());
     }
 
-    @Intrinsic
-    default boolean recipe$isDynamic() {
+    @Override
+    default boolean isDynamic() {
         return this.shadow$isSpecial();
     }
 
-    default RecipeType<? extends Recipe> recipe$getType() {
+    @Override
+    default RecipeType<? extends Recipe> type() {
         return (RecipeType) this.shadow$getType();
     }
 }

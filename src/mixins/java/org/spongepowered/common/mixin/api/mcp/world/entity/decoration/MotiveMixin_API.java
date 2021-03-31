@@ -32,7 +32,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(net.minecraft.world.entity.decoration.Motive.class)
-@Implements(value = @Interface(iface = ArtType.class, prefix = "artType$"))
 public abstract class MotiveMixin_API implements ArtType {
 
     // @formatter:off
@@ -40,13 +39,13 @@ public abstract class MotiveMixin_API implements ArtType {
     @Shadow public abstract int shadow$getHeight();
     // @formatter:on
 
-    @Intrinsic
-    public int artType$getWidth() {
+    @Override
+    public int width() {
         return this.shadow$getWidth();
     }
 
-    @Intrinsic
-    public int artType$getHeight() {
+    @Override
+    public int height() {
         return this.shadow$getHeight();
     }
 }

@@ -71,8 +71,8 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
         final Transaction<? extends BlockSnapshot> snapshotTransaction, final T context) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
-            final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.getOriginal();
-            final Block block = (Block) original.getState().getType();
+            final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.original();
+            final Block block = (Block) original.state().type();
             final BlockPos changedBlockPos = original.getBlockPos();
             original.getServerWorld().ifPresent(worldServer -> {
                 final LevelChunkBridge changedMixinChunk = (LevelChunkBridge) worldServer.getChunkAt(changedBlockPos);

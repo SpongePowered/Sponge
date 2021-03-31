@@ -43,7 +43,7 @@ public abstract class ImmutableDataProvider<V extends Value<E>, E> extends Abstr
 
     @Override
     public DataTransactionResult offer(DataHolder.Mutable dataHolder, E element) {
-        return DataTransactionResult.failResult(Value.immutableOf(this.getKey(), element));
+        return DataTransactionResult.failResult(Value.immutableOf(this.key(), element));
     }
 
     @Override

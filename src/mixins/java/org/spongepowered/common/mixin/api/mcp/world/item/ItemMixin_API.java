@@ -53,12 +53,12 @@ public abstract class ItemMixin_API implements ItemType {
     }
 
     @Override
-    public int getMaxStackQuantity() {
+    public int maxStackQuantity() {
         return this.shadow$getMaxStackSize();
     }
 
     @Override
-    public Optional<BlockType> getBlock() {
+    public Optional<BlockType> block() {
         return Optional.ofNullable(this.api$blockType);
     }
 

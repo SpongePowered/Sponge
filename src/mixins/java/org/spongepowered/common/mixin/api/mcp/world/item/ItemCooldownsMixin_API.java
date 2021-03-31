@@ -57,7 +57,7 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
     }
 
     @Override
-    public OptionalInt getCooldown(final ItemType type) {
+    public OptionalInt cooldown(final ItemType type) {
         checkNotNull(type, "Item type cannot be null!");
 
         final ItemCooldowns_CooldownInstanceAccessor cooldown = (ItemCooldowns_CooldownInstanceAccessor) this.cooldowns.get((Item) type);
@@ -85,7 +85,7 @@ public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.en
     }
 
     @Override
-    public OptionalDouble getFractionRemaining(final ItemType type) {
+    public OptionalDouble fractionRemaining(final ItemType type) {
         checkNotNull(type, "Item type cannot be null!");
         final float cooldown = this.shadow$getCooldownPercent((Item) type, 0);
 

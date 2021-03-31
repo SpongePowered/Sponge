@@ -49,7 +49,7 @@ public final class IDyeableArmorItemStackData {
                             if (v == null) {
                                 item.clearColor(h);
                             } else {
-                                item.setColor(h, (((v.getRed() << 8) + v.getGreen()) << 8) + v.getBlue());
+                                item.setColor(h, (((v.red() << 8) + v.green()) << 8) + v.blue());
                             }
                         })
                         .delete(h -> ((DyeableLeatherItem) h.getItem()).clearColor(h))

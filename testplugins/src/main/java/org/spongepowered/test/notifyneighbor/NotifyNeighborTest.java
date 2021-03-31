@@ -27,17 +27,12 @@ package org.spongepowered.test.notifyneighbor;
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
-import org.spongepowered.api.util.Direction;
-import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
-
-import java.util.Map;
 
 @Plugin("notifyneighbor")
 public final class NotifyNeighborTest implements LoadableModule {
@@ -51,17 +46,21 @@ public final class NotifyNeighborTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.plugin, new NotifyNeighborListener());
+        Sponge.eventManager().registerListeners(this.plugin, new NotifyNeighborListener());
     }
 
     public static class NotifyNeighborListener {
         @Listener
         public void onChangeBlock(final NotifyNeighborBlockEvent event) {
-            final LocatableBlock causeBlock = event.getCause().first(LocatableBlock.class).get();
-            for (Map.Entry<Direction, BlockState> entry : event.getNeighbors().entrySet()) {
-                Sponge.getGame().getSystemSubject().sendMessage(
-                        Component.text(causeBlock.getBlockPosition() + " " + causeBlock.getBlockState() + " notified " + entry.getValue() + " in direction " + entry.getKey()));
-            }
+            final Object root = event.cause().root();
+            Sponge.game().systemSubject().sendMessage(Component.text(root + " is the cause"));
+            event.tickets().forEach(ticket -> {
+                Sponge.game().systemSubject().sendMessage(
+                    Component.text(ticket.notifier().blockPosition() + " "
+                        + ticket.notifier().blockState() + " notified " + ticket.target().state()
+                        + " in direction " + ticket.target()));
+
+            });
         }
     }
 }

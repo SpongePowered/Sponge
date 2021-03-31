@@ -26,15 +26,11 @@ package org.spongepowered.common.service.server.permission;
 
 import com.google.common.base.Preconditions;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
-import org.spongepowered.common.profile.SpongeGameProfile;
 
 /**
  * {@link SubjectBridge} helper class to apply the appropriate subject to the
@@ -47,7 +43,7 @@ public final class SubjectHelper {
 
     public static void applySubject(final SubjectBridge ref) {
         Preconditions.checkNotNull(ref);
-        final PermissionService service = Sponge.getServer().getServiceProvider().permissionService();
+        final PermissionService service = Sponge.server().serviceProvider().permissionService();
         final SubjectReference subject;
 
         // check if we're using the native Sponge impl
@@ -60,12 +56,12 @@ public final class SubjectHelper {
                 // GameProfile is already resolved, use it directly
                 subject = ((UserCollection) collection).get(((GameProfileHolderBridge) ref).bridge$getGameProfile()).asSubjectReference();
             } else {
-                subject = collection.get(((Subject) ref).getIdentifier()).asSubjectReference();
+                subject = collection.get(((Subject) ref).identifier()).asSubjectReference();
             }
         } else {
             // build a new subject reference using the permission service
             // this doesn't actually load the subject, so it will be lazily init'd when needed.
-            subject = service.newSubjectReference(ref.bridge$getSubjectCollectionIdentifier(), ((Subject) ref).getIdentifier());
+            subject = service.newSubjectReference(ref.bridge$getSubjectCollectionIdentifier(), ((Subject) ref).identifier());
         }
 
         ref.bridge$setSubject(subject);

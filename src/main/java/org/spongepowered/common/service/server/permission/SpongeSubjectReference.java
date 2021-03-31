@@ -46,12 +46,12 @@ public class SpongeSubjectReference implements SubjectReference {
     }
 
     @Override
-    public String getCollectionIdentifier() {
+    public String collectionIdentifier() {
         return this.collectionId;
     }
 
     @Override
-    public String getSubjectIdentifier() {
+    public String subjectIdentifier() {
         return this.subjectId;
     }
 

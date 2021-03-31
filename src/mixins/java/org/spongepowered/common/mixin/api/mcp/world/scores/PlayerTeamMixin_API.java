@@ -70,13 +70,13 @@ public abstract class PlayerTeamMixin_API implements Team {
     @Shadow public abstract Collection<String> shadow$getPlayers();
     // @formatter:on
 
-    @Intrinsic
-    public String team$getName() {
+    @Override
+    public String name() {
         return this.name;
     }
 
     @Override
-    public Component getDisplayName() {
+    public Component displayName() {
         return ((PlayerTeamBridge) this).bridge$getDisplayName();
     }
 
@@ -86,7 +86,7 @@ public abstract class PlayerTeamMixin_API implements Team {
     }
 
     @Override
-    public NamedTextColor getColor() {
+    public NamedTextColor color() {
         return ((PlayerTeamBridge) this).bridge$getColor();
     }
 
@@ -96,7 +96,7 @@ public abstract class PlayerTeamMixin_API implements Team {
     }
 
     @Override
-    public Component getPrefix() {
+    public Component prefix() {
         return ((PlayerTeamBridge) this).bridge$getPrefix();
     }
 
@@ -106,7 +106,7 @@ public abstract class PlayerTeamMixin_API implements Team {
     }
 
     @Override
-    public Component getSuffix() {
+    public Component suffix() {
         return ((PlayerTeamBridge) this).bridge$getSuffix();
     }
 
@@ -137,7 +137,7 @@ public abstract class PlayerTeamMixin_API implements Team {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Visibility getNameTagVisibility() {
+    public Visibility nameTagVisibility() {
         return (Visibility) (Object) this.shadow$getNameTagVisibility();
     }
 
@@ -149,7 +149,7 @@ public abstract class PlayerTeamMixin_API implements Team {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Visibility getDeathMessageVisibility() {
+    public Visibility deathMessageVisibility() {
         return (Visibility) (Object) this.shadow$getDeathMessageVisibility();
     }
 
@@ -161,7 +161,7 @@ public abstract class PlayerTeamMixin_API implements Team {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public org.spongepowered.api.scoreboard.CollisionRule getCollisionRule() {
+    public org.spongepowered.api.scoreboard.CollisionRule collisionRule() {
         return (org.spongepowered.api.scoreboard.CollisionRule) (Object) this.shadow$getCollisionRule();
     }
 
@@ -172,7 +172,7 @@ public abstract class PlayerTeamMixin_API implements Team {
     }
 
     @Override
-    public Set<Component> getMembers() {
+    public Set<Component> members() {
         return this.shadow$getPlayers().stream().map(SpongeAdventure::legacySection).collect(Collectors.toSet());
     }
 
@@ -206,7 +206,7 @@ public abstract class PlayerTeamMixin_API implements Team {
     }
 
     @Override
-    public Optional<org.spongepowered.api.scoreboard.Scoreboard> getScoreboard() {
+    public Optional<org.spongepowered.api.scoreboard.Scoreboard> scoreboard() {
         return Optional.ofNullable((org.spongepowered.api.scoreboard.Scoreboard) this.scoreboard);
     }
 

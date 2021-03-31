@@ -56,18 +56,18 @@ public abstract class DedicatedPlayerListMixin extends PlayerList {
             ci.setReturnValue(true);
             return;
         }
-        final PermissionService permissionService = Sponge.getServer().getServiceProvider().permissionService();
-        final Subject subject = permissionService.getUserSubjects()
-                .getSubject(profile.getId().toString()).orElse(permissionService.getDefaults());
+        final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
+        final Subject subject = permissionService.userSubjects()
+                .subject(profile.getId().toString()).orElse(permissionService.defaults());
         ci.setReturnValue(subject.hasPermission(LoginPermissions.BYPASS_WHITELIST_PERMISSION));
     }
 
     @Inject(method = "canBypassPlayerLimit", at = @At("HEAD"), cancellable = true)
     private void impl$checkForPlayerLimitBypassPermission(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
-        final PermissionService permissionService = Sponge.getServer().getServiceProvider().permissionService();
-        final Subject subject = permissionService.getUserSubjects()
-                .getSubject(profile.getId().toString()).orElse(permissionService.getDefaults());
-        final Tristate tristate = subject.getPermissionValue(SubjectData.GLOBAL_CONTEXT, LoginPermissions.BYPASS_PLAYER_LIMIT_PERMISSION);
+        final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
+        final Subject subject = permissionService.userSubjects()
+                .subject(profile.getId().toString()).orElse(permissionService.defaults());
+        final Tristate tristate = subject.permissionValue(SubjectData.GLOBAL_CONTEXT, LoginPermissions.BYPASS_PLAYER_LIMIT_PERMISSION);
         // Use the op list if the permission isn't overridden for the subject and
         // if we are still using the default permission service
         if (tristate == Tristate.UNDEFINED && permissionService instanceof SpongePermissionService) {

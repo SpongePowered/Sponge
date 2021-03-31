@@ -57,12 +57,12 @@ public final class SpongeFilteredTrigger implements CriterionTriggerInstance, Fi
     }
 
     @Override
-    public Trigger getType() {
+    public Trigger type() {
         return (Trigger) this.triggerType;
     }
 
     @Override
-    public FilteredTriggerConfiguration getConfiguration() {
+    public FilteredTriggerConfiguration configuration() {
         return this.configuration;
     }
 

@@ -139,7 +139,7 @@ public abstract class ExplosionMixin_Tracker {
                     //     });
                     // }
 
-                    //this.world.setBlock(blockpos, Blocks.AIR.getDefaultState(), 3);
+                    //this.world.setBlock(blockpos, Blocks.AIR.defaultState(), 3);
                     //block.onExplosionDestroy(this.world, blockpos, this);
 
                     final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
@@ -162,7 +162,7 @@ public abstract class ExplosionMixin_Tracker {
             }
             // Sponge Start - This is built into the SpawnDestructBlocksEffect
             // for(Pair<ItemStack, BlockPos> pair : objectarraylist) {
-            //    Block.spawnAsEntity(this.world, pair.getSecond(), pair.getFirst());
+            //    Block.spawnAsEntity(this.world, pair.second(), pair.first());
             // }
             // Sponge End
         }

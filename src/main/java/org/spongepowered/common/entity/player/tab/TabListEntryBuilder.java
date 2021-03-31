@@ -84,11 +84,11 @@ public final class TabListEntryBuilder implements TabListEntry.Builder {
 
     @Override
     public TabListEntry.Builder from(TabListEntry value) {
-        this.list = checkNotNull(value.getList(), "list");
-        this.profile = checkNotNull(value.getProfile(), "profile");
-        this.displayName = value.getDisplayName().orElse(null);
-        this.latency = value.getLatency();
-        this.gameMode = checkNotNull(value.getGameMode(), "game mode");
+        this.list = checkNotNull(value.list(), "list");
+        this.profile = checkNotNull(value.profile(), "profile");
+        this.displayName = value.displayName().orElse(null);
+        this.latency = value.latency();
+        this.gameMode = checkNotNull(value.gameMode(), "game mode");
         return this;
     }
 

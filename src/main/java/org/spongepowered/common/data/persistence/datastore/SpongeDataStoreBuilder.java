@@ -75,7 +75,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
 
     @Override
     public <T, V extends Value<T>> SpongeDataStoreBuilder key(final Key<V> key, final DataQuery dataQuery) {
-        final BiFunction<DataView, DataQuery, Optional<T>> deserializer = this.getDeserializer(key.getElementType());
+        final BiFunction<DataView, DataQuery, Optional<T>> deserializer = this.getDeserializer(key.elementType());
         return this.key(key, (view, value) -> view.set(dataQuery, value), v -> deserializer.apply(v, dataQuery));
     }
 
@@ -92,7 +92,10 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
         if (registryTypeForValue.isPresent()) {
             return (view, dataQuery)  -> (Optional<T>) registryTypeForValue.flatMap(regType -> view.getRegistryValue(dataQuery, regType));
         }
-        if (Sponge.getGame().getDataManager().getTranslator(rawType).isPresent()) {
+        if (ResourceKey.class.isAssignableFrom(rawType)) {
+            return (view, dataQuery) -> (Optional<T>) view.getString(dataQuery).map(ResourceKey::resolve);
+        }
+        if (Sponge.game().dataManager().translator(rawType).isPresent()) {
             return (view, dataQuery)  -> (Optional<T>) view.getObject(dataQuery, rawType);
         }
         if (Set.class.isAssignableFrom(rawType)) {
@@ -121,7 +124,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
             final Function<DataQuery, Optional<?>> keyDeserializer;
             final Optional<RegistryType<Object>> registryTypeForKey = SpongeDataManager.INSTANCE.findRegistryTypeFor((Class) keyType);
             if (registryTypeForKey.isPresent()) {
-                keyDeserializer = key -> registryTypeForKey.flatMap(regType -> Sponge.getGame().registries().findRegistry(regType))
+                keyDeserializer = key -> registryTypeForKey.flatMap(regType -> Sponge.game().registries().findRegistry(regType))
                                                            .flatMap(r -> r.findValue(ResourceKey.resolve(key.toString())));
             } else if (((Class<?>) keyType).isEnum()) {
                 keyDeserializer = key -> Optional.ofNullable(Enum.valueOf(((Class<? extends Enum>) keyType), key.toString()));
@@ -137,7 +140,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
             final BiFunction<DataView, DataQuery, Optional<Object>> valueDeserializer = this.getDeserializer(valueType);
             return (view, dataQuery) -> (Optional<T>) view.getView(dataQuery).map(mapView -> {
                     final Map<Object, Object> resultMap = new HashMap<>();
-                    for (final DataQuery key : mapView.getKeys(false)) {
+                    for (final DataQuery key : mapView.keys(false)) {
                         final Object mapKey = keyDeserializer.apply(key)
                                         .orElseThrow(() -> new UnsupportedOperationException("Key not found " + key + " as " + keyType));
                         final Optional<?> mapValue = valueDeserializer.apply(mapView, key);
@@ -150,7 +153,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
     }
 
     @SuppressWarnings("unchecked")
-    private static <T> Optional<List<T>> deserializeList(Class<T> listType, DataView view, DataQuery dataQuery) {
+    private static <T> Optional<List<T>> deserializeList(final Class<T> listType, final DataView view, final DataQuery dataQuery) {
         if (DataView.class.isAssignableFrom(listType)) {
             return (Optional) view.getViewList(dataQuery);
         }
@@ -162,13 +165,13 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
         if (fromRegistry.isPresent()) {
             return (Optional) fromRegistry;
         }
-        if (Sponge.getGame().getDataManager().getTranslator(listType).isPresent()) {
+        if (Sponge.game().dataManager().translator(listType).isPresent()) {
             return view.getObjectList(dataQuery, listType);
         }
         return (Optional) view.getList(dataQuery);
     }
 
-    private <AT> AT[] listToArray(Class<AT> componentType, List<AT> list) {
+    private <AT> AT[] listToArray(final Class<AT> componentType, final List<AT> list) {
         return list.toArray((AT[])Array.newInstance(componentType, list.size()));
     }
 
@@ -184,7 +187,7 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
     @SuppressWarnings("rawtypes")
     public <T, V extends Value<T>> SpongeDataStoreBuilder key(final Key<V> key, final BiConsumer<DataView, T> serializer, final Function<DataView, Optional<T>> deserializer) {
         if (this.key != null) {
-            final DataQuery query = DataQuery.of(this.key.getNamespace(), this.key.getValue());
+            final DataQuery query = DataQuery.of(this.key.namespace(), this.key.value());
             final SpongeDataSerializer<T> customSerializer = new SpongeDataSerializer<>(serializer, this.version, query);
             final SpongeDataDeserializer<T> customDeserializer = new SpongeDataDeserializer<>(deserializer, this.version, query);
             this.serializers.put(key, (Tuple) Tuple.of(customSerializer, customDeserializer));
@@ -197,10 +200,10 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
 
     @Override
     @SuppressWarnings({"rawtypes", "unchecked"})
-    public EndStep keys(Key<?> key, Key<?>... moreKeys) {
-        this.key((Key) key, key.getKey().getValue());
-        for (Key<?> moreKey : moreKeys) {
-            this.key((Key) moreKey, moreKey.getKey().getValue());
+    public EndStep keys(final Key<?> key, final Key<?>... moreKeys) {
+        this.key((Key) key, key.key().value());
+        for (final Key<?> moreKey : moreKeys) {
+            this.key((Key) moreKey, moreKey.key().value());
         }
         return this;
     }
@@ -232,20 +235,20 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
     }
 
     @Override
-    public SpongeDataStoreBuilder pluginData(ResourceKey key) {
+    public SpongeDataStoreBuilder pluginData(final ResourceKey key) {
         this.key = key;
         return this;
     }
 
     @Override
-    public SpongeDataStoreBuilder pluginData(ResourceKey key, int version) {
+    public SpongeDataStoreBuilder pluginData(final ResourceKey key, final int version) {
         this.pluginData(key);
         this.version = version;
         return this;
     }
 
     @Override
-    public HolderStep updater(DataContentUpdater... updaters) {
+    public HolderStep updater(final DataContentUpdater... updaters) {
         this.updaters = updaters;
         return this;
     }
@@ -271,14 +274,14 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
         private final DataQuery key;
         private final int version;
 
-        public SpongeDataSerializer(BiConsumer<DataView, T> serializer, int version, DataQuery key) {
+        public SpongeDataSerializer(final BiConsumer<DataView, T> serializer, final int version, final DataQuery key) {
             this.serializer = serializer;
             this.key = key;
             this.version = version;
         }
 
         @Override
-        public void accept(DataView view, T v) {
+        public void accept(final DataView view, final T v) {
             final DataView data = DataUtil.getSpongeData(view, this.key, this.version).orElse(DataContainer.createNew());
             this.serializer.accept(data, v);
             if (data.isEmpty()) {
@@ -294,14 +297,14 @@ public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStor
         private final DataQuery key;
         private int version;
 
-        public SpongeDataDeserializer(Function<DataView, Optional<T>> deserializer, int version, DataQuery key) {
+        public SpongeDataDeserializer(final Function<DataView, Optional<T>> deserializer, final int version, final DataQuery key) {
             this.deserializer = deserializer;
             this.key = key;
             this.version = version;
         }
 
         @Override
-        public Optional<T> apply(DataView view) {
+        public Optional<T> apply(final DataView view) {
             return DataUtil.getSpongeData(view, this.key, this.version).flatMap(this.deserializer);
         }
     }

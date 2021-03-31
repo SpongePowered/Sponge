@@ -85,18 +85,18 @@ public final class SpongeGameConfigs {
     }
 
     public static boolean doesWorldConfigExist(final ResourceKey world) {
-        final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.getNamespace(), world.getValue() + ".conf"));
+        final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.namespace(), world.value() + ".conf"));
         return Files.exists(configPath);
     }
 
     public static InheritableConfigHandle<WorldConfig> createWorld(final @Nullable ResourceKey dimensionTypeKey, final ResourceKey world) {
         // Path format: config/sponge/worlds/<world-namespace>/<world-value>.conf
-        final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.getNamespace(), world.getValue() + ".conf"));
+        final Path configPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", world.namespace(), world.value() + ".conf"));
         if (dimensionTypeKey != null) {
             // Legacy config path: config/sponge/worlds/<dim-namespace>/<dim-value>/<world-name>/world.conf
             final String legacyName = SpongeGameConfigs.getLegacyWorldName(world);
             if (legacyName != null) {
-                final Path legacyPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", dimensionTypeKey.getNamespace(),
+                final Path legacyPath = SpongeConfigs.getDirectory().resolve(Paths.get("worlds", dimensionTypeKey.namespace(),
                         SpongeGameConfigs.getLegacyValue(dimensionTypeKey), legacyName, "world.conf"));
                 if (legacyPath.toFile().isFile() && !configPath.toFile().isFile()) {
                     try {
@@ -131,7 +131,7 @@ public final class SpongeGameConfigs {
         if (dimensionType.equals(Level.NETHER.location())) {
             return "nether";
         } else {
-            return dimensionType.getValue();
+            return dimensionType.value();
         }
     }
 

@@ -37,13 +37,13 @@ public class SpongePlaceholderComponentBuilder implements PlaceholderComponent.B
     @Nullable private PlaceholderContext context;
 
     @Override
-    public PlaceholderComponent.Builder setParser(final PlaceholderParser parser) {
+    public PlaceholderComponent.Builder parser(final PlaceholderParser parser) {
         this.parser = Preconditions.checkNotNull(parser, "parser cannot be null");
         return this;
     }
 
     @Override
-    public PlaceholderComponent.Builder setContext(final PlaceholderContext context) {
+    public PlaceholderComponent.Builder context(final PlaceholderContext context) {
         this.context = Preconditions.checkNotNull(context, "context cannot be null");
         return this;
     }

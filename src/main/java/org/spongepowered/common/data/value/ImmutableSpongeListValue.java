@@ -44,8 +44,8 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
 
     @Override
     @SuppressWarnings("unchecked")
-    public SpongeKey<? extends ListValue<E>, List<E>> getKey() {
-        return (SpongeKey<? extends ListValue<E>, List<E>>) super.getKey();
+    public SpongeKey<? extends ListValue<E>, List<E>> key() {
+        return (SpongeKey<? extends ListValue<E>, List<E>>) super.key();
     }
 
     @Override
@@ -94,16 +94,16 @@ public class ImmutableSpongeListValue<E> extends ImmutableSpongeCollectionValue<
             list = new ArrayList<>(this.element);
             consumer.accept(list);
         }
-        return this.getKey().getValueConstructor().getRawImmutable(list).asImmutable();
+        return this.key().getValueConstructor().getRawImmutable(list).asImmutable();
     }
 
     @Override
     public ListValue.Immutable<E> with(List<E> value) {
-        return this.getKey().getValueConstructor().getImmutable(value).asImmutable();
+        return this.key().getValueConstructor().getImmutable(value).asImmutable();
     }
 
     @Override
     public ListValue.Mutable<E> asMutable() {
-        return new MutableSpongeListValue<>(this.getKey(), this.get());
+        return new MutableSpongeListValue<>(this.key(), this.get());
     }
 }

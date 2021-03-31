@@ -50,7 +50,7 @@ public abstract class NearestAttackableTargetGoalMixin_API extends TargetGoalMix
     // @formatter:on
 
     @Override
-    public Class<? extends Living> getTargetClass() {
+    public Class<? extends Living> targetClass() {
         return (Class<? extends Living>) this.targetType;
     }
 
@@ -61,7 +61,7 @@ public abstract class NearestAttackableTargetGoalMixin_API extends TargetGoalMix
     }
 
     @Override
-    public int getChance() {
+    public int chance() {
         return this.randomInterval;
     }
 
@@ -78,7 +78,7 @@ public abstract class NearestAttackableTargetGoalMixin_API extends TargetGoalMix
     }
 
     @Override
-    public Predicate<Living> getFilter() {
+    public Predicate<Living> filter() {
         final Predicate<LivingEntity> predicate = ((TargetingConditionsAccessor) this.targetConditions).accessor$selector();
         return (Predicate<Living>) (Object) (predicate == null ? NearestAttackableTargetGoalMixin_API.ALWAYS_TRUE : predicate);
     }

@@ -96,7 +96,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     usedButton = packetIn.getAction() == ServerboundPlayerActionPacket.Action.DROP_ITEM
                         ? Constants.Networking.PACKET_BUTTON_PRIMARY_ID
                         : 1;
-                    slot = ((PlayerInventory) player.getInventory()).getEquipment().getSlot(
+                    slot = ((PlayerInventory) player.getInventory()).equipment().slot(
                         EquipmentTypes.MAIN_HAND).orElse(null);
                 } else {
                     final ServerboundContainerClickPacket packetIn = context.getPacket();
@@ -115,9 +115,9 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
                 SpongeCommon.postEvent(dropItemEvent);
                 if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
-                    dropItemEvent.getTransactions())) {
+                    dropItemEvent.transactions())) {
                     ((ServerPlayerBridge) player).bridge$restorePacketItem(InteractionHand.MAIN_HAND);
-                    PacketPhaseUtil.handleSlotRestore(player, player.containerMenu, dropItemEvent.getTransactions(),
+                    PacketPhaseUtil.handleSlotRestore(player, player.containerMenu, dropItemEvent.transactions(),
                         true);
                 } else {
                     PacketState.processSpawnedEntities(player, dropItemEvent);
@@ -146,7 +146,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             for (final Entity currentEntity : capturedEntities) {
                 if (currentEntity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((ServerPlayer) serverPlayer).getUser());
+                    ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((ServerPlayer) serverPlayer).user());
                 } else {
                     currentEntity.offer(Keys.CREATOR, serverPlayer.getUUID());
                 }
@@ -156,11 +156,11 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             final ClickContainerEvent.Drop event;
             if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {
                 event = SpongeEventFactory.createClickContainerEventDropSingle(
-                    frame.getCurrentCause(),
+                    frame.currentCause(),
                     openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
             } else {
                 event = SpongeEventFactory.createClickContainerEventDropFull(
-                    frame.getCurrentCause(),
+                    frame.currentCause(),
                     openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
             }
             // TODO the nature of how this event is handled prevents the cause information being preserved through

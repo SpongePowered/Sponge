@@ -57,8 +57,8 @@ public abstract class BanListEntryMixin<T> extends StoredUserEntryMixin<T> imple
 
 //        final Optional<Player> user;
 //        if ("Server".equals(this.source)) { // There could be a user called Server, but of course Mojang doesn't care...
-//            this.bridge$commandSrc = SpongeCommon.getGame().getServer().getConsole();
-//        } else if ((user = Sponge.getGame().getServer().getPlayer(this.bannedBy)).isPresent()) {
+//            this.bridge$commandSrc = SpongeCommon.game().getServer().getConsole();
+//        } else if ((user = Sponge.game().getServer().player(this.bannedBy)).isPresent()) {
 //            this.bridge$commandSrc = user.get();
 //        }
     }

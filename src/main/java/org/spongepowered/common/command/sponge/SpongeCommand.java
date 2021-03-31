@@ -90,9 +90,9 @@ public class SpongeCommand {
     public Command.Parameterized createSpongeCommand() {
         // /sponge audit
         final Command.Parameterized auditCommand = Command.builder()
-                .setPermission("sponge.command.audit")
-                .setShortDescription(Component.text("Audit mixin classes for implementation"))
-                .setExecutor(this::auditSubcommandExecutor)
+                .permission("sponge.command.audit")
+                .shortDescription(Component.text("Audit mixin classes for implementation"))
+                .executor(this::auditSubcommandExecutor)
                 .build();
 
         // /sponge chunks
@@ -100,38 +100,38 @@ public class SpongeCommand {
 
         // /sponge heap
         final Command.Parameterized heapCommand = Command.builder()
-                .setPermission("sponge.command.heap")
-                .setShortDescription(Component.text("Dump live JVM heap"))
-                .setExecutor(this::heapSubcommandExecutor)
+                .permission("sponge.command.heap")
+                .shortDescription(Component.text("Dump live JVM heap"))
+                .executor(this::heapSubcommandExecutor)
                 .build();
 
         // /sponge plugins
         final Command.Parameterized pluginsReloadCommand = Command.builder()
-                .setPermission("sponge.command.plugins.refresh")
-                .setShortDescription(Component.text("Refreshes supported plugins, typically causing plugin configuration reloads."))
-                .parameter(Parameter.builder(PluginContainer.class)
+                .permission("sponge.command.plugins.refresh")
+                .shortDescription(Component.text("Refreshes supported plugins, typically causing plugin configuration reloads."))
+                .addParameter(Parameter.builder(PluginContainer.class)
                         .optional()
-                        .parser(new FilteredPluginContainerParameter())
-                        .setKey(this.pluginContainerKey)
+                        .addParser(new FilteredPluginContainerParameter())
+                        .key(this.pluginContainerKey)
                         .build())
-                .setExecutor(this::pluginsRefreshSubcommandExecutor)
+                .executor(this::pluginsRefreshSubcommandExecutor)
                 .build();
         final Command.Parameterized pluginsListCommand = Command.builder()
-                .setPermission("sponge.command.plugins.list")
-                .setShortDescription(Component.text("Lists all currently installed plugins."))
-                .setExecutor(this::pluginsListSubcommand)
+                .permission("sponge.command.plugins.list")
+                .shortDescription(Component.text("Lists all currently installed plugins."))
+                .executor(this::pluginsListSubcommand)
                 .build();
         final Command.Parameterized pluginsInfoCommand = Command.builder()
-                .setPermission("sponge.command.plugins.info")
-                .setShortDescription(Component.text("Displays information about a specific plugin."))
-                .parameter(Parameter.plugin().setKey(this.pluginContainerKey).build())
-                .setExecutor(this::pluginsInfoSubcommand)
+                .permission("sponge.command.plugins.info")
+                .shortDescription(Component.text("Displays information about a specific plugin."))
+                .addParameter(Parameter.plugin().key(this.pluginContainerKey).build())
+                .executor(this::pluginsInfoSubcommand)
                 .build();
 
         final Command.Parameterized pluginsCommand = Command.builder()
-                .child(pluginsReloadCommand, "refresh")
-                .child(pluginsListCommand, "list")
-                .child(pluginsInfoCommand, "info")
+                .addChild(pluginsReloadCommand, "refresh")
+                .addChild(pluginsListCommand, "list")
+                .addChild(pluginsInfoCommand, "info")
                 .build();
 
         // /sponge timings
@@ -139,59 +139,59 @@ public class SpongeCommand {
 
         // /sponge tps
         final Command.Parameterized tpsCommand = Command.builder()
-                .setPermission("sponge.command.tps")
-                .setShortDescription(Component.text("Provides TPS (ticks per second) data for loaded worlds."))
-                .setExecutor(this::tpsExecutor)
+                .permission("sponge.command.tps")
+                .shortDescription(Component.text("Provides TPS (ticks per second) data for loaded worlds."))
+                .executor(this::tpsExecutor)
                 .build();
 
         // /sponge version
         final Command.Parameterized versionCommand = Command.builder()
-                .setPermission("sponge.command.version")
-                .setShortDescription(Component.text("Display Sponge's current version"))
-                .setExecutor(this::versionExecutor)
+                .permission("sponge.command.version")
+                .shortDescription(Component.text("Display Sponge's current version"))
+                .executor(this::versionExecutor)
                 .build();
 
         // /sponge which
         final Command.Parameterized whichCommand = Command.builder()
-                .setPermission("sponge.command.which")
-                .parameter(Parameter.builder(CommandMapping.class).setKey(this.commandMappingKey).parser(new CommandAliasesParameter()).build())
-                .setShortDescription(Component.text("Find the plugin that owns a specific command"))
-                .setExecutor(this::whichExecutor)
+                .permission("sponge.command.which")
+                .addParameter(Parameter.builder(CommandMapping.class).key(this.commandMappingKey).addParser(new CommandAliasesParameter()).build())
+                .shortDescription(Component.text("Find the plugin that owns a specific command"))
+                .executor(this::whichExecutor)
                 .build();
 
         // /sponge reload global|world [id]
         final Command.Parameterized reloadGlobalCommand = Command.builder()
-            .setPermission("sponge.command.reload.global")
-            .setShortDescription(Component.text("Reload Sponge's common configuration"))
-            .setExecutor(this::reloadGlobalExecutor)
+            .permission("sponge.command.reload.global")
+            .shortDescription(Component.text("Reload Sponge's common configuration"))
+            .executor(this::reloadGlobalExecutor)
             .build();
 
         final Command.Parameterized reloadWorldCommand = Command.builder()
-            .setPermission("sponge.command.reload.world")
-            .parameter(Parameter.world().setKey(this.worldKey).build())
-            .setShortDescription(Component.text("Reload Sponge's configuration for a single world"))
-            .setExecutor(this::reloadWorldExecutor)
+            .permission("sponge.command.reload.world")
+            .addParameter(Parameter.world().key(this.worldKey).build())
+            .shortDescription(Component.text("Reload Sponge's configuration for a single world"))
+            .executor(this::reloadWorldExecutor)
             .build();
 
         final Command.Parameterized reloadCommand = Command.builder()
-            .child(reloadGlobalCommand, "global")
-            .child(reloadWorldCommand, "world")
+            .addChild(reloadGlobalCommand, "global")
+            .addChild(reloadWorldCommand, "world")
             .build();
 
 
         // /sponge
         final Command.Builder commandBuilder = Command.builder()
-                .setPermission("sponge.command.root")
-                .setExecutor(this::rootCommand)
-                .child(auditCommand, "audit")
-                .child(chunksCommand, "chunks")
-                .child(heapCommand, "heap")
-                .child(pluginsCommand, "plugins")
-                .child(timingsCommand, "timings")
-                .child(tpsCommand, "tps")
-                .child(versionCommand, "version")
-                .child(whichCommand, "which")
-                .child(reloadCommand, "reload");
+                .permission("sponge.command.root")
+                .executor(this::rootCommand)
+                .addChild(auditCommand, "audit")
+                .addChild(chunksCommand, "chunks")
+                .addChild(heapCommand, "heap")
+                .addChild(pluginsCommand, "plugins")
+                .addChild(timingsCommand, "timings")
+                .addChild(tpsCommand, "tps")
+                .addChild(versionCommand, "version")
+                .addChild(whichCommand, "which")
+                .addChild(reloadCommand, "reload");
 
         this.additionalActions(commandBuilder);
         return commandBuilder.build();
@@ -217,13 +217,13 @@ public class SpongeCommand {
             ).build()
         );
 
-        final Optional<Command.Parameterized> parameterized = context.getExecutedCommand();
+        final Optional<Command.Parameterized> parameterized = context.executedCommand();
         if (parameterized.isPresent()) {
             final String subcommands = parameterized.get()
                     .subcommands()
                     .stream()
-                    .filter(x -> x.getCommand().canExecute(context.getCause()))
-                    .flatMap(x -> x.getAliases().stream())
+                    .filter(x -> x.command().canExecute(context.cause()))
+                    .flatMap(x -> x.aliases().stream())
                     .collect(Collectors.joining(", "));
             if (!subcommands.isEmpty()) {
                 context.sendMessage(Identity.nil(), Component.text().append(
@@ -247,10 +247,10 @@ public class SpongeCommand {
 
     private Command.Parameterized chunksSubcommand() {
         final Command.Parameterized globalCommand = Command.builder()
-                .setExecutor(context -> {
-                    for (final ServerWorld world : SpongeCommon.getGame().getServer().getWorldManager().worlds()) {
+                .executor(context -> {
+                    for (final ServerWorld world : SpongeCommon.getGame().server().worldManager().worlds()) {
                         context.sendMessage(Identity.nil(), Component.text().content("World ")
-                                        .append(Component.text(world.getKey().toString(), Style.style(TextDecoration.BOLD)))
+                                        .append(Component.text(world.key().toString(), Style.style(TextDecoration.BOLD)))
                                         .append(this.getChunksInfo(world))
                                         .build());
                     }
@@ -258,11 +258,11 @@ public class SpongeCommand {
                 })
                 .build();
         final Command.Parameterized worldCommand = Command.builder()
-                .parameter(CommonParameters.WORLD)
-                .setExecutor(context -> {
+                .addParameter(CommonParameters.WORLD)
+                .executor(context -> {
                     final ServerWorld world = context.requireOne(CommonParameters.WORLD);
                     context.sendMessage(Identity.nil(), Component.text().content("World ")
-                            .append(Component.text(world.getKey().toString(), Style.style(TextDecoration.BOLD)))
+                            .append(Component.text(world.key().toString(), Style.style(TextDecoration.BOLD)))
                             .append(this.getChunksInfo(world))
                             .build());
                     return CommandResult.success();
@@ -270,8 +270,8 @@ public class SpongeCommand {
                 .build();
         final Parameter.Key<Boolean> dumpAllKey = Parameter.key("dumpAll", Boolean.class);
         final Command.Parameterized dumpCommand = Command.builder()
-                .parameter(Parameter.literal(Boolean.class, true, "all").optional().setKey(dumpAllKey).build())
-                .setExecutor(context -> {
+                .addParameter(Parameter.literal(Boolean.class, true, "all").optional().key(dumpAllKey).build())
+                .executor(context -> {
                     final File file = new File(new File(new File("."), "chunk-dumps"),
                             "chunk-info-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.txt");
                     context.sendMessage(Identity.nil(), Component.text("Writing chunk info to: " + file.getAbsolutePath()));
@@ -281,10 +281,10 @@ public class SpongeCommand {
                 })
                 .build();
         return Command.builder()
-                .child(globalCommand, "global")
-                .child(worldCommand, "world")
-                .child(dumpCommand, "dump")
-                .setPermission("sponge.command.chunk")
+                .addChild(globalCommand, "global")
+                .addChild(worldCommand, "world")
+                .addChild(dumpCommand, "dump")
+                .permission("sponge.command.chunk")
                 .build();
     }
 
@@ -314,7 +314,7 @@ public class SpongeCommand {
 
     @NonNull
     private CommandResult pluginsListSubcommand(final CommandContext context) {
-        final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().getPlugins();
+        final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().plugins();
         context.sendMessage(Identity.nil(), this.title("Plugins (" + plugins.size() + ")"));
         for (final PluginContainer specificContainer : plugins) {
             final PluginMetadata metadata = specificContainer.getMetadata();
@@ -337,18 +337,18 @@ public class SpongeCommand {
 
     @NonNull
     private CommandResult pluginsRefreshSubcommandExecutor(final CommandContext context) {
-        final Optional<PluginContainer> pluginContainer = context.getOne(this.pluginContainerKey);
+        final Optional<PluginContainer> pluginContainer = context.one(this.pluginContainerKey);
         final RefreshGameEvent event = SpongeEventFactory.createRefreshGameEvent(
-                PhaseTracker.getCauseStackManager().getCurrentCause(),
+                PhaseTracker.getCauseStackManager().currentCause(),
                 SpongeCommon.getGame()
         );
         if (pluginContainer.isPresent()) {
             // just send the reload event to that
             context.sendMessage(Identity.nil(), Component.text("Sending refresh event to" + pluginContainer.get().getMetadata().getId() + ", please wait..."));
-            ((SpongeEventManager) SpongeCommon.getGame().getEventManager()).post(event, pluginContainer.get());
+            ((SpongeEventManager) SpongeCommon.getGame().eventManager()).post(event, pluginContainer.get());
         } else {
             context.sendMessage(Identity.nil(), Component.text("Sending refresh event to all plugins, please wait..."));
-            SpongeCommon.getGame().getEventManager().post(event);
+            SpongeCommon.getGame().eventManager().post(event);
         }
 
         context.sendMessage(Identity.nil(), Component.text("Completed plugin refresh."));
@@ -357,10 +357,10 @@ public class SpongeCommand {
 
     private Command.@NonNull Parameterized timingsSubcommand() {
         return Command.builder()
-                .setPermission("sponge.command.timings")
-                .setShortDescription(Component.text("Manages Sponge Timings data to see performance of the server."))
-                .child(Command.builder()
-                        .setExecutor(context -> {
+                .permission("sponge.command.timings")
+                .shortDescription(Component.text("Manages Sponge Timings data to see performance of the server."))
+                .addChild(Command.builder()
+                        .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
                                 context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
@@ -370,32 +370,32 @@ public class SpongeCommand {
                             return CommandResult.success();
                         })
                         .build(), "reset")
-                .child(Command.builder()
-                        .setExecutor(context -> {
+                .addChild(Command.builder()
+                        .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
                                 context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
                             }
-                            Timings.generateReport(context.getCause().getAudience());
+                            Timings.generateReport(context.cause().audience());
                             return CommandResult.success();
                         })
                         .build(), "report", "paste")
-                .child(Command.builder()
-                        .setExecutor(context -> {
+                .addChild(Command.builder()
+                        .executor(context -> {
                             Timings.setTimingsEnabled(true);
                             context.sendMessage(Identity.nil(), Component.text("Enabled Timings & Reset"));
                             return CommandResult.success();
                         })
                         .build(), "on")
-                .child(Command.builder()
-                        .setExecutor(context -> {
+                .addChild(Command.builder()
+                        .executor(context -> {
                             Timings.setTimingsEnabled(false);
                             context.sendMessage(Identity.nil(), Component.text("Disabled Timings"));
                             return CommandResult.success();
                         })
                         .build(), "off")
-                .child(Command.builder()
-                        .setExecutor(context -> {
+                .addChild(Command.builder()
+                        .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
                                 context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
@@ -405,8 +405,8 @@ public class SpongeCommand {
                             return CommandResult.success();
                         })
                         .build(), "verbon")
-                .child(Command.builder()
-                        .setExecutor(context -> {
+                .addChild(Command.builder()
+                        .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
                                 context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
@@ -416,8 +416,8 @@ public class SpongeCommand {
                             return CommandResult.success();
                         })
                         .build(), "verboff")
-                .child(Command.builder()
-                        .setExecutor(context -> {
+                .addChild(Command.builder()
+                        .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
                                 context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
                                 return CommandResult.empty();
@@ -432,7 +432,7 @@ public class SpongeCommand {
     private CommandResult tpsExecutor(final CommandContext context) {
          final List<Component> tps = new ArrayList<>();
           // Uncomment when per-world TPS is in and working.
-//        for (final ServerWorld world : Sponge.getServer().getWorldManager().getWorlds()) {
+//        for (final ServerWorld world : Sponge.getServer().worldManager().getWorlds()) {
 //            // Add code to get the average here.
 //            final TextComponent.Builder builder =
 //                    TextComponent.builder("World [")
@@ -443,13 +443,13 @@ public class SpongeCommand {
 
         tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimes, Component.text().content("Overall TPS: ")).build());
 
-        SpongeCommon.getGame().getServiceProvider()
+        SpongeCommon.getGame().serviceProvider()
                 .paginationService()
                 .builder()
                 .contents(tps)
                 .title(Component.text("Server TPS", NamedTextColor.WHITE))
                 .padding(Component.text("-", NamedTextColor.WHITE))
-                .sendTo(context.getCause().getAudience());
+                .sendTo(context.cause().audience());
 
         return CommandResult.success();
     }
@@ -518,10 +518,10 @@ public class SpongeCommand {
         context.sendMessage(Identity.nil(), Component.text().append(
                 this.title("Aliases: "),
                 Component.join(Component.text(", "),
-                    mapping.getAllAliases().stream().map(x -> Component.text(x, NamedTextColor.YELLOW)).collect(Collectors.toList())),
+                    mapping.allAliases().stream().map(x -> Component.text(x, NamedTextColor.YELLOW)).collect(Collectors.toList())),
                 Component.newline(),
                 this.title("Owned by: "),
-                this.hl(mapping.getPlugin().getMetadata().getName().orElseGet(() -> mapping.getPlugin().getMetadata().getId())))
+                this.hl(mapping.plugin().getMetadata().getName().orElseGet(() -> mapping.plugin().getMetadata().getId())))
                 .build());
         return CommandResult.success();
     }
@@ -541,7 +541,7 @@ public class SpongeCommand {
 
     private @NonNull CommandResult reloadWorldExecutor(final CommandContext context) {
         final ServerWorld target = context.requireOne(this.worldKey);
-        final ResourceKey worldId = target.getKey();
+        final ResourceKey worldId = target.key();
         SpongeGameConfigs.getForWorld(target).reload()
             .whenComplete(($, error) -> {
             if (error != null) {
@@ -563,14 +563,14 @@ public class SpongeCommand {
     // --
 
     protected Component getChunksInfo(final ServerWorld worldserver) {
-        if (((WorldBridge) worldserver).bridge$isFake() || worldserver.getWorldStorage().getWorldProperties() == null) {
+        if (((WorldBridge) worldserver).bridge$isFake() || worldserver.worldStorage().worldProperties() == null) {
             return Component.text().append(Component.newline(), Component.text("Fake world")).build();
         }
         return Component.text().append(Component.newline(), Component.text("chunk stuff here")).build();
         /*
                 key("DimensionId: "), value(((WorldServerBridge) worldserver).bridge$getDimensionId()), TextComponent.newline(),
                 key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), TextComponent.newline(),
-                key("Active chunks: "), value(worldserver.getChunkProvider().getLoadedChunks().size()), TextComponent.newline(),
+                key("Active chunks: "), value(worldserver.getChunkProvider().loadedChunks().size()), TextComponent.newline(),
                 key("Entities: "), value(worldserver.loadedEntityList.size()), TextComponent.newline(),
                 key("Tile Entities: "), value(worldserver.loadedTileEntityList.size()), TextComponent.newline(),
                 key("Removed Entities:"), value(((WorldAccessor) worldserver).accessor$getUnloadedEntityList().size()), TextComponent.newline(),

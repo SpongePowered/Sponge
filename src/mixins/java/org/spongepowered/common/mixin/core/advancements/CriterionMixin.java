@@ -71,7 +71,7 @@ public abstract class CriterionMixin implements CriterionBridge {
             cir.getReturnValue().addProperty("trigger_times", ((SpongeScoreTrigger.Instance) this.trigger).getTriggerTimes());
         }
         if (this.impl$scoreCriterion != null) {
-            cir.getReturnValue().addProperty("criterion", this.impl$scoreCriterion.getName());
+            cir.getReturnValue().addProperty("criterion", this.impl$scoreCriterion.name());
         }
     }
 

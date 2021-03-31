@@ -68,26 +68,26 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     }
 
     @Override
-    public BlockState getState() {
+    public BlockState state() {
         return this.blockState;
     }
 
     @Override
-    public BlockEntityType getBlockEntityType() {
+    public BlockEntityType blockEntityType() {
         return this.type;
     }
 
     @Override
-    public DataContainer getBlockEntityData() {
+    public DataContainer blockEntityData() {
         return NBTTranslator.INSTANCE.translateFrom(this.data);
     }
 
     @Override
     public Optional<BlockEntity> apply(final ServerLocation location) {
-        final BlockState currentState = location.getBlock();
+        final BlockState currentState = location.block();
         final Block currentBlock = ((net.minecraft.world.level.block.state.BlockState) currentState).getBlock();
         final Block newBlock = ((net.minecraft.world.level.block.state.BlockState) this.blockState).getBlock();
-        final Level minecraftWorld = (net.minecraft.world.level.Level) location.getWorld();
+        final Level minecraftWorld = (net.minecraft.world.level.Level) location.world();
 
         final BlockPos blockpos = VecHelper.toBlockPos(location);
         if (currentBlock != newBlock) {
@@ -113,13 +113,13 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         return builder.blockState(this.blockState)
             .addUnsafeCompound(this.data.copy())
-            .world(location.getWorldKey())
-            .position(location.getBlockPosition())
+            .world(location.worldKey())
+            .position(location.blockPosition())
             .build();
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return Constants.Sponge.BlockEntityArchetype.BASE_VERSION;
     }
 
@@ -128,7 +128,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
         return DataContainer.createNew()
                 .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_TYPE, this.type)
                 .set(Constants.Sponge.BlockEntityArchetype.BLOCK_STATE, this.blockState)
-                .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_DATA, this.getBlockEntityData())
+                .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_DATA, this.blockEntityData())
                 ;
     }
 

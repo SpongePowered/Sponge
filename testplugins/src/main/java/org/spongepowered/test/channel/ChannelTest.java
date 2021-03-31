@@ -99,7 +99,7 @@ public final class ChannelTest {
     public void onConnectionHandshake(final ServerSideConnectionEvent.Handshake event) {
         this.plugin.getLogger().info("Starting handshake phase.");
         final PingPacket pingPacket1 = new PingPacket(123);
-        final ServerSideConnection connection = event.getConnection();
+        final ServerSideConnection connection = event.connection();
         this.channel.sendTo(connection, pingPacket1)
                 .thenAccept(response1 -> {
                     this.logReceived(this.channel, response1, connection);
@@ -165,14 +165,14 @@ public final class ChannelTest {
 
     @Listener
     public void onConnectionLogin(final ServerSideConnectionEvent.Login event) {
-        this.plugin.getLogger().info("Player \"" + event.getProfile().getName().orElse("unknown") + "\" is logging in.");
+        this.plugin.getLogger().info("Player \"" + event.profile().name().orElse("unknown") + "\" is logging in.");
     }
 
     @Listener
     public void onConnectionJoin(final ServerSideConnectionEvent.Join event) {
-        this.plugin.getLogger().info("Player \"" + event.getPlayer().getName() + "\" joined.");
+        this.plugin.getLogger().info("Player \"" + event.player().name() + "\" joined.");
 
-        final ServerSideConnection connection = event.getConnection();
+        final ServerSideConnection connection = event.connection();
         final PingPacket pingPacket1 = new PingPacket(789);
         this.channel.sendTo(connection, pingPacket1)
                 .thenAccept(response1 -> this.logReceived(this.channel, response1, connection))
@@ -193,6 +193,6 @@ public final class ChannelTest {
     }
 
     private void logReceived(final Channel channel, final Object packet, final EngineConnection connection) {
-        this.plugin.getLogger().info("Received {} through {} on the {} side.", packet, channel.getKey(), ChannelTest.getName(connection.getSide()));
+        this.plugin.getLogger().info("Received {} through {} on the {} side.", packet, channel.key(), ChannelTest.getName(connection.side()));
     }
 }

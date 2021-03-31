@@ -57,8 +57,8 @@ public final class BookUtil {
         Locale lastLocale = BookUtil.STARTER_LOCALE;
 
         for (final Player player : players) {
-            if (!Objects.equals(player.getLocale(), lastLocale)) {
-                lastLocale = player.getLocale();
+            if (!Objects.equals(player.locale(), lastLocale)) {
+                lastLocale = player.locale();
                 item.offer(Keys.DISPLAY_NAME, GlobalTranslator.render(book.title(), lastLocale));
                 item.offer(Keys.AUTHOR, GlobalTranslator.render(book.author(), lastLocale));
                 final Locale finalLastLocale = lastLocale;

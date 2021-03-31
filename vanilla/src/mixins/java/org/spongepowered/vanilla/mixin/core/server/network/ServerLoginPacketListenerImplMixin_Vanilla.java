@@ -69,7 +69,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
     private void onResponsePayload(final ServerboundCustomQueryPacket packet, final CallbackInfo ci) {
         ci.cancel();
 
-        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.getChannelRegistry();
+        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.channelRegistry();
         this.server.execute(() -> channelRegistry.handleLoginResponsePayload((EngineConnection) this, packet));
     }
 
@@ -80,12 +80,12 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
             if (this.impl$handshakeState == ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_NOT_STARTED) {
                 this.impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_CLIENT_TYPE;
 
-                ((SpongeChannelRegistry) Sponge.getChannelRegistry()).requestClientType(connection).thenAccept(result -> {
+                ((SpongeChannelRegistry) Sponge.channelRegistry()).requestClientType(connection).thenAccept(result -> {
                     this.impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS;
                 });
 
             } else if (this.impl$handshakeState == ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS) {
-                ((SpongeChannelRegistry) Sponge.getChannelRegistry()).sendLoginChannelRegistry(connection).thenAccept(result -> {
+                ((SpongeChannelRegistry) Sponge.channelRegistry()).sendLoginChannelRegistry(connection).thenAccept(result -> {
                     final Cause cause = Cause.of(EventContext.empty(), this);
                     final ServerSideConnectionEvent.Handshake event =
                             SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection);
@@ -106,7 +106,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
     private void impl$onTryAcceptPlayer_beforeInitPlayer(final CallbackInfo ci) {
         final ServerSideConnection connection = (ServerSideConnection) this;
         // Also send the channel registrations using the minecraft channel, for compatibility
-        ((SpongeChannelRegistry) Sponge.getChannelRegistry()).sendChannelRegistrations(connection);
+        ((SpongeChannelRegistry) Sponge.channelRegistry()).sendChannelRegistrations(connection);
     }
 
     @Inject(method = "handleHello", at = @At("RETURN"))

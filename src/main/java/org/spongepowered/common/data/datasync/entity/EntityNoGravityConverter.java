@@ -52,7 +52,7 @@ public final class EntityNoGravityConverter extends DataParameterConverter<Boole
     @Override
     public Boolean getValueFromEvent(final Boolean originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.IS_GRAVITY_AFFECTED) {
+            if (immutableValue.key() == Keys.IS_GRAVITY_AFFECTED) {
                 return !(Boolean) immutableValue.get();
             }
         }

@@ -98,7 +98,7 @@ public final class DataSerializers {
             final TypeToken<Component> token = TypeToken.get(Component.class);
 
             @Override
-            public TypeToken<Component> getToken() {
+            public TypeToken<Component> token() {
                 return this.token;
             }
 
@@ -125,7 +125,7 @@ public final class DataSerializers {
             final TypeToken<UUID> token = TypeToken.get(UUID.class);
 
             @Override
-            public TypeToken<UUID> getToken() {
+            public TypeToken<UUID> token() {
                 return this.token;
             }
 
@@ -154,7 +154,7 @@ public final class DataSerializers {
             final TypeToken<Vector2d> token = TypeToken.get(Vector2d.class);
 
             @Override
-            public TypeToken<Vector2d> getToken() {
+            public TypeToken<Vector2d> token() {
                 return this.token;
             }
 
@@ -182,7 +182,7 @@ public final class DataSerializers {
             final TypeToken<Vector2f> token = TypeToken.get(Vector2f.class);
 
             @Override
-            public TypeToken<Vector2f> getToken() {
+            public TypeToken<Vector2f> token() {
                 return this.token;
             }
 
@@ -210,7 +210,7 @@ public final class DataSerializers {
             final TypeToken<Vector2i> token = TypeToken.get(Vector2i.class);
 
             @Override
-            public TypeToken<Vector2i> getToken() {
+            public TypeToken<Vector2i> token() {
                 return this.token;
             }
 
@@ -239,7 +239,7 @@ public final class DataSerializers {
             final TypeToken<Vector2l> token = TypeToken.get(Vector2l.class);
 
             @Override
-            public TypeToken<Vector2l> getToken() {
+            public TypeToken<Vector2l> token() {
                 return this.token;
             }
 
@@ -267,7 +267,7 @@ public final class DataSerializers {
             final TypeToken<Vector3d> token = TypeToken.get(Vector3d.class);
 
             @Override
-            public TypeToken<Vector3d> getToken() {
+            public TypeToken<Vector3d> token() {
                 return this.token;
             }
 
@@ -299,7 +299,7 @@ public final class DataSerializers {
             final TypeToken<Vector3f> token = TypeToken.get(Vector3f.class);
 
             @Override
-            public TypeToken<Vector3f> getToken() {
+            public TypeToken<Vector3f> token() {
                 return this.token;
             }
 
@@ -331,7 +331,7 @@ public final class DataSerializers {
             final TypeToken<Vector3i> token = TypeToken.get(Vector3i.class);
 
             @Override
-            public TypeToken<Vector3i> getToken() {
+            public TypeToken<Vector3i> token() {
                 return this.token;
             }
 
@@ -363,7 +363,7 @@ public final class DataSerializers {
             final TypeToken<Vector3l> token = TypeToken.get(Vector3l.class);
 
             @Override
-            public TypeToken<Vector3l> getToken() {
+            public TypeToken<Vector3l> token() {
                 return this.token;
             }
 
@@ -395,7 +395,7 @@ public final class DataSerializers {
             final TypeToken<Vector4f> token = TypeToken.get(Vector4f.class);
 
             @Override
-            public TypeToken<Vector4f> getToken() {
+            public TypeToken<Vector4f> token() {
                 return this.token;
             }
 
@@ -430,7 +430,7 @@ public final class DataSerializers {
             final TypeToken<Vector4i> token = TypeToken.get(Vector4i.class);
 
             @Override
-            public TypeToken<Vector4i> getToken() {
+            public TypeToken<Vector4i> token() {
                 return this.token;
             }
 
@@ -465,7 +465,7 @@ public final class DataSerializers {
             final TypeToken<Vector4l> token = TypeToken.get(Vector4l.class);
 
             @Override
-            public TypeToken<Vector4l> getToken() {
+            public TypeToken<Vector4l> token() {
                 return this.token;
             }
 
@@ -500,7 +500,7 @@ public final class DataSerializers {
             final TypeToken<Vector4d> token = TypeToken.get(Vector4d.class);
 
             @Override
-            public TypeToken<Vector4d> getToken() {
+            public TypeToken<Vector4d> token() {
                 return this.token;
             }
 
@@ -535,7 +535,7 @@ public final class DataSerializers {
             final TypeToken<Complexd> token = TypeToken.get(Complexd.class);
 
             @Override
-            public TypeToken<Complexd> getToken() {
+            public TypeToken<Complexd> token() {
                 return this.token;
             }
 
@@ -564,7 +564,7 @@ public final class DataSerializers {
             final TypeToken<Complexf> token = TypeToken.get(Complexf.class);
 
             @Override
-            public TypeToken<Complexf> getToken() {
+            public TypeToken<Complexf> token() {
                 return this.token;
             }
 
@@ -592,7 +592,7 @@ public final class DataSerializers {
             final TypeToken<Quaterniond> token = TypeToken.get(Quaterniond.class);
 
             @Override
-            public TypeToken<Quaterniond> getToken() {
+            public TypeToken<Quaterniond> token() {
                 return this.token;
             }
 
@@ -626,7 +626,7 @@ public final class DataSerializers {
             final TypeToken<Quaternionf> token = TypeToken.get(Quaternionf.class);
 
             @Override
-            public TypeToken<Quaternionf> getToken() {
+            public TypeToken<Quaternionf> token() {
                 return this.token;
             }
 
@@ -660,7 +660,7 @@ public final class DataSerializers {
             final TypeToken<LocalTime> token = TypeToken.get(LocalTime.class);
 
             @Override
-            public TypeToken<LocalTime> getToken() {
+            public TypeToken<LocalTime> token() {
                 return this.token;
             }
 
@@ -708,7 +708,7 @@ public final class DataSerializers {
             final TypeToken<LocalDate> token = TypeToken.get(LocalDate.class);
 
             @Override
-            public TypeToken<LocalDate> getToken() {
+            public TypeToken<LocalDate> token() {
                 return this.token;
             }
 
@@ -748,7 +748,7 @@ public final class DataSerializers {
             final TypeToken<LocalDateTime> token = TypeToken.get(LocalDateTime.class);
 
             @Override
-            public TypeToken<LocalDateTime> getToken() {
+            public TypeToken<LocalDateTime> token() {
                 return this.token;
             }
 
@@ -814,7 +814,7 @@ public final class DataSerializers {
             final TypeToken<ZonedDateTime> token = TypeToken.get(ZonedDateTime.class);
 
             @Override
-            public TypeToken<ZonedDateTime> getToken() {
+            public TypeToken<ZonedDateTime> token() {
                 return this.token;
             }
 
@@ -887,7 +887,7 @@ public final class DataSerializers {
             final TypeToken<Instant> token = TypeToken.get(Instant.class);
 
             @Override
-            public TypeToken<Instant> getToken() {
+            public TypeToken<Instant> token() {
                 return this.token;
             }
 
@@ -955,7 +955,7 @@ public final class DataSerializers {
             final TypeToken<Month> token = TypeToken.get(Month.class);
 
             @Override
-            public TypeToken<Month> getToken() {
+            public TypeToken<Month> token() {
                 return this.token;
             }
 

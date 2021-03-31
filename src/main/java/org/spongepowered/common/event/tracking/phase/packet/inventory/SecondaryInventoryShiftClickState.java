@@ -53,7 +53,7 @@ public final class SecondaryInventoryShiftClickState extends BasicInventoryPacke
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {
         return SpongeEventFactory.createClickContainerEventShiftSecondary(
-            PhaseTracker.getCauseStackManager().getCurrentCause(),
+            PhaseTracker.getCauseStackManager().currentCause(),
             openContainer, transaction, Optional.ofNullable(slot), slotTransactions);
 
     }

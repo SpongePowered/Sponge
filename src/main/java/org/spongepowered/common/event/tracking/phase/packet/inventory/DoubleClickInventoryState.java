@@ -62,7 +62,7 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
         final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {
-        return SpongeEventFactory.createClickContainerEventDouble(PhaseTracker.getCauseStackManager().getCurrentCause(),
+        return SpongeEventFactory.createClickContainerEventDouble(PhaseTracker.getCauseStackManager().currentCause(),
             openContainer, transaction,
             Optional.ofNullable(slot), slotTransactions);
     }

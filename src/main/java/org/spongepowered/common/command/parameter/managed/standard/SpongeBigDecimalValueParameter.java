@@ -52,7 +52,7 @@ public final class SpongeBigDecimalValueParameter extends ResourceKeyedArgumentV
 
     @Override
     @NonNull
-    public Optional<? extends BigDecimal> getValue(
+    public Optional<? extends BigDecimal> parseValue(
             final Parameter.@NonNull Key<? super BigDecimal> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {

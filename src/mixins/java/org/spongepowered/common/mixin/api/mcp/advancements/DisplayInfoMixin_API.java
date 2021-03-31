@@ -61,12 +61,12 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
     @Shadow @Final private boolean hidden;
 
     @Override
-    public Advancement getAdvancement() {
+    public Advancement advancement() {
         return ((DisplayInfoBridge) this).bridge$getAdvancement();
     }
 
     @Override
-    public Vector2d getPosition() {
+    public Vector2d position() {
         return new Vector2d(this.x, this.y);
     }
 
@@ -78,22 +78,22 @@ public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spo
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public AdvancementType getType() {
+    public AdvancementType type() {
         return (AdvancementType) (Object) this.frame;
     }
 
     @Override
-    public Component getDescription() {
+    public Component description() {
         return SpongeAdventure.asAdventure(this.description);
     }
 
     @Override
-    public Component getTitle() {
+    public Component title() {
         return SpongeAdventure.asAdventure(this.title);
     }
 
     @Override
-    public ItemStackSnapshot getIcon() {
+    public ItemStackSnapshot icon() {
         return ItemStackUtil.snapshotOf(this.icon);
     }
 

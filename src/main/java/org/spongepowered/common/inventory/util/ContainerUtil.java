@@ -329,7 +329,7 @@ public final class ContainerUtil {
             return (Carrier) inventory;
         }
         if (inventory instanceof CarriedInventory) {
-            final Optional<Carrier> carrier = ((CarriedInventory) inventory).getCarrier();
+            final Optional<Carrier> carrier = ((CarriedInventory) inventory).carrier();
             return carrier.orElse(null);
         }
         return null;

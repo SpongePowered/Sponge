@@ -103,17 +103,17 @@ public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder
         final ResourceLocation resourceLocation = (ResourceLocation) (Object) key;
 
         final net.minecraft.advancements.DisplayInfo displayInfo = this.displayInfo == null ? null : new net.minecraft.advancements.DisplayInfo(
-                ItemStackUtil.fromSnapshotToNative(this.displayInfo.getIcon()),
-                SpongeAdventure.asVanilla(this.displayInfo.getTitle()),
-                SpongeAdventure.asVanilla(this.displayInfo.getDescription()),
+                ItemStackUtil.fromSnapshotToNative(this.displayInfo.icon()),
+                SpongeAdventure.asVanilla(this.displayInfo.title()),
+                SpongeAdventure.asVanilla(this.displayInfo.description()),
                 this.backgroundPath,
-                (FrameType) (Object) this.displayInfo.getType(),
+                (FrameType) (Object) this.displayInfo.type(),
                 this.displayInfo.doesShowToast(),
                 this.displayInfo.doesAnnounceToChat(),
                 this.displayInfo.isHidden());
         final net.minecraft.advancements.Advancement parent = (net.minecraft.advancements.Advancement) this.parent;
         final Advancement advancement = (Advancement) new net.minecraft.advancements.Advancement(
-                resourceLocation, parent, displayInfo, rewards, result.getFirst(), result.getSecond());
+                resourceLocation, parent, displayInfo, rewards, result.first(), result.second());
         ((AdvancementBridge) advancement).bridge$setCriterion(this.criterion);
         return advancement;
     }

@@ -41,17 +41,17 @@ public final class SpongeLocationCarrier implements DefaultSingleBlockCarrier {
     }
 
     @Override
-    public World<?, ?> getWorld() {
-        return this.location.getWorld();
+    public World<?, ?> world() {
+        return this.location.world();
     }
 
     @Override
-    public ServerLocation getLocation() {
+    public ServerLocation location() {
         return this.location;
     }
 
     @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
+    public CarriedInventory<? extends Carrier> inventory() {
         return (CarriedInventory<? extends Carrier>) this.container;
     }
 }

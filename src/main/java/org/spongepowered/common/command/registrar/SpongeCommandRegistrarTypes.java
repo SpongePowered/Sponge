@@ -55,6 +55,6 @@ public final class SpongeCommandRegistrarTypes {
     }
 
     private static DefaultedRegistryReference<CommandRegistrarType<?>> key(final ResourceKey location) {
-        return RegistryKey.of(RegistryTypes.COMMAND_REGISTRAR_TYPE, location).asDefaultedReference(() -> Sponge.getGame().registries());
+        return RegistryKey.of(RegistryTypes.COMMAND_REGISTRAR_TYPE, location).asDefaultedReference(() -> Sponge.game().registries());
     }
 }

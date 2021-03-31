@@ -101,7 +101,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
     }
 
     @Override
-    public CompletableFuture<GameProfile> getProfile(final UUID uniqueId, final boolean signed) {
+    public CompletableFuture<GameProfile> profile(final UUID uniqueId, final boolean signed) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         return Objects.requireNonNull(this.profileCache.get(uniqueId)).thenApply(profile -> {
             if (profile == null) {
@@ -112,13 +112,13 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
     }
 
     @Override
-    public CompletableFuture<GameProfile> getProfile(final String name, final boolean signed) {
+    public CompletableFuture<GameProfile> profile(final String name, final boolean signed) {
         Objects.requireNonNull(name, "name");
         final CachedProfile cachedProfile = this.profileByNameCache.getIfPresent(name.toLowerCase(Locale.ROOT));
         if (cachedProfile != null) {
             return CompletableFuture.completedFuture(signed ? cachedProfile.getSigned() : cachedProfile.getUnsigned());
         }
-        return this.getBasicProfile(name).thenCompose(basicProfile -> this.getProfile(basicProfile.getUniqueId(), signed));
+        return this.basicProfile(name).thenCompose(basicProfile -> this.profile(basicProfile.uniqueId(), signed));
     }
 
     private static final class CachedProfile {
@@ -146,7 +146,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
     }
 
     @Override
-    public CompletableFuture<GameProfile> getBasicProfile(final UUID uniqueId) {
+    public CompletableFuture<GameProfile> basicProfile(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         return Objects.requireNonNull(this.profileCache.get(uniqueId)).thenApply(profile -> {
             if (profile == null) {
@@ -157,7 +157,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
     }
 
     @Override
-    public CompletableFuture<GameProfile> getBasicProfile(final String name, final @Nullable Instant time) {
+    public CompletableFuture<GameProfile> basicProfile(final String name, final @Nullable Instant time) {
         Objects.requireNonNull(name, "name");
         if (time != null) {
             return this.submit(() -> {
@@ -181,7 +181,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
     }
 
     @Override
-    public CompletableFuture<Map<String, GameProfile>> getBasicProfiles(final Iterable<String> names, final @Nullable Instant time) {
+    public CompletableFuture<Map<String, GameProfile>> basicProfiles(final Iterable<String> names, final @Nullable Instant time) {
         Objects.requireNonNull(names, "names");
         final CompletableFuture<Map<String, GameProfile>> result = new CompletableFuture<>();
         if (time != null) {

@@ -72,7 +72,7 @@ public class ProjectileTest implements LoadableModule {
     @Override
     public void enable(final CommandContext ctx) {
         this.listeners = new ProjectileTestListener();
-        Sponge.getEventManager().registerListeners(this.plugin, this.listeners);
+        Sponge.eventManager().registerListeners(this.plugin, this.listeners);
     }
 
     @Listener
@@ -80,22 +80,22 @@ public class ProjectileTest implements LoadableModule {
         final Parameter.Value<EntityType<@NonNull ?>> entityTypeParameter =
                 Parameter.registryElement(
                         TypeTokens.ENTITY_TYPE_TOKEN,
-                        (ctx) -> Sponge.getGame().registries(),
+                        (ctx) -> Sponge.game().registries(),
                         RegistryTypes.ENTITY_TYPE,
                         "minecraft",
                         "sponge")
-                    .setKey("type")
+                    .key("type")
                     .build();
-        final Parameter.Value<Boolean> targetParameter = Parameter.bool().setKey("target").optional().build();
+        final Parameter.Value<Boolean> targetParameter = Parameter.bool().key("target").optional().build();
         final Command.Parameterized launchCommand = Command.builder()
-                .parameters(entityTypeParameter, targetParameter)
-                .setExecutor(context -> {
-                    final Player player = context.getCause().first(Player.class)
+                .addParameters(entityTypeParameter, targetParameter)
+                .executor(context -> {
+                    final Player player = context.cause().first(Player.class)
                             .orElseThrow(() -> new CommandException(Component.text("Only a player can execute this command")));
                     final EntityType<?> entityType = context.requireOne(entityTypeParameter);
                     final Optional<Projectile> launched;
-                    if (context.getOne(targetParameter).orElse(false)) {
-                        final Collection<? extends Entity> nearbyEntities = player.getNearbyEntities(10,
+                    if (context.one(targetParameter).orElse(false)) {
+                        final Collection<? extends Entity> nearbyEntities = player.nearbyEntities(10,
                                 entity -> entity instanceof Living && entity != player);
                         if (nearbyEntities.isEmpty()) {
                             return CommandResult.error(Component.text("No entity to target nearby"));
@@ -103,7 +103,7 @@ public class ProjectileTest implements LoadableModule {
                         final Entity target = nearbyEntities.iterator().next();
                         launched = player.launchProjectileTo((EntityType<Projectile>) entityType, target);
                         if (launched.isPresent()) {
-                            player.sendMessage(Identity.nil(), Component.text("Launched projectile to " + RegistryTypes.ENTITY_TYPE.keyFor(Sponge.getGame().registries(), target.getType()).asString()));
+                            player.sendMessage(Identity.nil(), Component.text("Launched projectile to " + RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), target.type()).asString()));
                             return CommandResult.success();
                         }
                     } else {
@@ -120,12 +120,12 @@ public class ProjectileTest implements LoadableModule {
         event.register(this.plugin, launchCommand, "launch");
 
         final Command.Parameterized launchToMeCommand = Command.builder()
-                .parameter(entityTypeParameter)
-                .setExecutor(context -> {
-                    final Player player = context.getCause().first(Player.class)
+                .addParameter(entityTypeParameter)
+                .executor(context -> {
+                    final Player player = context.cause().first(Player.class)
                             .orElseThrow(() -> new CommandException(Component.text("Only a player can execute this command")));
                     final Collection<? extends ProjectileSource> nearbyProjectileSources =
-                            (Collection<? extends ProjectileSource>) player.getNearbyEntities(10, entity -> entity instanceof ProjectileSource);
+                            (Collection<? extends ProjectileSource>) player.nearbyEntities(10, entity -> entity instanceof ProjectileSource);
                     if (nearbyProjectileSources.isEmpty()) {
                         return CommandResult.error(Component.text("No projectile source nearby"));
                     }
@@ -133,34 +133,34 @@ public class ProjectileTest implements LoadableModule {
                     final ProjectileSource projectileSource = nearbyProjectileSources.iterator().next();
                     final EntityType<?> entityType = context.requireOne(entityTypeParameter);
                     final Optional<? extends Projectile> launched = projectileSource.launchProjectileTo((EntityType<Projectile>) entityType, player);
-                    final EntityType<?> type = ((Entity) projectileSource).getType();
+                    final EntityType<?> type = ((Entity) projectileSource).type();
                     if (launched.isPresent()) {
-                        final EntityType<?> launchedType = launched.get().getType();
+                        final EntityType<?> launchedType = launched.get().type();
                         player.sendMessage(Identity.nil(), Component.text()
-                                .append(Component.text("You made a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.getGame().registries(), type).asString()))
-                                .append(Component.text(" shoot a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.getGame().registries(), launchedType).asString()))
+                                .append(Component.text("You made a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), type).asString()))
+                                .append(Component.text(" shoot a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), launchedType).asString()))
                                 .append(Component.text(" at you")).build()
                         );
                         return CommandResult.success();
                     }
 
                     throw new CommandException(Component.text()
-                            .append(Component.text("Could not launch a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.getGame().registries(), type).asString()))
-                            .append(Component.text(" from a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.getGame().registries(), entityType).asString()))
+                            .append(Component.text("Could not launch a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), type).asString()))
+                            .append(Component.text(" from a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), entityType).asString()))
                             .append(Component.text(" at you")).build());
                 })
                 .build();
         event.register(this.plugin, launchToMeCommand, "launchtome");
 
         final Parameter.Value<ServerLocation> dispenserParameter = Parameter.location()
-                .setKey("dispenser")
+                .key("dispenser")
                 .build();
         final Command.Parameterized triggerDispenserCommand = Command.builder()
-                .parameters(dispenserParameter, entityTypeParameter)
-                .setExecutor(context -> {
-                    final Player player = context.getCause().first(Player.class)
+                .addParameters(dispenserParameter, entityTypeParameter)
+                .executor(context -> {
+                    final Player player = context.cause().first(Player.class)
                             .orElseThrow(() -> new CommandException(Component.text("Only a player can execute this command")));
-                    final BlockEntity dispenser = context.requireOne(dispenserParameter).getBlockEntity().orElse(null);
+                    final BlockEntity dispenser = context.requireOne(dispenserParameter).blockEntity().orElse(null);
                     if (dispenser == null) {
                         return CommandResult.error(Component.text("Could not find dispenser"));
                     }
@@ -169,14 +169,14 @@ public class ProjectileTest implements LoadableModule {
                     if (launched.isPresent()) {
                         launched.get().offer(Keys.SHOOTER, player);
                         player.sendMessage(Identity.nil(), Component.text()
-                                .append(Component.text("The dispenser launched a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.getGame().registries(), launched.get().getType()).asString()))
+                                .append(Component.text("The dispenser launched a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), launched.get().type()).asString()))
                                 .build()
                         );
                         return CommandResult.success();
                     }
 
                     return CommandResult.error(Component.text()
-                            .append(Component.text("Could not make the dispenser launch a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.getGame().registries(), entityType).asString()))
+                            .append(Component.text("Could not make the dispenser launch a ")).append(Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), entityType).asString()))
                             .build());
                 })
                 .build();
@@ -209,18 +209,18 @@ public class ProjectileTest implements LoadableModule {
 
         @Listener
         public void onClickBlock(final InteractBlockEvent.Secondary event, @First final ServerPlayer player) {
-            final Vector3d interactionPoint = event.getInteractionPoint();
-            final ServerWorld world = player.getWorld();
+            final Vector3d interactionPoint = event.interactionPoint();
+            final ServerWorld world = player.world();
             final EntityType<? extends Projectile> nextType = this.projectileTypes.poll();
             this.projectileTypes.offer(nextType);
-            final Optional<? extends BlockEntity> blockEntity = world.getBlockEntity(interactionPoint.toInt());
+            final Optional<? extends BlockEntity> blockEntity = world.blockEntity(interactionPoint.toInt());
             if (blockEntity.isPresent() && blockEntity.get() instanceof Dispenser) {
                 ((Dispenser) blockEntity.get()).launchProjectile(nextType);
             } else {
                 player.launchProjectile(nextType);
             }
             event.setCancelled(true);
-            player.sendMessage(Identity.nil(), Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.getGame().registries(), nextType).toString()));
+            player.sendMessage(Identity.nil(), Component.text(RegistryTypes.ENTITY_TYPE.keyFor(Sponge.game().registries(), nextType).toString()));
         }
 
     }

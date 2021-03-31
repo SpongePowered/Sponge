@@ -42,7 +42,7 @@ public final class EmptyDataProvider<V extends Value<E>, E> implements DataProvi
     }
 
     @Override
-    public Key<V> getKey() {
+    public Key<V> key() {
         return this.key;
     }
 

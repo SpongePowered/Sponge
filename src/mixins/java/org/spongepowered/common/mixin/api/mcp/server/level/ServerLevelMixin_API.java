@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.server.level;
 
 import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
@@ -36,6 +37,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -84,8 +86,6 @@ import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Arrays;
@@ -95,8 +95,11 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
-import java.util.stream.StreamSupport;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
@@ -120,8 +123,8 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Shadow public abstract long shadow$getSeed();
     // @formatter:on
 
-    @Intrinsic
-    public long serverWorld$getSeed() {
+    @Override
+    public long seed() {
         return this.shadow$getSeed();
     }
 
@@ -135,24 +138,24 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     // LocationCreator
 
     @Override
-    public ServerLocation getLocation(final Vector3i position) {
+    public ServerLocation location(final Vector3i position) {
         return ServerLocation.of(this, Objects.requireNonNull(position, "position"));
     }
 
     @Override
-    public ServerLocation getLocation(final Vector3d position) {
+    public ServerLocation location(final Vector3d position) {
         return ServerLocation.of(this, Objects.requireNonNull(position, "position"));
     }
 
     // ServerWorld
 
     @Override
-    public ServerWorldProperties getProperties() {
+    public ServerWorldProperties properties() {
         return (ServerWorldProperties) this.shadow$getLevelData();
     }
 
     @Override
-    public ChunkGenerator getGenerator() {
+    public ChunkGenerator generator() {
         return (ChunkGenerator) this.shadow$getChunkSource().getGenerator();
     }
 
@@ -162,12 +165,12 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     }
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return (ResourceKey) (Object) this.shadow$dimension().location();
     }
 
     @Override
-    public Server getEngine() {
+    public Server engine() {
         return (Server) this.shadow$getServer();
     }
 
@@ -188,16 +191,16 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
 
     @Override
     public boolean restoreSnapshot(final int x, final int y, final int z, final BlockSnapshot snapshot, final boolean force, final BlockChangeFlag flag) {
-        return Objects.requireNonNull(snapshot, "snapshot").withLocation(this.getLocation(x, y, z)).restore(force, Objects.requireNonNull(flag, "flag"));
+        return Objects.requireNonNull(snapshot, "snapshot").withLocation(this.location(x, y, z)).restore(force, Objects.requireNonNull(flag, "flag"));
     }
 
     @Override
-    public Path getDirectory() {
+    public Path directory() {
         return ((ServerLevelBridge) this).bridge$getLevelSave().getLevelPath(LevelResource.ROOT);
     }
 
     @Override
-    public WorldStorage getWorldStorage() {
+    public WorldStorage worldStorage() {
         return (WorldStorage) this.shadow$getChunkSource();
     }
 
@@ -220,12 +223,12 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     }
 
     @Override
-    public Collection<ServerPlayer> getPlayers() {
+    public Collection<ServerPlayer> players() {
         return Collections.unmodifiableCollection((Collection<ServerPlayer>) (Collection<?>) ImmutableList.copyOf(this.shadow$players()));
     }
 
     @Override
-    public Collection<org.spongepowered.api.entity.Entity> getEntities() {
+    public Collection<org.spongepowered.api.entity.Entity> entities() {
         final Iterable<Entity> all = this.entityManager.getEntityGetter().getAll();
 
         final List<Entity> returningList = StreamSupport.stream(all.spliterator(), false).collect(Collectors.toList());
@@ -233,12 +236,12 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     }
 
     @Override
-    public Collection<org.spongepowered.api.raid.Raid> getRaids() {
+    public Collection<org.spongepowered.api.raid.Raid> raids() {
         return (Collection<org.spongepowered.api.raid.Raid>) (Collection) ((RaidsAccessor) this.shadow$getRaids()).accessor$raidMap().values();
     }
 
     @Override
-    public Optional<org.spongepowered.api.raid.Raid> getRaidAt(final Vector3i blockPosition) {
+    public Optional<org.spongepowered.api.raid.Raid> raidAt(final Vector3i blockPosition) {
         return Optional.ofNullable((org.spongepowered.api.raid.Raid) this.shadow$getRaidAt(VecHelper.toBlockPos(Objects.requireNonNull(blockPosition, "blockPosition"))));
     }
 
@@ -252,7 +255,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     // EntityVolume
 
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> getEntity(final UUID uniqueId) {
+    public Optional<org.spongepowered.api.entity.Entity> entity(final UUID uniqueId) {
         return Optional.ofNullable((org.spongepowered.api.entity.Entity) this.shadow$getEntity(Objects.requireNonNull(uniqueId, "uniqueId")));
     }
 
@@ -266,12 +269,12 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     // UpdateableVolume
 
     @Override
-    public ScheduledUpdateList<BlockType> getScheduledBlockUpdates() {
+    public ScheduledUpdateList<BlockType> scheduledBlockUpdates() {
         return (ScheduledUpdateList<BlockType>) this.blockTicks;
     }
 
     @Override
-    public ScheduledUpdateList<FluidType> getScheduledFluidUpdates() {
+    public ScheduledUpdateList<FluidType> scheduledFluidUpdates() {
         return (ScheduledUpdateList<FluidType>) this.liquidTicks;
     }
 

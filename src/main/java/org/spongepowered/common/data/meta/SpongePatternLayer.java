@@ -45,26 +45,26 @@ public final class SpongePatternLayer implements BannerPatternLayer {
     }
 
     @Override
-    public BannerPatternShape getShape() {
+    public BannerPatternShape shape() {
         return this.id;
     }
 
     @Override
-    public DyeColor getColor() {
+    public DyeColor color() {
         return this.color;
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey idKey = Sponge.getGame().registries().registry(RegistryTypes.BANNER_PATTERN_SHAPE).valueKey(this.id);
-        final ResourceKey colorKey = Sponge.getGame().registries().registry(RegistryTypes.DYE_COLOR).valueKey(this.color);
+        final ResourceKey idKey = Sponge.game().registries().registry(RegistryTypes.BANNER_PATTERN_SHAPE).valueKey(this.id);
+        final ResourceKey colorKey = Sponge.game().registries().registry(RegistryTypes.DYE_COLOR).valueKey(this.color);
         return DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.contentVersion())
             .set(Constants.TileEntity.Banner.SHAPE, idKey)
             .set(Constants.TileEntity.Banner.COLOR, colorKey);
     }

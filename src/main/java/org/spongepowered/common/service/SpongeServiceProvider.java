@@ -40,7 +40,6 @@ import org.spongepowered.common.applaunch.config.common.ServicesCategory;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.lifecycle.AbstractProvideServiceEventImpl;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.service.SpongeServiceProvider.Registration;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -84,7 +83,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
     @Override
     @NonNull
     @SuppressWarnings("unchecked")
-    public final <T> Optional<ServiceRegistration<T>> getRegistration(@NonNull final Class<T> serviceClass) {
+    public final <T> Optional<ServiceRegistration<T>> registration(@NonNull final Class<T> serviceClass) {
         return Optional.ofNullable((ServiceRegistration<T>) this.services.get(serviceClass));
     }
 
@@ -126,7 +125,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
             Registration<?> registration = null;
             if (isSpecific) {
                 final Optional<PluginContainer> specificPluginContainer =
-                        Launch.getInstance().getPluginManager().getPlugin(pluginId);
+                        Launch.getInstance().getPluginManager().plugin(pluginId);
                 if (specificPluginContainer.isPresent()) {
                     registration = this.getSpecificRegistration(specificPluginContainer.get(), candidate);
                     if (registration == null) {
@@ -173,7 +172,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
                     prettyPrinter.log(SpongeCommon.getLogger(), Level.ERROR);
                 }
             } else {
-                final Collection<PluginContainer> toQuery = Launch.getInstance().getPluginManager().getPlugins();
+                final Collection<PluginContainer> toQuery = Launch.getInstance().getPluginManager().plugins();
                 registration = this.attemptRegistration(toQuery, candidate);
             }
 
@@ -216,7 +215,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
         // This is the actual query - a generic event.
         final AbstractProvideServiceEventImpl<T> event = this.createEvent(container, service);
         try {
-            ((SpongeEventManager) this.getGame().getEventManager()).post(event, container);
+            ((SpongeEventManager) this.getGame().eventManager()).post(event, container);
         } catch (final Exception ex) {
             ex.printStackTrace();
         }

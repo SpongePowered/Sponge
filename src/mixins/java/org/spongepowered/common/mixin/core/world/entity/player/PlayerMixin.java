@@ -208,7 +208,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.shadow$getSleepingPos().get();
                 final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
-                SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventTick(csm.getCurrentCause(), snapshot, (Humanoid) this));
+                SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventTick(csm.currentCause(), snapshot, (Humanoid) this));
                 csm.popCause();
             }
             return true;
@@ -386,11 +386,11 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                 final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchantmentFunction(this.shadow$getMainHandItem(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
                 final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream()
-                    .map(ModifierFunction::getModifier)
+                    .map(ModifierFunction::modifier)
                     .collect(Collectors.toList());
 
                 enchantmentDamage = (float) enchantmentModifierFunctions.stream()
-                    .map(ModifierFunction::getFunction)
+                    .map(ModifierFunction::function)
                     .mapToDouble(function -> function.applyAsDouble(originalBaseDamage))
                     .sum();
                 originalFunctions.addAll(enchantmentModifierFunctions);
@@ -444,7 +444,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                     if (isMainthread) {
                         PhaseTracker.getInstance().pushCause(damageSource);
                     }
-                    final Cause currentCause = isMainthread ? PhaseTracker.getInstance().getCurrentCause() : Cause.of(EventContext.empty(), damageSource);
+                    final Cause currentCause = isMainthread ? PhaseTracker.getInstance().currentCause() : Cause.of(EventContext.empty(), damageSource);
                     final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(currentCause, (org.spongepowered.api.entity.Entity) targetEntity,
                         originalFunctions, knockbackModifier, originalBaseDamage);
                     SpongeCommon.postEvent(event);
@@ -455,14 +455,14 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                         return;
                     }
 
-                    damage = (float) event.getFinalOutputDamage();
+                    damage = (float) event.finalOutputDamage();
                     // Sponge End
 
                     // Sponge Start - need final for later events
                     final double attackDamage = damage;
-                    knockbackModifier = (int) event.getKnockbackModifier();
+                    knockbackModifier = (int) event.knockbackModifier();
                     enchantmentDamage = (float) enchantmentModifiers.stream()
-                        .mapToDouble(event::getOutputDamage)
+                        .mapToDouble(event::outputDamage)
                         .sum();
                     // Sponge End
 
@@ -528,12 +528,12 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                                             sweapingFunctions, 1, 1.0D);
                                         SpongeCommon.postEvent(sweepingAttackEvent);
                                         if (!sweepingAttackEvent.isCancelled()) {
-                                            livingEntity.knockback(sweepingAttackEvent.getKnockbackModifier() * 0.4F,
+                                            livingEntity.knockback(sweepingAttackEvent.knockbackModifier() * 0.4F,
                                                     (double) Mth.sin(this.yRot * ((float)Math.PI / 180F)),
                                                     (double) -Mth.cos(this.yRot * ((float)Math.PI / 180F)));
 
                                             livingEntity.hurt(DamageSource.playerAttack((net.minecraft.world.entity.player.Player) (Object) this),
-                                                (float) sweepingAttackEvent.getFinalOutputDamage());
+                                                (float) sweepingAttackEvent.finalOutputDamage());
                                         }
                                     }
                                     // Sponge End

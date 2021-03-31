@@ -71,10 +71,10 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     @Override
     public MapDecoration.Builder from(MapDecoration value) {
         Preconditions.checkNotNull(value, "MapDecoration cannot be null");
-        this.type = value.getType();
-        this.x = value.getPosition().getX();
-        this.y = value.getPosition().getY();
-        this.rot = value.getRotation();
+        this.type = value.type();
+        this.x = value.position().getX();
+        this.y = value.position().getY();
+        this.rot = value.rotation();
         return this;
     }
 

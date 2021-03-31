@@ -71,7 +71,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
         // method of its class, only applicable to this packet, so just retain here.
         ((ServerboundCustomPayloadPacketAccessor) packet).accessor$data().retain();
 
-        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.getChannelRegistry();
+        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.channelRegistry();
         this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet));
     }
 
@@ -84,18 +84,18 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
     private void vanilla$onProcessChatMessage(final TextFilter.FilteredText message, final CallbackInfo ci, final String plain, final net.minecraft.network.chat.Component filtered, final net.minecraft.network.chat.Component unfiltered) {
         // todo(zml): See where mojang takes these chat filtering changes
         ChatFormatter.formatChatComponent((net.minecraft.network.chat.TranslatableComponent) unfiltered);
-        final PlayerChatRouter chatRouter = ((ServerPlayer) this.player).getChatRouter();
+        final PlayerChatRouter chatRouter = ((ServerPlayer) this.player).chatRouter();
         Component adventure = SpongeAdventure.asAdventure(unfiltered);
         adventure = ((TranslatableComponent) adventure).args().get(1);
 
         try (CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
             frame.pushCause(this.player);
             final PlayerChatEvent event = SpongeEventFactory
-                    .createPlayerChatEvent(PhaseTracker.SERVER.getCurrentCause(), chatRouter, Optional.of(chatRouter), adventure, adventure);
+                    .createPlayerChatEvent(PhaseTracker.SERVER.currentCause(), chatRouter, Optional.of(chatRouter), adventure, adventure);
             if (SpongeCommon.postEvent(event)) {
                 ci.cancel();
             } else {
-                event.getChatRouter().ifPresent(router -> router.chat((ServerPlayer) this.player, event.getMessage()));
+                event.chatRouter().ifPresent(router -> router.chat((ServerPlayer) this.player, event.message()));
             }
         }
     }

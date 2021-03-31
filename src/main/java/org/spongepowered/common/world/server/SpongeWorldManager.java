@@ -27,17 +27,12 @@ package org.spongepowered.common.world.server;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.WorldManager;
-import org.spongepowered.common.SpongeCommon;
 
 import java.io.IOException;
 import java.nio.file.Path;
-import java.util.Objects;
 
 public interface SpongeWorldManager extends WorldManager {
 
@@ -64,7 +59,7 @@ public interface SpongeWorldManager extends WorldManager {
         if (Level.END.equals(registryKey)) {
             return "DIM1";
         }
-        return key.getValue();
+        return key.value();
     }
 
     default boolean isVanillaWorld(final ResourceKey key) {
@@ -82,6 +77,6 @@ public interface SpongeWorldManager extends WorldManager {
     }
 
     default Path getDataPackFile(final ResourceKey key) {
-        return this.getDimensionDataPackDirectory().resolve(key.getNamespace()).resolve("dimension").resolve(key.getValue() + ".json");
+        return this.getDimensionDataPackDirectory().resolve(key.namespace()).resolve("dimension").resolve(key.value() + ".json");
     }
 }

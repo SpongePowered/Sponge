@@ -51,17 +51,17 @@ public final class SpongeKeyValueMatcher<V> implements KeyValueMatcher<V> {
     }
 
     @Override
-    public Key<? extends Value<V>> getKey() {
+    public Key<? extends Value<V>> key() {
         return this.key;
     }
 
     @Override
-    public Operator getOperator() {
+    public Operator operator() {
         return this.operator;
     }
 
     @Override
-    public Optional<V> getValue() {
+    public Optional<V> value() {
         return Optional.ofNullable(this.value);
     }
 
@@ -93,7 +93,7 @@ public final class SpongeKeyValueMatcher<V> implements KeyValueMatcher<V> {
         if (this.value == null || value == null) {
             return false;
         }
-        final BiPredicate<V, V> predicate = (BiPredicate<V, V>) this.key.getElementIncludesTester();
+        final BiPredicate<V, V> predicate = (BiPredicate<V, V>) this.key.elementIncludesTester();
         return predicate.test(this.value, value);
     }
 
@@ -108,19 +108,19 @@ public final class SpongeKeyValueMatcher<V> implements KeyValueMatcher<V> {
         if (this.value == null) {
             return -1;
         }
-        final Comparator<V> comparator = (Comparator<V>) this.key.getElementComparator();
+        final Comparator<V> comparator = (Comparator<V>) this.key.elementComparator();
         return -comparator.compare(this.value, value);
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.KeyValueMatcher.KEY, this.key)
                 .set(Constants.KeyValueMatcher.OPERATOR, this.operator.toString().toLowerCase());
         if (this.value != null) {

@@ -48,7 +48,7 @@ public abstract class CommandBlockEntityMixin_API extends BlockEntityMixin_API i
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.shadow$getCommandBlock().getName().getString();
     }
 
@@ -79,7 +79,7 @@ public abstract class CommandBlockEntityMixin_API extends BlockEntityMixin_API i
     }
 
     @Override
-    public String getIdentifier() {
+    public String identifier() {
         return this.shadow$getCommandBlock().getName().getString();
     }
 }

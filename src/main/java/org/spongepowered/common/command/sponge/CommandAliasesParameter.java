@@ -45,11 +45,11 @@ public final class CommandAliasesParameter implements ValueParameter<CommandMapp
 
     @Override
     public List<String> complete(final CommandContext context, final String input) {
-        return Sponge.getGame().getServer().getCommandManager().getKnownAliases().stream().filter(x -> x.startsWith(input)).collect(Collectors.toList());
+        return Sponge.game().server().commandManager().knownAliases().stream().filter(x -> x.startsWith(input)).collect(Collectors.toList());
     }
 
     @Override
-    public Optional<? extends CommandMapping> getValue(
+    public Optional<? extends CommandMapping> parseValue(
             final Parameter.Key<? super CommandMapping> parameterKey,
             final ArgumentReader.Mutable reader,
             final CommandContext.Builder context) throws ArgumentParseException {
@@ -57,8 +57,7 @@ public final class CommandAliasesParameter implements ValueParameter<CommandMapp
         if (reader.canRead() && reader.peekCharacter() == ':') {
             alias += reader.parseChar() + reader.parseUnquotedString();
         }
-        final Optional<CommandMapping> mapping =
-                Sponge.getGame().getServer().getCommandManager().getCommandMapping(alias);
+        final Optional<CommandMapping> mapping = Sponge.game().server().commandManager().commandMapping(alias);
         if (mapping.isPresent()) {
             return mapping;
         }
@@ -66,7 +65,7 @@ public final class CommandAliasesParameter implements ValueParameter<CommandMapp
     }
 
     @Override
-    public List<ClientCompletionType> getClientCompletionType() {
+    public List<ClientCompletionType> clientCompletionType() {
         return Collections.singletonList(ClientCompletionTypes.RESOURCE_KEY.get());
     }
 

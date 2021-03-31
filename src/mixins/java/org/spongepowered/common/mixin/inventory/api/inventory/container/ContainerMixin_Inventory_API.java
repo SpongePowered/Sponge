@@ -39,6 +39,7 @@ import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge
 import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.MissingImplementationException;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -75,7 +76,7 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
     }
 
     @Override
-    public List<Inventory> getViewed() {
+    public List<Inventory> viewed() {
         List<Inventory> list = new ArrayList<>();
         for (Container inv : ((ContainerBridge) this).bridge$getInventories().keySet()) {
             Inventory inventory = InventoryUtil.toInventory(inv, null);
@@ -96,14 +97,14 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
     }
 
     @Override
-    public Optional<org.spongepowered.api.item.inventory.ItemStack> getCursor() {
+    public Optional<org.spongepowered.api.item.inventory.ItemStack> cursor() {
         return this.listeners().stream().findFirst()
                 .map(p -> p.containerMenu.getCarried())
                 .map(ItemStackUtil::fromNative);
     }
 
     @Override
-    public ServerPlayer getViewer() {
+    public ServerPlayer viewer() {
         return this.listeners().stream()
             .filter(ServerPlayer.class::isInstance)
             .map(ServerPlayer.class::cast)
@@ -114,11 +115,12 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
     @Override
     public boolean isOpen() {
         final org.spongepowered.api.item.inventory.Container thisContainer = this;
-        return this.getViewer().getOpenInventory().map(c -> c == thisContainer).orElse(false);
+        throw new MissingImplementationException("Viewer", "openInventory");
+//        return this.viewer().openInventory().map(c -> c == thisContainer).orElse(false);
     }
 
     @Override
-    public ContainerType getType() {
+    public ContainerType type() {
         return ((ContainerType) this.menuType);
     }
 

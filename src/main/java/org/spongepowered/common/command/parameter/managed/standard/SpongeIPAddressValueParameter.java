@@ -53,7 +53,7 @@ public final class SpongeIPAddressValueParameter extends ResourceKeyedArgumentVa
 
     @Override
     @NonNull
-    public Optional<? extends InetAddress> getValue(
+    public Optional<? extends InetAddress> parseValue(
             final Parameter.@NonNull Key<? super InetAddress> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {

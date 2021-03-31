@@ -112,7 +112,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         if (tuple == null) {
             throw new IllegalArgumentException("Unsupported channel type: " + channelType);
         }
-        final SpongeChannel channel = tuple.getSecond().create(tuple.getFirst(), channelKey, this);
+        final SpongeChannel channel = tuple.second().create(tuple.first(), channelKey, this);
         this.channels.put(channelKey, channel);
         return (C) channel;
     }
@@ -124,7 +124,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
     }
 
     @Override
-    public <C extends Channel> C getOfType(final ResourceKey channelKey, final Class<C> channelType) {
+    public <C extends Channel> C ofType(final ResourceKey channelKey, final Class<C> channelType) {
         Objects.requireNonNull(channelKey, "channelKey");
         Objects.requireNonNull(channelType, "channelType");
         final Channel binding = this.channels.get(channelKey);
@@ -139,7 +139,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
     }
 
     @Override
-    public Collection<Channel> getChannels() {
+    public Collection<Channel> channels() {
         return ImmutableList.copyOf(this.channels.values());
     }
 
@@ -171,16 +171,16 @@ public class SpongeChannelRegistry implements ChannelRegistry {
             }
 
             @Override
-            public Game getGame() {
+            public Game game() {
                 return SpongeCommon.getGame();
             }
 
             @Override
-            public Cause getCause() {
+            public Cause cause() {
                 return cause;
             }
         };
-        Sponge.getEventManager().post(event);
+        Sponge.eventManager().post(event);
     }
 
     public CompletableFuture<Void> requestClientType(final EngineConnection connection) {
@@ -239,7 +239,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
 
     public void sendChannelRegistrations(final EngineConnection connection) {
         final ChannelBuf payload = RegisterChannelUtil.encodePayload(this.channels.keySet());
-        final Packet<?> mcPacket = PacketUtil.createPlayPayload(Constants.Channels.REGISTER_KEY, payload, connection.getSide());
+        final Packet<?> mcPacket = PacketUtil.createPlayPayload(Constants.Channels.REGISTER_KEY, payload, connection.side());
         PacketSender.sendTo(connection, mcPacket);
     }
 
@@ -256,7 +256,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
         final ChannelBuf buf = this.bufferAllocator.buffer();
         buf.writeVarInt(channels.size());
         for (final SpongeChannel channel : channels) {
-            buf.writeString(channel.getKey().getFormatted());
+            buf.writeString(channel.key().formatted());
             // The type is included to provide extra information for e.g. proxies
             // who want to improve sponge support
             // Not used by sponge itself
@@ -353,7 +353,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
     private boolean handleLoginRequestPayload(final EngineConnection connection, final ResourceKey channelKey,
             final int transactionId, final ChannelBuf payload) {
         if (channelKey.equals(Constants.Channels.SPONGE_CLIENT_TYPE)) {
-            final ClientType clientType = ((MinecraftBridge) Sponge.getClient()).bridge$getClientType();
+            final ClientType clientType = ((MinecraftBridge) Sponge.client()).bridge$getClientType();
             final ChannelBuf responsePayload = this.bufferAllocator.buffer();
             responsePayload.writeString(clientType.getName());
             final Packet<?> mcPacket = PacketUtil.createLoginPayloadResponse(responsePayload, transactionId);

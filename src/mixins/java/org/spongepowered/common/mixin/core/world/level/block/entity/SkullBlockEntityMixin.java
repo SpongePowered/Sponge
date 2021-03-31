@@ -84,12 +84,12 @@ public abstract class SkullBlockEntityMixin extends BlockEntity implements Skull
         if (input.isComplete() && input.getProperties().containsKey("textures")) {
             return input;
         }
-        final GameProfileManager manager = Sponge.getServer().getGameProfileManager();
+        final GameProfileManager manager = Sponge.server().gameProfileManager();
         CompletableFuture<org.spongepowered.api.profile.GameProfile> future = null;
         if (input.getId() != null) {
-            future = manager.getProfile(input.getId());
+            future = manager.profile(input.getId());
         } else if (!StringUtil.isNullOrEmpty(input.getName())) {
-            future = manager.getProfile(input.getName());
+            future = manager.profile(input.getName());
         }
         if (future == null) {
             return input;

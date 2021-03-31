@@ -71,7 +71,7 @@ public class SpongeRawDataChannel extends SpongeChannel implements RawDataChanne
     }
 
     ChannelBuf encodePayload(final Consumer<ChannelBuf> payload) {
-        final ChannelBuf buf = this.getRegistry().getBufferAllocator().buffer();
+        final ChannelBuf buf = this.registry().getBufferAllocator().buffer();
         payload.accept(buf);
         return buf;
     }

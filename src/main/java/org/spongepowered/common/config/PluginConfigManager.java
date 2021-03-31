@@ -64,24 +64,24 @@ public final class PluginConfigManager implements ConfigManager {
     }
 
     @Override
-    public ConfigRoot getSharedConfig(final PluginContainer container) {
+    public ConfigRoot sharedConfig(final PluginContainer container) {
         return new PluginConfigRoot(this.serializers, container.getMetadata().getId().toLowerCase(),
                                     SpongeCommon.getPluginConfigDirectory());
     }
 
     @Override
-    public ConfigRoot getPluginConfig(final PluginContainer container) {
+    public ConfigRoot pluginConfig(final PluginContainer container) {
         return new PluginConfigRoot(this.serializers, container.getMetadata().getId().toLowerCase(),
                                     SpongeCommon.getPluginConfigDirectory().resolve(container.getMetadata().getId().toLowerCase()));
     }
 
     @Override
-    public TypeSerializerCollection getSerializers() {
+    public TypeSerializerCollection serializers() {
         return this.serializers;
     }
 
     @Override
-    public WatchServiceListener getWatchServiceListener() {
+    public WatchServiceListener watchServiceListener() {
         return this.listener;
     }
 

@@ -72,11 +72,11 @@ public final class SpongeFindNearestAttackableTargetGoalBuilder extends SpongeTa
     @Override
     public FindNearestAttackableTargetGoal.Builder from(FindNearestAttackableTargetGoal value) {
         checkNotNull(value);
-        this.targetClass = value.getTargetClass();
+        this.targetClass = value.targetClass();
         this.checkSight = value.shouldCheckSight();
         this.checkOnlyNearby = value.shouldCheckOnlyNearby();
-        this.chance = value.getChance();
-        this.predicate = (Predicate<? extends LivingEntity>) (Predicate<?>) value.getFilter();
+        this.chance = value.chance();
+        this.predicate = (Predicate<? extends LivingEntity>) (Predicate<?>) value.filter();
         return this;
     }
 

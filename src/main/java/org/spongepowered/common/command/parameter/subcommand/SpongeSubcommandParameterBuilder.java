@@ -41,7 +41,7 @@ public final class SpongeSubcommandParameterBuilder implements Parameter.Subcomm
     private Command.@Nullable Parameterized command;
 
     @Override
-    public Parameter.Subcommand.@NonNull Builder alias(@NonNull final String alias) {
+    public Parameter.Subcommand.@NonNull Builder addAlias(@NonNull final String alias) {
         this.aliases.add(alias);
         return this;
     }
@@ -52,7 +52,7 @@ public final class SpongeSubcommandParameterBuilder implements Parameter.Subcomm
     }
 
     @Override
-    public Parameter.Subcommand.@NonNull Builder setSubcommand(final Command.@NonNull Parameterized command) {
+    public Parameter.Subcommand.@NonNull Builder subcommand(final Command.@NonNull Parameterized command) {
         this.command = command;
         return this;
     }

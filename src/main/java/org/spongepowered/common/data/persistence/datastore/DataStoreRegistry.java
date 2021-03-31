@@ -89,7 +89,7 @@ public final class DataStoreRegistry {
     private DataStore loadDataStore(final LookupKey lookupKey) {
         final List<DataStore> dataStores = filterDataStoreCandidates(this.dataStoreByValueKey.get(lookupKey.key), lookupKey.holderType);
         if (dataStores.size() > 1) {
-            throw new IllegalStateException("Multiple data-stores registered for the same data-key (" + lookupKey.key.getKey() + ") and data-holder " + lookupKey.holderType.toString());
+            throw new IllegalStateException("Multiple data-stores registered for the same data-key (" + lookupKey.key.key() + ") and data-holder " + lookupKey.holderType.toString());
         }
         if (dataStores.isEmpty()) {
             dataStores.add(this.NO_OP_DATASTORE);
@@ -99,14 +99,14 @@ public final class DataStoreRegistry {
 
     private List<DataStore> filterDataStoreCandidates(Collection<DataStore> candidates, Type holderType) {
         return candidates.stream()
-                .filter(ds -> ds.getSupportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType)))
+                .filter(ds -> ds.supportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType)))
                 .collect(Collectors.toList());
     }
 
     public Collection<DataStore> getDataStoresForType(Class<? extends DataHolder> holderType) {
         if (!this.dataStoreByTokenCache.containsKey(holderType)) {
             for (DataStore dataStore : this.allDataStores) {
-                if (dataStore.getSupportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType))) {
+                if (dataStore.supportedTypes().stream().anyMatch(token -> GenericTypeReflector.isSuperType(token, holderType))) {
                     this.dataStoreByTokenCache.put(holderType, dataStore);
                 }
             }

@@ -222,7 +222,7 @@ public class EmptyInventoryImpl implements EmptyInventory {
         return false;
     }
 
-    public Optional<Slot> getSlot(int index) {
+    public Optional<Slot> slot(int index) {
         return Optional.empty();
     }
 

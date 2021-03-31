@@ -40,12 +40,12 @@ public class SpongePlaceholderComponent implements PlaceholderComponent {
     }
 
     @Override
-    public PlaceholderContext getContext() {
+    public PlaceholderContext context() {
         return this.context;
     }
 
     @Override
-    public PlaceholderParser getParser() {
+    public PlaceholderParser parser() {
         return this.parser;
     }
 

@@ -42,7 +42,7 @@ import net.minecraft.world.level.block.state.properties.ChestType;
 public abstract class ChestBlockEntityMixin_API extends RandomizableContainerBlockEntityMixin_API<Chest> implements Chest {
 
     @Override
-    public Optional<Chest> getConnectedChest() {
+    public Optional<Chest> connectedChest() {
         // Based off of the logic in ChestBlock.getChestInventory but without a blocked check and returning the TE instead of the inventory.
         ChestBlockEntity chestTileEntity = (ChestBlockEntity) (Object) this;
         BlockState chestState = chestTileEntity.getBlockState();

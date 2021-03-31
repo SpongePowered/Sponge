@@ -78,6 +78,10 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     private UUID impl$uuid;
     private CompoundTag impl$nbt;
 
+    public MapItemSavedDataMixin(final String name) {
+        super(name);
+    }
+
     @Override
     public void bridge$updateWholeMap() {
         this.shadow$setColorsDirty(0,0);

@@ -52,7 +52,7 @@ public final class SpongeBlockStateMatcher extends AbstractSpongeStateMatcher<@N
 
     @Override
     @NonNull
-    public List<BlockState> getCompatibleStates() {
+    public List<BlockState> compatibleStates() {
         if (this.compatibleStates == null) {
             final Block blockType = (Block) this.type;
             this.compatibleStates = blockType.getStateDefinition().getPossibleStates()

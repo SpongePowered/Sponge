@@ -53,25 +53,25 @@ public final class SpongeScheduledTask implements ScheduledTask {
     }
 
     @Override
-    public UUID getUniqueId() {
+    public UUID uniqueId() {
         return this.id;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public Task getTask() {
+    public Task task() {
         return this.task;
     }
 
     @Override
     public boolean cancel() {
         boolean success = false;
-        if (this.getState() == ScheduledTaskState.RUNNING
-                || this.getState() == ScheduledTaskState.EXECUTING) {
+        if (this.state() == ScheduledTaskState.RUNNING
+                || this.state() == ScheduledTaskState.EXECUTING) {
             success = true;
         }
         this.state = ScheduledTaskState.CANCELED;
@@ -88,7 +88,7 @@ public final class SpongeScheduledTask implements ScheduledTask {
         return this.scheduler;
     }
 
-    long getTimestamp() {
+    long timestamp() {
         return this.timestamp;
     }
 
@@ -99,7 +99,7 @@ public final class SpongeScheduledTask implements ScheduledTask {
     /**
      * Returns a timestamp after which the next execution will take place.
      * Should only be compared to
-     * {@link SpongeScheduler#getTimestamp(SpongeScheduledTask)}.
+     * {@link SpongeScheduler#timestamp(boolean)}.
      *
      * @return The next execution timestamp
      */
@@ -110,7 +110,7 @@ public final class SpongeScheduledTask implements ScheduledTask {
         return this.timestamp + this.task.delay;
     }
 
-    ScheduledTaskState getState() {
+    ScheduledTaskState state() {
         return this.state;
     }
 

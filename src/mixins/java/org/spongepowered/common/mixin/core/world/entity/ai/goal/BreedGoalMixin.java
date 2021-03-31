@@ -68,9 +68,9 @@ public abstract class BreedGoalMixin {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this.animal);
                 final org.spongepowered.api.event.entity.BreedingEvent.FindMate event =
-                    SpongeEventFactory.createBreedingEventFindMate(frame.getCurrentCause(), TristateResult.Result.DEFAULT,
+                    SpongeEventFactory.createBreedingEventFindMate(frame.currentCause(), TristateResult.Result.DEFAULT,
                         TristateResult.Result.DEFAULT, (Animal) nearbyMate, true);
-                if (SpongeCommon.postEvent(event) || event.getResult() == TristateResult.Result.DENY) {
+                if (SpongeCommon.postEvent(event) || event.result() == TristateResult.Result.DENY) {
                     nearbyMate = null;
                 }
             }

@@ -46,7 +46,7 @@ public final class SpongeBigIntegerValueParameter extends ResourceKeyedArgumentV
 
     @Override
     @NonNull
-    public Optional<? extends BigInteger> getValue(
+    public Optional<? extends BigInteger> parseValue(
             final Parameter.@NonNull Key<? super BigInteger> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {

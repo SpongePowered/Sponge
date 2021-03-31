@@ -62,17 +62,17 @@ public final class SpongeTabListEntry implements TabListEntry {
     }
 
     @Override
-    public TabList getList() {
+    public TabList list() {
         return this.list;
     }
 
     @Override
-    public GameProfile getProfile() {
+    public GameProfile profile() {
         return this.profile;
     }
 
     @Override
-    public Optional<Component> getDisplayName() {
+    public Optional<Component> displayName() {
         return Optional.ofNullable(this.displayName);
     }
 
@@ -84,7 +84,7 @@ public final class SpongeTabListEntry implements TabListEntry {
     }
 
     @Override
-    public int getLatency() {
+    public int latency() {
         return this.latency;
     }
 
@@ -96,7 +96,7 @@ public final class SpongeTabListEntry implements TabListEntry {
     }
 
     @Override
-    public GameMode getGameMode() {
+    public GameMode gameMode() {
         return this.gameMode;
     }
 
@@ -136,7 +136,7 @@ public final class SpongeTabListEntry implements TabListEntry {
         }
 
         TabListEntry that = (TabListEntry) other;
-        return Objects.equal(this.profile.getUniqueId(), that.getProfile().getUniqueId());
+        return Objects.equal(this.profile.uniqueId(), that.profile().uniqueId());
     }
 
     @Override

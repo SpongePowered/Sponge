@@ -158,7 +158,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Override
     public void bridge$trackViewable(Object inventory) {
         if (inventory instanceof Carrier) {
-            inventory = ((Carrier) inventory).getInventory();
+            inventory = ((Carrier) inventory).inventory();
         }
         if (inventory instanceof Inventory) {
             ((Inventory) inventory).asViewable().ifPresent(i -> ((ViewableInventoryBridge) i).viewableBridge$addContainer((AbstractContainerMenu) (Object) this));
@@ -176,7 +176,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     private void impl$unTrackViewable(@Nullable Object inventory) {
         if (inventory instanceof Carrier) {
-            inventory = ((Carrier) inventory).getInventory();
+            inventory = ((Carrier) inventory).inventory();
         }
         if (inventory instanceof Inventory) {
             ((Inventory) inventory).asViewable().ifPresent(i -> ((ViewableInventoryBridge) i).viewableBridge$removeContainer(((AbstractContainerMenu) (Object) this)));

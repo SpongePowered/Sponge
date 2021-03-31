@@ -78,7 +78,7 @@ public final class PacketCommandState extends PacketState<PlayerCommandPhaseCont
         // We have to check if there is a player, because command blocks can be triggered
         // without player interaction.
         // Fixes https://github.com/SpongePowered/SpongeForge/issues/2442
-        PhaseTracker.getCauseStackManager().getCurrentCause().first(User.class).ifPresent(user -> {
+        PhaseTracker.getCauseStackManager().currentCause().first(User.class).ifPresent(user -> {
             TrackingUtil.associateTrackerToTarget(blockChange, transaction, user);
         });
    }
@@ -89,13 +89,13 @@ public final class PacketCommandState extends PacketState<PlayerCommandPhaseCont
         final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect, final Cause currentCause
     ) {
         final Cause newCauseWithSpawnType = Cause.builder().from(currentCause).build(
-            EventContext.builder().from(currentCause.getContext()).add(
+            EventContext.builder().from(currentCause.context()).add(
                 EventContextKeys.SPAWN_TYPE,
                 SpawnTypes.PLACEMENT.get()
             ).build());
         return SpongeEventFactory.createSpawnEntityEvent(newCauseWithSpawnType,
             collect.stream()
-                .map(t -> (org.spongepowered.api.entity.Entity) t.getFirst())
+                .map(t -> (org.spongepowered.api.entity.Entity) t.first())
                 .collect(Collectors.toList())
         );
     }

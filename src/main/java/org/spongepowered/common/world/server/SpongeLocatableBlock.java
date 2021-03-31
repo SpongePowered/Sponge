@@ -66,24 +66,24 @@ public final class SpongeLocatableBlock implements LocatableBlock {
     }
 
     SpongeLocatableBlock(final ServerWorld world, final int x, final int y, final int z) {
-        this.world = world.getKey();
+        this.world = world.key();
         this.worldRef = new WeakReference<>(world);
         this.position = new Vector3i(x, y, z);
-        this.blockState = world.getBlock(x, y, z);
+        this.blockState = world.block(x, y, z);
     }
 
     @Override
-    public BlockState getBlockState() {
+    public BlockState blockState() {
         return this.blockState;
     }
 
     @Override
-    public World<?, ?> getWorld() {
+    public World<?, ?> world() {
         return Objects.requireNonNull(this.worldRef.get(), "World was de-referenced!");
     }
 
     @Override
-    public ServerLocation getLocation() {
+    public ServerLocation location() {
         if (this.location == null) {
             this.location = ServerLocation.of(Objects.requireNonNull(this.worldRef.get(), "World was de-referenced!"), this.position);
         }
@@ -91,7 +91,7 @@ public final class SpongeLocatableBlock implements LocatableBlock {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
@@ -163,7 +163,7 @@ public final class SpongeLocatableBlock implements LocatableBlock {
 
     @Override
     public LocatableBlock mergeWith(final LocatableBlock that, final MergeFunction function) {
-        return LocatableBlock.builder().from(this).state(this.blockState.mergeWith(that.getBlockState(), function)).build();
+        return LocatableBlock.builder().from(this).state(this.blockState.mergeWith(that.blockState(), function)).build();
     }
 
     @Override

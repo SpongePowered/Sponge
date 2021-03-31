@@ -122,11 +122,11 @@ public final class SpongePaginationBuilder implements PaginationList.Builder {
     @Override
     public PaginationList.Builder from(final PaginationList list) {
         this.reset();
-        this.contents = list.getContents();
-        this.title = list.getTitle().orElse(null);
-        this.header = list.getHeader().orElse(null);
-        this.footer = list.getFooter().orElse(null);
-        this.paginationSpacer = list.getPadding();
+        this.contents = list.contents();
+        this.title = list.title().orElse(null);
+        this.header = list.header().orElse(null);
+        this.footer = list.footer().orElse(null);
+        this.paginationSpacer = list.padding();
 
         this.paginationList = null;
         return this;

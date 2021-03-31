@@ -341,12 +341,12 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             final ExplosionEvent.Pre
                     event =
                     SpongeEventFactory.createExplosionEventPre(
-                            PhaseTracker.SERVER.getCurrentCause(),
+                            PhaseTracker.SERVER.currentCause(),
                             explosion, ((org.spongepowered.api.world.server.ServerWorld) this));
             if (SpongeCommon.postEvent(event)) {
                 return (Explosion) explosion;
             }
-            explosion = event.getExplosion();
+            explosion = event.explosion();
         }
         final Explosion mcExplosion;
         try {
@@ -362,7 +362,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         }
 
         try (final PhaseContext<@NonNull ?> ignored = contextCreator.apply(mcExplosion)
-            .source(((Optional) explosion.getSourceExplosive()).orElse(this))) {
+            .source(((Optional) explosion.sourceExplosive()).orElse(this))) {
             ignored.buildAndSwitch();
             final boolean damagesTerrain = explosion.shouldBreakBlocks();
             // Sponge End
@@ -740,13 +740,13 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             return;
         }
 
-        final Cause currentCause = tracker.getCurrentCause();
+        final Cause currentCause = tracker.currentCause();
 
         final SpawnEntityEvent.Pre pre = SpongeEventFactory.createSpawnEntityEventPre(
             currentCause,
             Collections.singletonList((org.spongepowered.api.entity.Entity) entityIn)
         );
-        Sponge.getEventManager().post(pre);
+        Sponge.eventManager().post(pre);
         if (pre.isCancelled()) {
             cir.setReturnValue(false);
         }

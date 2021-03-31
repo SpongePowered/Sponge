@@ -60,7 +60,7 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
         final Entity destroyingEntity, final CompoundTag entityTag,
         final Supplier<Optional<DamageSource>> lastAttacker
     ) {
-        super(TransactionTypes.ENTITY_DEATH_DROPS.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).getKey());
+        super(TransactionTypes.ENTITY_DEATH_DROPS.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).key());
         this.worldSupplier = worldSupplier;
         this.destroyingEntity = destroyingEntity;
         this.entityTag = entityTag;

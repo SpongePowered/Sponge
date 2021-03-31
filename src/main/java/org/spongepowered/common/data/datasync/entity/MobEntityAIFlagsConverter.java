@@ -54,7 +54,7 @@ public final class MobEntityAIFlagsConverter extends DataParameterConverter<Byte
     @Override
     public Byte getValueFromEvent(Byte originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.IS_AI_ENABLED) {
+            if (immutableValue.key() == Keys.IS_AI_ENABLED) {
                 final Boolean hasAi = (Boolean) immutableValue.get();
                 originalValue = hasAi ? (byte) (originalValue & -2) : (byte) (originalValue | 1);
             }

@@ -40,7 +40,7 @@ public abstract class IntegratedServerMixin_API implements LocalServer {
     // @formatter:on
 
     @Override
-    public Client getClient() {
+    public Client client() {
         return (Client) this.minecraft;
     }
 }

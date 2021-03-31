@@ -90,7 +90,7 @@ public final class EntityData {
                     .create(Keys.FIRE_DAMAGE_DELAY)
                         .get(h -> new SpongeTicks(((EntityAccessor) h).invoker$getFireImmuneTicks()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 1 || ticks > Short.MAX_VALUE) {
                                 return false;
                             }
@@ -100,7 +100,7 @@ public final class EntityData {
                     .create(Keys.FIRE_TICKS)
                         .get(h -> ((EntityAccessor) h).accessor$remainingFireTicks() > 0 ? Ticks.of(((EntityAccessor) h).accessor$remainingFireTicks()) : null)
                         .set((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             ((EntityAccessor) h).accessor$remainingFireTicks(Math.max(ticks, Constants.Entity.MINIMUM_FIRE_TICKS));
                         })
                         .deleteAndGet(h -> {
@@ -121,7 +121,7 @@ public final class EntityData {
                     .create(Keys.INVULNERABILITY_TICKS)
                         .get(h -> new SpongeTicks(h.invulnerableTime))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0) {
                                 return false;
                             }

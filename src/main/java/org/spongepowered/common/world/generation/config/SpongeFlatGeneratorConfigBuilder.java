@@ -107,9 +107,9 @@ public final class SpongeFlatGeneratorConfigBuilder implements FlatGeneratorConf
         this.structureConfig = (StructureGenerationConfig) new StructureSettings(Optional.of(StructureSettings.DEFAULT_STRONGHOLD),
                 Maps.newHashMap(ImmutableMap.of(StructureFeature.VILLAGE, StructureSettings.DEFAULTS.get(StructureFeature.VILLAGE))));
         this.layers.clear();
-        this.layers.add(LayerConfig.of(1, BlockTypes.BEDROCK.get().getDefaultState()));
-        this.layers.add(LayerConfig.of(2, BlockTypes.DIRT.get().getDefaultState()));
-        this.layers.add(LayerConfig.of(1, BlockTypes.GRASS_BLOCK.get().getDefaultState()));
+        this.layers.add(LayerConfig.of(1, BlockTypes.BEDROCK.get().defaultState()));
+        this.layers.add(LayerConfig.of(2, BlockTypes.DIRT.get().defaultState()));
+        this.layers.add(LayerConfig.of(1, BlockTypes.GRASS_BLOCK.get().defaultState()));
         this.biome = Biomes.PLAINS;
         this.performDecoration = true;
         this.populateLakes = true;

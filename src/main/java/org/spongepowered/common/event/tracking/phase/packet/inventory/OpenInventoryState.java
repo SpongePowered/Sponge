@@ -47,18 +47,18 @@ public final class OpenInventoryState extends BasicInventoryPacketState {
         try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(player);
             final InteractContainerEvent.Open event =
-                SpongeEventFactory.createInteractContainerEventOpen(frame.getCurrentCause(), ContainerUtil.fromNative(player.containerMenu),
+                SpongeEventFactory.createInteractContainerEventOpen(frame.currentCause(), ContainerUtil.fromNative(player.containerMenu),
                         cursorTransaction);
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 player.closeContainer();
             } else {
                 // Custom cursor
-                final Transaction<ItemStackSnapshot> transaction = event.getCursorTransaction();
+                final Transaction<ItemStackSnapshot> transaction = event.cursorTransaction();
                 if (!transaction.isValid()) {
-                    PacketPhaseUtil.handleCustomCursor(player, transaction.getOriginal());
-                } else if (transaction.getCustom().isPresent()) {
-                    PacketPhaseUtil.handleCustomCursor(player, transaction.getFinal());
+                    PacketPhaseUtil.handleCustomCursor(player, transaction.original());
+                } else if (transaction.custom().isPresent()) {
+                    PacketPhaseUtil.handleCustomCursor(player, transaction.finalReplacement());
                 }
             }
         }

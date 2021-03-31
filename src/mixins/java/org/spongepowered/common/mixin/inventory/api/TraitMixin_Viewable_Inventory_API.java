@@ -61,7 +61,7 @@ import net.minecraft.world.level.block.entity.LecternBlockEntity;
 public abstract class TraitMixin_Viewable_Inventory_API implements ViewableInventory {
 
     @Override
-    public Set<ServerPlayer> getViewers() {
+    public Set<ServerPlayer> viewers() {
         if (this instanceof ViewableInventoryBridge) {
             return ((ViewableInventoryBridge) this).viewableBridge$getViewers();
         }

@@ -151,7 +151,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         final List<SlotTransaction> capturedTransactions = ((TrackedInventoryBridge) container).bridge$getCapturedSlotTransactions();
         for (final Iterator<SlotTransaction> iterator = capturedTransactions.iterator(); iterator.hasNext(); ) {
             final SlotTransaction trans = iterator.next();
-            Optional<Integer> slotIndex = trans.getSlot().get(Keys.SLOT_INDEX);
+            Optional<Integer> slotIndex = trans.slot().get(Keys.SLOT_INDEX);
             if (slotIndex.isPresent() && slotIndex.get() == 0) {
                 iterator.remove();
                 if (first == null) {
@@ -164,7 +164,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         // if we got a transaction on the crafting-slot use this
         if (first != null) {
             capturedTransactions.add(first);
-            craftedItem = first.getOriginal().copy();
+            craftedItem = first.original().copy();
         } else {
             craftedItem = ItemStackUtil.snapshotOf(this.impl$craftedStack);
         }
@@ -185,7 +185,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
 
         final SlotTransaction last;
         if (previewTransactions.isEmpty()) {
-            last = new SlotTransaction(craftingInventory.getResult(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(this.getItem()));
+            last = new SlotTransaction(craftingInventory.result(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(this.getItem()));
             previewTransactions.add(last);
         } else {
             last = previewTransactions.get(0);

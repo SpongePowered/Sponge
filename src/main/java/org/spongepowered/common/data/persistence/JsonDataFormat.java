@@ -183,7 +183,7 @@ public final class JsonDataFormat implements StringDataFormat {
     private static void writeView(JsonWriter writer, DataView view) throws IOException {
         writer.beginObject();
 
-        for (Map.Entry<DataQuery, Object> entry : view.getValues(false).entrySet()) {
+        for (Map.Entry<DataQuery, Object> entry : view.values(false).entrySet()) {
             writer.name(entry.getKey().asString('.'));
             JsonDataFormat.write(writer, entry.getValue());
         }

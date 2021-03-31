@@ -75,7 +75,7 @@ public abstract class SpongeSystemSubject implements Subject, SystemSubject, Bri
     @Override
     public String toString() {
       return MoreObjects.toStringHelper(this)
-          .add("identifier", this.getIdentifier())
+          .add("identifier", this.identifier())
           .add("reference", this.bridge$resolveOptional())
           .toString();
     }

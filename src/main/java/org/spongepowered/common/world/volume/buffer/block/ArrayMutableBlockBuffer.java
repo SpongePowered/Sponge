@@ -52,7 +52,7 @@ import net.minecraft.core.BlockPos;
 
 public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements BlockVolume.Mutable<ArrayMutableBlockBuffer> {
 
-    private static final BlockState AIR = BlockTypes.AIR.get().getDefaultState();
+    private static final BlockState AIR = BlockTypes.AIR.get().defaultState();
 
     private final Palette.Mutable<BlockState, BlockType> palette;
     private final RegistryReference<BlockType> defaultState;
@@ -62,7 +62,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         this(
             new MutableBimapPalette<>(
                 PaletteTypes.BLOCK_STATE_PALETTE.get(),
-                Sponge.getGame().registries().registry(RegistryTypes.BLOCK_TYPE),
+                Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE),
                 RegistryTypes.BLOCK_TYPE
             ),
             BlockTypes.AIR,
@@ -75,13 +75,13 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         final Vector3i start, final Vector3i size
     ) {
         super(start, size);
-        final Palette.Mutable<BlockState, BlockType> mutablePalette = palette.asMutable(Sponge.getGame().registries());
+        final Palette.Mutable<BlockState, BlockType> mutablePalette = palette.asMutable(Sponge.game().registries());
         this.palette = mutablePalette;
-        final int airId = mutablePalette.getOrAssign(ArrayMutableBlockBuffer.AIR);
+        final int airId = mutablePalette.orAssign(ArrayMutableBlockBuffer.AIR);
 
         final int dataSize = this.area();
         this.defaultState = defaultState;
-        this.data = new BlockBackingData.PackedBackingData(dataSize, palette.getHighestId());
+        this.data = new BlockBackingData.PackedBackingData(dataSize, palette.highestId());
 
         // all blocks default to air
         if (airId != 0) {
@@ -93,7 +93,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
 
     public ArrayMutableBlockBuffer(final Palette<BlockState, BlockType> palette, final Vector3i start, final Vector3i size, final char[] blocks) {
         super(start, size);
-        this.palette = palette.asMutable(Sponge.getGame().registries());
+        this.palette = palette.asMutable(Sponge.game().registries());
         this.data = new BlockBackingData.CharBackingData(blocks);
         this.defaultState = BlockTypes.AIR;
     }
@@ -108,7 +108,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
      */
     ArrayMutableBlockBuffer(final Palette<BlockState, BlockType> palette, final BlockBackingData blocks, final Vector3i start, final Vector3i size) {
         super(start, size);
-        this.palette = palette.asMutable(Sponge.getGame().registries());
+        this.palette = palette.asMutable(Sponge.game().registries());
         this.data = blocks;
         this.defaultState = BlockTypes.AIR;
     }
@@ -121,10 +121,10 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
     @Override
     public boolean setBlock(final int x, final int y, final int z, final BlockState block) {
         this.checkRange(x, y, z);
-        final int id = this.palette.getOrAssign(block);
+        final int id = this.palette.orAssign(block);
         if (id > this.data.getMax()) {
 
-            final int highId = this.palette.getHighestId();
+            final int highId = this.palette.highestId();
             final int dataSize = this.area();
             final BlockBackingData newdata = new BlockBackingData.PackedBackingData(dataSize, highId);
             for (int i = 0; i < dataSize; i++) {
@@ -139,24 +139,24 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
     @Override
     public boolean removeBlock(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        return this.setBlock(x, y, z, BlockTypes.AIR.get().getDefaultState());
+        return this.setBlock(x, y, z, BlockTypes.AIR.get().defaultState());
     }
 
     @Override
-    public BlockState getBlock(final int x, final int y, final int z) {
+    public BlockState block(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        final RegistryHolder registries = Sponge.getGame().registries();
+        final RegistryHolder registries = Sponge.game().registries();
         return this.palette.get(this.data.get(this.getIndex(x, y, z)), registries)
-            .orElseGet(() -> this.defaultState.get(registries).getDefaultState());
+            .orElseGet(() -> this.defaultState.get(registries).defaultState());
     }
 
     @Override
-    public FluidState getFluid(final int x, final int y, final int z) {
-        return this.getBlock(x, y, z).getFluidState();
+    public FluidState fluid(final int x, final int y, final int z) {
+        return this.block(x, y, z).fluidState();
     }
 
     @Override
-    public int getHighestYAt(final int x, final int z) {
+    public int highestYAt(final int x, final int z) {
         return 0;
     }
 
@@ -186,9 +186,9 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
     }
 
     @Override
-    public VolumeStream<ArrayMutableBlockBuffer, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        final Vector3i blockMin = this.getBlockMin();
-        final Vector3i blockMax = this.getBlockMax();
+    public VolumeStream<ArrayMutableBlockBuffer, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+        final Vector3i blockMin = this.blockMin();
+        final Vector3i blockMax = this.blockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final ArrayMutableBlockBuffer buffer;
         if (options.carbonCopy()) {
@@ -199,7 +199,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         final Stream<VolumeElement<ArrayMutableBlockBuffer, BlockState>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
             .mapToObj(x -> IntStream.range(blockMin.getZ(), blockMax.getZ() + 1)
                 .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
-                    .mapToObj(y -> VolumeElement.of(this, () -> buffer.getBlock(x, y, z), new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.of(this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);
@@ -210,7 +210,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
     }
 
     public net.minecraft.world.level.block.state.BlockState getBlock(final BlockPos blockPos) {
-        return (net.minecraft.world.level.block.state.BlockState) this.getBlock(blockPos.getX(), blockPos.getY(), blockPos.getZ());
+        return (net.minecraft.world.level.block.state.BlockState) this.block(blockPos.getX(), blockPos.getY(), blockPos.getZ());
     }
 
     public ArrayMutableBlockBuffer copy() {

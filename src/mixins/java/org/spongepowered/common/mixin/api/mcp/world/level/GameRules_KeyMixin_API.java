@@ -39,18 +39,18 @@ public class GameRules_KeyMixin_API<T> implements GameRule<T> {
     @Shadow @Final private String id;
 
     @Override
-    public String getName() {
+    public String name() {
         return this.id;
     }
 
     @Override
-    public Type getValueType() {
+    public Type valueType() {
         throw new UnsupportedOperationException("Not implemented yet");
     }
 
     @Override
     @SuppressWarnings("unchecked")
-    public T getDefaultValue() {
+    public T defaultValue() {
         final GameRules.Type<?> type = GameRulesAccessor.accessor$GAME_RULE_TYPES().get(this);
         final GameRules.Value<?> value = type.createRule();
         if (value instanceof GameRules.BooleanValue) {

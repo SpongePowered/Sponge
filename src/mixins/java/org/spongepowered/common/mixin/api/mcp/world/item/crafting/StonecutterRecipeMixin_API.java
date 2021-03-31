@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 public abstract class StonecutterRecipeMixin_API extends SingleItemRecipeMixin_API implements StoneCutterRecipe {
 
     @Override
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return (ResourceKey) (Object) this.id;
     }
 }

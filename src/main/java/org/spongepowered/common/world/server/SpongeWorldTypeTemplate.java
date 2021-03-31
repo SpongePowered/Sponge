@@ -102,7 +102,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
                             Codec.BOOL.fieldOf("has_raids").forGetter(DimensionType::hasRaids),
                             Codec.intRange(0, 256).fieldOf("logical_height").forGetter(DimensionType::logicalHeight),
                             ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(v -> ((Tag.Named<Block>)v.infiniburn()).getName()),
-                            ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) WorldTypeEffects.OVERWORLD.getKey()).forGetter(v -> ((DimensionTypeAccessor) v).accessor$effectsLocation()),
+                            ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) WorldTypeEffects.OVERWORLD.key()).forGetter(v -> ((DimensionTypeAccessor) v).accessor$effectsLocation()),
                             Codec.FLOAT.fieldOf("ambient_light").forGetter(v -> ((DimensionTypeAccessor) v).accessor$ambientLight()),
                             SpongeWorldTypeTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeSamplerProvider.INSTANCE.get((BiomeSampler) v.getBiomeZoomer()), v.createDragonFight())))
                     )
@@ -171,7 +171,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 0;
     }
 

@@ -69,10 +69,10 @@ public final class SpongeAvoidLivingGoalBuilder implements AvoidLivingGoal.Build
 
     @Override
     public AvoidLivingGoal.Builder from(AvoidLivingGoal value) {
-        return this.targetSelector(value.getTargetSelector())
-            .searchDistance(value.getSearchDistance())
-            .closeRangeSpeed(value.getCloseRangeSpeed())
-            .farRangeSpeed(value.getFarRangeSpeed());
+        return this.targetSelector(value.targetSelector())
+            .searchDistance(value.searchDistance())
+            .closeRangeSpeed(value.closeRangeSpeed())
+            .farRangeSpeed(value.farRangeSpeed());
     }
 
     @Override

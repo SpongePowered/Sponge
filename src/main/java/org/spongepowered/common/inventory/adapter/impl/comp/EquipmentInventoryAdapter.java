@@ -55,7 +55,7 @@ public class EquipmentInventoryAdapter extends BasicInventoryAdapter implements 
     }
 
     @Override
-    public Optional<Equipable> getCarrier() {
+    public Optional<Equipable> carrier() {
         return Optional.ofNullable(this.carrier);
     }
 
@@ -88,7 +88,7 @@ public class EquipmentInventoryAdapter extends BasicInventoryAdapter implements 
     }
 
     @Override
-    public Optional<Slot> getSlot(EquipmentType equipmentType) {
+    public Optional<Slot> slot(EquipmentType equipmentType) {
         Inventory slot = this.queryForType(equipmentType);
         if (slot instanceof Slot) {
             return Optional.of((Slot) slot);

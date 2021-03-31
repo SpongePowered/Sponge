@@ -56,7 +56,7 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
 
     @Override
     @NonNull
-    public Optional<? extends T> getValue(
+    public Optional<? extends T> parseValue(
             final Parameter.@NonNull Key<? super T> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
@@ -90,7 +90,7 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
 
     @Override
     @NonNull
-    public String getUsage(@NonNull final String key) {
+    public String usage(@NonNull final String key) {
         return String.join(" ", this.literalSupplier.get());
     }
 

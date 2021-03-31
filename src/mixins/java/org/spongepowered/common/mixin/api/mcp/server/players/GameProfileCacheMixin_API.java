@@ -65,11 +65,11 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
     @Override
     public boolean remove(final GameProfile profile) {
         Objects.requireNonNull(profile, "profile");
-        final UUID uniqueId = profile.getUniqueId();
+        final UUID uniqueId = profile.uniqueId();
         final GameProfileCache_GameProfileInfoAccessor entry = this.profilesByUUID.remove(uniqueId);
         if (entry != null) {
-            if (profile.getName().isPresent()) {
-                this.profilesByName.remove(profile.getName().get().toLowerCase(Locale.ROOT));
+            if (profile.name().isPresent()) {
+                this.profilesByName.remove(profile.name().get().toLowerCase(Locale.ROOT));
             }
             // Only return true if the entry wasn't expired
             return entry.invoker$getExpirationDate().getTime() >= System.currentTimeMillis();
@@ -100,7 +100,7 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
             final boolean isExpired = entry.invoker$getExpirationDate().getTime() < System.currentTimeMillis();
             if (isExpired || filter.test(profile)) {
                 it.remove();
-                profile.getName().ifPresent(name -> this.profilesByName.remove(name, entry));
+                profile.name().ifPresent(name -> this.profilesByName.remove(name, entry));
                 if (!isExpired) {
                     result.add(profile);
                 }
@@ -116,13 +116,13 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> getById(final UUID uniqueId) {
+    public Optional<GameProfile> byId(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         return Optional.ofNullable(this.shadow$get(uniqueId)).map(SpongeGameProfile::of);
     }
 
     @Override
-    public Map<UUID, Optional<GameProfile>> getByIds(final Iterable<UUID> uniqueIds) {
+    public Map<UUID, Optional<GameProfile>> byIds(final Iterable<UUID> uniqueIds) {
         Objects.requireNonNull(uniqueIds, "uniqueIds");
         final Map<UUID, Optional<GameProfile>> result = new HashMap<>();
         for (final UUID uniqueId : uniqueIds) {
@@ -132,7 +132,7 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> getByName(final String name) {
+    public Optional<GameProfile> byName(final String name) {
         Objects.requireNonNull(name, "name");
         @Nullable GameProfileCache_GameProfileInfoAccessor entry = this.profilesByName.get(name.toLowerCase(Locale.ROOT));
 
@@ -147,11 +147,11 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Map<String, Optional<GameProfile>> getByNames(final Iterable<String> names) {
+    public Map<String, Optional<GameProfile>> byNames(final Iterable<String> names) {
         Objects.requireNonNull(names, "names");
         final Map<String, Optional<GameProfile>> result = Maps.newHashMap();
         for (final String name : names) {
-            result.put(name, this.getByName(name));
+            result.put(name, this.byName(name));
         }
         return ImmutableMap.copyOf(result);
     }

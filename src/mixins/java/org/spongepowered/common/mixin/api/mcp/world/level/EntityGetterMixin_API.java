@@ -53,17 +53,17 @@ public interface EntityGetterMixin_API extends EntityVolume {
     //@formatter:on
 
     @Override
-    default Vector3i getBlockMin() {
+    default Vector3i blockMin() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
     }
 
     @Override
-    default Vector3i getBlockMax() {
+    default Vector3i blockMax() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
     }
 
     @Override
-    default Vector3i getBlockSize() {
+    default Vector3i blockSize() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of IEntityReader that isn't part of Sponge API");
     }
 
@@ -78,25 +78,25 @@ public interface EntityGetterMixin_API extends EntityVolume {
     }
 
     @Override
-    default Optional<Entity> getEntity(final UUID uuid) {
+    default Optional<Entity> entity(final UUID uuid) {
         return Optional.empty();
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    default Collection<? extends Player> getPlayers() {
+    default Collection<? extends Player> players() {
         return Collections.unmodifiableCollection((List<? extends Player>) (List<?>) this.shadow$players());
     }
 
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     @Override
-    default Collection<? extends Entity> getEntities(final AABB box, final Predicate<? super Entity> filter) {
+    default Collection<? extends Entity> entities(final AABB box, final Predicate<? super Entity> filter) {
         return (Collection) this.shadow$getEntities(null, VecHelper.toMinecraftAABB(box), VolumeStreamUtils.apiToImplPredicate(filter));
     }
 
     @SuppressWarnings(value = {"unchecked", "rawtypes"})
     @Override
-    default <E extends Entity> Collection<? extends E> getEntities(final Class<? extends E> entityClass, final AABB box, @Nullable
+    default <E extends Entity> Collection<? extends E> entities(final Class<? extends E> entityClass, final AABB box, @Nullable
     final Predicate<? super E> predicate) {
         final Predicate<? super net.minecraft.world.entity.Entity> filter = entity -> predicate == null || (entityClass.isInstance(entity) && predicate.test((E) entity));
         final List<net.minecraft.world.entity.Entity> ts = this.shadow$getEntitiesOfClass((Class<net.minecraft.world.entity.Entity>) (Class<?>) entityClass,

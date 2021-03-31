@@ -975,8 +975,7 @@ public final class Constants {
             ;
         public static final int DEFAULT = Constants.BlockChangeFlags.BLOCK_UPDATED
             | Constants.BlockChangeFlags.NOTIFY_CLIENTS;
-        public static final int NONE = Constants.BlockChangeFlags.NOTIFY_CLIENTS
-            | Constants.BlockChangeFlags.PHYSICS_MASK
+        public static final int NONE = Constants.BlockChangeFlags.PHYSICS_MASK
             | Constants.BlockChangeFlags.DENY_NEIGHBOR_SHAPE_UPDATE
             | Constants.BlockChangeFlags.NEIGHBOR_DROPS
             | Constants.BlockChangeFlags.PATHFINDING_UPDATES
@@ -1288,8 +1287,8 @@ public final class Constants {
 
         public static final Comparator<DataContentUpdater> DATA_CONTENT_UPDATER_COMPARATOR =
             (o1, o2) -> ComparisonChain.start()
-                .compare(o2.getInputVersion(), o1.getInputVersion())
-                .compare(o2.getOutputVersion(), o1.getOutputVersion())
+                .compare(o2.inputVersion(), o1.inputVersion())
+                .compare(o2.outputVersion(), o1.outputVersion())
                 .result();
 
         public static Comparator<Integer> intComparator() {

@@ -47,7 +47,7 @@ public final class SpongeTransform implements Transform {
     }
 
     @Override
-    public Vector3d getPosition() {
+    public Vector3d position() {
         return this.position;
     }
 
@@ -59,7 +59,7 @@ public final class SpongeTransform implements Transform {
     }
 
     @Override
-    public Vector3d getRotation() {
+    public Vector3d rotation() {
         return this.rotation;
     }
 
@@ -78,7 +78,7 @@ public final class SpongeTransform implements Transform {
     }
 
     @Override
-    public Quaterniond getRotationAsQuaternion() {
+    public Quaterniond rotationAsQuaternion() {
         if (this.rotationQuaternion == null) {
             this.rotationQuaternion = SpongeTransform.fromAxesAngles(this.rotation);
         }
@@ -86,22 +86,22 @@ public final class SpongeTransform implements Transform {
     }
 
     @Override
-    public double getPitch() {
+    public double pitch() {
         return this.rotation.getX();
     }
 
     @Override
-    public double getYaw() {
+    public double yaw() {
         return this.rotation.getY();
     }
 
     @Override
-    public double getRoll() {
+    public double roll() {
         return this.rotation.getZ();
     }
 
     @Override
-    public Vector3d getScale() {
+    public Vector3d scale() {
         return this.scale;
     }
 
@@ -117,9 +117,9 @@ public final class SpongeTransform implements Transform {
         Objects.requireNonNull(other);
 
         return new SpongeTransform(
-                this.position.add(other.getPosition()),
-            SpongeTransform.toAxesAngles(this.getRotationAsQuaternion().mul(other.getRotationAsQuaternion())),
-                this.scale.add(other.getScale())
+                this.position.add(other.position()),
+            SpongeTransform.toAxesAngles(this.rotationAsQuaternion().mul(other.rotationAsQuaternion())),
+                this.scale.add(other.scale())
         );
     }
 
@@ -147,7 +147,7 @@ public final class SpongeTransform implements Transform {
 
         return new SpongeTransform(
                 this.position,
-            SpongeTransform.toAxesAngles(this.getRotationAsQuaternion().mul(rotation)),
+            SpongeTransform.toAxesAngles(this.rotationAsQuaternion().mul(rotation)),
                 this.scale
         );
     }
@@ -166,7 +166,7 @@ public final class SpongeTransform implements Transform {
     @Override
     public Matrix4d toMatrix() {
         return Matrix4d.createScaling(this.scale.toVector4(1))
-                .rotate(this.getRotationAsQuaternion())
+                .rotate(this.rotationAsQuaternion())
                 .translate(this.position);
     }
 

@@ -76,7 +76,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     SpawnEntityTransaction(final Supplier<ServerLevel> worldSupplier, final Entity entityToSpawn,
         final Supplier<SpawnType> deducedSpawnType
     ) {
-        super(TransactionTypes.SPAWN_ENTITY.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).getKey());
+        super(TransactionTypes.SPAWN_ENTITY.get(), ((org.spongepowered.api.world.server.ServerWorld) worldSupplier.get()).key());
         this.worldSupplier = worldSupplier;
         this.entityToSpawn = entityToSpawn;
         this.entityTag = entityToSpawn.saveWithoutId(new CompoundTag());

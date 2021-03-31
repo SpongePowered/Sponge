@@ -99,7 +99,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
                 return origPath.toString();
             }
 
-            return Sponge.getConfigManager().getPluginConfig(plugin).getDirectory().resolve(orig).toAbsolutePath().toString();
+            return Sponge.configManager().pluginConfig(plugin).directory().resolve(orig).toAbsolutePath().toString();
         });
     }
 
@@ -134,15 +134,15 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
                 });
     }
     @Override
-    public DataSource getDataSource(final String jdbcConnection) throws SQLException {
-        return this.getDataSource(null, jdbcConnection);
+    public DataSource dataSource(final String jdbcConnection) throws SQLException {
+        return this.dataSource(null, jdbcConnection);
     }
 
     @Override
-    public DataSource getDataSource(final PluginContainer plugin, final String jdbcConnection) throws SQLException {
+    public DataSource dataSource(final PluginContainer plugin, final String jdbcConnection) throws SQLException {
         checkNotNull(this.connectionCache);
 
-        final String jdbcConnectionString = this.getConnectionUrlFromAlias(jdbcConnection).orElse(jdbcConnection);
+        final String jdbcConnectionString = this.connectionUrlFromAlias(jdbcConnection).orElse(jdbcConnection);
         final ConnectionInfo info = ConnectionInfo.fromUrl(plugin, jdbcConnectionString);
         try {
             return this.connectionCache.get(info);
@@ -268,7 +268,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
     }
 
     @Override
-    public Optional<String> getConnectionUrlFromAlias(final String alias) {
+    public Optional<String> connectionUrlFromAlias(final String alias) {
         return Optional.ofNullable(SpongeConfigs.getCommon().get().sql.aliases.get(alias));
     }
 

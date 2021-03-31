@@ -59,16 +59,16 @@ public final class SpongeWeather implements Weather {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 0;
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Universe.Weather.TYPE, this.type.key(RegistryTypes.WEATHER_TYPE))
-                .set(Constants.Universe.Weather.REMAINING_DURATION, this.remainingDuration.getTicks())
-                .set(Constants.Universe.Weather.RUNNING_DURATION, this.runningDuration.getTicks());
+                .set(Constants.Universe.Weather.REMAINING_DURATION, this.remainingDuration.ticks())
+                .set(Constants.Universe.Weather.RUNNING_DURATION, this.runningDuration.ticks());
     }
 }

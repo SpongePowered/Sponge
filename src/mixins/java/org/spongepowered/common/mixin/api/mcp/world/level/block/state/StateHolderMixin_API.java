@@ -52,7 +52,7 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     // @formatter:on
 
     @Override
-    public <T extends Comparable<T>> Optional<T> getStateProperty(StateProperty<T> stateProperty) {
+    public <T extends Comparable<T>> Optional<T> stateProperty(StateProperty<T> stateProperty) {
         if (!this.shadow$hasProperty((Property) stateProperty)) {
             return Optional.empty();
         }
@@ -61,8 +61,8 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     }
 
     @Override
-    public Optional<StateProperty<?>> getStatePropertyByName(String name) {
-        return this.getStateProperties().stream().filter(p -> p.getName().equals(name)).findFirst();
+    public Optional<StateProperty<?>> statePropertyByName(String name) {
+        return this.stateProperties().stream().filter(p -> p.name().equals(name)).findFirst();
     }
 
     @Override
@@ -96,17 +96,17 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     }
 
     @Override
-    public Collection<StateProperty<?>> getStateProperties() {
+    public Collection<StateProperty<?>> stateProperties() {
         return (Collection) this.shadow$getValues().keySet();
     }
 
     @Override
-    public Collection<?> getStatePropertyValues() {
+    public Collection<?> statePropertyValues() {
         return this.shadow$getValues().values();
     }
 
     @Override
-    public Map<StateProperty<?>, ?> getStatePropertyMap() {
+    public Map<StateProperty<?>, ?> statePropertyMap() {
         return (Map) this.shadow$getValues();
     }
 }

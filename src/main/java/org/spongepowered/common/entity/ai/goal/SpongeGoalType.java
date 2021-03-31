@@ -37,7 +37,7 @@ public final class SpongeGoalType implements GoalType {
     }
 
     @Override
-    public Class<? extends Goal<?>> getGoalClass() {
+    public Class<? extends Goal<?>> goalClass() {
         return this.goalClass;
     }
 }

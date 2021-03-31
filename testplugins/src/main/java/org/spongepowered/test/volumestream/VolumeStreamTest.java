@@ -71,16 +71,16 @@ public final class VolumeStreamTest implements LoadableModule {
     private static final Map<UUID, PlayerData> player_data = new HashMap<>();
 
     private static PlayerData get(final Player pl) {
-        PlayerData data = VolumeStreamTest.player_data.get(pl.getUniqueId());
+        PlayerData data = VolumeStreamTest.player_data.get(pl.uniqueId());
         if (data == null) {
-            data = new PlayerData(pl.getUniqueId());
-            VolumeStreamTest.player_data.put(pl.getUniqueId(), data);
+            data = new PlayerData(pl.uniqueId());
+            VolumeStreamTest.player_data.put(pl.uniqueId(), data);
         }
         return data;
     }
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.plugin, this.listener);
+        Sponge.eventManager().registerListeners(this.plugin, this.listener);
     }
 
     @Listener
@@ -89,14 +89,14 @@ public final class VolumeStreamTest implements LoadableModule {
         event.register(
             this.plugin,
             Command.builder()
-                .setShortDescription(Component.text("Copies a region of the world to your clipboard"))
-                .setPermission(this.plugin.getMetadata().getId() + ".command.copy")
-                .setExecutor(src -> {
-                    if (!(src.getCause().root() instanceof Player)) {
+                .shortDescription(Component.text("Copies a region of the world to your clipboard"))
+                .permission(this.plugin.getMetadata().getId() + ".command.copy")
+                .executor(src -> {
+                    if (!(src.cause().root() instanceof Player)) {
                         src.sendMessage(Identity.nil(), Component.text("Player only.", NamedTextColor.RED));
                         return CommandResult.success();
                     }
-                    final Player player = (Player) src.getCause().root();
+                    final Player player = (Player) src.cause().root();
                     final PlayerData data = VolumeStreamTest.get(player);
                     if (data.getPos1() == null || data.getPos2() == null) {
                         player.sendMessage(Identity.nil(), Component.text("You must set both positions before copying", NamedTextColor.RED));
@@ -104,8 +104,8 @@ public final class VolumeStreamTest implements LoadableModule {
                     }
                     final Vector3i min = data.getPos1().min(data.getPos2());
                     final Vector3i max = data.getPos1().max(data.getPos2());
-                    data.setOrigin(player.getBlockPosition());
-                    final ArchetypeVolume archetypeVolume = player.getWorld().createArchetypeVolume(min, max, player.getBlockPosition());
+                    data.setOrigin(player.blockPosition());
+                    final ArchetypeVolume archetypeVolume = player.world().createArchetypeVolume(min, max, player.blockPosition());
                     data.setClipboard(archetypeVolume);
                     player.sendMessage(Identity.nil(), Component.text("Saved to clipboard.", NamedTextColor.GREEN));
                     return CommandResult.success();
@@ -114,45 +114,45 @@ public final class VolumeStreamTest implements LoadableModule {
         );
         event.register(this.plugin,
             Command.builder()
-                .setShortDescription(Component.text("Pastes your clipboard to where you are standing"))
-                .setPermission(this.plugin.getMetadata().getId() + ".command.paste")
-                .setExecutor(src -> {
-                    if (!(src.getCause().root()  instanceof ServerPlayer)) {
+                .shortDescription(Component.text("Pastes your clipboard to where you are standing"))
+                .permission(this.plugin.getMetadata().getId() + ".command.paste")
+                .executor(src -> {
+                    if (!(src.cause().root()  instanceof ServerPlayer)) {
                         src.sendMessage(Identity.nil(), Component.text("Player only.", NamedTextColor.RED));
                         return CommandResult.success();
                     }
-                    final ServerPlayer player = (ServerPlayer) src.getCause().root();
+                    final ServerPlayer player = (ServerPlayer) src.cause().root();
                     final PlayerData data = VolumeStreamTest.get(player);
                     final ArchetypeVolume volume = data.getClipboard();
                     if (volume == null) {
                         player.sendMessage(Identity.nil(), Component.text("You must copy something before pasting", NamedTextColor.RED));
                         return CommandResult.success();
                     }
-                    try (CauseStackManager.StackFrame frame = Sponge.getServer().getCauseStackManager().pushCauseFrame()) {
+                    try (CauseStackManager.StackFrame frame = Sponge.server().causeStackManager().pushCauseFrame()) {
                         frame.pushCause(this.plugin);
-                        volume.getBlockStateStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                        volume.blockStateStream(volume.blockMin(), volume.blockMax(), StreamOptions.lazily())
                             .apply(VolumeCollectors.of(
-                                player.getWorld(),
-                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                player.world(),
+                                VolumePositionTranslators.relativeTo(player.blockPosition()),
                                 VolumeApplicators.applyBlocks(BlockChangeFlags.ALL)
                             ));
-                        volume.getBiomeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                        volume.biomeStream(volume.blockMin(), volume.blockMax(), StreamOptions.lazily())
                             .apply(VolumeCollectors.of(
-                                player.getWorld(),
-                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                player.world(),
+                                VolumePositionTranslators.relativeTo(player.blockPosition()),
                                 VolumeApplicators.applyBiomes()
                             ));
-                        volume.getBlockEntityArchetypeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                        volume.blockEntityArchetypeStream(volume.blockMin(), volume.blockMax(), StreamOptions.lazily())
                             .apply(VolumeCollectors.of(
-                                player.getWorld(),
-                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                player.world(),
+                                VolumePositionTranslators.relativeTo(player.blockPosition()),
                                 VolumeApplicators.applyBlockEntityArchetype()
                             ));
                         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT.get());
-                        volume.getEntityArchetypeStream(volume.getBlockMin(), volume.getBlockMax(), StreamOptions.lazily())
+                        volume.entityArchetypeStream(volume.blockMin(), volume.blockMax(), StreamOptions.lazily())
                             .apply(VolumeCollectors.of(
-                                player.getWorld(),
-                                VolumePositionTranslators.relativeTo(player.getBlockPosition()),
+                                player.world(),
+                                VolumePositionTranslators.relativeTo(player.blockPosition()),
                                 VolumeApplicators.applyEntityArchetype()
                             ));
                     }
@@ -168,16 +168,16 @@ public final class VolumeStreamTest implements LoadableModule {
 
         @Listener
         public void onInteract(final InteractBlockEvent.Secondary event, @Root final Player player) {
-            final HandType handUsed = event.getContext().require(EventContextKeys.USED_HAND);
-            event.getContext().get(EventContextKeys.USED_ITEM).ifPresent(snapshot -> {
-                final BlockSnapshot block = event.getBlock();
-                if (snapshot.getType().equals(ItemTypes.WOODEN_AXE.get()) && block != BlockSnapshot.empty()) {
+            final HandType handUsed = event.context().require(EventContextKeys.USED_HAND);
+            event.context().get(EventContextKeys.USED_ITEM).ifPresent(snapshot -> {
+                final BlockSnapshot block = event.block();
+                if (snapshot.type().equals(ItemTypes.WOODEN_AXE.get()) && block != BlockSnapshot.empty()) {
                     if (HandTypes.MAIN_HAND.get().equals(handUsed)) {
-                        VolumeStreamTest.get(player).setPos1(block.getPosition());
-                        player.sendMessage(Component.text("Position 1 set to " + block.getPosition(), NamedTextColor.LIGHT_PURPLE));
+                        VolumeStreamTest.get(player).setPos1(block.position());
+                        player.sendMessage(Component.text("Position 1 set to " + block.position(), NamedTextColor.LIGHT_PURPLE));
                     } else if (HandTypes.OFF_HAND.get().equals(handUsed)) {
-                        VolumeStreamTest.get(player).setPos2(block.getPosition());
-                        player.sendMessage(Component.text("Position 2 set to " + block.getPosition(), NamedTextColor.LIGHT_PURPLE));
+                        VolumeStreamTest.get(player).setPos2(block.position());
+                        player.sendMessage(Component.text("Position 2 set to " + block.position(), NamedTextColor.LIGHT_PURPLE));
                     }
                     event.setCancelled(true);
                 }

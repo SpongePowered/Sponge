@@ -26,14 +26,12 @@ package org.spongepowered.common.data;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataProvider;
 import org.spongepowered.api.data.DataRegistration;
 import org.spongepowered.api.data.DuplicateDataStoreException;
 import org.spongepowered.api.data.DuplicateProviderException;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataStore;
-import org.spongepowered.common.SpongeCommon;
 
 import java.lang.reflect.Type;
 import java.util.ArrayList;
@@ -51,7 +49,7 @@ public final class SpongeDataRegistrationBuilder implements DataRegistration.Bui
 
     @Override
     public DataRegistration.Builder store(final DataStore store) throws DuplicateDataStoreException {
-        for (final Type holderType : store.getSupportedTypes()) {
+        for (final Type holderType : store.supportedTypes()) {
             this.dataStoreMap.put(holderType, store);
         }
         return this;
@@ -59,7 +57,7 @@ public final class SpongeDataRegistrationBuilder implements DataRegistration.Bui
 
     @Override
     public DataRegistration.Builder provider(final DataProvider<?, ?> provider) throws DuplicateProviderException {
-        this.dataProviderMap.put(provider.getKey(), provider);
+        this.dataProviderMap.put(provider.key(), provider);
         return this;
     }
 

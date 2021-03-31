@@ -71,9 +71,9 @@ public class DataUtil {
         // Run content-updaters and collect failed data
         final Class<? extends DataHolder> typeToken = dataHolder.getClass().asSubclass(DataHolder.class);
         allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).ifPresent(customData -> {
-            for (DataQuery keyNamespace : customData.getKeys(false)) {
+            for (DataQuery keyNamespace : customData.keys(false)) {
                 final DataView keyedData = customData.getView(keyNamespace).get();
-                for (DataQuery keyValue : keyedData.getKeys(false)) {
+                for (DataQuery keyValue : keyedData.keys(false)) {
                     final ResourceKey dataStoreKey = ResourceKey.of(keyNamespace.asString("."), keyValue.asString("."));
                     final DataView dataStoreData = keyedData.getView(keyValue).get();
                     final Integer contentVersion = dataStoreData.getInt(Constants.Sponge.Data.V3.CONTENT_VERSION).orElse(1);
@@ -128,7 +128,7 @@ public class DataUtil {
 
                 // Build new custom data structure
                 // sponeg-data/<datastore-namespace>/<datastore-value>/{version|content}
-                final DataView dataStoreData = spongeDataV3.createView(DataQuery.of(key.getNamespace(), key.getValue()));
+                final DataView dataStoreData = spongeDataV3.createView(DataQuery.of(key.namespace(), key.value()));
                 dataStoreData.set(Constants.Sponge.Data.V3.CONTENT_VERSION, contentVersion);
                 dataStoreData.set(Constants.Sponge.Data.V3.CONTENT, data);
                 SpongeCommon.getLogger().info("Upgraded custom data for datastore: {}", key);
@@ -140,7 +140,7 @@ public class DataUtil {
         spongeDataV2.remove(Constants.Sponge.Data.V2.CUSTOM_MANIPULATOR_LIST);
 
         // convert sponge data v2 to v3
-        for (DataQuery spongeDataKey : spongeDataV2.getKeys(false)) {
+        for (DataQuery spongeDataKey : spongeDataV2.keys(false)) {
             final DataQuery query = SpongeDataManager.INSTANCE.legacySpongeDataQuery(spongeDataKey.toString());
             if (query == null) {
                 SpongeCommon.getLogger().error("Missing legacy sponge data query mapping {}", spongeDataKey.toString());

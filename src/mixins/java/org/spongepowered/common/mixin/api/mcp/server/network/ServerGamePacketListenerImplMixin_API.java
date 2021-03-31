@@ -52,7 +52,7 @@ public abstract class ServerGamePacketListenerImplMixin_API implements ServerPla
     // @formatter:on
 
     @Override
-    public GameProfile getProfile() {
+    public GameProfile profile() {
         return SpongeGameProfile.of(this.player.getGameProfile());
     }
 
@@ -68,22 +68,22 @@ public abstract class ServerGamePacketListenerImplMixin_API implements ServerPla
     }
 
     @Override
-    public ServerPlayer getPlayer() {
+    public ServerPlayer player() {
         return (ServerPlayer) this.player;
     }
 
     @Override
-    public InetSocketAddress getAddress() {
+    public InetSocketAddress address() {
         return ((ConnectionBridge) this.connection).bridge$getAddress();
     }
 
     @Override
-    public InetSocketAddress getVirtualHost() {
+    public InetSocketAddress virtualHost() {
         return ((ConnectionBridge) this.connection).bridge$getVirtualHost();
     }
 
     @Override
-    public int getLatency() {
+    public int latency() {
         return this.player.latency;
     }
 }

@@ -39,12 +39,12 @@ public abstract class RangedAttributeMixin_API implements RangedAttributeType {
     // @formatter:on
 
     @Override
-    public double getMinimumValue() {
+    public double minimumValue() {
         return this.minValue;
     }
 
     @Override
-    public double getMaximumValue() {
+    public double maximumValue() {
         return this.maxValue;
     }
 }

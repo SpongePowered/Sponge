@@ -53,7 +53,7 @@ public final class SecondaryInventoryClickState extends BasicInventoryPacketStat
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         @Nullable final Slot slot) {
         return SpongeEventFactory.createClickContainerEventSecondary(
-            PhaseTracker.getCauseStackManager().getCurrentCause(),
+            PhaseTracker.getCauseStackManager().currentCause(),
             openContainer, transaction, Optional.ofNullable(slot), slotTransactions);
     }
 

@@ -41,7 +41,7 @@ public class MinecraftRconService implements RconService {
     }
 
     @Override
-    public String getRconPassword() {
+    public String rconPassword() {
         return this.server.getProperties().rconPassword;
     }
 }

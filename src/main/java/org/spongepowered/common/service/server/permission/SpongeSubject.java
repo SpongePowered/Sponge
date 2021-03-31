@@ -29,11 +29,11 @@ import org.spongepowered.api.service.permission.MemorySubjectData;
 public abstract class SpongeSubject extends SpongeBaseSubject {
 
     @Override
-    public MemorySubjectData getTransientSubjectData() {
-        return this.getSubjectData();
+    public MemorySubjectData transientSubjectData() {
+        return this.subjectData();
     }
 
     @Override
-    public abstract MemorySubjectData getSubjectData();
+    public abstract MemorySubjectData subjectData();
 
 }

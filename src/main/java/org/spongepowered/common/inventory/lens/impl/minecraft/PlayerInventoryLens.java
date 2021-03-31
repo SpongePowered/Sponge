@@ -134,9 +134,9 @@ public class PlayerInventoryLens extends AbstractLens {
         if (this.isContainer && fabric instanceof AbstractContainerMenu) {
             // If Lens is for Container extract the PlayerInventory
             AbstractContainerMenu container = (AbstractContainerMenu) fabric;
-            Optional carrier = ((CarriedInventory) container).getCarrier();
+            Optional carrier = ((CarriedInventory) container).carrier();
             if (carrier.isPresent() && carrier.get() instanceof Player) {
-                return ((Player) carrier.get()).getInventory();
+                return ((Player) carrier.get()).inventory();
             }
         }
         return (Inventory) fabric.fabric$get(this.base).bridge$getAdapter();

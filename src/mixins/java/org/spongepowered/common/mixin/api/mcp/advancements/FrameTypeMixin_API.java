@@ -47,7 +47,7 @@ public abstract class FrameTypeMixin_API implements AdvancementType {
     }
 
     @Override
-    public TextColor getTextColor() {
+    public TextColor textColor() {
         return this.api$textColor;
     }
 }

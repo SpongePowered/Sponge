@@ -40,25 +40,26 @@ public final class ByteToBooleanContentUpdater implements DataContentUpdater {
     private final int to;
     private final List<DataQuery> queries;
 
-    public ByteToBooleanContentUpdater(int from, int to, Key<Value<Boolean>>... booleanKeys) {
+    @SafeVarargs
+    public ByteToBooleanContentUpdater(final int from, final int to, final Key<Value<Boolean>>... booleanKeys) {
         this.from = from;
         this.to = to;
-        this.queries = Arrays.stream(booleanKeys).map(k -> DataQuery.of(k.getKey().getValue())).collect(Collectors.toList());
+        this.queries = Arrays.stream(booleanKeys).map(k -> DataQuery.of(k.key().value())).collect(Collectors.toList());
     }
 
     @Override
-    public int getInputVersion() {
+    public int inputVersion() {
         return this.from;
     }
 
     @Override
-    public int getOutputVersion() {
+    public int outputVersion() {
         return this.to;
     }
 
     @Override
-    public DataView update(DataView content) {
-        for (DataQuery query : this.queries) {
+    public DataView update(final DataView content) {
+        for (final DataQuery query : this.queries) {
             final byte aByte = content.getByte(query).orElse((byte) 1);
             content.remove(query); // Delete boolean saved as byte
             content.set(query, aByte == 1);

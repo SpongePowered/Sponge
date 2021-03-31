@@ -52,7 +52,7 @@ public final class LivingEntityArrowCountConverter extends DataParameterConverte
     @Override
     public Integer getValueFromEvent(final Integer originalValue, final List<Immutable<?>> immutableValues) {
         for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.getKey() == Keys.STUCK_ARROWS) {
+            if (immutableValue.key() == Keys.STUCK_ARROWS) {
                 return (Integer) immutableValue.get();
             }
         }

@@ -48,14 +48,14 @@ public class SpongeUserWhiteList extends UserWhiteList {
 
     @Override
     protected boolean contains(final com.mojang.authlib.GameProfile entry) {
-        return Sponge.getServer().getServiceProvider().whitelistService().isWhitelisted(SpongeGameProfile.of(entry)).join();
+        return Sponge.server().serviceProvider().whitelistService().isWhitelisted(SpongeGameProfile.of(entry)).join();
     }
 
     @Override
     public String[] getUserList() {
         final List<String> names = new ArrayList<>();
-        for (final GameProfile profile : Sponge.getServer().getServiceProvider().whitelistService().getWhitelistedProfiles().join()) {
-            profile.getName().ifPresent(names::add);
+        for (final GameProfile profile : Sponge.server().serviceProvider().whitelistService().whitelistedProfiles().join()) {
+            profile.name().ifPresent(names::add);
         }
         return names.toArray(new String[names.size()]);
     }
@@ -63,17 +63,17 @@ public class SpongeUserWhiteList extends UserWhiteList {
     @SuppressWarnings("unchecked")
     @Override
     public void add(final UserWhiteListEntry entry) {
-        Sponge.getServer().getServiceProvider().whitelistService().addProfile(SpongeGameProfile.of(((StoredUserEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user()));
+        Sponge.server().serviceProvider().whitelistService().addProfile(SpongeGameProfile.of(((StoredUserEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user()));
     }
 
     @Override
     public void remove(final com.mojang.authlib.GameProfile entry) {
-        Sponge.getServer().getServiceProvider().whitelistService().removeProfile(SpongeGameProfile.of(entry));
+        Sponge.server().serviceProvider().whitelistService().removeProfile(SpongeGameProfile.of(entry));
     }
 
     @Override
     public boolean isEmpty() {
-        return Sponge.getServer().getServiceProvider().whitelistService().getWhitelistedProfiles().join().isEmpty();
+        return Sponge.server().serviceProvider().whitelistService().whitelistedProfiles().join().isEmpty();
     }
 
 }

@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -65,16 +66,15 @@ public abstract class PlayerEntityMixin_Inventory {
             final List<SlotTransaction> slotTransactions = ((TrackedInventoryBridge) inventory).bridge$getCapturedSlotTransactions();
             if (slotIn == EquipmentSlot.MAINHAND) {
                 final ItemStack orig = inventory.items.get(inventory.selected);
-                final Slot slot = ((PlayerInventory) inventory).getPrimary().getHotbar().getSlot(
-                    inventory.selected).get();
+                final Slot slot = ((PlayerInventory) inventory).primary().hotbar().slot(inventory.selected).get();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn == EquipmentSlot.OFFHAND) {
                 final ItemStack orig = inventory.offhand.get(0);
-                final Slot slot = ((PlayerInventory) inventory).getOffhand();
+                final Slot slot = ((PlayerInventory) inventory).offhand();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
                 final ItemStack orig = inventory.armor.get(slotIn.getIndex());
-                final Slot slot = ((PlayerInventory) inventory).getEquipment().getSlot(slotIn.getIndex()).get();
+                final Slot slot = ((PlayerInventory) inventory).equipment().slot(slotIn.getIndex()).get();
                 slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
             }
         }

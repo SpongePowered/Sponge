@@ -40,12 +40,12 @@ public final class SpongeAsset implements Asset {
     }
 
     @Override
-    public PluginContainer getOwner() {
+    public PluginContainer owner() {
         return this.plugin;
     }
 
     @Override
-    public URL getUrl() {
+    public URL url() {
         return this.url;
     }
 }

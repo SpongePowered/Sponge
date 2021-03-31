@@ -66,14 +66,14 @@ public final class SpongePlayerData implements DataSerializable {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, this.getContentVersion())
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Entity.Player.UUID, this.uniqueId.toString())
                 .set(Constants.Sponge.PlayerData.PLAYER_DATA_JOIN, this.firstJoined)
                 .set(Constants.Sponge.PlayerData.PLAYER_DATA_LAST, this.lastJoined);

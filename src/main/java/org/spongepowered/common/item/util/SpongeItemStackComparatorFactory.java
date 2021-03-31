@@ -48,7 +48,7 @@ public class SpongeItemStackComparatorFactory implements ItemStackComparators.Fa
 
     @Override
     public ItemStackComparators.Factory byType() {
-        final Comparator<ItemStack> comparator = Comparator.comparing(i -> i.getType().key(RegistryTypes.ITEM_TYPE));
+        final Comparator<ItemStack> comparator = Comparator.comparing(i -> i.type().key(RegistryTypes.ITEM_TYPE));
         return new SpongeItemStackComparatorFactory(this.comparator == null ? comparator : this.comparator.thenComparing(comparator));
     }
 
@@ -67,7 +67,7 @@ public class SpongeItemStackComparatorFactory implements ItemStackComparators.Fa
 
     @Override
     public ItemStackComparators.Factory bySize() {
-        final Comparator<ItemStack> comparator = Comparator.comparing(ItemStack::getQuantity);
+        final Comparator<ItemStack> comparator = Comparator.comparing(ItemStack::quantity);
         return new SpongeItemStackComparatorFactory(this.comparator == null ? comparator : this.comparator.thenComparing(this.comparator));
     }
 
@@ -105,8 +105,8 @@ public class SpongeItemStackComparatorFactory implements ItemStackComparators.Fa
 
         private boolean isIgnored(Set<Value.Immutable<?>> list, Value.Immutable<?> toCheck) {
             for (Key<? extends Value<?>> ignore : this.ignored) {
-                if (toCheck.getKey().equals(ignore)) {
-                    list.removeIf(val -> ignore.equals(val.getKey()));
+                if (toCheck.key().equals(ignore)) {
+                    list.removeIf(val -> ignore.equals(val.key()));
                     return true;
                 }
             }

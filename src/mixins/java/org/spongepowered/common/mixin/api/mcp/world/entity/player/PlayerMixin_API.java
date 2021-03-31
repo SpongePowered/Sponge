@@ -39,8 +39,7 @@ import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.mixin.api.mcp.world.entity.LivingEntityMixin_API;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
-@Implements(@Interface(iface = Player.class, prefix = "player$"))
-public abstract class PlayerMixin_API extends LivingEntityMixin_API {
+public abstract class PlayerMixin_API extends LivingEntityMixin_API implements Player {
 
     // @formatter:off
     @Shadow public AbstractContainerMenu containerMenu;
@@ -51,8 +50,8 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API {
 
     public final boolean impl$isFake = ((PlatformEntityBridge) (net.minecraft.world.entity.player.Player) (Object) this).bridge$isFakePlayer();
 
-    @Intrinsic
-    public String player$getName() {
+    @Override
+    public String name() {
         return this.shadow$getName().getString();
     }
 

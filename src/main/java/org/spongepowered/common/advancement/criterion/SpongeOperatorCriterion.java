@@ -44,17 +44,17 @@ public class SpongeOperatorCriterion implements OperatorCriterion, DefaultedAdva
     @Nullable private Collection<AdvancementCriterion> leafChildrenCriteria;
 
     SpongeOperatorCriterion(final String namePrefix, final Collection<AdvancementCriterion> criteria) {
-        this.name = namePrefix + Arrays.toString(criteria.stream().map(AdvancementCriterion::getName).toArray(String[]::new));
+        this.name = namePrefix + Arrays.toString(criteria.stream().map(AdvancementCriterion::name).toArray(String[]::new));
         this.criteria = ImmutableSet.copyOf(criteria);
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public Optional<FilteredTrigger<?>> getTrigger() {
+    public Optional<FilteredTrigger<?>> trigger() {
         return Optional.empty();
     }
 
@@ -79,12 +79,12 @@ public class SpongeOperatorCriterion implements OperatorCriterion, DefaultedAdva
     }
 
     @Override
-    public Collection<AdvancementCriterion> getCriteria() {
+    public Collection<AdvancementCriterion> criteria() {
         return this.criteria;
     }
 
     @Override
-    public Collection<AdvancementCriterion> getLeafCriteria() {
+    public Collection<AdvancementCriterion> leafCriteria() {
         if (this.leafChildrenCriteria == null) {
             this.leafChildrenCriteria = this.getAllChildrenCriteria0(true);
         }
@@ -94,13 +94,13 @@ public class SpongeOperatorCriterion implements OperatorCriterion, DefaultedAdva
     @Override
     public Collection<AdvancementCriterion> find(final String name) {
         return this.getRecursiveChildren().stream()
-                .filter(c -> c.getName().equals(name)).collect(ImmutableSet.toImmutableSet());
+                .filter(c -> c.name().equals(name)).collect(ImmutableSet.toImmutableSet());
     }
 
     @Override
     public Optional<AdvancementCriterion> findFirst(final String name) {
         return this.getRecursiveChildren().stream()
-                .filter(c -> c.getName().equals(name)).findFirst();
+                .filter(c -> c.name().equals(name)).findFirst();
     }
 
     @Override

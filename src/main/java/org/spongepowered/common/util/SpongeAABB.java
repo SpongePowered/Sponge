@@ -52,25 +52,25 @@ public final class SpongeAABB implements AABB {
     }
 
     @Override
-    public Vector3d getMin() {
+    public Vector3d min() {
         return this.min;
     }
 
     @Override
-    public Vector3d getMax() {
+    public Vector3d max() {
         return this.max;
     }
 
     @Override
-    public Vector3d getCenter() {
+    public Vector3d center() {
         if (this.center == null) {
-            this.center = this.min.add(this.getSize().div(2));
+            this.center = this.min.add(this.size().div(2));
         }
         return this.center;
     }
 
     @Override
-    public Vector3d getSize() {
+    public Vector3d size() {
         if (this.size == null) {
             this.size = this.max.sub(this.min);
         }
@@ -91,8 +91,8 @@ public final class SpongeAABB implements AABB {
         Objects.requireNonNull(other, "other");
         final Vector3d mins = this.min;
         final Vector3d maxs = this.max;
-        final Vector3d mino = other.getMin();
-        final Vector3d maxo = other.getMax();
+        final Vector3d mino = other.min();
+        final Vector3d maxo = other.max();
         return maxs.getX() >= mino.getX() && maxo.getX() >= mins.getX()
           && maxs.getY() >= mino.getY() && maxo.getY() >= mins.getY()
           && maxs.getZ() >= mino.getZ() && maxo.getZ() >= mins.getZ();

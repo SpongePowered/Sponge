@@ -426,7 +426,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
      * {@link CauseStackManager}. In certain cases, there are states that can have
      * excessive modifiers being pushed and popped with and without causes that may cause
      * performance degredation due to the excessive amounts of how many recyclings occur
-     * with {@link CauseStackManager#getCurrentCause()} lacking a cached context
+     * with {@link CauseStackManager#currentCause()} lacking a cached context
      * and therefor needing to re-create the context each and every time.
      *
      * @return True if the modifiers should be pushed to the manager

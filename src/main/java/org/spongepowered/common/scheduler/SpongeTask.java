@@ -44,7 +44,8 @@ public final class SpongeTask implements Task {
 
     final long delay; // nanos
     final long interval; // nanos
-    final boolean tickBased;
+    final boolean tickBasedDelay;
+    final boolean tickBasedInterval;
     @Nullable final String customName;
     private final PluginContainer owner;
     private final Consumer<ScheduledTask> consumer;
@@ -52,39 +53,41 @@ public final class SpongeTask implements Task {
 
     @Nullable private Timing taskTimer;
 
-    SpongeTask(Consumer<ScheduledTask> task, String name, String customName, PluginContainer pluginContainer,
-            long delay, long interval, boolean tickBased) {
+    SpongeTask(final Consumer<ScheduledTask> task, final String name, final String customName,
+               final PluginContainer pluginContainer, final long delay, final long interval,
+               final boolean tickBasedDelay, final boolean tickBasedInterval) {
         this.delay = delay;
         this.interval = interval;
         this.owner = pluginContainer;
         this.consumer = task;
         this.name = name;
         this.customName = customName;
-        this.tickBased = tickBased;
+        this.tickBasedDelay = tickBasedDelay;
+        this.tickBasedInterval = tickBasedInterval;
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.name;
     }
 
     @Override
-    public PluginContainer getOwner() {
+    public PluginContainer owner() {
         return this.owner;
     }
 
     @Override
-    public Duration getDelay() {
+    public Duration delay() {
         return Duration.ofNanos(this.delay);
     }
 
     @Override
-    public Duration getInterval() {
+    public Duration interval() {
         return Duration.ofNanos(this.interval);
     }
 
     @Override
-    public Consumer<ScheduledTask> getConsumer() {
+    public Consumer<ScheduledTask> consumer() {
         return this.consumer;
     }
 
@@ -149,10 +152,10 @@ public final class SpongeTask implements Task {
         @Override
         public Task.Builder delay(final Ticks delay) {
             Objects.requireNonNull(delay);
-            if (delay.getTicks() < 0) {
+            if (delay.ticks() < 0) {
                 throw new IllegalArgumentException("Delay must be equal to or greater than zero!");
             }
-            this.delay = delay.getTicks() * SpongeScheduler.TICK_DURATION_NS;
+            this.delay = delay.ticks() * SpongeScheduler.TICK_DURATION_NS;
             this.tickBasedDelay = true;
             return this;
         }
@@ -194,10 +197,10 @@ public final class SpongeTask implements Task {
         @Override
         public Task.Builder interval(final Ticks interval) {
             Objects.requireNonNull(interval);
-            if (interval.getTicks() < 0) {
+            if (interval.ticks() < 0) {
                 throw new IllegalArgumentException("Interval must be equal to or greater than zero!");
             }
-            this.interval = interval.getTicks() * SpongeScheduler.TICK_DURATION_NS;
+            this.interval = interval.ticks() * SpongeScheduler.TICK_DURATION_NS;
             this.tickBasedInterval = true;
             return this;
         }
@@ -222,12 +225,12 @@ public final class SpongeTask implements Task {
             Objects.requireNonNull(value);
 
             final SpongeTask task = (SpongeTask) value;
-            this.consumer = value.getConsumer();
-            this.plugin = task.getOwner();
+            this.consumer = value.consumer();
+            this.plugin = task.owner();
             this.interval = task.interval;
             this.delay = task.delay;
-            this.tickBasedDelay = task.tickBased;
-            this.tickBasedInterval = task.tickBased;
+            this.tickBasedDelay = task.tickBasedDelay;
+            this.tickBasedInterval = task.tickBasedInterval;
             this.name = task.customName;
             return this;
         }
@@ -255,8 +258,8 @@ public final class SpongeTask implements Task {
             } else {
                 name = this.name;
             }
-            return new SpongeTask(this.consumer, name, this.name, this.plugin, this.delay, this.interval, this.tickBasedDelay &&
-                    this.tickBasedInterval);
+            return new SpongeTask(this.consumer, name, this.name, this.plugin, this.delay, this.interval,
+                    this.tickBasedDelay, this.tickBasedInterval);
         }
     }
 }

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.scheduler;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import co.aikar.timings.Timing;
 import com.google.common.collect.Sets;
 import org.spongepowered.api.scheduler.ScheduledTask;
@@ -33,12 +31,14 @@ import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.plugin.PluginContainer;
 
 import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
@@ -61,7 +61,7 @@ public abstract class SpongeScheduler implements Scheduler {
     private final Map<UUID, SpongeScheduledTask> taskMap = new ConcurrentHashMap<>();
     private long sequenceNumber = 0L;
 
-    SpongeScheduler(String tag) {
+    SpongeScheduler(final String tag) {
         this.tag = tag;
     }
 
@@ -73,10 +73,10 @@ public abstract class SpongeScheduler implements Scheduler {
      * result should become a representation of the time that has passed
      * between those calls.</p>
      *
-     * @param task The task
+     * @param tickBased The task
      * @return Timestamp for the task
      */
-    protected long getTimestamp(SpongeScheduledTask task) {
+    protected long timestamp(final boolean tickBased) {
         return System.nanoTime();
     }
 
@@ -87,8 +87,8 @@ public abstract class SpongeScheduler implements Scheduler {
      * @param task The task to add
      */
     protected void addTask(final SpongeScheduledTask task) {
-        task.setTimestamp(this.getTimestamp(task));
-        this.taskMap.put(task.getUniqueId(), task);
+        task.setTimestamp(this.timestamp(task.task.tickBasedDelay));
+        this.taskMap.put(task.uniqueId(), task);
     }
 
     /**
@@ -97,26 +97,26 @@ public abstract class SpongeScheduler implements Scheduler {
      * @param task The task to remove
      */
     private void removeTask(final SpongeScheduledTask task) {
-        this.taskMap.remove(task.getUniqueId());
+        this.taskMap.remove(task.uniqueId());
     }
 
     @Override
-    public Optional<ScheduledTask> getTaskById(UUID id) {
-        checkNotNull(id, "id");
+    public Optional<ScheduledTask> taskById(final UUID id) {
+        Objects.requireNonNull(id, "id");
         synchronized (this.taskMap) {
             return Optional.ofNullable(this.taskMap.get(id));
         }
     }
 
     @Override
-    public Set<ScheduledTask> getTasksByName(String pattern) {
-        checkNotNull(pattern, "pattern");
+    public Set<ScheduledTask> tasksByName(final String pattern) {
+        Objects.requireNonNull(pattern, "pattern");
         final Pattern searchPattern = Pattern.compile(pattern);
-        final Set<ScheduledTask> matchingTasks = this.getTasks();
+        final Set<ScheduledTask> matchingTasks = this.tasks();
 
         final Iterator<ScheduledTask> it = matchingTasks.iterator();
         while (it.hasNext()) {
-            final Matcher matcher = searchPattern.matcher(it.next().getName());
+            final Matcher matcher = searchPattern.matcher(it.next().name());
             if (!matcher.matches()) {
                 it.remove();
             }
@@ -126,22 +126,22 @@ public abstract class SpongeScheduler implements Scheduler {
     }
 
     @Override
-    public Set<ScheduledTask> getTasks() {
+    public Set<ScheduledTask> tasks() {
         synchronized (this.taskMap) {
             return Sets.newHashSet(this.taskMap.values());
         }
     }
 
     @Override
-    public Set<ScheduledTask> getTasksByPlugin(PluginContainer plugin) {
-        checkNotNull(plugin, "plugin");
+    public Set<ScheduledTask> tasksByPlugin(final PluginContainer plugin) {
+        Objects.requireNonNull(plugin, "plugin");
         final String testOwnerId = plugin.getMetadata().getId();
 
-        final Set<ScheduledTask> allTasks = this.getTasks();
+        final Set<ScheduledTask> allTasks = this.tasks();
         final Iterator<ScheduledTask> it = allTasks.iterator();
 
         while (it.hasNext()) {
-            final String taskOwnerId = it.next().getOwner().getMetadata().getId();
+            final String taskOwnerId = it.next().owner().getMetadata().getId();
             if (!testOwnerId.equals(taskOwnerId)) {
                 it.remove();
             }
@@ -151,16 +151,16 @@ public abstract class SpongeScheduler implements Scheduler {
     }
 
     @Override
-    public SpongeTaskExecutorService createExecutor(PluginContainer plugin) {
-        checkNotNull(plugin, "plugin");
+    public SpongeTaskExecutorService createExecutor(final PluginContainer plugin) {
+        Objects.requireNonNull(plugin, "plugin");
         return new SpongeTaskExecutorService(() -> Task.builder().plugin(plugin), this);
     }
 
     @Override
-    public SpongeScheduledTask submit(Task task) {
-        checkNotNull(task, "task");
+    public SpongeScheduledTask submit(final Task task) {
+        Objects.requireNonNull(task, "task");
         final SpongeScheduledTask scheduledTask = new SpongeScheduledTask(this, (SpongeTask) task,
-                task.getName() + "-" + this.tag + "-#" + this.sequenceNumber++);
+                task.name() + "-" + this.tag + "-#" + this.sequenceNumber++);
         this.addTask(scheduledTask);
         return scheduledTask;
     }
@@ -207,33 +207,41 @@ public abstract class SpongeScheduler implements Scheduler {
     private void processTask(final SpongeScheduledTask task) {
         // If the task is now slated to be cancelled, we just remove it as if it
         // no longer exists.
-        if (task.getState() == SpongeScheduledTask.ScheduledTaskState.CANCELED) {
+        if (task.state() == SpongeScheduledTask.ScheduledTaskState.CANCELED) {
             this.removeTask(task);
             return;
         }
         // If the task is already being processed, we wait for the previous
         // occurrence to terminate.
-        if (task.getState() == SpongeScheduledTask.ScheduledTaskState.EXECUTING) {
+        if (task.state() == SpongeScheduledTask.ScheduledTaskState.EXECUTING) {
             return;
         }
-        long threshold = Long.MAX_VALUE;
+        final long threshold;
+        final boolean tickBased;
         // Figure out if we start a delayed Task after threshold ticks or, start
         // it after the interval (interval) of the repeating task parameter.
-        if (task.getState() == SpongeScheduledTask.ScheduledTaskState.WAITING) {
+        if (task.state() == SpongeScheduledTask.ScheduledTaskState.WAITING) {
             threshold = task.task.delay;
-        } else if (task.getState() == SpongeScheduledTask.ScheduledTaskState.RUNNING) {
+            tickBased = task.task.tickBasedDelay;
+        } else if (task.state() == SpongeScheduledTask.ScheduledTaskState.RUNNING) {
             threshold = task.task.interval;
+            tickBased = task.task.tickBasedInterval;
+        } else {
+            threshold = Long.MAX_VALUE;
+            tickBased = false;
         }
         // This moment is 'now'
-        long now = this.getTimestamp(task);
+        final long now = this.timestamp(tickBased);
         // So, if the current time minus the timestamp of the task is greater
         // than the delay to wait before starting the task, then start the task.
         // Repeating tasks get a reset-timestamp each time they are set RUNNING
         // If the task has a interval of 0 (zero) this task will not repeat, and
         // is removed after we start it.
-        if (threshold <= (now - task.getTimestamp())) {
+        if (threshold <= (now - task.timestamp())) {
             task.setState(SpongeScheduledTask.ScheduledTaskState.SWITCHING);
-            task.setTimestamp(this.getTimestamp(task));
+            // It is always interval here because that's the only thing that matters
+            // at this point.
+            task.setTimestamp(this.timestamp(task.task.tickBasedInterval));
             this.startTask(task);
             // If task is one time shot, remove it from the map.
             if (task.task.interval == 0L) {
@@ -250,18 +258,18 @@ public abstract class SpongeScheduler implements Scheduler {
     private void startTask(final SpongeScheduledTask task) {
         this.executeTaskRunnable(task, () -> {
             task.setState(SpongeScheduledTask.ScheduledTaskState.EXECUTING);
-            try (@Nullable final PhaseContext<?> context = this.createContext(task, task.getOwner());
+            try (@Nullable final PhaseContext<?> context = this.createContext(task, task.owner());
                     final Timing timings = task.task.getTimingsHandler()) {
                 timings.startTimingIfSync();
                 if (context != null) {
                     context.buildAndSwitch();
                 }
                 try {
-                    SpongeCommon.setActivePlugin(task.getOwner());
-                    task.task.getConsumer().accept(task);
-                } catch (Throwable t) {
+                    SpongeCommon.setActivePlugin(task.owner());
+                    task.task.consumer().accept(task);
+                } catch (final Throwable t) {
                     SpongeCommon.getLogger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
-                            task.getName(), task.getOwner().getMetadata().getId(), t);
+                            task.name(), task.owner().getMetadata().getId(), t);
                 }
             } finally {
                 if (!task.isCancelled()) {
@@ -274,7 +282,7 @@ public abstract class SpongeScheduler implements Scheduler {
     }
 
     @Nullable
-    protected PhaseContext<?> createContext(SpongeScheduledTask task, PluginContainer container) {
+    protected PhaseContext<?> createContext(final SpongeScheduledTask task, final PluginContainer container) {
         return null;
     }
 
@@ -282,7 +290,7 @@ public abstract class SpongeScheduler implements Scheduler {
      * Run when a task has completed and is switching into
      * the {@link SpongeScheduledTask.ScheduledTaskState#RUNNING} state
      */
-    protected void onTaskCompletion(SpongeScheduledTask task) {
+    protected void onTaskCompletion(final SpongeScheduledTask task) {
         // no-op for sync methods.
     }
 
@@ -293,13 +301,13 @@ public abstract class SpongeScheduler implements Scheduler {
      */
     protected abstract void executeTaskRunnable(SpongeScheduledTask task, Runnable runnable);
 
-    public <V> Future<V> execute(Callable<V> callable) {
+    public <V> Future<V> execute(final Callable<V> callable) {
         final FutureTask<V> runnable = new FutureTask<>(callable);
-        this.submit(new SpongeTaskBuilder().execute(runnable).plugin(SpongeCommon.getPlugin()).build());
+        this.submit(new SpongeTaskBuilder().execute(runnable).plugin(Launch.getInstance().getCommonPlugin()).build());
         return runnable;
     }
 
-    public Future<?> execute(Runnable runnable) {
+    public Future<?> execute(final Runnable runnable) {
         return this.execute(() -> {
             runnable.run();
             return null;

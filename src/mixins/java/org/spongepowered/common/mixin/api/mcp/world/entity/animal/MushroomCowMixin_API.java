@@ -38,7 +38,7 @@ public abstract class MushroomCowMixin_API extends AnimalMixin_API implements Mo
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.type().asImmutable());
+        values.add(this.mooshroomType().asImmutable());
 
         return values;
     }

@@ -66,7 +66,7 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
     @Override
     public void tracked$setCreatorReference(@Nullable final User creator) {
         this.tracker$creatorUser = new WeakReference<>(creator);
-        this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, creator == null ? null : creator.getUniqueId());
+        this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, creator == null ? null : creator.uniqueId());
     }
 
     @Override
@@ -85,7 +85,7 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
     @Override
     public void tracked$setNotifier(@Nullable final User notifier) {
         this.tracker$notifierUser = new WeakReference<>(notifier);
-        this.tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, notifier == null ? null : notifier.getUniqueId());
+        this.tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, notifier == null ? null : notifier.uniqueId());
     }
 
     @Override
@@ -109,26 +109,26 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
             return Optional.empty();
         }
         // get player if online
-        final ServerPlayer player = Sponge.getServer().getPlayer(uuid).orElse(null);
-        final User user = player == null ? null : player.getUser();
+        final ServerPlayer player = Sponge.server().player(uuid).orElse(null);
+        final User user = player == null ? null : player.user();
         if (user != null) {
             return Optional.of(user);
         }
 
         // check username cache
-        final String username = ((SpongeServer) Sponge.getServer()).getUsernameCache().getLastKnownUsername(uuid);
+        final String username = ((SpongeServer) Sponge.server()).getUsernameCache().getLastKnownUsername(uuid);
         if (username != null) {
-            return Sponge.getServer().getUserManager().get(GameProfile.of(uuid, username));
+            return Sponge.server().userManager().find(GameProfile.of(uuid, username));
         }
 
         // check mojang cache
-        final GameProfile profile = Sponge.getServer().getGameProfileManager().getCache().getById(uuid).orElse(null);
+        final GameProfile profile = Sponge.server().gameProfileManager().cache().byId(uuid).orElse(null);
         if (profile != null) {
-            return Sponge.getServer().getUserManager().get(profile);
+            return Sponge.server().userManager().find(profile);
         }
 
         // If we reach this point, queue UUID for async lookup and return empty
-        ((SpongeGameProfileManager) Sponge.getServer().getGameProfileManager()).lookupUserAsync(uuid);
+        ((SpongeGameProfileManager) Sponge.server().gameProfileManager()).lookupUserAsync(uuid);
         return Optional.empty();
     }
 

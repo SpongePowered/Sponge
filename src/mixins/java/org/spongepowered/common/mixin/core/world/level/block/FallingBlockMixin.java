@@ -72,7 +72,7 @@ public abstract class FallingBlockMixin {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(snapshot);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.FALLING_BLOCK);
-            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.getCurrentCause(),
+            final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.currentCause(),
                 ServerLocation.of(
                     (org.spongepowered.api.world.server.ServerWorld) world, pos.getX() + 0.5D, pos.getY(), pos.getZ() + 0.5D),
                 new Vector3d(0, 0, 0),

@@ -34,7 +34,7 @@ public final class SpongeLayerConfigFactory implements LayerConfig.Factory {
 
     @Override
     public LayerConfig of(final int height, final BlockState block) {
-        final FlatLayerInfo layer = new FlatLayerInfo(height, (Block) block.getType());
+        final FlatLayerInfo layer = new FlatLayerInfo(height, (Block) block.type());
         ((FlatLayerInfoBridge) layer).bridge$setBlockState((net.minecraft.world.level.block.state.BlockState) block);
         return (LayerConfig) layer;
     }

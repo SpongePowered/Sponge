@@ -41,12 +41,12 @@ public abstract class AbstractLifecycleEvent implements LifecycleEvent {
     }
 
     @Override
-    public final Cause getCause() {
+    public final Cause cause() {
         return this.cause;
     }
 
     @Override
-    public final Game getGame() {
+    public final Game game() {
         return this.game;
     }
 
@@ -60,7 +60,7 @@ public abstract class AbstractLifecycleEvent implements LifecycleEvent {
         }
 
         @Override
-        public final TypeToken<T> getParamType() {
+        public final TypeToken<T> paramType() {
             return this.token;
         }
     }

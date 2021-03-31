@@ -40,12 +40,12 @@ public final class SpongeRayTraceResult<T extends Locatable> implements RayTrace
     }
 
     @Override
-    public T getSelectedObject() {
+    public T selectedObject() {
         return this.selectedObject;
     }
 
     @Override
-    public Vector3d getHitPosition() {
+    public Vector3d hitPosition() {
         return this.hitPosition;
     }
 

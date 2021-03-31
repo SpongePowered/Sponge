@@ -58,8 +58,8 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     @Shadow public abstract double shadow$getSize();
     //@formatter:on
 
-    @Intrinsic
-    public Duration worldBorder$getWarningTime() {
+    @Override
+    public Duration warningTime() {
         return Duration.of(this.shadow$getWarningTime(), ChronoUnit.MILLIS);
     }
 
@@ -69,7 +69,7 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     }
 
     @Override
-    public double getWarningDistance() {
+    public double warningDistance() {
         return this.shadow$getWarningBlocks();
     }
 
@@ -79,12 +79,12 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     }
 
     @Override
-    public double getNewDiameter() {
+    public double newDiameter() {
         return this.shadow$getLerpTarget();
     }
 
     @Override
-    public double getDiameter() {
+    public double diameter() {
         return this.shadow$getSize();
     }
 
@@ -95,7 +95,7 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
 
     @Override
     public void setDiameter(final double diameter, final Duration time) {
-        this.shadow$lerpSizeBetween(this.getDiameter(), diameter, time.toMillis());
+        this.shadow$lerpSizeBetween(this.diameter(), diameter, time.toMillis());
     }
 
     @Override
@@ -104,12 +104,12 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     }
 
     @Override
-    public Duration getTimeRemaining() {
+    public Duration timeRemaining() {
         return Duration.of(this.shadow$getLerpRemainingTime(), ChronoUnit.MILLIS);
     }
 
     @Override
-    public Vector3d getCenter() {
+    public Vector3d center() {
         return new Vector3d(this.getCenterX(), 0, this.getCenterZ());
     }
 
@@ -119,7 +119,7 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     }
 
     @Override
-    public double getDamageThreshold() {
+    public double damageThreshold() {
         return this.shadow$getDamageSafeZone();
     }
 
@@ -129,7 +129,7 @@ public abstract class WorldBorderMixin_API implements WorldBorder {
     }
 
     @Override
-    public double getDamageAmount() {
+    public double damageAmount() {
         return this.shadow$getDamagePerBlock();
     }
 

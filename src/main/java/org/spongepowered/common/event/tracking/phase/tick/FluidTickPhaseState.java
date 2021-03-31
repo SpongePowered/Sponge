@@ -151,7 +151,7 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
     @Override
     public Operation getBlockOperation(final SpongeBlockSnapshot original, final BlockChange blockChange
     ) {
-        final FluidState fluidState = original.getState().getFluidState();
+        final FluidState fluidState = original.state().fluidState();
         if (!fluidState.isEmpty() && blockChange == BlockChange.DECAY) {
             return Operations.LIQUID_DECAY.get();
         }

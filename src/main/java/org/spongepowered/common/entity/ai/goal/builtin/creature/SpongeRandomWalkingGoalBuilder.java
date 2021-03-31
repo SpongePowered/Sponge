@@ -52,8 +52,8 @@ public final class SpongeRandomWalkingGoalBuilder implements RandomWalkingGoal.B
 
     @Override
     public RandomWalkingGoal.Builder from(RandomWalkingGoal value) {
-        return this.speed(value.getSpeed())
-            .executionChance(value.getExecutionChance());
+        return this.speed(value.speed())
+            .executionChance(value.executionChance());
     }
 
     @Override

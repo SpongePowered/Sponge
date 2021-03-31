@@ -89,15 +89,15 @@ public final class ShieldItemStackData {
                         })
                         .set((h, v) -> {
                             final ListTag layersTag = v.stream()
-                                    .filter(layer -> layer.getShape() != BannerPatternShapes.BASE.get())
+                                    .filter(layer -> layer.shape() != BannerPatternShapes.BASE.get())
                                     .map(ShieldItemStackData::layerToNbt)
                                     .collect(NBTCollectors.toTagList());
                             final CompoundTag blockEntity = h.getOrCreateTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             blockEntity.put(Constants.TileEntity.Banner.BANNER_PATTERNS, layersTag);
                             if (h.getItem() instanceof ShieldItem) {
                                 // TODO reject BannerPatternShapes.BASE for BannerItem?
-                                v.stream().filter(layer -> layer.getShape() == BannerPatternShapes.BASE.get()).forEach(layer -> {
-                                    blockEntity.putInt(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.world.item.DyeColor) (Object) layer.getColor()).getId());
+                                v.stream().filter(layer -> layer.shape() == BannerPatternShapes.BASE.get()).forEach(layer -> {
+                                    blockEntity.putInt(Constants.TileEntity.Banner.BANNER_BASE, ((net.minecraft.world.item.DyeColor) (Object) layer.color()).getId());
                                 });
                             }
                         })
@@ -113,8 +113,8 @@ public final class ShieldItemStackData {
 
     public static CompoundTag layerToNbt(final BannerPatternLayer layer) {
         final CompoundTag nbt = new CompoundTag();
-        nbt.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.getShape()).getHashname());
-        nbt.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.world.item.DyeColor) (Object) layer.getColor()).getId());
+        nbt.putString(Constants.TileEntity.Banner.BANNER_PATTERN_ID, ((BannerPattern) (Object) layer.shape()).getHashname());
+        nbt.putInt(Constants.TileEntity.Banner.BANNER_PATTERN_COLOR, ((net.minecraft.world.item.DyeColor) (Object) layer.color()).getId());
         return nbt;
     }
 }

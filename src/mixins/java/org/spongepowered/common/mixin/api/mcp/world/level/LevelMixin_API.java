@@ -117,12 +117,12 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     // World
 
     @Override
-    public Optional<? extends Player> getClosestPlayer(final int x, final int y, final int z, final double distance, final Predicate<? super Player> predicate) {
+    public Optional<? extends Player> closestPlayer(final int x, final int y, final int z, final double distance, final Predicate<? super Player> predicate) {
         return Optional.ofNullable((Player) ((net.minecraft.world.level.Level) (Object) this).getNearestPlayer(x, y, z, distance, (Predicate) Objects.requireNonNull(predicate, "predicate")));
     }
 
     @Override
-    public Chunk getChunk(final int cx, final int cy, final int cz) {
+    public Chunk chunk(final int cx, final int cy, final int cz) {
         return (Chunk) ((net.minecraft.world.level.Level) (Object) this).getChunk(cx >> 4, cz >> 4, ChunkStatus.EMPTY, true);
     }
 
@@ -142,7 +142,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     }
 
     @Override
-    public Iterable<Chunk> getLoadedChunks() {
+    public Iterable<Chunk> loadedChunks() {
         final ChunkSource chunkProvider = ((LevelAccessor) this).getChunkSource();
         if (chunkProvider instanceof ServerChunkCache) {
             final ChunkMapAccessor chunkManager = (ChunkMapAccessor) ((ServerChunkCache) chunkProvider).chunkMap;
@@ -161,31 +161,31 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     // BlockVolume
 
     @Override
-    public int getHighestYAt(final int x, final int z) {
-        return this.getHeight(HeightTypes.WORLD_SURFACE.get(), x, z);
+    public int highestYAt(final int x, final int z) {
+        return this.height(HeightTypes.WORLD_SURFACE.get(), x, z);
     }
 
     // Volume
 
     @Override
-    public Vector3i getBlockMin() {
+    public Vector3i blockMin() {
         return Constants.World.BLOCK_MIN;
     }
 
     @Override
-    public Vector3i getBlockMax() {
+    public Vector3i blockMax() {
         return Constants.World.BIOME_MAX;
     }
 
     @Override
-    public Vector3i getBlockSize() {
+    public Vector3i blockSize() {
         return Constants.World.BLOCK_SIZE;
     }
 
     // ContextSource
     
     @Override
-    public Context getContext() {
+    public Context context() {
         if (this.impl$context == null) {
             this.impl$context = new Context(Context.WORLD_KEY, this.shadow$dimension().location().toString());
         }
@@ -260,7 +260,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     }
 
     @Override
-    public Collection<? extends BlockEntity> getBlockEntities() {
+    public Collection<? extends BlockEntity> blockEntities() {
         // TODO - Figure out a clean way to gather tickable block entities
         return Collections.emptyList();
     }
@@ -299,14 +299,14 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         final Vector3i volMax = max.max(min);
         final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(adjustedVolMin, volMax.sub(rawVolMin).add(1, 1, 1), this.registries());
 
-        this.getBlockStateStream(min, max, StreamOptions.lazily())
+        this.blockStateStream(min, max, StreamOptions.lazily())
             .apply(VolumeCollectors.of(
                 volume,
                 VolumePositionTranslators.offset(origin),
                 VolumeApplicators.applyBlocks()
             ));
 
-        this.getBlockEntityStream(min, max, StreamOptions.lazily())
+        this.blockEntityStream(min, max, StreamOptions.lazily())
             .map((world, blockEntity, x, y, z) -> blockEntity.get().createArchetype())
             .apply(VolumeCollectors.of(
                 volume,
@@ -314,14 +314,14 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
                 VolumeApplicators.applyBlockEntityArchetypes()
             ));
 
-        this.getBiomeStream(min, max, StreamOptions.lazily())
+        this.biomeStream(min, max, StreamOptions.lazily())
             .apply(VolumeCollectors.of(
                 volume,
                 VolumePositionTranslators.offset(origin),
                 VolumeApplicators.applyBiomes()
             ));
 
-        this.getEntityStream(min, max, StreamOptions.lazily())
+        this.entityStream(min, max, StreamOptions.lazily())
             .map((world, entity, x, y, z) -> entity.get().createArchetype())
             .apply(VolumeCollectors.of(
                 volume,
@@ -338,18 +338,18 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     // EntityVolume
 
     @Override
-    public Optional<Entity> getEntity(final UUID uuid) {
+    public Optional<Entity> entity(final UUID uuid) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of Level that isn't part of Sponge API");
     }
 
     @Override
-    public Collection<? extends Player> getPlayers() {
+    public Collection<? extends Player> players() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of Level that isn't part of Sponge API");
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public VolumeStream<W, Entity> getEntityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
+    public VolumeStream<W, Entity> entityStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
             Objects.requireNonNull(options, "options"));
 
@@ -381,8 +381,8 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             // Filtered Position Entity Accessor
             (entityUuid, world) -> {
                 final net.minecraft.world.entity.@Nullable Entity entity = shouldCarbonCopy
-                    ? (net.minecraft.world.entity.Entity) backingVolume.getEntity(entityUuid).orElse(null)
-                    : (net.minecraft.world.entity.Entity) ((ProtoWorld) world).getEntity(entityUuid).orElse(null);
+                    ? (net.minecraft.world.entity.Entity) backingVolume.entity(entityUuid).orElse(null)
+                    : (net.minecraft.world.entity.Entity) ((ProtoWorld) world).entity(entityUuid).orElse(null);
                 if (entity == null) {
                     return null;
                 }

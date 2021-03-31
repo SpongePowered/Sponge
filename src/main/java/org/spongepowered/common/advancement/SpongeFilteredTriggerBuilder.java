@@ -60,8 +60,8 @@ public class SpongeFilteredTriggerBuilder<C extends FilteredTriggerConfiguration
 
     @Override
     public FilteredTrigger.Builder<C> from(final FilteredTrigger<C> value) {
-        this.config = value.getConfiguration();
-        this.type = value.getType();
+        this.config = value.configuration();
+        this.type = value.type();
         return this;
     }
 

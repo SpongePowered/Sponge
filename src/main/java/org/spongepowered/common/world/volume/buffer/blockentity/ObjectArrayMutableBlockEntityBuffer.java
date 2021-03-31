@@ -57,36 +57,36 @@ public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEnt
     @Override
     public void removeBlockEntity(final int x, final int y, final int z) {
         this.blockEntities.removeIf(be -> {
-            final Vector3i pos = be.getBlockPosition();
+            final Vector3i pos = be.blockPosition();
             return pos.getX() == x && pos.getZ() == z && pos.getY() == y;
         });
     }
 
 
     @Override
-    public VolumeStream<ObjectArrayMutableBlockEntityBuffer, BlockEntity> getBlockEntityStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<ObjectArrayMutableBlockEntityBuffer, BlockEntity> blockEntityStream(final Vector3i min, final Vector3i max,
             final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(min, max, this.getBlockMin(), this.getBlockMax(), options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
 
         final Stream<VolumeElement<ObjectArrayMutableBlockEntityBuffer, BlockEntity>> blockEntityStream = this.blockEntities.stream()
-            .map(be -> VolumeElement.of(this, be, be.getBlockPosition()));
+            .map(be -> VolumeElement.of(this, be, be.blockPosition()));
         return new SpongeVolumeStream<>(blockEntityStream, () -> this);
     }
 
     @Override
-    public Collection<? extends BlockEntity> getBlockEntities() {
+    public Collection<? extends BlockEntity> blockEntities() {
         return this.blockEntities;
     }
 
     @Override
-    public Optional<? extends BlockEntity> getBlockEntity(final int x, final int y, final int z) {
+    public Optional<? extends BlockEntity> blockEntity(final int x, final int y, final int z) {
         return this.blockEntities.stream().filter(be -> {
-            final Vector3i pos = be.getBlockPosition();
+            final Vector3i pos = be.blockPosition();
             return pos.getX() == x && pos.getY() == y && pos.getZ() == z;
         }).findFirst();
     }
 
     public net.minecraft.world.level.block.entity.@Nullable BlockEntity getTileEntity(final BlockPos blockPos) {
-        return (net.minecraft.world.level.block.entity.BlockEntity) this.getBlockEntity(blockPos.getX(), blockPos.getY(), blockPos.getZ()).orElse(null);
+        return (net.minecraft.world.level.block.entity.BlockEntity) this.blockEntity(blockPos.getX(), blockPos.getY(), blockPos.getZ()).orElse(null);
     }
 }

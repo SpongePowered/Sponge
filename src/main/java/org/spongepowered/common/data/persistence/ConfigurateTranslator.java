@@ -35,8 +35,6 @@ import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.data.persistence.ConfigurateTranslator.ToDataView;
-import org.spongepowered.common.data.persistence.ConfigurateTranslator.VisitState;
 import org.spongepowered.configurate.BasicConfigurationNode;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -86,7 +84,7 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
     }
 
     @Override
-    public TypeToken<ConfigurationNode> getToken() {
+    public TypeToken<ConfigurationNode> token() {
         return ConfigurateTranslator.TOKEN;
     }
 
@@ -109,9 +107,9 @@ public final class ConfigurateTranslator implements DataTranslator<Configuration
 
         // Unvisited hijinks to preserve any comments that may be present
         final Set<Object> unvisitedKeys = new HashSet<>(originalMap.keySet());
-        for (final DataQuery key : view.getKeys(false)) {
+        for (final DataQuery key : view.keys(false)) {
             this.valueToNode(node.node(key), view.get(key).orElse(null));
-            unvisitedKeys.remove(key.getParts().get(0));
+            unvisitedKeys.remove(key.parts().get(0));
         }
 
         for (final Object unusedChild : unvisitedKeys) {

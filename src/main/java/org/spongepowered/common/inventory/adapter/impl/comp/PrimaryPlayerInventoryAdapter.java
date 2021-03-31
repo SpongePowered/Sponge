@@ -42,7 +42,7 @@ public class PrimaryPlayerInventoryAdapter extends BasicInventoryAdapter impleme
     }
 
     @Override
-    public Hotbar getHotbar() {
+    public Hotbar hotbar() {
         return ((Hotbar) this.root.getHotbar().getAdapter(this.inventoryAdapter$getFabric(), this));
     }
 
@@ -52,7 +52,7 @@ public class PrimaryPlayerInventoryAdapter extends BasicInventoryAdapter impleme
     }
 
     @Override
-    public GridInventory getStorage() {
+    public GridInventory storage() {
         return ((GridInventory) this.root.getGrid().getAdapter(this.inventoryAdapter$getFabric(), this));
     }
 

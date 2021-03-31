@@ -55,12 +55,12 @@ public final class SpongeMetricsConfigManager implements MetricsConfigManager {
     }
 
     @Override
-    public Tristate getGlobalCollectionState() {
+    public Tristate globalCollectionState() {
         return this.metrics.get().globalState;
     }
 
     @Override
-    public Tristate getCollectionState(final PluginContainer container) {
+    public Tristate collectionState(final PluginContainer container) {
         return this.metrics.get().getCollectionState(container);
     }
 }

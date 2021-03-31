@@ -157,24 +157,24 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     @Override
-    public Selector.@NonNull Builder setLimit(final int limit) {
+    public Selector.@NonNull Builder limit(final int limit) {
         this.maxResults = limit;
         this.shadow$setLimited(limit != Integer.MAX_VALUE);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder setDistance(@NonNull final Range<@NonNull Double> range) {
-        Preconditions.checkArgument(range.getMin() == null || range.getMin() >= 0, "min must be non-negative");
-        Preconditions.checkArgument(range.getMax() == null || range.getMax() >= 0, "max must be non-negative");
+    public Selector.@NonNull Builder distance(@NonNull final Range<@NonNull Double> range) {
+        Preconditions.checkArgument(range.min() == null || range.min() >= 0, "min must be non-negative");
+        Preconditions.checkArgument(range.max() == null || range.max() >= 0, "max must be non-negative");
         this.distance = MinMaxBounds_FloatsAccessor.invoker$new(
-                this.api$floatFromDouble(range.getMin(), Function.identity()),
-                this.api$floatFromDouble(range.getMax(), Function.identity()));
+                this.api$floatFromDouble(range.min(), Function.identity()),
+                this.api$floatFromDouble(range.max(), Function.identity()));
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder setVolume(final org.spongepowered.math.vector.@NonNull Vector3d corner1,
+    public Selector.@NonNull Builder volume(final org.spongepowered.math.vector.@NonNull Vector3d corner1,
                                                final org.spongepowered.math.vector.@NonNull Vector3d corner2) {
         final org.spongepowered.math.vector.Vector3d minPoint = corner1.min(corner2);
         final org.spongepowered.math.vector.Vector3d distance = corner1.max(corner2).sub(minPoint);
@@ -188,12 +188,12 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     @Override
-    public Selector.@NonNull Builder setSortAlgorithm(@NonNull final Supplier<? extends SelectorSortAlgorithm> algorithm) {
-        return this.setSortAlgorithm(algorithm.get());
+    public Selector.@NonNull Builder sortAlgorithm(@NonNull final Supplier<? extends SelectorSortAlgorithm> algorithm) {
+        return this.sortAlgorithm(algorithm.get());
     }
 
     @Override
-    public Selector.@NonNull Builder setSortAlgorithm(@NonNull final SelectorSortAlgorithm algorithm) {
+    public Selector.@NonNull Builder sortAlgorithm(@NonNull final SelectorSortAlgorithm algorithm) {
         Preconditions.checkArgument(algorithm instanceof SpongeSelectorSortAlgorithm, "Must be a SpongeSelectorSortAlgorithm");
         this.shadow$setSorted(true);
         this.order = ((SpongeSelectorSortAlgorithm) algorithm).getSortAlgorithm();
@@ -201,27 +201,27 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     @Override
-    public Selector.@NonNull Builder advancement(@NonNull final Advancement advancement) {
+    public Selector.@NonNull Builder addAdvancement(@NonNull final Advancement advancement) {
         return this.api$advancement(advancement, false);
     }
 
     @Override
-    public Selector.@NonNull Builder notAdvancement(@NonNull final Advancement advancement) {
+    public Selector.@NonNull Builder addNotAdvancement(@NonNull final Advancement advancement) {
         return this.api$advancement(advancement, true);
     }
 
     @Override
-    public Selector.@NonNull Builder advancementCriterion(@NonNull final Advancement advancement, @NonNull final AdvancementCriterion criterion) {
+    public Selector.@NonNull Builder addAdvancementCriterion(@NonNull final Advancement advancement, @NonNull final AdvancementCriterion criterion) {
         return this.api$advancementCriterion(advancement, criterion, false);
     }
 
     @Override
-    public Selector.@NonNull Builder notAdvancementCriterion(@NonNull final Advancement advancement, @NonNull final AdvancementCriterion criterion) {
+    public Selector.@NonNull Builder addNotAdvancementCriterion(@NonNull final Advancement advancement, @NonNull final AdvancementCriterion criterion) {
         return this.api$advancementCriterion(advancement, criterion, true);
     }
 
     @Override
-    public Selector.@NonNull Builder setDataView(@NonNull final DataView view) {
+    public Selector.@NonNull Builder dataView(@NonNull final DataView view) {
         try {
             // TODO: ensure this works as expected
             final String json = DataFormats.JSON.get().write(view);
@@ -233,59 +233,59 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     @Override
-    public Selector.@NonNull Builder notEntityType(@NonNull final Supplier<@NonNull EntityType<@NonNull ?>> type) {
-        return this.notEntityType(type.get());
+    public Selector.@NonNull Builder addNotEntityType(@NonNull final Supplier<@NonNull EntityType<@NonNull ?>> type) {
+        return this.addNotEntityType(type.get());
     }
 
     @Override
-    public Selector.@NonNull Builder notEntityType(@NonNull final EntityType<@NonNull ?> type) {
+    public Selector.@NonNull Builder addNotEntityType(@NonNull final EntityType<@NonNull ?> type) {
         final ResourceKey key = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) type);
         this.api$handle("type", "!" + key.asString());
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder entityType(@NonNull final Supplier<@NonNull EntityType<@NonNull ?>> type, final boolean inherit) {
-        return this.entityType(type.get(), inherit);
+    public Selector.@NonNull Builder addEntityType(@NonNull final Supplier<@NonNull EntityType<@NonNull ?>> type, final boolean inherit) {
+        return this.addEntityType(type.get(), inherit);
     }
 
     @Override
-    public Selector.@NonNull Builder entityType(@NonNull final EntityType<@NonNull ?> type, final boolean inherit) {
+    public Selector.@NonNull Builder addEntityType(@NonNull final EntityType<@NonNull ?> type, final boolean inherit) {
         final ResourceKey key = (ResourceKey) (Object) Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) type);
         this.api$handle("type", String.format("%s%s", inherit ? "#" : "", key.asString()));
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder setExperienceLevel(@NonNull final Range<@NonNull Integer> range) {
-        Preconditions.checkArgument(range.getMin() == null || range.getMin() >= 0, "min must be non-negative");
-        Preconditions.checkArgument(range.getMax() == null || range.getMax() >= 0, "max must be non-negative");
-        this.level = MinMaxBounds_IntsAccessor.invoker$new(range.getMin(), range.getMax());
+    public Selector.@NonNull Builder experienceLevel(@NonNull final Range<@NonNull Integer> range) {
+        Preconditions.checkArgument(range.min() == null || range.min() >= 0, "min must be non-negative");
+        Preconditions.checkArgument(range.max() == null || range.max() >= 0, "max must be non-negative");
+        this.level = MinMaxBounds_IntsAccessor.invoker$new(range.min(), range.max());
         this.shadow$setIncludesEntities(false);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder gameMode(@NonNull final Supplier<? extends GameMode> mode) {
-        return this.gameMode(mode.get());
+    public Selector.@NonNull Builder addGameMode(@NonNull final Supplier<? extends GameMode> mode) {
+        return this.addGameMode(mode.get());
     }
 
     @Override
-    public Selector.@NonNull Builder gameMode(@NonNull final GameMode mode) {
-        final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.GAME_MODE).valueKey(mode);
-        this.api$handle("gamemode", key.getValue(), Tristate.FALSE);
+    public Selector.@NonNull Builder addGameMode(@NonNull final GameMode mode) {
+        final ResourceKey key = Sponge.game().registries().registry(RegistryTypes.GAME_MODE).valueKey(mode);
+        this.api$handle("gamemode", key.value(), Tristate.FALSE);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder notGameMode(@NonNull final Supplier<? extends GameMode> mode) {
-        return this.notGameMode(mode.get());
+    public Selector.@NonNull Builder addNotGameMode(@NonNull final Supplier<? extends GameMode> mode) {
+        return this.addNotGameMode(mode.get());
     }
 
     @Override
-    public Selector.@NonNull Builder notGameMode(@NonNull final GameMode mode) {
-        final ResourceKey key = Sponge.getGame().registries().registry(RegistryTypes.GAME_MODE).valueKey(mode);
-        this.api$handle("gamemode", key.getValue(), Tristate.TRUE);
+    public Selector.@NonNull Builder addNotGameMode(@NonNull final GameMode mode) {
+        final ResourceKey key = Sponge.game().registries().registry(RegistryTypes.GAME_MODE).valueKey(mode);
+        this.api$handle("gamemode", key.value(), Tristate.TRUE);
         return this;
     }
 
@@ -302,65 +302,65 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     @Override
-    public Selector.@NonNull Builder team(@NonNull final Team team) {
-        this.api$handle("team", team.getName(), Tristate.FALSE);
+    public Selector.@NonNull Builder addTeam(@NonNull final Team team) {
+        this.api$handle("team", team.name(), Tristate.FALSE);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder notTeam(@NonNull final Team team) {
-        this.api$handle("team", team.getName(), Tristate.TRUE);
+    public Selector.@NonNull Builder addNotTeam(@NonNull final Team team) {
+        this.api$handle("team", team.name(), Tristate.TRUE);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder name(@NonNull final String name) {
+    public Selector.@NonNull Builder addName(@NonNull final String name) {
         this.api$handle("name", name, Tristate.FALSE);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder notName(@NonNull final String name) {
+    public Selector.@NonNull Builder addNotName(@NonNull final String name) {
         this.api$handle("name", name, Tristate.TRUE);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder score(@NonNull final Score score, @NonNull final Range<@NonNull Integer> range) {
+    public Selector.@NonNull Builder addScore(@NonNull final Score score, @NonNull final Range<@NonNull Integer> range) {
         if (this.api$scores == null) {
             this.api$scores = new HashMap<>();
         }
         // TODO: Check this is right.
-        this.api$scores.put(score.getName().toString(), range);
+        this.api$scores.put(score.name().toString(), range);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder tag(@NonNull final String tag) {
+    public Selector.@NonNull Builder addTag(@NonNull final String tag) {
         this.api$handle("tag", tag, Tristate.FALSE);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder notTag(@NonNull final String tag) {
+    public Selector.@NonNull Builder addNotTag(@NonNull final String tag) {
         this.api$handle("tag", tag, Tristate.TRUE);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder setPitch(@NonNull final Range<@NonNull Double> range) {
+    public Selector.@NonNull Builder pitch(@NonNull final Range<@NonNull Double> range) {
         this.rotX = this.api$getWrappedBounds(range);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder setYaw(@NonNull final Range<@NonNull Double> range) {
+    public Selector.@NonNull Builder yaw(@NonNull final Range<@NonNull Double> range) {
         this.rotY = this.api$getWrappedBounds(range);
         return this;
     }
 
     @Override
-    public Selector.@NonNull Builder filter(@NonNull final Predicate<org.spongepowered.api.entity.@NonNull Entity> filter) {
+    public Selector.@NonNull Builder addFilter(@NonNull final Predicate<org.spongepowered.api.entity.@NonNull Entity> filter) {
         this.shadow$addPredicate((Predicate<Entity>) (Object) filter);
         return this;
     }
@@ -440,7 +440,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         if (this.api$advancement == null) {
             this.api$advancement = new Object2BooleanOpenHashMap<>();
         }
-        this.api$advancement.put(advancement.getKey().asString(), inverted);
+        this.api$advancement.put(advancement.key().asString(), inverted);
         return this;
     }
 
@@ -449,7 +449,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
         if (this.api$criterion == null) {
             this.api$criterion = new HashMap<>();
         }
-        this.api$criterion.computeIfAbsent(advancement.getKey().toString(), k -> new Object2BooleanOpenHashMap<>()).put(criterion.getName(), inverted);
+        this.api$criterion.computeIfAbsent(advancement.key().toString(), k -> new Object2BooleanOpenHashMap<>()).put(criterion.name(), inverted);
         return this;
     }
 
@@ -475,8 +475,8 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
 
 
     private WrappedMinMaxBounds api$getWrappedBounds(final Range<@NonNull Double> range) {
-        final Float a = this.api$floatFromDouble(range.getMin(), Mth::wrapDegrees);
-        final Float b = this.api$floatFromDouble(range.getMax(), Mth::wrapDegrees);
+        final Float a = this.api$floatFromDouble(range.min(), Mth::wrapDegrees);
+        final Float b = this.api$floatFromDouble(range.max(), Mth::wrapDegrees);
         if (a == null) {
             return new WrappedMinMaxBounds(null, b);
         }
@@ -490,13 +490,13 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     }
 
     private String api$intRangeToStringRepresentation(@NonNull final Range<@NonNull Integer> range) {
-        if (range.getMin() != null && range.getMax() != null && range.getMin().intValue() == range.getMax().intValue()) {
-            return String.valueOf(range.getMax().intValue());
+        if (range.min() != null && range.max() != null && range.min().intValue() == range.max().intValue()) {
+            return String.valueOf(range.max().intValue());
         }
 
         return String.format("%s..%s",
-                range.getMin() == null ? "" : String.valueOf(range.getMin().intValue()),
-                range.getMax() == null ? "" : String.valueOf(range.getMax().intValue()));
+                range.min() == null ? "" : String.valueOf(range.min().intValue()),
+                range.max() == null ? "" : String.valueOf(range.max().intValue()));
     }
 
 }

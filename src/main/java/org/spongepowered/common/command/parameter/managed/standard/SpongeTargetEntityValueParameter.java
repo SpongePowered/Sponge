@@ -54,20 +54,20 @@ public final class SpongeTargetEntityValueParameter extends ResourceKeyedZeroAdv
             final CommandContext.@NonNull Builder context,
             final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
-        final Object root = context.getCause().getCause().root();
+        final Object root = context.cause().cause().root();
         if (root instanceof Living) {
             final Living living = (Living) root;
             final Optional<RayTraceResult<@NonNull Entity>> rayTraceResult =
                     RayTrace.entity()
                             .sourceEyePosition(living)
-                            .direction(living.getHeadDirection())
+                            .direction(living.headDirection())
                             .limit(30)
                             .continueWhileBlock(RayTrace.onlyAir())
                             .select(this.isPlayerOnly ? entity -> entity instanceof Player : entity -> true)
                             .continueWhileEntity(r -> false) // if we hit an entity first, it obscures a player.
                             .execute();
             if (rayTraceResult.isPresent()) {
-                return rayTraceResult.map(RayTraceResult::getSelectedObject);
+                return rayTraceResult.map(RayTraceResult::selectedObject);
             }
 
             throw reader.createException(Component.text("The cause root is not looking at a entity!"));

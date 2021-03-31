@@ -153,7 +153,7 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
 
     @Override
     public void bridge$populateFromTemplate(final SpongeWorldTemplate s) {
-        this.impl$key = s.getKey();
+        this.impl$key = s.key();
         this.impl$gameMode = s.gameMode == null ? null : (ResourceLocation) (Object) s.gameMode.location();
         this.impl$difficulty = s.difficulty == null ? null : (ResourceLocation) (Object) s.difficulty.location();
         this.impl$serializationBehavior = s.serializationBehavior;

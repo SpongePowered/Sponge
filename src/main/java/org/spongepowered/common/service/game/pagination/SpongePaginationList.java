@@ -72,32 +72,32 @@ public final class SpongePaginationList implements PaginationList {
     }
 
     @Override
-    public Iterable<Component> getContents() {
+    public Iterable<Component> contents() {
         return this.contents;
     }
 
     @Override
-    public Optional<Component> getTitle() {
+    public Optional<Component> title() {
         return Optional.ofNullable(this.title);
     }
 
     @Override
-    public Optional<Component> getHeader() {
+    public Optional<Component> header() {
         return Optional.ofNullable(this.header);
     }
 
     @Override
-    public Optional<Component> getFooter() {
+    public Optional<Component> footer() {
         return Optional.ofNullable(this.footer);
     }
 
     @Override
-    public Component getPadding() {
+    public Component padding() {
         return this.paginationSpacer;
     }
 
     @Override
-    public int getLinesPerPage() {
+    public int linesPerPage() {
         return this.linesPerPage;
     }
 
@@ -120,8 +120,8 @@ public final class SpongePaginationList implements PaginationList {
         // Thus, we use a supplier to supply the player from the server, if required.
         final Supplier<Optional<? extends Audience>> audienceSupplier;
         if (receiver instanceof Player) {
-            final UUID playerUuid = ((Player) receiver).getUniqueId();
-            audienceSupplier = () -> Sponge.getServer().getPlayer(playerUuid);
+            final UUID playerUuid = ((Player) receiver).uniqueId();
+            audienceSupplier = () -> Sponge.server().player(playerUuid);
         } else {
             final WeakReference<Audience> srcReference = new WeakReference<>(receiver);
             audienceSupplier = () -> Optional.ofNullable(srcReference.get());

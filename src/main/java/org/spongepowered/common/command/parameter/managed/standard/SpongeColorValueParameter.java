@@ -75,12 +75,12 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
 
     @Override
     @NonNull
-    public Optional<? extends Color> getValue(
+    public Optional<? extends Color> parseValue(
             final Parameter.@NonNull Key<? super Color> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
 
-        final ArgumentReader.Immutable state = reader.getImmutable();
+        final ArgumentReader.Immutable state = reader.immutable();
         // First, is the argument type giving the correct return type?
         try {
             final ChatFormatting formatting = this.colorArgumentType.parse((StringReader) reader);

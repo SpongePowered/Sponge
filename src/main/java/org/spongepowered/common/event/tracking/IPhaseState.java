@@ -502,7 +502,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * {@link CauseStackManager}. In certain cases, there are states that can have
      * excessive modifiers being pushed and popped with and without causes that may cause
      * performance degredation due to the excessive amounts of how many recyclings occur
-     * with {@link CauseStackManager#getCurrentCause()} lacking a cached context
+     * with {@link CauseStackManager#currentCause()} lacking a cached context
      * and therefor needing to re-create the context each and every time.
      *
      * @param phaseContext The appropriate phase context
@@ -557,7 +557,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     ) {
         return SpongeEventFactory.createSpawnEntityEvent(currentCause,
             collect.stream()
-                .map(t -> (org.spongepowered.api.entity.Entity) t.getFirst())
+                .map(t -> (org.spongepowered.api.entity.Entity) t.first())
                 .collect(Collectors.toList())
         );
     }

@@ -91,7 +91,7 @@ public final class SpongeSpecialRecipe extends CustomRecipe {
     public RecipeSerializer<?> getSerializer() {
         // Fake special crafting serializer
         // because of Unknown recipe serializer when using our serializer with a vanilla client
-        // return Registry.RECIPE_SERIALIZER.getOrDefault(this.getId());
+        // return Registry.RECIPE_SERIALIZER.getOrDefault(this.id());
         return RecipeSerializer.BANNER_DUPLICATE;
     }
 }

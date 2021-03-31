@@ -48,12 +48,12 @@ public abstract class BlockBehaviour_BlockStateBaseMixin_API extends StateHolder
 
 
     @Override
-    public BlockType getType() {
+    public BlockType type() {
         return (BlockType) this.shadow$getBlock();
     }
 
     @Override
-    public org.spongepowered.api.fluid.FluidState getFluidState() {
+    public org.spongepowered.api.fluid.FluidState fluidState() {
         return (org.spongepowered.api.fluid.FluidState) (Object) this.shadow$getFluidState();
     }
 

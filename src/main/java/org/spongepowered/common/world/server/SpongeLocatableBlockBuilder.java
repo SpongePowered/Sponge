@@ -63,10 +63,10 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
     @Override
     public SpongeLocatableBlockBuilder location(final ServerLocation location) {
         Objects.requireNonNull(location, "LocationBridge cannot be null!");
-        this.blockState = location::getBlock;
-        this.position = location::getBlockPosition;
-        this.world = () -> location.getWorld().getKey();
-        final WeakReference<ServerWorld> worldRef = new WeakReference<>(location.getWorld());
+        this.blockState = location::block;
+        this.position = location::blockPosition;
+        this.world = () -> location.world().key();
+        final WeakReference<ServerWorld> worldRef = new WeakReference<>(location.world());
         this.worldReference = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld refrence dereferenced");
         return this;
     }
@@ -90,7 +90,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
         Objects.requireNonNull(worldSupplier, "Supplier cannot be null!");
         Objects.requireNonNull(worldSupplier.get(), "ServerWorld reference cannot be null!");
         this.worldReference = (Supplier<ServerWorld>) (Supplier<?>) worldSupplier;
-        this.world = () -> ((ServerWorld) worldSupplier.get()).getKey();
+        this.world = () -> ((ServerWorld) worldSupplier.get()).key();
         return this;
     }
 
@@ -99,16 +99,16 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
         Objects.requireNonNull(world, "World cannot be null!");
         final WeakReference<ServerWorld> reference = new WeakReference<>(world);
         this.worldReference = () -> Objects.requireNonNull(reference.get(), "ServerWorld refrence dereferenced");
-        this.world = () -> this.worldReference.get().getKey();
+        this.world = () -> this.worldReference.get().key();
         return this;
     }
 
     @Override
     public SpongeLocatableBlockBuilder from(final LocatableBlock value) {
         Objects.requireNonNull(value, "LocatableBlock cannot be null!");
-        this.position = value::getBlockPosition;
-        this.world = () -> value.getServerLocation().getWorld().getKey();
-        final WeakReference<ServerWorld> worldRef = new WeakReference<>(value.getServerLocation().getWorld());
+        this.position = value::blockPosition;
+        this.world = () -> value.serverLocation().world().key();
+        final WeakReference<ServerWorld> worldRef = new WeakReference<>(value.serverLocation().world());
         this.worldReference = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld refrence dereferenced");
         return this;
     }
@@ -142,7 +142,7 @@ public final class SpongeLocatableBlockBuilder extends AbstractDataBuilder<Locat
                 .orElseThrow(() -> new InvalidDataException("Could not locate an \"z\" coordinate in the container!"));
         final BlockState blockState = container.getSerializable(Constants.Block.BLOCK_STATE, BlockState.class)
                 .orElseThrow(() -> new InvalidDataException("Could not locate a BlockState"));
-        return Sponge.getServer().getWorldManager().world(worldKey)
+        return Sponge.server().worldManager().world(worldKey)
                 .map(world -> new SpongeLocatableBlockBuilder()
                         .position(x, y, z)
                         .world(world)

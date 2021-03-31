@@ -84,12 +84,12 @@ public class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
     }
 
     @Override
-    public PaletteType<T, R> getType() {
+    public PaletteType<T, R> type() {
         return this.paletteType;
     }
 
     @Override
-    public int getHighestId() {
+    public int highestId() {
         return this.maxId;
     }
 
@@ -122,7 +122,7 @@ public class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
     }
 
     @Override
-    public int getOrAssign(final T state) {
+    public int orAssign(final T state) {
         final PaletteReference<T, R> ref = MutableBimapPalette.createPaletteReference(
             state,
             this.paletteType,
@@ -140,11 +140,11 @@ public class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
     public Optional<T> get(final int id, final RegistryHolder holder) {
         return this.get(id)
             .flatMap(ref -> {
-                final Optional<T> byRegistry = this.paletteType.getResolver().apply(ref.value(), this.registry);
+                final Optional<T> byRegistry = this.paletteType.resolver().apply(ref.value(), this.registry);
                 if (!byRegistry.isPresent()) {
                     return Objects.requireNonNull(holder,"RegistryHolder cannot be null")
                         .findRegistry(ref.registry())
-                        .flatMap(reg -> this.getType().getResolver().apply(ref.value(), reg));
+                        .flatMap(reg -> this.type().resolver().apply(ref.value(), reg));
                 }
                 return byRegistry;
             });
@@ -170,7 +170,7 @@ public class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
         final PaletteType<T, R> paletteType,
         final Registry<R> registry
     ) {
-        final String string = paletteType.getStringifier().apply(registry, state);
+        final String string = paletteType.stringifier().apply(registry, state);
         return PaletteReference.byString(registry.type(), string);
     }
 
@@ -192,7 +192,7 @@ public class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
     public Stream<T> stream() {
         final HashBiMap<PaletteReference<T, R>, Integer> copy = HashBiMap.create(this.idsr);
         return copy.keySet().stream()
-            .map(ref -> this.paletteType.getResolver().apply(ref.value(), this.registry))
+            .map(ref -> this.paletteType.resolver().apply(ref.value(), this.registry))
             .filter(Optional::isPresent)
             .map(Optional::get);
     }
@@ -202,7 +202,7 @@ public class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
         final HashBiMap<Integer, PaletteReference<T, R>> copy = HashBiMap.create(this.ids);
         return copy.entrySet().stream()
             .map(entry -> {
-                final Optional<T> apply = this.paletteType.getResolver().apply(entry.getValue()
+                final Optional<T> apply = this.paletteType.resolver().apply(entry.getValue()
                     .value(), this.registry);
                 return apply.map(value -> new AbstractMap.SimpleEntry<>(value, entry.getKey()));
             })

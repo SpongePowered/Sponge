@@ -46,7 +46,7 @@ public final class SpongeWhitelistService implements WhitelistService {
 
     @SuppressWarnings("unchecked")
     @Override
-    public CompletableFuture<Collection<GameProfile>> getWhitelistedProfiles() {
+    public CompletableFuture<Collection<GameProfile>> whitelistedProfiles() {
         final List<GameProfile> profiles = new ArrayList<>();
 
         final UserWhiteList list = SpongeCommon.getServer().getPlayerList().getWhiteList();

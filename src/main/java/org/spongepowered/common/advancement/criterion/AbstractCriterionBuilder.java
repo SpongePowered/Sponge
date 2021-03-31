@@ -64,8 +64,8 @@ public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B
 
     @Override
     public B from(T value) {
-        this.trigger = value.getTrigger().orElse(null);
-        this.name = value.getName();
+        this.trigger = value.trigger().orElse(null);
+        this.name = value.name();
         return (B) this;
     }
 

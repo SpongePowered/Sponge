@@ -37,7 +37,7 @@ public abstract class TiersMixin_API implements ItemTier {
     // @formatter:on
 
     @Override
-    public org.spongepowered.api.item.recipe.crafting.Ingredient getRepairIngredient() {
+    public org.spongepowered.api.item.recipe.crafting.Ingredient repairIngredient() {
         return (org.spongepowered.api.item.recipe.crafting.Ingredient) (Object) this.shadow$getRepairIngredient();
     }
 }

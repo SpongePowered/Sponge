@@ -39,11 +39,11 @@ public class UpdateAnvilEventCost implements AnvilCost {
         this.materialCost = materialCost;
     }
 
-    public int getLevelCost() {
+    public int levelCost() {
         return this.levelCost;
     }
 
-    public int getMaterialCost() {
+    public int materialCost() {
         return this.materialCost;
     }
 
@@ -56,14 +56,14 @@ public class UpdateAnvilEventCost implements AnvilCost {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
-        return DataContainer.createNew().set(Queries.CONTENT_VERSION, this.getContentVersion())
-                .set(Constants.TileEntity.Anvils.MATERIALCOST, this.getMaterialCost())
-                .set(Constants.TileEntity.Anvils.LEVELCOST, this.getLevelCost());
+        return DataContainer.createNew().set(Queries.CONTENT_VERSION, this.contentVersion())
+                .set(Constants.TileEntity.Anvils.MATERIALCOST, this.materialCost())
+                .set(Constants.TileEntity.Anvils.LEVELCOST, this.levelCost());
     }
 }

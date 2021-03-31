@@ -40,7 +40,7 @@ public abstract class EntityDamageSourceMixin_API extends DamageSourceMixin_API 
     // @formatter:on
 
     @Override
-    public Entity getSource() {
+    public Entity source() {
         return ((Entity) this.entity);
     }
 

@@ -55,17 +55,17 @@ public final class SpongeDataRegistration implements DataRegistration {
 
     @Override
     @SuppressWarnings("unchecked")
-    public <V extends Value<E>, E> Collection<DataProvider<V, E>> getProvidersFor(Key<V> key) throws UnregisteredKeyException {
+    public <V extends Value<E>, E> Collection<DataProvider<V, E>> providersFor(Key<V> key) throws UnregisteredKeyException {
         return (Collection) this.dataProviderMap.get(key);
     }
 
     @Override
-    public Optional<DataStore> getDataStore(final TypeToken<? extends DataHolder> token) {
+    public Optional<DataStore> dataStore(final TypeToken<? extends DataHolder> token) {
         return this.getDataStore0(token.getType());
     }
 
     @Override
-    public Optional<DataStore> getDataStore(final Class<? extends DataHolder> token) {
+    public Optional<DataStore> dataStore(final Class<? extends DataHolder> token) {
         return this.getDataStore0(token);
     }
 
@@ -85,7 +85,7 @@ public final class SpongeDataRegistration implements DataRegistration {
     }
 
     @Override
-    public Iterable<Key<?>> getKeys() {
+    public Iterable<Key<?>> keys() {
         return this.keys;
     }
 

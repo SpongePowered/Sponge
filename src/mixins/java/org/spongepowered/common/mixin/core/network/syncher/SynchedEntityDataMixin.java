@@ -88,15 +88,15 @@ public abstract class SynchedEntityDataMixin {
                         final DataTransactionResult transaction = optional.get();
                         final ChangeDataHolderEvent.ValueChange
                             event =
-                            SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getCauseStackManager().getCurrentCause(), transaction,
+                            SpongeEventFactory.createChangeDataHolderEventValueChange(PhaseTracker.getCauseStackManager().currentCause(), transaction,
                                 (DataHolder.Mutable) this.entity);
-                        Sponge.getEventManager().post(event);
+                        Sponge.eventManager().post(event);
                         if (event.isCancelled()) {
                             //If the event is cancelled, well, don't change the underlying value.
                             return;
                         }
                         try {
-                            value = converter.get().getValueFromEvent(currentValue, event.getEndResult().getSuccessfulData());
+                            value = converter.get().getValueFromEvent(currentValue, event.endResult().successfulData());
                         } catch (final Exception e) {
                             // Worst case scenario, we don't want to cause an issue, so we just set the value
                             value = incomingValue;

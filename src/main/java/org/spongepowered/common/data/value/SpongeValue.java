@@ -46,7 +46,7 @@ public abstract class SpongeValue<E> implements Value<E> {
     }
 
     @Override
-    public SpongeKey<? extends Value<E>, E> getKey() {
+    public SpongeKey<? extends Value<E>, E> key() {
         return this.key;
     }
 

@@ -66,29 +66,29 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
-    public String getId() {
+    public String id() {
         return this.id;
     }
 
     @Override
-    public Optional<Component> getDescription() {
+    public Optional<Component> description() {
         return Optional.ofNullable(this.description);
     }
 
     @Override
-    public Map<Subject, Boolean> getAssignedSubjects(String identifier) {
+    public Map<Subject, Boolean> assignedSubjects(String identifier) {
         SubjectCollection subjects = this.permissionService.get(identifier);
-        return subjects.getLoadedWithPermission(this.id);
+        return subjects.loadedWithPermission(this.id);
     }
 
     @Override
     public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String type) {
         SubjectCollection subjects = this.permissionService.get(type);
-        return subjects.getAllWithPermission(this.id);
+        return subjects.allWithPermission(this.id);
     }
 
     @Override
-    public Optional<PluginContainer> getOwner() {
+    public Optional<PluginContainer> owner() {
         return Optional.of(this.owner);
     }
 
@@ -164,7 +164,7 @@ class SpongePermissionDescription implements PermissionDescription {
             SpongeSubjectCollection subjects = this.permissionService.get(PermissionService.SUBJECTS_ROLE_TEMPLATE);
             for (Entry<String, Tristate> assignment : this.roleAssignments.entrySet()) {
                 Subject subject = subjects.get(assignment.getKey());
-                subject.getTransientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, this.id, assignment.getValue());
+                subject.transientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, this.id, assignment.getValue());
             }
             return description;
         }

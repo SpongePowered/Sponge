@@ -45,7 +45,7 @@ import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 public final class ServerConsoleSystemSubject extends SpongeSystemSubject implements CommandSourceProviderBridge, CommandSource, CommandSourceBridge {
 
     @Override
-    public String getIdentifier() {
+    public String identifier() {
         return "console";
     }
 

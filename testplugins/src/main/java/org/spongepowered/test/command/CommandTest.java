@@ -82,42 +82,42 @@ public final class CommandTest {
 
     @Listener
     public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<ServerPlayer> playerKey = Parameter.player().setKey("player")
-                .setUsage(key -> "[any player]")
+        final Parameter.Value<ServerPlayer> playerKey = Parameter.player().key("player")
+                .usage(key -> "[any player]")
                 .build();
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(playerKey)
-                        .setExecutor(context -> {
-                            final ServerPlayer player = context.getOne(playerKey)
-                                    .orElse(context.getCause().root() instanceof ServerPlayer ? ((ServerPlayer) context.getCause().root()) : null);
-                            this.logger.info(player.getName());
+                        .addParameter(playerKey)
+                        .executor(context -> {
+                            final ServerPlayer player = context.one(playerKey)
+                                    .orElse(context.cause().root() instanceof ServerPlayer ? ((ServerPlayer) context.cause().root()) : null);
+                            this.logger.info(player.name());
                             return CommandResult.success();
                         })
                         .build(),
                 "getplayer");
 
-        final Parameter.Value<String> playerParameterKey = Parameter.string().setKey("name").optional().build();
+        final Parameter.Value<String> playerParameterKey = Parameter.string().key("name").optional().build();
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(playerParameterKey)
-                        .setExecutor(context -> {
-                            final Optional<String> result = context.getOne(playerParameterKey);
+                        .addParameter(playerParameterKey)
+                        .executor(context -> {
+                            final Optional<String> result = context.one(playerParameterKey);
                             final Collection<GameProfile> collection;
                             if (result.isPresent()) {
                                 // check to see if the string matches
-                                collection = Sponge.getGame().getServer().getUserManager()
+                                collection = Sponge.game().server().userManager()
                                         .streamOfMatches(result.get().toLowerCase(Locale.ROOT))
                                         .collect(Collectors.toList());
                             } else {
-                                collection = Sponge.getGame().getServer().getUserManager()
+                                collection = Sponge.game().server().userManager()
                                         .streamAll()
                                         .collect(Collectors.toList());
                             }
                             collection.forEach(x -> this.logger.info(
-                                    "GameProfile - UUID: {}, Name - {}", x.getUniqueId().toString(), x.getName().orElse("---")));
+                                    "GameProfile - UUID: {}, Name - {}", x.uniqueId().toString(), x.name().orElse("---")));
                             return CommandResult.success();
                         })
                         .build(),
@@ -129,13 +129,13 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
-                        .flag(Flag.builder().alias("f").alias("flag").build())
-                        .flag(Flag.builder().alias("t").alias("text").setParameter(Parameter.string().setKey(testKey).build()).build())
-                        .parameter(Parameter.formattingCodeText().setKey(requiredKey).build())
-                        .setExecutor(context -> {
-                            context.sendMessage(Identity.nil(), Component.text(context.getFlagInvocationCount("flag")));
-                            context.sendMessage(Identity.nil(), Component.text(context.getFlagInvocationCount("t")));
-                            context.getAll(testKey).forEach(x -> context.sendMessage(Identity.nil(), Component.text(x)));
+                        .addFlag(Flag.builder().alias("f").alias("flag").build())
+                        .addFlag(Flag.builder().alias("t").alias("text").setParameter(Parameter.string().key(testKey).build()).build())
+                        .addParameter(Parameter.formattingCodeText().key(requiredKey).build())
+                        .executor(context -> {
+                            context.sendMessage(Identity.nil(), Component.text(context.flagInvocationCount("flag")));
+                            context.sendMessage(Identity.nil(), Component.text(context.flagInvocationCount("t")));
+                            context.all(testKey).forEach(x -> context.sendMessage(Identity.nil(), Component.text(x)));
                             context.sendMessage(Identity.nil(), context.requireOne(requiredKey));
                             return CommandResult.success();
                         })
@@ -146,12 +146,12 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
-                        .flag(Flag.builder().alias("t").alias("text").setParameter(Parameter.string().setKey(testKey).build()).build())
-                        .parameter(Parameter.formattingCodeText().setKey(requiredKey).build())
-                        .setExecutor(context -> {
+                        .addFlag(Flag.builder().alias("t").alias("text").setParameter(Parameter.string().key(testKey).build()).build())
+                        .addParameter(Parameter.formattingCodeText().key(requiredKey).build())
+                        .executor(context -> {
                             context.sendMessage(Identity.nil(), Component.text("optional_test"));
-                            context.sendMessage(Identity.nil(), Component.text(context.getFlagInvocationCount("t")));
-                            context.getAll(testKey).forEach(x -> context.sendMessage(Identity.nil(), Component.text(x)));
+                            context.sendMessage(Identity.nil(), Component.text(context.flagInvocationCount("t")));
+                            context.all(testKey).forEach(x -> context.sendMessage(Identity.nil(), Component.text(x)));
                             context.sendMessage(Identity.nil(), context.requireOne(requiredKey));
                             return CommandResult.success();
                         })
@@ -162,7 +162,7 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
-                        .setExecutor(x -> {
+                        .executor(x -> {
                             x.sendMessage(Identity.nil(), Component.text().content("Click Me")
                                     .clickEvent(SpongeComponents.executeCallback(ctx -> ctx.sendMessage(Identity.nil(), Component.text("Hello"))))
                                     .build()
@@ -175,15 +175,15 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
-                        .setExecutor(x -> {
+                        .executor(x -> {
                             final Collection<Entity> collection = Selector.builder()
                                     .applySelectorType(SelectorTypes.ALL_ENTITIES.get())
-                                    .entityType(EntityTypes.PLAYER.get(), false)
-                                    .gameMode(GameModes.CREATIVE.get())
-                                    .setLimit(1)
+                                    .addEntityType(EntityTypes.PLAYER.get(), false)
+                                    .addGameMode(GameModes.CREATIVE.get())
+                                    .limit(1)
                                     .includeSelf()
                                     .build()
-                                    .select(x.getCause());
+                                    .select(x.cause());
                             for (final Entity entity : collection) {
                                 x.sendMessage(Identity.nil(), Component.text(entity.toString()));
                             }
@@ -194,12 +194,12 @@ public final class CommandTest {
         );
 
         final Parameter.Key<ServerLocation> serverLocationKey = Parameter.key("serverLocation", ServerLocation.class);
-        final Parameter.Value<ServerLocation> serverLocationParameter = Parameter.location().setKey(serverLocationKey).build();
+        final Parameter.Value<ServerLocation> serverLocationParameter = Parameter.location().key(serverLocationKey).build();
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(serverLocationParameter)
-                        .setExecutor(x -> {
+                        .addParameter(serverLocationParameter)
+                        .executor(x -> {
                             x.sendMessage(Identity.nil(), Component.text(x.requireOne(serverLocationKey).toString()));
                             return CommandResult.success();
                         })
@@ -213,15 +213,15 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(serverLocationParameter)
-                        .parameter(
+                        .addParameter(serverLocationParameter)
+                        .addParameter(
                                 Parameter.registryElement(
                                         typeToken,
-                                        commandContext -> Sponge.getGame().registries(),
+                                        commandContext -> Sponge.game().registries(),
                                         RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER,
                                         "sponge"
-                                ).setKey(commandParameterKey).build())
-                        .setExecutor(x -> {
+                                ).key(commandParameterKey).build())
+                        .executor(x -> {
                             x.sendMessage(Identity.nil(), Component.text(x.requireOne(serverLocationKey).toString()));
                             x.sendMessage(Identity.nil(), Component.text(x.requireOne(commandParameterKey).toString()));
                             return CommandResult.success();
@@ -235,10 +235,10 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(Parameter.enumValue(TestEnum.class).setKey(enumParameterKey).build())
-                        .parameter(Parameter.string().setKey(stringKey).setSuggestions((context, currentInput) -> ImmutableList.of("bacon", "eggs", "spam")).build())
-                        .setExecutor(x -> {
-                            x.sendMessage(Identity.nil(), Component.text(x.getOne(enumParameterKey).orElse(TestEnum.ONE).name()));
+                        .addParameter(Parameter.enumValue(TestEnum.class).key(enumParameterKey).build())
+                        .addParameter(Parameter.string().key(stringKey).suggestions((context, currentInput) -> ImmutableList.of("bacon", "eggs", "spam")).build())
+                        .executor(x -> {
+                            x.sendMessage(Identity.nil(), Component.text(x.one(enumParameterKey).orElse(TestEnum.ONE).name()));
                             return CommandResult.success();
                         })
                         .build(),
@@ -250,9 +250,9 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(Parameter.resourceKey().setKey(resourceKeyKey).build())
-                        .setExecutor(x -> {
-                            x.sendMessage(Identity.nil(), Component.text(x.requireOne(resourceKeyKey).getFormatted()));
+                        .addParameter(Parameter.resourceKey().key(resourceKeyKey).build())
+                        .executor(x -> {
+                            x.sendMessage(Identity.nil(), Component.text(x.requireOne(resourceKeyKey).formatted()));
                             return CommandResult.success();
                         })
                         .build(),
@@ -263,9 +263,9 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
-                    .parameter(Parameter.user().setKey(userKey).build())
-                    .setExecutor(context -> {
-                        context.sendMessage(Identity.nil(), Component.text(context.requireOne(userKey).getName()));
+                    .addParameter(Parameter.user().key(userKey).build())
+                    .executor(context -> {
+                        context.sendMessage(Identity.nil(), Component.text(context.requireOne(userKey).name()));
                         return CommandResult.success();
                     })
                     .build(),
@@ -276,40 +276,40 @@ public final class CommandTest {
         event.register(
                 this.plugin,
                 Command.builder()
-                        .setExecutor(context -> {
-                            context.sendMessage(Identity.nil(), Component.text("Collected literals: " + String.join(", ", context.getAll(stringLiteralKey))));
+                        .executor(context -> {
+                            context.sendMessage(Identity.nil(), Component.text("Collected literals: " + String.join(", ", context.all(stringLiteralKey))));
                             return CommandResult.success();
                         })
-                        .setTerminal(true)
-                        .parameter(
-                                Parameter.firstOfBuilder(Parameter.literal(String.class, "1", "1").setKey(stringLiteralKey).build())
-                                    .or(Parameter.literal(String.class, "2", "2").setKey(stringLiteralKey).build())
+                        .terminal(true)
+                        .addParameter(
+                                Parameter.firstOfBuilder(Parameter.literal(String.class, "1", "1").key(stringLiteralKey).build())
+                                    .or(Parameter.literal(String.class, "2", "2").key(stringLiteralKey).build())
                                     .terminal()
                                     .build()
                         )
-                        .parameter(Parameter.seqBuilder(Parameter.literal(String.class, "3", "3").setKey(stringLiteralKey).build())
-                                .then(Parameter.literal(String.class, "4", "4").setKey(stringLiteralKey).build())
+                        .addParameter(Parameter.seqBuilder(Parameter.literal(String.class, "3", "3").key(stringLiteralKey).build())
+                                .then(Parameter.literal(String.class, "4", "4").key(stringLiteralKey).build())
                                 .terminal()
                                 .build())
-                        .parameter(Parameter.literal(String.class, "5", "5").optional().setKey(stringLiteralKey).build())
-                        .parameter(Parameter.literal(String.class, "6", "6").setKey(stringLiteralKey).build())
+                        .addParameter(Parameter.literal(String.class, "5", "5").optional().key(stringLiteralKey).build())
+                        .addParameter(Parameter.literal(String.class, "6", "6").key(stringLiteralKey).build())
                         .build(),
                 "testnesting");
 
         final Parameter.Value<SystemSubject> systemSubjectValue = Parameter.builder(SystemSubject.class)
-                .setKey("systemsubject")
-                .parser(VariableValueParameters.literalBuilder(SystemSubject.class).setLiteral(Collections.singleton("-"))
-                        .setReturnValue(Sponge::getSystemSubject).build())
+                .key("systemsubject")
+                .addParser(VariableValueParameters.literalBuilder(SystemSubject.class).literal(Collections.singleton("-"))
+                        .returnValue(Sponge::systemSubject).build())
                 .build();
         event.register(
                 this.plugin,
                 Command.builder()
-                        .parameter(Parameter.firstOf(
+                        .addParameter(Parameter.firstOf(
                                 systemSubjectValue,
                                 CommonParameters.PLAYER
                         ))
-                        .parameter(Parameter.remainingJoinedStrings().setKey(stringKey).build())
-                        .setExecutor(context -> {
+                        .addParameter(Parameter.remainingJoinedStrings().key(stringKey).build())
+                        .executor(context -> {
                             final Audience audience;
                             final String name;
                             if (context.hasAny(systemSubjectValue)) {
@@ -317,12 +317,12 @@ public final class CommandTest {
                                 name = "Console";
                             } else {
                                 final ServerPlayer player = context.requireOne(CommonParameters.PLAYER);
-                                name = player.getName();
+                                name = player.name();
                                 audience = player;
                             }
                             final String message = context.requireOne(stringKey);
                             context.sendMessage(Identity.nil(), Component.text("To " + name + "> " + message));
-                            final Object root = context.getCause().root();
+                            final Object root = context.cause().root();
                             final Identity identity = root instanceof ServerPlayer ? ((ServerPlayer) root).identity() : Identity.nil();
                             audience.sendMessage(identity, Component.text("From " + name + "> " + message));
                             return CommandResult.success();
@@ -336,15 +336,15 @@ public final class CommandTest {
         final ValueCompleter stringValueCompleter = (c, s) -> s.isEmpty() ? Collections.singletonList("x") : Arrays.asList(s, s + "bar", "foo_" + s);
 //        final ValueCompleter stringValueCompleter = null;
 
-        final Parameter.Value<String> r_opt = Parameter.remainingJoinedStrings().setKey("r_def").optional().build();
-        final Parameter.Value<String> r_req = Parameter.remainingJoinedStrings().setKey("r_req").setSuggestions(stringValueCompleter).build();
-        final Parameter.Value<String> opt1 = Parameter.string().optional().setKey("opt1").build();
-        final Parameter.Value<String> opt2 = Parameter.string().optional().setKey("opt2").build();
-        final Parameter.Value<String> topt = Parameter.string().optional().setKey("topt").terminal().build();
-        final Parameter.Value<String> req1 = Parameter.string().setKey("req1").setSuggestions(stringValueCompleter).build();
-        final Parameter.Value<String> req2 = Parameter.string().setKey("req2").build();
-        final Parameter.Value<Boolean> lit1 = Parameter.literal(Boolean.class, true, "lit1").setKey("lit1").build();
-        final Parameter.Value<Boolean> lit2 = Parameter.literal(Boolean.class, true, "lit2").setKey("lit2").build();
+        final Parameter.Value<String> r_opt = Parameter.remainingJoinedStrings().key("r_def").optional().build();
+        final Parameter.Value<String> r_req = Parameter.remainingJoinedStrings().key("r_req").suggestions(stringValueCompleter).build();
+        final Parameter.Value<String> opt1 = Parameter.string().optional().key("opt1").build();
+        final Parameter.Value<String> opt2 = Parameter.string().optional().key("opt2").build();
+        final Parameter.Value<String> topt = Parameter.string().optional().key("topt").terminal().build();
+        final Parameter.Value<String> req1 = Parameter.string().key("req1").suggestions(stringValueCompleter).build();
+        final Parameter.Value<String> req2 = Parameter.string().key("req2").build();
+        final Parameter.Value<Boolean> lit1 = Parameter.literal(Boolean.class, true, "lit1").key("lit1").build();
+        final Parameter.Value<Boolean> lit2 = Parameter.literal(Boolean.class, true, "lit2").key("lit2").build();
         final Parameter optSeq_lit_req1 = Parameter.seqBuilder(lit1).then(req1).optional().build();
         final Parameter optSeq_lit_req2 = Parameter.seqBuilder(lit2).then(req2).optional().build();
         final Parameter seq_req_2 = Parameter.seqBuilder(req1).then(req2).build();
@@ -352,13 +352,13 @@ public final class CommandTest {
         final Parameter seq_opt_2_req = Parameter.seqBuilder(opt1).then(opt2).then(req1).build();
 
         // <req1>
-        builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, req1))
-                        .parameter(req1).build(),"required");
+        builder.addChild(Command.builder().executor(context -> CommandTest.printParameters(context, req1))
+                        .addParameter(req1).build(),"required");
 
         // subcommand|<r_def>
-        builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, r_opt))
-                        .parameter(r_opt)
-                        .child(Command.builder().setExecutor(c -> CommandTest.printParameters(c, r_opt)).build(), "subcommand")
+        builder.addChild(Command.builder().executor(context -> CommandTest.printParameters(context, r_opt))
+                        .addParameter(r_opt)
+                        .addChild(Command.builder().executor(c -> CommandTest.printParameters(c, r_opt)).build(), "subcommand")
                         .build(),
                 "optional_or_subcmd");
 
@@ -367,82 +367,82 @@ public final class CommandTest {
 
         // [def1] <r_req>
         // TODO missing executed command when only providing a single value
-        builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, opt1, r_req))
-                .parameters(opt1, r_req).build(), "optional_r_required");
+        builder.addChild(Command.builder().executor(context -> CommandTest.printParameters(context, opt1, r_req))
+                .addParameters(opt1, r_req).build(), "optional_r_required");
 
         // [opt1] [opt2] <r_req>
         // TODO missing executed command when only providing a single value
-        builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, opt1, opt2, r_req))
-                .parameters(opt1, opt2, r_req).build(), "optional_optional_required");
+        builder.addChild(Command.builder().executor(context -> CommandTest.printParameters(context, opt1, opt2, r_req))
+                .addParameters(opt1, opt2, r_req).build(), "optional_optional_required");
 
         // [opt1] [opt2]
         // TODO some redundancy in generated nodes because opt1 node can terminate early
-        builder.child(Command.builder().setExecutor(context -> CommandTest.printParameters(context, opt1, opt2))
-                .parameters(opt1, opt2).build(), "optional_optional");
+        builder.addChild(Command.builder().executor(context -> CommandTest.printParameters(context, opt1, opt2))
+                .addParameters(opt1, opt2).build(), "optional_optional");
 
         // [opt1] [literal <req1>]
         // TODO completion does not include req1 when opt1/literal is ambigous
-        builder.child(Command.builder().setExecutor(c -> CommandTest.printParameters(c, opt1, lit1, req1))
-                .parameters(opt1, optSeq_lit_req1).build(), "optional_optsequence_literal_required");
+        builder.addChild(Command.builder().executor(c -> CommandTest.printParameters(c, opt1, lit1, req1))
+                .addParameters(opt1, optSeq_lit_req1).build(), "optional_optsequence_literal_required");
 
         // [literal <req1>] [literal2 <req2>]
         // TODO sequences are not optional
-        builder.child(Command.builder().setExecutor(c -> CommandTest.printParameters(c, lit1, req1, lit2, req2))
-                .parameters(optSeq_lit_req1, optSeq_lit_req2).build(), "opt_sequence_2_literal_required");
+        builder.addChild(Command.builder().executor(c -> CommandTest.printParameters(c, lit1, req1, lit2, req2))
+                .addParameters(optSeq_lit_req1, optSeq_lit_req2).build(), "opt_sequence_2_literal_required");
 
         // <<req1> <req2>>
-        builder.child(Command.builder().setExecutor(c -> CommandTest.printParameters(c, req1, req2))
-                .parameters(seq_req_2).build(), "seq_required_required");
+        builder.addChild(Command.builder().executor(c -> CommandTest.printParameters(c, req1, req2))
+                .addParameters(seq_req_2).build(), "seq_required_required");
 
         // <[opt1] [opt2]>
         // TODO some redundancy in generated nodes because opt1 node can terminate early
-        builder.child(Command.builder().setExecutor(c -> CommandTest.printParameters(c, opt1, opt2))
-                .parameters(seq_opt_2).build(), "seq_optional_optional");
+        builder.addChild(Command.builder().executor(c -> CommandTest.printParameters(c, opt1, opt2))
+                .addParameters(seq_opt_2).build(), "seq_optional_optional");
 
         // <[opt1] [opt2] <req>>
-        builder.child(Command.builder().setExecutor(c -> CommandTest.printParameters(c, opt1, opt2, req1))
-                .parameters(seq_opt_2_req).build(), "seq_optional_optional_required");
+        builder.addChild(Command.builder().executor(c -> CommandTest.printParameters(c, opt1, opt2, req1))
+                .addParameters(seq_opt_2_req).build(), "seq_optional_optional_required");
 
         // [opt1] <req> [opt2]
         // TODO some redundancy in generated nodes because req1 node can terminate early
-        builder.child(Command.builder().setExecutor(c -> CommandTest.printParameters(c, opt1, req1, opt2))
-                .parameters(opt1, req1, opt2).build(), "optional_required_optional");
+        builder.addChild(Command.builder().executor(c -> CommandTest.printParameters(c, opt1, req1, opt2))
+                .addParameters(opt1, req1, opt2).build(), "optional_required_optional");
 
         // [opt1] [topt] !terminal
         // or
         // [opt1] [topt] <req1>
-        builder.child(Command.builder().setExecutor(c -> CommandTest.printParameters(c, opt1, topt, req1))
-                .parameters(opt1, topt, req1).build(), "optional_toptional_optional");
+        builder.addChild(Command.builder().executor(c -> CommandTest.printParameters(c, opt1, topt, req1))
+                .addParameters(opt1, topt, req1).build(), "optional_toptional_optional");
 
         event.register(this.plugin, builder.build(), "testcommand", "testcmd");
 
         // Adapted from https://github.com/SpongePowered/Sponge/issues/3238#issuecomment-750456173
 
         final Command.Parameterized firstSub = Command.builder()
-                .parameter(CommonParameters.BOOLEAN)
-                .setExecutor(c -> {
+                .addParameter(CommonParameters.BOOLEAN)
+                .executor(c -> {
                     c.sendMessage(Identity.nil(), Component.text("first"));
                     return CommandResult.success();
                 })
                 .build();
         final Command.Parameterized secondSub = Command.builder()
-                .parameter(CommonParameters.BOOLEAN)
-                .setExecutor(c -> {
+                .addParameter(CommonParameters.BOOLEAN)
+                .executor(c -> {
                     c.sendMessage(Identity.nil(), Component.text("second"));
                     return CommandResult.success();
                 })
                 .build();
         final Command.Parameterized parent = Command.builder()
-                .setExecutor(c -> {
+                .executor(c -> {
                     c.sendMessage(Identity.nil(), Component.text("parent"));
                     return CommandResult.success();
                 })
-                .parameters(CommonParameters.WORLD)
-                .parameters(Parameter.firstOf(
+                .addParameters(CommonParameters.WORLD)
+                .addParameters(Parameter.firstOf(
                         Parameter.subcommand(firstSub, "first"),
                         Parameter.subcommand(secondSub, "second")
                 ))
-                .setTerminal(true)
+                .terminal(true)
                 .build();
 
         event.register(this.plugin, parent, "testterminal");
@@ -450,14 +450,14 @@ public final class CommandTest {
         // exceptions
 
         event.register(this.plugin, Command.builder()
-                      .setShortDescription(Component.text("test throwing execptions"))
-                      .child(Command.builder()
-                            .setExecutor(ctx -> {
+                      .shortDescription(Component.text("test throwing execptions"))
+                      .addChild(Command.builder()
+                            .executor(ctx -> {
                                 throw new CommandException(Component.text("Exit via exception"));
                             })
                             .build(), "exception")
-                      .child(Command.builder()
-                            .setExecutor(ctx -> {
+                      .addChild(Command.builder()
+                            .executor(ctx -> {
                                 return CommandResult.error(Component.text("Exit via failed result"));
                             }).build(), "failedresult")
                       .build(), "testfailure");
@@ -471,12 +471,12 @@ public final class CommandTest {
     private static CommandResult printParameters(final CommandContext context, final Parameter.Value<?>... params)
     {
         for (final Parameter.Value<?> param : params) {
-            final Object paramValue = context.getOne(param).map(Object::toString).orElse("missing");
-            final String paramUsage = param.getUsage(context.getCause());
+            final Object paramValue = context.one(param).map(Object::toString).orElse("missing");
+            final String paramUsage = param.usage(context.cause());
             context.sendMessage(Identity.nil(), Component.text(paramUsage + ": " + paramValue));
         }
         // TODO usage starts with "command" - comes from SpogneParameterizedCommand#getCachedDispatcher
-        context.getExecutedCommand().ifPresent(cmd -> context.sendMessage(Identity.nil(), cmd.getUsage(context.getCause()).color(NamedTextColor.GRAY)));
+        context.executedCommand().ifPresent(cmd -> context.sendMessage(Identity.nil(), cmd.usage(context.cause()).color(NamedTextColor.GRAY)));
         return CommandResult.success();
     }
 

@@ -85,20 +85,20 @@ public class MutableMapBlockEntityArchetypeBuffer extends AbstractMutableBlockEn
     }
 
     @Override
-    public Optional<BlockEntityArchetype> getBlockEntityArchetype(final int x, final int y, final int z) {
+    public Optional<BlockEntityArchetype> blockEntityArchetype(final int x, final int y, final int z) {
         return Optional.ofNullable(this.blockEntities.get(new Vector3i(x, y, z)));
     }
 
     @Override
-    public Map<Vector3i, BlockEntityArchetype> getBlockEntityArchetypes() {
+    public Map<Vector3i, BlockEntityArchetype> blockEntityArchetypes() {
         return this.blockEntities;
     }
 
     @Override
-    public VolumeStream<MutableMapBlockEntityArchetypeBuffer, BlockEntityArchetype> getBlockEntityArchetypeStream(final Vector3i min,
+    public VolumeStream<MutableMapBlockEntityArchetypeBuffer, BlockEntityArchetype> blockEntityArchetypeStream(final Vector3i min,
         final Vector3i max, final StreamOptions options
     ) {
-        VolumeStreamUtils.validateStreamArgs(min, max, this.getBlockMin(), this.getBlockMax(), options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
         final Stream<Map.Entry<Vector3i, BlockEntityArchetype>> entryStream;
         if (options.carbonCopy()) {
             final Map<Vector3i, BlockEntityArchetype> copy = new HashMap<>();

@@ -51,7 +51,7 @@ public abstract class ServerLoginPacketListenerImplMixin_API implements ServerSi
     // @formatter:on
 
     @Override
-    public GameProfile getProfile() {
+    public GameProfile profile() {
         return SpongeGameProfile.of(this.gameProfile);
     }
 
@@ -67,12 +67,12 @@ public abstract class ServerLoginPacketListenerImplMixin_API implements ServerSi
     }
 
     @Override
-    public InetSocketAddress getAddress() {
+    public InetSocketAddress address() {
         return ((ConnectionBridge) this.connection).bridge$getAddress();
     }
 
     @Override
-    public InetSocketAddress getVirtualHost() {
+    public InetSocketAddress virtualHost() {
         return ((ConnectionBridge) this.connection).bridge$getVirtualHost();
     }
 }

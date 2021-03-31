@@ -57,10 +57,10 @@ public final class PrimaryInventoryClickState extends BasicInventoryPacketState 
         if (!capturedEntities.isEmpty()) {
             PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
             return SpongeEventFactory.createClickContainerEventDropOutsidePrimary(
-                PhaseTracker.getCauseStackManager().getCurrentCause(),
+                PhaseTracker.getCauseStackManager().currentCause(),
                 openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
         }
-        return SpongeEventFactory.createClickContainerEventPrimary(PhaseTracker.getCauseStackManager().getCurrentCause(),
+        return SpongeEventFactory.createClickContainerEventPrimary(PhaseTracker.getCauseStackManager().currentCause(),
             openContainer, transaction, Optional.ofNullable(slot), slotTransactions);
     }
 

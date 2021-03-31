@@ -116,7 +116,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
             @NonNull final String arguments) throws CommandException {
         try {
             final SpongeCommandDispatcher dispatcher = this.commandManager().getDispatcher();
-            return CommandResult.builder().setResult(
+            return CommandResult.builder().result(
                     dispatcher.execute(
                             dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause))).build();
         } catch (final SpongeCommandSyntaxException ex) {
@@ -154,7 +154,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
             throw new IllegalArgumentException(command + " is not a valid a valid command!");
         }
 
-        return commandEntry.getHelp(cause);
+        return commandEntry.help(cause);
     }
 
     @Override
@@ -174,7 +174,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
         if (!(command instanceof SpongeParameterizedCommand)) {
             throw new IllegalArgumentException("Command must be a SpongeParameterizedCommand!");
         }
-        return ((SpongeParameterizedCommand) command).buildWithAliases(mapping.getAllAliases());
+        return ((SpongeParameterizedCommand) command).buildWithAliases(mapping.allAliases());
     }
 
 }

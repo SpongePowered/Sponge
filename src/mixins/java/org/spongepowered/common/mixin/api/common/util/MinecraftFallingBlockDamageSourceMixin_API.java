@@ -38,18 +38,18 @@ import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 public abstract class MinecraftFallingBlockDamageSourceMixin_API extends EntityDamageSourceMixin_API implements FallingBlockDamageSource {
 
     @Override
-    public FallingBlock getSource() {
-        return (FallingBlock) super.getSource();
+    public FallingBlock source() {
+        return (FallingBlock) super.source();
     }
 
     @Override
     public String toString() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.getType());
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.type());
 
         return MoreObjects.toStringHelper(this)
             .add("Name", this.shadow$getMsgId())
             .add("Key", resourceKey)
-            .add("FallingBlock", this.getSource().toString())
+            .add("FallingBlock", this.source().toString())
             .toString();
     }
 }

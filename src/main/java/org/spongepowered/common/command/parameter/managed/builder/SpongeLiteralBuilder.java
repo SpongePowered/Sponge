@@ -39,13 +39,13 @@ public final class SpongeLiteralBuilder<T> implements VariableValueParameters.Li
     @Nullable private Supplier<T> returnValue;
 
     @Override
-    public VariableValueParameters.@NonNull LiteralBuilder<T> setLiteral(@NonNull final Supplier<? extends Collection<String>> literalSupplier) {
+    public VariableValueParameters.@NonNull LiteralBuilder<T> literal(@NonNull final Supplier<? extends Collection<String>> literalSupplier) {
         this.strings = literalSupplier;
         return this;
     }
 
     @Override
-    public VariableValueParameters.@NonNull LiteralBuilder<T> setReturnValue(@NonNull final Supplier<T> returnValueSupplier) {
+    public VariableValueParameters.@NonNull LiteralBuilder<T> returnValue(@NonNull final Supplier<T> returnValueSupplier) {
         this.returnValue = returnValueSupplier;
         return this;
     }

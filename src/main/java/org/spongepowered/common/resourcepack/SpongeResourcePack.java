@@ -55,18 +55,18 @@ public abstract class SpongeResourcePack implements ResourcePack {
     public abstract String getUrlString();
 
     @Override
-    public String getId() {
+    public String id() {
         return this.id;
     }
 
     @Override
-    public Optional<String> getHash() {
+    public Optional<String> hash() {
         return Optional.of(this.hash);
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("id", this.getId()).add("uri", this.getUri()).toString();
+        return MoreObjects.toStringHelper(this).add("id", this.id()).add("uri", this.uri()).toString();
     }
 
     public static SpongeResourcePack create(String uri, String hash) throws URISyntaxException {

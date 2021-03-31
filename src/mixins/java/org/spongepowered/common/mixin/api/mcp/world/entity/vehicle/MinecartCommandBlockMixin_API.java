@@ -41,7 +41,7 @@ public abstract class MinecartCommandBlockMixin_API extends AbstractMinecartMixi
     // @formatter:on
 
     @Override
-    public String getIdentifier() {
+    public String identifier() {
         return this.getCommandBlock().getName().getString();
     }
 

@@ -77,11 +77,11 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow public abstract void shadow$addAttributeModifier(Attribute attribute, net.minecraft.world.entity.ai.attributes.AttributeModifier modifier, @Nullable EquipmentSlot equipmentSlot);
     // @formatter:on
 
-    public int itemStack$getQuantity() {
+    public int itemStack$quantity() {
         return this.shadow$getCount();
     }
 
-    public ItemType itemStack$getType() {
+    public ItemType itemStack$type() {
         return (ItemType) this.shadow$getItem();
     }
 
@@ -89,7 +89,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         this.shadow$setCount(quantity);
     }
 
-    public int itemStack$getMaxStackQuantity() {
+    public int itemStack$maxStackQuantity() {
         return this.shadow$getMaxStackSize();
     }
 
@@ -129,7 +129,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         return (ItemStack) (Object) this.shadow$copy();
     }
 
-    public Collection<AttributeModifier> itemStack$getAttributeModifiers(final AttributeType attributeType, final EquipmentType equipmentType) {
+    public Collection<AttributeModifier> itemStack$attributeModifiers(final AttributeType attributeType, final EquipmentType equipmentType) {
         Preconditions.checkNotNull(attributeType, "Attribute type cannot be null");
         Preconditions.checkNotNull(equipmentType, "Equipment type cannot be null");
 
@@ -161,17 +161,17 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 
     @Override
     public DataContainer toContainer() {
-        final ResourceKey key = (ResourceKey) (Object) Registry.ITEM.getKey((Item) this.itemStack$getType());
+        final ResourceKey key = (ResourceKey) (Object) Registry.ITEM.getKey((Item) this.itemStack$type());
         final DataContainer container = DataContainer.createNew()
-            .set(Queries.CONTENT_VERSION, this.getContentVersion())
+            .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.ItemStack.TYPE, key)
-                .set(Constants.ItemStack.COUNT, this.itemStack$getQuantity())
+                .set(Constants.ItemStack.COUNT, this.itemStack$quantity())
                 .set(Constants.ItemStack.DAMAGE_VALUE, this.shadow$getDamageValue());
         if (this.shadow$hasTag()) { // no tag? no data, simple as that.
             final CompoundTag compound = this.shadow$getTag().copy();

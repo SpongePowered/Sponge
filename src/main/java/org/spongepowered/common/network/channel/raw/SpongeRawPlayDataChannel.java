@@ -59,7 +59,7 @@ public class SpongeRawPlayDataChannel implements RawPlayDataChannel {
     @Override
     public boolean isSupportedBy(final EngineConnection connection) {
         Objects.requireNonNull(connection, "connection");
-        return ConnectionUtil.getRegisteredChannels(connection).contains(this.parent.getKey());
+        return ConnectionUtil.getRegisteredChannels(connection).contains(this.parent.key());
     }
 
     @Override
@@ -116,7 +116,7 @@ public class SpongeRawPlayDataChannel implements RawPlayDataChannel {
             return future;
         }
 
-        final Packet<?> mcPacket = PacketUtil.createPlayPayload(this.parent.getKey(), payload, connection.getSide());
+        final Packet<?> mcPacket = PacketUtil.createPlayPayload(this.parent.key(), payload, connection.side());
         PacketSender.sendTo(connection, mcPacket, future);
         return future;
     }

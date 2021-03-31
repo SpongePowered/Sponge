@@ -51,7 +51,7 @@ public final class ParticleOptionUtil {
         options.put(ParticleOptions.QUANTITY.get(), 1);
 
         if (type.getDeserializer() == BlockParticleOption.DESERIALIZER) {
-            options.put(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().getDefaultState());
+            options.put(ParticleOptions.BLOCK_STATE.get(), BlockTypes.AIR.get().defaultState());
         } else if (type.getDeserializer() == ItemParticleOption.DESERIALIZER) {
             options.put(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStackSnapshot.empty());
         } else if (type.getDeserializer() == DustParticleOptions.DESERIALIZER) {

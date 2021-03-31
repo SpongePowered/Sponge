@@ -54,8 +54,8 @@ public final class SpongeScoreboardBuilder implements Scoreboard.Builder {
 
     @Override
     public Scoreboard.Builder from(Scoreboard value) {
-        this.objectives = new ArrayList<>(value.getObjectives());
-        this.teams = new ArrayList<>(value.getTeams());
+        this.objectives = new ArrayList<>(value.objectives());
+        this.teams = new ArrayList<>(value.teams());
         return this;
     }
 

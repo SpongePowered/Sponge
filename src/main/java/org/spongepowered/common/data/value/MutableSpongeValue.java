@@ -43,11 +43,11 @@ public final class MutableSpongeValue<E> extends AbstractMutableSpongeValue<E> {
 
     @Override
     public Immutable<E> asImmutable() {
-        return this.getKey().getValueConstructor().getImmutable(this.element).asImmutable();
+        return this.key().getValueConstructor().getImmutable(this.element).asImmutable();
     }
 
     @Override
     public Mutable<E> copy() {
-        return new MutableSpongeValue<>(this.getKey(), CopyHelper.copy(this.element));
+        return new MutableSpongeValue<>(this.key(), CopyHelper.copy(this.element));
     }
 }

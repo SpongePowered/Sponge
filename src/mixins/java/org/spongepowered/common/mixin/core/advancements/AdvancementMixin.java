@@ -108,7 +108,7 @@ public abstract class AdvancementMixin implements AdvancementBridge {
         }
         for (Map.Entry<String, List<DefaultedAdvancementCriterion>> groupEntry : scoreCriteria.entrySet()) {
             criteriaMap.put(groupEntry.getKey(), new SpongeScoreCriterion(groupEntry.getKey(), groupEntry.getValue()));
-            groupEntry.getValue().forEach(c -> criteriaMap.remove(c.getName()));
+            groupEntry.getValue().forEach(c -> criteriaMap.remove(c.name()));
         }
 
         final Set<AdvancementCriterion> andCriteria = new HashSet<>();

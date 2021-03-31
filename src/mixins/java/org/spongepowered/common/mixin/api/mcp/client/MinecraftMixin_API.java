@@ -67,12 +67,12 @@ public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Run
     }
 
     @Override
-    public Optional<LocalPlayer> getPlayer() {
+    public Optional<LocalPlayer> player() {
         return Optional.ofNullable((LocalPlayer) this.player);
     }
 
     @Override
-    public Optional<LocalServer> getServer() {
+    public Optional<LocalServer> server() {
         final MinecraftBridge minecraftBridge = (MinecraftBridge) (this);
         final IntegratedServer integratedServer = minecraftBridge.bridge$getTemporaryIntegratedServer();
 
@@ -84,12 +84,12 @@ public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Run
     }
 
     @Override
-    public Optional<ClientWorld> getWorld() {
+    public Optional<ClientWorld> world() {
         return Optional.ofNullable((ClientWorld) this.level);
     }
 
     @Override
-    public Optional<ClientSideConnection> getConnection() {
+    public Optional<ClientSideConnection> connection() {
         if (this.pendingConnection == null) {
             return Optional.empty();
         }
@@ -97,17 +97,17 @@ public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Run
     }
 
     @Override
-    public Game getGame() {
-        return Sponge.getGame();
+    public Game game() {
+        return Sponge.game();
     }
 
     @Override
-    public CauseStackManager getCauseStackManager() {
+    public CauseStackManager causeStackManager() {
         return PhaseTracker.getCauseStackManager();
     }
 
     @Override
-    public ClientScheduler getScheduler() {
+    public ClientScheduler scheduler() {
         return this.api$scheduler;
     }
 

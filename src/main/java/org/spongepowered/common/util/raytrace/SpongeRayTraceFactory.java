@@ -39,7 +39,7 @@ public final class SpongeRayTraceFactory implements RayTrace.Factory {
 
     public SpongeRayTraceFactory() {
         this.onlyAir = locatableBlock -> {
-            final BlockType type = locatableBlock.getBlockState().getType();
+            final BlockType type = locatableBlock.blockState().type();
             return type == BlockTypes.AIR.get() ||
                     type == BlockTypes.CAVE_AIR.get() ||
                     type == BlockTypes.VOID_AIR.get();

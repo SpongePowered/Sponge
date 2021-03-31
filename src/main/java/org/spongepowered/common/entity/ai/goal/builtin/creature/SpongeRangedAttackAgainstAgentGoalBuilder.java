@@ -63,9 +63,9 @@ public final class SpongeRangedAttackAgainstAgentGoalBuilder implements RangedAt
     @Override
     public RangedAttackAgainstAgentGoal.Builder from(RangedAttackAgainstAgentGoal value) {
         checkNotNull(value);
-        this.maxSpeed = value.getMoveSpeed();
-        this.delayBetweenAttacks = value.getDelayBetweenAttacks();
-        this.attackRadius = value.getAttackRadius();
+        this.maxSpeed = value.moveSpeed();
+        this.delayBetweenAttacks = value.delayBetweenAttacks();
+        this.attackRadius = value.attackRadius();
         return this;
     }
 

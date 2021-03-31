@@ -127,7 +127,7 @@ public final class WorldMigrator {
 
         // Previous to 1/10/2018, Sponge accidentally used the wrong save folder for client saves (put them on the root instead of saves/my_save).
         // This fixes this issue by moving over the folders and deleting them on the root
-        if (Sponge.getPlatform().getType().isClient()) {
+        if (Sponge.platform().type().isClient()) {
             try {
                 Files.newDirectoryStream(worldContainer.getParent()).forEach((saveFolder) -> {
                     final boolean isWorld = Files.exists(saveFolder.resolve("level.dat"));

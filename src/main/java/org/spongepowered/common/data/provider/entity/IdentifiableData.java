@@ -45,19 +45,19 @@ public final class IdentifiableData {
         registrator
                 .asMutable(Identifiable.class)
                     .create(Keys.FIRST_DATE_JOINED)
-                        .get(h -> ((SpongeServer) Sponge.getServer()).getPlayerDataManager().getFirstJoined(h.getUniqueId()).orElse(null))
+                        .get(h -> ((SpongeServer) Sponge.server()).getPlayerDataManager().getFirstJoined(h.uniqueId()).orElse(null))
                         .set((h, v) -> {
-                            final UUID id = h.getUniqueId();
-                            final Instant played = ((SpongeServer) Sponge.getServer()).getPlayerDataManager().getFirstJoined(id).orElse(v);
-                            ((SpongeServer) Sponge.getServer()).getPlayerDataManager().setPlayerInfo(id, played, v);
+                            final UUID id = h.uniqueId();
+                            final Instant played = ((SpongeServer) Sponge.server()).getPlayerDataManager().getFirstJoined(id).orElse(v);
+                            ((SpongeServer) Sponge.server()).getPlayerDataManager().setPlayerInfo(id, played, v);
                         })
                         .supports(h -> h instanceof Player || h instanceof SpongeUser)
                     .create(Keys.LAST_DATE_PLAYED)
-                        .get(h -> ((SpongeServer) Sponge.getServer()).getPlayerDataManager().getLastPlayed(h.getUniqueId()).orElse(null))
+                        .get(h -> ((SpongeServer) Sponge.server()).getPlayerDataManager().getLastPlayed(h.uniqueId()).orElse(null))
                         .set((h, v) -> {
-                            final UUID id = h.getUniqueId();
-                            final Instant played = ((SpongeServer) Sponge.getServer()).getPlayerDataManager().getFirstJoined(id).orElse(v);
-                            ((SpongeServer) Sponge.getServer()).getPlayerDataManager().setPlayerInfo(id, played, v);
+                            final UUID id = h.uniqueId();
+                            final Instant played = ((SpongeServer) Sponge.server()).getPlayerDataManager().getFirstJoined(id).orElse(v);
+                            ((SpongeServer) Sponge.server()).getPlayerDataManager().setPlayerInfo(id, played, v);
                         })
                         .supports(h -> h instanceof Player || h instanceof SpongeUser);
     }

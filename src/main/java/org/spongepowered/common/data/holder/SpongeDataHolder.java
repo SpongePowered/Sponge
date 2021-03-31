@@ -98,23 +98,23 @@ public interface SpongeDataHolder extends DataHolder {
 
     @Override
     default <E, V extends Value<E>> Optional<V> getValue(Key<V> key) {
-        return this.impl$apply(key, DataProvider::getValue, Optional::empty);
+        return this.impl$apply(key, DataProvider::value, Optional::empty);
     }
 
     default Map<Key<?>, Object> impl$getMappedValues() {
         return this.impl$delegateDataHolder().stream()
                 .flatMap(dh -> this.impl$getAllProviders(dh).stream()
-                        .map(provider -> provider.getValue(dh).orElse(null))
+                        .map(provider -> provider.value(dh).orElse(null))
                         .filter(Objects::nonNull)
                         .map(Value::asImmutable))
-                .collect(ImmutableMap.toImmutableMap(Value::getKey, Value::get));
+                .collect(ImmutableMap.toImmutableMap(Value::key, Value::get));
     }
 
     @Override
     default Set<Key<?>> getKeys() {
         return this.impl$delegateDataHolder().stream()
                 .flatMap(dh -> this.impl$getAllProviders(dh).stream()
-                        .filter(provider -> provider.get(dh).isPresent()).map(DataProvider::getKey))
+                        .filter(provider -> provider.get(dh).isPresent()).map(DataProvider::key))
                 .collect(ImmutableSet.toImmutableSet());
     }
 
@@ -122,7 +122,7 @@ public interface SpongeDataHolder extends DataHolder {
     default Set<Value.Immutable<?>> getValues() {
         return this.impl$delegateDataHolder().stream()
                 .flatMap(dh -> this.impl$getAllProviders(dh).stream()
-                        .map(provider -> provider.getValue(dh).orElse(null))
+                        .map(provider -> provider.value(dh).orElse(null))
                         .filter(Objects::nonNull)
                         .map(Value::asImmutable))
                 .collect(ImmutableSet.toImmutableSet());

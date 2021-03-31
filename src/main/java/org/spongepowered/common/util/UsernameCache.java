@@ -57,7 +57,7 @@ public final class UsernameCache {
     public UsernameCache(final Server server) {
         this.usernameByUniqueId = new ConcurrentHashMap<>();
         this.gson = new GsonBuilder().setPrettyPrinting().create();
-        this.cacheFile = server.getGame().getGameDirectory().resolve("usernamecache.json");
+        this.cacheFile = server.game().gameDirectory().resolve("usernamecache.json");
     }
 
     public void setUsername(final UUID uniqueId, final String username) {

@@ -50,7 +50,7 @@ public abstract class CommandBlockMixin {
         // However, when a plugin provides a permission service, we have to force the op level to 0 on the client, since
         // the server can't tell the client to open it.
         // If the server-side permission check fails, we need to forcibly close it, since it will already have opened on the client.
-        if (!world.isClientSide() && !(Sponge.getServer().getServiceProvider().permissionService() instanceof SpongePermissionService)) {
+        if (!world.isClientSide() && !(Sponge.server().serviceProvider().permissionService() instanceof SpongePermissionService)) {
             // CommandBlock GUI opens solely on the client, we need to force it close on cancellation
             ((ServerPlayer) player).connection.send(new ClientboundContainerClosePacket(0));
         }

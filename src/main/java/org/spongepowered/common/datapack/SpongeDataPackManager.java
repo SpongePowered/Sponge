@@ -46,7 +46,7 @@ import java.util.Map;
 
 public final class SpongeDataPackManager {
 
-    public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.getGame());
+    public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.game());
 
     private final Game game;
     private final Map<SpongeDataPackType, List<DataPackSerializable>> serializables;
@@ -102,7 +102,7 @@ public final class SpongeDataPackManager {
     private <T extends DataPackSerializable, U extends DataPackSerializedObject> Map<SpongeDataPackType<T, U>, List<T>> callRegisterDataPackValueEvent(final SpongeDataPackType<T, U> type) {
         final RegisterDataPackValueEventImpl<T, U> event = new RegisterDataPackValueEventImpl<>(Cause.of(EventContext.empty(), this.game),
                 this.game, type);
-        this.game.getEventManager().post(event);
+        this.game.eventManager().post(event);
         return event.serializables();
     }
 

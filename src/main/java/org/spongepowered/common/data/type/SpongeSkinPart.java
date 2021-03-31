@@ -48,7 +48,7 @@ public final class SpongeSkinPart implements SkinPart {
     }
 
     public int getMask() {
-        final MappedRegistry<SkinPart> registry = (MappedRegistry<SkinPart>) (Object) Sponge.getGame().registries().registry(RegistryTypes.SKIN_PART);
+        final MappedRegistry<SkinPart> registry = (MappedRegistry<SkinPart>) (Object) Sponge.game().registries().registry(RegistryTypes.SKIN_PART);
         return 1 << registry.getId(this);
     }
 }

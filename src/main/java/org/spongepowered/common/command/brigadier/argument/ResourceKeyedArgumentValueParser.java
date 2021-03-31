@@ -36,7 +36,7 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
     }
 
     @Override
-    public final ResourceKey getKey() {
+    public final ResourceKey key() {
         return this.key;
     }
 }

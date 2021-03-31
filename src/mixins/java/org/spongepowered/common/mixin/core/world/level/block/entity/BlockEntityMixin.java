@@ -126,7 +126,7 @@ public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoun
 
         return MoreObjects.toStringHelper(this)
             .add("type", key)
-            .add("world", ((ServerWorld) this.level).getKey())
+            .add("world", ((ServerWorld) this.level).key())
             .add("pos", this.worldPosition);
     }
 

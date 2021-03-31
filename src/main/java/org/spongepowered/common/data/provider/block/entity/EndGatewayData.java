@@ -42,7 +42,7 @@ public final class EndGatewayData {
                     .create(Keys.COOLDOWN)
                         .get(x -> new SpongeTicks(x.accessor$teleportCooldown()))
                         .setAnd((h, v) -> {
-                            final int ticks = (int) v.getTicks();
+                            final int ticks = (int) v.ticks();
                             if (ticks < 0) {
                                 return false;
                             }
@@ -55,7 +55,7 @@ public final class EndGatewayData {
                     .create(Keys.END_GATEWAY_AGE)
                         .get(x -> new SpongeTicks(x.accessor$age()))
                         .setAnd((h, v) -> {
-                            final long ticks = v.getTicks();
+                            final long ticks = v.ticks();
                             if (ticks < 0) {
                                 return false;
                             }

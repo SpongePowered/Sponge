@@ -45,21 +45,21 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
 
     @Override
     public Optional<Instant> get() {
-        return this.get(this.getAdvancement().getCriterion()).get().get();
+        return this.get(this.advancement().criterion()).get().get();
     }
 
     @Override
     public Instant grant() {
-        return this.get(this.getAdvancement().getCriterion()).get().grant();
+        return this.get(this.advancement().criterion()).get().grant();
     }
 
     @Override
     public Optional<Instant> revoke() {
-        return this.get(this.getAdvancement().getCriterion()).get().revoke();
+        return this.get(this.advancement().criterion()).get().revoke();
     }
 
     @Override
-    public Advancement getAdvancement() {
+    public Advancement advancement() {
         return ((AdvancementProgressBridge) this).bridge$getAdvancement();
     }
 
@@ -68,7 +68,7 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
         Preconditions.checkNotNull(criterion, "criterion");
         final Map<String, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
         Preconditions.checkState(map != null, "progressMap isn't initialized");
-        return Optional.ofNullable((CriterionProgress) map.get(criterion.getName()));
+        return Optional.ofNullable((CriterionProgress) map.get(criterion.name()));
     }
 
     @Override
@@ -76,22 +76,22 @@ public abstract class AdvancementProgressMixin_API implements org.spongepowered.
         Preconditions.checkNotNull(criterion);
         final Map<String, ImplementationBackedCriterionProgress> map = ((AdvancementProgressBridge) this).bridge$getProgressMap();
         Preconditions.checkState(map != null, "progressMap isn't initialized");
-        return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion.getName()));
+        return Optional.ofNullable((ScoreCriterionProgress) map.get(criterion.name()));
     }
 
     @Override
     public CriterionProgress require(final AdvancementCriterion criterion) {
         Objects.requireNonNull(criterion, "criterion");
 
-        return this.get(criterion).orElseThrow(() -> new IllegalStateException("The criterion " + criterion.getName()
-                + " isn't present on the advancement '" + this.getAdvancement() + "'."));
+        return this.get(criterion).orElseThrow(() -> new IllegalStateException("The criterion " + criterion.name()
+                + " isn't present on the advancement '" + this.advancement() + "'."));
     }
 
     @Override
     public ScoreCriterionProgress require(final ScoreAdvancementCriterion criterion) {
         Objects.requireNonNull(criterion, "criterion");
 
-        return this.get(criterion).orElseThrow(() -> new IllegalStateException("The score criterion " + criterion.getName()
-                + " isn't present on the advancement '" + this.getAdvancement().getKey().toString() + "'."));
+        return this.get(criterion).orElseThrow(() -> new IllegalStateException("The score criterion " + criterion.name()
+                + " isn't present on the advancement '" + this.advancement().key().toString() + "'."));
     }
 }

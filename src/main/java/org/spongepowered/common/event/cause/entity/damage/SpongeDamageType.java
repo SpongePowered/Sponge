@@ -35,7 +35,7 @@ public final class SpongeDamageType implements DamageType {
     }
 
     @Override
-    public String getName() {
+    public String name() {
         return this.languageKey;
     }
 }

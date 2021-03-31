@@ -66,7 +66,7 @@ public class SpongeFavicon implements Favicon {
     }
 
     @Override
-    public BufferedImage getImage() {
+    public BufferedImage image() {
         return this.decoded;
     }
 
@@ -94,28 +94,6 @@ public class SpongeFavicon implements Favicon {
         return MoreObjects.toStringHelper(this)
                 .addValue(this.decoded)
                 .toString();
-    }
-
-    public static Favicon load(String raw) throws IOException {
-        return new SpongeFavicon(raw);
-    }
-
-    public static Favicon load(Path path) throws IOException {
-        try (InputStream in = Files.newInputStream(path)) {
-            return SpongeFavicon.load(in);
-        }
-    }
-
-    public static Favicon load(URL url) throws IOException {
-        return SpongeFavicon.load(ImageIO.read(url));
-    }
-
-    public static Favicon load(InputStream in) throws IOException {
-        return SpongeFavicon.load(ImageIO.read(in));
-    }
-
-    public static Favicon load(BufferedImage image) throws IOException {
-        return new SpongeFavicon(image);
     }
 
     private static final String FAVICON_PREFIX = "data:image/png;base64,";
@@ -153,6 +131,36 @@ public class SpongeFavicon implements Favicon {
             }
         } finally {
             base64.release();
+        }
+    }
+
+    public static final class FactoryImpl implements Favicon.Factory {
+
+        @Override
+        public Favicon load(final String raw) throws IOException {
+            return new SpongeFavicon(raw);
+        }
+
+        @Override
+        public Favicon load(final Path path) throws IOException {
+            try (InputStream in = Files.newInputStream(path)) {
+                return this.load(in);
+            }
+        }
+
+        @Override
+        public Favicon load(final URL url) throws IOException {
+            return this.load(ImageIO.read(url));
+        }
+
+        @Override
+        public Favicon load(final InputStream in) throws IOException {
+            return this.load(ImageIO.read(in));
+        }
+
+        @Override
+        public Favicon load(final BufferedImage image) throws IOException {
+            return new SpongeFavicon(image);
         }
     }
 }

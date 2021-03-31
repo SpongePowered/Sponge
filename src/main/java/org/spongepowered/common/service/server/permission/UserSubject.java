@@ -78,12 +78,12 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public String getIdentifier() {
+    public String identifier() {
         return this.player.getId().toString();
     }
 
     @Override
-    public Optional<String> getFriendlyIdentifier() {
+    public Optional<String> friendlyIdentifier() {
         return Optional.of(this.player.getName());
     }
 
@@ -101,12 +101,12 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public SubjectCollection getContainingCollection() {
+    public SubjectCollection containingCollection() {
         return this.collection;
     }
 
     @Override
-    public MemorySubjectData getSubjectData() {
+    public MemorySubjectData subjectData() {
         return this.data;
     }
 
@@ -116,13 +116,13 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public Tristate getPermissionValue(final Set<Context> contexts, final String permission) {
-        Tristate ret = super.getPermissionValue(contexts, permission);
+    public Tristate permissionValue(final Set<Context> contexts, final String permission) {
+        Tristate ret = super.permissionValue(contexts, permission);
         if (ret == Tristate.UNDEFINED) {
-            ret = this.getDataPermissionValue(this.collection.getDefaults().getSubjectData(), permission);
+            ret = this.getDataPermissionValue(this.collection.defaults().subjectData(), permission);
         }
         if (ret == Tristate.UNDEFINED) {
-            ret = this.getDataPermissionValue(this.collection.getService().getDefaults().getSubjectData(), permission);
+            ret = this.getDataPermissionValue(this.collection.getService().defaults().subjectData(), permission);
         }
         if (ret == Tristate.UNDEFINED && this.getOpLevel() >= SpongePermissionService.getServerOpLevel()) {
             ret = Tristate.TRUE;
@@ -131,13 +131,13 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public Optional<String> getOption(final Set<Context> contexts, final String option) {
-        Optional<String> ret = super.getOption(contexts, option);
+    public Optional<String> option(final Set<Context> contexts, final String option) {
+        Optional<String> ret = super.option(contexts, option);
         if (!ret.isPresent()) {
-            ret = this.getDataOptionValue(this.collection.getDefaults().getSubjectData(), option);
+            ret = this.getDataOptionValue(this.collection.defaults().subjectData(), option);
         }
         if (!ret.isPresent()) {
-            ret = this.getDataOptionValue(this.collection.getService().getDefaults().getSubjectData(), option);
+            ret = this.getDataOptionValue(this.collection.getService().defaults().subjectData(), option);
         }
         return ret;
     }

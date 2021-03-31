@@ -76,7 +76,7 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecra
 
     @Override
     public Entity getEntity() {
-        return (Entity) this.getSource();
+        return (Entity) this.source();
     }
 
     @Override
@@ -106,7 +106,7 @@ public abstract class SpongeCommonIndirectEntityDamageSource extends net.minecra
 
     @Override
     public float getFoodExhaustion() {
-        return (float) this.getExhaustion();
+        return (float) this.exhaustion();
     }
 
 }

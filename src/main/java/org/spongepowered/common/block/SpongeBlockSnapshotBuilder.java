@@ -96,7 +96,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
     @Override
     @NonNull
     public SpongeBlockSnapshotBuilder world(@NonNull final ServerWorldProperties worldProperties) {
-        this.worldKey = Objects.requireNonNull(worldProperties).getKey();
+        this.worldKey = Objects.requireNonNull(worldProperties).key();
         return this;
     }
 
@@ -106,7 +106,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
     }
     
     public SpongeBlockSnapshotBuilder world(final ServerLevel world) {
-        this.worldKey = ((org.spongepowered.api.world.server.ServerWorld) Objects.requireNonNull(world)).getKey();
+        this.worldKey = ((org.spongepowered.api.world.server.ServerWorld) Objects.requireNonNull(world)).key();
         this.worldRef = new WeakReference<>(world);
         return this;
     }
@@ -172,7 +172,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
 
         this.blockState = this.blockState.with(key, value)
                 .orElseThrow(() -> new IllegalArgumentException(String.format("Key %s is not supported for block state %s",
-                        key.getKey().asString(),
+                        key.key().asString(),
                         this.blockState.toString())));
         return this;
     }
@@ -182,26 +182,26 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
     public SpongeBlockSnapshotBuilder from(final BlockSnapshot holder) {
         Objects.requireNonNull(holder);
 
-        this.blockState = holder.getState();
-        this.worldKey = holder.getWorld();
-        if (holder.getCreator().isPresent()) {
-            this.creatorUniqueId = holder.getCreator().get();
+        this.blockState = holder.state();
+        this.worldKey = holder.world();
+        if (holder.creator().isPresent()) {
+            this.creatorUniqueId = holder.creator().get();
         }
-        if (holder.getNotifier().isPresent()) {
-            this.notifierUniqueId = holder.getNotifier().get();
+        if (holder.notifier().isPresent()) {
+            this.notifierUniqueId = holder.notifier().get();
         }
-        this.coordinates = holder.getPosition();
+        this.coordinates = holder.position();
         return this;
     }
 
     public SpongeBlockSnapshotBuilder from(final SpongeBlockSnapshot snapshot) {
         Objects.requireNonNull(snapshot);
 
-        this.blockState = snapshot.getState();
-        this.worldKey = snapshot.getWorld();
+        this.blockState = snapshot.state();
+        this.worldKey = snapshot.world();
         this.worldRef = snapshot.world;
         this.compound = snapshot.compound;
-        this.coordinates = snapshot.getPosition();
+        this.coordinates = snapshot.position();
         this.flag = snapshot.getChangeFlag();
         return this;
     }
@@ -277,7 +277,7 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
                 return Optional.empty();
             }
             final UUID uuid = UUID.fromString(container.getString(Constants.Sponge.BlockSnapshot.WORLD_UUID).get());
-            Sponge.getServer().getWorldManager().worldKey(uuid).ifPresent(worldKey -> container.set(Queries.WORLD_KEY, worldKey));
+            Sponge.server().worldManager().worldKey(uuid).ifPresent(worldKey -> container.set(Queries.WORLD_KEY, worldKey));
         }
 
         DataUtil.checkDataExists(container, Constants.Block.BLOCK_STATE);

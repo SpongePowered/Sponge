@@ -108,7 +108,7 @@ public class CustomInventory implements Container, CarriedBridge {
         for (Inventory inv : this.inventories) {
             if (inv.capacity() > index - offset) {
                 // This MUST not use Sponge API level because Minecraft relies on returning ItemStack references
-                return inv.getSlot(index - offset).map(InventoryAdapter.class::cast)
+                return inv.slot(index - offset).map(InventoryAdapter.class::cast)
                         .map(slot -> slot.inventoryAdapter$getRootLens().getStack(slot.inventoryAdapter$getFabric(), 0))
                         .orElse(ItemStack.EMPTY);
             }
@@ -126,7 +126,7 @@ public class CustomInventory implements Container, CarriedBridge {
                 continue;
             }
             InventoryTransactionResult.Poll result = inv.pollFrom(index - offset, count);
-            return ItemStackUtil.fromSnapshotToNative(result.getPolledItem());
+            return ItemStackUtil.fromSnapshotToNative(result.polledItem());
         }
         return ItemStack.EMPTY;
     }
@@ -137,7 +137,7 @@ public class CustomInventory implements Container, CarriedBridge {
         for (Inventory inv : this.inventories) {
             if (inv.capacity() > index - offset) {
                 InventoryTransactionResult.Poll result = inv.pollFrom(index - offset);
-                return ItemStackUtil.fromSnapshotToNative(result.getPolledItem());
+                return ItemStackUtil.fromSnapshotToNative(result.polledItem());
             }
             offset += inv.capacity();
         }

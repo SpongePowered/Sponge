@@ -45,22 +45,22 @@ public abstract class MinecraftBlockDamageSourceMixin_API extends DamageSourceMi
     @Shadow(remap = false) @Final private ServerLocation location;
 
     @Override
-    public ServerLocation getLocation() {
+    public ServerLocation location() {
         return this.location;
     }
 
     @Override
-    public BlockSnapshot getBlockSnapshot() {
+    public BlockSnapshot blockSnapshot() {
         return this.blockSnapshot;
     }
 
     @Override
     public String toString() {
-        final ResourceKey resourceKey = Sponge.getGame().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.getType());
+        final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.DAMAGE_TYPE).valueKey(this.type());
         return MoreObjects.toStringHelper("BlockDamageSource")
             .add("Name", this.shadow$getMsgId())
             .add("Key", resourceKey)
-            .add("BlockSnapshot", this.getBlockSnapshot())
+            .add("BlockSnapshot", this.blockSnapshot())
             .add("Location", this.location)
             .toString();
     }

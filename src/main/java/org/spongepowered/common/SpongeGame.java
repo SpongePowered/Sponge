@@ -33,7 +33,6 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.asset.AssetManager;
-import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.channel.ChannelRegistry;
@@ -106,12 +105,12 @@ public final class SpongeGame implements Game {
     }
 
     @Override
-    public Path getGameDirectory() {
+    public Path gameDirectory() {
         return SpongeCommon.getGameDirectory();
     }
 
     @Override
-    public ServerConsoleSystemSubject getSystemSubject() {
+    public ServerConsoleSystemSubject systemSubject() {
         if (this.systemSubject == null) {
             this.systemSubject = new ServerConsoleSystemSubject();
         }
@@ -119,93 +118,93 @@ public final class SpongeGame implements Game {
     }
 
     @Override
-    public Platform getPlatform() {
+    public Platform platform() {
         return this.platform;
     }
 
     @Override
-    public GameRegistry getRegistry() {
+    public GameRegistry registry() {
         return this.registry;
     }
 
     @Override
-    public BuilderProvider getBuilderProvider() {
+    public BuilderProvider builderProvider() {
         return this.builderProvider;
     }
 
     @Override
-    public FactoryProvider getFactoryProvider() {
+    public FactoryProvider factoryProvider() {
         return this.factoryProvider;
     }
 
     @Override
-    public DataManager getDataManager() {
+    public DataManager dataManager() {
         return this.dataManager;
     }
 
     @Override
-    public PluginManager getPluginManager() {
+    public PluginManager pluginManager() {
         return this.pluginManager;
     }
 
     @Override
-    public EventManager getEventManager() {
+    public EventManager eventManager() {
         return this.eventManager;
     }
 
     @Override
-    public AssetManager getAssetManager() {
+    public AssetManager assetManager() {
         return this.assetManager;
     }
 
     @Override
-    public PluginConfigManager getConfigManager() {
+    public PluginConfigManager configManager() {
         return this.configManager;
     }
 
     @Override
-    public ChannelRegistry getChannelRegistry() {
+    public ChannelRegistry channelRegistry() {
         return this.channelRegistry;
     }
 
     @Override
-    public MetricsConfigManager getMetricsConfigManager() {
+    public MetricsConfigManager metricsConfigManager() {
         return this.metricsConfigManager;
     }
 
     @Override
-    public SqlManager getSqlManager() {
+    public SqlManager sqlManager() {
         return this.sqlManager;
     }
 
     @Override
-    public ServiceProvider.GameScoped getServiceProvider() {
+    public ServiceProvider.GameScoped serviceProvider() {
         return this.serviceProvider;
     }
 
     @Override
-    public AsyncScheduler getAsyncScheduler() {
+    public AsyncScheduler asyncScheduler() {
         return this.asyncScheduler;
     }
 
     @Override
-    public Locale getLocale(final String locale) {
+    public Locale locale(final String locale) {
         return LocaleCache.getLocale(Preconditions.checkNotNull(locale));
     }
 
     @Override
     public boolean isServerAvailable() {
         if (this.client != null) {
-            return this.client.getServer().isPresent();
+            return this.client.server().isPresent();
         }
 
         return this.server != null;
     }
 
     @Override
-    public Server getServer() {
+    public Server server() {
         if (this.client != null) {
-            return this.client.getServer().orElseThrow(() -> new IllegalStateException("The singleplayer server is not available!"));
+            return this.client.server().orElseThrow(() -> new IllegalStateException("The singleplayer server is not available!"));
         }
 
         Preconditions.checkState(this.server != null, "The dedicated server is not available!");
@@ -222,7 +221,7 @@ public final class SpongeGame implements Game {
     }
 
     @Override
-    public Client getClient() {
+    public Client client() {
         Preconditions.checkState(this.client != null, "The client is not available!");
         return this.client;
     }

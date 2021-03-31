@@ -45,7 +45,7 @@ public abstract class CrashReportMixin_Vanilla {
     private void vanilla$addPluginsToEnvironment(final CallbackInfo ci) {
         this.systemDetails.setDetail("Plugins", () -> {
             final StringBuilder result = new StringBuilder(64);
-            for (final PluginContainer container : Sponge.getPluginManager().getPlugins()) {
+            for (final PluginContainer container : Sponge.pluginManager().plugins()) {
                 final PluginMetadata metadata = container.getMetadata();
 
                 final String name = metadata.getName().orElse(metadata.getId());

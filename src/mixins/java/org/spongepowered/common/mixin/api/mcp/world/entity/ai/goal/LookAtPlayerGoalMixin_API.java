@@ -44,7 +44,7 @@ public abstract class LookAtPlayerGoalMixin_API extends Goal implements LookAtGo
     // @formatter:on
 
     @Override
-    public Class<? extends Living> getWatchedClass() {
+    public Class<? extends Living> watchedClass() {
         return (Class<? extends Living>) this.lookAtType;
     }
 
@@ -55,7 +55,7 @@ public abstract class LookAtPlayerGoalMixin_API extends Goal implements LookAtGo
     }
 
     @Override
-    public float getMaxDistance() {
+    public float maxDistance() {
         return this.lookDistance;
     }
 
@@ -66,7 +66,7 @@ public abstract class LookAtPlayerGoalMixin_API extends Goal implements LookAtGo
     }
 
     @Override
-    public float getChance() {
+    public float chance() {
         return this.probability;
     }
 

@@ -42,7 +42,7 @@ public abstract class Heightmap_TypeMixin_API implements HeightType {
     // @formatter:on
 
     @Override
-    public BlockReaderAwareMatcher<BlockState> getMatcher() {
+    public BlockReaderAwareMatcher<BlockState> matcher() {
         return (state, volume, position) -> this.isOpaque.test((net.minecraft.world.level.block.state.BlockState) state);
     }
 }

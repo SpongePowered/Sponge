@@ -67,7 +67,7 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public Optional<ItemStack> getEquipped(final EquipmentType type) {
+    public Optional<ItemStack> equipped(final EquipmentType type) {
         final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
         final EquipmentInventoryLens lens = this.impl$equipmentInventory(inv);
         return Optional.of(ItemStackUtil.fromNative(lens.getStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlot) (Object) type).getIndex())));
@@ -81,7 +81,7 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public ItemStack getItemInHand(HandType handType) {
+    public ItemStack itemInHand(HandType handType) {
         Preconditions.checkNotNull(handType);
         final net.minecraft.world.item.ItemStack nmsItem = ((LivingEntity) (Object)this).getItemInHand((InteractionHand) (Object) handType);
         return ItemStackUtil.fromNative(nmsItem);
@@ -94,8 +94,8 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public ItemStack getHead() {
-        return this.getEquipped(EquipmentTypes.HEAD).get();
+    public ItemStack head() {
+        return this.equipped(EquipmentTypes.HEAD).get();
     }
 
     @Override
@@ -104,8 +104,8 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public ItemStack getChest() {
-        return this.getEquipped(EquipmentTypes.CHEST).get();
+    public ItemStack chest() {
+        return this.equipped(EquipmentTypes.CHEST).get();
     }
 
     @Override
@@ -114,8 +114,8 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public ItemStack getLegs() {
-        return this.getEquipped(EquipmentTypes.LEGS).get();
+    public ItemStack legs() {
+        return this.equipped(EquipmentTypes.LEGS).get();
     }
 
     @Override
@@ -124,8 +124,8 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     }
 
     @Override
-    public ItemStack getFeet() {
-        return this.getEquipped(EquipmentTypes.FEET).get();
+    public ItemStack feet() {
+        return this.equipped(EquipmentTypes.FEET).get();
     }
 
     @Override

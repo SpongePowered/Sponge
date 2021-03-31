@@ -37,7 +37,7 @@ public final class ImmutableSpongeValue<E> extends AbstractImmutableSpongeValue<
 
     @Override
     public Immutable<E> with(E value) {
-        return this.getKey().getValueConstructor().getImmutable(value).asImmutable();
+        return this.key().getValueConstructor().getImmutable(value).asImmutable();
     }
 
     @Override
@@ -47,6 +47,6 @@ public final class ImmutableSpongeValue<E> extends AbstractImmutableSpongeValue<
 
     @Override
     public Mutable<E> asMutable() {
-        return new MutableSpongeValue<>(this.getKey(), this.get());
+        return new MutableSpongeValue<>(this.key(), this.get());
     }
 }

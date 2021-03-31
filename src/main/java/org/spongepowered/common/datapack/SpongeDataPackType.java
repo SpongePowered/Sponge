@@ -97,21 +97,21 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         private final SpongeDataPackType<@NonNull Advancement, DataPackSerializedObject> advancement = new SpongeDataPackType<>(TypeToken.get(Advancement.class),
                 new DataPackSerializer<>("Advancements", "advancements"),
                 s -> ((net.minecraft.advancements.Advancement) s).deconstruct().serializeToJson(),
-                (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
+                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 false
         );
 
         private final SpongeDataPackType<@NonNull RecipeRegistration, RecipeSerializedObject> recipe = new SpongeDataPackType<>(TypeToken.get(RecipeRegistration.class),
                 new RecipeDataPackSerializer(),
                 s -> ((FinishedRecipe) s).serializeRecipe(),
-                (i1, i2) -> new RecipeSerializedObject(i1.getKey(), i2, new DataPackSerializedObject(i1.getKey(), ((FinishedRecipe) i1).serializeAdvancement())),
+                (i1, i2) -> new RecipeSerializedObject(i1.key(), i2, new DataPackSerializedObject(i1.key(), ((FinishedRecipe) i1).serializeAdvancement())),
                 false
         );
 
         private final SpongeDataPackType<@NonNull WorldTypeTemplate, DataPackSerializedObject> worldType = new SpongeDataPackType<>(TypeToken.get(WorldTypeTemplate.class),
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
                 s -> {
-                    final OptionalLong fixedTime = !s.fixedTime().isPresent() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().getTicks());
+                    final OptionalLong fixedTime = !s.fixedTime().isPresent() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().ticks());
                     // TODO - Zidane!!!
                     throw new UnsupportedOperationException("Zidane, fix this");
 //                    final DimensionType type =
@@ -119,24 +119,22 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 //                                    s.coordinateMultiplier(),
 //                                    s.createDragonFight(), s.piglinSafe(), s.bedsUsable(), s.respawnAnchorsUsable(), s.hasRaids(), s.logicalHeight(),
 //                                    (BiomeZoomer) s.biomeSampler(), (ResourceLocation) (Object) ((SpongeWorldTypeTemplate) s).infiniburn,
-//                                    (ResourceLocation) (Object) s.effect().getKey(), s.ambientLighting());
+//                                    (ResourceLocation) (Object) s.effect().key(), s.ambientLighting());
 //                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
                 },
-                (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
+                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 true
         );
 
         private final SpongeDataPackType<@NonNull WorldTemplate, DataPackSerializedObject> world = new SpongeDataPackType<>(TypeToken.get(WorldTemplate.class),
                 new DataPackSerializer<>("Dimensions", "dimension"),
                 s -> {
-                    final LevelStem template =
-                            new LevelStem(() -> BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get((ResourceLocation) (Object) s.worldType().location()),
-                                    (ChunkGenerator) s.generator());
+                    final LevelStem template = new LevelStem(() -> BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get((ResourceLocation) (Object) s.worldType().location()), (ChunkGenerator) s.generator());
                     ((LevelStemBridge) (Object) template).bridge$setFromSettings(false);
                     ((LevelStemBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
                     return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), template).getOrThrow(false, e -> {});
                 },
-                (i1, i2) -> new DataPackSerializedObject(i1.getKey(), i2),
+                (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 true
         );
 

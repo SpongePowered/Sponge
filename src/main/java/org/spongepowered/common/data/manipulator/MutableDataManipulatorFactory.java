@@ -51,7 +51,7 @@ public final class MutableDataManipulatorFactory implements DataManipulator.Muta
 
         final Map<Key<?>, Object> mappedValues = new HashMap<>();
         for (final Value<?> value : values) {
-            mappedValues.put(value.getKey(), CopyHelper.copy(value.get()));
+            mappedValues.put(value.key(), CopyHelper.copy(value.get()));
         }
         return mappedValues;
     }

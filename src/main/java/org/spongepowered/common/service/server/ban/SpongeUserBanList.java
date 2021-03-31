@@ -27,13 +27,15 @@ package org.spongepowered.common.service.server.ban;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanService;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.io.File;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
-import javax.annotation.Nullable;
 import net.minecraft.server.players.UserBanList;
 import net.minecraft.server.players.UserBanListEntry;
 
@@ -48,37 +50,48 @@ public class SpongeUserBanList extends UserBanList {
 
     @Override
     protected boolean contains(final com.mojang.authlib.GameProfile profile) {
-        return Sponge.getServer().getServiceProvider().banService().isBanned(SpongeGameProfile.of(profile)).join();
+        return Sponge.server().serviceProvider().banService().isBanned(SpongeGameProfile.of(profile)).join();
     }
 
     @Override
     public UserBanListEntry get(final com.mojang.authlib.GameProfile profile) {
-        return (UserBanListEntry) Sponge.getServer().getServiceProvider().banService().getBanFor(SpongeGameProfile.of(profile)).join().orElse(null);
+        final Optional<Ban.Profile> ban = Sponge.server().serviceProvider().banService().banFor(SpongeGameProfile.of(profile)).join();
+        return ban.map(x -> {
+            if (x instanceof UserBanListEntry) {
+                return (UserBanListEntry) x;
+            } else {
+                return new UserBanListEntry(SpongeGameProfile.toMcProfile(x.profile()),
+                        Date.from(x.creationDate()),
+                        x.banSource().map(SpongeAdventure::legacySection).orElse(null),
+                        x.expirationDate().map(Date::from).orElse(null),
+                        x.reason().map(SpongeAdventure::legacySection).orElse(null));
+            }
+        }).orElse(null);
     }
 
     @Override
     public String[] getUserList() {
         final List<String> names = new ArrayList<>();
 
-        for (final Ban.Profile ban : Sponge.getServer().getServiceProvider().banService().getProfileBans().join()) {
-            ban.getProfile().getName().ifPresent(names::add);
+        for (final Ban.Profile ban : Sponge.server().serviceProvider().banService().profileBans().join()) {
+            ban.profile().name().ifPresent(names::add);
         }
         return names.toArray(new String[names.size()]);
     }
 
     @Override
     public void add(final UserBanListEntry entry) {
-        Sponge.getServer().getServiceProvider().banService().addBan((Ban) entry);
+        Sponge.server().serviceProvider().banService().addBan((Ban) entry);
     }
 
     @Override
     public boolean isEmpty() {
-        return Sponge.getServer().getServiceProvider().banService().getProfileBans().join().isEmpty();
+        return Sponge.server().serviceProvider().banService().profileBans().join().isEmpty();
     }
 
     @Override
     public void remove(final com.mojang.authlib.GameProfile entry) {
-        Sponge.getServer().getServiceProvider().banService().pardon(SpongeGameProfile.of(entry));
+        Sponge.server().serviceProvider().banService().pardon(SpongeGameProfile.of(entry));
     }
 
 }

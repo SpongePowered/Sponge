@@ -52,7 +52,7 @@ public final class MapInfoItemStackData {
 							if (itemStack.getTag() == null) {
 								return null;
 							}
-							return (MapInfo) ((Level)Sponge.getServer().getWorldManager().defaultWorld())
+							return (MapInfo) ((Level)Sponge.server().worldManager().defaultWorld())
 									.getMapData(Constants.Map.MAP_PREFIX + itemStack.getTag().getInt(Constants.Map.MAP_ID));
 						}) // Nullable
 						.set((itemStack, mapInfo) -> {

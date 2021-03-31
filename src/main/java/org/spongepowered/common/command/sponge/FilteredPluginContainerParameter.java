@@ -45,7 +45,7 @@ public final class FilteredPluginContainerParameter implements ValueParameter<Pl
     private final Map<String, PluginContainer> validPluginContainers = FilteredPluginContainerParameter.getValidContainers();
 
     private static Map<String, PluginContainer> getValidContainers() {
-        return Launch.getInstance().getPluginManager().getPlugins()
+        return Launch.getInstance().getPluginManager().plugins()
                 .stream()
                 .filter(x -> !(x instanceof DummyPluginContainer))
                 .collect(Collectors.toMap(x -> x.getMetadata().getId(), x -> x));
@@ -57,7 +57,7 @@ public final class FilteredPluginContainerParameter implements ValueParameter<Pl
     }
 
     @Override
-    public Optional<? extends PluginContainer> getValue(
+    public Optional<? extends PluginContainer> parseValue(
             final Parameter.Key<? super PluginContainer> parameterKey,
             final ArgumentReader.Mutable reader,
             final CommandContext.Builder context) throws ArgumentParseException {

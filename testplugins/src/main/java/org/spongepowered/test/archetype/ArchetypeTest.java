@@ -58,13 +58,13 @@ public final class ArchetypeTest implements LoadableModule {
     @Listener
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.plugin, Command.builder()
-                .child(Command.builder().setExecutor(this::testEntityArchetype).build(), "entity")
+                .addChild(Command.builder().executor(this::testEntityArchetype).build(), "entity")
                 .build(), "testarchetypes");
     }
 
     private CommandResult testEntityArchetype(CommandContext context) {
-        context.getCause().first(ServerPlayer.class).ifPresent(p -> {
-            final Sheep entity = p.getWorld().createEntity(EntityTypes.SHEEP, p.getPosition());
+        context.cause().first(ServerPlayer.class).ifPresent(p -> {
+            final Sheep entity = p.world().createEntity(EntityTypes.SHEEP, p.position());
             this.testEntityArchetype(entity);
         });
         return CommandResult.success();
@@ -72,7 +72,7 @@ public final class ArchetypeTest implements LoadableModule {
 
     @Override
     public void enable(CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.plugin, new ArchetypeTestListener());
+        Sponge.eventManager().registerListeners(this.plugin, new ArchetypeTestListener());
     }
 
 
@@ -80,23 +80,23 @@ public final class ArchetypeTest implements LoadableModule {
         // TODO we're missing InteractEntityEvent implementation so we cannot test with this yet
         @Listener
         public void onRightClickEntity(InteractEntityEvent.Secondary event) {
-            final Entity entity = event.getEntity();
+            final Entity entity = event.entity();
             ArchetypeTest.this.testEntityArchetype(entity);
         }
     }
 
 
     public void testEntityArchetype(Entity entity) {
-        Sponge.getServer().getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN); // Need that for restoring
+        Sponge.server().causeStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLUGIN); // Need that for restoring
 
         final EntityArchetype archetype = entity.createArchetype();
         // Restore same entity from archetype
-        archetype.apply(entity.getServerLocation());
+        archetype.apply(entity.serverLocation());
         // Test restoring from serialized archetype
         final EntityArchetype rebuiltArchetype = EntityArchetype.builder().build(archetype.toContainer()).get();
-        rebuiltArchetype.apply(entity.getServerLocation());
+        rebuiltArchetype.apply(entity.serverLocation());
 
-        final EntitySnapshot rebuiltSnapshot = rebuiltArchetype.toSnapshot(entity.getServerLocation());
+        final EntitySnapshot rebuiltSnapshot = rebuiltArchetype.toSnapshot(entity.serverLocation());
         rebuiltSnapshot.restore();
     }
 }

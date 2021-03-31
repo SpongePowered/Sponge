@@ -63,7 +63,7 @@ public final class StandardCatalogedArgumentParser<S, T> extends StandardArgumen
 
     @Override
     @NonNull
-    public ResourceKey getKey() {
+    public ResourceKey key() {
         return this.key;
     }
 

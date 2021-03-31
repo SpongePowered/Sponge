@@ -53,12 +53,12 @@ public abstract class GoalSelectorMixin_API<O extends Agent> implements GoalExec
 
     @SuppressWarnings("unchecked")
     @Override
-    public O getOwner() {
+    public O owner() {
         return (O) ((GoalSelectorBridge) this).bridge$getOwner();
     }
 
     @Override
-    public GoalExecutorType getType() {
+    public GoalExecutorType type() {
         return ((GoalSelectorBridge) this).bridge$getType();
     }
 
@@ -81,16 +81,16 @@ public abstract class GoalSelectorMixin_API<O extends Agent> implements GoalExec
     }
 
     @Override
-    public List<? super Goal<? extends O>> getTasksByType(final GoalType type) {
+    public List<? super Goal<? extends O>> tasksByType(final GoalType type) {
         final ImmutableList.Builder<Goal<?>> tasks = ImmutableList.builder();
         this.availableGoals.stream().map(WrappedGoal::getGoal).map(Goal.class::cast)
-                .filter(goal -> goal.getType() == type)
+                .filter(goal -> goal.type() == type)
                 .forEach(tasks::add);
         return tasks.build();
     }
 
     @Override
-    public List<? super Goal<? extends O>> getTasks() {
+    public List<? super Goal<? extends O>> tasks() {
         final ImmutableList.Builder<Goal<?>> tasks = ImmutableList.builder();
         this.availableGoals.stream().map(WrappedGoal::getGoal).map(Goal.class::cast).forEach(tasks::add);
         return tasks.build();

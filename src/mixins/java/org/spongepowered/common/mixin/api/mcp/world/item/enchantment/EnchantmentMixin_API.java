@@ -55,27 +55,27 @@ public abstract class EnchantmentMixin_API implements EnchantmentType {
     // @formatter:on
 
     @Override
-    public int getWeight() {
+    public int weight() {
         return this.rarity.getWeight();
     }
 
     @Override
-    public int getMinimumLevel() {
+    public int minimumLevel() {
         return this.shadow$getMinLevel();
     }
 
     @Override
-    public int getMaximumLevel() {
+    public int maximumLevel() {
         return this.shadow$getMaxLevel();
     }
 
     @Override
-    public int getMinimumEnchantabilityForLevel(final int level) {
+    public int minimumEnchantabilityForLevel(final int level) {
         return this.shadow$getMinCost(level);
     }
 
     @Override
-    public int getMaximumEnchantabilityForLevel(final int level) {
+    public int maximumEnchantabilityForLevel(final int level) {
         return this.shadow$getMaxCost(level);
     }
 

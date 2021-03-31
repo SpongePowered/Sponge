@@ -77,14 +77,14 @@ public abstract class CriterionTrigger_ListenerMixin {
         // Sponge filters are always handled in the trigger method
         if (!(this.trigger instanceof SpongeFilteredTrigger)) {
             final FilteredTrigger filteredTrigger = (FilteredTrigger) this.trigger;
-            if (filteredTrigger.getType() instanceof SpongeCriterionTrigger) {
-                final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+            if (filteredTrigger.type() instanceof SpongeCriterionTrigger) {
+                final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
                 final ServerPlayer player = ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer();
-                final TypeToken typeToken = TypeToken.get(filteredTrigger.getType().getConfigurationType());
+                final TypeToken typeToken = TypeToken.get(filteredTrigger.type().configurationType());
                 final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause,
                         advancement, advancementCriterion, typeToken, player, filteredTrigger, true);
                 SpongeCommon.postEvent(event);
-                if (!event.getResult()) {
+                if (!event.result()) {
                     ci.cancel();
                     return;
                 }
@@ -94,7 +94,7 @@ public abstract class CriterionTrigger_ListenerMixin {
         // Handle the score criteria ourselves, with each trigger will
         // the score be increased by one.
         if (advancementCriterion instanceof ScoreAdvancementCriterion) {
-            ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer().getProgress(advancement)
+            ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer().progress(advancement)
                     .get((ScoreAdvancementCriterion) advancementCriterion).get().add(1);
             ci.cancel();
             PhaseTracker.getCauseStackManager().popCause();

@@ -34,7 +34,6 @@ import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.decoration.MapDecoration;
-import org.spongepowered.common.accessor.world.level.saveddata.maps.MapItemSavedDataAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -82,6 +81,7 @@ public final class MapInfoData {
 				.create(Keys.MAP_SCALE)
 					.get(mapData -> (int) mapData.scale)
 					/*.set((mapData, scale) -> {
+						mapData.scale = scale.byteValue();
 						mapData.setOrigin(mapData.x, mapData.z, mapData.scale);
 						mapData.setDirty();
 					})*/
@@ -91,11 +91,17 @@ public final class MapInfoData {
 						mapData.trackingPosition = tracksPlayers;
 						mapData.setDirty();
 					})*/
+				/*.create(Keys.MAP_UNLIMITED_TRACKING)
+					.get(mapData -> mapData.unlimitedTracking)
+					.set((mapData, unlimitedTracking) -> {
+						mapData.unlimitedTracking = unlimitedTracking;
+						mapData.setDirty();
+					})*/
 				.create(Keys.MAP_WORLD)
 					.get(mapData -> {
 						final int id = ((MapItemSavedDataBridge)mapData).bridge$getMapId();
 						if (mapData.dimension == null) {
-							LogManager.getLogger().error("Map with id: {}, uuid: {} has an null world. This will probably cause more errors later/on save", id, ((MapInfo)mapData).getUniqueId());
+							LogManager.getLogger().error("Map with id: {}, uuid: {} has an null world. This will probably cause more errors later/on save", id, ((MapInfo)mapData).uniqueId());
 							return null;
 						}
 
@@ -105,13 +111,6 @@ public final class MapInfoData {
 						mapData.dimension = ((Level) Sponge.getServer().getWorldManager().world(key).get()).dimension();
 						mapData.setDirty();
 					})*/
-			.asMutable(MapItemSavedDataAccessor.class)
-				 .create(Keys.MAP_UNLIMITED_TRACKING)
-					  .get(mapData -> mapData.accessor$unlimitedTracking())
-					  /*.set((mapData, unlimitedTracking) -> {
-						  mapData.unlimitedTracking = unlimitedTracking;
-						  mapData.setDirty();
-					  })*/
 			.asMutable(MapItemSavedDataBridge.class)
 					.create(Keys.MAP_DECORATIONS)
 					.get(MapItemSavedDataBridge::bridge$getDecorations)

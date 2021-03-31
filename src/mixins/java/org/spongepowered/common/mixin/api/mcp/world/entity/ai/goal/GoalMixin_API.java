@@ -45,12 +45,12 @@ public abstract class GoalMixin_API<O extends Agent> implements org.spongepowere
     // @formatter:on
 
     @Override
-    public GoalType getType() {
+    public GoalType type() {
         return ((GoalBridge) this).bridge$getType();
     }
 
     @Override
-    public Optional<GoalExecutor<O>> getExecutor() {
+    public Optional<GoalExecutor<O>> executor() {
         return (Optional<GoalExecutor<O>>) (Optional<?>) ((GoalBridge) this).bridge$getGoalExecutor();
     }
 

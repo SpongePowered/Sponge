@@ -38,7 +38,7 @@ public abstract class AbstractHorseMixin_Carrier_Inventory_API implements Carrie
     @Shadow protected SimpleContainer inventory;
 
     @Override
-    public CarriedInventory<? extends Carrier> getInventory() {
+    public CarriedInventory<? extends Carrier> inventory() {
         return InventoryUtil.carriedWrapperInventory(this.inventory, this);
     }
 

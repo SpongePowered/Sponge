@@ -45,6 +45,7 @@ import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
+import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -102,6 +103,7 @@ import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.util.SpongeItemStackComparatorFactory;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlerFactory;
+import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
@@ -229,6 +231,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(NoiseGeneratorConfig.Factory.class, new SpongeNoiseGeneratorConfig.FactoryImpl())
                 .registerFactory(ChunkGenerator.Factory.class, new SpongeChunkGeneratorFactory())
                 .registerFactory(ItemStackComparators.Factory.class, new SpongeItemStackComparatorFactory())
+                .registerFactory(Favicon.Factory.class, new SpongeFavicon.FactoryImpl())
         ;
     }
 }

@@ -43,7 +43,7 @@ public final class ServerScheduler extends SyncScheduler {
     public void tick() {
         super.tick();
 
-        for (final Player player : Sponge.getServer().getOnlinePlayers()) {
+        for (final Player player : Sponge.server().onlinePlayers()) {
             if (player instanceof net.minecraft.world.entity.player.Player) {
                 // Detect Changes on PlayerInventories marked as dirty.
                 ((InventoryBridge) ((net.minecraft.world.entity.player.Player) player).getInventory()).bridge$cleanupDirty();

@@ -46,7 +46,7 @@ public final class SpongeEmptyCanvas implements SpongeMapCanvas {
     public static final SpongeEmptyCanvas INSTANCE = new SpongeEmptyCanvas();
 
     @Override
-    public MapColor getColor(final int x, final int y) {
+    public MapColor color(final int x, final int y) {
         return MapColor.of(MapColorTypes.NONE.get());
     }
 
@@ -70,7 +70,7 @@ public final class SpongeEmptyCanvas implements SpongeMapCanvas {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 

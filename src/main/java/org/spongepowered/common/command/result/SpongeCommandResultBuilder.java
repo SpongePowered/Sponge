@@ -36,7 +36,7 @@ public final class SpongeCommandResultBuilder implements CommandResult.Builder {
     @Nullable private Component errorMessage;
 
     @Override
-    public CommandResult.@NonNull Builder setResult(final int result) {
+    public CommandResult.@NonNull Builder result(final int result) {
         this.result = result;
         return this;
     }

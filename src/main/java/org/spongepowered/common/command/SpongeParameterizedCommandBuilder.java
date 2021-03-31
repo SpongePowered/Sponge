@@ -61,7 +61,7 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     private boolean isTerminal = false;
 
     @Override
-    public Command.@NonNull Builder child(final Command.@NonNull Parameterized child, @NonNull final Iterable<String> aliases) {
+    public Command.@NonNull Builder addChild(final Command.@NonNull Parameterized child, @NonNull final Iterable<String> aliases) {
         for (final String alias : aliases) {
             if (this.claimedSubcommands.contains(alias.toLowerCase())) {
                 throw new IllegalStateException("The alias " + alias + " already has an associated subcommand.");
@@ -76,32 +76,32 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder flag(@NonNull final Flag flag) {
-        for (final String alias : flag.getAliases()) {
+    public Command.@NonNull Builder addFlag(@NonNull final Flag flag) {
+        for (final String alias : flag.aliases()) {
             if (this.flagAliases.contains(alias)) {
                 throw new IllegalArgumentException("The alias " + alias + " is already in use.");
             }
         }
 
         this.flags.add(flag);
-        this.flagAliases.addAll(flag.getAliases());
+        this.flagAliases.addAll(flag.aliases());
         return this;
     }
 
     @Override
-    public Command.@NonNull Builder parameter(@NonNull final Parameter parameter) {
+    public Command.@NonNull Builder addParameter(@NonNull final Parameter parameter) {
         this.parameters.add(parameter);
         return this;
     }
 
     @Override
-    public Command.@NonNull Builder setExecutor(@NonNull final CommandExecutor executor) {
+    public Command.@NonNull Builder executor(@NonNull final CommandExecutor executor) {
         this.commandExecutor = executor;
         return this;
     }
 
     @Override
-    public Command.@NonNull Builder setExtendedDescription(@Nullable final Function<CommandCause, Optional<Component>> extendedDescriptionFunction) {
+    public Command.@NonNull Builder extendedDescription(@Nullable final Function<CommandCause, Optional<Component>> extendedDescriptionFunction) {
         if (extendedDescriptionFunction == null) {
             this.extendedDescription = cause -> Optional.empty();
         } else {
@@ -111,7 +111,7 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder setShortDescription(@Nullable final Function<CommandCause, Optional<Component>> descriptionFunction) {
+    public Command.@NonNull Builder shortDescription(@Nullable final Function<CommandCause, Optional<Component>> descriptionFunction) {
         if (descriptionFunction == null) {
             this.shortDescription = cause -> Optional.empty();
         } else {
@@ -121,21 +121,21 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder setPermission(@Nullable final String permission) {
+    public Command.@NonNull Builder permission(@Nullable final String permission) {
         if (permission == null) {
-            return this.setExecutionRequirements(null);
+            return this.executionRequirements(null);
         }
-        return this.setExecutionRequirements(commandCause -> commandCause.hasPermission(permission));
+        return this.executionRequirements(commandCause -> commandCause.hasPermission(permission));
     }
 
     @Override
-    public Command.@NonNull Builder setExecutionRequirements(@Nullable final Predicate<CommandCause> executionRequirements) {
+    public Command.@NonNull Builder executionRequirements(@Nullable final Predicate<CommandCause> executionRequirements) {
         this.executionRequirements = executionRequirements;
         return this;
     }
 
     @Override
-    public Command.@NonNull Builder setTerminal(final boolean terminal) {
+    public Command.@NonNull Builder terminal(final boolean terminal) {
         this.isTerminal = terminal;
         return this;
     }
@@ -152,7 +152,7 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
 
         final List<Parameter.Subcommand> subcommands =
                 this.subcommands.entrySet().stream()
-                        .map(x -> new SpongeSubcommandParameterBuilder().aliases(x.getValue()).setSubcommand(x.getKey()).build())
+                        .map(x -> new SpongeSubcommandParameterBuilder().aliases(x.getValue()).subcommand(x.getKey()).build())
                         .collect(Collectors.toList());
 
         // build the node.

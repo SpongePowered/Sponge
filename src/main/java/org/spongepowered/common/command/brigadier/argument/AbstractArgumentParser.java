@@ -52,10 +52,10 @@ public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, Su
     @Override
     public T parse(final Parameter.Key<? super T> key, final SpongeCommandContextBuilder contextBuilder, final SpongeStringReader reader)
             throws CommandSyntaxException {
-        final ArgumentReader.Immutable state = reader.getImmutable();
+        final ArgumentReader.Immutable state = reader.immutable();
         final org.spongepowered.api.command.parameter.CommandContext.Builder.Transaction transaction = contextBuilder.startTransaction();
         try {
-            final Optional<? extends T> value = this.getValue(key, reader, contextBuilder);
+            final Optional<? extends T> value = this.parseValue(key, reader, contextBuilder);
             contextBuilder.commit(transaction);
             if (value.isPresent()) {
                 return value.get();
@@ -65,7 +65,7 @@ public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, Su
             reader.setState(state);
             contextBuilder.rollback(transaction);
             throw CommandSyntaxException.BUILT_IN_EXCEPTIONS.dispatcherParseException()
-                    .createWithContext(reader, e.getSuperText());
+                    .createWithContext(reader, e.superText());
         }
         return null;
     }

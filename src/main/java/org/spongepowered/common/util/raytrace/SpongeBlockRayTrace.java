@@ -39,7 +39,7 @@ import net.minecraft.world.phys.Vec3;
 public final class SpongeBlockRayTrace extends AbstractSpongeRayTrace<@NonNull LocatableBlock> {
 
     private static final Predicate<LocatableBlock> DEFAULT_FILTER = block -> {
-        final BlockType type = block.getBlockState().getType();
+        final BlockType type = block.blockState().type();
         return type != BlockTypes.CAVE_AIR.get() && type != BlockTypes.VOID_AIR.get() && type != BlockTypes.AIR.get();
     };
 

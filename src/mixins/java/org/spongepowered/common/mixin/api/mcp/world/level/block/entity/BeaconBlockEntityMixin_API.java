@@ -47,7 +47,7 @@ public abstract class BeaconBlockEntityMixin_API extends BlockEntityMixin_API im
     // @formatter:on
 
     @Override
-    public int getCompletedLevels() {
+    public int completedLevels() {
         return this.levels < 0 ? 0 : this.levels;
     }
 

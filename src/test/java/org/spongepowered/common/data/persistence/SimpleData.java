@@ -64,7 +64,7 @@ final class SimpleData implements DataSerializable {
     }
 
     @Override
-    public int getContentVersion() {
+    public int contentVersion() {
         return 1;
     }
 

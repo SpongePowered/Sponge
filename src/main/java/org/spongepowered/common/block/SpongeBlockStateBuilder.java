@@ -27,7 +27,6 @@ package org.spongepowered.common.block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
@@ -49,7 +48,7 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<@NonNull BlockS
 
     @Override
     public BlockState.@NonNull Builder blockType(@NonNull final BlockType blockType) {
-        this.blockState = Objects.requireNonNull(blockType).getDefaultState();
+        this.blockState = Objects.requireNonNull(blockType).defaultState();
         return this;
     }
 

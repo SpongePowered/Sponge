@@ -25,17 +25,11 @@
 package org.spongepowered.test.chunk;
 
 import com.google.inject.Inject;
-import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.Listener;
-import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.entity.InteractEntityEvent;
-import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.event.world.chunk.ChunkEvent;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
@@ -52,30 +46,30 @@ public final class ChunkEventTest implements LoadableModule {
 
     @Override
     public void enable(final CommandContext ctx) {
-        Sponge.getEventManager().registerListeners(this.plugin, new ChunkListener());
+        Sponge.eventManager().registerListeners(this.plugin, new ChunkListener());
     }
 
 
     public static class ChunkListener {
         @Listener
         public void onChunkLoad(ChunkEvent.Load event) {
-            Sponge.getGame().getSystemSubject().sendMessage(Component.text("Load Chunk " + event.getTargetChunk().getChunkPosition() + " in " + event.getChunkWorld().asString()));
+            Sponge.game().systemSubject().sendMessage(Component.text("Load Chunk " + event.targetChunk().chunkPosition() + " in " + event.chunkWorld().asString()));
         }
 
         @Listener
         public void onChunkSave(ChunkEvent.Save.Pre event) {
             event.setCancelled(true);
-            Sponge.getGame().getSystemSubject().sendMessage(Component.text("Pre Save Chunk " + event.getChunkPosition() + " in " + event.getChunkWorld().asString()));
+            Sponge.game().systemSubject().sendMessage(Component.text("Pre Save Chunk " + event.chunkPosition() + " in " + event.chunkWorld().asString()));
         }
 
         @Listener
         public void onChunkSave(ChunkEvent.Save.Post event) {
-            Sponge.getGame().getSystemSubject().sendMessage(Component.text("Post Save Chunk " + event.getChunkPosition() + " in " + event.getChunkWorld().asString()));
+            Sponge.game().systemSubject().sendMessage(Component.text("Post Save Chunk " + event.chunkPosition() + " in " + event.chunkWorld().asString()));
         }
 
         @Listener
         public void onChunkUnload(ChunkEvent.Unload event) {
-            Sponge.getGame().getSystemSubject().sendMessage(Component.text("Unload Chunk " + event.getChunkPosition() + " in " + event.getChunkWorld().asString()));
+            Sponge.game().systemSubject().sendMessage(Component.text("Unload Chunk " + event.chunkPosition() + " in " + event.chunkWorld().asString()));
         }
     }
 }

@@ -68,7 +68,7 @@ public abstract class MutableSpongeCollectionValue<E, C extends Collection<E>,
     }
 
     @Override
-    public C getAll() {
+    public C all() {
         return this.element;
     }
 

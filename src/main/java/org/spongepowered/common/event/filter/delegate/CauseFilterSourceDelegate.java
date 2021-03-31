@@ -44,7 +44,7 @@ public abstract class CauseFilterSourceDelegate implements ParameterFilterSource
     public Tuple<Integer, Integer> write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int local) {
         // Get the cause
         mv.visitVarInsn(ALOAD, 1);
-        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Event.class), "getCause",
+        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Event.class), "cause",
                 "()" + Type.getDescriptor(Cause.class), true);
 
         Class<?> targetType = param.getType();

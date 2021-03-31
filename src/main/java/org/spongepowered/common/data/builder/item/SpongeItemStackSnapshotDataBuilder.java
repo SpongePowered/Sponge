@@ -55,7 +55,7 @@ public final class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilde
     @Override
     protected Optional<ItemStackSnapshot> buildContent(DataView container) throws InvalidDataException {
         if (container.contains(Constants.ItemStack.TYPE, Constants.ItemStack.COUNT)) {
-            final ItemType itemType = container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, Sponge.getGame().registries()).get();
+            final ItemType itemType = container.getRegistryValue(Constants.ItemStack.TYPE, RegistryTypes.ITEM_TYPE, Sponge.game().registries()).get();
             if (itemType == ItemTypes.AIR.get()) {
                 return Optional.of(ItemStackSnapshot.empty());
             }

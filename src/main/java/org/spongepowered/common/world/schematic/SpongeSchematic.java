@@ -73,17 +73,17 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     }
 
     @Override
-    public Palette<BlockState, BlockType> getBlockPalette() {
+    public Palette<BlockState, BlockType> blockPalette() {
         return this.volume.getBlockPalette();
     }
 
     @Override
-    public Palette<Biome, Biome> getBiomePalette() {
+    public Palette<Biome, Biome> biomePalette() {
         return this.volume.getBiomePalette();
     }
 
     @Override
-    public DataView getMetadata() {
+    public DataView metadata() {
         return this.metadata;
     }
 
@@ -98,42 +98,42 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     }
 
     @Override
-    public Optional<BlockEntityArchetype> getBlockEntityArchetype(final int x, final int y, final int z) {
-        return this.volume.getBlockEntityArchetype(x, y, z);
+    public Optional<BlockEntityArchetype> blockEntityArchetype(final int x, final int y, final int z) {
+        return this.volume.blockEntityArchetype(x, y, z);
     }
 
     @Override
-    public Map<Vector3i, BlockEntityArchetype> getBlockEntityArchetypes() {
-        return this.volume.getBlockEntityArchetypes();
+    public Map<Vector3i, BlockEntityArchetype> blockEntityArchetypes() {
+        return this.volume.blockEntityArchetypes();
     }
 
     @Override
-    public VolumeStream<ArchetypeVolume, BlockEntityArchetype> getBlockEntityArchetypeStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<ArchetypeVolume, BlockEntityArchetype> blockEntityArchetypeStream(final Vector3i min, final Vector3i max,
         final StreamOptions options
     ) {
-        return this.volume.getBlockEntityArchetypeStream(min, max, options);
+        return this.volume.blockEntityArchetypeStream(min, max, options);
     }
 
     @Override
-    public Collection<EntityArchetype> getEntityArchetypes() {
-        return this.volume.getEntityArchetypes();
+    public Collection<EntityArchetype> entityArchetypes() {
+        return this.volume.entityArchetypes();
     }
 
     @Override
-    public Collection<EntityArchetype> getEntityArchetypes(final Predicate<EntityArchetype> filter) {
-        return this.volume.getEntityArchetypes(filter);
+    public Collection<EntityArchetype> entityArchetypes(final Predicate<EntityArchetype> filter) {
+        return this.volume.entityArchetypes(filter);
     }
 
     @Override
-    public VolumeStream<ArchetypeVolume, EntityArchetype> getEntityArchetypeStream(
+    public VolumeStream<ArchetypeVolume, EntityArchetype> entityArchetypeStream(
         final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        return this.volume.getEntityArchetypeStream(min, max, options);
+        return this.volume.entityArchetypeStream(min, max, options);
     }
 
     @Override
-    public Stream<EntityArchetypeEntry> getEntitiesByPosition() {
-        return this.volume.getEntitiesByPosition();
+    public Stream<EntityArchetypeEntry> entitiesByPosition() {
+        return this.volume.entitiesByPosition();
     }
 
     @Override
@@ -147,32 +147,32 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     }
 
     @Override
-    public BlockState getBlock(final int x, final int y, final int z) {
-        return this.volume.getBlock(x, y, z);
+    public BlockState block(final int x, final int y, final int z) {
+        return this.volume.block(x, y, z);
     }
 
     @Override
-    public FluidState getFluid(final int x, final int y, final int z) {
-        return this.volume.getFluid(x, y, z);
+    public FluidState fluid(final int x, final int y, final int z) {
+        return this.volume.fluid(x, y, z);
     }
 
     @Override
-    public int getHighestYAt(final int x, final int z) {
-        return this.volume.getHighestYAt(x, z);
+    public int highestYAt(final int x, final int z) {
+        return this.volume.highestYAt(x, z);
     }
 
     @Override
-    public VolumeStream<ArchetypeVolume, BlockState> getBlockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<ArchetypeVolume, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        return this.volume.getBlockStateStream(min, max, options);
+        return this.volume.blockStateStream(min, max, options);
     }
 
     @Override
     public <E> Optional<E> get(final int x, final int y, final int z, final Key<? extends Value<E>> key) {
         final Stream<Supplier<Optional<E>>> dataRetrievalStream = Stream.of(
-            () -> this.getBlock(x, y, z).get(key),
-            () -> this.getFluid(x, y, z).get(key),
-            () -> this.getBlockEntityArchetype(x, y, z).flatMap(archetype -> archetype.get(key))
+            () -> this.block(x, y, z).get(key),
+            () -> this.fluid(x, y, z).get(key),
+            () -> this.blockEntityArchetype(x, y, z).flatMap(archetype -> archetype.get(key))
         );
         return dataRetrievalStream.map(Supplier::get)
             .filter(Optional::isPresent)
@@ -183,9 +183,9 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     @Override
     public <E, V extends Value<E>> Optional<V> getValue(final int x, final int y, final int z, final Key<V> key) {
         final Stream<Supplier<Optional<V>>> dataRetrievalStream = Stream.of(
-            () -> this.getBlock(x, y, z).getValue(key),
-            () -> this.getFluid(x, y, z).getValue(key),
-            () -> this.getBlockEntityArchetype(x, y, z).flatMap(archetype -> archetype.getValue(key))
+            () -> this.block(x, y, z).getValue(key),
+            () -> this.fluid(x, y, z).getValue(key),
+            () -> this.blockEntityArchetype(x, y, z).flatMap(archetype -> archetype.getValue(key))
         );
         return dataRetrievalStream.map(Supplier::get)
             .filter(Optional::isPresent)
@@ -196,9 +196,9 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     @Override
     public boolean supports(final int x, final int y, final int z, final Key<?> key) {
         final Stream<Supplier<Boolean>> dataRetrievalStream = Stream.of(
-            () -> this.getBlock(x, y, z).supports(key),
-            () -> this.getFluid(x, y, z).supports(key),
-            () -> this.getBlockEntityArchetype(x, y, z).map(archetype -> archetype.supports(key)).orElse(false)
+            () -> this.block(x, y, z).supports(key),
+            () -> this.fluid(x, y, z).supports(key),
+            () -> this.blockEntityArchetype(x, y, z).map(archetype -> archetype.supports(key)).orElse(false)
         );
         return dataRetrievalStream.map(Supplier::get)
             .filter(Boolean::booleanValue)
@@ -207,11 +207,11 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     }
 
     @Override
-    public Set<Key<@NonNull ?>> getKeys(final int x, final int y, final int z) {
+    public Set<Key<@NonNull ?>> keys(final int x, final int y, final int z) {
         final Stream<Supplier<Set<Key<@NonNull ?>>>> dataRetrievalStream = Stream.of(
-            () -> this.getBlock(x, y, z).getKeys(),
-            () -> this.getFluid(x, y, z).getKeys(),
-            () -> this.getBlockEntityArchetype(x, y, z).map(ValueContainer::getKeys).orElseGet(Collections::emptySet)
+            () -> this.block(x, y, z).getKeys(),
+            () -> this.fluid(x, y, z).getKeys(),
+            () -> this.blockEntityArchetype(x, y, z).map(ValueContainer::getKeys).orElseGet(Collections::emptySet)
         );
         return dataRetrievalStream.map(Supplier::get)
             .flatMap(Set::stream)
@@ -221,9 +221,9 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     @Override
     public Set<Value.Immutable<?>> getValues(final int x, final int y, final int z) {
         final Stream<Supplier<Set<Value.Immutable<?>>>> dataRetrievalStream = Stream.of(
-            () -> this.getBlock(x, y, z).getValues(),
-            () -> this.getFluid(x, y, z).getValues(),
-            () -> this.getBlockEntityArchetype(x, y, z).map(ValueContainer::getValues).orElseGet(Collections::emptySet)
+            () -> this.block(x, y, z).getValues(),
+            () -> this.fluid(x, y, z).getValues(),
+            () -> this.blockEntityArchetype(x, y, z).map(ValueContainer::getValues).orElseGet(Collections::emptySet)
         );
         return dataRetrievalStream.map(Supplier::get)
             .flatMap(Set::stream)
@@ -233,19 +233,19 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     @Override
     public <E> DataTransactionResult offer(final int x, final int y, final int z, final Key<? extends Value<E>> key, final E value) {
         final Stream<Supplier<DataTransactionResult>> dataRetrievalStream = Stream.of(
-            () -> this.getBlock(x, y, z).with(key, value)
+            () -> this.block(x, y, z).with(key, value)
                 .map(newState -> {
                     final Value<E> newValue = newState.requireValue(key);
                     this.setBlock(x, y, z, newState);
                     return DataTransactionResult.successResult(newValue.asImmutable());
                 }).orElseGet(DataTransactionResult::failNoData),
-            () -> this.getFluid(x, y, z).with(key, value)
+            () -> this.fluid(x, y, z).with(key, value)
                 .map(newState -> {
                     final Value<E> newValue = newState.requireValue(key);
-                    this.setBlock(x, y, z, newState.getBlock());
+                    this.setBlock(x, y, z, newState.block());
                     return DataTransactionResult.successResult(newValue.asImmutable());
                 }).orElseGet(DataTransactionResult::failNoData),
-            () -> this.getBlockEntityArchetype(x, y, z).map(archetype -> archetype.offer(key, value)).orElseGet(DataTransactionResult::failNoData)
+            () -> this.blockEntityArchetype(x, y, z).map(archetype -> archetype.offer(key, value)).orElseGet(DataTransactionResult::failNoData)
         );
         return dataRetrievalStream.map(Supplier::get)
             .filter(DataTransactionResult::isSuccessful)
@@ -257,19 +257,19 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     @Override
     public DataTransactionResult remove(final int x, final int y, final int z, final Key<@NonNull ?> key) {
         final Stream<Supplier<DataTransactionResult>> dataRetrievalStream = Stream.of(
-            () -> this.getBlock(x, y, z).without(key)
+            () -> this.block(x, y, z).without(key)
                 .map(newState -> {
-                    final Value.Immutable newValue = this.getBlock(x, y, z).requireValue((Key) key).asImmutable();
+                    final Value.Immutable newValue = this.block(x, y, z).requireValue((Key) key).asImmutable();
                     this.setBlock(x, y, z, newState);
                     return DataTransactionResult.successResult(newValue);
                 }).orElseGet(DataTransactionResult::failNoData),
-            () -> this.getFluid(x, y, z).without(key)
+            () -> this.fluid(x, y, z).without(key)
                 .map(newState -> {
-                    final Value.Immutable newValue = this.getFluid(x, y, z).requireValue((Key) key).asImmutable();
-                    this.setBlock(x, y, z, newState.getBlock());
+                    final Value.Immutable newValue = this.fluid(x, y, z).requireValue((Key) key).asImmutable();
+                    this.setBlock(x, y, z, newState.block());
                     return DataTransactionResult.successResult(newValue);
                 }).orElseGet(DataTransactionResult::failNoData),
-            () -> this.getBlockEntityArchetype(x, y, z).map(archetype -> archetype.remove(key)).orElseGet(DataTransactionResult::failNoData)
+            () -> this.blockEntityArchetype(x, y, z).map(archetype -> archetype.remove(key)).orElseGet(DataTransactionResult::failNoData)
         );
         return dataRetrievalStream.map(Supplier::get)
             .filter(DataTransactionResult::isSuccessful)
@@ -279,7 +279,7 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
 
     @Override
     public DataTransactionResult undo(final int x, final int y, final int z, final DataTransactionResult result) {
-        return result.getReplacedData().stream()
+        return result.replacedData().stream()
             .map(successful -> this.offer(x, y, z, successful))
             .collect(DataTransactionResult.toTransaction());
     }
@@ -297,7 +297,7 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     ) {
         return from.getValues().stream()
             .map(value -> {
-                final Value<?> merged = this.get(xTo, yTo, zTo, value.getKey())
+                final Value<?> merged = this.get(xTo, yTo, zTo, value.key())
                     .map(existing -> function.merge((Value) existing, value).asImmutable())
                     .orElse(value);
 
@@ -312,7 +312,7 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     ) {
         return this.getValues(xFrom, yFrom, zFrom).stream()
             .map(value -> {
-                final Value<?> merged = this.get(xTo, yTo, zTo, value.getKey())
+                final Value<?> merged = this.get(xTo, yTo, zTo, value.key())
                     .map(existing -> function.merge((Value) existing, value).asImmutable())
                     .orElse(value.asImmutable());
 
@@ -323,14 +323,14 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
 
     @Override
     public boolean validateRawData(final int x, final int y, final int z, final DataView container) {
-        return this.getBlockEntityArchetype(x, y, z)
+        return this.blockEntityArchetype(x, y, z)
             .map(archetype -> archetype.validateRawData(container))
             .orElse(false);
     }
 
     @Override
     public void setRawData(final int x, final int y, final int z, final DataView container) throws InvalidDataException {
-        this.getBlockEntityArchetype(x, y, z)
+        this.blockEntityArchetype(x, y, z)
             .ifPresent(archetype -> archetype.setRawData(container));
     }
 
@@ -340,14 +340,14 @@ public class SpongeSchematic extends AbstractVolumeBuffer implements Schematic {
     }
 
     @Override
-    public Biome getBiome(final int x, final int y, final int z) {
-        return this.getBiome(x, y, z);
+    public Biome biome(final int x, final int y, final int z) {
+        return this.biome(x, y, z);
     }
 
     @Override
-    public VolumeStream<ArchetypeVolume, Biome> getBiomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<ArchetypeVolume, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        return this.volume.getBiomeStream(min, max, options);
+        return this.volume.biomeStream(min, max, options);
     }
 
     @Override

@@ -68,7 +68,7 @@ public abstract class WolfMixin extends AgableMobMixin implements AggressiveEnti
             try {
                 PhaseTracker.getCauseStackManager().pushCause(ItemStackUtil.fromNative(stack).createSnapshot());
                 PhaseTracker.getCauseStackManager().pushCause(player);
-                if (!SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getCauseStackManager().getCurrentCause(), (Wolf) this))) {
+                if (!SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (Wolf) this))) {
                     stack.grow(1);
                     return random;
                 }

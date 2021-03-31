@@ -68,7 +68,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
 
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
-    public Collection<Subject> getLoadedSubjects() {
+    public Collection<Subject> loadedSubjects() {
         return (Collection) this.levels.values();
     }
 
@@ -84,14 +84,14 @@ public class OpLevelCollection extends SpongeSubjectCollection {
             this.data = new GlobalMemorySubjectData(this) {
 
                 @Override
-                public List<SubjectReference> getParents(final Set<Context> contexts) {
+                public List<SubjectReference> parents(final Set<Context> contexts) {
                     if (!contexts.isEmpty()) {
                         return Collections.emptyList();
                     }
                     if (level == 0) {
-                        return super.getParents(contexts);
+                        return super.parents(contexts);
                     } else {
-                        return ImmutableList.<SubjectReference>builder().add(service.getGroupForOpLevel(level - 1).asSubjectReference()).addAll(super.getParents(contexts)).build();
+                        return ImmutableList.<SubjectReference>builder().add(service.getGroupForOpLevel(level - 1).asSubjectReference()).addAll(super.parents(contexts)).build();
                     }
                 }
             };
@@ -103,13 +103,13 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public String getIdentifier() {
+        public String identifier() {
             return "op_" + this.level;
         }
 
         @Override
-        public SubjectCollection getContainingCollection() {
-            return this.service.getGroupSubjects();
+        public SubjectCollection containingCollection() {
+            return this.service.groupSubjects();
         }
 
         @Override
@@ -118,7 +118,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public MemorySubjectData getSubjectData() {
+        public MemorySubjectData subjectData() {
             return this.data;
         }
     }
