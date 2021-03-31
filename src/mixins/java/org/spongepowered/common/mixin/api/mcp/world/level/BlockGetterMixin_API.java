@@ -53,7 +53,6 @@ public interface BlockGetterMixin_API extends PrimitiveGameVolume {
     @Shadow net.minecraft.world.level.material.FluidState shadow$getFluidState(BlockPos p_204610_1_);
     @Shadow int shadow$getLightEmission(BlockPos p_217298_1_);
     @Shadow int shadow$getMaxLightLevel();
-    @Shadow int shadow$getMaxBuildHeight();
     //@formatter:on
 
     @Override

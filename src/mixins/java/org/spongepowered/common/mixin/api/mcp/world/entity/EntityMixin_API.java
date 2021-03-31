@@ -85,7 +85,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     // @formatter:off
     @Shadow public float yRot;
     @Shadow public float xRot;
-    @Shadow public boolean removed;
     @Final @Shadow protected Random random;
     @Shadow public int tickCount;
     @Shadow protected UUID uuid;

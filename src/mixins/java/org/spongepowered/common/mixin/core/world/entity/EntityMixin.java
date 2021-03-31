@@ -165,7 +165,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract Level shadow$getCommandSenderWorld();
     @Shadow public abstract net.minecraft.world.phys.Vec3 shadow$position();
     @Shadow public abstract MinecraftServer shadow$getServer();
-    @Shadow public abstract void shadow$setLevel(Level worldIn);
     @Shadow @Nullable public abstract ItemEntity shadow$spawnAtLocation(ItemStack stack, float offsetY);
     @Shadow protected abstract void shadow$setRot(float yaw, float pitch);
     @Shadow @Nullable public abstract Entity shadow$getVehicle();

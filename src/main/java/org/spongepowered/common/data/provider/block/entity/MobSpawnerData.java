@@ -120,7 +120,7 @@ public final class MobSpawnerData {
 
     private static WeightedTable<EntityArchetype> getEntities(final BaseSpawner logic) {
         final WeightedTable<EntityArchetype> possibleEntities = new WeightedTable<>();
-        for (final SpawnData weightedEntity : ((BaseSpawnerAccessor) logic).accessor$spawnPotentials()) {
+        for (final SpawnData weightedEntity : ((BaseSpawnerAccessor) logic).accessor$spawnPotentials().unwrap()) {
 
             final CompoundTag nbt = weightedEntity.getTag();
 
