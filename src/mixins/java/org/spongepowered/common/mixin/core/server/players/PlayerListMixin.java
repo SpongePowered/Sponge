@@ -35,6 +35,7 @@ import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
+import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerScoreboard;
@@ -75,7 +76,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
@@ -395,8 +395,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final ServerLevel targetWorld = (ServerLevel) event.destinationWorld();
         ((ServerPlayerBridge) recreatedPlayer).bridge$sendChangeDimension(
             targetWorld.dimensionType(),
-            ((ClientboundRespawnPacketAccessor) packetIn).accessor$dimension(),
-            ((ClientboundRespawnPacketAccessor) packetIn).accessor$seed(),
+            ((ClientboundRespawnPacket) packetIn).getDimension(),
+            ((ClientboundRespawnPacket) packetIn).getSeed(),
             recreatedPlayer.gameMode.getGameModeForPlayer(),
             recreatedPlayer.gameMode.getPreviousGameModeForPlayer(),
             targetWorld.isDebug(),

@@ -34,7 +34,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
 import net.minecraft.Util;
-import net.minecraft.util.WeighedRandom;
+import net.minecraft.util.random.WeightedRandom;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import java.util.List;
@@ -109,14 +109,14 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
      * See {@link EnchantmentHelper#selectEnchantment}
      */
     private List<EnchantmentInstance> basedOfFixedPool(Random randomIn, List<Enchantment> pool) {
-        List<EnchantmentInstance> list = Lists.<EnchantmentInstance>newArrayList();
+        final List<EnchantmentInstance> list = Lists.<EnchantmentInstance>newArrayList();
 
-        List<EnchantmentInstance> list1 = SpongeRandomEnchantmentListBuilder.toNative(pool);
+        final List<EnchantmentInstance> list1 = SpongeRandomEnchantmentListBuilder.toNative(pool);
 
-        // Same code as net.minecraft.enchantment.EnchantmentHelper#buildEnchantmentList
+        // Same code as net.minecraft.enchantment.EnchantmentHelper#selectEnchantment
         if (!list1.isEmpty())
         {
-            WeighedRandom.getRandomItem(randomIn, list1).ifPresent(list::add);
+            WeightedRandom.getRandomItem(randomIn, list1).ifPresent(list::add);
 
             while (randomIn.nextInt(50) <= this.level)
             {
@@ -127,7 +127,7 @@ public final class SpongeRandomEnchantmentListBuilder implements Enchantment.Ran
                     break;
                 }
 
-                WeighedRandom.getRandomItem(randomIn, list1).ifPresent(list::add);
+                WeightedRandom.getRandomItem(randomIn, list1).ifPresent(list::add);
                 this.level /= 2;
             }
         }

@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.network.protocol.game.ServerboundResourcePackPacketAccessor;
 import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerImplBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -39,15 +39,15 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 public final class ResourcePackState extends BasicPacketState {
 
     @Override
-    public void unwind(BasicPacketContext phaseContext) {
+    public void unwind(final BasicPacketContext phaseContext) {
         final net.minecraft.server.level.ServerPlayer player = phaseContext.getPacketPlayer();
 
         final ServerGamePacketListenerImpl connection = player.connection;
         final ServerGamePacketListenerImplBridge mixinHandler = (ServerGamePacketListenerImplBridge) connection;
-        final ServerboundResourcePackPacketAccessor resource = phaseContext.getPacket();
+        final ServerboundResourcePackPacket resource = phaseContext.getPacket();
         final ResourcePackStatusEvent.ResourcePackStatus status;
-        ResourcePack pack;
-        switch (resource.accessor$action()) {
+        final ResourcePack pack;
+        switch (resource.getAction()) {
             case ACCEPTED:
                 pack = mixinHandler.bridge$popReceivedResourcePack(true);
                 status = ResourcePackStatusEvent.ResourcePackStatus.ACCEPTED;

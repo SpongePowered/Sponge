@@ -142,7 +142,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         final Level level, final BlockPos entityPos, final BlockState state, final AbstractFurnaceBlockEntity entity) {
         final int clampedCookTime = Mth.clamp(newCookTime, zero, totalCookTime);
         final ItemStackSnapshot fuel = ItemStackUtil.snapshotOf(((AbstractFurnaceBlockEntityMixin) (Object) entity).items.get(1));
-        final Cause cause = PhaseTracker.getCauseStackManager().getCurrentCause();
+        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final AbstractCookingRecipe recipe = ((AbstractFurnaceBlockEntityMixin) (Object) entity).impl$getCurrentRecipe();
         final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
                 Optional.of((CookingRecipe) recipe), Collections.emptyList());

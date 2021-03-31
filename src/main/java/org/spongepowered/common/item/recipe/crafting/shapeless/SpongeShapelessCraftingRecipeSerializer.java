@@ -66,7 +66,7 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
         if (nonnulllist.size() > 9) {
             throw new JsonParseException("Too many ingredients for shapeless recipe");
         }
-        final ItemStack itemstack = ShapedRecipe.itemFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
+        final ItemStack itemstack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
         final ItemStack spongeStack = ResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
         final Function<CraftingContainer, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
         final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction = ResultUtil.deserializeRemainingItemsFunction(json);

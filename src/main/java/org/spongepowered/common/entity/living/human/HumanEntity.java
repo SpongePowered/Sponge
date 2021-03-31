@@ -72,7 +72,6 @@ import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scoreboard.TeamMember;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoPacketAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
@@ -469,10 +468,9 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      * @param action The action to apply on the tab list
      * @return A new tab list packet
      */
-    @SuppressWarnings("ConstantConditions")
     public ClientboundPlayerInfoPacket createPlayerListPacket(final ClientboundPlayerInfoPacket.Action action) {
         final ClientboundPlayerInfoPacket packet = new ClientboundPlayerInfoPacket(action);
-        ((ClientboundPlayerInfoPacketAccessor) packet).accessor$entries()
+        packet.getEntries()
                 .add(new PlayerUpdate(this.fakeProfile, 0, GameType.DEFAULT_MODE, this.getDisplayName()));
         return packet;
     }

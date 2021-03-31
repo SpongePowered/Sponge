@@ -78,10 +78,6 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     private UUID impl$uuid;
     private CompoundTag impl$nbt;
 
-    public MapItemSavedDataMixin(final String name) {
-        super(name);
-    }
-
     @Override
     public void bridge$updateWholeMap() {
         this.shadow$setColorsDirty(0,0);
@@ -137,7 +133,7 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     public void bridge$initMapId(final int id) {
         // TODO: Move this to Level#setMapData or MapItem#createAndStoreSavedData?
         this.impl$mapId = id;
-        final SpongeMapStorage mapStorage = (SpongeMapStorage) Sponge.getServer().getMapStorage();
+        final SpongeMapStorage mapStorage = (SpongeMapStorage) Sponge.server().mapStorage();
         mapStorage.addMapInfo((MapInfo) this);
         this.impl$uuid = mapStorage.requestUUID(this.impl$mapId);
     }

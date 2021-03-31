@@ -33,7 +33,6 @@ import com.google.common.collect.Maps;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket.PlayerUpdate;
 import net.minecraft.network.protocol.game.ClientboundTabListPacket;
 import net.minecraft.world.level.GameType;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -41,10 +40,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoPacketAccessor;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundTabListPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.network.PacketUtil;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.ArrayList;
@@ -113,7 +109,7 @@ public final class SpongeTabList implements TabList {
     @SuppressWarnings("ConstantConditions")
     private void refreshClientHeaderFooter() {
         // MC-98180 - Sending null as header or footer will cause an exception on the client
-        final ClientboundTabListPacket packet = PacketUtil.createClientboundTabListPacket(
+        final ClientboundTabListPacket packet = new ClientboundTabListPacket(
             this.header == null ? SpongeTabList.EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.header),
             this.footer == null ? SpongeTabList.EMPTY_COMPONENT : SpongeAdventure.asVanilla(this.footer)
         );
@@ -194,7 +190,7 @@ public final class SpongeTabList implements TabList {
         final ClientboundPlayerInfoPacket.PlayerUpdate data = new ClientboundPlayerInfoPacket.PlayerUpdate(SpongeGameProfile.toMcProfile(entry.profile()),
             entry.latency(), (GameType) (Object) entry.gameMode(),
             entry.displayName().isPresent() ? SpongeAdventure.asVanilla(entry.displayName().get()) : null);
-        ((ClientboundPlayerInfoPacketAccessor) packet).accessor$entries().add(data);
+        packet.getEntries().add(data);
         this.player.connection.send(packet);
     }
 
@@ -208,8 +204,8 @@ public final class SpongeTabList implements TabList {
      */
     @SuppressWarnings("ConstantConditions")
     public void updateEntriesOnSend(final ClientboundPlayerInfoPacket packet) {
-        for (final ClientboundPlayerInfoPacket.PlayerUpdate data : ((ClientboundPlayerInfoPacketAccessor) packet).accessor$entries()) {
-            final ClientboundPlayerInfoPacket.Action action = ((ClientboundPlayerInfoPacketAccessor) packet).accessor$action();
+        for (final ClientboundPlayerInfoPacket.PlayerUpdate data : packet.getEntries()) {
+            final ClientboundPlayerInfoPacket.Action action = packet.getAction();
             if (action == ClientboundPlayerInfoPacket.Action.ADD_PLAYER) {
                 // If an entry with the same id exists nothing will be done
                 this.addEntry(data);

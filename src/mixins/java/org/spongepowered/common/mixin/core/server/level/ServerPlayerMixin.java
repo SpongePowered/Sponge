@@ -103,7 +103,6 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
-import org.spongepowered.common.accessor.network.protocol.game.ServerboundClientInformationPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
@@ -788,14 +787,13 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             return;
         }
 
-        final ServerboundClientInformationPacketAccessor $packet = (ServerboundClientInformationPacketAccessor) packet;
-        final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
+        final Locale newLocale = LocaleCache.getLocale(packet.getLanguage());
 
         final ImmutableSet<SkinPart> skinParts = Sponge.game().registries().registry(RegistryTypes.SKIN_PART).stream()
                 .map(part -> (SpongeSkinPart) part)
                 .filter(part -> part.test(packet.getModelCustomisation()))
                 .collect(ImmutableSet.toImmutableSet());
-        final int viewDistance = $packet.accessor$viewDistance();
+        final int viewDistance = packet.getViewDistance();
 
         // Post before the player values are updated
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -814,12 +812,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Inject(method = "updateOptions", at = @At("TAIL"))
     private void impl$updateTrackedClientSettings(final ServerboundClientInformationPacket packet, final CallbackInfo ci) {
-        final ServerboundClientInformationPacketAccessor $packet = (ServerboundClientInformationPacketAccessor) packet;
-        final Locale newLocale = LocaleCache.getLocale($packet.accessor$language());
-        final int viewDistance = $packet.accessor$viewDistance();
+        final Locale newLocale = LocaleCache.getLocale(packet.getLanguage());
 
         // Update the fields we track ourselves
-        this.impl$viewDistance = viewDistance;
+        this.impl$viewDistance = packet.getViewDistance();
         this.bridge$setLanguage(newLocale);
         this.impl$language = newLocale;
     }

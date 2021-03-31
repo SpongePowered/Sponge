@@ -78,7 +78,6 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.common.accessor.client.KeyMappingAccessor;
 import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAccessor;
-import org.spongepowered.common.accessor.network.chat.TextColorAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
 import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
@@ -337,7 +336,7 @@ public final class SpongeAdventure {
         if (color == null) {
             return null;
         }
-        return TextColor.color(((TextColorAccessor) (Object) color).accessor$value());
+        return TextColor.color(color.getValue());
     }
 
     public static @Nullable TextColor asAdventure(final ChatFormatting formatting) {

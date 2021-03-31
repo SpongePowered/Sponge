@@ -111,6 +111,6 @@ public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseM
 
     @Override
     public List<DataHolder> impl$delegateDataHolder() {
-        return Arrays.asList(this, this.getType());
+        return Arrays.asList(this, this.type());
     }
 }

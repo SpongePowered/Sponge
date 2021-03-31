@@ -49,7 +49,6 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.network.protocol.game.ServerboundCustomPayloadPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;

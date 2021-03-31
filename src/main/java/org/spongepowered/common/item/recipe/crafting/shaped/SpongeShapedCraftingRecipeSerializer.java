@@ -66,7 +66,7 @@ public class SpongeShapedCraftingRecipeSerializer extends ShapedRecipe.Serialize
         final int i = astring[0].length();
         final int j = astring.length;
         final NonNullList<Ingredient> nonnulllist = ShapedRecipeAccessor.invoker$dissolvePattern(astring, map, i, j);
-        final ItemStack itemstack = ShapedRecipe.itemFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
+        final ItemStack itemstack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
         final ItemStack spongeStack = ResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
         final Function<CraftingContainer, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
         final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction = ResultUtil.deserializeRemainingItemsFunction(json);

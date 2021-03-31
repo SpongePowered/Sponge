@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.network;
 
-import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
-import net.minecraft.network.protocol.game.ClientboundTabListPacket;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -34,8 +32,6 @@ import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundAddPlayerPacketAccessor;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundTabListPacketAccessor;
-import org.spongepowered.common.accessor.network.protocol.login.ClientboundCustomQueryPacketAccessor;
 
 import java.lang.invoke.MethodHandle;
 import java.lang.invoke.MethodHandles;
@@ -75,12 +71,7 @@ public final class PacketUtil {
     }
 
     public static net.minecraft.network.protocol.Packet<?> createLoginPayloadRequest(final ResourceKey channel, final ChannelBuf payload, final int transactionId) {
-        final ClientboundCustomQueryPacket packet = PacketUtil.createPacketWithoutConstructor(ClientboundCustomQueryPacket.class);
-        final ClientboundCustomQueryPacketAccessor accessor = (ClientboundCustomQueryPacketAccessor) packet;
-        accessor.accessor$identifier((ResourceLocation) (Object) channel);
-        accessor.accessor$transactionId(transactionId);
-        accessor.accessor$data((FriendlyByteBuf) payload);
-        return packet;
+        return new ClientboundCustomQueryPacket(transactionId, (ResourceLocation) (Object) channel, (FriendlyByteBuf) payload);
     }
 
     public static net.minecraft.network.protocol.Packet<?> createPlayPayload(final ResourceKey channel, final ChannelBuf payload, final EngineConnectionSide<?> side) {
@@ -111,14 +102,6 @@ public final class PacketUtil {
         accessor.accessor$z(z);
         accessor.accessor$yRot(yRot);
         accessor.accessor$xRot(xRot);
-        return packet;
-    }
-
-    public static ClientboundTabListPacket createClientboundTabListPacket(final Component header, final Component footer) {
-        final ClientboundTabListPacket packet = PacketUtil.createPacketWithoutConstructor(ClientboundTabListPacket.class);
-        final ClientboundTabListPacketAccessor accessor = (ClientboundTabListPacketAccessor) packet;
-        accessor.accessor$header(header);
-        accessor.accessor$footer(header);
         return packet;
     }
 

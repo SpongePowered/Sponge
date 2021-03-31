@@ -43,10 +43,6 @@ import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundCustomPayloadPacketAccessor;
-import org.spongepowered.common.accessor.network.protocol.game.ServerboundCustomPayloadPacketAccessor;
-import org.spongepowered.common.accessor.network.protocol.login.ClientboundCustomQueryPacketAccessor;
-import org.spongepowered.common.accessor.network.protocol.login.ServerboundCustomQueryPacketAccessor;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
@@ -279,19 +275,15 @@ public class SpongeChannelRegistry implements ChannelRegistry {
     }
 
     public boolean handlePlayPayload(final EngineConnection connection, final ServerboundCustomPayloadPacket packet) {
-        final ServerboundCustomPayloadPacketAccessor accessor = (ServerboundCustomPayloadPacketAccessor) packet;
-
-        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$identifier();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
+        final ResourceKey channel = (ResourceKey) (Object) packet.getIdentifier();
+        final ChannelBuf payload = (ChannelBuf) packet.getData();
 
         return this.handlePlayPayload(connection, channel, payload);
     }
 
     public boolean handlePlayPayload(final EngineConnection connection, final ClientboundCustomPayloadPacket packet) {
-        final ClientboundCustomPayloadPacketAccessor accessor = (ClientboundCustomPayloadPacketAccessor) packet;
-
-        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$identifier();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
+        final ResourceKey channel = (ResourceKey) (Object) packet.getIdentifier();
+        final ChannelBuf payload = (ChannelBuf) packet.getData();
 
         return this.handlePlayPayload(connection, channel, payload);
     }
@@ -337,11 +329,9 @@ public class SpongeChannelRegistry implements ChannelRegistry {
 
     public boolean handleLoginRequestPayload(final EngineConnection connection, final ClientboundCustomQueryPacket packet) {
         // Server -> Client request
-
-        final ClientboundCustomQueryPacketAccessor accessor = (ClientboundCustomQueryPacketAccessor) packet;
-        final ResourceKey channel = (ResourceKey) (Object) accessor.accessor$identifier();
-        final int transactionId = accessor.accessor$transactionId();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
+        final ResourceKey channel = (ResourceKey) (Object) packet.getIdentifier();
+        final int transactionId = packet.getTransactionId();
+        final ChannelBuf payload = (ChannelBuf) packet.getData();
 
         try {
             return this.handleLoginRequestPayload(connection, channel, transactionId, payload);
@@ -386,9 +376,8 @@ public class SpongeChannelRegistry implements ChannelRegistry {
     public void handleLoginResponsePayload(final EngineConnection connection, final ServerboundCustomQueryPacket packet) {
         // Client -> Server response
 
-        final ServerboundCustomQueryPacketAccessor accessor = (ServerboundCustomQueryPacketAccessor) packet;
-        final int transactionId = accessor.accessor$transactionId();
-        final ChannelBuf payload = (ChannelBuf) accessor.accessor$data();
+        final int transactionId = packet.getTransactionId();
+        final ChannelBuf payload = (ChannelBuf) packet.getData();
 
         try {
             this.handleLoginResponsePayload(connection, transactionId, payload);

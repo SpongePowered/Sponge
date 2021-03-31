@@ -30,11 +30,5 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ClientIntentionPacket.class)
 public interface ClientIntentionPacketAccessor {
-
-    @Accessor("hostName") String accessor$hostName();
-
     @Accessor("hostName") void accessor$hostName(final String hostName);
-
-    @Accessor("port") int accessor$port();
-
 }

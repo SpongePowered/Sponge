@@ -60,7 +60,7 @@ public abstract class ServerHandshakePacketListenerImplMixin_IpForward {
     private void bungee$patchHandshake(final ClientIntentionPacket packet, final CallbackInfo ci) {
         if (SpongeConfigs.getCommon().get().ipForwarding.mode == IpForwardingCategory.Mode.LEGACY
             && packet.getIntention() == ConnectionProtocol.LOGIN) {
-            final String ip = ((ClientIntentionPacketAccessor) packet).accessor$hostName();
+            final String ip = packet.getHostName();
             final String[] split = ip.split("\00\\|", 2)[0].split("\00"); // ignore any extra data
 
             if (split.length == 3 || split.length == 4) {

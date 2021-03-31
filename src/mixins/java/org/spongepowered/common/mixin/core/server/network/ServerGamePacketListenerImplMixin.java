@@ -117,6 +117,7 @@ import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
@@ -270,13 +271,13 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
 
         // During login, minecraft sends a packet containing neither the 'moving' or 'rotating' flag set - but only once.
         // We don't fire an event to avoid confusing plugins.
-        if (!packetInAccessor.accessor$hasPos() && !packetInAccessor.accessor$hasRot()) {
+        if (!packetIn.hasPosition() && !packetIn.hasRotation()) {
             return;
         }
 
         final boolean goodMovementPacket = this.receivedMovePacketCount - this.knownMovePacketCount <= 5;
-        final boolean fireMoveEvent = goodMovementPacket && packetInAccessor.accessor$hasPos() && ShouldFire.MOVE_ENTITY_EVENT;
-        final boolean fireRotationEvent = goodMovementPacket && packetInAccessor.accessor$hasRot() && ShouldFire.ROTATE_ENTITY_EVENT;
+        final boolean fireMoveEvent = goodMovementPacket && packetIn.hasPosition() && ShouldFire.MOVE_ENTITY_EVENT;
+        final boolean fireRotationEvent = goodMovementPacket && packetIn.hasRotation() && ShouldFire.ROTATE_ENTITY_EVENT;
 
         final ServerPlayer player = (ServerPlayer) this.player;
         final Vector3d fromRotation = new Vector3d(this.player.yRot, this.player.xRot, 0);
@@ -371,11 +372,11 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
                     target = "Lnet/minecraft/world/entity/Entity;interactAt(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
             )
     )
-    public void impl$onRightClickAtEntity(final ServerboundInteractPacket p_147340_1, final CallbackInfo ci) {
-        final Entity entity = p_147340_1.getTarget(this.player.getLevel());
-        final ItemStack itemInHand = p_147340_1.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(p_147340_1.getHand());
+    public void impl$onRightClickAtEntity(final ServerboundInteractPacket interact, final CallbackInfo ci) {
+        final Entity entity = interact.getTarget(this.player.getLevel());
+        final ItemStack itemInHand = interact.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(interact.getHand());
         final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
-                .callInteractEntityEventSecondary(this.player, itemInHand, entity, p_147340_1.getHand(), VecHelper.toVector3d(p_147340_1.getLocation()));
+                .callInteractEntityEventSecondary(this.player, itemInHand, entity, interact.getHand(), VecHelper.toVector3d(interact.getLocation()));
         if (event.isCancelled()) {
             ci.cancel();
         } else {

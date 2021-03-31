@@ -47,8 +47,7 @@ public abstract class ServerHandshakePacketListenerImplMixin implements Connecti
     private void impl$updateVersionAndHost(final ClientIntentionPacket packetIn, final CallbackInfo ci) {
         final ConnectionBridge info = (ConnectionBridge) this.connection;
         info.bridge$setVersion(packetIn.getProtocolVersion());
-        info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(
-                ((ClientIntentionPacketAccessor) packetIn).accessor$hostName()), ((ClientIntentionPacketAccessor) packetIn).accessor$port());
+        info.bridge$setVirtualHost(NetworkUtil.cleanVirtualHost(packetIn.getHostName()), packetIn.getPort());
     }
 
     @Override

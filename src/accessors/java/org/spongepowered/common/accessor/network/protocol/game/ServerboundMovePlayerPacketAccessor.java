@@ -43,10 +43,6 @@ public interface ServerboundMovePlayerPacketAccessor {
 
     @Accessor("z") void accessor$z(final double z);
 
-    @Accessor("hasPos") boolean accessor$hasPos();
-
     @Accessor("hasPos") void accessor$hasPos(final boolean hasPos);
-
-    @Accessor("hasRot") boolean accessor$hasRot();
 
 }

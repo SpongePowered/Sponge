@@ -54,7 +54,7 @@ public class SpongeSmithingRecipeSerializer<R extends UpgradeRecipe> implements 
 
         final Function<Container, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
 
-        ItemStack itemstack = ShapedRecipe.itemFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
+        ItemStack itemstack = ShapedRecipe.itemStackFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
         final ItemStack spongeStack = ResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
 
         return (R) new SpongeSmithingRecipe(recipeId, base, addition, spongeStack == null ? itemstack : spongeStack, resultFunction);
