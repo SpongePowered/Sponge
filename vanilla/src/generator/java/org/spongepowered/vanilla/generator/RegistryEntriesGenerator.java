@@ -161,7 +161,7 @@ class RegistryEntriesGenerator<V> implements Generator {
         GAME {
             @Override
             protected CodeBlock registryKeyToReference() {
-                return CodeBlock.of("asDefaultedReference(() -> $T.getGame().registries())", Types.SPONGE);
+                return CodeBlock.of("asDefaultedReference(() -> $T.game().registries())", Types.SPONGE);
             }
 
             @Override
@@ -177,7 +177,7 @@ class RegistryEntriesGenerator<V> implements Generator {
         SERVER {
             @Override
             protected CodeBlock registryKeyToReference() {
-                return CodeBlock.of("asDefaultedReference(() -> $T.getServer().registries())", Types.SPONGE);
+                return CodeBlock.of("asDefaultedReference(() -> $T.server().registries())", Types.SPONGE);
             }
 
             @Override

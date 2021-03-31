@@ -181,8 +181,8 @@ class RegistryEntriesValidator<V> implements Generator {
     }
 
     private FieldDeclaration makeField(final String ownType, final String factoryMethod, final ResourceLocation element) {
-        FieldDeclaration fieldDeclaration = new FieldDeclaration();
-        VariableDeclarator variable = new VariableDeclarator(StaticJavaParser.parseType("DefaultedRegistryReference<FixMe>"), Types.keyToFieldName(element.getPath()));
+        final FieldDeclaration fieldDeclaration = new FieldDeclaration();
+        final VariableDeclarator variable = new VariableDeclarator(StaticJavaParser.parseType("DefaultedRegistryReference<FixMe>"), Types.keyToFieldName(element.getPath()));
         fieldDeclaration.getVariables().add(variable);
         fieldDeclaration.setModifiers(createModifierList(Keyword.PUBLIC, Keyword.STATIC, Keyword.FINAL));
         variable.setInitializer(new MethodCallExpr(new NameExpr(ownType), factoryMethod, new NodeList<>(RegistryEntriesValidator.resourceKey(element))));
