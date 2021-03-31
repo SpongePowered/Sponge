@@ -68,7 +68,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
     private void onHandleCustomPayload(final ServerboundCustomPayloadPacket packet, final CallbackInfo ci) {
         // For some reason, "ServerboundCustomPayloadPacket" is released in the processPacket
         // method of its class, only applicable to this packet, so just retain here.
-        ((ServerboundCustomPayloadPacketAccessor) packet).accessor$data().retain();
+        packet.getData().retain();
 
         final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.channelRegistry();
         this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet));
