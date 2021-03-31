@@ -364,43 +364,6 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         }
     }
 
-    @Inject(
-            method = "handleInteract",
-            cancellable = true,
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/Entity;interactAt(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"
-            )
-    )
-    public void impl$onRightClickAtEntity(final ServerboundInteractPacket interact, final CallbackInfo ci) {
-        final Entity entity = interact.getTarget(this.player.getLevel());
-        final ItemStack itemInHand = interact.getHand() == null ? ItemStack.EMPTY : this.player.getItemInHand(interact.getHand());
-        final InteractEntityEvent.Secondary event = SpongeCommonEventFactory
-                .callInteractEntityEventSecondary(this.player, itemInHand, entity, interact.getHand(), VecHelper.toVector3d(interact.getLocation()));
-        if (event.isCancelled()) {
-            ci.cancel();
-        } else {
-            this.impl$ignorePackets++;
-        }
-    }
-
-    @Inject(
-            method = "handleInteract",
-            cancellable = true,
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;attack(Lnet/minecraft/world/entity/Entity;)V")
-    )
-    public void impl$onLeftClickEntity(final ServerboundInteractPacket p_147340_1_, final CallbackInfo ci) {
-        final Entity entity = p_147340_1_.getTarget(this.player.getLevel());
-
-        final InteractEntityEvent.Primary event = SpongeCommonEventFactory.callInteractEntityEventPrimary(this.player,
-                this.player.getItemInHand(this.player.getUsedItemHand()), entity, this.player.getUsedItemHand());
-        if (event.isCancelled()) {
-            ci.cancel();
-        } else {
-            this.impl$ignorePackets++;
-        }
-    }
-
     @SuppressWarnings("ConstantConditions")
     @Inject(method = "handleAnimate",
             at = @At(value = "INVOKE",
