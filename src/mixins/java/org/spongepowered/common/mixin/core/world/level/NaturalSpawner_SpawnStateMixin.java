@@ -58,6 +58,9 @@ public abstract class NaturalSpawner_SpawnStateMixin implements NaturalSpawner_S
             case AMBIENT:
                 maxInstancesPerChunk = spawnLimits.ambient;
                 break;
+            case UNDERGROUND_WATER_CREATURE:
+                maxInstancesPerChunk = spawnLimits.undergroundAquaticCreature;
+                break;
             case WATER_CREATURE:
                 maxInstancesPerChunk = spawnLimits.aquaticCreature;
                 break;

@@ -84,6 +84,8 @@ public abstract class NaturalSpawnerMixin {
                 return tickRates.creature;
             case AMBIENT:
                 return tickRates.ambient;
+            case UNDERGROUND_WATER_CREATURE:
+                return tickRates.undergroundAquaticCreature;
             case WATER_CREATURE:
                 return tickRates.aquaticCreature;
             case WATER_AMBIENT:

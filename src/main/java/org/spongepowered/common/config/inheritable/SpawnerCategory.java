@@ -48,6 +48,10 @@ public final class SpawnerCategory {
         @Comment("The number of creatures the spawner can potentially spawn around a player.")
         public int creature = 10;
 
+        @Setting("underground-aquatic-creature")
+        @Comment("The number of underground aquatic creatures the spawner can potentially spawn around a player.")
+        public int undergroundAquaticCreature = 5;
+
         @Setting("aquatic-creature")
         @Comment("The number of aquatic creatures the spawner can potentially spawn around a player.")
         public int aquaticCreature = 5;
@@ -71,6 +75,10 @@ public final class SpawnerCategory {
         @Setting
         @Comment("The creature spawning tick rate. Default: 1")
         public int creature = 1;
+
+        @Setting("underground-aquatic-creature")
+        @Comment("The underground aquatic creature spawning tick rate. Default: 1")
+        public int undergroundAquaticCreature = 1;
 
         @Setting("aquatic-creature")
         @Comment("The aquatic creature spawning tick rate. Default: 1")
