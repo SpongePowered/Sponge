@@ -303,8 +303,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
             final CompoundTag compound = new CompoundTag();
             this.shadow$saveAsPassenger(compound);
             final Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, this.shadow$getCommandSenderWorld(), (createdEntity) -> {
-                compound.putUUID(Constants.UUID, createdEntity.getUUID());
-                createdEntity.load(compound);
+                createdEntity.setUUID(UUID.randomUUID());
                 return createdEntity;
             });
             return (org.spongepowered.api.entity.Entity) entity;
