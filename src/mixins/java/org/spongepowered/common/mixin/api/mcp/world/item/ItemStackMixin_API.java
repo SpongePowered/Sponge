@@ -27,6 +27,11 @@ package org.spongepowered.common.mixin.api.mcp.world.item;
 import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Multimap;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.entity.ai.attributes.Attribute;
+import net.minecraft.world.item.Item;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.SerializableDataHolder;
@@ -51,11 +56,6 @@ import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.Constants;
 
 import java.util.Collection;
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.entity.ai.attributes.Attribute;
-import net.minecraft.world.item.Item;
 
 @Mixin(net.minecraft.world.item.ItemStack.class)
 @Implements(@Interface(iface = ItemStack.class, prefix = "itemStack$")) // We need to soft implement this interface due to a synthetic bridge method
@@ -73,7 +73,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
     @Shadow public abstract CompoundTag shadow$getTag();
     @Shadow public abstract net.minecraft.world.item.ItemStack shadow$copy();
     @Shadow public abstract Item shadow$getItem();
-    @Shadow public abstract Multimap<String, net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getAttributeModifiers(EquipmentSlot equipmentSlot);
+    @Shadow public abstract Multimap<Attribute, net.minecraft.world.entity.ai.attributes.AttributeModifier> shadow$getAttributeModifiers(EquipmentSlot equipmentSlot);
     @Shadow public abstract void shadow$addAttributeModifier(Attribute attribute, net.minecraft.world.entity.ai.attributes.AttributeModifier modifier, @Nullable EquipmentSlot equipmentSlot);
     // @formatter:on
 
@@ -135,10 +135,8 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
 
         final ImmutableList.Builder<AttributeModifier> builder = ImmutableList.builder();
 
-//        for (EquipmentSlotType equipmentSlotType : ((SpongeEquipmentType) equipmentType).getSlots()) {
-//            final Multimap<String, net.minecraft.entity.ai.attributes.AttributeModifier> modifierMultimap = this.shadow$getAttributeModifiers(equipmentSlotType);
-//            builder.addAll((Iterable) modifierMultimap.get(attributeType.getKey().getValue()));
-//        }
+        final Multimap<Attribute, net.minecraft.world.entity.ai.attributes.AttributeModifier> modifierMultimap = this.shadow$getAttributeModifiers(((EquipmentSlot) (Object) equipmentType));
+        builder.addAll((Iterable) modifierMultimap.get(((Attribute) attributeType)));
 
         return builder.build();
     }
@@ -148,16 +146,7 @@ public abstract class ItemStackMixin_API implements SerializableDataHolder.Mutab
         Preconditions.checkNotNull(modifier, "Attribute modifier cannot be null");
         Preconditions.checkNotNull(equipmentType, "Equipment type cannot be null");
 
-//        if (equipmentType.equals(EquipmentTypes.ANY.get()) || equipmentType.equals(EquipmentTypes.EQUIPPED.get())) {
-//            // Any equipment slot = null
-//            this.shadow$addAttributeModifier(modifier.getName(), (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, null);
-//            return;
-//        }
-//
-//        // Get all slots this modifier applies to, and apply
-//        for (EquipmentSlotType equipmentSlotType : ((SpongeEquipmentType) equipmentType).getSlots()) {
-//            this.shadow$addAttributeModifier(modifier.getName(), (net.minecraft.entity.ai.attributes.AttributeModifier) modifier, equipmentSlotType);
-//        }
+        this.shadow$addAttributeModifier((Attribute) attributeType, (net.minecraft.world.entity.ai.attributes.AttributeModifier) modifier, ((EquipmentSlot) (Object) equipmentType));
     }
 
     @Override
