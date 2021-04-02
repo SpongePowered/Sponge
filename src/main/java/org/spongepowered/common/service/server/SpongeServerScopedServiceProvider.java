@@ -38,7 +38,6 @@ import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.context.ContextService;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.healthcheck.HealthCheckService;
-import org.spongepowered.api.service.metrics.MetricsService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.event.lifecycle.AbstractProvideServiceEventImpl;
@@ -122,10 +121,5 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
     @Override
     public HealthCheckService healthCheckService() {
         return this.provideUnchecked(HealthCheckService.class);
-    }
-
-    @Override
-    public MetricsService metricsService() {
-        return this.provideUnchecked(MetricsService.class);
     }
 }

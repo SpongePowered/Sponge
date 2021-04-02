@@ -25,8 +25,6 @@
 package org.spongepowered.common.event.tracking;
 
 import co.aikar.timings.Timing;
-import io.prometheus.client.Counter;
-import io.prometheus.client.Histogram;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
@@ -50,6 +48,8 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.TickBlockEvent;
+import org.spongepowered.api.metrics.Meter;
+import org.spongepowered.api.metrics.meter.Histogram;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
@@ -108,15 +108,12 @@ import static com.google.common.base.Preconditions.checkNotNull;
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class TrackingUtil {
 
-    private static final Histogram PHASE_TICK_DURATION = Histogram.build()
-            .namespace("sponge")
-            .subsystem("phase_tracker")
-            .name("tick_duration")
-            .unit("seconds")
+    private static final Histogram PHASE_TICK_DURATION = Meter.newHistogram()
+            .name("sponge", "phase_tracker", "tick_duration", "seconds")
             .help("Duration of tileentity tick calls?")
             .labelNames("phase")
             .exponentialBuckets(1E-9, 10, 10)
-            .register();
+            .build();
 
     public static final Marker ENTITY_TICK = MarkerManager.getMarker("ENTITY TICK");
     public static final Marker TILE_ENTITY_TICK = MarkerManager.getMarker("TILE ENTITY TICK");
@@ -147,7 +144,7 @@ public final class TrackingUtil {
         }
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
-        PHASE_TICK_DURATION.labels("entity").time(() -> {
+        PHASE_TICK_DURATION.time(() -> {
             try (final EntityTickContext context = tickContext;
                  final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
             ) {
@@ -169,7 +166,7 @@ public final class TrackingUtil {
             } catch (final Exception e) {
                 PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
             }
-        });
+        }, "entity");
     }
 
     public static void tickRidingEntity(final net.minecraft.world.entity.Entity entity) {
@@ -219,7 +216,7 @@ public final class TrackingUtil {
             ((ActiveChunkReferantBridge) tile).bridge$setActiveChunk((TrackedLevelChunkBridge) tileEntity.getLevel().getChunkAt(tileEntity.getBlockPos()));
         }
 
-        PHASE_TICK_DURATION.labels("blockentity").time(() -> {
+        PHASE_TICK_DURATION.time(() -> {
             final TileEntityTickContext context = TickPhase.Tick.TILE_ENTITY.createPhaseContext(PhaseTracker.SERVER).source(mixinTileEntity);
             try (final PhaseContext<?> phaseContext = context) {
 
@@ -245,7 +242,7 @@ public final class TrackingUtil {
             if (tileEntity.isRemoved()) {
                 ((ActiveChunkReferantBridge) tileEntity).bridge$setActiveChunk(null);
             }
-        });
+        }, "blockentity");
     }
 
     @SuppressWarnings("rawtypes")
@@ -271,7 +268,7 @@ public final class TrackingUtil {
         currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
 
-        PHASE_TICK_DURATION.labels("block").time(() -> {
+        PHASE_TICK_DURATION.time(() -> {
             try (final PhaseContext<@NonNull ?> context = phaseContext;
                  final Timing timing = ((TimingBridge) block.getBlock()).bridge$getTimingsHandler()) {
                 timing.startTiming();
@@ -282,7 +279,7 @@ public final class TrackingUtil {
                 PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
 
             }
-        });
+        }, "block");
     }
 
     public static void updateTickFluid(
@@ -311,7 +308,7 @@ public final class TrackingUtil {
         currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
 
-        PHASE_TICK_DURATION.labels("fluid").time(() -> {
+        PHASE_TICK_DURATION.time(() -> {
             try (final PhaseContext<?> context = phaseContext;
                  final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
                 timing.startTiming();
@@ -322,7 +319,7 @@ public final class TrackingUtil {
                 PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
 
             }
-        });
+        }, "fluid");
     }
 
     @SuppressWarnings("rawtypes")
@@ -353,7 +350,7 @@ public final class TrackingUtil {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
-        PHASE_TICK_DURATION.labels("random_block").time(() -> {
+        PHASE_TICK_DURATION.time(() -> {
             try (final PhaseContext<@NonNull ?> context = phaseContext) {
                 context.buildAndSwitch();
                 PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, "Wrapping Random Block Tick: {}", state);
@@ -361,7 +358,7 @@ public final class TrackingUtil {
             } catch (final Exception | NoClassDefFoundError e) {
                 PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
             }
-        });
+        }, "random_block");
     }
     @SuppressWarnings("rawtypes")
     public static void randomTickFluid(final TrackedWorldBridge mixinWorld,
@@ -394,7 +391,7 @@ public final class TrackingUtil {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         currentContext.appendNotifierPreBlockTick(world, pos, phaseContext);
         // Now actually switch to the new phase
-        PHASE_TICK_DURATION.labels("random_fluid").time(() -> {
+        PHASE_TICK_DURATION.time(() -> {
             try (final PhaseContext<@NonNull ?> context = phaseContext) {
                 context.buildAndSwitch();
                 PhaseTracker.LOGGER.trace(TrackingUtil.FLUID_TICK, () -> "Wrapping Random Fluid Tick: " + state.toString());
@@ -402,7 +399,7 @@ public final class TrackingUtil {
             } catch (final Exception | NoClassDefFoundError e) {
                 PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
             }
-        });
+        }, "random_fluid");
     }
 
     public static boolean fireMinecraftBlockEvent(final ServerLevel worldIn, final BlockEventData event,
