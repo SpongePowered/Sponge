@@ -568,7 +568,7 @@ project("SpongeVanilla") {
         injectRepositories().set(false)
         runs {
             // Full development environment
-            sequenceOf(8, 11, 15).forEach {
+            sequenceOf(8, 11, 16).forEach {
                 server("runJava${it}Server") {
                     args("--nogui", "--launchTarget", "sponge_server_dev")
                     // ideaModule("${rootProject.name}.${project.name}.applaunch")
@@ -711,7 +711,7 @@ project("SpongeVanilla") {
             exclude(group = "org.apache.logging.log4j")
         }
         vanillaAppLaunchConfig("org.ow2.asm:asm-commons:$asmVersion")
-        vanillaAppLaunchConfig("cpw.mods:grossjava9hacks:1.1.+") {
+        vanillaAppLaunchConfig("cpw.mods:grossjava9hacks:1.3.3") {
             exclude(group = "org.apache.logging.log4j")
         }
         vanillaAppLaunchConfig("net.fabricmc:access-widener:1.0.2") {

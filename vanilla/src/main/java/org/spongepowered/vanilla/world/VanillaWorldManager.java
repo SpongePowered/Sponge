@@ -580,7 +580,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final String copyDirectoryName = this.getDirectoryName(copyKey);
 
         final Path copyDirectory = isVanillaCopyWorld ? this.defaultWorldDirectory
-                .resolve(copyDirectoryName) : this.customWorldsDirectory.resolve(key.namespace()).resolve(key.value());
+                .resolve(copyDirectoryName) : this.customWorldsDirectory.resolve(copyKey.namespace()).resolve(copyKey.value());
 
         try {
             Files.walkFileTree(originalDirectory, new SimpleFileVisitor<Path>() {
@@ -658,7 +658,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         if (fixedObject != null) {
             try (final BufferedWriter writer = Files.newBufferedWriter(copiedDimensionTemplate)) {
-                writer.write(fixedObject.getAsString());
+                writer.write(fixedObject.toString());
             } catch (final IOException e) {
                 FutureUtil.completedWithException(e);
             }

@@ -28,11 +28,13 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 
 import java.util.OptionalInt;
@@ -40,9 +42,11 @@ import java.util.OptionalInt;
 @Mixin(value = ServerPlayer.class)
 public abstract class ServerPlayerEntityMixin_Inventory extends PlayerEntityMixin_Inventory {
 
-    @Inject(method = "openMenu", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;addSlotListener(Lnet/minecraft/world/inventory/ContainerListener;)V"))
-    private void impl$onOpenMenu(final MenuProvider containerProvider, final CallbackInfoReturnable<OptionalInt> cir) {
-        ((TrackedContainerBridge) this.containerMenu).bridge$trackViewable(containerProvider);
+    @Inject(method = "openMenu",
+            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
+    private void impl$onOpenMenu(final MenuProvider containerProvider, CallbackInfoReturnable<OptionalInt> cir, AbstractContainerMenu var2) {
+        ((TrackedContainerBridge) var2).bridge$trackViewable(containerProvider);
     }
 
     @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;addSlotListener(Lnet/minecraft/world/inventory/ContainerListener;)V"))
