@@ -33,6 +33,10 @@
     </RollingRandomAccessFile>
   </Appenders>
   <Loggers>
+    <!-- Log Vanilla loggers at INFO to suppress some debug messages -->
+    <Logger name="net.minecraft" level="INFO"/>
+    <Logger name="com.mojang" level="INFO"/>
+
     <Root level="DEBUG">
       <AppenderRef ref="SysOut" level="INFO"/>
       <AppenderRef ref="File" level="INFO"/>
