@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
+import com.google.common.collect.ImmutableList;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.random.WeightedRandomList;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.SpawnData;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
@@ -141,7 +143,7 @@ public final class MobSpawnerData {
     }
 
     private static void setEntities(final BaseSpawnerAccessor logic, final WeightedTable<EntityArchetype> table) {
-        logic.accessor$spawnPotentials().clear();
+        final ImmutableList.Builder<SpawnData> builder = ImmutableList.builder();
         for (final TableEntry<EntityArchetype> entry : table) {
             if (!(entry instanceof WeightedObject)) {
                 continue;
@@ -156,7 +158,8 @@ public final class MobSpawnerData {
             }
 
 
-            logic.accessor$spawnPotentials().add(new SpawnData((int) entry.weight(), compound));
+            builder.add(new SpawnData((int) entry.weight(), compound));
         }
+        logic.accessor$spawnPotentials(WeightedRandomList.create(builder.build()));
     }
 }

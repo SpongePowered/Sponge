@@ -25,12 +25,10 @@
 package org.spongepowered.common.accessor.world.level;
 
 import net.minecraft.util.random.WeightedRandomList;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-
-import java.util.List;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.SpawnData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(BaseSpawner.class)
 public interface BaseSpawnerAccessor {
@@ -40,6 +38,8 @@ public interface BaseSpawnerAccessor {
     @Accessor("spawnDelay") void accessor$spawnDelay(final int spawnDelay);
 
     @Accessor("spawnPotentials") WeightedRandomList<SpawnData> accessor$spawnPotentials();
+
+    @Accessor("spawnPotentials") void accessor$spawnPotentials(WeightedRandomList<SpawnData> newData);
 
     @Accessor("nextSpawnData") SpawnData accessor$nextSpawnData();
 
