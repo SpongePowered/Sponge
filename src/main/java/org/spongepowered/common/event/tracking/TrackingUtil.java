@@ -111,7 +111,7 @@ public final class TrackingUtil {
     private static final Histogram PHASE_TICK_DURATION = Meter.newHistogram()
             .name("sponge", "phase_tracker", "tick_duration", "seconds")
             .help("Duration of tileentity tick calls?")
-            .labelNames("phase")
+            .labelNames("phase", "chunk_x", "chunk_z")
             .exponentialBuckets(1E-9, 10, 10)
             .build();
 
@@ -166,7 +166,7 @@ public final class TrackingUtil {
             } catch (final Exception e) {
                 PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, tickContext);
             }
-        }, "entity");
+        }, "entity", entity.xChunk, entity.zChunk);
     }
 
     public static void tickRidingEntity(final net.minecraft.world.entity.Entity entity) {
@@ -242,7 +242,7 @@ public final class TrackingUtil {
             if (tileEntity.isRemoved()) {
                 ((ActiveChunkReferantBridge) tileEntity).bridge$setActiveChunk(null);
             }
-        }, "blockentity");
+        }, "blockentity", pos.getX() >> 4, pos.getZ() >> 4);
     }
 
     @SuppressWarnings("rawtypes")
@@ -279,7 +279,7 @@ public final class TrackingUtil {
                 PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
 
             }
-        }, "block");
+        }, "block", pos.getX() >> 4, pos.getZ() >> 4);
     }
 
     public static void updateTickFluid(
@@ -319,7 +319,7 @@ public final class TrackingUtil {
                 PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
 
             }
-        }, "fluid");
+        }, "fluid", pos.getX() >> 4, pos.getZ() >> 4);
     }
 
     @SuppressWarnings("rawtypes")
@@ -358,7 +358,7 @@ public final class TrackingUtil {
             } catch (final Exception | NoClassDefFoundError e) {
                 PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
             }
-        }, "random_block");
+        }, "random_block", pos.getX() >> 4, pos.getZ() >> 4);
     }
     @SuppressWarnings("rawtypes")
     public static void randomTickFluid(final TrackedWorldBridge mixinWorld,
@@ -399,7 +399,7 @@ public final class TrackingUtil {
             } catch (final Exception | NoClassDefFoundError e) {
                 PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);
             }
-        }, "random_fluid");
+        }, "random_fluid", pos.getX() >> 4, pos.getZ() >> 4);
     }
 
     public static boolean fireMinecraftBlockEvent(final ServerLevel worldIn, final BlockEventData event,
