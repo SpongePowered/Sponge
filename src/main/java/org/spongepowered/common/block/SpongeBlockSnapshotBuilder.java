@@ -156,6 +156,16 @@ public class SpongeBlockSnapshotBuilder extends AbstractDataBuilder<@NonNull Blo
     }
 
     @Override
+    @NonNull
+    public BlockSnapshot empty() {
+        return SpongeBlockSnapshotBuilder.pooled()
+                .world(Constants.World.INVALID_WORLD_KEY)
+                .position(new Vector3i(0, 0, 0))
+                .blockState(Blocks.AIR.defaultBlockState())
+                .build();
+    }
+
+    @Override
     public <V> BlockSnapshot.@NonNull Builder add(@NonNull final Key<@NonNull ? extends Value<V>> key, @NonNull final V value) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(value);

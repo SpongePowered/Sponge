@@ -33,7 +33,6 @@ import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.adventure.SpongeComponents;
-import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
@@ -91,7 +90,6 @@ import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
 import org.spongepowered.common.adventure.AudiencesFactory;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.block.SpongeBlockSnapshotFactory;
 import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
 import org.spongepowered.common.command.parameter.SpongeParameterFactory;
 import org.spongepowered.common.command.parameter.managed.factory.SpongeVariableValueParametersFactory;
@@ -234,7 +232,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(ChunkGenerator.Factory.class, new SpongeChunkGeneratorFactory())
                 .registerFactory(ItemStackComparators.Factory.class, new SpongeItemStackComparatorFactory())
                 .registerFactory(Favicon.Factory.class, new SpongeFavicon.FactoryImpl())
-                .registerFactory(BlockSnapshot.Factory.class, new SpongeBlockSnapshotFactory())
         ;
     }
 }
