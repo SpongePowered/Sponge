@@ -1,13 +1,14 @@
-import java.security.MessageDigest
 import java.util.Locale
 
 plugins {
-    id("org.spongepowered.gradle.vanilla")
+    id("org.spongepowered.gradle.vanilla") version "0.2-SNAPSHOT"
     `maven-publish`
     `java-library`
     eclipse
-    id("org.cadixdev.licenser") version "0.5.0"
+    id("org.cadixdev.licenser") version "0.5.1"
     id("com.github.johnrengelman.shadow") version "6.1.0"
+    id("org.spongepowered.gradle.sponge.dev") version "1.0.2" apply false // for version json generation
+    id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
 }
 
 val apiProject = project.project("SpongeAPI")
@@ -24,7 +25,7 @@ val junitVersion: String by project
 
 minecraft {
     version(minecraftVersion)
-    injectRepositories().set(false)
+    injectRepositories(false)
     project.sourceSets["main"].resources
             .filter { it.name.endsWith(".accesswidener") }
             .files
@@ -79,26 +80,17 @@ tasks {
 version = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
 
 // Configurations
-val minecraftConfig by configurations.named("minecraft")
-val minecraftClasspathConfig by configurations.named("minecraftClasspath")
-
 val applaunchConfig by configurations.register("applaunch")
 
 val launchConfig by configurations.register("launch") {
-    extendsFrom(minecraftConfig)
-    extendsFrom(minecraftClasspathConfig)
     extendsFrom(applaunchConfig)
 }
 val accessorsConfig by configurations.register("accessors") {
-    extendsFrom(minecraftConfig)
     extendsFrom(launchConfig)
-    extendsFrom(minecraftClasspathConfig)
 }
 val mixinsConfig by configurations.register("mixins") {
     extendsFrom(applaunchConfig)
     extendsFrom(launchConfig)
-    extendsFrom(minecraftConfig)
-    extendsFrom(minecraftClasspathConfig)
 }
 
 // create the sourcesets
@@ -165,6 +157,7 @@ dependencies {
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig(project(":SpongeAPI"))
+    launchConfig(minecraft.minecraftDependency())
     launchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
     launchConfig("org.spongepowered:mixin:$mixinVersion")
     launchConfig("org.checkerframework:checker-qual:3.4.1")
@@ -252,7 +245,6 @@ license {
 }
 
 allprojects {
-
     configurations.configureEach {
         resolutionStrategy.dependencySubstitution {
             // https://github.com/zml2008/guice/tree/backport/5.0.1
@@ -262,11 +254,28 @@ allprojects {
         }
     }
 
+    apply(plugin = "org.jetbrains.gradle.plugin.idea-ext")
     apply(plugin = "java-library")
     apply(plugin = "maven-publish")
 
     base {
         archivesBaseName = name.toLowerCase(Locale.ENGLISH)
+    }
+
+    idea {
+        if (project != null) {
+            (project as ExtensionAware).extensions["settings"].run {
+                /* (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.ActionDelegationConfig::class).run {
+                    delegateBuildRunToGradle = false
+                    testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.PLATFORM
+                } */ // TODO: Make this default once we can silence the Mixin AP
+                (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.IdeaCompilerConfiguration::class).run {
+                    addNotNullAssertions = false
+                    useReleaseOption = JavaVersion.current().isJava10Compatible
+                    parallelCompilation = true
+                }
+            }
+        }
     }
 
     tasks {
@@ -417,7 +426,6 @@ if (testplugins != null) {
     project("testplugins") {
         apply {
             plugin("java-library")
-            plugin("idea")
             plugin("eclipse")
             plugin("org.cadixdev.licenser")
         }
@@ -462,8 +470,6 @@ project("SpongeVanilla") {
 
     val vanillaLibrariesConfig by configurations.register("libraries") {
     }
-    val vanillaMinecraftConfig by configurations.named("minecraft")
-    val vanillaMinecraftClasspathConfig by configurations.named("minecraftClasspath")
     val vanillaAppLaunchConfig by configurations.register("applaunch") {
         extendsFrom(vanillaLibrariesConfig)
     }
@@ -506,8 +512,6 @@ project("SpongeVanilla") {
 
         configurations.named(implementationConfigurationName) {
             extendsFrom(vanillaAppLaunchConfig)
-            extendsFrom(vanillaMinecraftConfig)
-            extendsFrom(vanillaMinecraftClasspathConfig)
         }
     }
     val vanillaMixins by sourceSets.register("mixins") {
@@ -536,10 +540,7 @@ project("SpongeVanilla") {
     }
     val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
         extendsFrom(vanillaAppLaunchConfig)
-        extendsFrom(vanillaMinecraftConfig)
-        extendsFrom(vanillaMinecraftClasspathConfig)
     }
-    configurations.named(vanillaMixins.annotationProcessorConfigurationName)
     configurations.named(vanillaInstaller.implementationConfigurationName) {
         extendsFrom(vanillaInstallerConfig)
     }
@@ -557,11 +558,9 @@ project("SpongeVanilla") {
             sequenceOf(8, 11, 16).forEach {
                 server("runJava${it}Server") {
                     args("--nogui", "--launchTarget", "sponge_server_dev")
-                    // ideaModule("${rootProject.name}.${project.name}.applaunch")
                 }
                 client("runJava${it}Client") {
                     args("--launchTarget", "sponge_client_dev")
-                    // ideaModule("${rootProject.name}.${project.name}.applaunch")
                 }
                 tasks.named("runJava${it}Server", JavaExec::class).configure {
                     javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(it)) })
@@ -611,6 +610,7 @@ project("SpongeVanilla") {
                 }
                 mainClass().set("org.spongepowered.vanilla.applaunch.Main")
                 classpath().from(vanillaAppLaunch.runtimeClasspath, vanillaAppLaunch.output)
+                ideaRunSourceSet().set(vanillaAppLaunch)
             }
         }
         commonProject.sourceSets["main"].resources
@@ -634,6 +634,9 @@ project("SpongeVanilla") {
 
         vanillaMixinsImplementation(project(commonProject.path))
         add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
+        add(vanillaAppLaunch.implementationConfigurationName, vanillaProject.minecraft.minecraftDependency())
+        add(vanillaLaunch.implementationConfigurationName, vanillaProject.minecraft.minecraftDependency())
+        add(vanillaMixins.implementationConfigurationName, vanillaProject.minecraft.minecraftDependency())
 
         vanillaInstallerConfig("com.google.code.gson:gson:2.8.0")
         vanillaInstallerConfig("org.spongepowered:configurate-hocon:4.0.0")
@@ -656,6 +659,7 @@ project("SpongeVanilla") {
         vanillaInstallerConfig("org.cadixdev:lorenz-io-proguard:0.5.6")
 
         vanillaAppLaunchConfig(project(":SpongeAPI"))
+        // vanillaAppLaunchConfig(vanillaProject.minecraft.minecraftDependency())
         vanillaAppLaunchConfig(platform("net.kyori:adventure-bom:4.7.0"))
         vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate4")
         vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
@@ -783,7 +787,7 @@ project("SpongeVanilla") {
 
         val installerResources = vanillaProject.layout.buildDirectory.dir("generated/resources/installer")
         vanillaInstaller.resources.srcDir(installerResources)
-        val emitDependencies by registering(OutputDependenciesToJson::class) {
+        val emitDependencies by registering(org.spongepowered.gradle.convention.task.OutputDependenciesToJson::class) {
             group = "sponge"
             // everything in applaunch
             configuration.set(vanillaAppLaunchConfig)
@@ -888,106 +892,6 @@ project("SpongeVanilla") {
                     }
                 }
             }
-        }
-    }
-}
-
-abstract class OutputDependenciesToJson: DefaultTask() {
-
-    companion object {
-        val GSON: com.google.gson.Gson = com.google.gson.GsonBuilder().also {
-            it.setPrettyPrinting()
-        }.create()
-    }
-
-    /**
-     * A single dependency
-     */
-    data class DependencyDescriptor(val group: String, val module: String, val version: String, val md5: String)
-
-    /**
-     * A manifest containing a list of dependencies.
-     *
-     * At runtime, transitive dependencies won't be traversed, so this needs to
-     * include direct + transitive depends.
-     */
-    data class DependencyManifest(val dependencies: List<DependencyDescriptor>)
-
-    /**
-     * Configuration to gather depenency artifacts from
-     */
-    @get:org.gradle.api.tasks.Input
-    abstract val configuration: Property<Configuration>
-
-    /**
-     * Excludes configuration, to remove certain entries from dependencies and transitive dependencies of [configuration]
-     */
-    @get:org.gradle.api.tasks.Input
-    abstract val excludeConfiguration: Property<Configuration>
-
-    /**
-     * Classifiers to include in the dependency manifest. The empty string identifies no classifier.
-     */
-    @get:org.gradle.api.tasks.Input
-    abstract val allowedClassifiers: SetProperty<String>
-
-    @get:org.gradle.api.tasks.OutputFile
-    abstract val outputFile: RegularFileProperty
-
-    init {
-        allowedClassifiers.add("")
-    }
-
-    @org.gradle.api.tasks.TaskAction
-    fun generateDependenciesJson() {
-        val foundConfig = if (this.excludeConfiguration.isPresent) {
-            val config = this.configuration.get().copyRecursive()
-            val excludes = this.excludeConfiguration.get()
-            excludes.allDependencies.forEach {
-                config.exclude(group = it.group, module = it.name)
-            }
-            config
-        } else {
-            this.configuration.get()
-        }
-
-        val manifest = foundConfig.resolvedConfiguration.firstLevelModuleDependencies.asSequence()
-                .flatMap { it.allModuleArtifacts.asSequence() }
-                // only jars with the allowed classifiers
-                .filter { it.extension == "jar" && allowedClassifiers.get().contains(it.classifier ?: "") }
-                .filter { it.moduleVersion.id.name != "SpongeAPI" }
-                .distinct()
-                .map { dependency ->
-
-                    val ident = dependency.moduleVersion.id
-                    val version = (dependency.id.componentIdentifier as? ModuleComponentIdentifier)?.version ?: ident.version
-                    // Get file input stream for reading the file content
-                    val md5hash = dependency.file.inputStream().use {
-                        val hasher = MessageDigest.getInstance("MD5")
-                        val buf = ByteArray(4096)
-                        var read: Int = it.read(buf)
-                        while (read != -1) {
-                            hasher.update(buf, 0, read)
-                            read = it.read(buf)
-                        }
-
-                        hasher.digest().joinToString("") { "%02x".format(it) }
-                    }
-
-                    // create descriptor
-                    DependencyDescriptor(
-                            group = ident.group,
-                            module = ident.name,
-                            version = version,
-                            md5 = md5hash
-                    )
-                }.toList().run {
-                    DependencyManifest(this)
-                }
-
-        logger.info("Writing version manifest to ${outputFile.get().asFile}")
-        this.outputFile.get().asFile.bufferedWriter(Charsets.UTF_8).use {
-            GSON.toJson(manifest, it)
         }
     }
 }
