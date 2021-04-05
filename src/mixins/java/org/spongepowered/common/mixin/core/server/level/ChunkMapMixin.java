@@ -25,11 +25,13 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
 import org.spongepowered.api.ResourceKey;
@@ -96,6 +98,17 @@ public abstract class ChunkMapMixin {
         level.unload(chunk);
         final Vector3i chunkPos = new Vector3i(chunk.getPos().x, 0, chunk.getPos().z);
         final ChunkEvent.Unload event = SpongeEventFactory.createChunkEventUnload(PhaseTracker.getInstance().currentCause(), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
+        SpongeCommon.postEvent(event);
+    }
+
+    @Redirect(method = "*",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ChunkHolder;replaceProtoChunk(Lnet/minecraft/world/level/chunk/ImposterProtoChunk;)V")
+    )
+    private void impl$onReplaceProto(final ChunkHolder holder, final ImposterProtoChunk chunk) {
+        holder.replaceProtoChunk(chunk);
+
+        final Vector3i chunkPos = new Vector3i(chunk.getPos().x, 0, chunk.getPos().z);
+        final ChunkEvent.Generated event = SpongeEventFactory.createChunkEventGenerated(PhaseTracker.getInstance().currentCause(), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
         SpongeCommon.postEvent(event);
     }
 
