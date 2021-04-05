@@ -42,16 +42,21 @@ import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.StandardCopyOption;
 import java.security.MessageDigest;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 
 public final class InstallerMain {
+
+    private static final int MAX_TRIES = 2;
 
     private final Installer installer;
 
@@ -64,20 +69,41 @@ public final class InstallerMain {
         new InstallerMain(args).run();
     }
 
-    public void run() throws Exception {
+    public void run() {
+        try  {
+            this.downloadAndRun();
+        } catch (final Exception ex) {
+            Logger.error(ex, "Failed to download Sponge libraries and/or Minecraft");
+            System.exit(2);
+        } finally {
+            this.installer.getLibraryManager().finishedProcessing();
+        }
+    }
+
+    public void downloadAndRun() throws Exception {
         final Version mcVersion = this.downloadMinecraftManifest();
         final CompletableFuture<Path> mappingsFuture = this.downloadMappings(mcVersion, LauncherCommandLine.librariesDirectory);
         final CompletableFuture<Path> originalMcFuture = this.downloadMinecraft(mcVersion, LauncherCommandLine.librariesDirectory);
         final CompletableFuture<Path> remappedMinecraftJarFuture = mappingsFuture.thenCombineAsync(originalMcFuture, (mappings, minecraft) -> {
             try {
-                return this.remapMinecraft(LauncherCommandLine.librariesDirectory, minecraft, mappings, this.installer.getLibraryManager().preparationWorker());
+                return this.remapMinecraft(minecraft, mappings, this.installer.getLibraryManager().preparationWorker());
             } catch (final IOException ex) {
                 return AsyncUtils.sneakyThrow(ex);
             }
         }, this.installer.getLibraryManager().preparationWorker());
         this.installer.getLibraryManager().validate();
 
-        final Path remappedMinecraftJar = remappedMinecraftJarFuture.join();
+        final Path remappedMinecraftJar;
+        try {
+            remappedMinecraftJar = remappedMinecraftJarFuture.get();
+        } catch (final ExecutionException ex) {
+            final /* @Nullable */ Throwable cause = ex.getCause();
+            if (cause instanceof Exception) {
+                throw (Exception) cause;
+            }
+            throw ex;
+        }
+
         this.installer.getLibraryManager().addLibrary(new LibraryManager.Library("minecraft", remappedMinecraftJar));
         this.installer.getLibraryManager().finishedProcessing();
 
@@ -105,7 +131,10 @@ public final class InstallerMain {
             Class.forName(className)
                 .getMethod("main", String[].class)
                 .invoke(null, (Object) args);
-        } catch (final ClassNotFoundException | NoSuchMethodException | IllegalAccessException | InvocationTargetException ex) {
+        } catch (final InvocationTargetException ex) {
+            Logger.error(ex.getCause(), "Failed to invoke main class {} due to an error", className);
+            System.exit(1);
+        } catch (final ClassNotFoundException | NoSuchMethodException | IllegalAccessException ex) {
             Logger.error(ex, "Failed to invoke main class {} due to an error", className);
             System.exit(1);
         }
@@ -163,17 +192,13 @@ public final class InstallerMain {
             } else {
                 if (this.installer.getLauncherConfig().checkLibraryHashes) {
                     Logger.info("Detected existing Minecraft Server jar, verifying hashes...");
-                    final MessageDigest sha1 = MessageDigest.getInstance("SHA-1");
 
                     // Pipe the download stream into the file and compute the SHA-1
-                    final byte[] bytes = Files.readAllBytes(downloadTarget);
-                    final String fileSha1 = InstallerUtils.toHexString(sha1.digest(bytes));
-
-                    if (version.downloads.server.sha1.equals(fileSha1)) {
+                    if (InstallerUtils.validateSha1(version.downloads.server.sha1, downloadTarget)) {
                         Logger.info("Minecraft Server jar verified!");
                     } else {
-                        Logger.error("Checksum verification failed: Expected {}, {}. Deleting cached Minecraft Server jar...",
-                                version.downloads.server.sha1, fileSha1);
+                        Logger.error("Checksum verification failed: Expected {}. Deleting cached Minecraft Server jar...",
+                                version.downloads.server.sha1);
                         Files.delete(downloadTarget);
                         InstallerUtils.downloadCheckHash(version.downloads.server.url, downloadTarget,
                                 MessageDigest.getInstance("SHA-1"), version.downloads.server.sha1, false);
@@ -192,30 +217,48 @@ public final class InstallerMain {
             final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_MAPPINGS_PREFIX)
                     .resolve(Constants.Libraries.MINECRAFT_VERSION_TARGET)
                     .resolve(Constants.Libraries.MINECRAFT_MAPPINGS_NAME);
-            if (Files.notExists(downloadTarget)) {
-                final Version.Downloads.Download mappings = version.downloads.server_mappings;
-                if (mappings == null) {
-                    throw new IOException(String.format("Mappings were not included in version manifest for %s", Constants.Libraries.MINECRAFT_VERSION_TARGET));
-                }
-                // TODO Figure out how to sha1 check the zip file
-                if (this.installer.getLauncherConfig().autoDownloadLibraries) {
-                    InstallerUtils.download(mappings.url, downloadTarget, false);
+
+            final Version.Downloads.Download mappings = version.downloads.server_mappings;
+            if (mappings == null) {
+                throw new IOException(String.format("Mappings were not included in version manifest for %s", Constants.Libraries.MINECRAFT_VERSION_TARGET));
+            }
+
+            final boolean checkHashes = this.installer.getLauncherConfig().checkLibraryHashes;
+            if (Files.exists(downloadTarget)) {
+                if (checkHashes) {
+                    Logger.info("Detected existing mappings, verifying hashes...");
+                    if (InstallerUtils.validateSha1(mappings.sha1, downloadTarget)) {
+                        Logger.info("Mappings verified!");
+                        return downloadTarget;
+                    } else {
+                        Logger.error("Checksum verification failed: Expected {}. Deleting cached server mappings file...",
+                            version.downloads.server.sha1);
+                        Files.delete(downloadTarget);
+                    }
                 } else {
-                    throw new IOException(String.format("Mappings were not located at '%s' and downloading them has been turned off.", downloadTarget));
+                    return downloadTarget;
+                }
+            }
+
+            if (this.installer.getLauncherConfig().autoDownloadLibraries) {
+                if (checkHashes) {
+                    InstallerUtils.downloadCheckHash(mappings.url, downloadTarget,
+                        MessageDigest.getInstance("SHA-1"), mappings.sha1, false);
+                } else {
+                    InstallerUtils.download(mappings.url, downloadTarget, false);
                 }
             } else {
-                Logger.info("Detected existing mappings, verifying hashes...");
-                // TODO Figure out how to sha1 check the zip file
-                Logger.info("mappings verified!");
+                throw new IOException(String.format("Mappings were not located at '%s' and downloading them has been turned off.", downloadTarget));
             }
 
             return downloadTarget;
         }, this.installer.getLibraryManager().preparationWorker());
     }
 
-    private Path remapMinecraft(final Path librariesDirectory, final Path inputJar, final Path serverMappings, final ExecutorService service) throws IOException {
+    private Path remapMinecraft(final Path inputJar, final Path serverMappings, final ExecutorService service) throws IOException {
         Logger.info("Checking if we need to remap Minecraft...");
         final Path outputJar = inputJar.resolveSibling(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_remapped.jar");
+        final Path tempOutput = outputJar.resolveSibling(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_remapped.jar.tmp");
 
         if (Files.exists(outputJar)) {
             Logger.info("Remapped Minecraft detected, skipping...");
@@ -245,7 +288,30 @@ public final class InstallerMain {
                     return super.transform(entry);
                 }
             });
-            atlas.run(inputJar, outputJar);
+            // Write to a temporary file so we don't have corrupt partial output
+            atlas.run(inputJar, tempOutput);
+        }
+
+        // Restore file
+        try {
+            Files.move(tempOutput, outputJar, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+        } catch (final AccessDeniedException ex) {
+            // Sometimes because of file locking this will fail... Let's just try again and hope for the best
+            // Thanks Windows!
+            for (int tries = 0; tries < InstallerMain.MAX_TRIES; ++tries) {
+                // Pause for a bit
+                try {
+                    Thread.sleep(5 * tries);
+                    Files.move(tempOutput, outputJar, StandardCopyOption.ATOMIC_MOVE, StandardCopyOption.REPLACE_EXISTING);
+                } catch (final AccessDeniedException ex2) {
+                    if (tries == InstallerMain.MAX_TRIES - 1) {
+                        throw ex;
+                    }
+                } catch (final InterruptedException exInterrupt) {
+                    Thread.currentThread().interrupt();
+                    throw ex;
+                }
+            }
         }
 
         return outputJar;
