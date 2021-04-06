@@ -11,8 +11,8 @@ plugins {
     id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
 }
 
-val apiProject = project.project("SpongeAPI")
 val commonProject = project
+val apiVersion: String by project
 val minecraftVersion: String by project
 val recommendedVersion: String by project
 
@@ -39,9 +39,9 @@ val commonManifest = the<JavaPluginConvention>().manifest {
     attributes(
         "Specification-Title" to "Sponge",
         "Specification-Vendor" to "SpongePowered",
-        "Specification-Version" to apiProject.version,
+        "Specification-Version" to apiVersion,
         "Implementation-Title" to project.name,
-        "Implementation-Version" to generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+        "Implementation-Version" to generateImplementationVersionString(apiVersion, minecraftVersion, recommendedVersion),
         "Implementation-Vendor" to "SpongePowered"
     )
 }
@@ -77,7 +77,7 @@ tasks {
 
 }
 
-version = generateImplementationVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
+version = generateImplementationVersionString(apiVersion, minecraftVersion, recommendedVersion)
 
 // Configurations
 val applaunchConfig by configurations.register("applaunch")
@@ -138,7 +138,7 @@ val mixins by sourceSets.registering {
 
 dependencies {
     // api
-    api(project(":SpongeAPI"))
+    api("org.spongepowered:spongeapi:$apiVersion")
 
     // Database stuffs... likely needs to be looked at
     implementation("com.zaxxer:HikariCP:2.6.3")
@@ -156,7 +156,7 @@ dependencies {
     implementation("net.kyori:adventure-serializer-configurate4")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
-    launchConfig(project(":SpongeAPI"))
+    launchConfig("org.spongepowered:spongeapi:$apiVersion")
     launchConfig(minecraft.minecraftDependency())
     launchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
     launchConfig("org.spongepowered:mixin:$mixinVersion")
@@ -191,7 +191,7 @@ dependencies {
     applaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
 
     mixinsConfig(sourceSets.named("main").map { it.output })
-    add(mixins.get().implementationConfigurationName, project(":SpongeAPI"))
+    add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
     // Tests
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
@@ -238,7 +238,7 @@ license {
         this["organization"] = organization
         this["url"] = projectUrl
     }
-    header = apiProject.file("HEADER.txt")
+    header = rootProject.file("HEADER.txt")
 
     include("**/*.java")
     newLine = false
@@ -313,9 +313,6 @@ allprojects {
         }
     }
     sourceSets.configureEach {
-        if (project.name == "SpongeAPI" && "main" == this.name) {
-            return@configureEach;
-        }
         val sourceSet = this
         val sourceJarName: String = if ("main".equals(this.name)) "sourceJar" else "${this.name}SourceJar"
         tasks.register(sourceJarName, Jar::class.java) {
@@ -431,8 +428,7 @@ if (testplugins != null) {
         }
 
         dependencies {
-            implementation(rootProject.project(":SpongeAPI"))
-            annotationProcessor(rootProject.project(":SpongeAPI"))
+            annotationProcessor(implementation("org.spongepowered:spongeapi:$apiVersion")!!)
         }
 
         tasks.jar {
@@ -446,7 +442,7 @@ if (testplugins != null) {
                 this["organization"] = organization
                 this["url"] = projectUrl
             }
-            header = apiProject.file("HEADER.txt")
+            header = rootProject.file("HEADER.txt")
 
             include("**/*.java")
             newLine = false
@@ -465,7 +461,7 @@ project("SpongeVanilla") {
     }
 
     description = "The SpongeAPI implementation for Vanilla Minecraft"
-    version = generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion)
+    version = generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion)
     println("SpongeVanilla Version $version")
 
     val vanillaLibrariesConfig by configurations.register("libraries") {
@@ -633,7 +629,7 @@ project("SpongeVanilla") {
         implementation(project(commonProject.path))
 
         vanillaMixinsImplementation(project(commonProject.path))
-        add(vanillaLaunch.implementationConfigurationName, project(":SpongeAPI"))
+        add(vanillaLaunch.implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
         add(vanillaAppLaunch.implementationConfigurationName, vanillaProject.minecraft.minecraftDependency())
         add(vanillaLaunch.implementationConfigurationName, vanillaProject.minecraft.minecraftDependency())
         add(vanillaMixins.implementationConfigurationName, vanillaProject.minecraft.minecraftDependency())
@@ -658,7 +654,7 @@ project("SpongeVanilla") {
         }
         vanillaInstallerConfig("org.cadixdev:lorenz-io-proguard:0.5.6")
 
-        vanillaAppLaunchConfig(project(":SpongeAPI"))
+        vanillaAppLaunchConfig("org.spongepowered:spongeapi:$apiVersion")
         // vanillaAppLaunchConfig(vanillaProject.minecraft.minecraftDependency())
         vanillaAppLaunchConfig(platform("net.kyori:adventure-bom:4.7.0"))
         vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate4")
@@ -719,9 +715,9 @@ project("SpongeVanilla") {
         attributes(
             "Specification-Title" to "SpongeVanilla",
             "Specification-Vendor" to "SpongePowered",
-            "Specification-Version" to apiProject.version,
+            "Specification-Version" to apiVersion,
             "Implementation-Title" to project.name,
-            "Implementation-Version" to generatePlatformBuildVersionString(apiProject.version as String, minecraftVersion, recommendedVersion),
+            "Implementation-Version" to generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion),
             "Implementation-Vendor" to "SpongePowered"
         )
     }
@@ -831,7 +827,7 @@ project("SpongeVanilla") {
             from(vanillaInstallerConfig)
             dependencies {
                 include(project(":"))
-                include(project(":SpongeAPI"))
+                include("org.spongepowered:spongeapi:$apiVersion")
             }
 
             // We cannot have modules in a shaded jar
@@ -849,7 +845,7 @@ project("SpongeVanilla") {
             this["organization"] = organization
             this["url"] = projectUrl
         }
-        header = apiProject.file("HEADER.txt")
+        header = rootProject.file("HEADER.txt")
 
         include("**/*.java")
         newLine = false

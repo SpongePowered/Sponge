@@ -1,8 +1,3 @@
-rootProject.name = "Sponge"
-
-include("SpongeAPI")
-include(":SpongeVanilla")
-project(":SpongeVanilla").projectDir = file("vanilla")
 pluginManagement {
     repositories {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
@@ -11,12 +6,47 @@ pluginManagement {
     }
 }
 
+rootProject.name = "Sponge"
+
+includeBuild("SpongeAPI") {
+    dependencySubstitution {
+        substitute(module("org.spongepowered:spongeapi")).with(project(":"))
+    }
+}
+include(":SpongeVanilla")
+project(":SpongeVanilla").projectDir = file("vanilla")
+
 dependencyResolutionManagement {
-    // repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS) // TODO: Apply this once SpongeAPI is properly isolated
+    repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
     repositories {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
+    }
+}
+
+// Include properties from API project
+val apiProps = file("SpongeAPI/gradle.properties")
+if (apiProps.exists()) {
+    val props = java.util.Properties()
+    apiProps.bufferedReader(Charsets.UTF_8).use {
+        props.load(it)
+    }
+    val extraProperties = mutableMapOf<String, String>()
+    props.stringPropertyNames().forEach { key ->
+        val value = props.getProperty(key)
+        if (value != null) {
+            if (key.startsWith("api")) {
+                extraProperties[key] = value
+            } else {
+                extraProperties["api${key.capitalize()}"] = value
+            }
+        }
+    }
+
+    gradle.beforeProject {
+        val extraExt = project.extensions.extraProperties
+        extraProperties.forEach { (k, v) -> extraExt.set(k, v) }
     }
 }
 
