@@ -4,17 +4,18 @@ pluginManagement {
             name = "sponge"
         }
     }
-}
 
-rootProject.name = "Sponge"
+    plugins {
+        // Default plugin versions
+        id("org.spongepowered.gradle.vanilla") version "0.2-SNAPSHOT"
+        id("org.cadixdev.licenser") version "0.5.1"
+        id("com.github.johnrengelman.shadow") version "6.1.0"
+        id("org.spongepowered.gradle.sponge.dev") version "1.1.0-SNAPSHOT"
+        id("implementation-structure")
+        id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
 
-includeBuild("SpongeAPI") {
-    dependencySubstitution {
-        substitute(module("org.spongepowered:spongeapi")).with(project(":"))
     }
 }
-include(":SpongeVanilla")
-project(":SpongeVanilla").projectDir = file("vanilla")
 
 dependencyResolutionManagement {
     repositoriesMode.set(RepositoriesMode.FAIL_ON_PROJECT_REPOS)
@@ -25,30 +26,18 @@ dependencyResolutionManagement {
     }
 }
 
-// Include properties from API project
-val apiProps = file("SpongeAPI/gradle.properties")
-if (apiProps.exists()) {
-    val props = java.util.Properties()
-    apiProps.bufferedReader(Charsets.UTF_8).use {
-        props.load(it)
-    }
-    val extraProperties = mutableMapOf<String, String>()
-    props.stringPropertyNames().forEach { key ->
-        val value = props.getProperty(key)
-        if (value != null) {
-            if (key.startsWith("api")) {
-                extraProperties[key] = value
-            } else {
-                extraProperties["api${key.capitalize()}"] = value
-            }
-        }
-    }
+rootProject.name = "Sponge"
 
-    gradle.beforeProject {
-        val extraExt = project.extensions.extraProperties
-        extraProperties.forEach { (k, v) -> extraExt.set(k, v) }
+// Set up project structure
+
+includeBuild("build-logic")
+includeBuild("SpongeAPI") {
+    dependencySubstitution {
+        substitute(module("org.spongepowered:spongeapi")).with(project(":"))
     }
 }
+include(":SpongeVanilla")
+project(":SpongeVanilla").projectDir = file("vanilla")
 
 val testPlugins = file("testplugins.settings.gradle.kts")
 if (testPlugins.exists()) {
@@ -74,4 +63,29 @@ val spongeForgeEnabledInCi: String = startParameter.projectProperties.getOrDefau
 if (spongeForgeEnabledInCi.toBoolean()) {
     include(":SpongeForge")
     project(":SpongeForge").projectDir = file("forge")
+}
+
+// Include properties from API project (with api prefix)
+val apiProps = file("SpongeAPI/gradle.properties")
+if (apiProps.exists()) {
+    val props = java.util.Properties()
+    apiProps.bufferedReader(Charsets.UTF_8).use {
+        props.load(it)
+    }
+    val extraProperties = mutableMapOf<String, String>()
+    props.stringPropertyNames().forEach { key ->
+        val value = props.getProperty(key)
+        if (value != null) {
+            if (key.startsWith("api")) {
+                extraProperties[key] = value
+            } else {
+                extraProperties["api${key.capitalize()}"] = value
+            }
+        }
+    }
+
+    gradle.beforeProject {
+        val extraExt = project.extensions.extraProperties
+        extraProperties.forEach { (k, v) -> extraExt.set(k, v) }
+    }
 }
