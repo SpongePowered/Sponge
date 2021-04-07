@@ -46,6 +46,7 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Shadow public abstract int shadow$getBedrockRoofPosition();
     @Shadow public abstract int shadow$getBedrockFloorPosition();
     @Shadow public abstract int shadow$seaLevel();
+    @Shadow public abstract int shadow$getMinSurfaceLevel();
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getDefaultBlock();
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$getDefaultFluid();
     @Shadow protected abstract boolean shadow$isAquifersEnabled();
@@ -87,6 +88,11 @@ public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorC
     @Intrinsic
     public int noiseGeneratorConfig$seaLevel() {
         return this.shadow$seaLevel();
+    }
+
+    @Intrinsic
+    public int noiseGeneratorConfig$minSurfaceLevel() {
+        return this.shadow$getMinSurfaceLevel();
     }
 
     @Override

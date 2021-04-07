@@ -43,7 +43,7 @@ public final class SpongeNoiseGeneratorConfig {
         public StructureGenerationConfig structureConfig;
         public NoiseConfig noiseConfig;
         public BlockState defaultBlock, defaultFluid;
-        public int bedrockRoofY, bedrockFloorY, seaLevel;
+        public int bedrockRoofY, bedrockFloorY, seaLevel, minSurfaceLevel;
         public boolean aquifers, noiseCaves, deepslate;
 
         @Override
@@ -85,6 +85,12 @@ public final class SpongeNoiseGeneratorConfig {
         @Override
         public NoiseGeneratorConfig.Builder seaLevel(final int y) {
             this.seaLevel = y;
+            return this;
+        }
+
+        @Override
+        public NoiseGeneratorConfig.Builder minSurfaceLevel(final int y) {
+            this.minSurfaceLevel = y;
             return this;
         }
 
@@ -140,7 +146,7 @@ public final class SpongeNoiseGeneratorConfig {
         public NoiseGeneratorConfig build() {
             final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new((StructureSettings) this.structureConfig,
                     (net.minecraft.world.level.levelgen.NoiseSettings) this.noiseConfig, (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
-                    (net.minecraft.world.level.block.state.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, false,
+                    (net.minecraft.world.level.block.state.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, this.minSurfaceLevel, false,
                     this.aquifers, this.noiseCaves, this.deepslate
                 );
             return (NoiseGeneratorConfig) (Object) settings;

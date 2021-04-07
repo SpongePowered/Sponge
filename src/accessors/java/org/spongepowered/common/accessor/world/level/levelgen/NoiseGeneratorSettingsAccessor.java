@@ -42,7 +42,7 @@ public interface NoiseGeneratorSettingsAccessor {
         final BlockState defaultFluid,
         final int bedrockRoofPosition,
         final int bedrockFloorPosition,
-        final int seaLevel, final boolean disableMobGeneration, final boolean aquifersEnabled, final boolean noiseCavesEnabled, final boolean deepslateEnabled
+        final int seaLevel, final int minSurfaceLevel, final boolean disableMobGeneration, final boolean aquifersEnabled, final boolean noiseCavesEnabled, final boolean deepslateEnabled
     ) {
         throw new UntransformedInvokerError();
     }
