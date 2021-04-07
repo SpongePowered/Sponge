@@ -49,25 +49,29 @@ public final class SpongeWorldTypeEffect extends AbstractResourceKeyed implement
 
     public static final class FactoryImpl implements WorldTypeEffect.Factory {
 
-        private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
+        private static final class Holder {
 
-        private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
+            private static final SpongeWorldTypeEffect OVERWORLD = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.OVERWORLD_EFFECTS);
 
-        private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.END_EFFECTS);
+            private static final SpongeWorldTypeEffect NETHER = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.NETHER_EFFECTS);
+
+            private static final SpongeWorldTypeEffect END = new SpongeWorldTypeEffect((ResourceKey) (Object) DimensionType.END_EFFECTS);
+
+        }
 
         @Override
         public WorldTypeEffect overworld() {
-            return FactoryImpl.OVERWORLD;
+            return FactoryImpl.Holder.OVERWORLD;
         }
 
         @Override
         public WorldTypeEffect nether() {
-            return FactoryImpl.NETHER;
+            return FactoryImpl.Holder.NETHER;
         }
 
         @Override
         public WorldTypeEffect end() {
-            return FactoryImpl.END;
+            return FactoryImpl.Holder.END;
         }
     }
 }
