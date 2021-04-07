@@ -80,10 +80,8 @@ public abstract class FishingHookMixin extends EntityMixin {
     @Shadow @Final private int luck;
 
     @Shadow @Nullable public abstract Player shadow$getPlayerOwner();
+    @Shadow protected abstract void shadow$pullEntity(net.minecraft.world.entity.Entity var1);
     // @formatter:on
-
-    @Shadow protected abstract void bringInHookedEntity();
-
 
     @Nullable private ProjectileSource impl$projectileSource;
 
@@ -137,7 +135,7 @@ public abstract class FishingHookMixin extends EntityMixin {
             // Sponge end
 
             if (this.hookedIn != null) {
-                this.bringInHookedEntity();
+                this.shadow$pullEntity(this.hookedIn);
                 CriteriaTriggers.FISHING_ROD_HOOKED.trigger((ServerPlayer) playerEntity, stack, (FishingHook) (Object) this, Collections.emptyList());
                 this.level.broadcastEntityEvent((net.minecraft.world.entity.Entity) (Object) this, (byte) 31);
                 i = this.hookedIn instanceof ItemEntity ? 3 : 5;
