@@ -29,6 +29,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BodyPart;
 import org.spongepowered.api.data.type.BodyParts;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -105,10 +106,12 @@ public final class ArmorStandData {
                                 disabledSlots ^= 0b1111_1111;
                             }
 
+                            if (v.get(EquipmentTypes.MAIN_HAND.get())) chunk |= 1 << 0;
                             if (v.get(EquipmentTypes.FEET.get())) chunk |= 1 << 1;
                             if (v.get(EquipmentTypes.LEGS.get())) chunk |= 1 << 2;
                             if (v.get(EquipmentTypes.CHEST.get())) chunk |= 1 << 3;
                             if (v.get(EquipmentTypes.HEAD.get())) chunk |= 1 << 4;
+                            if (v.get(EquipmentTypes.OFF_HAND.get())) chunk |= 1 << 5;
 
                             disabledSlots |= (chunk << 16);
                             ((ArmorStandAccessor) h).accessor$disabledSlots(disabledSlots);
@@ -121,12 +124,16 @@ public final class ArmorStandData {
                             // include all chunk
                             final int disabled = ((ArmorStandAccessor) h).accessor$disabledSlots();
                             final int resultantChunk = ((disabled >> 16) & 0b1111_1111) | (disabled & 0b1111_1111);
+                            final ImmutableMap.Builder<EquipmentType, Boolean> builder = ImmutableMap.builder();
 
-                            return ImmutableMap.of(
-                                    EquipmentTypes.FEET.get(), (resultantChunk & (1 << 1)) != 0,
-                                    EquipmentTypes.LEGS.get(), (resultantChunk & (1 << 2)) != 0,
-                                    EquipmentTypes.CHEST.get(), (resultantChunk & (1 << 3)) != 0,
-                                    EquipmentTypes.HEAD.get(), (resultantChunk & (1 << 4)) != 0);
+                            return builder
+                                    .put(EquipmentTypes.MAIN_HAND.get(), (resultantChunk & (1 << 0)) != 0)
+                                    .put(EquipmentTypes.FEET.get(), (resultantChunk & (1 << 1)) != 0)
+                                    .put(EquipmentTypes.LEGS.get(), (resultantChunk & (1 << 2)) != 0)
+                                    .put(EquipmentTypes.CHEST.get(), (resultantChunk & (1 << 3)) != 0)
+                                    .put(EquipmentTypes.HEAD.get(), (resultantChunk & (1 << 4)) != 0)
+                                    .put(EquipmentTypes.OFF_HAND.get(), (resultantChunk & (1 << 5)) != 0)
+                                    .build();
                         })
                         .set((h, v) -> {
                             int chunk = 0;
@@ -140,10 +147,12 @@ public final class ArmorStandData {
                                 ((ArmorStandAccessor) h).accessor$disabledSlots(disabledSlots);
                             }
 
+                            if (v.get(EquipmentTypes.MAIN_HAND.get())) chunk |= 1 << 0;
                             if (v.get(EquipmentTypes.FEET.get())) chunk |= 1 << 1;
                             if (v.get(EquipmentTypes.LEGS.get())) chunk |= 1 << 2;
                             if (v.get(EquipmentTypes.CHEST.get())) chunk |= 1 << 3;
                             if (v.get(EquipmentTypes.HEAD.get())) chunk |= 1 << 4;
+                            if (v.get(EquipmentTypes.OFF_HAND.get())) chunk |= 1 << 5;
 
                             disabledSlots |= (chunk << 8);
                             ((ArmorStandAccessor) h).accessor$disabledSlots(disabledSlots);
