@@ -27,6 +27,7 @@ package org.spongepowered.common.command.parameter.managed.standard;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -47,11 +48,10 @@ public final class SpongeTargetBlockValueParameter extends ResourceKeyedZeroAdva
 
     @Override
     @NonNull
-    public Optional<? extends ServerLocation> getValue(final CommandContext.@NonNull Builder context,
-            final ArgumentReader.@NonNull Mutable reader)
+    public Optional<? extends ServerLocation> parseValue(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader)
             throws ArgumentParseException {
 
-        final Object root = context.cause().cause().root();
+        final Object root = cause.cause().root();
         if (root instanceof Living) {
             final Living living = (Living) root;
             final Optional<RayTraceResult<@NonNull LocatableBlock>> rayTraceResult =

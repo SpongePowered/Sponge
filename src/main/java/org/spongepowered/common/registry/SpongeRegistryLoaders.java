@@ -34,6 +34,7 @@ import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.kyori.adventure.text.Component;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.DimensionArgument;
@@ -318,23 +319,23 @@ public final class SpongeRegistryLoaders {
             l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> StandardCatalogedArgumentParser.createConverter(k, BlockStateArgument.block(),
                     (reader, cause, state) -> (BlockState) state.getState()));
             l.add(ResourceKeyedValueParameters.BOOLEAN, k -> StandardCatalogedArgumentParser.createIdentity(k, BoolArgumentType.bool()));
-            l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new); //Includes ColorArgumentParser.color(), but does more. TODO: what does 1.16 do?
+            l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new);
             l.add(ResourceKeyedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
             l.add(ResourceKeyedValueParameters.DATE_TIME, SpongeDateTimeValueParameter::new);
             l.add(ResourceKeyedValueParameters.DOUBLE, k -> StandardCatalogedArgumentParser.createIdentity(k, DoubleArgumentType.doubleArg()));
             l.add(ResourceKeyedValueParameters.DURATION, SpongeDurationValueParameter::new);
-            l.add(ResourceKeyedValueParameters.ENTITY, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entity(), (reader, cause, selector) -> (Entity) selector.findSingleEntity(cause.getSource())));
+            l.add(ResourceKeyedValueParameters.ENTITY, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entity(), (reader, cause, selector) -> (Entity) selector.findSingleEntity((CommandSourceStack) cause)));
             l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
             l.add(ResourceKeyedValueParameters.INTEGER, k -> StandardCatalogedArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
             l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
             l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> StandardCatalogedArgumentParser.createConverter(k, ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
             l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
             l.add(ResourceKeyedValueParameters.LONG, k -> StandardCatalogedArgumentParser.createIdentity(k, LongArgumentType.longArg()));
-            l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities(cause.getSource()).stream().map(x -> (Entity) x).collect(Collectors.toList())));
-            l.add(ResourceKeyedValueParameters.MANY_GAME_PROFILES, k -> StandardCatalogedArgumentParser.createConverter(k, GameProfileArgument.gameProfile(), (reader, cause, converter) -> converter.getNames(cause.getSource())));
-            l.add(ResourceKeyedValueParameters.MANY_PLAYERS, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.players(), (reader, cause, selector) -> selector.findPlayers(cause.getSource())));
+            l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(Collectors.toList())));
+            l.add(ResourceKeyedValueParameters.MANY_GAME_PROFILES, k -> StandardCatalogedArgumentParser.createConverter(k, GameProfileArgument.gameProfile(), (reader, cause, converter) -> converter.getNames((CommandSourceStack) cause)));
+            l.add(ResourceKeyedValueParameters.MANY_PLAYERS, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.players(), (reader, cause, selector) -> selector.findPlayers((CommandSourceStack) cause)));
             l.add(ResourceKeyedValueParameters.NONE, SpongeNoneValueParameter::new);
-            l.add(ResourceKeyedValueParameters.PLAYER, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer(cause.getSource())));
+            l.add(ResourceKeyedValueParameters.PLAYER, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer((CommandSourceStack) cause)));
             l.add(ResourceKeyedValueParameters.PLUGIN, SpongePluginContainerValueParameter::new);
             l.add(ResourceKeyedValueParameters.REMAINING_JOINED_STRINGS, k -> StandardCatalogedArgumentParser.createIdentity(k, StringArgumentType.greedyString()));
             l.add(ResourceKeyedValueParameters.RESOURCE_KEY, k -> StandardCatalogedArgumentParser.createConverter(k, ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation));
@@ -369,11 +370,11 @@ public final class SpongeRegistryLoaders {
             );
             l.add(ResourceKeyedValueParameters.VECTOR2D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec2Argument.vec2(),
                     (reader, cause, result) -> {
-                        final net.minecraft.world.phys.Vec3 r = result.getPosition(cause.getSource());
+                        final net.minecraft.world.phys.Vec3 r = result.getPosition((CommandSourceStack) cause);
                         return new Vector2d(r.x, r.z);
                     })
             );
-            l.add(ResourceKeyedValueParameters.VECTOR3D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition(cause.getSource()))));
+            l.add(ResourceKeyedValueParameters.VECTOR3D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition((CommandSourceStack) cause))));
             l.add(ResourceKeyedValueParameters.WORLD, k -> StandardCatalogedArgumentParser.createConverter(k,
                     DimensionArgument.dimension(),
                     (reader, cause, result) -> Sponge.server().worldManager().world((ResourceKey) (Object) result)

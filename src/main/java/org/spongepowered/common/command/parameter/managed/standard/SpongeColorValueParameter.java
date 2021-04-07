@@ -34,6 +34,7 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.commands.arguments.ColorArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -67,7 +68,7 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+    public List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
         final SuggestionsBuilder builder = new SuggestionsBuilder(currentInput, 0);
         this.listSuggestions((com.mojang.brigadier.context.CommandContext<?>) context, builder);
         return builder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
@@ -76,9 +77,7 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
     @Override
     @NonNull
     public Optional<? extends Color> parseValue(
-            final Parameter.@NonNull Key<? super Color> parameterKey,
-            final ArgumentReader.@NonNull Mutable reader,
-            final CommandContext.@NonNull Builder context) throws ArgumentParseException {
+            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
         final ArgumentReader.Immutable state = reader.immutable();
         // First, is the argument type giving the correct return type?

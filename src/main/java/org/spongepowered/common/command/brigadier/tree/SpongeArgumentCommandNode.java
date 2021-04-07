@@ -36,14 +36,19 @@ import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
+import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
@@ -61,15 +66,12 @@ import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Predicate;
 import java.util.stream.Collectors;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.SuggestionProviders;
 
 // We have to extend ArgumentCommandNode for Brig to even use this...
 public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<CommandSourceStack, T> implements SpongeNode {
 
     @Nullable
-    private static SuggestionProvider<CommandSourceStack> createSuggestionProvider(@Nullable final ValueCompleter completer) {
+    private static SuggestionProvider<CommandSourceStack> createSuggestionProvider(final @Nullable ValueCompleter completer) {
         if (completer == null) {
             return null;
         }
@@ -83,9 +85,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         };
     }
 
-
     private final Parameter.Key<? super T> key;
-    private final ArgumentParser<? extends T> parser;
+    private final ArgumentParser<T> parser;
+    private final @Nullable ValueParameterModifier<T> modifier;
     private final ValueUsage usage;
     private final boolean isComplexSuggestions;
 
@@ -99,14 +101,15 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     public SpongeArgumentCommandNode(
             final Parameter.Key<? super T> key,
             final ValueUsage usage,
-            final ArgumentParser<? extends T> parser,
+            final ArgumentParser<T> parser,
             @Nullable final ValueCompleter valueCompleter,
             @Nullable final Command command,
             final Predicate<CommandSourceStack> predicate,
             @Nullable final CommandNode<CommandSourceStack> redirect,
             final RedirectModifier<CommandSourceStack> modifier,
             final boolean forks,
-            final String keyName) {
+            final String keyName,
+            final @Nullable ValueParameterModifier<T> parameterModifier) {
         super(keyName,
                 (ArgumentType<T>) Constants.Command.STANDARD_STRING_ARGUMENT_TYPE, // we can abuse generics, we're not actually going to use this.
                 command,
@@ -116,6 +119,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                 forks,
                 SpongeArgumentCommandNode.createSuggestionProvider(valueCompleter));
         this.parser = parser;
+        this.modifier = parameterModifier;
         this.isComplexSuggestions = this.parser instanceof ComplexSuggestionNodeProvider;
         this.key = key;
         this.usage = usage;
@@ -180,11 +184,8 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                         // create node
                         final RequiredArgumentBuilder<SharedSuggestionProvider, ?> arg = RequiredArgumentBuilder.argument(this.getName(), type);
                         arg.requires(x -> true);
-                        // if the first node is a string argument type, send the completions.
-                        if (isFirst && type instanceof StringArgumentType) {
-                            arg.suggests(this.parser::listSuggestions);
-                        }
-                        if (forceCustomSuggestionsInner) {
+                        // if the first node is forced to be custom suggestions or is a string argument type, send the completions.
+                        if (forceCustomSuggestionsInner || isFirst && type instanceof StringArgumentType) {
                             arg.suggests(SuggestionProviders.ASK_SERVER);
                         }
                         final CommandNode<SharedSuggestionProvider> built = arg.build();
@@ -206,7 +207,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             if (this.getCommand() != null) {
                 toReturn.executes(x -> 0);
             }
-            if (forceCustomSuggestions && !CommandUtil.checkForCustomSuggestions(previousNode)) {
+            if (this.modifier != null || forceCustomSuggestions && !CommandUtil.checkForCustomSuggestions(previousNode)) {
                 toReturn.suggests(SuggestionProviders.ASK_SERVER);
             } else if (this.getCustomSuggestions() != null) {
                 toReturn.suggests((SuggestionProvider) this.getCustomSuggestions());
@@ -221,7 +222,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         final RequiredArgumentBuilder<CommandSourceStack, ?> builder = RequiredArgumentBuilder.argument(this.getUsageTextForClient(), type);
         builder.requires(this.getRequirement());
         builder.forward(this.getRedirect(), this.getRedirectModifier(), this.isFork());
-        if (!CommandUtil.checkForCustomSuggestions(rootSuggestionNode)) {
+        if (this.modifier != null) {
+            builder.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
+        } if (!CommandUtil.checkForCustomSuggestions(rootSuggestionNode)) {
             if (type != this.getType()) {
                 builder.suggests((SuggestionProvider) SuggestionProviders.ASK_SERVER);
             } else {
@@ -293,7 +296,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     public final void parse(final StringReader reader, final CommandContextBuilder<CommandSourceStack> contextBuilder) throws CommandSyntaxException {
         final int start = reader.getCursor();
         final SpongeCommandContextBuilder builder = (SpongeCommandContextBuilder) contextBuilder;
-        final T result = this.parser.parse(this.key, builder, (SpongeStringReader) reader);
+        final T result = this.parser.parse(this.key, builder, (SpongeStringReader) reader, this.modifier);
         if (result != null) {
             builder.putEntry(this.key, result);
             final ParsedArgument<CommandSourceStack, T> parsed = new ParsedArgument<>(start, reader.getCursor(), result);
@@ -309,10 +312,14 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     public final CompletableFuture<Suggestions> listSuggestions(
             final CommandContext<CommandSourceStack> context,
             final SuggestionsBuilder builder) throws CommandSyntaxException {
+        final CompletableFuture<Suggestions> suggestions;
         if (this.getCustomSuggestions() == null) {
-            return this.parser.listSuggestions(context, builder);
+            suggestions = this.parser.listSuggestions(context, builder);
+        } else {
+            suggestions = this.getCustomSuggestions().getSuggestions(context, builder);
         }
-        return this.getCustomSuggestions().getSuggestions(context, builder);
+        // applies the modifier if there is one
+        return this.suggestUsingModifier(context, builder.getRemaining(), suggestions);
     }
 
     @Override
@@ -326,9 +333,25 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         this.nodeHolder.add(node);
     }
 
+    private CompletableFuture<Suggestions> suggestUsingModifier(
+            final CommandContext<?> context,
+            final String input,
+            final CompletableFuture<Suggestions> suggestions) {
+        if (this.modifier != null) {
+            return suggestions.thenApply(x -> {
+                final List<String> originalSuggestions =
+                        x.getList().stream().map(Suggestion::getText).collect(Collectors.toList());
+                final List<String> modifiedSuggestions =
+                        this.modifier.modifyCompletion((org.spongepowered.api.command.parameter.CommandContext) context, input, originalSuggestions);
+                return Suggestions.create(context.getInput(), modifiedSuggestions.stream().map(y -> new Suggestion(x.getRange(), y)).collect(Collectors.toList()));
+            });
+        }
+        return suggestions;
+    }
+
     @Override
     public int hashCode() {
-        return Objects.hash(super.hashCode(), this.key, this.parser, this.usage, this.isComplexSuggestions, this.getCustomSuggestions());
+        return Objects.hash(super.hashCode(), this.key, this.parser, this.modifier, this.usage, this.isComplexSuggestions, this.getCustomSuggestions());
     }
 
     @Override
@@ -347,7 +370,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
                 this.getRedirect() == that.getRedirect() && // See SuggestionArgumentNode for an explanation
                 this.key.equals(that.key) &&
                 this.parser.equals(that.parser) &&
+                Objects.equals(this.modifier, that.modifier) &&
                 Objects.equals(this.usage, that.usage) &&
                 Objects.equals(this.getCustomSuggestions(), that.getCustomSuggestions());
     }
+
 }

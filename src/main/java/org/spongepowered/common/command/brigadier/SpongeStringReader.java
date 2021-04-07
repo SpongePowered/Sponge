@@ -235,12 +235,12 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
 
     @Override
     @NonNull
-    public ArgumentParseException createException(@NonNull final Component errorMessage) {
+    public ArgumentParseException createException(@Nullable final Component errorMessage) {
         return new ArgumentParseException(errorMessage, this.input(), this.getCursor());
     }
 
     @NonNull
-    public ArgumentParseException createException(@NonNull final Component errorMessage, @NonNull final Throwable inner) {
+    public ArgumentParseException createException(@Nullable final Component errorMessage, @NonNull final Throwable inner) {
         return new ArgumentParseException(errorMessage, inner, this.input(), this.getCursor());
     }
 

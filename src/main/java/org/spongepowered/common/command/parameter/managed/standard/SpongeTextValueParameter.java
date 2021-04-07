@@ -37,6 +37,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -60,7 +61,7 @@ public final class SpongeTextValueParameter extends AbstractArgumentParser<Compo
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+    public List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         return ImmutableList.of();
     }
 
@@ -85,7 +86,7 @@ public final class SpongeTextValueParameter extends AbstractArgumentParser<Compo
 
     @Override
     public List<ArgumentType<?>> getClientCompletionArgumentType() {
-        return ImmutableList.of(this.clientCompletionType);
+        return Collections.singletonList(this.clientCompletionType);
     }
 
 }

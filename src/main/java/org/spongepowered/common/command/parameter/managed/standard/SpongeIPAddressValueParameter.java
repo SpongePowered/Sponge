@@ -24,18 +24,17 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,16 +46,14 @@ public final class SpongeIPAddressValueParameter extends ResourceKeyedArgumentVa
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
-        return ImmutableList.of();
+    public List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+        return Collections.emptyList();
     }
 
     @Override
     @NonNull
     public Optional<? extends InetAddress> parseValue(
-            final Parameter.@NonNull Key<? super InetAddress> parameterKey,
-            final ArgumentReader.@NonNull Mutable reader,
-            final CommandContext.@NonNull Builder context) throws ArgumentParseException {
+            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
         final String stringToParse = reader.parseString();
         try {

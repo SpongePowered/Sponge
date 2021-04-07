@@ -38,10 +38,6 @@ public final class StandardCatalogedArgumentParser<S, T> extends StandardArgumen
         return new StandardCatalogedArgumentParser<>(key, type, (reader, c, x) -> x);
     }
 
-    public static <S, T> StandardCatalogedArgumentParser<S, T> createCast(final ResourceKey key, final ArgumentType<S> type, final Class<T> castType) {
-        return new StandardCatalogedArgumentParser<>(key, type, (reader, c, x) -> castType.cast(x));
-    }
-
     public static <S, T> StandardCatalogedArgumentParser<S, T> createConverter(
             final ResourceKey key,
             final ArgumentType<S> type,

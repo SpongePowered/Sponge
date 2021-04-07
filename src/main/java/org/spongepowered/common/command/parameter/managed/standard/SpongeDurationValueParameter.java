@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -36,6 +37,7 @@ import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgument
 
 import java.time.Duration;
 import java.time.format.DateTimeParseException;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,16 +49,14 @@ public final class SpongeDurationValueParameter extends ResourceKeyedArgumentVal
 
     @Override
     @NonNull
-    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
-        return ImmutableList.of();
+    public List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
+        return Collections.emptyList();
     }
 
     @Override
     @NonNull
     public Optional<? extends Duration> parseValue(
-            final Parameter.@NonNull Key<? super Duration> parameterKey,
-            final ArgumentReader.@NonNull Mutable reader,
-            final CommandContext.@NonNull Builder context) throws ArgumentParseException {
+            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
         String s = reader.parseString().toUpperCase();
         if (!s.contains("T")) {

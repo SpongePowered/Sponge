@@ -210,6 +210,10 @@ public final class LibraryManager {
     }
 
     public void finishedProcessing() {
+        if (this.preparationWorker.isTerminated()) {
+            return;
+        }
+
         this.preparationWorker.shutdown();
         boolean successful;
         try {

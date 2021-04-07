@@ -32,19 +32,24 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
+import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorTypes;
@@ -64,6 +69,7 @@ import org.spongepowered.plugin.jvm.Plugin;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -461,6 +467,47 @@ public final class CommandTest {
                                 return CommandResult.error(Component.text("Exit via failed result"));
                             }).build(), "failedresult")
                       .build(), "testfailure");
+
+
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .addParameter(Parameter.enumValue(TestEnum.class).modifier(new ValueParameterModifier<TestEnum>() {
+                            @Override
+                            public @NotNull Optional<? extends TestEnum> modifyResult(final Parameter.@NotNull Key<? super TestEnum> parameterKey,
+                                                                                      final ArgumentReader.@NotNull Immutable reader,
+                                                                                      final CommandContext.@NotNull Builder context,
+                                                                                      @Nullable final TestEnum value) throws ArgumentParseException {
+                                if (value == TestEnum.THREE) {
+                                    throw reader.createException(Component.text("Can't select three!"));
+                                }
+                                return Optional.ofNullable(value);
+                            }
+
+                            @Override
+                            public @NotNull List<String> modifyCompletion(@NotNull final CommandContext context,
+                                                                          @NotNull final String currentInput,
+                                                                          @NotNull final List<String> completions) {
+                                return completions.stream().filter(x -> !x.equalsIgnoreCase(TestEnum.THREE.name())).collect(Collectors.toList());
+                            }
+
+                            @Override
+                            public @Nullable Component modifyExceptionMessage(@Nullable final Component exceptionMessage) {
+                                if (exceptionMessage == null) {
+                                    return null;
+                                }
+                                return exceptionMessage.replaceText(builder -> {
+                                    builder.match(", three").replacement("").once();
+                                });
+                            }
+                        }).key(enumParameterKey).build())
+                        .executor(x -> {
+                            x.sendMessage(Identity.nil(), Component.text(x.one(enumParameterKey).orElse(TestEnum.ONE).name()));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "testenummodified"
+        );
     }
 
     @Listener

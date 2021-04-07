@@ -27,6 +27,7 @@ package org.spongepowered.vanilla.installer;
 import org.tinylog.Logger;
 
 import java.io.IOException;
+import java.io.InputStream;
 import java.net.HttpURLConnection;
 import java.net.URL;
 import java.nio.channels.Channels;
@@ -37,6 +38,7 @@ import java.nio.file.Path;
 import java.nio.file.StandardOpenOption;
 import java.security.DigestInputStream;
 import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 public final class InstallerUtils {
 
@@ -54,6 +56,30 @@ public final class InstallerUtils {
             hexChars[j * 2 + 1] = InstallerUtils.hexArray[v & 0x0F];
         }
         return new String(hexChars);
+    }
+
+    public static boolean validateSha1(final String expectedHash, final Path path) throws IOException {
+        try (final InputStream is = Files.newInputStream(path)) {
+            return InstallerUtils.validateSha1(expectedHash, is);
+        }
+    }
+
+    public static boolean validateSha1(final String expectedHash, final InputStream stream) throws IOException {
+        final MessageDigest digest;
+        try {
+            digest = MessageDigest.getInstance("SHA-1");
+        } catch (final NoSuchAlgorithmException ex) {
+            throw new AssertionError(ex); // Guaranteed present by MessageDigest spec
+        }
+
+        final byte[] buf = new byte[4096];
+        int read;
+
+        while ((read = stream.read(buf)) != -1) {
+            digest.update(buf,0, read);
+        }
+
+        return expectedHash.equals(InstallerUtils.toHexString(digest.digest()));
     }
 
     /**
