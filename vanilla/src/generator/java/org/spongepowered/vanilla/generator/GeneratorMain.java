@@ -25,6 +25,7 @@
 package org.spongepowered.vanilla.generator;
 
 import com.github.javaparser.utils.Log;
+import net.minecraft.SharedConstants;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
@@ -55,6 +56,7 @@ public final class GeneratorMain {
     public static void main(final String[] args) {
         Logger.info("Begining bootstrap");
         Log.setAdapter(new JavaparserLog());
+        SharedConstants.tryDetectVersion();
         Bootstrap.bootStrap();
         Bootstrap.validate();
 
