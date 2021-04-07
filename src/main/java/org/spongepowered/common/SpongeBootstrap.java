@@ -29,6 +29,7 @@ import com.google.inject.Guice;
 import com.google.inject.Injector;
 import com.google.inject.Module;
 import com.google.inject.Stage;
+import net.minecraft.SharedConstants;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeGuice;
@@ -47,6 +48,9 @@ public final class SpongeBootstrap {
     public static Blackboard.Key<Injector> PARENT_INJECTOR = Blackboard.Key.of("parent_injector", Injector.class);
 
     public static void perform(final String engineName, final Runnable engineStart) {
+        // We need to know the minecraft version early
+        SharedConstants.tryDetectVersion();
+
         final Stage stage = SpongeGuice.getInjectorStage(Launch.getInstance().getInjectionStage());
         SpongeCommon.getLogger().debug("Creating injector in stage '{}'", stage);
         final List<Module> modules = Lists.newArrayList(
