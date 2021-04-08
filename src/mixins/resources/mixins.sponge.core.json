@@ -24,6 +24,7 @@
         "commands.CommandsMixin",
         "commands.CommandSourceMixin",
         "commands.CommandSourceStackMixin",
+        "commands.arguments.ComponentArgumentMixin",
         "commands.arguments.DimensionArgumentMixin",
         "commands.arguments.selector.EntitySelectorParserMixin",
         "core.RegistryAccessMixin",

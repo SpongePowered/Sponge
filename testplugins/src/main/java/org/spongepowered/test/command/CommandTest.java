@@ -508,6 +508,22 @@ public final class CommandTest {
                         .build(),
                 "testenummodified"
         );
+
+        final Parameter.Value<String> testString = Parameter.string().key("string").build();
+        final Parameter.Value<Component> jsonTextParameter = Parameter.jsonText().key("text").build();
+        event.register(
+                this.plugin,
+                Command.builder()
+                    .addParameter(jsonTextParameter)
+                    .addParameter(testString)
+                    .executor(ctx -> {
+                        ctx.sendMessage(Identity.nil(), ctx.requireOne(jsonTextParameter));
+                        ctx.sendMessage(Identity.nil(), Component.text(ctx.requireOne(testString)));
+                        return CommandResult.success();
+                    })
+                    .build(),
+                "testcomponentjson"
+        );
     }
 
     @Listener
