@@ -58,6 +58,7 @@ import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBu
 import org.spongepowered.common.util.CommandUtil;
 import org.spongepowered.common.util.Constants;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Iterator;
 import java.util.List;
@@ -319,7 +320,7 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             suggestions = this.getCustomSuggestions().getSuggestions(context, builder);
         }
         // applies the modifier if there is one
-        return this.suggestUsingModifier(context, builder.getRemaining(), suggestions);
+        return this.suggestUsingModifier(context, builder, suggestions);
     }
 
     @Override
@@ -335,18 +336,25 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
 
     private CompletableFuture<Suggestions> suggestUsingModifier(
             final CommandContext<?> context,
-            final String input,
+            final SuggestionsBuilder suggestionsBuilder,
             final CompletableFuture<Suggestions> suggestions) {
         if (this.modifier != null) {
             return suggestions.thenApply(x -> {
                 final List<String> originalSuggestions =
                         x.getList().stream().map(Suggestion::getText).collect(Collectors.toList());
                 final List<String> modifiedSuggestions =
-                        this.modifier.modifyCompletion((org.spongepowered.api.command.parameter.CommandContext) context, input, originalSuggestions);
-                return Suggestions.create(context.getInput(), modifiedSuggestions.stream().map(y -> new Suggestion(x.getRange(), y)).collect(Collectors.toList()));
+                        this.modifier.modifyCompletion((org.spongepowered.api.command.parameter.CommandContext) context, suggestionsBuilder.getRemaining(), new ArrayList<>(originalSuggestions));
+                if (originalSuggestions.equals(modifiedSuggestions)) {
+                    return x;
+                }
+                final SuggestionsBuilder newBuilder = suggestionsBuilder.restart();
+                for (final String suggestion : modifiedSuggestions) {
+                    newBuilder.suggest(suggestion);
+                }
+                return newBuilder.build();
             });
         }
-        return suggestions;
+        return suggestionsBuilder.buildFuture();
     }
 
     @Override
