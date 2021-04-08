@@ -43,8 +43,8 @@ public abstract class ComponentArgumentMixin {
         // the JSON reader has advanced as far as the next element instead.
         // We need to step back one, but only if:
         // * There is more reading to do
-        // * The next character is not whitespace OR
-        // * The preceding character is whitespace
+        // * The next character is not the argument separator
+        // * The preceding character is the argument separator
         if (var1.canRead() && var1.peek() != CommandDispatcher.ARGUMENT_SEPARATOR_CHAR
                 && var1.peek(-1) == CommandDispatcher.ARGUMENT_SEPARATOR_CHAR) {
             var1.setCursor(var1.getCursor() - 1);
