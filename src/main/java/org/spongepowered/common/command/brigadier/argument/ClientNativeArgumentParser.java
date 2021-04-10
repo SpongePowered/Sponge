@@ -32,24 +32,24 @@ import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedVal
 /**
  * For use with ArgumentTypes in the base game
  */
-public final class StandardCatalogedArgumentParser<S, T> extends StandardArgumentParser<S, T> implements ResourceKeyedValueParameter<T> {
+public final class ClientNativeArgumentParser<S, T> extends StandardArgumentParser<S, T> implements ResourceKeyedValueParameter<T> {
 
-    public static <T> StandardCatalogedArgumentParser<T, T> createIdentity(final ResourceKey key, final ArgumentType<T> type) {
-        return new StandardCatalogedArgumentParser<>(key, type, (reader, c, x) -> x);
+    public static <T> ClientNativeArgumentParser<T, T> createIdentity(final ResourceKey key, final ArgumentType<T> type) {
+        return new ClientNativeArgumentParser<>(key, type, (reader, c, x) -> x);
     }
 
-    public static <S, T> StandardCatalogedArgumentParser<S, T> createConverter(
+    public static <S, T> ClientNativeArgumentParser<S, T> createConverter(
             final ResourceKey key,
             final ArgumentType<S> type,
             final StandardArgumentParser.Converter<S, T> converter) {
-        return new StandardCatalogedArgumentParser<>(key, type, converter);
+        return new ClientNativeArgumentParser<>(key, type, converter);
     }
 
     // ---
 
     private final ResourceKey key;
 
-    private StandardCatalogedArgumentParser(
+    private ClientNativeArgumentParser(
             final ResourceKey key,
             final ArgumentType<S> type,
             final StandardArgumentParser.Converter<S, T> converter) {
@@ -61,6 +61,11 @@ public final class StandardCatalogedArgumentParser<S, T> extends StandardArgumen
     @NonNull
     public ResourceKey key() {
         return this.key;
+    }
+
+    @Override
+    public boolean hasClientNativeCompletions() {
+        return true;
     }
 
 }

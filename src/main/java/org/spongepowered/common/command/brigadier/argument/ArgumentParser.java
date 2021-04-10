@@ -86,4 +86,8 @@ public interface ArgumentParser<T> {
 
     boolean doesNotRead();
 
+    default boolean hasClientNativeCompletions() {
+        return false;
+    }
+
 }

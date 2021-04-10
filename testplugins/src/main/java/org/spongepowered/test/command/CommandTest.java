@@ -50,6 +50,7 @@ import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
+import org.spongepowered.api.command.parameter.managed.operator.Operator;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorTypes;
@@ -524,6 +525,35 @@ public final class CommandTest {
                     .build(),
                 "testcomponentjson"
         );
+
+        final Parameter.Value<Integer> firstIntParameter = Parameter.integerNumber().key("int1").build();
+        final Parameter.Value<Integer> secondIntParameter = Parameter.integerNumber().key("int2").build();
+        final Parameter.Value<Operator> operatorParameter = Parameter.operator().key("operator").build();
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .addParameter(firstIntParameter)
+                        .addParameter(operatorParameter)
+                        .addParameter(secondIntParameter)
+                        .executor(ctx -> {
+                            final int first = ctx.requireOne(firstIntParameter);
+                            final int second = ctx.requireOne(secondIntParameter);
+                            final Operator operator = ctx.requireOne(operatorParameter);
+                            ctx.sendMessage(Identity.nil(), Component.text(first));
+                            ctx.sendMessage(Identity.nil(),
+                                    RegistryTypes.OPERATOR.get()
+                                            .findValueKey(operator)
+                                            .map(key -> Component.text(key.asString()))
+                                            .orElse(Component.text("Not set"))
+                            );
+                            ctx.sendMessage(Identity.nil(), Component.text(second));
+                            if (operator instanceof Operator.Simple) {
+                                ctx.sendMessage(Identity.nil(), Component.text(((Operator.Simple) operator).apply(first, second)));
+                            }
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "testoperator");
     }
 
     @Listener

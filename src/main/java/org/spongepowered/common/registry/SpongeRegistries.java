@@ -56,6 +56,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.MOVEMENT_TYPE, SpongeRegistryLoaders.movementType());
         holder.createRegistry(RegistryTypes.MUSIC_DISC, SpongeRegistryLoaders.musicDisc());
         holder.createRegistry(RegistryTypes.NOTE_PITCH, SpongeRegistryLoaders.notePitch());
+        holder.createRegistry(RegistryTypes.OPERATOR, SpongeRegistryLoaders.operator());
         holder.createRegistry(RegistryTypes.OPERATION, SpongeRegistryLoaders.operation());
         holder.createRegistry(RegistryTypes.PALETTE_TYPE, SpongeRegistryLoaders.paletteType());
         holder.createRegistry(RegistryTypes.PARROT_TYPE, SpongeRegistryLoaders.parrotType());
