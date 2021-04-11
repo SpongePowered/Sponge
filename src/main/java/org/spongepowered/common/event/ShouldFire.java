@@ -113,4 +113,10 @@ public final class ShouldFire {
 
     public static boolean KICK_PLAYER_EVENT = false;
 
+    public static boolean CHUNK_EVENT_LOAD = false;
+    public static boolean CHUNK_EVENT_SAVE_PRE = false;
+    public static boolean CHUNK_EVENT_SAVE_POST = false;
+    public static boolean CHUNK_EVENT_GENERATED = false;
+    public static boolean CHUNK_EVENT_UNLOAD = false;
+
 }

@@ -44,7 +44,7 @@ public final class EntityActivationRangeCategory {
 
     @Setting("auto-populate")
     @Comment("If 'true', newly discovered entities will be added to this config with a default value.")
-    public final boolean autoPopulate = false;
+    public boolean autoPopulate = false;
 
     public EntityActivationRangeCategory() {
         this.globalRanges.put("ambient", 32);

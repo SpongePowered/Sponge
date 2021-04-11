@@ -22,23 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.entity.projectile;
+package org.spongepowered.common.mixin.entityactivation.entity.item;
 
-import net.minecraft.entity.projectile.AbstractArrowEntity;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_EntityActivation;
 
-@Mixin(AbstractArrowEntity.class)
-public abstract class AbstractArrowEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
+@Mixin(FireworkRocketEntity.class)
+public abstract class FireworkRocketEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
 
-    @Shadow private int ticksInGround;
+    // @formatter:off
+    @Shadow private int lifetime;
+    // @formatter:on
 
     @Override
     public void activation$inactiveTick() {
-        if (this.onGround) {
-            this.ticksInGround += 1;
-        }
+        this.lifetime += 1;
         super.activation$inactiveTick();
     }
 }
