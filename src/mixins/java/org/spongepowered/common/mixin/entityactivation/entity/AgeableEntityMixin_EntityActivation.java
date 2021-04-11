@@ -22,30 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.entity.item;
+package org.spongepowered.common.mixin.entityactivation.entity;
 
-import net.minecraft.entity.item.ItemEntity;
+import net.minecraft.world.entity.AgableMob;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.level.storage.WorldInfoBridge;
-import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_EntityActivation;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.asm.mixin.SoftOverride;
 
-@Mixin(ItemEntity.class)
-public abstract class ItemEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
+@Mixin(AgableMob.class)
+public abstract class AgeableEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
 
-    @Shadow private int pickupDelay;
-    @Shadow private int age;
+    // @formatter:off
+    @Shadow public abstract int shadow$getAge();
+    @Shadow public abstract void shadow$setAge(int age);
+    // @formatter:on
 
     @Override
+    @SoftOverride
     public void activation$inactiveTick() {
-        if (this.pickupDelay > 0 && this.pickupDelay != Constants.Entity.Item.INFINITE_PICKUP_DELAY) {
-            --this.pickupDelay;
-        }
+        super.activation$inactiveTick();
 
-        if (!this.shadow$getEntityWorld().isRemote() && this.age >= ((WorldInfoBridge) this.shadow$getEntityWorld().getWorldInfo())
-                .bridge$getConfigAdapter().getConfig().getEntity().getItemDespawnRate()) {
-            this.shadow$remove();
+        if (!this.level.isClientSide()) {
+            int i = this.shadow$getAge();
+
+            if (i < 0) {
+                ++i;
+                this.shadow$setAge(i);
+            } else if (i > 0) {
+                --i;
+                this.shadow$setAge(i);
+            }
         }
     }
 }

@@ -22,21 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.entity.item;
+package org.spongepowered.common.mixin.entityactivation.entity;
 
-import net.minecraft.entity.item.FireworkRocketEntity;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_EntityActivation;
 
-@Mixin(FireworkRocketEntity.class)
-public abstract class FireworkRocketEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
+@Mixin(LivingEntity.class)
+public abstract class LivingEntityMixin_Activation extends EntityMixin_EntityActivation {
 
-    @Shadow private int fireworkAge;
+    // @formatter:off
+    @Shadow protected int noActionTime;
+    // @formatter:on
 
     @Override
     public void activation$inactiveTick() {
-        this.fireworkAge += 1;
         super.activation$inactiveTick();
+        ++this.noActionTime;
     }
 }

@@ -22,34 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.entity;
+package org.spongepowered.common.mixin.entityactivation.entity.projectile;
 
-import net.minecraft.entity.AgeableEntity;
+import net.minecraft.world.entity.projectile.AbstractArrow;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.SoftOverride;
+import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_EntityActivation;
 
-@Mixin(AgeableEntity.class)
-public abstract class AgeableEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
+@Mixin(AbstractArrow.class)
+public abstract class AbstractArrowEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
 
-    @Shadow public abstract int shadow$getGrowingAge();
-    @Shadow public abstract void shadow$setGrowingAge(int age);
+    // @formatter:off
+    @Shadow protected int inGroundTime;
+    // @formatter:on
 
     @Override
-    @SoftOverride
     public void activation$inactiveTick() {
-        super.activation$inactiveTick();
-
-        if (!this.shadow$getEntityWorld().isRemote()) {
-            int i = this.shadow$getGrowingAge();
-
-            if (i < 0) {
-                ++i;
-                this.shadow$setGrowingAge(i);
-            } else if (i > 0) {
-                --i;
-                this.shadow$setGrowingAge(i);
-            }
+        if (this.onGround) {
+            this.inGroundTime += 1;
         }
+        super.activation$inactiveTick();
     }
 }

@@ -22,10 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.entity;
+package org.spongepowered.common.mixin.entityactivation.entity;
 
-import net.minecraft.entity.EntityType;
-import net.minecraft.world.World;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -33,26 +35,29 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.level.storage.WorldInfoBridge;
-import org.spongepowered.common.mixin.invalid.plugin.entityactivation.EntityActivationRange;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
 
-@Mixin(value = net.minecraft.entity.Entity.class, priority = 1002)
+@Mixin(value = Entity.class, priority = 1002)
 public abstract class EntityMixin_EntityActivation implements ActivationCapabilityBridge {
 
-    @Shadow public boolean onGround;
-    @Shadow public abstract World shadow$getEntityWorld();
-    @Shadow public abstract void shadow$remove();
+    // @formatter:off
+    @Shadow protected boolean onGround;
+    @Shadow public Level level;
 
-    private final byte entityActivation$type = EntityActivationRange.initializeEntityActivationType((net.minecraft.entity.Entity) (Object) this);
+    @Shadow public abstract void shadow$remove();
+    // @formatter:on
+
+    private final byte entityActivation$type = EntityActivationRange.initializeEntityActivationType((Entity) (Object) this);
     private boolean entityActivation$defaultState = true;
     private long entityActivation$activatedTick = Integer.MIN_VALUE;
     private int entityActivation$range;
     private boolean entityActivation$refreshCache = false;
 
     @Inject(method = "<init>", at = @At("RETURN"))
-    private void entityActivation$initActivationRanges(EntityType<?> type, World world, CallbackInfo ci) {
-        if (world != null && !((WorldBridge) world).bridge$isFake() && ((WorldInfoBridge) world.getWorldInfo()).bridge$isValid()) {
-            EntityActivationRange.initializeEntityActivationState((net.minecraft.entity.Entity) (Object) this);
+    private void entityActivation$initActivationRanges(EntityType<?> type, Level world, CallbackInfo ci) {
+        if (world != null && !((WorldBridge) world).bridge$isFake() && ((PrimaryLevelDataBridge) ((LevelAccessor) world).getLevelData()).bridge$valid()) {
+            EntityActivationRange.initializeEntityActivationState((Entity) (Object) this);
         }
     }
 

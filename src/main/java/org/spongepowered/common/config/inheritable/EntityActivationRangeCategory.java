@@ -54,6 +54,10 @@ public final class EntityActivationRangeCategory {
         this.globalRanges.put("misc", 16);
     }
 
+    public boolean autoPopulate() {
+        return this.autoPopulate;
+    }
+
     @ConfigSerializable
     public static final class ModSubCategory {
 

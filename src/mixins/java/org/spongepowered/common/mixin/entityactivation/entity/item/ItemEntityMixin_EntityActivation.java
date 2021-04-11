@@ -22,20 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.entity;
+package org.spongepowered.common.mixin.entityactivation.entity.item;
 
-import net.minecraft.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_EntityActivation;
+import org.spongepowered.common.util.Constants;
 
-@Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin_Activation extends EntityMixin_EntityActivation {
+@Mixin(ItemEntity.class)
+public abstract class ItemEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
 
-    @Shadow protected int idleTime;
+    // @formatter:off
+    @Shadow private int pickupDelay;
+    @Shadow private int age;
+    // @formatter:on
 
     @Override
     public void activation$inactiveTick() {
-        super.activation$inactiveTick();
-        ++this.idleTime;
+        if (this.pickupDelay > 0 && this.pickupDelay != Constants.Entity.Item.INFINITE_PICKUP_DELAY) {
+            --this.pickupDelay;
+        }
+
+        if (!this.level.isClientSide() && this.age >= SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate) {
+            this.shadow$remove();
+        }
     }
 }

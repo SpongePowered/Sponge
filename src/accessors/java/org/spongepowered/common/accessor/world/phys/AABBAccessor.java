@@ -22,19 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.world.server;
+package org.spongepowered.common.accessor.world.phys;
 
-import net.minecraft.world.server.ServerWorld;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.mixin.core.world.WorldMixin;
-import org.spongepowered.common.mixin.invalid.plugin.entityactivation.EntityActivationRange;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(value = ServerWorld.class, priority = 1005)
-public abstract class ServerWorldMixin_EntityActivation extends WorldMixin {
+@Mixin(AABB.class)
+public interface AABBAccessor {
 
-    @Override
-    protected void impl$entityActivationCheck(final CallbackInfo ci) {
-        EntityActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));
-    }
+    @Accessor("minX") void accessor$setMinX(double minX);
+
+    @Accessor("minY") void accessor$setMinY(double minY);
+
+    @Accessor("minZ") void accessor$setMinZ(double minZ);
+
+    @Accessor("maxX") void accessor$setMaxX(double maxX);
+
+    @Accessor("maxY") void accessor$setMaxY(double maxY);
+
+    @Accessor("maxZ") void accessor$setMaxZ(double maxZ);
 }

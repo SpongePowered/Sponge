@@ -103,7 +103,7 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
 
     @Override
     public boolean bridge$isQueuedForUnload() {
-        throw new UnsupportedOperationException("implement me");
+        return false; // TODO actually implement this
     }
 
     @Override
@@ -200,11 +200,12 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
 
     @Override
     public boolean bridge$areNeighborsLoaded() {
-        for (int i = 0; i < 4; i++) {
-            if (this.impl$neighbors[i] == null) {
-                return false;
-            }
-        }
+        // TODO neighbors are never set
+//        for (int i = 0; i < 4; i++) {
+//            if (this.impl$neighbors[i] == null) {
+//                return false;
+//            }
+//        }
 
         return true;
     }

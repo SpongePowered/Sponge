@@ -191,6 +191,7 @@
         "world.level.storage.LevelStorageSource_LevelStorageAccessAccessor",
         "world.level.storage.PlayerDataStorageAccessor",
         "world.level.storage.PrimaryLevelDataAccessor",
+        "world.phys.AABBAccessor",
         "world.scores.ObjectiveAccessor",
         "world.scores.PlayerTeamAccessor",
         "world.scores.ScoreAccessor",
