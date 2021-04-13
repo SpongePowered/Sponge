@@ -153,16 +153,21 @@ minecraft {
                 // Then add necessary module cracks
                 if (!this.name.contains("Java8")) {
                     base + listOf(
-                            "--illegal-access=deny", // enable strict mode in prep for Java 16
-                            "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
-                            "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
+                        "--illegal-access=deny", // enable strict mode in prep for Java 16
+                        "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
+                        "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
                     )
                 } else {
                     base
                 }
             }
             mainClass().set("org.spongepowered.vanilla.applaunch.Main")
-            classpath().from(vanillaAppLaunch.runtimeClasspath, vanillaAppLaunch.output)
+            classpath().setFrom(
+                vanillaAppLaunch.output,
+                vanillaAppLaunch.runtimeClasspath,
+                configurations.minecraft.map { it.outgoing.artifacts.files },
+                configurations.minecraft
+            )
             ideaRunSourceSet().set(vanillaAppLaunch)
         }
     }

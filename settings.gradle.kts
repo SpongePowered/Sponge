@@ -10,7 +10,7 @@ pluginManagement {
         id("org.spongepowered.gradle.vanilla") version "0.2-SNAPSHOT"
         id("org.cadixdev.licenser") version "0.5.1"
         id("com.github.johnrengelman.shadow") version "6.1.0"
-        id("org.spongepowered.gradle.sponge.dev") version "1.1.0-SNAPSHOT"
+        id("org.spongepowered.gradle.sponge.dev") version "1.0.3"
         id("implementation-structure")
         id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
 

@@ -44,7 +44,7 @@ public final class MixinServiceVanillaModLauncher extends MixinServiceModLaunche
 
     private static final class ContainerHandleVanillaModLauncher extends ContainerHandleModLauncher {
 
-        public ContainerHandleVanillaModLauncher(String name) {
+        public ContainerHandleVanillaModLauncher(final String name) {
             super(name);
 
             this.setAttribute(Constants.ManifestAttributes.MIXINCONNECTOR, "org.spongepowered.vanilla.applaunch.mixin.VanillaLaunchMixinConnector");
