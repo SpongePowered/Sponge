@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.resourcepack;
 
+import net.kyori.adventure.text.Component;
+
 import java.net.URI;
 import java.net.URISyntaxException;
 
@@ -34,14 +36,14 @@ public final class SpongeURIResourcePack extends SpongeResourcePack {
     private final URI uri;
     private final String name;
 
-    public SpongeURIResourcePack(URI uri, @Nullable String hash) {
-        super(hash);
+    public SpongeURIResourcePack(URI uri, @Nullable String hash, Component component) {
+        super(hash, component);
         this.uri = uri;
         this.name = this.getName0();
     }
 
-    public SpongeURIResourcePack(String uri, @Nullable String hash) throws URISyntaxException {
-        this(new URI(uri), hash);
+    public SpongeURIResourcePack(String uri, @Nullable String hash, Component component) throws URISyntaxException {
+        this(new URI(uri), hash, component);
     }
 
     private String getName0() {

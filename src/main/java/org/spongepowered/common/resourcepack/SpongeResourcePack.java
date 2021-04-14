@@ -27,6 +27,7 @@ package org.spongepowered.common.resourcepack;
 import com.google.common.base.MoreObjects;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
+import net.kyori.adventure.text.Component;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeCommon;
 
@@ -44,12 +45,14 @@ import java.util.UUID;
 public abstract class SpongeResourcePack implements ResourcePack {
 
     private final String hash;
+    private final Component prompt;
     private final String id = UUID.randomUUID().toString();
 
     public static final int HASH_SIZE = 40;
 
-    public SpongeResourcePack(@Nullable String hash) {
+    public SpongeResourcePack(@Nullable String hash, Component prompt) {
         this.hash = hash;
+        this.prompt = prompt;
     }
 
     public abstract String getUrlString();
@@ -65,25 +68,30 @@ public abstract class SpongeResourcePack implements ResourcePack {
     }
 
     @Override
+    public Component prompt() {
+        return this.prompt;
+    }
+
+    @Override
     public String toString() {
         return MoreObjects.toStringHelper(this).add("id", this.id()).add("uri", this.uri()).toString();
     }
 
-    public static SpongeResourcePack create(String uri, String hash) throws URISyntaxException {
+    public static SpongeResourcePack create(String uri, String hash, Component component) throws URISyntaxException {
         if (uri.startsWith(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL)) {
-            return new SpongeWorldResourcePack(uri, hash);
+            return new SpongeWorldResourcePack(uri, hash, component);
         }
         if (hash != null && hash.length() != SpongeResourcePack.HASH_SIZE) {
             hash = null;
         }
-        return new SpongeURIResourcePack(uri, hash);
+        return new SpongeURIResourcePack(uri, hash, component);
     }
 
-    public static SpongeResourcePack create(URI uri, String hash) {
+    public static SpongeResourcePack create(URI uri, String hash, Component component) {
         if (uri.toString().startsWith(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL)) {
-            return new SpongeWorldResourcePack(uri, hash);
+            return new SpongeWorldResourcePack(uri, hash, component);
         }
-        return new SpongeURIResourcePack(uri, hash);
+        return new SpongeURIResourcePack(uri, hash, component);
     }
 
     public static final class Factory implements ResourcePack.Factory {
@@ -102,7 +110,7 @@ public abstract class SpongeResourcePack implements ResourcePack {
                         hasher.putBytes(buf, 0, read);
                     }
                 }
-                return SpongeResourcePack.create(uri, hasher.hash().toString());
+                return SpongeResourcePack.create(uri, hasher.hash().toString(), Component.empty());
             } catch (final IOException e) {
                 FileNotFoundException ex = new FileNotFoundException(e.toString());
                 ex.initCause(e);
@@ -120,7 +128,7 @@ public abstract class SpongeResourcePack implements ResourcePack {
 
         @Override
         public ResourcePack fromUriUnchecked(final URI uri) {
-            return SpongeResourcePack.create(Objects.requireNonNull(uri), null);
+            return SpongeResourcePack.create(Objects.requireNonNull(uri), null, Component.empty());
         }
     }
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server;
 
 import co.aikar.timings.Timing;
 import com.google.inject.Injector;
+import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
@@ -130,7 +131,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             this.impl$resourcePack = null;
         } else {
             try {
-                this.impl$resourcePack = SpongeResourcePack.create(url, hash);
+                this.impl$resourcePack = SpongeResourcePack.create(url, hash, Component.empty());
             } catch (final URISyntaxException e) {
                 e.printStackTrace();
             }

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.resourcepack;
 
+import net.kyori.adventure.text.Component;
+
 import javax.annotation.Nullable;
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
@@ -36,8 +38,8 @@ public final class SpongeWorldResourcePack extends SpongeResourcePack {
     private final URI uri;
     public static final String LEVEL_PACK_PROTOCOL = "level://";
 
-    public SpongeWorldResourcePack(final String levelUri, @Nullable final String hash) {
-        super(hash);
+    public SpongeWorldResourcePack(final String levelUri, @Nullable final String hash, Component component) {
+        super(hash, component);
         this.path = levelUri.substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length());
         try {
             this.uri = URI.create(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL + URLEncoder.encode(this.path, "UTF-8"));
@@ -46,8 +48,8 @@ public final class SpongeWorldResourcePack extends SpongeResourcePack {
         }
     }
 
-    public SpongeWorldResourcePack(final URI levelUri, @Nullable final String hash) {
-        super(hash);
+    public SpongeWorldResourcePack(final URI levelUri, @Nullable final String hash, Component component) {
+        super(hash, component);
         String path = levelUri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length());
         try {
             this.path = URLDecoder.decode(path, "UTF-8");
