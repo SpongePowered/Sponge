@@ -22,25 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.mixin.entityactivation.entity;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.Shadow;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+@Mixin(LivingEntity.class)
+public abstract class LivingEntityMixin_Activation extends EntityMixin_EntityActivation {
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+    // @formatter:off
+    @Shadow protected int noActionTime;
+    // @formatter:on
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
-
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(final boolean flush);
-
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
-
+    @Override
+    public void activation$inactiveTick() {
+        super.activation$inactiveTick();
+        ++this.noActionTime;
+    }
 }

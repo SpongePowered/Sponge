@@ -48,14 +48,22 @@ import java.io.Reader;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.Writer;
+import java.lang.reflect.Array;
 import java.nio.charset.StandardCharsets;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
 import javax.annotation.Nullable;
 
 public final class JsonDataFormat implements StringDataFormat {
+
+    public static final String ARRAYTYPE = "_arraytype";
+    public static final String VALUE = "value";
+    public static final String BYTE = "byte";
+    public static final String INT = "int";
+    public static final String LONG = "long";
 
     public static DataContainer serialize(Gson gson, Object o) throws IOException {
         DataViewJsonWriter writer = new DataViewJsonWriter();
@@ -100,7 +108,13 @@ public final class JsonDataFormat implements StringDataFormat {
 
             if (reader.peek() == JsonToken.BEGIN_OBJECT) {
                 // Check this early so we don't need to copy the view
-                JsonDataFormat.readView(reader, view.createView(key));
+                final DataView subView = view.createView(key);
+                JsonDataFormat.readView(reader, subView);
+                // handle special array types
+                subView.getString(DataQuery.of(ARRAYTYPE)).ifPresent(type -> {
+                    view.remove(key);
+                    view.set(key, JsonDataFormat.readArray(type, subView));
+                });
             } else {
                 view.set(key, JsonDataFormat.read(reader));
             }
@@ -114,7 +128,9 @@ public final class JsonDataFormat implements StringDataFormat {
         JsonToken token = reader.peek();
         switch (token) {
             case BEGIN_OBJECT:
-                return JsonDataFormat.createContainer(reader);
+                final DataContainer container = JsonDataFormat.createContainer(reader);
+                // handle special array types
+                return container.getString(DataQuery.of(ARRAYTYPE)).map(s -> JsonDataFormat.readArray(s, container)).orElse(container);
             case BEGIN_ARRAY:
                 return JsonDataFormat.readArray(reader);
             case BOOLEAN:
@@ -128,6 +144,33 @@ public final class JsonDataFormat implements StringDataFormat {
                 return JsonDataFormat.readNumber(reader);
             default:
                 throw new IOException("Unexpected token: " + token);
+        }
+    }
+
+    private static Object readArray(String type, DataView container) {
+        final Object value = container.get(of(VALUE)).get();
+        final List<Object> list = new ArrayList<>();
+        if (value instanceof Collection) {
+            list.addAll(((Collection<?>) value));
+        } else if (value.getClass().isArray()) {
+            for (int i = 0; i < Array.getLength(value); i++) {
+                list.add(Array.get(value, i));
+            }
+        }
+        switch (type) {
+            case INT:
+                return list.stream().mapToInt(n -> (int) n).toArray();
+            case BYTE:
+                final byte[] bytes = new byte[list.size()];
+                for (int i = 0; i < list.size(); i++) {
+                    bytes[i] = (byte) list.get(i);
+                }
+                return bytes;
+            case LONG:
+                return list.stream().mapToLong(n -> (long) n).toArray();
+            default:
+                throw new IllegalArgumentException("Unknown type " + type);
+
         }
     }
 
@@ -208,9 +251,54 @@ public final class JsonDataFormat implements StringDataFormat {
             JsonDataFormat.writeView(writer, ((DataSerializable) value).toContainer());
         } else if (value instanceof DataView) {
             JsonDataFormat.writeView(writer, (DataView) value);
+        } else if (value instanceof int[]) {
+            JsonDataFormat.writeArray(writer, (int[]) value);
+        } else if (value instanceof long[]) {
+            JsonDataFormat.writeArray(writer, (long[]) value);
+        } else if (value instanceof byte[]) {
+            JsonDataFormat.writeArray(writer, (byte[]) value);
         } else {
             throw new IllegalArgumentException("Unable to translate object to JSON: " + value);
         }
+    }
+
+    private static void writeArray(JsonWriter writer, byte[] array) throws IOException {
+        writer.beginObject();
+        writer.name(ARRAYTYPE);
+        writer.value(BYTE);
+        writer.name(VALUE);
+        writer.beginArray();
+        for (byte value : array) {
+            writer.value(value);
+        }
+        writer.endArray();
+        writer.endObject();
+    }
+
+    private static void writeArray(JsonWriter writer, int[] array) throws IOException {
+        writer.beginObject();
+        writer.name(ARRAYTYPE);
+        writer.value(INT);
+        writer.name(VALUE);
+        writer.beginArray();
+        for (int value : array) {
+            writer.value(value);
+        }
+        writer.endArray();
+        writer.endObject();
+    }
+
+    private static void writeArray(JsonWriter writer, long[] array) throws IOException {
+        writer.beginObject();
+        writer.name(ARRAYTYPE);
+        writer.value(LONG);
+        writer.name(VALUE);
+        writer.beginArray();
+        for (long value : array) {
+            writer.value(value);
+        }
+        writer.endArray();
+        writer.endObject();
     }
 
     private static void writeArray(JsonWriter writer, Iterable<?> iterable) throws IOException {

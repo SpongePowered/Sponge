@@ -147,7 +147,7 @@ public final class SpongeGameConfigs {
         return null;
     }
 
-    private static InheritableConfigHandle<GlobalConfig> getGlobalInheritable() {
+    public static InheritableConfigHandle<GlobalConfig> getGlobalInheritable() {
         if (SpongeGameConfigs.global == null) {
             SpongeGameConfigs.initLock.lock();
             try {

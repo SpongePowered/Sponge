@@ -22,25 +22,36 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.mixin.entityactivation.entity;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
+import net.minecraft.world.entity.AgeableMob;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.SoftOverride;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+@Mixin(AgeableMob.class)
+public abstract class AgeableEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+    // @formatter:off
+    @Shadow public abstract int shadow$getAge();
+    @Shadow public abstract void shadow$setAge(int age);
+    // @formatter:on
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
+    @Override
+    @SoftOverride
+    public void activation$inactiveTick() {
+        super.activation$inactiveTick();
 
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(final boolean flush);
+        if (!this.level.isClientSide()) {
+            int i = this.shadow$getAge();
 
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
-
+            if (i < 0) {
+                ++i;
+                this.shadow$setAge(i);
+            } else if (i > 0) {
+                --i;
+                this.shadow$setAge(i);
+            }
+        }
+    }
 }

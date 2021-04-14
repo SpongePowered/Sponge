@@ -22,25 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.accessor.world.phys;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+@Mixin(AABB.class)
+public interface AABBAccessor {
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+    @Accessor("minX") void accessor$setMinX(double minX);
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
+    @Accessor("minY") void accessor$setMinY(double minY);
 
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(final boolean flush);
+    @Accessor("minZ") void accessor$setMinZ(double minZ);
 
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
+    @Accessor("maxX") void accessor$setMaxX(double maxX);
 
+    @Accessor("maxY") void accessor$setMaxY(double maxY);
+
+    @Accessor("maxZ") void accessor$setMaxZ(double maxZ);
 }

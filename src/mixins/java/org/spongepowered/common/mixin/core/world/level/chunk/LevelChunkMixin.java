@@ -25,16 +25,20 @@
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
+import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
@@ -48,6 +52,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.bridge.world.level.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -101,7 +106,7 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
 
     @Override
     public boolean bridge$isQueuedForUnload() {
-        throw new UnsupportedOperationException("implement me");
+        return ((ChunkMapAccessor) ((ServerChunkCache) this.level.getChunkSource()).chunkMap).accessor$pendingUnloads().containsKey(this.chunkPos.toLong());
     }
 
     @Override

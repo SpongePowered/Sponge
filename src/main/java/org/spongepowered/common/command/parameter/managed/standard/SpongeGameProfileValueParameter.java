@@ -26,7 +26,6 @@ package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.Component;
@@ -37,19 +36,15 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.util.Collection;
-import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
-import java.util.stream.Collectors;
 
-public final class SpongeGameProfileValueParameter extends ResourceKeyedArgumentValueParser<GameProfile> {
+public final class SpongeGameProfileValueParameter extends ResourceKeyedArgumentValueParser.ClientNativeCompletions<GameProfile> {
 
     private final GameProfileArgument argument = GameProfileArgument.gameProfile();
 
@@ -63,14 +58,6 @@ public final class SpongeGameProfileValueParameter extends ResourceKeyedArgument
             final SuggestionsBuilder builder) {
 
         return this.argument.listSuggestions(context, builder);
-    }
-
-    @Override
-    @NonNull
-    public List<String> complete(final @NonNull CommandCause context, @NonNull final String currentInput) {
-        final SuggestionsBuilder builder = new SuggestionsBuilder(currentInput, 0);
-        this.listSuggestions((com.mojang.brigadier.context.CommandContext<?>) context, builder);
-        return builder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
     }
 
     @Override

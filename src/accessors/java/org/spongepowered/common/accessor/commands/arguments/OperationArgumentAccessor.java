@@ -22,20 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.entity;
+package org.spongepowered.common.accessor.commands.arguments;
 
-import net.minecraft.entity.LivingEntity;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.commands.arguments.OperationArgument;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
-@Mixin(LivingEntity.class)
-public abstract class LivingEntityMixin_Activation extends EntityMixin_EntityActivation {
+@Mixin(OperationArgument.class)
+public interface OperationArgumentAccessor {
 
-    @Shadow protected int idleTime;
-
-    @Override
-    public void activation$inactiveTick() {
-        super.activation$inactiveTick();
-        ++this.idleTime;
+    @Accessor("ERROR_INVALID_OPERATION")
+    static SimpleCommandExceptionType accessor$ERROR_INVALID_OPERATION() {
+        throw new UntransformedAccessorError();
     }
+
 }

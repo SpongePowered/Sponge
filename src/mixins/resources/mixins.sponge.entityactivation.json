@@ -1,0 +1,19 @@
+{
+    "minVersion": "0.8",
+    "package": "org.spongepowered.common.mixin.entityactivation",
+    "plugin": "org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRangePlugin",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "mixins": [
+      "entity.AgeableEntityMixin_EntityActivation",
+      "entity.EntityMixin_EntityActivation",
+      "entity.LivingEntityMixin_Activation",
+      "entity.item.FireworkRocketEntityMixin_EntityActivation",
+      "entity.item.ItemEntityMixin_EntityActivation",
+      "entity.projectile.AbstractArrowEntityMixin_EntityActivation",
+      "world.server.ServerWorldMixin_EntityActivation"
+    ],
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

@@ -22,25 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.command.parameter.managed.operator;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.api.command.parameter.managed.operator.Operator;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+public final class SpongeMaxOperator implements Operator.Simple {
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+    @Override
+    public int apply(final int first, final int second) {
+        return Math.max(first, second);
+    }
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
+    @Override
+    public long apply(final long first, final long second) {
+        return Math.max(first, second);
+    }
 
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(final boolean flush);
+    @Override
+    public double apply(final double first, final double second) {
+        return Math.max(first, second);
+    }
 
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
-
+    @Override
+    public String asString() {
+        return ">";
+    }
 }

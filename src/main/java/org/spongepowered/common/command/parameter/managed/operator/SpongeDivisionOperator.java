@@ -22,34 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.entity;
+package org.spongepowered.common.command.parameter.managed.operator;
 
-import net.minecraft.entity.AgeableEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.SoftOverride;
+import org.spongepowered.api.command.parameter.managed.operator.Operator;
 
-@Mixin(AgeableEntity.class)
-public abstract class AgeableEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
-
-    @Shadow public abstract int shadow$getGrowingAge();
-    @Shadow public abstract void shadow$setGrowingAge(int age);
+public final class SpongeDivisionOperator implements Operator.Simple {
 
     @Override
-    @SoftOverride
-    public void activation$inactiveTick() {
-        super.activation$inactiveTick();
-
-        if (!this.shadow$getEntityWorld().isRemote()) {
-            int i = this.shadow$getGrowingAge();
-
-            if (i < 0) {
-                ++i;
-                this.shadow$setGrowingAge(i);
-            } else if (i > 0) {
-                --i;
-                this.shadow$setGrowingAge(i);
-            }
-        }
+    public int apply(final int first, final int second) {
+        return first / second;
     }
+
+    @Override
+    public long apply(final long first, final long second) {
+        return first / second;
+    }
+
+    @Override
+    public double apply(final double first, final double second) {
+        return first / second;
+    }
+
+    @Override
+    public String asString() {
+        return "/=";
+    }
+
 }

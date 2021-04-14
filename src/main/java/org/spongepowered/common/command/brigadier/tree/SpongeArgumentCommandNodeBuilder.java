@@ -32,7 +32,6 @@ import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
-import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 
 // We use the ArgumentBuilder primarily for setting redirects properly.
@@ -45,6 +44,13 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
     private final @Nullable ValueUsage usage;
     private final @Nullable ValueParameterModifier<T> modifier;
 
+    private static @Nullable ValueCompleter filterNativeCompleters(final ArgumentParser<?> parser, final ValueCompleter completer) {
+        if (parser == completer && parser.hasClientNativeCompletions()) {
+            return null;
+        }
+        return completer;
+    }
+
     public SpongeArgumentCommandNodeBuilder(
             final SpongeParameterKey<? super T> key,
             final ArgumentParser<T> type,
@@ -54,7 +60,7 @@ public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<C
             final @Nullable String suffix) {
         this.key = key;
         this.type = type;
-        this.completer = type == completer && type instanceof StandardCatalogedArgumentParser ? null : completer;
+        this.completer = SpongeArgumentCommandNodeBuilder.filterNativeCompleters(type, completer);
         this.modifier = modifier;
         this.usage = usage;
         this.suffix = suffix;

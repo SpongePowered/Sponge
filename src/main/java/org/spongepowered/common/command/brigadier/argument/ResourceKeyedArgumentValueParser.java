@@ -24,17 +24,25 @@
  */
 package org.spongepowered.common.command.brigadier.argument;
 
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.suggestion.Suggestion;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedValueParameter;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgumentParser<T> implements ResourceKeyedValueParameter<T>,
         ValueParameter.Simple<T> {
@@ -59,8 +67,47 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
 
     @Override
     @NonNull
-    public final List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+    public List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         return this.complete(context.cause(), currentInput);
+    }
+
+    // Used when the context is important because we pass through to a child "listSuggestions"
+    public static abstract class ClientNativeCompletions<T> extends ResourceKeyedArgumentValueParser<T> {
+
+        public ClientNativeCompletions(final ResourceKey key) {
+            super(key);
+        }
+
+        @Override
+        public final @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+            final CommandDispatcher<CommandSourceStack> dispatcher = SpongeCommon.getServer().getCommands().getDispatcher();
+            final SpongeCommandContextBuilder builder = new SpongeCommandContextBuilder(
+                    dispatcher,
+                    (CommandSourceStack) cause,
+                    dispatcher.getRoot(),
+                    0
+            );
+            return this.complete(builder, currentInput);
+        }
+
+        @Override
+        @NonNull
+        public final List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+            final com.mojang.brigadier.context.CommandContext<?> c;
+            if (context instanceof CommandContext.Builder) {
+                c = (com.mojang.brigadier.context.CommandContext<?>) ((CommandContext.Builder) context).build(currentInput);
+            } else {
+                c = (com.mojang.brigadier.context.CommandContext<?>) context;
+            }
+            final SuggestionsBuilder builder = new SuggestionsBuilder(c.getInput(), c.getRange().getStart());
+            this.listSuggestions(c, builder);
+            return builder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
+        }
+
+        @Override
+        public final boolean hasClientNativeCompletions() {
+            return true;
+        }
     }
 
 }

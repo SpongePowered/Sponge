@@ -22,25 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.server.level;
+package org.spongepowered.common.mixin.entityactivation.entity.item;
 
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.longs.Long2ObjectLinkedOpenHashMap;
-import net.minecraft.server.level.ChunkHolder;
-import net.minecraft.server.level.ChunkMap;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_EntityActivation;
+import org.spongepowered.common.util.Constants;
 
-@Mixin(ChunkMap.class)
-public interface ChunkMapAccessor {
+@Mixin(ItemEntity.class)
+public abstract class ItemEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
 
-    @Accessor("entityMap") Int2ObjectMap<ChunkMap_TrackedEntityAccessor> accessor$entityMap();
+    // @formatter:off
+    @Shadow private int pickupDelay;
+    @Shadow private int age;
+    // @formatter:on
 
-    @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
+    @Override
+    public void activation$inactiveTick() {
+        if (this.pickupDelay > 0 && this.pickupDelay != Constants.Entity.Item.INFINITE_PICKUP_DELAY) {
+            --this.pickupDelay;
+        }
 
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(final boolean flush);
-
-    @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
-
+        if (!this.level.isClientSide() && this.age >= SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate) {
+            this.shadow$remove(Entity.RemovalReason.DISCARDED);
+        }
+    }
 }

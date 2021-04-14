@@ -22,21 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.entity.item;
+package org.spongepowered.common.command.parameter.managed.operator;
 
-import net.minecraft.entity.item.FireworkRocketEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_EntityActivation;
+import org.spongepowered.api.command.parameter.managed.operator.Operator;
 
-@Mixin(FireworkRocketEntity.class)
-public abstract class FireworkRocketEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
-
-    @Shadow private int fireworkAge;
+public final class SpongeMultiplicationOperator implements Operator.Simple {
 
     @Override
-    public void activation$inactiveTick() {
-        this.fireworkAge += 1;
-        super.activation$inactiveTick();
+    public int apply(final int first, final int second) {
+        return first * second;
+    }
+
+    @Override
+    public long apply(final long first, final long second) {
+        return first * second;
+    }
+
+    @Override
+    public double apply(final double first, final double second) {
+        return first * second;
+    }
+
+    @Override
+    public String asString() {
+        return "*=";
     }
 }

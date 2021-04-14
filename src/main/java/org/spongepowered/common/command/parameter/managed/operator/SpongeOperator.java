@@ -22,30 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.entity.item;
+package org.spongepowered.common.command.parameter.managed.operator;
 
-import net.minecraft.entity.item.ItemEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.level.storage.WorldInfoBridge;
-import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_EntityActivation;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.api.command.parameter.managed.operator.Operator;
 
-@Mixin(ItemEntity.class)
-public abstract class ItemEntityMixin_EntityActivation extends EntityMixin_EntityActivation {
+public final class SpongeOperator implements Operator {
+    private final String asString;
 
-    @Shadow private int pickupDelay;
-    @Shadow private int age;
+    public SpongeOperator(final String asString) {
+        this.asString = asString;
+    }
 
     @Override
-    public void activation$inactiveTick() {
-        if (this.pickupDelay > 0 && this.pickupDelay != Constants.Entity.Item.INFINITE_PICKUP_DELAY) {
-            --this.pickupDelay;
-        }
-
-        if (!this.shadow$getEntityWorld().isRemote() && this.age >= ((WorldInfoBridge) this.shadow$getEntityWorld().getWorldInfo())
-                .bridge$getConfigAdapter().getConfig().getEntity().getItemDespawnRate()) {
-            this.shadow$remove();
-        }
+    public String asString() {
+        return this.asString;
     }
 }

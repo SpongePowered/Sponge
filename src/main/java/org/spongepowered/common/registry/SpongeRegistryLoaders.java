@@ -63,6 +63,8 @@ import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
+import org.spongepowered.api.command.parameter.managed.operator.Operator;
+import org.spongepowered.api.command.parameter.managed.operator.Operators;
 import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedValueParameters;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
@@ -168,8 +170,16 @@ import org.spongepowered.common.adventure.SpongeResolveOperation;
 import org.spongepowered.common.ban.SpongeBanType;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;
 import org.spongepowered.common.block.transaction.BlockOperation;
-import org.spongepowered.common.command.brigadier.argument.StandardCatalogedArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ClientNativeArgumentParser;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeMaxOperator;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeMinOperator;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeModulusOperator;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeAdditionOperator;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeDivisionOperator;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeMultiplicationOperator;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeOperator;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeSubtractionOperator;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigDecimalValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeBigIntegerValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeColorValueParameter;
@@ -179,6 +189,7 @@ import org.spongepowered.common.command.parameter.managed.standard.SpongeDuratio
 import org.spongepowered.common.command.parameter.managed.standard.SpongeGameProfileValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeIPAddressValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeNoneValueParameter;
+import org.spongepowered.common.command.parameter.managed.standard.SpongeOperatorValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongePluginContainerValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeServerLocationValueParameter;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeTargetBlockValueParameter;
@@ -316,38 +327,39 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
             l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> StandardCatalogedArgumentParser.createConverter(k, BlockStateArgument.block(),
+            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(),
                     (reader, cause, state) -> (BlockState) state.getState()));
-            l.add(ResourceKeyedValueParameters.BOOLEAN, k -> StandardCatalogedArgumentParser.createIdentity(k, BoolArgumentType.bool()));
+            l.add(ResourceKeyedValueParameters.BOOLEAN, k -> ClientNativeArgumentParser.createIdentity(k, BoolArgumentType.bool()));
             l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new);
             l.add(ResourceKeyedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
             l.add(ResourceKeyedValueParameters.DATE_TIME, SpongeDateTimeValueParameter::new);
-            l.add(ResourceKeyedValueParameters.DOUBLE, k -> StandardCatalogedArgumentParser.createIdentity(k, DoubleArgumentType.doubleArg()));
+            l.add(ResourceKeyedValueParameters.DOUBLE, k -> ClientNativeArgumentParser.createIdentity(k, DoubleArgumentType.doubleArg()));
             l.add(ResourceKeyedValueParameters.DURATION, SpongeDurationValueParameter::new);
-            l.add(ResourceKeyedValueParameters.ENTITY, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entity(), (reader, cause, selector) -> (Entity) selector.findSingleEntity((CommandSourceStack) cause)));
+            l.add(ResourceKeyedValueParameters.ENTITY, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entity(), (reader, cause, selector) -> (Entity) selector.findSingleEntity((CommandSourceStack) cause)));
             l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
-            l.add(ResourceKeyedValueParameters.INTEGER, k -> StandardCatalogedArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
+            l.add(ResourceKeyedValueParameters.INTEGER, k -> ClientNativeArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
             l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
-            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> StandardCatalogedArgumentParser.createConverter(k, ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
+            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
             l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
-            l.add(ResourceKeyedValueParameters.LONG, k -> StandardCatalogedArgumentParser.createIdentity(k, LongArgumentType.longArg()));
-            l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(Collectors.toList())));
-            l.add(ResourceKeyedValueParameters.MANY_GAME_PROFILES, k -> StandardCatalogedArgumentParser.createConverter(k, GameProfileArgument.gameProfile(), (reader, cause, converter) -> converter.getNames((CommandSourceStack) cause)));
-            l.add(ResourceKeyedValueParameters.MANY_PLAYERS, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.players(), (reader, cause, selector) -> selector.findPlayers((CommandSourceStack) cause)));
+            l.add(ResourceKeyedValueParameters.LONG, k -> ClientNativeArgumentParser.createIdentity(k, LongArgumentType.longArg()));
+            l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(Collectors.toList())));
+            l.add(ResourceKeyedValueParameters.MANY_GAME_PROFILES, k -> ClientNativeArgumentParser.createConverter(k, GameProfileArgument.gameProfile(), (reader, cause, converter) -> converter.getNames((CommandSourceStack) cause)));
+            l.add(ResourceKeyedValueParameters.MANY_PLAYERS, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.players(), (reader, cause, selector) -> selector.findPlayers((CommandSourceStack) cause)));
             l.add(ResourceKeyedValueParameters.NONE, SpongeNoneValueParameter::new);
-            l.add(ResourceKeyedValueParameters.PLAYER, k -> StandardCatalogedArgumentParser.createConverter(k, EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer((CommandSourceStack) cause)));
+            l.add(ResourceKeyedValueParameters.OPERATOR, SpongeOperatorValueParameter::new);
+            l.add(ResourceKeyedValueParameters.PLAYER, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer((CommandSourceStack) cause)));
             l.add(ResourceKeyedValueParameters.PLUGIN, SpongePluginContainerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.REMAINING_JOINED_STRINGS, k -> StandardCatalogedArgumentParser.createIdentity(k, StringArgumentType.greedyString()));
-            l.add(ResourceKeyedValueParameters.RESOURCE_KEY, k -> StandardCatalogedArgumentParser.createConverter(k, ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation));
-            l.add(ResourceKeyedValueParameters.STRING, k -> StandardCatalogedArgumentParser.createIdentity(k, StringArgumentType.string()));
+            l.add(ResourceKeyedValueParameters.REMAINING_JOINED_STRINGS, k -> ClientNativeArgumentParser.createIdentity(k, StringArgumentType.greedyString()));
+            l.add(ResourceKeyedValueParameters.RESOURCE_KEY, k -> ClientNativeArgumentParser.createConverter(k, ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation));
+            l.add(ResourceKeyedValueParameters.STRING, k -> ClientNativeArgumentParser.createIdentity(k, StringArgumentType.string()));
             l.add(ResourceKeyedValueParameters.TARGET_BLOCK, SpongeTargetBlockValueParameter::new);
             l.add(ResourceKeyedValueParameters.TARGET_ENTITY, k -> new SpongeTargetEntityValueParameter(k, false));
             l.add(ResourceKeyedValueParameters.TARGET_PLAYER, k -> new SpongeTargetEntityValueParameter(k, true));
-            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.string(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)));
-            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE_ALL, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)));
-            l.add(ResourceKeyedValueParameters.TEXT_JSON, k -> StandardCatalogedArgumentParser.createConverter(k, ComponentArgument.textComponent(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)));
-            l.add(ResourceKeyedValueParameters.TEXT_JSON_ALL, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.json(result)));
-            l.add(ResourceKeyedValueParameters.URL, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.string(),
+            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)));
+            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)));
+            l.add(ResourceKeyedValueParameters.TEXT_JSON, k -> ClientNativeArgumentParser.createConverter(k, ComponentArgument.textComponent(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)));
+            l.add(ResourceKeyedValueParameters.TEXT_JSON_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.json(result)));
+            l.add(ResourceKeyedValueParameters.URL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(),
                     (reader, cause, input) -> {
                         try {
                             return new URL(input);
@@ -358,7 +370,7 @@ public final class SpongeRegistryLoaders {
                     })
             );
             l.add(ResourceKeyedValueParameters.USER, SpongeUserValueParameter::new);
-            l.add(ResourceKeyedValueParameters.UUID, k -> StandardCatalogedArgumentParser.createConverter(k, StringArgumentType.string(),
+            l.add(ResourceKeyedValueParameters.UUID, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(),
                     (reader, cause, input) -> {
                         try {
                             return UUID.fromString(input);
@@ -368,14 +380,14 @@ public final class SpongeRegistryLoaders {
                         }
                     })
             );
-            l.add(ResourceKeyedValueParameters.VECTOR2D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec2Argument.vec2(),
+            l.add(ResourceKeyedValueParameters.VECTOR2D, k -> ClientNativeArgumentParser.createConverter(k, Vec2Argument.vec2(),
                     (reader, cause, result) -> {
                         final net.minecraft.world.phys.Vec3 r = result.getPosition((CommandSourceStack) cause);
                         return new Vector2d(r.x, r.z);
                     })
             );
-            l.add(ResourceKeyedValueParameters.VECTOR3D, k -> StandardCatalogedArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition((CommandSourceStack) cause))));
-            l.add(ResourceKeyedValueParameters.WORLD, k -> StandardCatalogedArgumentParser.createConverter(k,
+            l.add(ResourceKeyedValueParameters.VECTOR3D, k -> ClientNativeArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition((CommandSourceStack) cause))));
+            l.add(ResourceKeyedValueParameters.WORLD, k -> ClientNativeArgumentParser.createConverter(k,
                     DimensionArgument.dimension(),
                     (reader, cause, result) -> Sponge.server().worldManager().world((ResourceKey) (Object) result)
                             .orElseThrow(() -> DimensionArgumentAccessor.accessor$ERROR_INVALID_VALUE().createWithContext(reader, result))
@@ -672,6 +684,20 @@ public final class SpongeRegistryLoaders {
             l.add(22, NotePitches.E2, SpongeNotePitch::new);
             l.add(23, NotePitches.F2, SpongeNotePitch::new);
             l.add(24, NotePitches.F_SHARP2, SpongeNotePitch::new);
+        });
+    }
+
+    public static RegistryLoader<Operator> operator() {
+        return RegistryLoader.of(l -> {
+            l.add(Operators.ADDITION, SpongeAdditionOperator::new);
+            l.add(Operators.ASSIGN, () -> new SpongeOperator("="));
+            l.add(Operators.DIVISION, SpongeDivisionOperator::new);
+            l.add(Operators.MAX, SpongeMinOperator::new);
+            l.add(Operators.MIN, SpongeMaxOperator::new);
+            l.add(Operators.MODULUS, SpongeModulusOperator::new);
+            l.add(Operators.MULTIPLICATION, SpongeMultiplicationOperator::new);
+            l.add(Operators.SUBTRACTION, SpongeSubtractionOperator::new);
+            l.add(Operators.SWAP, () -> new SpongeOperator("><"));
         });
     }
 

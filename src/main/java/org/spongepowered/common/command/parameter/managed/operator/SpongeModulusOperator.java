@@ -22,19 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.entityactivation.world.server;
+package org.spongepowered.common.command.parameter.managed.operator;
 
-import net.minecraft.world.server.ServerWorld;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.mixin.core.world.WorldMixin;
-import org.spongepowered.common.mixin.invalid.plugin.entityactivation.EntityActivationRange;
+import org.spongepowered.api.command.parameter.managed.operator.Operator;
 
-@Mixin(value = ServerWorld.class, priority = 1005)
-public abstract class ServerWorldMixin_EntityActivation extends WorldMixin {
+public final class SpongeModulusOperator implements Operator.Simple {
+    @Override
+    public int apply(final int first, final int second) {
+        return first % second;
+    }
 
     @Override
-    protected void impl$entityActivationCheck(final CallbackInfo ci) {
-        EntityActivationRange.activateEntities(((net.minecraft.world.World) (Object) this));
+    public long apply(final long first, final long second) {
+        return first % second;
+    }
+
+    @Override
+    public double apply(final double first, final double second) {
+        return first % second;
+    }
+
+    @Override
+    public String asString() {
+        return "%=";
     }
 }

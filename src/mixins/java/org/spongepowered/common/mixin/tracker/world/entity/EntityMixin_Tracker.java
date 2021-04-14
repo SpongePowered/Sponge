@@ -28,7 +28,9 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Pose;
+import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -49,9 +51,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.world.entity.EntityTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.entity.EntityTrackedBridge;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -239,5 +242,18 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Override
     public void populateFrameModifier(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
 
+    }
+
+    @Inject(method = "remove", at = @At(value = "RETURN"))
+    private void impl$createDestructionEventOnDeath(final CallbackInfo ci) {
+        if (ShouldFire.DESTRUCT_ENTITY_EVENT
+                && !((WorldBridge) this.level).bridge$isFake()) {
+
+            if (!((Entity) (Object) this instanceof LivingEntity)) {
+                this.tracker$destructCause = PhaseTracker.getCauseStackManager().currentCause();
+            } else if ((Entity) (Object) this instanceof ArmorStand) {
+                SpongeCommonEventFactory.callDestructEntityEventDeath((ArmorStand) (Object) this, null);
+            }
+        }
     }
 }
