@@ -79,6 +79,7 @@
         "mcp.world.entity.HumanoidArmMixin_API",
         "mcp.world.entity.LightningBoltMixin_API",
         "mcp.world.entity.LivingEntityMixin_API",
+        "mcp.world.entity.MarkerMixin_API",
         "mcp.world.entity.MobMixin_API",
         "mcp.world.entity.PathfinderMobMixin_API",
         "mcp.world.entity.TamableAnimalMixin_API",
