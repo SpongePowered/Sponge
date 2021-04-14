@@ -44,6 +44,7 @@ import org.spongepowered.common.bridge.adventure.StyleBridge;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 @Mixin(AbstractComponent.class)
 public abstract class AbstractComponentMixin implements ComponentBridge {
@@ -68,20 +69,25 @@ public abstract class AbstractComponentMixin implements ComponentBridge {
                 final ScoreComponent $this = (ScoreComponent) this;
                 this.bridge$vanillaComponent = new net.minecraft.network.chat.ScoreComponent($this.name(), $this.objective());
             } else if (this instanceof SelectorComponent) {
-                this.bridge$vanillaComponent = new net.minecraft.network.chat.SelectorComponent(((SelectorComponent) this).pattern());
+                //TODO fix this once kyori NBTComponents support minecraft separator
+                this.bridge$vanillaComponent = new net.minecraft.network.chat.SelectorComponent(((SelectorComponent) this).pattern(), Optional.of(new net.minecraft.network.chat.TextComponent(",")));
             } else if (this instanceof NBTComponent<?, ?>) {
                 if (this instanceof BlockNBTComponent) {
                     final BlockNBTComponent $this = (BlockNBTComponent) this;
-                    this.bridge$vanillaComponent = new NbtComponent.BlockNbtComponent($this.nbtPath(), $this.interpret(), $this.pos().asString());
+                    //TODO fix this once kyori NBTComponents support minecraft separator
+                    this.bridge$vanillaComponent = new NbtComponent.BlockNbtComponent($this.nbtPath(), $this.interpret(), $this.pos().asString(), Optional.of(new net.minecraft.network.chat.TextComponent(",")));
                 } else if (this instanceof EntityNBTComponent) {
                     final EntityNBTComponent $this = (EntityNBTComponent) this;
-                    this.bridge$vanillaComponent = new NbtComponent.EntityNbtComponent($this.nbtPath(), $this.interpret(), $this.selector());
+                    //TODO fix this once kyori BTComponents support minecraft separator
+                    this.bridge$vanillaComponent = new NbtComponent.EntityNbtComponent($this.nbtPath(), $this.interpret(), $this.selector(), Optional.of(new net.minecraft.network.chat.TextComponent(",")));
                 } else if (this instanceof StorageNBTComponent) {
                     final StorageNBTComponent $this = (StorageNBTComponent) this;
+                    //TODO fix this once kyori NBTComponents support minecraft separator
                     this.bridge$vanillaComponent = new NbtComponent.StorageNbtComponent(
                         $this.nbtPath(),
                         $this.interpret(),
-                        SpongeAdventure.asVanilla($this.storage())
+                        SpongeAdventure.asVanilla($this.storage()),
+                        Optional.of(new net.minecraft.network.chat.TextComponent(","))
                     );
                 }
             }
