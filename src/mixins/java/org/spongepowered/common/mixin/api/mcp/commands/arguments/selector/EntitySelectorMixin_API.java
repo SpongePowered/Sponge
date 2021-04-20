@@ -34,6 +34,7 @@ import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
@@ -47,6 +48,8 @@ public abstract class EntitySelectorMixin_API implements Selector {
 
     // @formatter:off
     @Shadow public abstract List<? extends net.minecraft.world.entity.Entity> shadow$findEntities(CommandSourceStack source) throws CommandSyntaxException;
+    @Shadow @Final private int maxResults;
+    @Shadow @Final private boolean includesEntities;
     // @formatter:on
 
     @Override
@@ -67,6 +70,16 @@ public abstract class EntitySelectorMixin_API implements Selector {
     @NonNull
     public Collection<Entity> select(@NonNull final CommandCause cause) {
         return this.api$select((CommandSourceStack) cause);
+    }
+
+    @Override
+    public int limit() {
+        return this.maxResults;
+    }
+
+    @Override
+    public boolean playersOnly() {
+        return !this.includesEntities;
     }
 
     private Collection<Entity> api$select(@NonNull final CommandSourceStack source) {
