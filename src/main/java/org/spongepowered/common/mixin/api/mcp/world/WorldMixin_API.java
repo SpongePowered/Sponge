@@ -707,18 +707,26 @@ public abstract class WorldMixin_API implements World {
     @Override
     public Set<AABB> getIntersectingBlockCollisionBoxes(AABB box) {
         checkNotNull(box, "box");
-        return getCollisionBoxes(null, VecHelper.toMinecraftAABB(box)).stream()
-                .map(VecHelper::toSpongeAABB)
-                .collect(Collectors.toSet());
+        return getCollisionBoxes(null, box);
     }
 
     @Override
     public Set<AABB> getIntersectingCollisionBoxes(Entity owner, AABB box) {
         checkNotNull(owner, "owner");
         checkNotNull(box, "box");
-        return getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMinecraftAABB(box)).stream()
-                .map(VecHelper::toSpongeAABB)
-                .collect(Collectors.toSet());
+        return getCollisionBoxes(owner, box);
+    }
+
+    private Set<AABB> getCollisionBoxes(Entity owner, AABB box) {
+        Set<AABB> result = new HashSet<>();
+        for (AxisAlignedBB aabb : getCollisionBoxes((net.minecraft.entity.Entity) owner, VecHelper.toMinecraftAABB(box))) {
+            try {
+                result.add(VecHelper.toSpongeAABB(aabb));
+            } catch (IllegalArgumentException exception) {
+                // Box is degenerate, ignore
+            }
+        }
+        return result;
     }
 
     @Override
