@@ -131,6 +131,13 @@ public final class DataSerializers {
 
             @Override
             public UUID translate(DataView view) throws InvalidDataException {
+                // fix for API7 notifier/creator uuids
+                if (view.contains(Constants.UUID_LEAST_QUERY) && view.contains(Constants.UUID_MOST_QUERY)) {
+                    final long most = view.getLong(Constants.UUID_MOST_QUERY).get();
+                    final long least = view.getLong(Constants.UUID_LEAST_QUERY).get();
+                    return new UUID(most, least);
+                }
+
                 final long most = view.getLong(Queries.UUID_MOST).orElseThrow(DataSerializers.invalidDataQuery(Queries.UUID_MOST));
                 final long least = view.getLong(Queries.UUID_LEAST).orElseThrow(DataSerializers.invalidDataQuery(Queries.UUID_LEAST));
                 return new UUID(most, least);
