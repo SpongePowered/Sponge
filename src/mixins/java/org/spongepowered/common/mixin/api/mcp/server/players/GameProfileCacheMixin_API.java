@@ -116,13 +116,13 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> byId(final UUID uniqueId) {
+    public Optional<GameProfile> findById(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
         return Optional.ofNullable(this.shadow$get(uniqueId)).map(SpongeGameProfile::of);
     }
 
     @Override
-    public Map<UUID, Optional<GameProfile>> byIds(final Iterable<UUID> uniqueIds) {
+    public Map<UUID, Optional<GameProfile>> findByIds(final Iterable<UUID> uniqueIds) {
         Objects.requireNonNull(uniqueIds, "uniqueIds");
         final Map<UUID, Optional<GameProfile>> result = new HashMap<>();
         for (final UUID uniqueId : uniqueIds) {
@@ -132,7 +132,7 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Optional<GameProfile> byName(final String name) {
+    public Optional<GameProfile> findByName(final String name) {
         Objects.requireNonNull(name, "name");
         @Nullable GameProfileCache_GameProfileInfoAccessor entry = this.profilesByName.get(name.toLowerCase(Locale.ROOT));
 
@@ -147,11 +147,11 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
     }
 
     @Override
-    public Map<String, Optional<GameProfile>> byNames(final Iterable<String> names) {
+    public Map<String, Optional<GameProfile>> findByNames(final Iterable<String> names) {
         Objects.requireNonNull(names, "names");
         final Map<String, Optional<GameProfile>> result = Maps.newHashMap();
         for (final String name : names) {
-            result.put(name, this.byName(name));
+            result.put(name, this.findByName(name));
         }
         return ImmutableMap.copyOf(result);
     }

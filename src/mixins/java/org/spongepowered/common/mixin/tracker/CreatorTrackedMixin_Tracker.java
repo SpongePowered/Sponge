@@ -122,7 +122,7 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
         }
 
         // check mojang cache
-        final GameProfile profile = Sponge.server().gameProfileManager().cache().byId(uuid).orElse(null);
+        final GameProfile profile = Sponge.server().gameProfileManager().cache().findById(uuid).orElse(null);
         if (profile != null) {
             return Sponge.server().userManager().find(profile);
         }

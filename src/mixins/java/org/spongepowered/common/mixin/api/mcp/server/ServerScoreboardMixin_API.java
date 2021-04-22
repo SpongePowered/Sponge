@@ -125,7 +125,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
 
         final Set<org.spongepowered.api.scoreboard.Score> scores = new HashSet<>();
         for (final net.minecraft.world.scores.Objective objective: ((ScoreboardAccessor) this).accessor$objectivesByName().values()) {
-            ((ObjectiveBridge) objective).bridge$getSpongeObjective().score(name).ifPresent(scores::add);
+            ((ObjectiveBridge) objective).bridge$getSpongeObjective().findScore(name).ifPresent(scores::add);
         }
         return scores;
     }
@@ -136,7 +136,7 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
 
         for (final net.minecraft.world.scores.Objective objective: ((ScoreboardAccessor) this).accessor$objectivesByName().values()) {
             final SpongeObjective spongeObjective = ((ObjectiveBridge) objective).bridge$getSpongeObjective();
-            spongeObjective.score(name).ifPresent(spongeObjective::removeScore);
+            spongeObjective.findScore(name).ifPresent(spongeObjective::removeScore);
         }
     }
 
