@@ -255,7 +255,9 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         compound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.x, this.y, this.z));
         compound.put(Constants.Entity.ENTITY_ROTATION, Constants.NBT.newFloatNBTList(this.yaw, this.pitch));
 
-        DataUtil.syncDataToTag(this);
+        if (DataUtil.syncDataToTag(this)) {
+            compound.merge(this.data$getCompound());
+        }
     }
 
     @Override
