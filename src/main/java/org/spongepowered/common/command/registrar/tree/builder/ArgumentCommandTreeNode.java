@@ -25,12 +25,15 @@
 package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.command.brigadier.tree.ForcedRedirectArgumentSuggestionNode;
+import org.spongepowered.common.command.registrar.tree.key.SpongeCustomSuggestionProviderClientCompletionKey;
 
 public abstract class ArgumentCommandTreeNode<T extends CommandTreeNode<T>>
         extends AbstractCommandTreeNode<T, CommandNode<SharedSuggestionProvider>> {
@@ -47,8 +50,18 @@ public abstract class ArgumentCommandTreeNode<T extends CommandTreeNode<T>>
                 nodeKey,
                 this.getArgumentType(),
                 this.isExecutable() ? AbstractCommandTreeNode.EXECUTABLE : null,
-                this.isCustomSuggestions() ? SuggestionProviders.ASK_SERVER : null
+                this.suggestionsProvider()
         );
+    }
+
+    private @Nullable SuggestionProvider<SharedSuggestionProvider> suggestionsProvider() {
+        if (this.isCustomSuggestions()) {
+            return SuggestionProviders.ASK_SERVER;
+        }
+        if (this.parameterType instanceof SpongeCustomSuggestionProviderClientCompletionKey) {
+            return ((SpongeCustomSuggestionProviderClientCompletionKey) this.parameterType).defaultSuggestionProvider();
+        }
+        return null;
     }
 
     protected abstract ArgumentType<?> getArgumentType();

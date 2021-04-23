@@ -47,6 +47,7 @@ import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.commands.synchronization.brigadier.DoubleArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
@@ -205,6 +206,7 @@ import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegi
 import org.spongepowered.common.command.registrar.SpongeRawCommandRegistrar;
 import org.spongepowered.common.command.registrar.tree.key.SpongeAmountClientCompletionKey;
 import org.spongepowered.common.command.registrar.tree.key.SpongeBasicClientCompletionKey;
+import org.spongepowered.common.command.registrar.tree.key.SpongeCustomSuggestionProviderClientCompletionKey;
 import org.spongepowered.common.command.registrar.tree.key.SpongeEntityClientCompletionKey;
 import org.spongepowered.common.command.registrar.tree.key.SpongeRangeClientCompletionKey;
 import org.spongepowered.common.command.registrar.tree.key.SpongeStringClientCompletionKey;
@@ -440,6 +442,9 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<ClientCompletionKey<?>> clientCompletionKey() {
         final Function<ResourceKey, ArgumentType<?>> fn = key -> ((EmptyArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(key).accessor$serializer()).accessor$constructor().get();
         return RegistryLoader.of(l -> {
+            l.add(ClientCompletionKeys.ALL_RECIPES, k -> new SpongeCustomSuggestionProviderClientCompletionKey(k, ResourceLocationArgument.id(), SuggestionProviders.ALL_RECIPES));
+            l.add(ClientCompletionKeys.AVAILABLE_BIOMES, k -> new SpongeCustomSuggestionProviderClientCompletionKey(k, ResourceLocationArgument.id(), SuggestionProviders.AVAILABLE_BIOMES));
+            l.add(ClientCompletionKeys.AVAILABLE_SOUNDS, k -> new SpongeCustomSuggestionProviderClientCompletionKey(k, ResourceLocationArgument.id(), SuggestionProviders.AVAILABLE_SOUNDS));
             l.add(ClientCompletionKeys.BLOCK_PREDICATE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.BLOCK_STATE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.BOOL, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
@@ -449,7 +454,7 @@ public final class SpongeRegistryLoaders {
             l.add(ClientCompletionKeys.DOUBLE, k -> SpongeRangeClientCompletionKey.createFrom(k, new DoubleArgumentSerializer()));
             l.add(ClientCompletionKeys.ENTITY, SpongeEntityClientCompletionKey::new);
             l.add(ClientCompletionKeys.ENTITY_ANCHOR, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
-            l.add(ClientCompletionKeys.ENTITY_SUMMON, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.ENTITY_SUMMON, k -> new SpongeCustomSuggestionProviderClientCompletionKey(k, fn.apply(k), SuggestionProviders.SUMMONABLE_ENTITIES));
             l.add(ClientCompletionKeys.FLOAT, k -> SpongeRangeClientCompletionKey.createFrom(k, new FloatArgumentSerializer()));
             l.add(ClientCompletionKeys.FUNCTION, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.GAME_PROFILE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
