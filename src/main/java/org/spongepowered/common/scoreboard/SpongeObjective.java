@@ -127,12 +127,12 @@ public final class SpongeObjective implements Objective {
     }
 
     @Override
-    public Optional<Score> score(final Component name) {
+    public Optional<Score> findScore(final Component name) {
         return Optional.ofNullable(this.scores.get(name));
     }
 
     @Override
-    public Score scoreOrCreate(final Component name) {
+    public Score findOrCreateScore(final Component name) {
         if (this.scores.containsKey(name)) {
             return this.scores.get(name);
         }
@@ -179,7 +179,7 @@ public final class SpongeObjective implements Objective {
 
     @Override
     public boolean removeScore(final Component name) {
-        final Optional<Score> score = this.score(name);
+        final Optional<Score> score = this.findScore(name);
         return score.filter(this::removeScore).isPresent();
     }
 

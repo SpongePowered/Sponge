@@ -78,7 +78,7 @@ public abstract class BlockMixin_API extends AbstractBlockMixin_API {
     }
 
     @Override
-    public Optional<StateProperty<?>> statePropertyByName(final String name) {
+    public Optional<StateProperty<?>> findStateProperty(final String name) {
         return Optional.ofNullable((StateProperty<?>) this.stateDefinition.getProperty(name));
     }
 

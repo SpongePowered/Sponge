@@ -72,7 +72,7 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
     public InventoryTransactionResult.Poll poll() {
         final net.minecraft.world.item.ItemStack stack = this.inventoryAdapter$getFabric().fabric$getStack(this.ordinal);
         if (stack.isEmpty()) {
-            return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS).poll(ItemStackSnapshot.empty()).build();
+            return InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.FAILURE).poll(ItemStackSnapshot.empty()).build();
         }
 
         this.inventoryAdapter$getFabric().fabric$setStack(this.ordinal, net.minecraft.world.item.ItemStack.EMPTY);
@@ -171,7 +171,7 @@ public class SlotAdapter extends BasicInventoryAdapter implements Slot {
 
     @Override
     public int freeCapacity() {
-        return !this.slot.getStack(this.inventoryAdapter$getFabric()).isEmpty()? 1 : 0;
+        return this.slot.getStack(this.inventoryAdapter$getFabric()).isEmpty() ? 1 : 0;
     }
 
     @Override

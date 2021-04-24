@@ -215,7 +215,7 @@ public final class ServerUserProvider {
 
     Stream<GameProfile> streamAll() {
         final GameProfileCache cache = ((Server) this.server).gameProfileManager().cache();
-        return this.knownUUIDs.stream().map(x -> cache.byId(x).orElseGet(() -> GameProfile.of(x)));
+        return this.knownUUIDs.stream().map(x -> cache.findById(x).orElseGet(() -> GameProfile.of(x)));
     }
 
     private Path getPlayerDataFile(final UUID uniqueId) {

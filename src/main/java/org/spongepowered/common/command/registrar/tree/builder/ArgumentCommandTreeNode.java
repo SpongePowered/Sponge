@@ -47,7 +47,7 @@ public abstract class ArgumentCommandTreeNode<T extends CommandTreeNode<T>>
                 nodeKey,
                 this.getArgumentType(),
                 this.isExecutable() ? AbstractCommandTreeNode.EXECUTABLE : null,
-                this.isCustomSuggestions() ? SuggestionProviders.ASK_SERVER : null
+                this.suggestionProvider()
         );
     }
 

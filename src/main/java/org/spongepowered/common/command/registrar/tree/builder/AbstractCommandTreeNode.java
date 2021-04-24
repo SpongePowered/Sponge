@@ -24,14 +24,16 @@
  */
 package org.spongepowered.common.command.registrar.tree.builder;
 
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.mojang.brigadier.Command;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.registrar.tree.ClientSuggestionProvider;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.command.brigadier.tree.ForcedRedirectNode;
 
@@ -48,7 +50,7 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     @Nullable private CommandTreeNode<?> redirect = null;
     @Nullable private Map<String, AbstractCommandTreeNode<?, ?>> children = null;
     private boolean executable = false;
-    private boolean customSuggestions = false;
+    private @Nullable ClientSuggestionProvider suggestionProvider = null;
     private Predicate<CommandCause> requirement = c -> true;
 
     public ImmutableMap<String, AbstractCommandTreeNode<?, ?>> getChildren() {
@@ -63,7 +65,9 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     public T child(@NonNull final String key, final CommandTreeNode.@NonNull Argument<@NonNull ?> child) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(child);
-        Preconditions.checkState(this.redirect == null, "There must be no redirect if using children nodes");
+        if (this.redirect != null) {
+            throw new IllegalStateException("There must be no redirect if using children nodes");
+        }
         this.checkKey(key);
         if (this.children == null) {
             this.children = new HashMap<>();
@@ -76,8 +80,10 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     @Override
     @NonNull
     public T redirect(@NonNull final CommandTreeNode<@NonNull ?> to) {
-        Preconditions.checkNotNull(to);
-        Preconditions.checkState(this.children == null, "There must be no children if using a redirect");
+        Objects.requireNonNull(to);
+        if (this.redirect != null) {
+            throw new IllegalStateException("There must be no children if using a redirect");
+        }
         this.redirect = to;
         return this.getThis();
     }
@@ -90,10 +96,15 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     }
 
     @Override
+    public @NonNull T suggestions(final @Nullable ClientSuggestionProvider suggestionProvider) {
+        this.suggestionProvider = suggestionProvider;
+        return this.getThis();
+    }
+
+    @Override
     @NonNull
     public T customSuggestions() {
-        this.customSuggestions = true;
-        return this.getThis();
+        return this.suggestions((ClientSuggestionProvider) SuggestionProviders.ASK_SERVER);
     }
 
     @Override
@@ -117,8 +128,8 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
         return this.executable;
     }
 
-    public boolean isCustomSuggestions() {
-        return this.customSuggestions;
+    public SuggestionProvider<SharedSuggestionProvider> suggestionProvider() {
+        return (SuggestionProvider<SharedSuggestionProvider>) this.suggestionProvider;
     }
 
     @Nullable

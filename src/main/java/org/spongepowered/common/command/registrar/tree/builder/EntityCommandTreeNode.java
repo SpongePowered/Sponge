@@ -47,14 +47,14 @@ public final class EntityCommandTreeNode
     protected ArgumentType<?> getArgumentType() {
         if (this.playersOnly) {
             if (this.oneOnly) {
-                return EntityArgument.players();
+                return EntityArgument.player();
             }
-            return EntityArgument.player();
+            return EntityArgument.players();
         } else {
             if (this.oneOnly) {
-                return EntityArgument.entities();
+                return EntityArgument.entity();
             }
-            return EntityArgument.entity();
+            return EntityArgument.entities();
         }
     }
 

@@ -27,7 +27,6 @@ package org.spongepowered.common.registry;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -47,6 +46,11 @@ import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.commands.synchronization.brigadier.DoubleArgumentSerializer;
+import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
+import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
+import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
@@ -69,6 +73,8 @@ import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedVal
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKeys;
+import org.spongepowered.api.command.registrar.tree.ClientSuggestionProvider;
+import org.spongepowered.api.command.registrar.tree.ClientSuggestionProviders;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithms;
 import org.spongepowered.api.command.selector.SelectorType;
@@ -172,11 +178,11 @@ import org.spongepowered.common.block.BlockStateSerializerDeserializer;
 import org.spongepowered.common.block.transaction.BlockOperation;
 import org.spongepowered.common.command.brigadier.argument.ClientNativeArgumentParser;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeAdditionOperator;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeDivisionOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeMaxOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeMinOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeModulusOperator;
-import org.spongepowered.common.command.parameter.managed.operator.SpongeAdditionOperator;
-import org.spongepowered.common.command.parameter.managed.operator.SpongeDivisionOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeMultiplicationOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeSubtractionOperator;
@@ -202,6 +208,7 @@ import org.spongepowered.common.command.registrar.SpongeRawCommandRegistrar;
 import org.spongepowered.common.command.registrar.tree.key.SpongeAmountClientCompletionKey;
 import org.spongepowered.common.command.registrar.tree.key.SpongeBasicClientCompletionKey;
 import org.spongepowered.common.command.registrar.tree.key.SpongeEntityClientCompletionKey;
+import org.spongepowered.common.command.registrar.tree.key.SpongeRangeClientCompletionKey;
 import org.spongepowered.common.command.registrar.tree.key.SpongeStringClientCompletionKey;
 import org.spongepowered.common.command.selector.SpongeSelectorSortAlgorithm;
 import org.spongepowered.common.command.selector.SpongeSelectorType;
@@ -441,17 +448,17 @@ public final class SpongeRegistryLoaders {
             l.add(ClientCompletionKeys.COLOR, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.COMPONENT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.DIMENSION, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
-            l.add(ClientCompletionKeys.DOUBLE, k -> new SpongeBasicClientCompletionKey(k, DoubleArgumentType.doubleArg()));
+            l.add(ClientCompletionKeys.DOUBLE, k -> SpongeRangeClientCompletionKey.createFrom(k, new DoubleArgumentSerializer()));
             l.add(ClientCompletionKeys.ENTITY, SpongeEntityClientCompletionKey::new);
             l.add(ClientCompletionKeys.ENTITY_ANCHOR, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.ENTITY_SUMMON, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
-            l.add(ClientCompletionKeys.FLOAT, k -> new SpongeBasicClientCompletionKey(k, FloatArgumentType.floatArg()));
+            l.add(ClientCompletionKeys.FLOAT, k -> SpongeRangeClientCompletionKey.createFrom(k, new FloatArgumentSerializer()));
             l.add(ClientCompletionKeys.FUNCTION, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.GAME_PROFILE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
-            l.add(ClientCompletionKeys.INTEGER, k -> new SpongeBasicClientCompletionKey(k, IntegerArgumentType.integer()));
+            l.add(ClientCompletionKeys.INTEGER, k -> SpongeRangeClientCompletionKey.createFrom(k, new IntegerArgumentSerializer()));
             l.add(ClientCompletionKeys.ITEM_ENCHANTMENT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.ITEM_SLOT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
-            l.add(ClientCompletionKeys.LONG, k -> new SpongeBasicClientCompletionKey(k, LongArgumentType.longArg()));
+            l.add(ClientCompletionKeys.LONG, k -> SpongeRangeClientCompletionKey.createFrom(k, new LongArgumentSerializer()));
             l.add(ClientCompletionKeys.MESSAGE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.MOB_EFFECT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.NBT_COMPOUND_TAG, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
@@ -482,6 +489,15 @@ public final class SpongeRegistryLoaders {
             l.add(ClientCompletionTypes.RESOURCE_KEY, k -> new SpongeClientCompletionType(ResourceLocationArgument.id()));
             l.add(ClientCompletionTypes.STRING, k -> new SpongeClientCompletionType(StringArgumentType.string()));
             l.add(ClientCompletionTypes.WHOLE_NUMBER, k -> new SpongeClientCompletionType(LongArgumentType.longArg()));
+        });
+    }
+
+    public static RegistryLoader<ClientSuggestionProvider> clientSuggestionProvider() {
+        return RegistryLoader.of(l -> {
+            l.add(ClientSuggestionProviders.ALL_RECIPES, k -> (ClientSuggestionProvider) SuggestionProviders.ALL_RECIPES);
+            l.add(ClientSuggestionProviders.AVAILABLE_BIOMES, k -> (ClientSuggestionProvider) SuggestionProviders.AVAILABLE_BIOMES);
+            l.add(ClientSuggestionProviders.AVAILABLE_SOUNDS, k -> (ClientSuggestionProvider) SuggestionProviders.AVAILABLE_SOUNDS);
+            l.add(ClientSuggestionProviders.SUMMONABLE_ENTITIES, k -> (ClientSuggestionProvider) SuggestionProviders.SUMMONABLE_ENTITIES);
         });
     }
 

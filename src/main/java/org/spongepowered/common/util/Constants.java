@@ -105,7 +105,9 @@ public final class Constants {
 
     public static final String UUID = "UUID";
     public static final String UUID_MOST = "UUIDMost";
+    public static final DataQuery UUID_MOST_QUERY = DataQuery.of(Constants.UUID_MOST);
     public static final String UUID_LEAST = "UUIDLeast";
+    public static final DataQuery UUID_LEAST_QUERY = DataQuery.of(Constants.UUID_LEAST);
     public static final BlockPos DUMMY_POS = new BlockPos(0, 0, 0);
     public static final String MINECRAFT = "minecraft";
     public static final int MINECRAFT_DATA_VERSION = SharedConstants.getCurrentVersion().getWorldVersion();

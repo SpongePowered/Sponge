@@ -101,7 +101,7 @@ public abstract class SpongeScheduler implements Scheduler {
     }
 
     @Override
-    public Optional<ScheduledTask> taskById(final UUID id) {
+    public Optional<ScheduledTask> findTask(final UUID id) {
         Objects.requireNonNull(id, "id");
         synchronized (this.taskMap) {
             return Optional.ofNullable(this.taskMap.get(id));
@@ -109,7 +109,7 @@ public abstract class SpongeScheduler implements Scheduler {
     }
 
     @Override
-    public Set<ScheduledTask> tasksByName(final String pattern) {
+    public Set<ScheduledTask> findTasks(final String pattern) {
         Objects.requireNonNull(pattern, "pattern");
         final Pattern searchPattern = Pattern.compile(pattern);
         final Set<ScheduledTask> matchingTasks = this.tasks();
@@ -133,7 +133,7 @@ public abstract class SpongeScheduler implements Scheduler {
     }
 
     @Override
-    public Set<ScheduledTask> tasksByPlugin(final PluginContainer plugin) {
+    public Set<ScheduledTask> tasks(final PluginContainer plugin) {
         Objects.requireNonNull(plugin, "plugin");
         final String testOwnerId = plugin.getMetadata().getId();
 

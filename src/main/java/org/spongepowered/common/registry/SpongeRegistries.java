@@ -41,6 +41,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.CAT_TYPE, SpongeRegistryLoaders.catType());
         holder.createRegistry(RegistryTypes.CLIENT_COMPLETION_KEY, SpongeRegistryLoaders.clientCompletionKey());
         holder.createRegistry(RegistryTypes.CLIENT_COMPLETION_TYPE, SpongeRegistryLoaders.clientCompletionType());
+        holder.createRegistry(RegistryTypes.CLIENT_SUGGESTION_PROVIDER, SpongeRegistryLoaders.clientSuggestionProvider());
         holder.createRegistry(RegistryTypes.COMMAND_REGISTRAR_TYPE, SpongeRegistryLoaders.commandRegistrarType(), true);
         holder.createRegistry(RegistryTypes.CURRENCY, (RegistryLoader<Currency>) null, true);
         holder.createRegistry(RegistryTypes.DAMAGE_TYPE, SpongeRegistryLoaders.damageType());

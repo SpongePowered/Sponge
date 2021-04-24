@@ -264,7 +264,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Score getOrCreatePlayerScore(final String name, final net.minecraft.world.scores.Objective objective) {
-        return ((SpongeScore) ((ObjectiveBridge) objective).bridge$getSpongeObjective().scoreOrCreate(SpongeAdventure.legacySection(name)))
+        return ((SpongeScore) ((ObjectiveBridge) objective).bridge$getSpongeObjective().findOrCreateScore(SpongeAdventure.legacySection(name)))
                 .getScoreFor(objective);
     }
 
@@ -272,7 +272,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
     public void resetPlayerScore(final String name, final net.minecraft.world.scores.Objective objective) {
         if (objective != null) {
             final SpongeObjective spongeObjective = ((ObjectiveBridge) objective).bridge$getSpongeObjective();
-            final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.score(SpongeAdventure.legacySection(name));
+            final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.findScore(SpongeAdventure.legacySection(name));
             if (score.isPresent()) {
                 spongeObjective.removeScore(score.get());
             } else {

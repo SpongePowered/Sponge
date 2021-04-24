@@ -61,7 +61,7 @@ public abstract class StateHolderMixin_API<S extends State<S>, C> implements Sta
     }
 
     @Override
-    public Optional<StateProperty<?>> statePropertyByName(String name) {
+    public Optional<StateProperty<?>> findStateProperty(String name) {
         return this.stateProperties().stream().filter(p -> p.name().equals(name)).findFirst();
     }
 
