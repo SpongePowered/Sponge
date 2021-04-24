@@ -72,6 +72,7 @@ version = spongeImpl.generateImplementationVersionString(apiVersion, minecraftVe
 val applaunchConfig by configurations.register("applaunch")
 
 val launchConfig by configurations.register("launch") {
+    extendsFrom(configurations.minecraft.get())
     extendsFrom(applaunchConfig)
 }
 val accessorsConfig by configurations.register("accessors") {
@@ -146,7 +147,6 @@ dependencies {
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     launchConfig("org.spongepowered:spongeapi:$apiVersion")
-    launchConfig(minecraft.minecraftDependency())
     launchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
     launchConfig("org.spongepowered:mixin:$mixinVersion")
     launchConfig("org.checkerframework:checker-qual:3.4.1")
@@ -228,8 +228,8 @@ allprojects {
                 .filter { it.name.endsWith(".accesswidener") }
                 .files
                 .forEach {
-                    accessWidener(it)
-                    parent?.minecraft?.accessWidener(it)
+                    accessWideners(it)
+                    parent?.minecraft?.accessWideners(it)
                 }
         }
     }
@@ -237,10 +237,10 @@ allprojects {
     idea {
         if (project != null) {
             (project as ExtensionAware).extensions["settings"].run {
-                /* (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.ActionDelegationConfig::class).run {
+                (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.ActionDelegationConfig::class).run {
                     delegateBuildRunToGradle = false
                     testRunner = org.jetbrains.gradle.ext.ActionDelegationConfig.TestRunner.PLATFORM
-                } */ // TODO: Make this default once we can silence the Mixin AP
+                }
                 (this as ExtensionAware).extensions.getByType(org.jetbrains.gradle.ext.IdeaCompilerConfiguration::class).run {
                     addNotNullAssertions = false
                     useReleaseOption = JavaVersion.current().isJava10Compatible
@@ -262,12 +262,14 @@ allprojects {
     val spongeSnapshotRepo: String? by project
     val spongeReleaseRepo: String? by project
     tasks {
+        val emptyAnnotationProcessors = objects.fileCollection()
         withType(JavaCompile::class).configureEach {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
             if (JavaVersion.current().isJava10Compatible) {
                 options.release.set(8)
             }
+            options.annotationProcessorPath = emptyAnnotationProcessors
         }
 
         withType(PublishToMavenRepository::class).configureEach {

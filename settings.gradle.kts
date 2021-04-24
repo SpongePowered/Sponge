@@ -1,5 +1,12 @@
+import org.spongepowered.gradle.vanilla.repository.MinecraftRepositoryExtension
+
 pluginManagement {
     repositories {
+        mavenLocal {
+            content {
+                includeGroup("org.spongepowered")
+            }
+        }
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
@@ -13,8 +20,11 @@ pluginManagement {
         id("org.spongepowered.gradle.sponge.dev") version "1.0.3"
         id("implementation-structure")
         id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
-
     }
+}
+
+plugins {
+    id("org.spongepowered.gradle.vanilla")
 }
 
 dependencyResolutionManagement {
@@ -27,6 +37,10 @@ dependencyResolutionManagement {
 }
 
 rootProject.name = "Sponge"
+
+extensions.configure(MinecraftRepositoryExtension::class) {
+    injectRepositories(false)
+}
 
 // Set up project structure
 

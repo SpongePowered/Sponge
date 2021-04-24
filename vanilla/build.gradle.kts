@@ -20,6 +20,7 @@ version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVer
 val vanillaLibrariesConfig by configurations.register("libraries")
 val vanillaAppLaunchConfig by configurations.register("applaunch") {
     extendsFrom(vanillaLibrariesConfig)
+    extendsFrom(configurations.minecraft.get())
 }
 val vanillaInstallerConfig by configurations.register("installer")
 
@@ -175,13 +176,13 @@ minecraft {
             .filter { it.name.endsWith(".accesswidener") }
             .files
             .forEach {
-                accessWidener(it)
+                accessWideners(it)
             }
 
     project.sourceSets["main"].resources
             .filter { it.name.endsWith(".accesswidener") }
             .files
-            .forEach { accessWidener(it) }
+            .forEach { accessWideners(it) }
 }
 
 dependencies {
@@ -198,9 +199,6 @@ dependencies {
 
     vanillaMixinsImplementation(project(commonProject.path))
     add(vanillaLaunch.implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
-    add(vanillaAppLaunch.implementationConfigurationName, project.minecraft.minecraftDependency())
-    add(vanillaLaunch.implementationConfigurationName, project.minecraft.minecraftDependency())
-    add(vanillaMixins.implementationConfigurationName, project.minecraft.minecraftDependency())
 
     vanillaInstallerConfig("com.google.code.gson:gson:2.8.0")
     vanillaInstallerConfig("org.spongepowered:configurate-hocon:4.0.0")
@@ -223,7 +221,6 @@ dependencies {
     vanillaInstallerConfig("org.cadixdev:lorenz-io-proguard:0.5.6")
 
     vanillaAppLaunchConfig("org.spongepowered:spongeapi:$apiVersion")
-    // vanillaAppLaunchConfig(project.minecraft.minecraftDependency())
     vanillaAppLaunchConfig(platform("net.kyori:adventure-bom:4.7.0"))
     vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate4")
     vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
