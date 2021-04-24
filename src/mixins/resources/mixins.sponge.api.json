@@ -29,6 +29,7 @@
         "mcp.commands.CommandSourceStackMixin_API",
         "mcp.commands.arguments.selector.EntitySelectorMixin_API",
         "mcp.commands.arguments.selector.EntitySelectorParserMixin_API",
+        "mcp.commands.synchronization.SuggestionProviders_WrapperMixin_API",
         "mcp.core.RegistryMixin_API",
         "mcp.core.WritableRegistryMixin_API",
         "mcp.core.particles.ParticleTypeMixin_API",

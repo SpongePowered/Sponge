@@ -27,7 +27,6 @@ package org.spongepowered.common.registry;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.BoolArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
-import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
@@ -47,6 +46,7 @@ import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
+import net.minecraft.commands.synchronization.SuggestionProviders;
 import net.minecraft.commands.synchronization.brigadier.DoubleArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
@@ -73,6 +73,8 @@ import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedVal
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKeys;
+import org.spongepowered.api.command.registrar.tree.ClientSuggestionProvider;
+import org.spongepowered.api.command.registrar.tree.ClientSuggestionProviders;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithms;
 import org.spongepowered.api.command.selector.SelectorType;
@@ -176,11 +178,11 @@ import org.spongepowered.common.block.BlockStateSerializerDeserializer;
 import org.spongepowered.common.block.transaction.BlockOperation;
 import org.spongepowered.common.command.brigadier.argument.ClientNativeArgumentParser;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeAdditionOperator;
+import org.spongepowered.common.command.parameter.managed.operator.SpongeDivisionOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeMaxOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeMinOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeModulusOperator;
-import org.spongepowered.common.command.parameter.managed.operator.SpongeAdditionOperator;
-import org.spongepowered.common.command.parameter.managed.operator.SpongeDivisionOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeMultiplicationOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeOperator;
 import org.spongepowered.common.command.parameter.managed.operator.SpongeSubtractionOperator;
@@ -487,6 +489,15 @@ public final class SpongeRegistryLoaders {
             l.add(ClientCompletionTypes.RESOURCE_KEY, k -> new SpongeClientCompletionType(ResourceLocationArgument.id()));
             l.add(ClientCompletionTypes.STRING, k -> new SpongeClientCompletionType(StringArgumentType.string()));
             l.add(ClientCompletionTypes.WHOLE_NUMBER, k -> new SpongeClientCompletionType(LongArgumentType.longArg()));
+        });
+    }
+
+    public static RegistryLoader<ClientSuggestionProvider> clientSuggestionProvider() {
+        return RegistryLoader.of(l -> {
+            l.add(ClientSuggestionProviders.ALL_RECIPES, k -> (ClientSuggestionProvider) SuggestionProviders.ALL_RECIPES);
+            l.add(ClientSuggestionProviders.AVAILABLE_BIOMES, k -> (ClientSuggestionProvider) SuggestionProviders.AVAILABLE_BIOMES);
+            l.add(ClientSuggestionProviders.AVAILABLE_SOUNDS, k -> (ClientSuggestionProvider) SuggestionProviders.AVAILABLE_SOUNDS);
+            l.add(ClientSuggestionProviders.SUMMONABLE_ENTITIES, k -> (ClientSuggestionProvider) SuggestionProviders.SUMMONABLE_ENTITIES);
         });
     }
 

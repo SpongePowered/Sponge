@@ -559,10 +559,10 @@ public final class CommandTest {
     @Listener
     public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
         event.register(this.plugin, new RawCommandTest(), "rawcommandtest");
+        event.register(this.plugin, new ClientSuggestionsRawCommandTest(), "rawrecipescommandtest");
     }
 
-    private static CommandResult printParameters(final CommandContext context, final Parameter.Value<?>... params)
-    {
+    private static CommandResult printParameters(final CommandContext context, final Parameter.Value<?>... params) {
         for (final Parameter.Value<?> param : params) {
             final Object paramValue = context.one(param).map(Object::toString).orElse("missing");
             final String paramUsage = param.usage(context.cause());
