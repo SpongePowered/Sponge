@@ -44,7 +44,7 @@ public final class SpongeNoiseGeneratorConfig {
         public NoiseConfig noiseConfig;
         public BlockState defaultBlock, defaultFluid;
         public int bedrockRoofY, bedrockFloorY, seaLevel, minSurfaceLevel;
-        public boolean aquifers, noiseCaves, deepslate;
+        public boolean aquifers, noiseCaves, deepslate, oreVeins;
 
         @Override
         public NoiseGeneratorConfig.Builder structureConfig(final StructureGenerationConfig config) {
@@ -113,6 +113,12 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
+        public NoiseGeneratorConfig.Builder oreVeins(final boolean enableOreVeins) {
+            this.oreVeins = enableOreVeins;
+            return this;
+        }
+
+        @Override
         public NoiseGeneratorConfig.Builder reset() {
             this.structureConfig = (StructureGenerationConfig) new StructureSettings(true);
             this.noiseConfig = NoiseConfig.overworld();
@@ -124,6 +130,7 @@ public final class SpongeNoiseGeneratorConfig {
             this.aquifers = false;
             this.noiseCaves = false;
             this.deepslate = false;
+            this.oreVeins = false;
             return this;
         }
 
@@ -139,6 +146,7 @@ public final class SpongeNoiseGeneratorConfig {
             this.aquifers = value.aquifers();
             this.noiseCaves = value.noiseCaves();
             this.deepslate = value.deepslate();
+            this.deepslate = value.oreVeins();
             return this;
         }
 
@@ -147,7 +155,7 @@ public final class SpongeNoiseGeneratorConfig {
             final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new((StructureSettings) this.structureConfig,
                     (net.minecraft.world.level.levelgen.NoiseSettings) this.noiseConfig, (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
                     (net.minecraft.world.level.block.state.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, this.minSurfaceLevel, false,
-                    this.aquifers, this.noiseCaves, this.deepslate
+                    this.aquifers, this.noiseCaves, this.deepslate, this.oreVeins
                 );
             return (NoiseGeneratorConfig) (Object) settings;
         }
