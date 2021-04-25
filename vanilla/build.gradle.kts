@@ -112,15 +112,11 @@ minecraft {
         sequenceOf(8, 11, 16).forEach {
             server("runJava${it}Server") {
                 args("--nogui", "--launchTarget", "sponge_server_dev")
+                targetVersion(it)
             }
             client("runJava${it}Client") {
                 args("--launchTarget", "sponge_client_dev")
-            }
-            tasks.named("runJava${it}Server", JavaExec::class).configure {
-                javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(it)) })
-            }
-            tasks.named("runJava${it}Client", JavaExec::class).configure {
-                javaLauncher.set(javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(it)) })
+                targetVersion(it)
             }
         }
 
@@ -133,19 +129,23 @@ minecraft {
         }
 
         configureEach {
-            workingDirectory().set(project.file("run/"))
-            if (System.getProperty("idea.active")?.toBoolean() == true) {
+            workingDirectory(project.file("run/"))
+            if (org.spongepowered.gradle.vanilla.util.IdeConfigurer.isIdeaImport()) {
                 // IntelliJ does not properly report its compatibility
                 jvmArgs("-Dterminal.ansi=true", "-Djansi.mode=force")
+            } else if (org.spongepowered.gradle.vanilla.util.IdeConfigurer.isEclipseImport()) {
+                // Eclipse doesn't handle ansi, even if the "process escape sequences" option is enabled...
+                // jvmArgs("-Dspongevanilla.disableAnsi=true")
             }
             jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
-            allJvmArgumentProviders() += CommandLineArgumentProvider {
+            allJvmArgumentProviders += CommandLineArgumentProvider {
                 // Resolve the Mixin artifact for use as a reload agent
                 val mixinJar = vanillaAppLaunchConfig.resolvedConfiguration
                         .getFiles { it.name == "mixin" && it.group == "org.spongepowered" }
                         .firstOrNull()
 
-                val base = if (mixinJar != null) {
+                // The mixin agent initializes logging too early, which prevents jansi from properly stripping escape codes in Eclipse.
+                val base = if (!org.spongepowered.gradle.vanilla.util.IdeConfigurer.isEclipseImport() && mixinJar != null) {
                     listOf("-javaagent:$mixinJar")
                 } else {
                     emptyList()
@@ -162,14 +162,13 @@ minecraft {
                     base
                 }
             }
-            mainClass().set("org.spongepowered.vanilla.applaunch.Main")
-            classpath().setFrom(
+            mainClass("org.spongepowered.vanilla.applaunch.Main")
+            classpath.setFrom(
                 vanillaAppLaunch.output,
                 vanillaAppLaunch.runtimeClasspath,
-                configurations.minecraft.map { it.outgoing.artifacts.files },
                 configurations.minecraft
             )
-            ideaRunSourceSet().set(vanillaAppLaunch)
+            ideaRunSourceSet.set(vanillaAppLaunch)
         }
     }
     commonProject.sourceSets["main"].resources
