@@ -150,19 +150,13 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     }
 
     @Override
-    default boolean isChunkLoaded(final int x, final int y, final int z, final boolean allowEmpty) {
-        return this.shadow$hasChunk(x >> 4, z >> 4);
+    default boolean isChunkLoaded(final int cx, final int cy, final int cz, final boolean allowEmpty) {
+        return this.shadow$hasChunk(cx, cz);
     }
 
     @Override
-    default boolean hasChunk(final int x, final int y, final int z) {
-        return this.shadow$hasChunk(x >> 4, z >> 4);
-    }
-
-    @Override
-    default boolean hasChunk(final Vector3i position) {
-        Objects.requireNonNull(position, "position");
-        return this.shadow$hasChunk(position.getX() >> 4, position.getZ() >> 4);
+    default boolean hasChunk(final int cx, final int cy, final int cz) {
+        return this.shadow$hasChunk(cx, cz);
     }
 
     // HeightAwareVolume
