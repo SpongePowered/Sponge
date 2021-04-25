@@ -41,6 +41,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
@@ -284,7 +285,6 @@ import org.spongepowered.math.vector.Vector3d;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -377,16 +377,7 @@ public final class SpongeRegistryLoaders {
                     })
             );
             l.add(ResourceKeyedValueParameters.USER, SpongeUserValueParameter::new);
-            l.add(ResourceKeyedValueParameters.UUID, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(),
-                    (reader, cause, input) -> {
-                        try {
-                            return UUID.fromString(input);
-                        } catch (final IllegalArgumentException ex) {
-                            throw new SimpleCommandExceptionType(new TextComponent(ex.getMessage()))
-                                    .createWithContext(reader);
-                        }
-                    })
-            );
+            l.add(ResourceKeyedValueParameters.UUID, k -> ClientNativeArgumentParser.createIdentity(k, UuidArgument.uuid()));
             l.add(ResourceKeyedValueParameters.VECTOR2D, k -> ClientNativeArgumentParser.createConverter(k, Vec2Argument.vec2(),
                     (reader, cause, result) -> {
                         final net.minecraft.world.phys.Vec3 r = result.getPosition((CommandSourceStack) cause);
