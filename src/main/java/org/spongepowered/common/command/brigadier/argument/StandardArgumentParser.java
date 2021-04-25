@@ -31,7 +31,6 @@ import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.RootCommandNode;
-import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -42,6 +41,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
@@ -140,7 +140,7 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
         try {
             return Optional.of(this.converter.convert((StringReader) reader, cause, this.type.parse((StringReader) reader)));
         } catch (final CommandSyntaxException e) {
-            throw new ArgumentParseException(Component.text(e.getMessage()), e, e.getInput(), e.getCursor());
+            throw new ArgumentParseException(SpongeAdventure.asAdventure(e.getRawMessage()), e, e.getInput(), e.getCursor());
         }
     }
 

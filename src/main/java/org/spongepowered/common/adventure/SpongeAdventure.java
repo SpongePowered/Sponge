@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.adventure;
 
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
@@ -283,6 +284,15 @@ public final class SpongeAdventure {
 
     public static Component asAdventure(final net.minecraft.network.chat.Component component) {
         return ((BaseComponentBridge) component).bridge$asAdventureComponent();
+    }
+
+    public static Component asAdventure(final Message message) {
+        if (message instanceof net.minecraft.network.chat.Component) {
+            return SpongeAdventure.asAdventure((net.minecraft.network.chat.Component) message);
+        } else if (message instanceof Component) {
+            return (Component) message;
+        }
+        return Component.text(message.getString());
     }
 
     public static net.minecraft.network.chat.Style asVanilla(final Style style) {
