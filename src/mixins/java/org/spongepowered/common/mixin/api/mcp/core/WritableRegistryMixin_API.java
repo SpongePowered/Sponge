@@ -25,6 +25,9 @@
 package org.spongepowered.common.mixin.api.mcp.core;
 
 import com.mojang.serialization.Lifecycle;
+import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,9 +35,6 @@ import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.core.Registry;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.ResourceLocation;
 
 @Mixin(WritableRegistry.class)
 public abstract class WritableRegistryMixin_API<T> extends RegistryMixin_API<T> {
@@ -49,7 +49,12 @@ public abstract class WritableRegistryMixin_API<T> extends RegistryMixin_API<T> 
         Objects.requireNonNull(key, "key");
         Objects.requireNonNull(value, "value");
 
-        return Optional.ofNullable(((WritableRegistryBridge<V>) this).bridge$register(net.minecraft.resources.ResourceKey.create((net.minecraft.resources.ResourceKey<? extends Registry<V>>) this
-                        .shadow$key(), (ResourceLocation) (Object) key), value, Lifecycle.stable()));
+        return Optional.ofNullable(
+            ((WritableRegistryBridge<V>) this).bridge$register(
+                (net.minecraft.resources.ResourceKey<V>) net.minecraft.resources.ResourceKey
+                    .create((net.minecraft.resources.ResourceKey<? extends Registry<T>>) this.shadow$key(), (ResourceLocation) (Object) key),
+                value, Lifecycle.stable()
+            )
+        );
     }
 }
