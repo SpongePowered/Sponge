@@ -17,12 +17,12 @@ description = "The SpongeAPI implementation for Vanilla Minecraft"
 version = spongeImpl.generatePlatformBuildVersionString(apiVersion, minecraftVersion, recommendedVersion)
 
 // Vanilla extra configurations
-val vanillaLibrariesConfig by configurations.register("libraries")
-val vanillaAppLaunchConfig by configurations.register("applaunch") {
-    extendsFrom(vanillaLibrariesConfig)
+val vanillaLibrariesConfig = configurations.register("libraries")
+val vanillaAppLaunchConfig = configurations.register("applaunch") {
+    extendsFrom(vanillaLibrariesConfig.get())
     extendsFrom(configurations.minecraft.get())
 }
-val vanillaInstallerConfig by configurations.register("installer")
+val vanillaInstallerConfig = configurations.register("installer")
 
 // Common source sets and configurations
 val launchConfig = commonProject.configurations.named("launch")
@@ -56,7 +56,7 @@ val vanillaMain by sourceSets.named("main") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, launch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
     configurations.named(implementationConfigurationName) {
-        extendsFrom(vanillaLibrariesConfig)
+        extendsFrom(vanillaLibrariesConfig.get())
     }
 }
 val vanillaLaunch by sourceSets.register("launch") {
@@ -67,7 +67,7 @@ val vanillaLaunch by sourceSets.register("launch") {
     spongeImpl.applyNamedDependencyOnOutput(project, this, vanillaMain, project, vanillaMain.implementationConfigurationName)
 
     configurations.named(implementationConfigurationName) {
-        extendsFrom(vanillaAppLaunchConfig)
+        extendsFrom(vanillaAppLaunchConfig.get())
     }
 }
 val vanillaMixins by sourceSets.register("mixins") {
@@ -95,13 +95,13 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaMain, this, project, this.runtimeOnlyConfigurationName)
 }
 val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
-    extendsFrom(vanillaAppLaunchConfig)
+    extendsFrom(vanillaAppLaunchConfig.get())
 }
 configurations.named(vanillaInstaller.implementationConfigurationName) {
-    extendsFrom(vanillaInstallerConfig)
+    extendsFrom(vanillaInstallerConfig.get())
 }
 configurations.named(vanillaAppLaunch.implementationConfigurationName) {
-    extendsFrom(vanillaAppLaunchConfig)
+    extendsFrom(vanillaAppLaunchConfig.get())
     extendsFrom(launchConfig.get())
 }
 val vanillaAppLaunchRuntime by configurations.named(vanillaAppLaunch.runtimeOnlyConfigurationName)
@@ -200,77 +200,86 @@ dependencies {
     vanillaMixinsImplementation(project(commonProject.path))
     add(vanillaLaunch.implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
-    vanillaInstallerConfig("com.google.code.gson:gson:2.8.0")
-    vanillaInstallerConfig("org.spongepowered:configurate-hocon:4.0.0")
-    vanillaInstallerConfig("org.spongepowered:configurate-core:4.0.0")
-    vanillaInstallerConfig("net.sf.jopt-simple:jopt-simple:5.0.3")
-    vanillaInstallerConfig("org.tinylog:tinylog-api:2.2.1")
-    vanillaInstallerConfig("org.tinylog:tinylog-impl:2.2.1")
+    val installer = vanillaInstallerConfig.name
+    installer("com.google.code.gson:gson:2.8.0")
+    installer("org.spongepowered:configurate-hocon:4.0.0")
+    installer("org.spongepowered:configurate-core:4.0.0")
+    installer("net.sf.jopt-simple:jopt-simple:5.0.3")
+    installer("org.tinylog:tinylog-api:2.2.1")
+    installer("org.tinylog:tinylog-impl:2.2.1")
     // Override ASM versions, and explicitly declare dependencies so ASM is excluded from the manifest.
     val asmExclusions = sequenceOf("-commons", "-tree", "-analysis", "")
             .map { "asm$it" }
             .onEach {
-                vanillaInstallerConfig("org.ow2.asm:$it:$asmVersion")
+                installer("org.ow2.asm:$it:$asmVersion")
             }.toSet()
-    vanillaInstallerConfig("org.cadixdev:atlas:0.2.1") {
+    installer("org.cadixdev:atlas:0.2.1") {
         asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
     }
-    vanillaInstallerConfig("org.cadixdev:lorenz-asm:0.5.6") {
+    installer("org.cadixdev:lorenz-asm:0.5.6") {
         asmExclusions.forEach { exclude(group = "org.ow2.asm", module = it) } // Use our own ASM version
     }
-    vanillaInstallerConfig("org.cadixdev:lorenz-io-proguard:0.5.6")
+    installer("org.cadixdev:lorenz-io-proguard:0.5.6")
 
-    vanillaAppLaunchConfig("org.spongepowered:spongeapi:$apiVersion")
-    vanillaAppLaunchConfig(platform("net.kyori:adventure-bom:4.7.0"))
-    vanillaAppLaunchConfig("net.kyori:adventure-serializer-configurate4")
-    vanillaAppLaunchConfig("org.spongepowered:mixin:$mixinVersion")
-    vanillaAppLaunchConfig("org.ow2.asm:asm-util:$asmVersion")
-    vanillaAppLaunchConfig("org.ow2.asm:asm-tree:$asmVersion")
-    vanillaAppLaunchConfig("com.google.guava:guava:$guavaVersion")
-    vanillaAppLaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
-    vanillaAppLaunchConfig("javax.inject:javax.inject:1")
-    vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
-    vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
-    vanillaAppLaunchConfig("com.lmax:disruptor:3.4.2")
-    vanillaAppLaunchConfig("com.zaxxer:HikariCP:2.6.3")
-    vanillaAppLaunchConfig("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
-    vanillaAppLaunchConfig(platform("org.spongepowered:configurate-bom:4.0.0"))
-    vanillaAppLaunchConfig("org.spongepowered:configurate-core") {
+    // Add the API as a runtime dependency, just so it gets shaded into the jar
+    add(vanillaInstaller.runtimeOnlyConfigurationName, "org.spongepowered:spongeapi:$apiVersion") {
+        isTransitive = false
+    }
+
+    val appLaunch = vanillaAppLaunchConfig.name
+    appLaunch("org.spongepowered:spongeapi:$apiVersion")
+    appLaunch(platform("net.kyori:adventure-bom:4.7.0"))
+    appLaunch("net.kyori:adventure-serializer-configurate4")
+    appLaunch("org.spongepowered:mixin:$mixinVersion")
+    appLaunch("org.ow2.asm:asm-util:$asmVersion")
+    appLaunch("org.ow2.asm:asm-tree:$asmVersion")
+    appLaunch("com.google.guava:guava:$guavaVersion")
+    appLaunch("org.spongepowered:plugin-spi:$pluginSpiVersion")
+    appLaunch("javax.inject:javax.inject:1")
+    appLaunch("org.apache.logging.log4j:log4j-api:2.11.2")
+    appLaunch("org.apache.logging.log4j:log4j-core:2.11.2")
+    appLaunch("com.lmax:disruptor:3.4.2")
+    appLaunch("com.zaxxer:HikariCP:2.6.3")
+    appLaunch("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
+    appLaunch(platform("org.spongepowered:configurate-bom:4.0.0"))
+    appLaunch("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    vanillaAppLaunchConfig("org.spongepowered:configurate-hocon") {
+    appLaunch("org.spongepowered:configurate-hocon") {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
-    vanillaAppLaunchConfig("org.spongepowered:configurate-jackson") {
+    appLaunch("org.spongepowered:configurate-jackson") {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
 
-    vanillaLibrariesConfig("net.minecrell:terminalconsoleappender:1.2.0")
-    vanillaLibrariesConfig("org.jline:jline-terminal:$jlineVersion")
-    vanillaLibrariesConfig("org.jline:jline-reader:$jlineVersion")
-    vanillaLibrariesConfig("org.jline:jline-terminal-jansi:$jlineVersion") {
+    val libraries = vanillaLibrariesConfig.name
+    libraries("net.minecrell:terminalconsoleappender:1.2.0")
+    libraries("org.jline:jline-terminal:$jlineVersion")
+    libraries("org.jline:jline-reader:$jlineVersion")
+    libraries("org.jline:jline-terminal-jansi:$jlineVersion") {
         exclude("org.fusesource.jansi") // Use our own JAnsi
     }
     // A newer version is required to make log4j happy
-    vanillaLibrariesConfig("org.fusesource.jansi:jansi:2.3.1")
+    libraries("org.fusesource.jansi:jansi:2.3.1")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // The ModLauncher compatibility launch layer
-    vanillaAppLaunchConfig("cpw.mods:modlauncher:$modlauncherVersion") {
+    appLaunch("cpw.mods:modlauncher:$modlauncherVersion") {
+        exclude(group = "org.apache.logging.log4j")
+        exclude(group = "net.sf.jopt-simple") // uses a newer version than MC
+    }
+    appLaunch("org.ow2.asm:asm-commons:$asmVersion")
+    appLaunch("cpw.mods:grossjava9hacks:1.3.3") {
         exclude(group = "org.apache.logging.log4j")
     }
-    vanillaAppLaunchConfig("org.ow2.asm:asm-commons:$asmVersion")
-    vanillaAppLaunchConfig("cpw.mods:grossjava9hacks:1.3.3") {
-        exclude(group = "org.apache.logging.log4j")
-    }
-    vanillaAppLaunchConfig("net.fabricmc:access-widener:1.0.2") {
+    appLaunch("net.fabricmc:access-widener:1.0.2") {
         exclude(group = "org.apache.logging.log4j")
     }
 
-    testplugins?.apply {
-        vanillaAppLaunchRuntime(project(testplugins.path)) {
+    testplugins?.also {
+        vanillaAppLaunchRuntime(project(it.path)) {
             exclude(group = "org.spongepowered")
         }
     }
@@ -348,14 +357,18 @@ tasks {
 
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
     vanillaInstaller.resources.srcDir(installerResources)
-    val emitDependencies by registering(org.spongepowered.gradle.convention.task.OutputDependenciesToJson::class) {
+
+    val downloadNotNeeded = configurations.register("downloadNotNeeded") {
+        extendsFrom(configurations.minecraft.get())
+        extendsFrom(vanillaInstallerConfig.get())
+    }
+
+    val emitDependencies by registering(org.spongepowered.gradle.impl.OutputDependenciesToJson::class) {
         group = "sponge"
         // everything in applaunch
-        configuration.set(vanillaAppLaunchConfig)
+        this.dependencies(vanillaAppLaunchConfig)
         // except what we're providing through the installer
-        excludeConfiguration.set(vanillaInstallerConfig)
-        // for accesstransformers
-        allowedClassifiers.add("service")
+        this.excludedDependencies(downloadNotNeeded)
 
         outputFile.set(installerResources.map { it.file("libraries.json") })
     }
@@ -365,6 +378,8 @@ tasks {
 
     shadowJar {
         mergeServiceFiles()
+
+        configurations = listOf(project.configurations.getByName(vanillaInstaller.runtimeClasspathConfigurationName))
 
         archiveClassifier.set("universal")
         manifest {
@@ -379,21 +394,23 @@ tasks {
             ))
             from(vanillaManifest)
         }
-        from(commonProject.tasks.jar)
-        from(commonProject.tasks.named("mixinsJar"))
-        from(commonProject.tasks.named("accessorsJar"))
-        from(commonProject.tasks.named("launchJar"))
-        from(commonProject.tasks.named("applaunchJar"))
-        from(jar)
-        from(vanillaInstallerJar)
-        from(vanillaAppLaunchJar)
-        from(vanillaLaunchJar)
-        from(vanillaMixinsJar)
-        from(vanillaInstallerConfig)
-        dependencies {
-            include(project(":"))
-            include("org.spongepowered:spongeapi:$apiVersion")
+        from(commonProject.sourceSets.main.map { it.output })
+        from(commonProject.sourceSets.named("mixins").map {it.output })
+        from(commonProject.sourceSets.named("accessors").map {it.output })
+        from(commonProject.sourceSets.named("launch").map {it.output })
+        from(commonProject.sourceSets.named("applaunch").map {it.output })
+        from(sourceSets.main.map {it.output })
+        from(vanillaInstaller.output)
+        from(vanillaInstallerJava9.output) {
+            into("META-INF/versions/9/")
         }
+        from(vanillaAppLaunch.output)
+        from(vanillaLaunch.output)
+        from(vanillaMixins.output)
+        /*dependencies {
+            // include(project(":"))
+            include("org.spongepowered:spongeapi:$apiVersion")
+        } */
 
         // We cannot have modules in a shaded jar
         exclude("META-INF/versions/*/module-info.class")
