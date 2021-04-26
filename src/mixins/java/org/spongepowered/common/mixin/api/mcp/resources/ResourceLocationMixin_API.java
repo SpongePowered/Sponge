@@ -29,7 +29,6 @@ import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -38,7 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
       @Interface(iface = Key.class, prefix = "adventure$"),
       @Interface(iface = ResourceKey.class, prefix = "resourceKey$")
 })
-public abstract class ResourceLocationMixin_API implements Key, ResourceKey {
+public abstract class ResourceLocationMixin_API {
 
     // @formatter:off
     @Shadow public abstract String shadow$getNamespace();
@@ -53,8 +52,7 @@ public abstract class ResourceLocationMixin_API implements Key, ResourceKey {
         return this.shadow$getPath();
     }
 
-    @Intrinsic
     public int adventure$compareTo(Key o) {
-        return ResourceKey.super.compareTo(o);
+        return -o.compareTo((Key) this);
     }
 }

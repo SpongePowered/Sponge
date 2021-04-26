@@ -58,8 +58,6 @@ import java.util.Map;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 
-import javax.annotation.Nonnull;
-
 public final class SpongeCommandContextBuilder extends CommandContextBuilder<CommandSourceStack>
         implements org.spongepowered.api.command.parameter.CommandContext.Builder {
 
@@ -481,7 +479,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public void rollback(@Nonnull final Transaction transaction) throws IllegalArgumentException {
+    public void rollback(final @NonNull Transaction transaction) throws IllegalArgumentException {
         if (this.transaction != null && this.transaction.peek() == transaction) {
             ((SpongeCommandContextBuilderTransaction) transaction).rollback();
             this.removeTransaction(transaction);

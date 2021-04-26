@@ -7,17 +7,17 @@ The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms
 * [Source]
 * [Issues]
 * [Documentation]
-* [Discord]: [#sponge ]
+* [Discord]: `#sponge`
 
 ## Latest Builds
 
 ### Sponge
 
-**1.16.4**: ![Snapshots](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Sponge&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
+**1.16.5**: ![Snapshots](https://img.shields.io/nexus/maven-snapshots/org.spongepowered/sponge?label=Sponge&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
 
 ### SpongeVanilla
 
-**1.16.4**: ![Snapshots](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=SpongeVanilla&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
+**1.16.5**: ![Snapshots](https://img.shields.io/nexus/maven-releases/org.spongepowered/spongevanilla?label=SpongeVanilla&server=https%3A%2F%2Frepo-new.spongepowered.org%2F)
 
 
 ## Prerequisites
@@ -32,32 +32,35 @@ The following steps will ensure your project is cloned properly.
 
 ## Setup
 **Note**: Sponge uses [Gradle] as its build system. The repo includes the Gradle wrapper that will automatically download the correct Gradle 
-version. Local installations of Gradle may work but are untested. To execute the Gradle wrapper, run the `./gradlew` script on Unix systems or only
-`gradlew` on Windows systems.
+version. Local installations of Gradle may work (as long as they are using Gradle 6.8+) but are untested. To execute the Gradle wrapper, run the 
+`./gradlew` script on Unix systems or only `gradlew` on Windows systems.
 
-Before you are able to build Sponge, you must first prepare the environment (some IDEs may do this for you).
-
-  - Run `./gradlew build --refresh-dependencies`
-
-Even if this fails to compile Sponge, it will download all the dependencies so you can get started.  
+To have browsable sources for use in-IDE, run `./gradlew :decompile`. This command will need to be re-ran after any change to
+Minecraft version or to `.accesswidener` files. If sources are not appearing properly, an IDE refresh should fix things.
 
 ### IDE Setup
 __For [Eclipse]__
-  1. Run `./gradlew eclipse`
-  2. Import Sponge as an existing project (File > Import > General)
-  3. Select the root folder for Sponge and make sure `Search for nested projects` is enabled
-  4. Check Sponge when it finishes building and click **Finish**
+ 1. Make sure the Buildship plugin is installed (available on the [Eclipse Marketplace])
+ 2. Import the project as an *Existing Gradle Project* (via File > Import > Gradle)
+
+While we do our best to support any IDE, most of our developers use IntelliJ, so issues may pop up with Eclipse from time to time.
+We'll be happy to work to resolve those issues if reported via [our issues page][Issues] or fixed via PR.
 
 __For [IntelliJ]__
   1. Make sure you have the Gradle plugin enabled (File > Settings > Plugins).  
   2. Click File > New > Project from Existing Sources > Gradle and select the root folder for Sponge.
   3. Make sure _Use default gradle wrapper_ is selected. Older/newer Gradle versions may work but we only test using the wrapper.
 
-## Building
-__Note:__ You must [Setup the environment](#setup) before you can build Sponge.
+For both Eclipse and IntelliJ, a variety of run configurations will be generated which allow running the client and server in development. These run 
+configurations will be re-generated on each project import, so any desired modifications should be done on copies of the configurations.
 
-In order to build Sponge you simply need to run the `gradlew` command. On Windows systems you should run `gradlew` instead of `./gradlew` to
-invoke the Gradle wrapper. You can find the compiled JAR files in `./build/libs`.
+While these run configurations have Java versions attached to them, be aware that IntelliJ ignores that information entirely, and Eclipse will 
+only be able to align those java versions with whatever JREs it is aware of.
+
+## Building
+
+In order to build Sponge you simply need to run the `gradlew build` command. On Windows systems you should run `gradlew build` instead 
+of `./gradlew build` to invoke the Gradle wrapper. You can find the compiled JAR files in `./build/libs` and `./vanilla/build/libs`.
 
 ## Updating your Clone
 The following steps will update your clone with the official repo.
@@ -72,6 +75,7 @@ Are you a talented programmer looking to contribute some code? We'd love the hel
 * Please follow the above guidelines for your pull request(s) to be accepted.
 
 [Eclipse]: https://eclipse.org/
+[Eclipse Marketplace]: http://marketplace.eclipse.org/content/buildship-gradle-integration
 [Gradle]: https://gradle.org/
 [Homepage]: https://spongepowered.org/
 [IntelliJ]: http://www.jetbrains.com/idea/

@@ -324,7 +324,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
         try (final PhaseContext<@NonNull ?> context = phaseContext) {
             context.buildAndSwitch();
-            PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, () -> "Wrapping Random Block Tick: " + state.toString());
+            PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, "Wrapping Random Block Tick: {}", state);
             state.randomTick(world, pos, random);
         } catch (final Exception | NoClassDefFoundError e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, phaseContext);

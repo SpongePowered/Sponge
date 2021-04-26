@@ -1,0 +1,24 @@
+plugins {
+    id "java-gradle-plugin"
+    id "org.spongepowered.gradle.sponge.dev" version "1.0.3"
+}
+
+repositories {
+    maven {
+        url = "https://repo.spongepowered.org/repository/maven-public"
+        name = "sponge"
+    }
+}
+
+dependencies {
+    implementation("com.google.code.gson:gson:2.8.6")
+}
+
+gradlePlugin {
+    plugins {
+        impl {
+            id = "implementation-structure"
+            implementationClass = "org.spongepowered.gradle.impl.SpongeImplementationPlugin"
+        }
+    }
+}
