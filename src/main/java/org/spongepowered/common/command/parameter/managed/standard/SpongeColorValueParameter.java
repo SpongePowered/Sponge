@@ -29,19 +29,20 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import com.mojang.brigadier.tree.RootCommandNode;
 import net.kyori.adventure.text.Component;
 import net.minecraft.ChatFormatting;
+import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.ColorArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.accessor.ChatFormattingAccessor;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
+import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
 import java.util.List;
 import java.util.Optional;
@@ -70,7 +71,7 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
     @NonNull
     public List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
         final SuggestionsBuilder builder = new SuggestionsBuilder(currentInput, 0);
-        this.listSuggestions((com.mojang.brigadier.context.CommandContext<?>) context, builder);
+        this.listSuggestions(new SpongeCommandContextBuilder(null, (CommandSourceStack) context, new RootCommandNode<>(), 0).build(currentInput), builder);
         return builder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
     }
 
