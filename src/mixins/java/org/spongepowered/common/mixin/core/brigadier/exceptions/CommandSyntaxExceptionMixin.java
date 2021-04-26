@@ -22,32 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.mixin;
+package org.spongepowered.common.mixin.core.brigadier.exceptions;
 
-import org.spongepowered.asm.launch.platform.container.ContainerHandleModLauncher;
-import org.spongepowered.asm.service.modlauncher.MixinServiceModLauncher;
-import org.spongepowered.asm.util.Constants;
+import com.mojang.brigadier.Message;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.kyori.adventure.text.Component;
+import net.kyori.adventure.util.ComponentMessageThrowable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-public final class MixinServiceVanillaModLauncher extends MixinServiceModLauncher {
-
-    private final ContainerHandleModLauncher rootContainer = new ContainerHandleVanillaModLauncher(this.getName());
+@Mixin(CommandSyntaxException.class)
+public abstract class CommandSyntaxExceptionMixin implements ComponentMessageThrowable {
+    // @formatter:off
+    @Shadow public abstract Message getRawMessage();
+    // @formatter:on
 
     @Override
-    public boolean isValid() {
-        return true;
-    }
-
-    @Override
-    public ContainerHandleModLauncher getPrimaryContainer() {
-        return this.rootContainer;
-    }
-
-    private static final class ContainerHandleVanillaModLauncher extends ContainerHandleModLauncher {
-
-        public ContainerHandleVanillaModLauncher(final String name) {
-            super(name);
-
-            this.setAttribute(Constants.ManifestAttributes.MIXINCONNECTOR, "org.spongepowered.vanilla.applaunch.mixin.VanillaLaunchMixinConnector");
-        }
+    public Component componentMessage() {
+        return SpongeAdventure.asAdventure(this.getRawMessage());
     }
 }

@@ -41,6 +41,7 @@ import net.minecraft.commands.arguments.EntityArgument;
 import net.minecraft.commands.arguments.GameProfileArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
+import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
 import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
@@ -284,7 +285,6 @@ import org.spongepowered.math.vector.Vector3d;
 import java.net.MalformedURLException;
 import java.net.URL;
 import java.util.Locale;
-import java.util.UUID;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
@@ -377,16 +377,7 @@ public final class SpongeRegistryLoaders {
                     })
             );
             l.add(ResourceKeyedValueParameters.USER, SpongeUserValueParameter::new);
-            l.add(ResourceKeyedValueParameters.UUID, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(),
-                    (reader, cause, input) -> {
-                        try {
-                            return UUID.fromString(input);
-                        } catch (final IllegalArgumentException ex) {
-                            throw new SimpleCommandExceptionType(new TextComponent(ex.getMessage()))
-                                    .createWithContext(reader);
-                        }
-                    })
-            );
+            l.add(ResourceKeyedValueParameters.UUID, k -> ClientNativeArgumentParser.createIdentity(k, UuidArgument.uuid()));
             l.add(ResourceKeyedValueParameters.VECTOR2D, k -> ClientNativeArgumentParser.createConverter(k, Vec2Argument.vec2(),
                     (reader, cause, result) -> {
                         final net.minecraft.world.phys.Vec3 r = result.getPosition((CommandSourceStack) cause);
@@ -442,10 +433,13 @@ public final class SpongeRegistryLoaders {
     public static RegistryLoader<ClientCompletionKey<?>> clientCompletionKey() {
         final Function<ResourceKey, ArgumentType<?>> fn = key -> ((EmptyArgumentSerializerAccessor<?>) ArgumentTypesAccessor.accessor$BY_NAME().get(key).accessor$serializer()).accessor$constructor().get();
         return RegistryLoader.of(l -> {
+            l.add(ClientCompletionKeys.ANGLE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.BLOCK_POS, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.BLOCK_PREDICATE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.BLOCK_STATE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.BOOL, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.COLOR, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.COLUMN_POS, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.COMPONENT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.DIMENSION, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.DOUBLE, k -> SpongeRangeClientCompletionKey.createFrom(k, new DoubleArgumentSerializer()));
@@ -453,11 +447,15 @@ public final class SpongeRegistryLoaders {
             l.add(ClientCompletionKeys.ENTITY_ANCHOR, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.ENTITY_SUMMON, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.FLOAT, k -> SpongeRangeClientCompletionKey.createFrom(k, new FloatArgumentSerializer()));
+            l.add(ClientCompletionKeys.FLOAT_RANGE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.FUNCTION, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.GAME_PROFILE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.INTEGER, k -> SpongeRangeClientCompletionKey.createFrom(k, new IntegerArgumentSerializer()));
+            l.add(ClientCompletionKeys.INT_RANGE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.ITEM_ENCHANTMENT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.ITEM_PREDICATE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.ITEM_SLOT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.ITEM_STACK, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.LONG, k -> SpongeRangeClientCompletionKey.createFrom(k, new LongArgumentSerializer()));
             l.add(ClientCompletionKeys.MESSAGE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.MOB_EFFECT, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
@@ -476,6 +474,7 @@ public final class SpongeRegistryLoaders {
             l.add(ClientCompletionKeys.SWIZZLE, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.TEAM, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.TIME, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
+            l.add(ClientCompletionKeys.UUID, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.VEC2, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
             l.add(ClientCompletionKeys.VEC3, k -> new SpongeBasicClientCompletionKey(k, fn.apply(k)));
         });

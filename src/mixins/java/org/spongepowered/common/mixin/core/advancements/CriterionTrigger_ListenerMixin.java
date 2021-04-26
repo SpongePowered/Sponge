@@ -32,6 +32,7 @@ import net.minecraft.server.PlayerAdvancements;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
+import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -43,8 +44,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.advancement.SpongeCriterionTrigger;
+import org.spongepowered.common.advancement.SpongeFilteredTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -76,11 +77,11 @@ public abstract class CriterionTrigger_ListenerMixin {
         }
         // Sponge filters are always handled in the trigger method
         if (!(this.trigger instanceof SpongeFilteredTrigger)) {
-            final FilteredTrigger filteredTrigger = (FilteredTrigger) this.trigger;
+            final FilteredTrigger<FilteredTriggerConfiguration> filteredTrigger = (FilteredTrigger) this.trigger;
             if (filteredTrigger.type() instanceof SpongeCriterionTrigger) {
                 final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
                 final ServerPlayer player = ((PlayerAdvancementsBridge) playerAdvancements).bridge$getPlayer();
-                final TypeToken typeToken = TypeToken.get(filteredTrigger.type().configurationType());
+                final TypeToken<FilteredTriggerConfiguration> typeToken = (TypeToken) TypeToken.get(filteredTrigger.type().configurationType());
                 final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause,
                         advancement, advancementCriterion, typeToken, player, filteredTrigger, true);
                 SpongeCommon.postEvent(event);

@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
+import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
@@ -138,11 +139,13 @@ public final class SpongeTabList implements TabList {
     }
 
     private void addEntry(final ClientboundPlayerInfoPacket.PlayerUpdate entry) {
-        if (!this.entries.containsKey(entry.getProfile().getId())) {
+        final GameProfile profile = entry.getProfile();
+        if (!this.entries.containsKey(profile.getId())) {
+            final net.minecraft.network.chat.Component displayName = entry.getDisplayName();
             this.addEntry(new SpongeTabListEntry(
                     this,
-                    SpongeGameProfile.of(entry.getProfile()),
-                    entry.getDisplayName() == null ? null : SpongeAdventure.asAdventure(entry.getDisplayName()),
+                    SpongeGameProfile.of(profile),
+                    displayName == null ? null : SpongeAdventure.asAdventure(displayName),
                     entry.getLatency(),
                     (GameMode) (Object) entry.getGameMode()
             ), false);
@@ -170,8 +173,8 @@ public final class SpongeTabList implements TabList {
     public Optional<TabListEntry> removeEntry(final UUID uniqueId) {
         checkNotNull(uniqueId, "unique id");
 
-        if (this.entries.containsKey(uniqueId)) {
-            final TabListEntry entry = this.entries.remove(uniqueId);
+        final TabListEntry entry = this.entries.remove(uniqueId);
+        if (entry != null) {
             this.sendUpdate(entry, ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER);
             return Optional.of(entry);
         }
@@ -204,24 +207,24 @@ public final class SpongeTabList implements TabList {
      */
     @SuppressWarnings("ConstantConditions")
     public void updateEntriesOnSend(final ClientboundPlayerInfoPacket packet) {
-        for (final ClientboundPlayerInfoPacket.PlayerUpdate data : packet.getEntries()) {
+        for (final ClientboundPlayerInfoPacket.PlayerUpdate update : packet.getEntries()) {
             final ClientboundPlayerInfoPacket.Action action = packet.getAction();
             if (action == ClientboundPlayerInfoPacket.Action.ADD_PLAYER) {
                 // If an entry with the same id exists nothing will be done
-                this.addEntry(data);
+                this.addEntry(update);
             } else if (action == ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER) {
-                this.removeEntry(data.getProfile().getId());
+                this.removeEntry(update.getProfile().getId());
             } else {
-                this.entry(data.getProfile().getId()).ifPresent(entry -> {
+                this.entry(update.getProfile().getId()).ifPresent(entry -> {
                     if (action == ClientboundPlayerInfoPacket.Action.UPDATE_DISPLAY_NAME) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
-                        entry.setDisplayName(data.getDisplayName() == null ? null : SpongeAdventure.asAdventure(data.getDisplayName()));
+                        entry.setDisplayName(update.getDisplayName() == null ? null : SpongeAdventure.asAdventure(update.getDisplayName()));
                     } else if (action == ClientboundPlayerInfoPacket.Action.UPDATE_LATENCY) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
-                        entry.setLatency(data.getLatency());
+                        entry.setLatency(update.getLatency());
                     } else if (action == ClientboundPlayerInfoPacket.Action.UPDATE_GAME_MODE) {
                         ((SpongeTabListEntry) entry).updateWithoutSend();
-                        entry.setGameMode((GameMode) (Object) data.getGameMode());
+                        entry.setGameMode((GameMode) (Object) update.getGameMode());
                     } else {
                         throw new IllegalArgumentException("unknown packet action: " + action);
                     }

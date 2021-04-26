@@ -37,6 +37,7 @@ import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
 import org.spongepowered.vanilla.launch.VanillaLaunch;
 
+import java.lang.reflect.InvocationTargetException;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -96,7 +97,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
     }
 
     @Override
-    public void addDummyPlugin(DummyPluginContainer plugin) {
+    public void addDummyPlugin(final DummyPluginContainer plugin) {
         Objects.requireNonNull(plugin);
 
         this.plugins.put(plugin.getMetadata().getId(), plugin);
@@ -110,8 +111,8 @@ public final class VanillaPluginManager implements SpongePluginManager {
             final String loaderClass = languageService.getPluginLoader();
             final PluginLoader<PluginResource, PluginContainer> pluginLoader;
             try {
-                pluginLoader =  (PluginLoader<PluginResource, PluginContainer>) Class.forName(loaderClass).newInstance();
-            } catch (final InstantiationException | IllegalAccessException | ClassNotFoundException e) {
+                pluginLoader =  (PluginLoader<PluginResource, PluginContainer>) Class.forName(loaderClass).getConstructor().newInstance();
+            } catch (final InstantiationException | IllegalAccessException | ClassNotFoundException | NoSuchMethodException | InvocationTargetException e) {
                 throw new RuntimeException(e);
             }
             for (final PluginCandidate<PluginResource> candidate : candidates) {

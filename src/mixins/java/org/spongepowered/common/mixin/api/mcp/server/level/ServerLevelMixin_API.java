@@ -66,6 +66,7 @@ import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
+import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
@@ -83,6 +84,7 @@ import org.spongepowered.common.mixin.api.mcp.world.level.LevelMixin_API;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
+import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -312,5 +314,10 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Override
     public RegistryHolder registries() {
         return ((ServerLevelBridge) this).bridge$registries();
+    }
+
+    @Override
+    public ChunkLayout chunkLayout() {
+        return SpongeChunkLayout.INSTANCE;
     }
 }
