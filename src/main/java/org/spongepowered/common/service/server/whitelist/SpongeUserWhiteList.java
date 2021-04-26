@@ -63,12 +63,12 @@ public class SpongeUserWhiteList extends UserWhiteList {
     @SuppressWarnings("unchecked")
     @Override
     public void add(final UserWhiteListEntry entry) {
-        Sponge.server().serviceProvider().whitelistService().addProfile(SpongeGameProfile.of(((StoredUserEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user()));
+        Sponge.server().serviceProvider().whitelistService().addProfile(SpongeGameProfile.of(((StoredUserEntryAccessor<com.mojang.authlib.GameProfile>) entry).accessor$user())).join();
     }
 
     @Override
     public void remove(final com.mojang.authlib.GameProfile entry) {
-        Sponge.server().serviceProvider().whitelistService().removeProfile(SpongeGameProfile.of(entry));
+        Sponge.server().serviceProvider().whitelistService().removeProfile(SpongeGameProfile.of(entry)).join();
     }
 
     @Override

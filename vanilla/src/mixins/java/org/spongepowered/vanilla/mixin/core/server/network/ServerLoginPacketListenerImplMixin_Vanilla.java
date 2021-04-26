@@ -101,14 +101,6 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
         }
     }
 
-    @Inject(method = "handleAcceptedLogin", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/server/players/PlayerList;placeNewPlayer(Lnet/minecraft/network/Connection;Lnet/minecraft/server/level/ServerPlayer;)V"))
-    private void impl$onTryAcceptPlayer_beforeInitPlayer(final CallbackInfo ci) {
-        final ServerSideConnection connection = (ServerSideConnection) this;
-        // Also send the channel registrations using the minecraft channel, for compatibility
-        ((SpongeChannelRegistry) Sponge.channelRegistry()).sendChannelRegistrations(connection);
-    }
-
     @Inject(method = "handleHello", at = @At("RETURN"))
     private void impl$onProcessLoginStart(final ServerboundHelloPacket packet, final CallbackInfo ci) {
         if (this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT) {

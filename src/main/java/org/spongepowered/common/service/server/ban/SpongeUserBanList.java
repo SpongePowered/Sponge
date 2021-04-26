@@ -50,7 +50,7 @@ public class SpongeUserBanList extends UserBanList {
 
     @Override
     protected boolean contains(final com.mojang.authlib.GameProfile profile) {
-        return Sponge.server().serviceProvider().banService().isBanned(SpongeGameProfile.of(profile)).join();
+        return Sponge.server().serviceProvider().banService().banFor(SpongeGameProfile.of(profile)).join().isPresent();
     }
 
     @Override
@@ -81,7 +81,7 @@ public class SpongeUserBanList extends UserBanList {
 
     @Override
     public void add(final UserBanListEntry entry) {
-        Sponge.server().serviceProvider().banService().addBan((Ban) entry);
+        Sponge.server().serviceProvider().banService().addBan((Ban) entry).join();
     }
 
     @Override
@@ -91,7 +91,7 @@ public class SpongeUserBanList extends UserBanList {
 
     @Override
     public void remove(final com.mojang.authlib.GameProfile entry) {
-        Sponge.server().serviceProvider().banService().pardon(SpongeGameProfile.of(entry));
+        Sponge.server().serviceProvider().banService().pardon(SpongeGameProfile.of(entry)).join();
     }
 
 }
