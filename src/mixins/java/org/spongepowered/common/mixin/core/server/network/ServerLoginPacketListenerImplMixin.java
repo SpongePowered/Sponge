@@ -71,6 +71,8 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
     @Shadow protected abstract com.mojang.authlib.GameProfile shadow$createFakeProfile(com.mojang.authlib.GameProfile profile);
     @Shadow public abstract void shadow$disconnect(net.minecraft.network.chat.Component reason);
 
+    private boolean impl$accepted = false;
+
     @Override
     public Connection bridge$getConnection() {
         return this.connection;
@@ -86,6 +88,13 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         if (!this.gameProfile.isComplete()) {
             this.gameProfile = this.shadow$createFakeProfile(this.gameProfile);
         }
+
+        // Sponge start - avoid #tick calling handleAcceptedLogin more than once.
+        if (this.impl$accepted) {
+            return;
+        }
+        this.impl$accepted = true;
+        // Sponge end
 
         // Sponge start - completable future
         ((PlayerListBridge) this.server.getPlayerList()).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.gameProfile).thenAcceptAsync(componentOpt -> {
