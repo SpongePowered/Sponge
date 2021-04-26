@@ -56,7 +56,7 @@ import java.util.Optional;
 import java.util.Set;
 
 @Mixin(EmptyMapItem.class)
-public abstract class ItemEmptyMapMixin {
+public abstract class EmptyMapItemMixin {
 
     @Redirect(method = "use",
             at = @At(value = "INVOKE",

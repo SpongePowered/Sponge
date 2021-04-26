@@ -33,7 +33,7 @@
         "core.Vec3iMixin",
         "core.dispenser.AbstractProjectileDispenseBehaviorMixin",
         "data.SpongeDataHolderMixin",
-        "item.ItemEmptyMapMixin",
+        "item.EmptyMapItemMixin",
         "map.MapIdTrackerMixin",
         "network.ConnectionMixin",
         "network.FriendlyByteBufMixin",
