@@ -30,7 +30,6 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.common.bridge.world.entity.item.ItemEntityBridge;
 import org.spongepowered.common.data.ByteToBooleanContentUpdater;
 import org.spongepowered.common.data.SpongeDataManager;
@@ -41,8 +40,8 @@ import org.spongepowered.common.util.SpongeTicks;
 
 public final class ItemData {
 
-    public static final Key<Value<Integer>> PREVIOUS_PICKUP_DELAY = Key.builder().key(ResourceKey.sponge("power")).type(TypeTokens.INTEGER_VALUE_TOKEN).build();
-    public static final Key<Value<Integer>> PREVIOUS_DESPAWN_DELAY = Key.builder().key(ResourceKey.sponge("power")).type(TypeTokens.INTEGER_VALUE_TOKEN).build();
+    public static final Key<Value<Integer>> PREVIOUS_PICKUP_DELAY = Key.builder().key(ResourceKey.sponge("power")).elementType(Integer.class).build();
+    public static final Key<Value<Integer>> PREVIOUS_DESPAWN_DELAY = Key.builder().key(ResourceKey.sponge("power")).elementType(Integer.class).build();
 
     private static final DataContentUpdater INFINITE_DELAYS_UPDATER_BYTE_TO_BOOL_FIX = new ByteToBooleanContentUpdater(1, 2, Keys.INFINITE_PICKUP_DELAY, Keys.INFINITE_DESPAWN_DELAY);
 

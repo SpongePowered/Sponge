@@ -25,6 +25,7 @@
 package org.spongepowered.test.projectile;
 
 import com.google.inject.Inject;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -50,7 +51,6 @@ import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.math.vector.Vector3d;
@@ -79,7 +79,7 @@ public class ProjectileTest implements LoadableModule {
     public void registerCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<EntityType<@NonNull ?>> entityTypeParameter =
                 Parameter.registryElement(
-                        TypeTokens.ENTITY_TYPE_TOKEN,
+                        new TypeToken<EntityType<?>>() {},
                         (ctx) -> Sponge.game().registries(),
                         RegistryTypes.ENTITY_TYPE,
                         "minecraft",
