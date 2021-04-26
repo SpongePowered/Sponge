@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -38,7 +39,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
@@ -61,7 +61,7 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
     public ClickContainerEvent createInventoryEvent(final ServerPlayer playerMP, final Container openContainer,
         final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
-        @Nullable final Slot slot) {
+        final @Nullable Slot slot) {
         return SpongeEventFactory.createClickContainerEventDouble(PhaseTracker.getCauseStackManager().currentCause(),
             openContainer, transaction,
             Optional.ofNullable(slot), slotTransactions);

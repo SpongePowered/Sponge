@@ -53,8 +53,7 @@ import org.spongepowered.common.util.VecHelper;
 public final class SpongeCommandCauseFactory implements CommandCause.Factory {
 
     @Override
-    @NonNull
-    public CommandCause create() {
+    public @NonNull CommandCause create() {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final Cause cause = frame.currentCause();
             final CommandSource iCommandSource =

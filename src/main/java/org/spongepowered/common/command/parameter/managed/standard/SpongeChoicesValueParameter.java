@@ -72,14 +72,12 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
     }
 
     @Override
-    @NonNull
-    public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandContext context, final String currentInput) {
         return this.choices.get().stream().filter(x -> x.startsWith(currentInput)).collect(Collectors.toList());
     }
 
     @Override
-    @NonNull
-    public Optional<? extends T> parseValue(
+    public @NonNull Optional<? extends T> parseValue(
             final Parameter.@NonNull Key<? super T> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {

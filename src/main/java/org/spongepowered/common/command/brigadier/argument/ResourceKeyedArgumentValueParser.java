@@ -66,8 +66,7 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
     }
 
     @Override
-    @NonNull
-    public List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         return this.complete(context.cause(), currentInput);
     }
 
@@ -91,8 +90,7 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
         }
 
         @Override
-        @NonNull
-        public final List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+        public final @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
             final com.mojang.brigadier.context.CommandContext<?> c;
             if (context instanceof CommandContext.Builder) {
                 c = (com.mojang.brigadier.context.CommandContext<?>) ((CommandContext.Builder) context).build(currentInput);

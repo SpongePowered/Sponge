@@ -69,7 +69,7 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
 
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
-        @Nullable final GameTransaction<@NonNull ?> parent
+        final @Nullable GameTransaction<@NonNull ?> parent
     ) {
         return Optional.of((context, stackFrame) -> {
             stackFrame.pushCause(this.destroyingEntity);
@@ -97,7 +97,7 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
 
     @Override
     public Optional<HarvestEntityEvent> generateEvent(
-        final PhaseContext<@NonNull ?> context, @Nullable final GameTransaction<@NonNull ?> parent,
+        final PhaseContext<@NonNull ?> context, final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<HarvestEntityEvent>> gameTransactions,
         final Cause currentCause,
         final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder

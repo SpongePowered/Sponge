@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -40,7 +41,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
 
 public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Builder.BuildingStep, Inventory.Builder.EndStep {
 
@@ -49,8 +49,8 @@ public class SpongeInventoryBuilder implements Inventory.Builder, Inventory.Buil
     private int size = 0;
 
     private Lens finalLens; // always set before build
-    @Nullable private UUID identity;
-    @Nullable private Carrier carrier;
+    private @Nullable UUID identity;
+    private @Nullable Carrier carrier;
     private CompoundSlotLensProvider finalProvider;
 
     public BuildingStep slots(int amount) {

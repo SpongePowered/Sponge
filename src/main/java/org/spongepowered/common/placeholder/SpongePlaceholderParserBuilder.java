@@ -26,16 +26,16 @@ package org.spongepowered.common.placeholder;
 
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
 
 public final class SpongePlaceholderParserBuilder implements PlaceholderParser.Builder {
 
-    @Nullable private Function<PlaceholderContext, Component> parser;
+    private @Nullable Function<PlaceholderContext, Component> parser;
 
     @Override
     public PlaceholderParser.Builder parser(final Function<PlaceholderContext, Component> parser) {

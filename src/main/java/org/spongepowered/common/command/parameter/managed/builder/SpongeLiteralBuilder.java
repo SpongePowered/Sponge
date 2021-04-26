@@ -35,24 +35,23 @@ import java.util.function.Supplier;
 
 public final class SpongeLiteralBuilder<T> implements VariableValueParameters.LiteralBuilder<T> {
 
-    @Nullable private Supplier<? extends Collection<String>> strings;
-    @Nullable private Supplier<T> returnValue;
+    private @Nullable Supplier<? extends Collection<String>> strings;
+    private @Nullable Supplier<T> returnValue;
 
     @Override
-    public VariableValueParameters.@NonNull LiteralBuilder<T> literal(@NonNull final Supplier<? extends Collection<String>> literalSupplier) {
+    public VariableValueParameters.@NonNull LiteralBuilder<T> literal(final @NonNull Supplier<? extends Collection<String>> literalSupplier) {
         this.strings = literalSupplier;
         return this;
     }
 
     @Override
-    public VariableValueParameters.@NonNull LiteralBuilder<T> returnValue(@NonNull final Supplier<T> returnValueSupplier) {
+    public VariableValueParameters.@NonNull LiteralBuilder<T> returnValue(final @NonNull Supplier<T> returnValueSupplier) {
         this.returnValue = returnValueSupplier;
         return this;
     }
 
     @Override
-    @NonNull
-    public ValueParameter<T> build() {
+    public @NonNull ValueParameter<T> build() {
         return new SpongeLiteralValueParameter<>(this.strings, this.returnValue);
     }
 

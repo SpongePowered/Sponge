@@ -26,13 +26,13 @@ package org.spongepowered.common.scheduler;
 
 import com.google.common.collect.ComparisonChain;
 import com.google.common.collect.ImmutableList;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.ScheduledTaskFuture;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.scheduler.TaskExecutorService;
 import org.spongepowered.api.scheduler.TaskFuture;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.temporal.TemporalUnit;
 import java.util.List;
@@ -98,7 +98,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
     }
 
     @Override
-    public <T> TaskFuture<T> submit(final Runnable command, @Nullable final T result) {
+    public <T> TaskFuture<T> submit(final Runnable command, final @Nullable T result) {
         final FutureTask<T> runnable = new FutureTask<>(command, result);
         final Task task = this.createTask(runnable)
                 .build();
@@ -289,7 +289,7 @@ class SpongeTaskExecutorService extends AbstractExecutorService implements TaskE
      */
     private static class RepeatableFutureTask<V> extends FutureTask<V> {
 
-        @Nullable private ScheduledTask owningTask = null;
+        private @Nullable ScheduledTask owningTask = null;
 
         RepeatableFutureTask(final Runnable runnable) {
             super(runnable, null);

@@ -32,7 +32,7 @@ import org.spongepowered.common.command.registrar.tree.builder.AbstractCommandTr
 
 public final class ForcedRedirectLiteralCommandNode extends LiteralCommandNode<SharedSuggestionProvider> implements ForcedRedirectNode {
 
-    @Nullable private CommandNode<SharedSuggestionProvider> forcedRedirect = null;
+    private @Nullable CommandNode<SharedSuggestionProvider> forcedRedirect = null;
 
     public ForcedRedirectLiteralCommandNode(final String literal, final boolean executable) {
         super(literal, executable ? AbstractCommandTreeNode.EXECUTABLE : null, c -> true, null, null, false);

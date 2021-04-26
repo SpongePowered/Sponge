@@ -70,9 +70,8 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
     protected abstract List<Service<?>> servicesToSelect();
 
     @Override
-    @NonNull
     @SuppressWarnings("unchecked")
-    public final <T> Optional<T> provide(@NonNull final Class<T> serviceClass) {
+    public final <T> @NonNull Optional<T> provide(final @NonNull Class<T> serviceClass) {
         final Registration<T> registration = (Registration<T>) this.services.get(serviceClass);
         if (registration != null) {
             return Optional.of(registration.service());
@@ -81,15 +80,13 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
     }
 
     @Override
-    @NonNull
     @SuppressWarnings("unchecked")
-    public final <T> Optional<ServiceRegistration<T>> registration(@NonNull final Class<T> serviceClass) {
+    public final <T> @NonNull Optional<ServiceRegistration<T>> registration(final @NonNull Class<T> serviceClass) {
         return Optional.ofNullable((ServiceRegistration<T>) this.services.get(serviceClass));
     }
 
-    @NonNull
     @SuppressWarnings("unchecked")
-    protected final <T> T provideUnchecked(final Class<T> serviceClass) {
+    protected final <T> @NonNull T provideUnchecked(final Class<T> serviceClass) {
         final Registration<T> registration = (Registration<T>) this.services.get(serviceClass);
         if (registration != null) {
             return registration.service();
@@ -194,8 +191,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
 
     }
 
-    @Nullable
-    private <T> Registration<T> attemptRegistration(final Collection<PluginContainer> pluginContainers, final Service<T> service) {
+    private <T> @Nullable Registration<T> attemptRegistration(final Collection<PluginContainer> pluginContainers, final Service<T> service) {
         Registration<T> registration = null;
         final Iterator<PluginContainer> pluginContainerIterator = pluginContainers.iterator();
         while (registration == null && pluginContainerIterator.hasNext()) {
@@ -210,8 +206,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
 
     protected abstract <T> AbstractProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service);
 
-    @Nullable
-    private <T> Registration<T> getSpecificRegistration(final PluginContainer container, final Service<T> service) {
+    private <T> @Nullable Registration<T> getSpecificRegistration(final PluginContainer container, final Service<T> service) {
         // This is the actual query - a generic event.
         final AbstractProvideServiceEventImpl<T> event = this.createEvent(container, service);
         try {
@@ -232,8 +227,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
         return null;
     }
 
-    @Nullable
-    private <T> Registration<T> createRegistration(final Service<T> service, final PluginContainer container) {
+    private <T> @Nullable Registration<T> createRegistration(final Service<T> service, final PluginContainer container) {
         final T impl = service.provideDefaultService(this.injector);
         if (impl == null) {
             return null;
@@ -254,20 +248,17 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
         }
 
         @Override
-        @NonNull
-        public Class<T> serviceClass() {
+        public @NonNull Class<T> serviceClass() {
             return this.clazz;
         }
 
         @Override
-        @NonNull
-        public T service() {
+        public @NonNull T service() {
             return this.object;
         }
 
         @Override
-        @NonNull
-        public PluginContainer pluginContainer() {
+        public @NonNull PluginContainer pluginContainer() {
             return this.pluginContainer;
         }
     }
@@ -275,12 +266,12 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
     protected static final class Service<T> {
 
         @NonNull private final Class<T> service;
-        @Nullable private final Class<? extends T> defaultServiceClass;
+        private final @Nullable Class<? extends T> defaultServiceClass;
         @NonNull private final Function<ServicesCategory.ServicePluginSubCategory, String> configEntryProvider;
 
-        public Service(@NonNull final Class<T> service,
-                @NonNull final Function<ServicesCategory.ServicePluginSubCategory, String> configEntryProvider,
-                @Nullable final Class<? extends T> defaultServiceClass) {
+        public Service(final @NonNull Class<T> service,
+                final @NonNull Function<ServicesCategory.ServicePluginSubCategory, String> configEntryProvider,
+                final @Nullable Class<? extends T> defaultServiceClass) {
             this.service = service;
             this.defaultServiceClass = defaultServiceClass;
             this.configEntryProvider = configEntryProvider;
@@ -298,8 +289,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
             return this.defaultServiceClass != null;
         }
 
-        @Nullable
-        public T provideDefaultService(final Injector injector) {
+        public @Nullable T provideDefaultService(final Injector injector) {
             if (this.defaultServiceClass != null) {
                 return injector.getInstance(this.defaultServiceClass);
             } else {

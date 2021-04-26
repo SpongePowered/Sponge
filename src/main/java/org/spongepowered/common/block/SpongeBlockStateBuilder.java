@@ -47,42 +47,37 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<@NonNull BlockS
     }
 
     @Override
-    public BlockState.@NonNull Builder blockType(@NonNull final BlockType blockType) {
+    public BlockState.@NonNull Builder blockType(final @NonNull BlockType blockType) {
         this.blockState = Objects.requireNonNull(blockType).defaultState();
         return this;
     }
 
     @Override
-    @NonNull
-    public <V> SpongeBlockStateBuilder add(@NonNull final Key<@NonNull ? extends Value<V>> key, @NonNull final V value) {
+    public <V> @NonNull SpongeBlockStateBuilder add(final @NonNull Key<@NonNull ? extends Value<V>> key, final @NonNull V value) {
         Objects.requireNonNull(key, "key");
         this.blockState = this.blockState.with(key, value).orElse(this.blockState);
         return this;
     }
 
     @Override
-    @NonNull
-    public SpongeBlockStateBuilder from(@NonNull final BlockState holder) {
+    public @NonNull SpongeBlockStateBuilder from(final @NonNull BlockState holder) {
         this.blockState = holder;
         return this;
     }
 
     @Override
-    @NonNull
-    public SpongeBlockStateBuilder reset() {
+    public @NonNull SpongeBlockStateBuilder reset() {
         this.blockState = null;
         return this;
     }
 
     @Override
-    @NonNull
-    public BlockState build() {
+    public @NonNull BlockState build() {
         return this.blockState;
     }
 
     @Override
-    @NonNull
-    protected Optional<BlockState> buildContent(final DataView container) throws InvalidDataException {
+    protected @NonNull Optional<BlockState> buildContent(final DataView container) throws InvalidDataException {
         if (!container.contains(Constants.Block.BLOCK_STATE)) {
             return Optional.empty();
         }
@@ -95,7 +90,7 @@ public class SpongeBlockStateBuilder extends AbstractDataBuilder<@NonNull BlockS
     }
 
     @Override
-    public BlockState.@NonNull Builder fromString(@NonNull final String id) {
+    public BlockState.@NonNull Builder fromString(final @NonNull String id) {
         this.blockState = BlockStateSerializerDeserializer.deserialize(id)
                 .orElseThrow(() -> new IllegalArgumentException("The provided state is not valid."));
         return this;

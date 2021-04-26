@@ -40,13 +40,13 @@ public final class EffectResult {
     public final List<ItemStack> drops;
     public final boolean hasResult;
 
-    public EffectResult(@Nullable final BlockState resultingState, final boolean hasResult) {
+    public EffectResult(final @Nullable BlockState resultingState, final boolean hasResult) {
         this.resultingState = resultingState;
         this.hasResult = hasResult;
         this.drops = Collections.emptyList();
     }
 
-    public EffectResult(@Nullable final BlockState resultingState, final List<ItemStack> drops, final boolean hasResult) {
+    public EffectResult(final @Nullable BlockState resultingState, final List<ItemStack> drops, final boolean hasResult) {
         this.resultingState = resultingState;
         this.drops = drops;
         this.hasResult = hasResult;

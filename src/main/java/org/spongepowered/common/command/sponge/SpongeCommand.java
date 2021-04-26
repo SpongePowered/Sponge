@@ -85,7 +85,7 @@ public class SpongeCommand {
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", CommandMapping.class);
     private final Parameter.Key<ServerWorld> worldKey = Parameter.key("world", ServerWorld.class);
 
-    @Nullable private Component versionText = null;
+    private @Nullable Component versionText = null;
 
     public Command.Parameterized createSpongeCommand() {
         // /sponge audit
@@ -201,8 +201,7 @@ public class SpongeCommand {
         // no-op for vanilla, SF might like to add a /sponge mods command, for example.
     }
 
-    @NonNull
-    private CommandResult rootCommand(final CommandContext context) {
+    private @NonNull CommandResult rootCommand(final CommandContext context) {
         final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
         final PluginContainer apiPlugin = Launch.getInstance().getApiPlugin();
         final PluginContainer minecraftPlugin = Launch.getInstance().getMinecraftPlugin();
@@ -238,8 +237,7 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    @NonNull
-    private CommandResult auditSubcommandExecutor(final CommandContext context) {
+    private @NonNull CommandResult auditSubcommandExecutor(final CommandContext context) {
         SpongeCommon.getLogger().info("Starting Mixin Audit");
         Launch.getInstance().auditMixins();
         return CommandResult.success();
@@ -288,8 +286,7 @@ public class SpongeCommand {
                 .build();
     }
 
-    @NonNull
-    private CommandResult heapSubcommandExecutor(final CommandContext context) {
+    private @NonNull CommandResult heapSubcommandExecutor(final CommandContext context) {
         final File file = new File(new File(new File("."), "dumps"),
                 "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.hprof");
         // src.sendMessage(Text.of("Writing JVM heap data to: ", file));
@@ -312,8 +309,7 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    @NonNull
-    private CommandResult pluginsListSubcommand(final CommandContext context) {
+    private @NonNull CommandResult pluginsListSubcommand(final CommandContext context) {
         final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().plugins();
         context.sendMessage(Identity.nil(), this.title("Plugins (" + plugins.size() + ")"));
         for (final PluginContainer specificContainer : plugins) {
@@ -328,15 +324,13 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    @NonNull
-    private CommandResult pluginsInfoSubcommand(final CommandContext context) {
+    private @NonNull CommandResult pluginsInfoSubcommand(final CommandContext context) {
         final PluginContainer pluginContainer = context.requireOne(this.pluginContainerKey);
         context.sendMessage(Identity.nil(), this.createContainerMeta(pluginContainer.getMetadata()));
         return CommandResult.success();
     }
 
-    @NonNull
-    private CommandResult pluginsRefreshSubcommandExecutor(final CommandContext context) {
+    private @NonNull CommandResult pluginsRefreshSubcommandExecutor(final CommandContext context) {
         final Optional<PluginContainer> pluginContainer = context.one(this.pluginContainerKey);
         final RefreshGameEvent event = SpongeEventFactory.createRefreshGameEvent(
                 PhaseTracker.getCauseStackManager().currentCause(),
@@ -462,8 +456,7 @@ public class SpongeCommand {
         return builder;
     }
 
-    @NonNull
-    private CommandResult versionExecutor(final CommandContext context) {
+    private @NonNull CommandResult versionExecutor(final CommandContext context) {
         if (this.versionText == null) {
             final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
 
@@ -512,8 +505,7 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    @NonNull
-    private CommandResult whichExecutor(final CommandContext context) {
+    private @NonNull CommandResult whichExecutor(final CommandContext context) {
         final CommandMapping mapping = context.requireOne(this.commandMappingKey);
         context.sendMessage(Identity.nil(), Component.text().append(
                 this.title("Aliases: "),

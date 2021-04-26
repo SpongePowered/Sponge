@@ -24,20 +24,20 @@
  */
 package org.spongepowered.common.world.portal;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalType;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 
 public final class VanillaPortal implements Portal {
 
     private final PortalType type;
     private final ServerLocation origin, destination;
 
-    public VanillaPortal(final PortalType type, final ServerLocation origin, @Nullable final ServerLocation destination) {
+    public VanillaPortal(final PortalType type, final ServerLocation origin, final @Nullable ServerLocation destination) {
         this.type = type;
         this.origin = origin;
         this.destination = destination;

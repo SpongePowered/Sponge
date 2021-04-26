@@ -259,7 +259,7 @@ public interface SpongeMutableDataHolder extends SpongeDataHolder, DataHolder.Mu
         } else {
             for (final Value replacement : that.getValues()) {
                 final Key<Value<Object>> key = replacement.key();
-                @Nullable final Value original = this.getValue(key).map(Value::asImmutable).orElse(null);
+                final @Nullable Value original = this.getValue(key).map(Value::asImmutable).orElse(null);
                 final Value merged = function.merge(original, replacement);
                 final DataTransactionResult result = this.offer(merged);
                 builder.absorbResult(result);

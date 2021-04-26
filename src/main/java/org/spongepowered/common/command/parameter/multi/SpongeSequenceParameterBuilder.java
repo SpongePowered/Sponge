@@ -50,7 +50,7 @@ public final class SpongeSequenceParameterBuilder implements Parameter.SequenceB
     }
 
     @Override
-    public Parameter.@NonNull SequenceBuilder then(@NonNull final Parameter parameter) {
+    public Parameter.@NonNull SequenceBuilder then(final @NonNull Parameter parameter) {
         this.parameterList.add(parameter);
         return this;
     }

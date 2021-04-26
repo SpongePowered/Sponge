@@ -324,7 +324,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         }
 
         @Override
-        public WorldTypeTemplate.Builder fixedTime(@Nullable final MinecraftDayTime fixedTime) {
+        public WorldTypeTemplate.Builder fixedTime(final @Nullable MinecraftDayTime fixedTime) {
             this.fixedTime = fixedTime;
             return this;
         }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import com.google.common.collect.ImmutableList;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -41,7 +42,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
@@ -63,7 +63,7 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
     public ClickContainerEvent createInventoryEvent(final ServerPlayer playerMP, final Container openContainer,
         final Transaction<ItemStackSnapshot> transaction, final List<SlotTransaction> slotTransactions,
         final List<Entity> capturedEntities,
-        final int usedButton, @Nullable final org.spongepowered.api.item.inventory.Slot slot) {
+        final int usedButton, final org.spongepowered.api.item.inventory.@Nullable Slot slot) {
         return SpongeEventFactory.createClickContainerEventNumberPress(
             PhaseTracker.getCauseStackManager().currentCause(),
             openContainer, transaction,

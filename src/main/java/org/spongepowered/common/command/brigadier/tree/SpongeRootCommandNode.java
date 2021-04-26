@@ -37,7 +37,7 @@ public final class SpongeRootCommandNode extends RootCommandNode<CommandSourceSt
 
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
-    @Nullable private Command<CommandSourceStack> executor;
+    private @Nullable Command<CommandSourceStack> executor;
 
     @Override
     public void addChild(final CommandNode<CommandSourceStack> node) {

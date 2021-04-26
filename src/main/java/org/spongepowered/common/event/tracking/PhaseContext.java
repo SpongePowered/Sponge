@@ -80,7 +80,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
     protected final IPhaseState<P> state; // Only temporary to verify the state creation with constructors
     protected boolean isCompleted = false;
     // Only used in hard debugging instances.
-    @Nullable private StackTraceElement[] stackTrace;
+    private @Nullable StackTraceElement[] stackTrace;
 
     // General
     @Nullable protected User creator;
@@ -91,7 +91,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
     private boolean allowsBulkEntityCaptures = true;
     @Nullable Deque<CauseStackManager.StackFrame> usedFrame;
 
-    @Nullable private Object source;
+    private @Nullable Object source;
 
     public P source(final Object owner) {
         checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
@@ -237,8 +237,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         return Optional.empty();
     }
 
-    @Nullable
-    public Object getSource() {
+    public @Nullable Object getSource() {
         return this.source;
     }
 
@@ -357,7 +356,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         if (this == obj) {
             return true;
         }
@@ -438,8 +437,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         }
     }
 
-    @Nullable
-    public User getActiveUser() {
+    public @Nullable User getActiveUser() {
         if (this.notifier != null) {
             return this.notifier;
         }

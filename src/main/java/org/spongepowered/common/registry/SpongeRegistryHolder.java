@@ -26,6 +26,7 @@ package org.spongepowered.common.registry;
 
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.registry.Registry;
@@ -44,7 +45,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.core.WritableRegistry;
@@ -166,8 +166,7 @@ public final class SpongeRegistryHolder implements RegistryHolder {
             final RegistryType<T> type,
             final @Nullable InitialRegistryData<T> defaultValues,
             final boolean isDynamic,
-            final @Nullable
-            BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback
+            final @Nullable BiConsumer<net.minecraft.resources.ResourceKey<T>, T> callback
     ) {
         Objects.requireNonNull(type, "type");
 

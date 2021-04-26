@@ -25,6 +25,7 @@
 package org.spongepowered.common.map.color;
 
 import com.google.common.base.Preconditions;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.map.color.MapColor;
@@ -34,12 +35,10 @@ import org.spongepowered.api.map.color.MapShades;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
 
-import javax.annotation.Nullable;
 
 public class SpongeMapColorBuilder implements MapColor.Builder {
 
-    @Nullable
-    private MapColorType color = null;
+    private @Nullable MapColorType color = null;
     private MapShade shade = MapShades.BASE.get();
 
     @Override

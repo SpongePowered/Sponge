@@ -118,20 +118,19 @@ public final class SpongeNumberRangeBuilder<T extends Number> implements Variabl
     }
 
     @Override
-    public VariableValueParameters.@NonNull NumberRangeBuilder<T> min(@NonNull final T min) {
+    public VariableValueParameters.@NonNull NumberRangeBuilder<T> min(final @NonNull T min) {
         this.min = Objects.requireNonNull(min);
         return this;
     }
 
     @Override
-    public VariableValueParameters.@NonNull NumberRangeBuilder<T> max(@NonNull final T max) {
+    public VariableValueParameters.@NonNull NumberRangeBuilder<T> max(final @NonNull T max) {
         this.max = Objects.requireNonNull(max);
         return this;
     }
 
     @Override
-    @NonNull
-    public ValueParameter<T> build() {
+    public @NonNull ValueParameter<T> build() {
         if (!this.definition.validate(this.min, this.max)) {
             throw new IllegalStateException("Min must be smaller or equal to max!");
         }

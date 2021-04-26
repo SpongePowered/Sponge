@@ -61,8 +61,7 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     int bridge$getViewDistance();
 
-    @Nullable
-    User bridge$getUserObject();
+    @Nullable User bridge$getUserObject();
 
     Locale bridge$getLanguage();
 
@@ -95,8 +94,7 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     void bridge$setSkinParts(final Set<SkinPart> skinParts);
 
-    @Nullable
-    User bridge$getUser();
+    @Nullable User bridge$getUser();
 
     net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend();
 

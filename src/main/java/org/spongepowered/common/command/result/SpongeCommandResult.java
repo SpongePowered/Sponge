@@ -35,12 +35,12 @@ public final class SpongeCommandResult implements CommandResult {
 
     private final boolean isSuccess;
     private final int result;
-    @Nullable private final Component errorMessage;
+    private final @Nullable Component errorMessage;
 
     public SpongeCommandResult(
             final boolean isSuccess,
             final int result,
-            @Nullable final Component errorMessage) {
+            final @Nullable Component errorMessage) {
         this.isSuccess = isSuccess;
         this.result = result;
         this.errorMessage = errorMessage;
@@ -57,8 +57,7 @@ public final class SpongeCommandResult implements CommandResult {
     }
 
     @Override
-    @NonNull
-    public Optional<Component> errorMessage() {
+    public @NonNull Optional<Component> errorMessage() {
         return Optional.ofNullable(this.errorMessage);
     }
 

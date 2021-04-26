@@ -50,8 +50,7 @@ public final class SpongeTargetEntityValueParameter extends ResourceKeyedZeroAdv
     }
 
     @Override
-    @NonNull
-    public Optional<? extends Entity> parseValue(
+    public @NonNull Optional<? extends Entity> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
         final Object root = cause.cause().root();

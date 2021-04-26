@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BedPart;
 import net.minecraft.world.level.block.state.properties.DoubleBlockHalf;
@@ -36,8 +36,7 @@ import net.minecraft.world.level.block.state.properties.Half;
 
 public final class PortionTypeUtil {
 
-    @Nullable
-    public static PortionType getFromBedBlock(final BlockState holder, final EnumProperty<BedPart> property) {
+    public static @Nullable PortionType getFromBedBlock(final BlockState holder, final EnumProperty<BedPart> property) {
         final BedPart part = holder.getValue(property);
         switch (part) {
             case HEAD:
@@ -49,8 +48,7 @@ public final class PortionTypeUtil {
         }
     }
 
-    @Nullable
-    public static BlockState setForBedBlock(final BlockState holder, final PortionType value, final EnumProperty<BedPart> property) {
+    public static @Nullable BlockState setForBedBlock(final BlockState holder, final PortionType value, final EnumProperty<BedPart> property) {
         if (value == PortionTypes.TOP.get()) {
             return holder.setValue(property, BedPart.HEAD);
         }

@@ -49,25 +49,22 @@ public final class SpongeRayTraceFactory implements RayTrace.Factory {
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull Entity> entityRayTrace() {
+    public @NonNull RayTrace<@NonNull Entity> entityRayTrace() {
         return new SpongeEntityRayTrace();
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull LocatableBlock> blockRayTrace() {
+    public @NonNull RayTrace<@NonNull LocatableBlock> blockRayTrace() {
         return new SpongeBlockRayTrace();
     }
 
     @Override
-    public Predicate<LocatableBlock> onlyAir() {
+    public @NonNull Predicate<LocatableBlock> onlyAir() {
         return this.onlyAir;
     }
 
     @Override
-    @NonNull
-    public Predicate<LocatableBlock> notAir() {
+    public @NonNull Predicate<LocatableBlock> notAir() {
         return this.notAir;
     }
 

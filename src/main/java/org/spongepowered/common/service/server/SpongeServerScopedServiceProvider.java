@@ -87,26 +87,22 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
     }
 
     @Override
-    @NonNull
-    public final BanService banService() {
+    public final @NonNull BanService banService() {
         return this.provideUnchecked(BanService.class);
     }
 
     @Override
-    @NonNull
-    public final Optional<EconomyService> economyService() {
+    public final @NonNull Optional<EconomyService> economyService() {
         return this.provide(EconomyService.class);
     }
 
     @Override
-    @NonNull
-    public final PermissionService permissionService() {
+    public final @NonNull PermissionService permissionService() {
         return this.provideUnchecked(PermissionService.class);
     }
 
     @Override
-    @NonNull
-    public final WhitelistService whitelistService() {
+    public final @NonNull WhitelistService whitelistService() {
         return this.provideUnchecked(WhitelistService.class);
     }
 }

@@ -44,13 +44,13 @@ public final class SpongeDisplaySlot implements DisplaySlot {
         this(null, null);
     }
 
-    public SpongeDisplaySlot(@Nullable final ChatFormatting color, @Nullable final Function<ChatFormatting, DisplaySlot> withColorFunction) {
+    public SpongeDisplaySlot(final @Nullable ChatFormatting color, final @Nullable Function<ChatFormatting, DisplaySlot> withColorFunction) {
         this.withColorFunction = withColorFunction;
         this.formatting = color;
     }
 
     @Override
-    public DisplaySlot withTeamColor(@Nullable final NamedTextColor color) {
+    public DisplaySlot withTeamColor(final @Nullable NamedTextColor color) {
         if (this.withColorFunction == null) {
             return this;
         }

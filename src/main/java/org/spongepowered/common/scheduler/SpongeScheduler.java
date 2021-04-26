@@ -26,6 +26,7 @@ package org.spongepowered.common.scheduler;
 
 import co.aikar.timings.Timing;
 import com.google.common.collect.Sets;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
@@ -35,7 +36,6 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -258,7 +258,7 @@ public abstract class SpongeScheduler implements Scheduler {
     private void startTask(final SpongeScheduledTask task) {
         this.executeTaskRunnable(task, () -> {
             task.setState(SpongeScheduledTask.ScheduledTaskState.EXECUTING);
-            try (@Nullable final PhaseContext<?> context = this.createContext(task, task.owner());
+            try (final @Nullable PhaseContext<?> context = this.createContext(task, task.owner());
                     final Timing timings = task.task.getTimingsHandler()) {
                 timings.startTimingIfSync();
                 if (context != null) {
@@ -281,8 +281,7 @@ public abstract class SpongeScheduler implements Scheduler {
         });
     }
 
-    @Nullable
-    protected PhaseContext<?> createContext(final SpongeScheduledTask task, final PluginContainer container) {
+    protected @Nullable PhaseContext<?> createContext(final SpongeScheduledTask task, final PluginContainer container) {
         return null;
     }
 

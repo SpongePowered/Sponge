@@ -81,9 +81,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     // processing). Example: When starting to perform neighbor notifications during piston movement, one
     // can feasibly see that the block state is changed already without being able to get the appropriate
     // block state.
-    @Nullable private GameTransaction tail;
-    @Nullable private GameTransaction head;
-    @Nullable private ResultingTransactionBySideEffect effect;
+    private @Nullable GameTransaction tail;
+    private @Nullable GameTransaction head;
+    private @Nullable ResultingTransactionBySideEffect effect;
 
     public TransactionalCaptureSupplier() {
     }
@@ -167,7 +167,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return true;
     }
 
-    public boolean logTileRemoval(@Nullable final BlockEntity tileentity, final Supplier<ServerLevel> worldSupplier) {
+    public boolean logTileRemoval(final @Nullable BlockEntity tileentity, final Supplier<ServerLevel> worldSupplier) {
         if (tileentity == null) {
             return false;
         }
@@ -197,7 +197,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
 
     public void logNeighborNotification(final Supplier<ServerLevel> serverWorldSupplier, final BlockPos immutableFrom, final Block blockIn,
         final BlockPos immutableTarget, final BlockState targetBlockState,
-        @Nullable final BlockEntity existingTile
+        final @Nullable BlockEntity existingTile
     ) {
         final NeighborNotification notificationTransaction = new NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom, existingTile);
         this.logTransaction(notificationTransaction);
@@ -271,8 +271,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         this.logTransaction(transaction);
     }
     @SuppressWarnings({"ConstantConditions"})
-    @Nullable
-    public EffectTransactor ensureEntityDropTransactionEffect(final Entity entity) {
+    public @Nullable EffectTransactor ensureEntityDropTransactionEffect(final Entity entity) {
         if (this.tail != null) {
             if (this.tail.acceptEntityDrops(entity)) {
                 return null;
@@ -307,7 +306,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(EntityPerformingDropsEffect.getInstance()));
     }
 
-    public void completeBlockDrops(@Nullable final EffectTransactor context) {
+    public void completeBlockDrops(final @Nullable EffectTransactor context) {
         if (this.effect != null) {
             if (this.effect.effect == PrepareBlockDrops.getInstance()) {
                 if (context != null) {
@@ -480,8 +479,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
 
     @SuppressWarnings("unchecked")
     private static <E extends Event & Cancellable> void generateEventForTransaction(
-        @NonNull final GameTransaction<E> pointer,
-        @Nullable final GameTransaction<@NonNull ?> parent,
+        final @NonNull GameTransaction<E> pointer,
+        final @Nullable GameTransaction<@NonNull ?> parent,
         final PhaseContext<@NonNull ?> context,
         final ImmutableList.Builder<EventByTransaction<@NonNull ?>> builder,
         final ImmutableList<GameTransaction<E>> transactions,
@@ -529,7 +528,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         if (this == obj) {
             return true;
         }

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -44,7 +45,6 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
@@ -76,7 +76,7 @@ import java.util.List;
 public final class PacketPhaseUtil {
 
     @SuppressWarnings("rawtypes")
-    public static boolean handleSlotRestore(final Player player, @Nullable final AbstractContainerMenu containerMenu, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
+    public static boolean handleSlotRestore(final Player player, final @Nullable AbstractContainerMenu containerMenu, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
         boolean restoredAny = false;
         for (final SlotTransaction slotTransaction : slotTransactions) {
 
@@ -243,8 +243,7 @@ public final class PacketPhaseUtil {
      * @param entity The entity
      * @return A possible data parameter or null if unknown
      */
-    @Nullable
-    public static EntityDataAccessor<?> findModifiedEntityInteractDataParameter(final ItemStack stack, final Entity entity) {
+    public static @Nullable EntityDataAccessor<?> findModifiedEntityInteractDataParameter(final ItemStack stack, final Entity entity) {
         final Item item = stack.getItem();
 
         if (item instanceof DyeItem) {

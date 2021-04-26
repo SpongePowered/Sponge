@@ -310,7 +310,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     private CompletableFuture<org.spongepowered.api.world.server.ServerWorld> loadWorld0(final net.minecraft.resources.ResourceKey<Level> registryKey,
-            final LevelStem template, WorldGenSettings generatorSettings) {
+            final LevelStem template, final WorldGenSettings generatorSettings) {
         final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
         final LevelSettings defaultLevelSettings = ((PrimaryLevelDataAccessor) defaultLevelData).accessor$settings();
         final LevelStemBridge templateBridge = (LevelStemBridge) (Object) template;
@@ -319,7 +319,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final WorldType worldType = (WorldType) template.type();
         final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.type());
 
-        MinecraftServerAccessor.accessor$LOGGER().info("Loading World '{}' ({})", worldKey, worldTypeKey);
+        MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
         final String directoryName = this.getDirectoryName(worldKey);
         final boolean isVanillaSubLevel = this.isVanillaSubWorld(directoryName);
         final LevelStorageSource.LevelStorageAccess storageSource;
@@ -365,7 +365,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         final boolean isDebugGeneration = levelData.worldGenSettings().isDebug();
         final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
-        final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$getProgressListenerFactory().create(11);
+        final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
 
         final ServerLevel world = new ServerLevel(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), storageSource, levelData,
                 registryKey, (DimensionType) worldType, chunkStatusListener, template.generator(), isDebugGeneration, seed, ImmutableList.of(), true);
@@ -803,7 +803,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             throw new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location()));
         }
 
-        SpongeCommon.getLogger().info("Unloading World '{}' ({})", registryKey.location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
+        SpongeCommon.getLogger().info("Unloading world '{}' ({})", registryKey.location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
 
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         world.getChunkSource().removeRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, registryKey.location());
@@ -852,7 +852,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final WorldType worldType = (WorldType) template.type();
             final ResourceKey worldTypeKey = RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) template.type());
 
-            MinecraftServerAccessor.accessor$LOGGER().info("Loading World '{}' ({})", worldKey, worldTypeKey);
+            MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
             if (!isDefaultWorld && !templateBridge.bridge$loadOnStartup()) {
                 SpongeCommon.getLogger().warn("World '{}' has been disabled from loading at startup. Skipping...", worldKey);
                 continue;
@@ -921,7 +921,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             final long seed = BiomeManager.obfuscateSeed(levelData.worldGenSettings().seed());
 
             final net.minecraft.resources.ResourceKey<Level> registryKey = SpongeWorldManager.createRegistryKey(worldKey);
-            final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$getProgressListenerFactory().create(11);
+            final ChunkProgressListener chunkStatusListener = ((MinecraftServerAccessor) this.server).accessor$progressListenerFactory().create(11);
             final List<CustomSpawner> spawners;
             if (isDefaultWorld) {
                 spawners = ImmutableList.of(new PhantomSpawner(), new PatrolSpawner(), new CatSpawner(), new VillageSiege(), new WanderingTraderSpawner(levelData));
@@ -986,7 +986,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 }
                 levelData.setInitialized(true);
                 if (isDebugGeneration) {
-                    ((MinecraftServerAccessor) this.server).invoker$setDebugLevel(levelData);
+                    ((MinecraftServerAccessor) this.server).invoker$setupDebugLevel(levelData);
                 }
             } catch (final Throwable throwable) {
                 final CrashReport crashReport = CrashReport.forThrowable(throwable, "Exception initializing world '" + world.dimension().location()  + "'");
@@ -1074,20 +1074,20 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         chunkStatusListener.updateSpawnPos(chunkPos);
         final ServerChunkCache serverChunkProvider = world.getChunkSource();
         serverChunkProvider.getLightEngine().setTaskPerBatch(500);
-        ((MinecraftServerAccessor) this.server).accessor$setNextTickTime(Util.getMillis());
+        ((MinecraftServerAccessor) this.server).accessor$nextTickTime(Util.getMillis());
         serverChunkProvider.addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, 11, world.dimension().location());
 
         while (serverChunkProvider.getTickingGenerated() != 441) {
-            ((MinecraftServerAccessor) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
+            ((MinecraftServerAccessor) this.server).accessor$nextTickTime(Util.getMillis() + 10L);
             ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
         }
 
-        ((MinecraftServerAccessor) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
+        ((MinecraftServerAccessor) this.server).accessor$nextTickTime(Util.getMillis() + 10L);
         ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
 
         this.updateForcedChunks(world, serverChunkProvider);
 
-        ((MinecraftServerAccessor) this.server).accessor$setNextTickTime(Util.getMillis() + 10L);
+        ((MinecraftServerAccessor) this.server).accessor$nextTickTime(Util.getMillis() + 10L);
         ((MinecraftServerAccessor) this.server).accessor$waitUntilNextTick();
         chunkStatusListener.stop();
         serverChunkProvider.getLightEngine().setTaskPerBatch(5);

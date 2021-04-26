@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.teleport;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -38,7 +39,6 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 
@@ -46,10 +46,10 @@ public final class ConfigTeleportHelperFilter implements TeleportHelperFilter {
 
     // We try to cache this in case of big mod blacklists, we don't want to parse this
     // all the time.
-    @Nullable private static List<BlockType> floorBlockTypes = null;
-    @Nullable private static List<BlockState> floorBlockStates = null;
-    @Nullable private static List<BlockType> bodyBlockTypes = null;
-    @Nullable private static List<BlockState> bodyBlockStates = null;
+    private static @Nullable List<BlockType> floorBlockTypes = null;
+    private static @Nullable List<BlockState> floorBlockStates = null;
+    private static @Nullable List<BlockType> bodyBlockTypes = null;
+    private static @Nullable List<BlockState> bodyBlockStates = null;
 
     public static void invalidateCache() {
         ConfigTeleportHelperFilter.floorBlockTypes = null;
@@ -90,13 +90,13 @@ public final class ConfigTeleportHelperFilter implements TeleportHelperFilter {
     }
 
     @Override
-    public boolean isSafeFloorMaterial(@NonNull final BlockState blockState) {
+    public boolean isSafeFloorMaterial(final @NonNull BlockState blockState) {
         ConfigTeleportHelperFilter.updateCacheIfNecessary();
         return !ConfigTeleportHelperFilter.floorBlockStates.contains(blockState) && !ConfigTeleportHelperFilter.floorBlockTypes.contains(blockState.type());
     }
 
     @Override
-    public boolean isSafeBodyMaterial(@NonNull final BlockState blockState) {
+    public boolean isSafeBodyMaterial(final @NonNull BlockState blockState) {
         ConfigTeleportHelperFilter.updateCacheIfNecessary();
         return !ConfigTeleportHelperFilter.bodyBlockStates.contains(blockState) && !ConfigTeleportHelperFilter.bodyBlockTypes.contains(blockState.type());
     }

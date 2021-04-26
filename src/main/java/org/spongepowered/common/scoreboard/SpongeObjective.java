@@ -27,6 +27,7 @@ package org.spongepowered.common.scoreboard;
 import com.google.common.collect.Maps;
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
@@ -47,7 +48,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 
 @SuppressWarnings({"ConstantConditions", "unchecked"})
 public final class SpongeObjective implements Objective {
@@ -245,10 +245,10 @@ public final class SpongeObjective implements Objective {
     public static final class Builder implements Objective.Builder {
 
         private static final int MAX_NAME_LENGTH = 16;
-        @Nullable private String name;
-        @Nullable private Component displayName;
-        @Nullable private Criterion criterion;
-        @Nullable private ObjectiveDisplayMode objectiveDisplayMode;
+        private @Nullable String name;
+        private @Nullable Component displayName;
+        private @Nullable Criterion criterion;
+        private @Nullable ObjectiveDisplayMode objectiveDisplayMode;
 
         @Override
         public Objective.Builder name(final String name) {

@@ -72,8 +72,7 @@ import java.util.stream.Collectors;
 // We have to extend ArgumentCommandNode for Brig to even use this...
 public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<CommandSourceStack, T> implements SpongeNode {
 
-    @Nullable
-    private static SuggestionProvider<CommandSourceStack> createSuggestionProvider(final @Nullable ValueCompleter completer) {
+    private static @Nullable SuggestionProvider<CommandSourceStack> createSuggestionProvider(final @Nullable ValueCompleter completer) {
         if (completer == null) {
             return null;
         }
@@ -101,18 +100,18 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     // used so we can have insertion order.
     private final UnsortedNodeHolder nodeHolder = new UnsortedNodeHolder();
 
-    @Nullable private Command<CommandSourceStack> executor;
-    @Nullable private CommandNode<CommandSourceStack> forcedRedirect;
+    private @Nullable Command<CommandSourceStack> executor;
+    private @Nullable CommandNode<CommandSourceStack> forcedRedirect;
 
     @SuppressWarnings({"unchecked"})
     public SpongeArgumentCommandNode(
             final Parameter.Key<? super T> key,
             final ValueUsage usage,
             final ArgumentParser<T> parser,
-            @Nullable final ValueCompleter valueCompleter,
-            @Nullable final Command command,
+            final @Nullable ValueCompleter valueCompleter,
+            final @Nullable Command command,
             final Predicate<CommandSourceStack> predicate,
-            @Nullable final CommandNode<CommandSourceStack> redirect,
+            final @Nullable CommandNode<CommandSourceStack> redirect,
             final RedirectModifier<CommandSourceStack> modifier,
             final boolean forks,
             final String keyName,

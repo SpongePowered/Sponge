@@ -76,8 +76,7 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
     }
 
     @Override
-    @NonNull
-    public String input() {
+    public @NonNull String input() {
         return this.input;
     }
 
@@ -97,8 +96,7 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
     }
 
     @Override
-    @NonNull
-    public String parsed() {
+    public @NonNull String parsed() {
         if (this.cursor == 0) {
             return "";
         }
@@ -106,8 +104,7 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
     }
 
     @Override
-    @NonNull
-    public String remaining() {
+    public @NonNull String remaining() {
         return this.input.substring(this.cursor);
     }
 
@@ -130,8 +127,7 @@ public final class SpongeImmutableArgumentReader implements ArgumentReader.Immut
     }
 
     @Override
-    @NonNull
-    public ArgumentParseException createException(@NonNull final Component errorMessage) {
+    public @NonNull ArgumentParseException createException(final @NonNull Component errorMessage) {
         return new ArgumentParseException(errorMessage, this.input(), this.cursor());
     }
 

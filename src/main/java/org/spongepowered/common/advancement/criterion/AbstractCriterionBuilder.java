@@ -27,18 +27,18 @@ package org.spongepowered.common.advancement.criterion;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 
-import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
 public abstract class AbstractCriterionBuilder<T extends AdvancementCriterion, B extends AdvancementCriterion.BaseBuilder<T, B>>
         implements ScoreAdvancementCriterion.BaseBuilder<T, B> {
 
-    @Nullable protected FilteredTrigger<?> trigger;
-    @Nullable protected String name;
+    protected @Nullable FilteredTrigger<?> trigger;
+    protected @Nullable String name;
 
     @Override
     public B trigger(FilteredTrigger<?> trigger) {

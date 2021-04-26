@@ -186,7 +186,7 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
 
     @Override
     public <T extends Entity> Collection<? extends T> entities(final Class<? extends T> entityClass, final AABB box,
-        @Nullable final Predicate<? super T> predicate
+        final @Nullable Predicate<? super T> predicate
     ) {
         Objects.requireNonNull(entityClass);
         Objects.requireNonNull(box);

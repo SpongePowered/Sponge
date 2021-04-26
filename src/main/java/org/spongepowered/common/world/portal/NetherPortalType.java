@@ -109,8 +109,7 @@ public final class NetherPortalType extends VanillaPortalType {
         }
 
         @Override
-        @Nullable
-        public PortalInfo getPortalInfo(final net.minecraft.world.entity.Entity entity,
+        public @Nullable PortalInfo getPortalInfo(final net.minecraft.world.entity.Entity entity,
                 final ServerLevel currentWorld,
                 final ServerLevel targetWorld,
                 final Vector3d currentPosition) {

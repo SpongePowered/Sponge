@@ -28,13 +28,13 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkState;
 
 import io.leangen.geantyref.TypeToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.TypeTokenUtil;
 
 import java.lang.reflect.Type;
 
-import javax.annotation.Nullable;
 
 public final class SpongeEventContextKeyBuilder<T> extends AbstractResourceKeyedBuilder<EventContextKey<T>, EventContextKey.Builder<T>> implements EventContextKey.Builder<T> {
 

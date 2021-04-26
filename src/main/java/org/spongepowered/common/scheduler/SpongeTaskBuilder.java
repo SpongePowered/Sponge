@@ -42,9 +42,9 @@ public final class SpongeTaskBuilder implements Task.Builder {
 
     private static final AtomicInteger taskCounter = new AtomicInteger();
 
-    @Nullable private Consumer<ScheduledTask> consumer;
-    @Nullable private PluginContainer plugin;
-    @Nullable private String name;
+    private @Nullable Consumer<ScheduledTask> consumer;
+    private @Nullable PluginContainer plugin;
+    private @Nullable String name;
     private long delay;
     private long interval;
     private boolean tickBasedDelay;

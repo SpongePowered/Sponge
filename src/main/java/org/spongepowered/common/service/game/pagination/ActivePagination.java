@@ -32,9 +32,9 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.exception.CommandException;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -53,19 +53,16 @@ abstract class ActivePagination {
     private final UUID id = UUID.randomUUID();
     private final Component nextPageText;
     private final Component prevPageText;
-    @Nullable
-    private final Component title;
-    @Nullable
-    private final Component header;
-    @Nullable
-    private final Component footer;
+    private final @Nullable Component title;
+    private final @Nullable Component header;
+    private final @Nullable Component footer;
     private int currentPage;
     private final int maxContentLinesPerPage;
     protected final PaginationCalculator calc;
     private final Component padding;
 
     public ActivePagination(final Supplier<Optional<? extends Audience>> src, final PaginationCalculator calc,
-            @Nullable final Component title, @Nullable final Component header, @Nullable final Component footer,
+            final @Nullable Component title, final @Nullable Component header, final @Nullable Component footer,
             final Component padding) {
         this.src = src;
         this.calc = calc;

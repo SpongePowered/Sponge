@@ -25,22 +25,20 @@
 package org.spongepowered.common.datapack.recipe;
 
 import com.google.gson.JsonObject;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.datapack.DataPackSerializedObject;
 
-import javax.annotation.Nullable;
-
 public final class RecipeSerializedObject extends DataPackSerializedObject {
 
-    @Nullable private final DataPackSerializedObject advancementObject;
+    private final @Nullable DataPackSerializedObject advancementObject;
 
-    public RecipeSerializedObject(final ResourceKey key, final JsonObject object, @Nullable DataPackSerializedObject advancementObject) {
+    public RecipeSerializedObject(final ResourceKey key, final JsonObject object, final @Nullable DataPackSerializedObject advancementObject) {
         super(key, object);
         this.advancementObject = advancementObject;
     }
 
-    @Nullable
-    public DataPackSerializedObject getAdvancementObject() {
+    public @Nullable DataPackSerializedObject getAdvancementObject() {
         return this.advancementObject;
     }
 }

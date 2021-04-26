@@ -71,7 +71,7 @@ public final class BlockChangeFlagManager {
 
     public static final class Factory implements BlockChangeFlag.Factory {
 
-        @Nullable private BlockChangeFlag none;
+        private @Nullable BlockChangeFlag none;
 
         @Override
         public BlockChangeFlag none() {

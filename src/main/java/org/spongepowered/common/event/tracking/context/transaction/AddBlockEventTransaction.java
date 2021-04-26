@@ -62,7 +62,7 @@ public class AddBlockEventTransaction extends BlockEventBasedTransaction {
 
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
-        @Nullable final GameTransaction<@NonNull ?> parent
+        final @Nullable GameTransaction<@NonNull ?> parent
     ) {
         return Optional.empty();
     }

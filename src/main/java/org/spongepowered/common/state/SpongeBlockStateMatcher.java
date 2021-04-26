@@ -46,13 +46,12 @@ public final class SpongeBlockStateMatcher extends AbstractSpongeStateMatcher<@N
     }
 
     @Override
-    public boolean matches(@NonNull final BlockState state) {
+    public boolean matches(final @NonNull BlockState state) {
         return this.isValid((net.minecraft.world.level.block.state.BlockState) state);
     }
 
     @Override
-    @NonNull
-    public List<BlockState> compatibleStates() {
+    public @NonNull List<BlockState> compatibleStates() {
         if (this.compatibleStates == null) {
             final Block blockType = (Block) this.type;
             this.compatibleStates = blockType.getStateDefinition().getPossibleStates()

@@ -43,9 +43,8 @@ public final class TradeOfferGeneratorWrapper implements VillagerTrades.ItemList
         this.generator = generator;
     }
 
-    @Nullable
     @Override
-    public MerchantOffer getOffer(final Entity trader, final Random rand) {
+    public @Nullable MerchantOffer getOffer(final Entity trader, final Random rand) {
         return (MerchantOffer) this.generator.apply((org.spongepowered.api.entity.Entity) trader, rand);
     }
 

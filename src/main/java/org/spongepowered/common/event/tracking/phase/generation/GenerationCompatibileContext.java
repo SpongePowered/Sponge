@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkSource;
 

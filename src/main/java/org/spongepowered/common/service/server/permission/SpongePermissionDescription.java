@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -39,7 +40,6 @@ import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
@@ -54,7 +54,7 @@ class SpongePermissionDescription implements PermissionDescription {
 
     private final SpongePermissionService permissionService;
     private final String id;
-    @Nullable private final Component description;
+    private final @Nullable Component description;
     private final PluginContainer owner;
 
     SpongePermissionDescription(SpongePermissionService permissionService, String id, @Nullable Component description, PluginContainer owner) {
@@ -125,7 +125,7 @@ class SpongePermissionDescription implements PermissionDescription {
         private final SpongePermissionService permissionService;
         private final PluginContainer owner;
         private String id;
-        @Nullable private Component description;
+        private @Nullable Component description;
         private final Map<String, Tristate> roleAssignments = new LinkedHashMap<>();
 
         Builder(SpongePermissionService permissionService, PluginContainer owner) {

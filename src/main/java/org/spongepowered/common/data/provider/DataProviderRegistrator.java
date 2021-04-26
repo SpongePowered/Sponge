@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider;
 
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -60,7 +61,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
 
 public class DataProviderRegistrator {
 
@@ -250,16 +250,16 @@ public class DataProviderRegistrator {
     private static class MutableRegistrationBase<H, E, R extends MutableRegistrationBase<H, E, R>> {
 
         final Key<? extends Value<E>> key;
-        @Nullable private BiFunction<H, E, Value<E>> constructValue;
-        @Nullable private Function<H, E> get;
-        @Nullable private BiFunction<H, E, Boolean> setAnd;
-        @Nullable private BiConsumer<H, E> set;
-        @Nullable private Function<H, Boolean> deleteAnd;
-        @Nullable private Consumer<H> delete;
-        @Nullable private Function<H, DataTransactionResult> deleteAndGet;
-        @Nullable private Function<H, E> resetOnDelete;
-        @Nullable private BiFunction<H, E, DataTransactionResult> setAndGet;
-        @Nullable private Function<H, Boolean> supports;
+        private @Nullable BiFunction<H, E, Value<E>> constructValue;
+        private @Nullable Function<H, E> get;
+        private @Nullable BiFunction<H, E, Boolean> setAnd;
+        private @Nullable BiConsumer<H, E> set;
+        private @Nullable Function<H, Boolean> deleteAnd;
+        private @Nullable Consumer<H> delete;
+        private @Nullable Function<H, DataTransactionResult> deleteAndGet;
+        private @Nullable Function<H, E> resetOnDelete;
+        private @Nullable BiFunction<H, E, DataTransactionResult> setAndGet;
+        private @Nullable Function<H, Boolean> supports;
 
         public MutableRegistrationBase(Key<? extends Value<E>> key) {
             this.key = key;
@@ -443,10 +443,10 @@ public class DataProviderRegistrator {
     @SuppressWarnings("unchecked")
     private static class ImmutableRegistrationBase<H, E, R extends ImmutableRegistrationBase<H, E, R>> {
         private final Key<? extends Value<E>> key;
-        @Nullable private BiFunction<H, E, Value<E>> constructValue;
-        @Nullable private Function<H, E> get;
-        @Nullable private BiFunction<H, E, H> set;
-        @Nullable private Function<H, Boolean> supports;
+        private @Nullable BiFunction<H, E, Value<E>> constructValue;
+        private @Nullable Function<H, E> get;
+        private @Nullable BiFunction<H, E, H> set;
+        private @Nullable Function<H, Boolean> supports;
 
         public ImmutableRegistrationBase(Key<? extends Value<E>> key) {
             this.key = key;

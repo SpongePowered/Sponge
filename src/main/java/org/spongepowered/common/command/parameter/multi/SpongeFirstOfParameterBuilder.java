@@ -50,7 +50,7 @@ public final class SpongeFirstOfParameterBuilder implements Parameter.FirstOfBui
     }
 
     @Override
-    public Parameter.@NonNull FirstOfBuilder or(@NonNull final Parameter parameter) {
+    public Parameter.@NonNull FirstOfBuilder or(final @NonNull Parameter parameter) {
         this.parameterList.add(parameter);
         return this;
     }

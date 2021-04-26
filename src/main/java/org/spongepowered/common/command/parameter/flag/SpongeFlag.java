@@ -41,13 +41,13 @@ public final class SpongeFlag implements Flag {
     private final Set<String> keys;
     private final Set<String> aliases;
     private final Predicate<CommandCause> requirement;
-    @Nullable private final Parameter associatedParameter;
+    private final @Nullable Parameter associatedParameter;
 
     public SpongeFlag(
             final Set<String> keys,
             final Set<String> aliases,
             final Predicate<CommandCause> requirement,
-            @Nullable final Parameter associatedParameter) {
+            final @Nullable Parameter associatedParameter) {
         this.keys = keys;
         this.aliases = aliases;
         this.requirement = requirement;
@@ -55,26 +55,22 @@ public final class SpongeFlag implements Flag {
     }
 
     @Override
-    @NonNull
-    public Collection<String> unprefixedAliases() {
+    public @NonNull Collection<String> unprefixedAliases() {
         return ImmutableSet.copyOf(this.keys);
     }
 
     @Override
-    @NonNull
-    public Collection<String> aliases() {
+    public @NonNull Collection<String> aliases() {
         return ImmutableSet.copyOf(this.aliases);
     }
 
     @Override
-    @NonNull
-    public Predicate<CommandCause> requirement() {
+    public @NonNull Predicate<CommandCause> requirement() {
         return this.requirement;
     }
 
     @Override
-    @NonNull
-    public Optional<Parameter> associatedParameter() {
+    public @NonNull Optional<Parameter> associatedParameter() {
         return Optional.ofNullable(this.associatedParameter);
     }
 

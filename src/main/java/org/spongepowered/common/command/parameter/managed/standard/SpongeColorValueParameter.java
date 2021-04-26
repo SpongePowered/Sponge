@@ -87,8 +87,7 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
     }
 
     @Override
-    @NonNull
-    public Optional<? extends Color> parseValue(
+    public @NonNull Optional<? extends Color> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
         final ArgumentReader.Immutable state = reader.immutable();

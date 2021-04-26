@@ -37,10 +37,9 @@ public final class NumericalParticleType implements ParticleType {
 
     private final int id;
     private final Map<ParticleOption<?>, Object> defaultOptions;
-    @Nullable
-    private final DataCalculator dataCalculator;
+    private final @Nullable DataCalculator dataCalculator;
 
-    public NumericalParticleType(final int id, final Map<ParticleOption<?>, Object> defaultOptions, @Nullable final DataCalculator dataCalculator) {
+    public NumericalParticleType(final int id, final Map<ParticleOption<?>, Object> defaultOptions, final @Nullable DataCalculator dataCalculator) {
         this.id = id;
         this.defaultOptions = ImmutableMap.copyOf(defaultOptions);
         this.dataCalculator = dataCalculator;

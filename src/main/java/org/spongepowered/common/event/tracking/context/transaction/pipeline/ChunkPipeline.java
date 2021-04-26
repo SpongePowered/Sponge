@@ -103,8 +103,7 @@ public final class ChunkPipeline implements BlockPipeline {
         return Objects.requireNonNull(this.sectionSupplier, "ChunkSection Supplier is null in ChunkPipeline").get();
     }
 
-    @Nullable
-    public BlockState processChange(final PhaseContext<?> context, final BlockState currentState, final BlockState proposedState,
+    public @Nullable BlockState processChange(final PhaseContext<?> context, final BlockState currentState, final BlockState proposedState,
         final BlockPos pos,
         final int limit
     ) {

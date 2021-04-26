@@ -34,8 +34,8 @@ import org.spongepowered.math.vector.Vector3d;
 public final class SpongeAABB implements AABB {
     private final Vector3d min;
     private final Vector3d max;
-    @Nullable private Vector3d size = null;
-    @Nullable private Vector3d center = null;
+    private @Nullable Vector3d size = null;
+    private @Nullable Vector3d center = null;
 
     public SpongeAABB(final Vector3d v1, final Vector3d v2) {
         this.min = v1.min(v2);

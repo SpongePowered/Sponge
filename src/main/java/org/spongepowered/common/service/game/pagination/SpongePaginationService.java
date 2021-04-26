@@ -31,6 +31,7 @@ import com.google.common.collect.MapMaker;
 import com.google.inject.Singleton;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
@@ -55,7 +56,6 @@ import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 
 @Singleton
 public final class SpongePaginationService implements PaginationService {
@@ -63,7 +63,7 @@ public final class SpongePaginationService implements PaginationService {
     static final class SourcePaginations {
 
         private final Map<UUID, ActivePagination> paginations = new ConcurrentHashMap<>();
-        @Nullable private volatile UUID lastUuid;
+        private @Nullable volatile UUID lastUuid;
 
         @Nullable public ActivePagination get(final UUID uuid) {
             return this.paginations.get(uuid);
@@ -80,8 +80,7 @@ public final class SpongePaginationService implements PaginationService {
             return this.paginations.keySet();
         }
 
-        @Nullable
-        public UUID getLastUuid() {
+        public @Nullable UUID getLastUuid() {
             return this.lastUuid;
         }
     }
@@ -100,8 +99,7 @@ public final class SpongePaginationService implements PaginationService {
         return new SpongePaginationBuilder(this);
     }
 
-    @Nullable
-    SourcePaginations getPaginationState(final Audience source, final boolean create) {
+    @Nullable SourcePaginations getPaginationState(final Audience source, final boolean create) {
         if (source instanceof Player) {
             return this.getPaginationStateForPlayer((Player) source, create);
         }
@@ -109,8 +107,7 @@ public final class SpongePaginationService implements PaginationService {
         return this.getPaginationStateForNonPlayer(source, create);
     }
 
-    @Nullable
-    private SourcePaginations getPaginationStateForNonPlayer(final Audience source, final boolean create) {
+    private @Nullable SourcePaginations getPaginationStateForNonPlayer(final Audience source, final boolean create) {
         SourcePaginations ret = this.activePaginations.get(source);
         if (ret == null && create) {
             ret = new SourcePaginations();
@@ -122,8 +119,7 @@ public final class SpongePaginationService implements PaginationService {
         return ret;
     }
 
-    @Nullable
-    private SourcePaginations getPaginationStateForPlayer(final Player source, final boolean create) {
+    private @Nullable SourcePaginations getPaginationStateForPlayer(final Player source, final boolean create) {
         return this.playerActivePaginations.get(source.uniqueId(), k -> create ? new SourcePaginations() : null);
     }
 

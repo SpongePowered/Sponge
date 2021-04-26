@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.CauseStackManager;
@@ -37,7 +38,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
@@ -73,7 +73,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     @Override
     public void associateNeighborStateNotifier(
-        final BlockEventTickContext context, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
+        final BlockEventTickContext context, final @Nullable BlockPos sourcePos, final Block block, final BlockPos notifyPos,
                                                final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {

@@ -46,26 +46,26 @@ public abstract class AbstractStateMatcherBuilder<S extends State<@NonNull S>, T
     @Nullable T type;
 
     @Override
-    public StateMatcher.@NonNull Builder<@NonNull S, @NonNull T> type(@NonNull final T type) {
+    public StateMatcher.@NonNull Builder<@NonNull S, @NonNull T> type(final @NonNull T type) {
         this.type = type;
         return this;
     }
 
     @Override
-    public StateMatcher.@NonNull Builder<@NonNull S, @NonNull T> supportsStateProperty(@NonNull final StateProperty<@NonNull ?> stateProperty) {
+    public StateMatcher.@NonNull Builder<@NonNull S, @NonNull T> supportsStateProperty(final @NonNull StateProperty<@NonNull ?> stateProperty) {
         this.requiredProperties.add(stateProperty);
         return this;
     }
 
     @Override
     public <V extends Comparable<V>> StateMatcher.@NonNull Builder<@NonNull S, @NonNull T> stateProperty(
-            @NonNull final StateProperty<@NonNull V> stateProperty, @NonNull final V value) {
+            final @NonNull StateProperty<@NonNull V> stateProperty, final @NonNull V value) {
         this.properties.put(stateProperty, value);
         return this;
     }
 
     @Override
-    public StateMatcher.@NonNull Builder<@NonNull S, @NonNull T> matcher(@NonNull final KeyValueMatcher<?> matcher) {
+    public StateMatcher.@NonNull Builder<@NonNull S, @NonNull T> matcher(final @NonNull KeyValueMatcher<?> matcher) {
         this.keyValueMatchers.add(matcher);
         return this;
     }
@@ -81,7 +81,7 @@ public abstract class AbstractStateMatcherBuilder<S extends State<@NonNull S>, T
 
     @Override
     @SuppressWarnings("unchecked")
-    public StateMatcher.@NonNull Builder<@NonNull S, @NonNull T> from(@NonNull final StateMatcher<@NonNull S> value) {
+    public StateMatcher.@NonNull Builder<@NonNull S, @NonNull T> from(final @NonNull StateMatcher<@NonNull S> value) {
         final AbstractStateMatcherBuilder<S, T> that = ((AbstractStateMatcherBuilder<S, T>) value);
         this.type = that.type;
         this.properties.clear();

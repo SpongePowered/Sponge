@@ -46,7 +46,7 @@ import net.minecraft.world.item.trading.MerchantOffer;
 public class SpongeTradeOfferBuilder extends AbstractDataBuilder<TradeOffer> implements TradeOffer.Builder, DataBuilder<TradeOffer> {
 
     private ItemStackSnapshot firstItem = ItemStackSnapshot.empty();
-    @Nullable private ItemStackSnapshot secondItem;
+    private @Nullable ItemStackSnapshot secondItem;
     private ItemStackSnapshot sellingItem = ItemStackSnapshot.empty();
     private int useCount;
     private int maxUses;

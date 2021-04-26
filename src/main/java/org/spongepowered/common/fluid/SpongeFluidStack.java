@@ -25,6 +25,7 @@
 package org.spongepowered.common.fluid;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Key;
@@ -41,13 +42,12 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 
 public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
 
     private FluidType fluidType;
     private int volume;
-    @Nullable private DataContainer extraData;
+    private @Nullable DataContainer extraData;
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     SpongeFluidStack(final SpongeFluidStackBuilder builder) {
@@ -59,15 +59,14 @@ public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
         }
     }
 
-    private SpongeFluidStack(final FluidType fluidType, final int volume, @Nullable final DataContainer extraData) {
+    private SpongeFluidStack(final FluidType fluidType, final int volume, final @Nullable DataContainer extraData) {
         this.fluidType = fluidType;
         this.volume = volume;
         this.extraData = extraData == null ? null : extraData.copy();
     }
 
     @Override
-    @NonNull
-    public FluidType fluid() {
+    public @NonNull FluidType fluid() {
         return this.fluidType;
     }
 
@@ -77,8 +76,7 @@ public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
     }
 
     @Override
-    @NonNull
-    public FluidStack setVolume(final int volume) {
+    public @NonNull FluidStack setVolume(final int volume) {
         if (volume <= 0) {
             throw new IllegalArgumentException("Volume must be at least 0!");
         }
@@ -87,8 +85,7 @@ public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
     }
 
     @Override
-    @NonNull
-    public FluidStackSnapshot createSnapshot() {
+    public @NonNull FluidStackSnapshot createSnapshot() {
         return new SpongeFluidStackSnapshotBuilder().from(this).build();
     }
 
@@ -98,7 +95,7 @@ public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
     }
 
     @Override
-    public void setRawData(@NonNull final DataView container) throws InvalidDataException {
+    public void setRawData(final @NonNull DataView container) throws InvalidDataException {
         try {
             final int contentVersion = container.getInt(Queries.CONTENT_VERSION).get();
             if (contentVersion != this.contentVersion()) {
@@ -126,8 +123,7 @@ public class SpongeFluidStack implements FluidStack, SpongeMutableDataHolder {
     }
 
     @Override
-    @NonNull
-    public DataContainer toContainer() {
+    public @NonNull DataContainer toContainer() {
         final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.FLUID_TYPE).valueKey(this.fluidType);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.contentVersion())

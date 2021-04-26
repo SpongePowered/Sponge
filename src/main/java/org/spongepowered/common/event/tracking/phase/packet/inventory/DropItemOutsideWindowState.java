@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -41,7 +42,6 @@ import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import net.minecraft.network.protocol.Packet;
 import java.util.List;
 import java.util.Optional;
@@ -62,7 +62,7 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
     public ClickContainerEvent createInventoryEvent(final net.minecraft.server.level.ServerPlayer playerMP, final Container openContainer,
         final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
-        @Nullable final Slot slot) {
+        final @Nullable Slot slot) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 

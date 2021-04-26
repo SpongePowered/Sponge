@@ -25,11 +25,11 @@
 package org.spongepowered.common.event.tracking;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import javax.annotation.Nullable;
 import java.util.Optional;
 
 public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseContext> {
@@ -39,8 +39,7 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
         super.reset();
     }
 
-    @Nullable
-    static UnwindingPhaseContext unwind(final PhaseContext<@NonNull ?> context, final boolean hasCaptures) {
+    static @Nullable UnwindingPhaseContext unwind(final PhaseContext<@NonNull ?> context, final boolean hasCaptures) {
         if (!context.requiresPost() || !hasCaptures) {
             return null;
         }

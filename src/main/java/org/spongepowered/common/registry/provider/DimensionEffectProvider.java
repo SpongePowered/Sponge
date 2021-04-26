@@ -41,8 +41,7 @@ public final class DimensionEffectProvider {
         this.mappings = new Object2ObjectOpenHashMap<>();
     }
 
-    @Nullable
-    public WorldTypeEffect get(final ResourceKey key) {
+    public @Nullable WorldTypeEffect get(final ResourceKey key) {
         return this.mappings.get(key);
     }
 

@@ -61,14 +61,12 @@ public final class SpongeParameterKey<T> implements Parameter.Key<T> {
     }
 
     @Override
-    @NonNull
-    public String key() {
+    public @NonNull String key() {
         return this.key;
     }
 
     @Override
-    @NonNull
-    public Type type() {
+    public @NonNull Type type() {
         return this.type;
     }
 

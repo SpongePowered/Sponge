@@ -29,6 +29,7 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -87,7 +88,6 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NbtIo;
@@ -119,10 +119,10 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     private boolean vanishIgnoresCollision;
     private boolean vanishPreventsTargeting;
 
-    @Nullable private SubjectReference subjectReference;
-    @Nullable private SpongeUserInventory inventory; // lazy load when accessing inventory
-    @Nullable private PlayerEnderChestContainer enderChest; // lazy load when accessing inventory
-    @Nullable private CompoundTag compound;
+    private @Nullable SubjectReference subjectReference;
+    private @Nullable SpongeUserInventory inventory; // lazy load when accessing inventory
+    private @Nullable PlayerEnderChestContainer enderChest; // lazy load when accessing inventory
+    private @Nullable CompoundTag compound;
     private boolean isConstructing;
 
     public SpongeUser(final GameProfile profile) {
@@ -291,7 +291,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public boolean canEquip(final EquipmentType type, @Nullable final ItemStack equipment) {
+    public boolean canEquip(final EquipmentType type, final @Nullable ItemStack equipment) {
         return true;
     }
 
@@ -301,7 +301,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
+    public boolean equip(final EquipmentType type, final @Nullable ItemStack equipment) {
         if (this.canEquip(type, equipment)) {
             this.loadInventory();
             this.setEquippedItem(type, equipment);
@@ -371,7 +371,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public void setItemInHand(final HandType handType, @Nullable final ItemStack itemInHand) {
+    public void setItemInHand(final HandType handType, final @Nullable ItemStack itemInHand) {
         if (handType == HandTypes.MAIN_HAND.get()) {
             this.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand);
         } else if (handType == HandTypes.OFF_HAND.get()) {
@@ -456,11 +456,11 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     // Helpers for Equipment:
 
-    private void setEquippedItem(final Supplier<? extends EquipmentType> type, @Nullable final ItemStack item) {
+    private void setEquippedItem(final Supplier<? extends EquipmentType> type, final @Nullable ItemStack item) {
         this.setEquippedItem(type.get(), item);
     }
 
-    private void setEquippedItem(final EquipmentType type, @Nullable final ItemStack item) {
+    private void setEquippedItem(final EquipmentType type, final @Nullable ItemStack item) {
         throw new MissingImplementationException("SpongeUser", "setEquippedItem");
     }
 

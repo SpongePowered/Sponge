@@ -79,7 +79,7 @@ public final class SpongeLayeredBiomeProviderHelper {
     private static final class SpongeDataSection {
         public final List<Supplier<Biome>> biomes;
 
-        private SpongeDataSection(@Nullable final List<Supplier<Biome>> biomes) {
+        private SpongeDataSection(final @Nullable List<Supplier<Biome>> biomes) {
             this.biomes = biomes;
         }
     }

@@ -56,15 +56,13 @@ public final class SpongeUserValueParameter extends ResourceKeyedArgumentValuePa
     }
 
     @Override
-    @NonNull
-    public List<String> complete(@NonNull final CommandCause cause, @NonNull final String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
         return Sponge.server().userManager().streamOfMatches(currentInput).filter(GameProfile::hasName)
                 .map(x -> x.name().orElse("")).collect(Collectors.toList());
     }
 
     @Override
-    @NonNull
-    public Optional<? extends User> parseValue(
+    public @NonNull Optional<? extends User> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader)
             throws ArgumentParseException {
         final String peek = reader.peekString();

@@ -37,19 +37,18 @@ import java.util.function.Supplier;
 
 public abstract class AbstractProvideServiceEventImpl<T> extends AbstractLifecycleEvent.GenericImpl<T> implements ProvideServiceEvent<T> {
 
-    @Nullable private Supplier<T> serviceFactory;
+    private @Nullable Supplier<T> serviceFactory;
 
     public AbstractProvideServiceEventImpl(final Cause cause, final Game game, final TypeToken<T> token) {
         super(cause, game, token);
     }
 
     @Override
-    public void suggest(@NonNull final Supplier<T> serviceFactory) {
+    public void suggest(final @NonNull Supplier<T> serviceFactory) {
         this.serviceFactory = serviceFactory;
     }
 
-    @Nullable
-    public Supplier<T> getSuggestion() {
+    public @Nullable Supplier<T> getSuggestion() {
         return this.serviceFactory;
     }
 

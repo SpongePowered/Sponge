@@ -27,6 +27,7 @@ package org.spongepowered.common.fluid;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Key;
@@ -45,7 +46,6 @@ import java.util.LinkedHashMap;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 
 public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@NonNull FluidStackSnapshot> implements FluidStackSnapshot.Builder {
 
@@ -59,7 +59,7 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
     }
 
     @Override
-    public FluidStackSnapshot.@NonNull Builder fluid(@NonNull final FluidType fluidType) {
+    public FluidStackSnapshot.@NonNull Builder fluid(final @NonNull FluidType fluidType) {
         this.fluidType = Objects.requireNonNull(fluidType, "FluidType cannot be null!");
         return this;
     }
@@ -71,7 +71,7 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
     }
 
     @Override
-    public FluidStackSnapshot.@NonNull Builder from(@NonNull final FluidStack fluidStack) {
+    public FluidStackSnapshot.@NonNull Builder from(final @NonNull FluidStack fluidStack) {
         this.fluidType = fluidStack.fluid();
         this.volume = fluidStack.volume();
         final DataContainer datacontainer = fluidStack.toContainer();
@@ -83,7 +83,7 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
     }
 
     @Override
-    public FluidStackSnapshot.@NonNull Builder from(@NonNull final FluidStackSnapshot holder) {
+    public FluidStackSnapshot.@NonNull Builder from(final @NonNull FluidStackSnapshot holder) {
         Objects.requireNonNull(holder, "FluidStackSnapshot cannot be null!");
         if (!(holder instanceof SpongeFluidStackSnapshot)) {
             throw new IllegalArgumentException("Must be a SpongeFluidStackSnapshot");
@@ -113,8 +113,7 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
     }
 
     @Override
-    @NonNull
-    protected Optional<FluidStackSnapshot> buildContent(@NonNull final DataView container) throws InvalidDataException {
+    protected @NonNull Optional<FluidStackSnapshot> buildContent(final @NonNull DataView container) throws InvalidDataException {
         try {
             if (container.contains(Constants.Fluids.FLUID_TYPE, Constants.Fluids.FLUID_VOLUME)) {
                 final String rawFluid = container.getString(Constants.Fluids.FLUID_TYPE).get();
@@ -147,7 +146,7 @@ public final class SpongeFluidStackSnapshotBuilder extends AbstractDataBuilder<@
     }
 
     @Override
-    public <V> FluidStackSnapshot.@NonNull Builder add(@NonNull final Key<@NonNull? extends Value<V>> key, @NonNull final V value) {
+    public <V> FluidStackSnapshot.@NonNull Builder add(final @NonNull Key<@NonNull? extends Value<V>> key, final @NonNull V value) {
         if (this.keyValues == null) {
             this.keyValues = new LinkedHashMap<>();
         }

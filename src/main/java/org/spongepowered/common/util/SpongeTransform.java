@@ -25,12 +25,12 @@
 package org.spongepowered.common.util;
 
 import com.google.common.base.MoreObjects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.math.imaginary.Quaterniond;
 import org.spongepowered.math.matrix.Matrix4d;
 import org.spongepowered.math.vector.Vector3d;
 
-import javax.annotation.Nullable;
 import java.util.Objects;
 
 public final class SpongeTransform implements Transform {
@@ -38,7 +38,7 @@ public final class SpongeTransform implements Transform {
     private final Vector3d position;
     private final Vector3d rotation;
     private final Vector3d scale;
-    @Nullable private Quaterniond rotationQuaternion = null;
+    private @Nullable Quaterniond rotationQuaternion = null;
 
     public SpongeTransform(final Vector3d position, final Vector3d rotation, final Vector3d scale) {
         this.position = position;

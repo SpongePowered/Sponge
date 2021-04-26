@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -32,7 +33,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import javax.annotation.Nullable;
 import net.minecraft.network.protocol.Packet;
 
 @SuppressWarnings("unchecked")
@@ -43,7 +43,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     private ItemStackSnapshot cursor = ItemStackSnapshot.empty();
     private ItemStack itemUsed = ItemStack.empty();
     private ItemStackSnapshot itemUsedSnapshot = ItemStackSnapshot.empty();
-    @Nullable private HandType handUsed;
+    private @Nullable HandType handUsed;
     private boolean ignoreCreative;
     private boolean interactItemChanged;
 

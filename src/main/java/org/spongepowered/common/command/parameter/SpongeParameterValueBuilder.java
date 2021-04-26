@@ -62,7 +62,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> key(@NonNull final String key) {
+    public Parameter.Value.@NonNull Builder<T> key(final @NonNull String key) {
         return this.key(new SpongeParameterKey<>(key, this.typeToken));
     }
 
@@ -79,7 +79,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> suggestions(@Nullable final ValueCompleter completer) {
+    public Parameter.Value.@NonNull Builder<T> suggestions(final @Nullable ValueCompleter completer) {
         this.completer = completer;
         return this;
     }
@@ -91,13 +91,13 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> usage(@Nullable final ValueUsage usage) {
+    public Parameter.Value.@NonNull Builder<T> usage(final @Nullable ValueUsage usage) {
         this.usage = usage;
         return this;
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> requiredPermission(@Nullable final String permission) {
+    public Parameter.Value.@NonNull Builder<T> requiredPermission(final @Nullable String permission) {
         if (permission == null) {
             return this.requirements(null);
         } else {
@@ -106,7 +106,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> requirements(@Nullable final Predicate<CommandCause> executionRequirements) {
+    public Parameter.Value.@NonNull Builder<T> requirements(final @Nullable Predicate<CommandCause> executionRequirements) {
         this.executionRequirements = executionRequirements;
         return this;
     }
@@ -130,8 +130,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     }
 
     @Override
-    @NonNull
-    public SpongeParameterValue<T> build() throws IllegalStateException {
+    public @NonNull SpongeParameterValue<T> build() throws IllegalStateException {
         Preconditions.checkState(this.key != null, "The command key may not be null");
         Preconditions.checkState(!this.parsers.isEmpty(), "There must be parsers");
         final ImmutableList.Builder<ValueParser<? extends T>> parsersBuilder = ImmutableList.builder();

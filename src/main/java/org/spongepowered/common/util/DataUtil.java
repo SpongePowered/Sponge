@@ -26,6 +26,7 @@ package org.spongepowered.common.util;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -40,7 +41,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
@@ -93,7 +93,7 @@ public final class DataUtil {
         return () -> new InvalidDataException("not found");
     }
 
-    public static Vector3d getPosition3d(final DataView view, @Nullable final DataQuery query) {
+    public static Vector3d getPosition3d(final DataView view, final @Nullable DataQuery query) {
         final DataView internal = query == null ? view : view.getView(query).orElseThrow(DataUtil.dataNotFound());
         final double x = internal.getDouble(Queries.POSITION_X).orElseThrow(DataUtil.dataNotFound());
         final double y = internal.getDouble(Queries.POSITION_Y).orElseThrow(DataUtil.dataNotFound());

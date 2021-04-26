@@ -69,8 +69,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     @Override
-    @NonNull
-    public List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
         return this.complete(currentInput);
     }
 
@@ -84,8 +83,7 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     @Override
-    @NonNull
-    public Optional<? extends ServerLocation> parseValue(
+    public @NonNull Optional<? extends ServerLocation> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         final ArgumentReader.Immutable state = reader.immutable();
         ServerWorld serverWorld;

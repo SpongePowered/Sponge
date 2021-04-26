@@ -36,8 +36,7 @@ public final class SpongeSelectorFactory implements Selector.Factory {
     }
 
     @Override
-    @NonNull
-    public Selector parse(@NonNull final String string) throws IllegalArgumentException {
+    public @NonNull Selector parse(final @NonNull String string) throws IllegalArgumentException {
         try {
             return (Selector) new EntitySelectorParser(new StringReader(string)).parse();
         } catch (final Exception ex) {

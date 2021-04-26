@@ -33,7 +33,7 @@ import org.spongepowered.api.command.CommandResult;
 public final class SpongeCommandResultBuilder implements CommandResult.Builder {
 
     private int result;
-    @Nullable private Component errorMessage;
+    private @Nullable Component errorMessage;
 
     @Override
     public CommandResult.@NonNull Builder result(final int result) {
@@ -42,14 +42,13 @@ public final class SpongeCommandResultBuilder implements CommandResult.Builder {
     }
 
     @Override
-    public CommandResult.@NonNull Builder error(@Nullable final Component errorMessage) {
+    public CommandResult.@NonNull Builder error(final @Nullable Component errorMessage) {
         this.errorMessage = errorMessage;
         return this;
     }
 
     @Override
-    @NonNull
-    public CommandResult build() {
+    public @NonNull CommandResult build() {
         return new SpongeCommandResult(this.errorMessage == null && this.result != 0, this.result, this.errorMessage);
     }
 

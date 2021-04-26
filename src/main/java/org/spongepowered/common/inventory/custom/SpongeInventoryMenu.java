@@ -30,6 +30,7 @@ import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Cause;
@@ -54,7 +55,6 @@ import java.util.HashMap;
 import java.util.Map;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 
 public class SpongeInventoryMenu implements InventoryMenu {
 
@@ -62,12 +62,11 @@ public class SpongeInventoryMenu implements InventoryMenu {
     private Map<Container, ServerPlayer> tracked = new HashMap<>();
     private Component title;
 
-    @Nullable
-    private SlotClickHandler slotClickHandler;
-    @Nullable private ClickHandler clickHandler;
-    @Nullable private KeySwapHandler keySwapHandler;
-    @Nullable private SlotChangeHandler changeHandler;
-    @Nullable private CloseHandler closeHandler;
+    private @Nullable SlotClickHandler slotClickHandler;
+    private @Nullable ClickHandler clickHandler;
+    private @Nullable KeySwapHandler keySwapHandler;
+    private @Nullable SlotChangeHandler changeHandler;
+    private @Nullable CloseHandler closeHandler;
 
     private boolean readonly; // TODO make with wrapper slot
 

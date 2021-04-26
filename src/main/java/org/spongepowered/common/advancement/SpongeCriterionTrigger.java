@@ -28,6 +28,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import io.leangen.geantyref.TypeToken;
 import com.google.gson.JsonObject;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
@@ -46,7 +47,6 @@ import java.util.ArrayList;
 import java.util.function.Consumer;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.resources.ResourceLocation;
@@ -59,12 +59,12 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
     final Function<JsonObject, FilteredTriggerConfiguration> constructor;
     private final ResourceLocation id;
     private final Multimap<PlayerAdvancements, Listener> listeners = HashMultimap.create();
-    @Nullable final Consumer<CriterionEvent.Trigger> eventHandler;
+    final @Nullable Consumer<CriterionEvent.Trigger> eventHandler;
     private final String name;
 
     SpongeCriterionTrigger(final Type triggerConfigurationType,
         final Function<JsonObject, FilteredTriggerConfiguration> constructor,
-        final ResourceLocation id, @Nullable final Consumer<CriterionEvent.Trigger> eventHandler,
+        final ResourceLocation id, final @Nullable Consumer<CriterionEvent.Trigger> eventHandler,
         final String name) {
         this.triggerConfigurationType = triggerConfigurationType;
         this.eventHandler = eventHandler;
@@ -129,8 +129,7 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
         }
     }
 
-    @Nullable
-    public Consumer<CriterionEvent.Trigger> getEventHandler() {
+    public @org.checkerframework.checker.nullness.qual.Nullable Consumer<CriterionEvent.Trigger> getEventHandler() {
         return this.eventHandler;
     }
 }

@@ -29,8 +29,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPhaseState<C> {
 
     // @formatter: off
-    @Nullable private transient C serverCached;
-    @Nullable private C clientCached;
+    private @Nullable transient C serverCached;
+    private @Nullable C clientCached;
     // @formatter: on
 
     protected PooledPhaseState() {

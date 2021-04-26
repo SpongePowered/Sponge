@@ -46,8 +46,7 @@ public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> ex
     }
 
     @Override
-    @NonNull
-    public Result<C> register(@NonNull final PluginContainer container, @NonNull final C command, @NonNull final String alias,
+    public @NonNull Result<C> register(final @NonNull PluginContainer container, final @NonNull C command, final @NonNull String alias,
             final String @NonNull... aliases) throws CommandFailedRegistrationException {
         return new ResultImpl<>(
                 this,
@@ -72,15 +71,13 @@ public final class RegisterCommandEventImpl<C, R extends CommandRegistrar<C>> ex
         }
 
         @Override
-        @NonNull
-        public Result<C> register(@NonNull final PluginContainer container, @NonNull final C command, @NonNull final String alias,
+        public @NonNull Result<C> register(final @NonNull PluginContainer container, final @NonNull C command, final @NonNull String alias,
                 final String @NonNull... aliases) throws CommandFailedRegistrationException {
             return this.parentEvent.register(container, command, alias, aliases);
         }
 
         @Override
-        @NonNull
-        public CommandMapping mapping() {
+        public @NonNull CommandMapping mapping() {
             return this.mapping;
         }
 

@@ -31,6 +31,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
@@ -38,7 +39,6 @@ import org.spongepowered.api.profile.GameProfile;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 
 /*
  * This is intentionally not a mixin of SPacketPlayerListItem.AddPlayerData.
@@ -47,7 +47,7 @@ public final class SpongeTabListEntry implements TabListEntry {
 
     private SpongeTabList list;
     private final GameProfile profile;
-    @Nullable private Component displayName;
+    private @Nullable Component displayName;
     private int latency;
     private GameMode gameMode;
     private boolean updateWithoutSend;

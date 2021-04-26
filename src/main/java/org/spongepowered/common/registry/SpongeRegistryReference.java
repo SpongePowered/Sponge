@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.registry;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.Registry;
@@ -40,7 +41,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 
 public class SpongeRegistryReference<T> extends SpongeRegistryKey<T> implements RegistryReference<T> {
 
@@ -92,10 +92,9 @@ public class SpongeRegistryReference<T> extends SpongeRegistryKey<T> implements 
         return found;
     }
 
-    @Nullable
-    private T getFromHolder(final RegistryHolder holder) {
+    private @Nullable T getFromHolder(final RegistryHolder holder) {
         final Optional<Registry<T>> regOpt = holder.findRegistry(this.registry());
-        return regOpt.flatMap(entries -> entries.findValue(this.location())).orElse(null);
+        return (T) regOpt.flatMap(entries -> entries.findValue(this.location())).orElse(null);
     }
 
     public static final class FactoryImpl implements RegistryReference.Factory {

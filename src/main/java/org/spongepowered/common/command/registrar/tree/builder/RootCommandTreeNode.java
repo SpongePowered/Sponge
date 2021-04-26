@@ -41,8 +41,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 public final class RootCommandTreeNode extends AbstractCommandTreeNode<CommandTreeNode.Root, RootCommandNode<SharedSuggestionProvider>>
         implements CommandTreeNode.Root {
 
-    @Nullable
-    public CommandNode<SharedSuggestionProvider> createArgumentTree(final CommandCause cause, final LiteralArgumentBuilder<SharedSuggestionProvider> rootBuilder) {
+    public @Nullable CommandNode<SharedSuggestionProvider> createArgumentTree(final CommandCause cause, final LiteralArgumentBuilder<SharedSuggestionProvider> rootBuilder) {
         if (this.getRequirement().test(cause)) {
             final Map<AbstractCommandTreeNode<?, ?>, CommandNode<SharedSuggestionProvider>> nodeToSuggestionProvider = new IdentityHashMap<>();
             // this is going to be iterated only.

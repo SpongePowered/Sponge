@@ -46,8 +46,7 @@ import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
 
 public final class SpongeRangeClientCompletionKey<N extends Number> extends AbstractResourceKeyed implements ClientCompletionKey<CommandTreeNode.@NonNull Range<@NonNull N>> {
 
-    @Nullable
-    public static SpongeRangeClientCompletionKey<?> createFrom(final ResourceKey key, final ArgumentSerializer<?> serializer) {
+    public static @Nullable SpongeRangeClientCompletionKey<?> createFrom(final ResourceKey key, final ArgumentSerializer<?> serializer) {
         if (serializer instanceof FloatArgumentSerializer) {
             return new SpongeRangeClientCompletionKey<>(key, FloatArgumentType::floatArg, Float.MIN_VALUE, Float.MAX_VALUE);
         }

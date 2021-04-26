@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -52,7 +53,6 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import java.util.ArrayList;
@@ -99,9 +99,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         this.stateMask = stateMask;
     }
 
-    @Nullable
-    public ClickContainerEvent createInventoryEvent(final net.minecraft.server.level.ServerPlayer playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
-            final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable final Slot slot) {
+    public @Nullable ClickContainerEvent createInventoryEvent(final net.minecraft.server.level.ServerPlayer playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
+                                                              final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, final @Nullable Slot slot) {
         return null;
     }
 

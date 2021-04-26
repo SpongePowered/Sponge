@@ -98,7 +98,7 @@ public final class SpongeTabList implements TabList {
     }
 
     @Override
-    public TabList setHeaderAndFooter(@Nullable final Component header, @Nullable final Component footer) {
+    public TabList setHeaderAndFooter(final @Nullable Component header, final @Nullable Component footer) {
         // Do not call the methods, set directly
         this.header = header;
         this.footer = footer;

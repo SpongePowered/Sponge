@@ -26,8 +26,8 @@ package org.spongepowered.common.resourcepack;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 
 public final class SpongeURIResourcePack extends SpongeResourcePack {
 

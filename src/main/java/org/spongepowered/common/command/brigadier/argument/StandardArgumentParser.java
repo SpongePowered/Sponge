@@ -57,8 +57,9 @@ import java.util.stream.Collectors;
  */
 public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValueParameter.Simple<T> {
 
+    @SuppressWarnings("unchecked")
     public static <T> StandardArgumentParser<T, T> createIdentity(final ArgumentType<T> type) {
-        return new StandardArgumentParser<>(type, (reader, c, x) -> x);
+        return new StandardArgumentParser<>(type, (StandardArgumentParser.Converter<T, T>) Converter.IDENTITY);
     }
 
     public static <S, T> StandardArgumentParser<S, T> createConverter(
@@ -125,8 +126,7 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
     }
 
     @Override
-    @NonNull
-    public List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
         final SuggestionsBuilder suggestionsBuilder = new SuggestionsBuilder(currentInput, 0);
         this.listSuggestions(
                 new SpongeCommandContextBuilder(null, (CommandSourceStack) context, new RootCommandNode<>(), 0).build(currentInput), suggestionsBuilder);
@@ -134,8 +134,7 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
     }
 
     @Override
-    @NonNull
-    public Optional<? extends T> parseValue(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader)
+    public @NonNull Optional<? extends T> parseValue(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader)
             throws ArgumentParseException {
         try {
             return Optional.of(this.converter.convert((StringReader) reader, cause, this.type.parse((StringReader) reader)));
@@ -146,6 +145,7 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
 
     @FunctionalInterface
     public interface Converter<S, T> {
+        Converter<Object, Object> IDENTITY = (reader, cause, input) -> input;
 
         T convert(StringReader reader, CommandCause cause, S input) throws CommandSyntaxException;
 

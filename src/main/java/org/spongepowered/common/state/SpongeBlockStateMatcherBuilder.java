@@ -35,8 +35,7 @@ import java.util.HashMap;
 public final class SpongeBlockStateMatcherBuilder extends AbstractStateMatcherBuilder<@NonNull BlockState, @NonNull BlockType> {
 
     @Override
-    @NonNull
-    public StateMatcher<@NonNull BlockState> build() throws IllegalStateException {
+    public @NonNull StateMatcher<@NonNull BlockState> build() throws IllegalStateException {
         if (this.type == null) {
             throw new IllegalStateException("BlockType cannot be null");
         }
@@ -46,7 +45,7 @@ public final class SpongeBlockStateMatcherBuilder extends AbstractStateMatcherBu
     }
 
     @Override
-    public StateMatcher.Builder<@NonNull BlockState, @NonNull BlockType> from(@NonNull final StateMatcher<@NonNull BlockState> value) {
+    public StateMatcher.Builder<@NonNull BlockState, @NonNull BlockType> from(final @NonNull StateMatcher<@NonNull BlockState> value) {
         if (!(value instanceof SpongeBlockStateMatcher)) {
             throw new IllegalArgumentException("BlockStateMatcher must be a SpongeBlockStateMatcher");
         }

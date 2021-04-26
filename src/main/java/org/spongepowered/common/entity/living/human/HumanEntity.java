@@ -238,7 +238,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     @Override
-    public void die(@Nullable final DamageSource cause) {
+    public void die(final @Nullable DamageSource cause) {
         super.die(cause);
         this.reapplyPosition();
         if (cause != null) {
@@ -378,7 +378,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         return true;
     }
 
-    public void removeFromTabListDelayed(@Nullable final ServerPlayer player, final ClientboundPlayerInfoPacket removePacket) {
+    public void removeFromTabListDelayed(final @Nullable ServerPlayer player, final ClientboundPlayerInfoPacket removePacket) {
         final int delay = SpongeGameConfigs.getForWorld(this.level).get().entity.human.tabListRemoveDelay;
         final Runnable removeTask = () -> this.pushPackets(player, removePacket);
         if (delay == 0) {
@@ -493,7 +493,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      * @param player The player tracking this human
      * @param packets All packets to send in a single tick
      */
-    public void pushPackets(@Nullable final ServerPlayer player, final Packet<?>... packets) {
+    public void pushPackets(final @Nullable ServerPlayer player, final Packet<?>... packets) {
         final List<Stream<Packet<?>>> queue;
         if (player == null) {
             queue = this.playerPacketMap.computeIfAbsent(null, k -> new ArrayList<>());
@@ -509,7 +509,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
      * @param player The player to get packets for (or null for all players)
      * @return An array of packets to send in a single tick
      */
-    public Stream<Packet<?>> popQueuedPackets(@Nullable final ServerPlayer player) {
+    public Stream<Packet<?>> popQueuedPackets(final @Nullable ServerPlayer player) {
         final List<Stream<Packet<?>>> queue = this.playerPacketMap.get(player == null ? null : player.getUUID());
         return queue == null || queue.isEmpty() ? Stream.empty() : queue.remove(0);
     }

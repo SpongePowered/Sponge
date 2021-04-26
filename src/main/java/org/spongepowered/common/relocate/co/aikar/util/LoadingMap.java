@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.relocate.co.aikar.util;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Constructor;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -33,6 +32,7 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Allows you to pass a Loader function that when a key is accessed that doesn't
@@ -365,8 +365,7 @@ public class LoadingMap<K, V> extends AbstractMap<K, V> {
     public static abstract class Feeder<T> implements Function<T, T> {
 
         @Override
-        @Nullable
-        public T apply(@Nullable Object input) {
+        public @Nullable T apply(final @Nullable Object input) {
             return this.apply();
         }
 

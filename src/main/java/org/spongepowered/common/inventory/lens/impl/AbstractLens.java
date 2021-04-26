@@ -27,6 +27,7 @@ package org.spongepowered.common.inventory.lens.impl;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
@@ -35,7 +36,6 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.property.KeyValuePair;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Collections;
@@ -115,9 +115,8 @@ public abstract class AbstractLens implements Lens {
         return this.adapterType;
     }
 
-    @Nullable
     @Override
-    public SlotLens getSlotLens(Fabric fabric, int ordinal) {
+    public @Nullable SlotLens getSlotLens(Fabric fabric, int ordinal) {
         if (ordinal < 0 || ordinal > this.maxOrdinal) {
             return null;
         }

@@ -26,6 +26,7 @@ package org.spongepowered.common.advancement.criterion;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.CriterionProgress;
@@ -33,13 +34,12 @@ import org.spongepowered.api.advancement.criteria.CriterionProgress;
 import java.time.Instant;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 
 public abstract class SpongeOperatorCriterionProgress implements ImplementationBackedCriterionProgress, CriterionProgress {
 
     final AdvancementProgress progress;
     private final SpongeOperatorCriterion criterion;
-    @Nullable private Optional<Instant> cachedAchievedState;
+    private @Nullable Optional<Instant> cachedAchievedState;
 
     SpongeOperatorCriterionProgress(final AdvancementProgress progress, final SpongeOperatorCriterion criterion) {
         this.progress = progress;

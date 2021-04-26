@@ -58,8 +58,7 @@ public final class ClientNativeArgumentParser<S, T> extends StandardArgumentPars
     }
 
     @Override
-    @NonNull
-    public ResourceKey key() {
+    public @NonNull ResourceKey key() {
         return this.key;
     }
 

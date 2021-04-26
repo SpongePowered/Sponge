@@ -131,9 +131,9 @@ public final class PhaseTracker implements CauseStackManager {
 
             if (currentContext.state == TickPhase.Tick.TILE_ENTITY) {
                 // Try to save ourselves
-                @Nullable final BlockEntity source = (BlockEntity) currentContext.getSource();
+                final @Nullable BlockEntity source = (BlockEntity) currentContext.getSource();
 
-                @Nullable final BlockEntityType<?> type = Optional.ofNullable(source)
+                final @Nullable BlockEntityType<?> type = Optional.ofNullable(source)
                                                    .map(BlockEntity::getType)
                                                    .orElse(null);
                 if (type != null) {
@@ -210,10 +210,10 @@ public final class PhaseTracker implements CauseStackManager {
     private final Map<EventContextKey<?>, Object> ctx = Maps.newHashMap();
     private int min_depth = 0;
     private int[] duplicateCauses = new int[100];
-    @Nullable private Cause cached_cause;
-    @Nullable private EventContext cached_ctx;
+    private @Nullable Cause cached_cause;
+    private @Nullable EventContext cached_ctx;
     private final AtomicBoolean pendingProviders = new AtomicBoolean(false);
-    @Nullable private WeakReference<Thread> sidedThread;
+    private @Nullable WeakReference<Thread> sidedThread;
     private boolean hasRun = false;
     /*
      * Specifically a Deque because we need to replicate
@@ -263,7 +263,7 @@ public final class PhaseTracker implements CauseStackManager {
             .build();
     }
 
-    public void setThread(@Nullable final Thread thread) throws IllegalAccessException {
+    public void setThread(final @Nullable Thread thread) throws IllegalAccessException {
         if ((this == PhaseTracker.SERVER || this == PhaseTracker.CLIENT) && thread == null) {
             this.sidedThread = new WeakReference<>(null);
             return;
@@ -315,8 +315,7 @@ public final class PhaseTracker implements CauseStackManager {
         return this.stack.peekContext();
     }
 
-    @Nullable
-    public Thread getSidedThread() {
+    public @Nullable Thread getSidedThread() {
         return this.sidedThread != null ? this.sidedThread.get() : null;
     }
 
@@ -605,7 +604,7 @@ public final class PhaseTracker implements CauseStackManager {
     public void popCauseFrame(final StackFrame oldFrame) {
         checkNotNull(oldFrame, "oldFrame");
         this.enforceMainThread();
-        @Nullable final SpongeCauseStackFrame frame = this.frames.peek();
+        final @Nullable SpongeCauseStackFrame frame = this.frames.peek();
         if (frame != oldFrame) {
             // If the given frame is not the top frame then some form of
             // corruption of the stack has occurred and we do our best to correct
@@ -645,7 +644,7 @@ public final class PhaseTracker implements CauseStackManager {
             }
 
             while (offset >= 0) {
-                @Nullable final SpongeCauseStackFrame f = this.frames.peek();
+                final @Nullable SpongeCauseStackFrame f = this.frames.peek();
                 if (PhaseTracker.DEBUG_CAUSE_FRAMES && offset > 0) {
                     printer.add("   Stack frame in position %n :", offset);
                     printer.add(f.stackDebug);
@@ -712,7 +711,7 @@ public final class PhaseTracker implements CauseStackManager {
         checkNotNull(value, "value");
         this.enforceMainThread();
         this.cached_ctx = null;
-        @Nullable final Object existing = this.ctx.put(key, value);
+        final @Nullable Object existing = this.ctx.put(key, value);
         if (!this.frames.isEmpty()) {
             this.frames.peek().storeOriginalContext(key, existing);
         }
@@ -785,7 +784,7 @@ public final class PhaseTracker implements CauseStackManager {
     }
 
     void popFrameMutator(final PhaseContext<?> context) {
-        @Nullable final PhaseContext<?> peek = this.phaseContextProviders.peek();
+        final @Nullable PhaseContext<?> peek = this.phaseContextProviders.peek();
         if (peek == null) {
             return;
         }

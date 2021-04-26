@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.util;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
@@ -61,7 +62,6 @@ import org.spongepowered.common.inventory.lens.impl.minecraft.SingleGridLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.container.ContainerLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
-import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.CompoundContainer;
@@ -151,9 +151,9 @@ public final class ContainerUtil {
     }
 
     private static class CraftingInventoryData {
-        @Nullable private Integer out;
-        @Nullable private Integer base;
-        @Nullable private CraftingContainer grid;
+        private @Nullable Integer out;
+        private @Nullable Integer base;
+        private @Nullable CraftingContainer grid;
     }
 
     /**
@@ -236,7 +236,7 @@ public final class ContainerUtil {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static Lens generateAdapterLens(final SlotLensProvider slots, final int index,
-            final org.spongepowered.common.inventory.util.ContainerUtil.CraftingInventoryData crafting, final List<Slot> slotList, @Nullable final net.minecraft.world.Container subInventory) {
+            final org.spongepowered.common.inventory.util.ContainerUtil.CraftingInventoryData crafting, final List<Slot> slotList, final net.minecraft.world.@Nullable Container subInventory) {
 
         Lens lens = ((InventoryBridge) subInventory).bridge$getAdapter().inventoryAdapter$getRootLens();
         if (lens instanceof PlayerInventoryLens) {
@@ -265,8 +265,7 @@ public final class ContainerUtil {
         return new DelegatingLens(index, slotList, lens, slots);
     }
 
-    @Nullable
-    public static Carrier getCarrier(final Container container) {
+    public static @Nullable Carrier getCarrier(final Container container) {
         if (container instanceof BlockCarrier) {
             return ((BlockCarrier) container);
         }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity.projectile;
 
 import com.google.common.collect.Maps;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -55,7 +56,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.LivingEntity;
@@ -80,7 +80,7 @@ public final class ProjectileUtil {
     private static final Map<Class<? extends ProjectileSource>, ProjectileSourceLogic<?>> projectileSourceLogic = Maps.newHashMap();
 
     public static <T extends Projectile> Optional<T> launch(final EntityType<T> projectileType, final ProjectileSource source,
-            @Nullable final Vector3d vel) {
+            final @Nullable Vector3d vel) {
         final ProjectileLogic<T> logic = ProjectileUtil.getLogic(projectileType);
         if (logic == null) {
             return Optional.empty();
@@ -96,7 +96,7 @@ public final class ProjectileUtil {
     }
 
     public static <T extends Projectile, S extends ProjectileSource> Optional<T> launchWithArgs(final EntityType<T> projectileType,
-            final Class<S> projectileSourceClass, final S source, @Nullable final Vector3d vel, final Object... args) {
+            final Class<S> projectileSourceClass, final S source, final @Nullable Vector3d vel, final Object... args) {
         final ProjectileSourceLogic<S> sourceLogic = ProjectileUtil.getSourceLogic(projectileSourceClass);
         if (sourceLogic == null) {
             return Optional.empty();

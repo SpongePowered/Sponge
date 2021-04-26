@@ -37,6 +37,7 @@ import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -62,7 +63,6 @@ import org.spongepowered.common.util.TypeTokenUtil;
 import org.spongepowered.configurate.util.Types;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -168,8 +168,7 @@ public final class SpongeEventManager implements EventManager {
         return new RegisteredListener.Cache(handlers);
     }
 
-    @Nullable
-    private static String getHandlerErrorOrNull(Method method) {
+    private static @Nullable String getHandlerErrorOrNull(Method method) {
         final int modifiers = method.getModifiers();
         final List<String> errors = new ArrayList<>();
         if (Modifier.isStatic(modifiers)) {
@@ -442,8 +441,7 @@ public final class SpongeEventManager implements EventManager {
         return event instanceof Cancellable && ((Cancellable) event).isCancelled();
     }
 
-    @Nullable
-    private EventListenerPhaseContext createPluginContext(final RegisteredListener<?> handler) {
+    private @Nullable EventListenerPhaseContext createPluginContext(final RegisteredListener<?> handler) {
         if (PhaseTracker.getInstance().getPhaseContext().allowsEventListener()) {
             return PluginPhase.Listener.GENERAL_LISTENER.createPhaseContext(PhaseTracker.getInstance())
                 .source(handler.getPlugin());

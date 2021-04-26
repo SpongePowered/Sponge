@@ -48,14 +48,12 @@ public final class SpongeSelectorType implements SelectorType {
     }
 
     @Override
-    @NonNull
-    public final String selectorToken() {
+    public final @NonNull String selectorToken() {
         return this.selectorToken;
     }
 
     @Override
-    @NonNull
-    public final Selector toSelector() {
+    public final @NonNull Selector toSelector() {
         return this.selector;
     }
 

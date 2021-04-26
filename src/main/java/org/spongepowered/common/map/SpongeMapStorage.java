@@ -27,6 +27,7 @@ package org.spongepowered.common.map;
 import com.google.common.collect.BiMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.MapStorage;
@@ -38,7 +39,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.HashSet;
@@ -56,7 +56,7 @@ import java.util.UUID;
 public final class SpongeMapStorage implements MapStorage {
 
 	private final Map<UUID, MapInfo> loadedMapUUIDs = new HashMap<>();
-	@Nullable private BiMap<Integer, UUID> mapIdUUIDIndex = null;
+ private @Nullable BiMap<Integer, UUID> mapIdUUIDIndex = null;
 
 	@Override
 	public Collection<MapInfo> allMapInfos() {

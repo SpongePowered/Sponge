@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;
@@ -36,7 +37,6 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -47,7 +47,7 @@ public final class InteractAtEntityPacketState extends BasicPacketState {
     public boolean isPacketIgnored(Packet<?> packetIn, ServerPlayer packetPlayer) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that doesn't exist on the server.
-        @Nullable net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(packetPlayer.level);
+        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(packetPlayer.level);
         return entity == null;
     }
 

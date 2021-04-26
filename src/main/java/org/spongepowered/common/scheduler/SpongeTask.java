@@ -26,13 +26,13 @@ package org.spongepowered.common.scheduler;
 
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.temporal.TemporalUnit;
 import java.util.Objects;
@@ -46,12 +46,12 @@ public final class SpongeTask implements Task {
     final long interval; // nanos
     final boolean tickBasedDelay;
     final boolean tickBasedInterval;
-    @Nullable final String customName;
+    final @Nullable String customName;
     private final PluginContainer owner;
     private final Consumer<ScheduledTask> consumer;
     private final String name;
 
-    @Nullable private Timing taskTimer;
+    private @Nullable Timing taskTimer;
 
     SpongeTask(final Consumer<ScheduledTask> task, final String name, final String customName,
                final PluginContainer pluginContainer, final long delay, final long interval,
@@ -112,9 +112,9 @@ public final class SpongeTask implements Task {
 
         private static final AtomicInteger taskCounter = new AtomicInteger();
 
-        @Nullable private Consumer<ScheduledTask> consumer;
-        @Nullable private PluginContainer plugin;
-        @Nullable private String name;
+        private @Nullable Consumer<ScheduledTask> consumer;
+        private @Nullable PluginContainer plugin;
+        private @Nullable String name;
 
         private long delay;
         private long interval;

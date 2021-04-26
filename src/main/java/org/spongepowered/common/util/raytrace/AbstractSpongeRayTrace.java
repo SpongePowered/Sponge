@@ -68,36 +68,33 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public final RayTrace<@NonNull T> world(@NonNull final ServerWorld serverWorld) {
+    public final @NonNull RayTrace<@NonNull T> world(final @NonNull ServerWorld serverWorld) {
         this.world = serverWorld.key();
         return this;
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull T> sourceEyePosition(@NonNull final Living entity) {
+    public @NonNull RayTrace<@NonNull T> sourceEyePosition(final @NonNull Living entity) {
         this.sourcePosition(entity.get(Keys.EYE_POSITION)
                 .orElseThrow(() -> new IllegalArgumentException("Entity does not have an eye position key")));
         return this.world(entity.serverLocation().world());
     }
 
     @Override
-    @NonNull
-    public final RayTrace<@NonNull T> sourcePosition(@NonNull final Vector3d sourcePosition) {
+    public final @NonNull RayTrace<@NonNull T> sourcePosition(final @NonNull Vector3d sourcePosition) {
         this.start = sourcePosition;
         return this;
     }
 
     @Override
-    public RayTrace<@NonNull T> direction(@NonNull final Vector3d direction) {
+    public @NonNull RayTrace<@NonNull T> direction(final @NonNull Vector3d direction) {
         this.end = null;
         this.direction = direction.normalize();
         return this;
     }
 
     @Override
-    public RayTrace<@NonNull T> limit(final int distance) {
+    public @NonNull RayTrace<@NonNull T> limit(final int distance) {
         if (distance < 1) {
             throw new IllegalArgumentException("distance limit must be positive");
         }
@@ -106,16 +103,14 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public final RayTrace<@NonNull T> continueUntil(@NonNull final Vector3d endPosition) {
+    public final @NonNull RayTrace<@NonNull T> continueUntil(final @NonNull Vector3d endPosition) {
         this.end = endPosition;
         this.direction = null;
         return this;
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull T> continueWhileLocation(@NonNull final Predicate<ServerLocation> continueWhileLocation) {
+    public @NonNull RayTrace<@NonNull T> continueWhileLocation(final @NonNull Predicate<ServerLocation> continueWhileLocation) {
         if (this.continueWhileLocation == null) {
             this.continueWhileLocation = continueWhileLocation;
         } else {
@@ -125,8 +120,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull T> continueWhileBlock(@NonNull final Predicate<LocatableBlock> continueWhileBlock) {
+    public @NonNull RayTrace<@NonNull T> continueWhileBlock(final @NonNull Predicate<LocatableBlock> continueWhileBlock) {
         if (this.continueWhileBlock == null) {
             this.continueWhileBlock = continueWhileBlock;
         } else {
@@ -136,8 +130,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull T> continueWhileEntity(@NonNull final Predicate<Entity> continueWhileEntity) {
+    public @NonNull RayTrace<@NonNull T> continueWhileEntity(final @NonNull Predicate<Entity> continueWhileEntity) {
         if (this.continueWhileEntity == null) {
             this.continueWhileEntity = continueWhileEntity;
         } else {
@@ -147,8 +140,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public final RayTrace<@NonNull T> select(@NonNull final Predicate<T> filter) {
+    public final @NonNull RayTrace<@NonNull T> select(final @NonNull Predicate<T> filter) {
         if (this.select == this.defaultFilter) {
             this.select = filter;
         } else {
@@ -158,7 +150,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    public Optional<RayTraceResult<@NonNull T>> execute() {
+    public @NonNull Optional<RayTraceResult<@NonNull T>> execute() {
         this.setupEnd();
 
         // get the direction
@@ -256,8 +248,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull T> reset() {
+    public @NonNull RayTrace<@NonNull T> reset() {
         this.select = this.defaultFilter;
         this.world = null;
         this.start = null;

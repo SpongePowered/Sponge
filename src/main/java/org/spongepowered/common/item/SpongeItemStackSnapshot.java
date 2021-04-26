@@ -33,6 +33,7 @@ import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.Item;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
@@ -60,7 +61,6 @@ import java.util.UUID;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
 public class SpongeItemStackSnapshot implements ItemStackSnapshot {
@@ -74,8 +74,8 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     private final transient ItemStack privateStack; // only for internal use since the processors have a huge say
     private final ImmutableSet<Key<?>> keys;
     private final ImmutableSet<org.spongepowered.api.data.value.Value.Immutable<?>> values;
-    @Nullable private final CompoundTag compound;
-    @Nullable private UUID creatorUniqueId;
+    private final @Nullable CompoundTag compound;
+    private @Nullable UUID creatorUniqueId;
 
     @SuppressWarnings({"EqualsBetweenInconvertibleTypes", "ConstantConditions"})
     public SpongeItemStackSnapshot(final ItemStack itemStack) {
@@ -131,7 +131,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
     public SpongeItemStackSnapshot(final ItemType itemType,
                                    final int quantity,
                                    final ImmutableList<DataManipulator.Immutable> manipulators,
-                                   @Nullable final CompoundTag compound) {
+                                   final @Nullable CompoundTag compound) {
         this.itemType = checkNotNull(itemType);
         this.quantity = quantity;
         this.manipulators = checkNotNull(manipulators);
@@ -284,7 +284,7 @@ public class SpongeItemStackSnapshot implements ItemStackSnapshot {
         return Optional.ofNullable(this.creatorUniqueId);
     }
 
-    public void setCreator(@Nullable final UUID uuid) {
+    public void setCreator(final @Nullable UUID uuid) {
         if (uuid != null) {
             this.creatorUniqueId = uuid;
         }

@@ -64,17 +64,17 @@ public interface MinecraftServerAccessor {
 
     @Accessor("executor") Executor accessor$executor();
 
-    @Accessor("progressListenerFactory") ChunkProgressListenerFactory accessor$getProgressListenerFactory();
+    @Accessor("progressListenerFactory") ChunkProgressListenerFactory accessor$progressListenerFactory();
 
-    @Accessor("nextTickTime") void accessor$setNextTickTime(long nextTickTime);
+    @Accessor("nextTickTime") void accessor$nextTickTime(final long nextTickTime);
 
     @Invoker("isSpawningMonsters") boolean invoker$isSpawningMonsters();
 
-    @Invoker("setupDebugLevel") void invoker$setDebugLevel(WorldData serverConfiguration);
+    @Invoker("setupDebugLevel") void invoker$setupDebugLevel(final WorldData serverConfiguration);
 
     @Invoker("forceDifficulty") void invoker$forceDifficulty();
 
-    @Invoker("readScoreboard") void accessor$readScoreboard(DimensionDataStorage manager);
+    @Invoker("readScoreboard") void accessor$readScoreboard(final DimensionDataStorage manager);
 
     @Invoker("waitUntilNextTick") void accessor$waitUntilNextTick();
 }

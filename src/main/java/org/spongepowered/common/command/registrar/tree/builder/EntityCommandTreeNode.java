@@ -39,7 +39,7 @@ public final class EntityCommandTreeNode
     private boolean playersOnly = false;
     private boolean oneOnly = false;
 
-    public EntityCommandTreeNode(@Nullable final ClientCompletionKey<EntitySelection> parameterType) {
+    public EntityCommandTreeNode(final @Nullable ClientCompletionKey<EntitySelection> parameterType) {
         super(parameterType);
     }
 
@@ -59,8 +59,7 @@ public final class EntityCommandTreeNode
     }
 
     @Override
-    @NonNull
-    public EntitySelection playersOnly() {
+    public @NonNull EntitySelection playersOnly() {
         this.playersOnly = true;
         return this;
     }

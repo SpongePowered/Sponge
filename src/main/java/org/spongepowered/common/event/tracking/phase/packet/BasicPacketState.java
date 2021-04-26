@@ -40,7 +40,7 @@ public class BasicPacketState extends PacketState<BasicPacketContext> {
 
     @Override
     public void foldContextForThread(final BasicPacketContext context, final TickTaskBridge returnValue) {
-        @Nullable final ServerPlayer source = context.getPacketPlayer();
+        final @Nullable ServerPlayer source = context.getPacketPlayer();
         returnValue.bridge$contextShift((c, f) -> {
             if (source != null) {
                 f.pushCause(source);

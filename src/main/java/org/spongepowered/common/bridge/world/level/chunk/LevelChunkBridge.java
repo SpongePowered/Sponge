@@ -67,8 +67,7 @@ public interface LevelChunkBridge {
 
     void bridge$setNeighborChunk(int index, @Nullable LevelChunk chunk);
 
-    @Nullable
-    LevelChunk bridge$getNeighborChunk(int index);
+    @Nullable LevelChunk bridge$getNeighborChunk(int index);
 
     boolean bridge$areNeighborsLoaded();
 

@@ -31,14 +31,13 @@ import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCo
 public final class SpongeClientCompletionType implements ClientCompletionType {
     public static final SpongeClientCompletionType NONE = new SpongeClientCompletionType(null);
 
-    @Nullable private final ArgumentType<?> type;
+    private final @Nullable ArgumentType<?> type;
 
-    public SpongeClientCompletionType(@Nullable final ArgumentType<?> type) {
+    public SpongeClientCompletionType(final @Nullable ArgumentType<?> type) {
         this.type = type;
     }
 
-    @Nullable
-    public ArgumentType<?> getType() {
+    public @Nullable ArgumentType<?> getType() {
         return this.type;
     }
 

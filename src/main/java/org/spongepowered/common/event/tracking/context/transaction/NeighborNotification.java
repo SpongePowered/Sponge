@@ -72,7 +72,7 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
         final Supplier<ServerLevel> serverWorldSupplier,
         final BlockState notifyState, final BlockPos notifyPos,
         final Block sourceBlock, final BlockPos sourcePos,
-        @Nullable final BlockEntity existingTile
+        final @Nullable BlockEntity existingTile
     ) {
         super(TransactionTypes.NEIGHBOR_NOTIFICATION.get(), ((org.spongepowered.api.world.server.ServerWorld) serverWorldSupplier.get()).key());
         this.affectedPosition = sourcePos;
@@ -130,7 +130,7 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
 
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
-        @Nullable final GameTransaction<@NonNull ?> parent
+        final @Nullable GameTransaction<@NonNull ?> parent
     ) {
         return Optional.of((context, frame) -> {
             if (parent instanceof ChangeBlock) {

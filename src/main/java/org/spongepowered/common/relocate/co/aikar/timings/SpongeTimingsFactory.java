@@ -28,12 +28,12 @@ import co.aikar.timings.Timing;
 import co.aikar.timings.TimingsFactory;
 import com.google.common.collect.EvictingQueue;
 import net.kyori.adventure.audience.Audience;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.common.TimingsCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import java.util.Queue;
 import java.util.concurrent.TimeUnit;
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -54,7 +55,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.server.level.ServerLevel;
@@ -69,8 +69,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     private static final DataProviderLookup lookup = SpongeDataManager.getProviderRegistry().getProviderLookup(SpongeEntityArchetype.class);
 
-    @Nullable
-    private Vector3d position;
+    private @Nullable Vector3d position;
 
     SpongeEntityArchetype(final SpongeEntityArchetypeBuilder builder) {
         super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundTag() :
@@ -82,8 +81,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         return this.type;
     }
 
-    @Nullable
-    public CompoundTag getData() {
+    public @Nullable CompoundTag getData() {
         return this.data;
     }
 

@@ -33,13 +33,13 @@ import com.google.inject.spi.Dependency;
 import com.google.inject.spi.ProviderInstanceBinding;
 import com.google.inject.spi.ProvisionListener;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Executable;
 import java.lang.reflect.Field;
 import java.lang.reflect.Member;
 import java.lang.reflect.Type;
 import java.util.List;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Allows injecting the {@link SpongeInjectionPoint} in {@link Provider}s.
@@ -47,21 +47,20 @@ import java.util.List;
 @SuppressWarnings("deprecation") // getDependencyChain, DependencyAndSource -- restored in our fork
 public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> implements Module, ProvisionListener, Provider<SpongeInjectionPoint> {
 
-    @Nullable private SpongeInjectionPoint injectionPoint;
+    private @Nullable SpongeInjectionPoint injectionPoint;
 
-    @Nullable
     @Override
-    public SpongeInjectionPoint get() {
+    public @Nullable SpongeInjectionPoint get() {
         return this.injectionPoint;
     }
 
     @Override
-    public boolean matches(Binding<?> binding) {
+    public boolean matches(final Binding<?> binding) {
         return binding instanceof ProviderInstanceBinding && ((ProviderInstanceBinding<?>) binding).getUserSuppliedProvider() == this;
     }
 
     @Override
-    public <T> void onProvision(ProvisionInvocation<T> provision) {
+    public <T> void onProvision(final ProvisionInvocation<T> provision) {
         try {
             this.injectionPoint = InjectionPointProvider.findInjectionPoint(provision.getDependencyChain());
             provision.provision();
@@ -70,8 +69,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
         }
     }
 
-    @Nullable
-    private static SpongeInjectionPoint findInjectionPoint(List<com.google.inject.spi.DependencyAndSource> dependencyChain) {
+    private static @Nullable SpongeInjectionPoint findInjectionPoint(final List<com.google.inject.spi.DependencyAndSource> dependencyChain) {
         if (dependencyChain.size() < 3) {
             throw new AssertionError("Provider is not included in the dependency chain");
         }
@@ -105,7 +103,7 @@ public final class InjectionPointProvider extends AbstractMatcher<Binding<?>> im
     }
 
     @Override
-    public void configure(Binder binder) {
+    public void configure(final Binder binder) {
         binder.bind(SpongeInjectionPoint.class).toProvider(this);
         binder.bindListener(this, this);
     }

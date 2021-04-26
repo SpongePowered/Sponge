@@ -121,7 +121,7 @@ public final class SpongeNodePermissionCache {
 
     private static final class CachingStringSupplier implements Supplier<String> {
 
-        @Nullable private String cached = null;
+        private @Nullable String cached = null;
         private final Supplier<String> stringSupplier;
 
         private CachingStringSupplier(final Supplier<String> stringSupplier) {

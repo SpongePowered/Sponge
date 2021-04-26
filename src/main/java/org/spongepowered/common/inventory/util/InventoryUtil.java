@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -47,7 +48,6 @@ import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -101,7 +101,7 @@ public final class InventoryUtil {
         return InventoryUtil.toInventory(inventory, null);
     }
 
-    public static Inventory toInventory(Object inventory, @Nullable final Object forgeItemHandler) {
+    public static Inventory toInventory(Object inventory, final @Nullable Object forgeItemHandler) {
         if (forgeItemHandler == null) {
             if (inventory instanceof ChestBlockEntity) {
                 inventory = InventoryUtil.getDoubleChestInventory(((ChestBlockEntity) inventory)).orElse(((Inventory) inventory));

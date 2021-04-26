@@ -123,7 +123,7 @@ public final class SpongeParameterTranslator {
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     private void createFlags(final LiteralCommandNode<CommandSourceStack> node, final List<Flag> flags,
-            @Nullable final SpongeCommandExecutorWrapper wrapper) {
+            final @Nullable SpongeCommandExecutorWrapper wrapper) {
         final Collection<CommandNode<CommandSourceStack>> nodesToAddChildrenTo = new ArrayList<>();
         for (final Flag flag : flags) {
             // first create the literal.
@@ -182,7 +182,7 @@ public final class SpongeParameterTranslator {
     private Collection<? extends CommandNode<CommandSourceStack>> createAndAttachNode(
             final Collection<? extends CommandNode<CommandSourceStack>> parents,
             final List<Parameter> children,
-            @Nullable final SpongeCommandExecutorWrapper executorWrapper,
+            final @Nullable SpongeCommandExecutorWrapper executorWrapper,
             final boolean shouldTerminate,
             final boolean allowSubcommands) {
 
@@ -315,10 +315,9 @@ public final class SpongeParameterTranslator {
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
-    @NonNull
-    private static <T> SpongeArgumentCommandNodeBuilder<T> createArgumentNodeBuilders(
+    private static <T> @NonNull SpongeArgumentCommandNodeBuilder<T> createArgumentNodeBuilders(
             final SpongeParameterValue<T> parameter,
-            @Nullable final String suffix) {
+            final @Nullable String suffix) {
 
         ArgumentParser<T> type = parameter.argumentTypeIfStandard();
 

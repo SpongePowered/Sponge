@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.custom;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
@@ -39,7 +40,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
@@ -51,7 +51,7 @@ public class CustomInventory implements Container, CarriedBridge {
     private Lens lens;
 
     private final PluginContainer plugin;
-    @Nullable private final UUID identity;
+    private final @Nullable UUID identity;
     private final List<Inventory> inventories;
 
     private int size;
@@ -80,8 +80,7 @@ public class CustomInventory implements Container, CarriedBridge {
         return this.plugin;
     }
 
-    @Nullable
-    public UUID getIdentity() {
+    public @Nullable UUID getIdentity() {
         return this.identity;
     }
 

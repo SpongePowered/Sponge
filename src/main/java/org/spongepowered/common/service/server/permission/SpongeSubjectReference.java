@@ -24,20 +24,18 @@
  */
 package org.spongepowered.common.service.server.permission;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nullable;
 
 public class SpongeSubjectReference implements SubjectReference {
     private final SpongePermissionService service;
     private final String collectionId;
     private final String subjectId;
-
-    @Nullable
-    private SpongeSubject cache = null;
+    private @Nullable SpongeSubject cache = null;
 
     public SpongeSubjectReference(SpongePermissionService service, String collectionId, String subjectId) {
         this.service = service;

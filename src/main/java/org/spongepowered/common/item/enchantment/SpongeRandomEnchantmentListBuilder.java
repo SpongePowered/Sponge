@@ -27,12 +27,12 @@ package org.spongepowered.common.item.enchantment;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import net.minecraft.Util;
 import net.minecraft.util.WeighedRandom;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
@@ -43,12 +43,12 @@ import java.util.stream.Collectors;
 
 public final class SpongeRandomEnchantmentListBuilder implements Enchantment.RandomListBuilder {
 
-    @Nullable private Integer seed;
-    @Nullable private Integer option;
-    @Nullable private Integer level;
+    private @Nullable Integer seed;
+    private @Nullable Integer option;
+    private @Nullable Integer level;
     private boolean treasure;
-    @Nullable private List<Enchantment> pool;
-    @Nullable private ItemStack item;
+    private @Nullable List<Enchantment> pool;
+    private @Nullable ItemStack item;
 
     @Override
     public Enchantment.RandomListBuilder seed(int seed) {

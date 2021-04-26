@@ -389,7 +389,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param minecraftWorld The world
      * @param notifier The tracker type (owner or notifier)
      */
-    default void associateNeighborStateNotifier(final C unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
+    default void associateNeighborStateNotifier(final C unwindingContext, final @Nullable BlockPos sourcePos, final Block block, final BlockPos notifyPos,
         final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
 
     }

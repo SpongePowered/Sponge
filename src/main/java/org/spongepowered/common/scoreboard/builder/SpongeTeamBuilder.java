@@ -30,6 +30,7 @@ import static com.google.common.base.Preconditions.checkState;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.world.scores.PlayerTeam;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scoreboard.CollisionRule;
 import org.spongepowered.api.scoreboard.CollisionRules;
 import org.spongepowered.api.scoreboard.Team;
@@ -40,12 +41,11 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
 
 public final class SpongeTeamBuilder implements Team.Builder {
 
-    @Nullable private String name;
-    @Nullable private Component displayName;
+    private @Nullable String name;
+    private @Nullable Component displayName;
     private NamedTextColor color;
     private Component prefix;
     private Component suffix;

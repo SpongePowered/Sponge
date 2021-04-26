@@ -33,13 +33,11 @@ public interface CriterionBridge {
 
     void bridge$setName(String name);
 
-    @Nullable
-    SpongeScoreCriterion bridge$getScoreCriterion();
+    @Nullable SpongeScoreCriterion bridge$getScoreCriterion();
 
     void bridge$setScoreCriterion(@Nullable SpongeScoreCriterion criterion);
 
-    @Nullable
-    Integer bridge$getScoreGoal();
+    @Nullable Integer bridge$getScoreGoal();
 
     void bridge$setScoreGoal(@Nullable Integer goal);
 

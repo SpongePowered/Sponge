@@ -26,8 +26,7 @@ package org.spongepowered.common.entity.player;
 
 import java.util.HashMap;
 import java.util.Map;
-
-import javax.annotation.Nullable;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class ClientType {
     private static final Map<String, ClientType> lookup = new HashMap<>();
@@ -44,8 +43,7 @@ public final class ClientType {
         ClientType.lookup.put(name, this);
     }
 
-    @Nullable
-    public static ClientType from(final String value) {
+    public static @Nullable ClientType from(final String value) {
         return ClientType.lookup.get(value);
     }
 

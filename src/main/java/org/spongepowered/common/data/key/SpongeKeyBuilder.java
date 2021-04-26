@@ -55,8 +55,8 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends AbstractResou
 
     private @Nullable Type valueType;
     private @Nullable Type elementType;
-    @Nullable private Comparator<? super E> comparator;
-    @Nullable private BiPredicate<? super E, ? super E> includesTester;
+    private @Nullable Comparator<? super E> comparator;
+    private @Nullable BiPredicate<? super E, ? super E> includesTester;
 
     @Override
     public <T, B extends Value<T>> SpongeKeyBuilder<T, B> type(final TypeToken<B> token) {

@@ -25,6 +25,7 @@
 package org.spongepowered.common.fluid;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -41,7 +42,6 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
 
-import javax.annotation.Nullable;
 
 public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmutableDataHolder<@NonNull FluidStackSnapshot> {
 
@@ -50,7 +50,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
 
     private final FluidType fluidType;
     private final int volume;
-    @Nullable private final DataContainer extraData;
+    private final @Nullable DataContainer extraData;
 
     SpongeFluidStackSnapshot(final SpongeFluidStackSnapshotBuilder builder) {
         this.fluidType = builder.fluidType;
@@ -58,15 +58,14 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
         this.extraData = builder.container == null ? null : builder.container.copy();
     }
 
-    private SpongeFluidStackSnapshot(final FluidType fluidType, final int volume, @Nullable final DataContainer extraData) {
+    private SpongeFluidStackSnapshot(final FluidType fluidType, final int volume, final @Nullable DataContainer extraData) {
         this.fluidType = fluidType;
         this.volume = volume;
         this.extraData = extraData == null ? null : extraData.copy();
     }
 
     @Override
-    @NonNull
-    public FluidType fluid() {
+    public @NonNull FluidType fluid() {
         return this.fluidType;
     }
 
@@ -76,8 +75,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
-    @NonNull
-    public FluidStack createStack() {
+    public @NonNull FluidStack createStack() {
         return new SpongeFluidStackBuilder().from(this).build();
     }
 
@@ -87,8 +85,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
-    @NonNull
-    public DataContainer toContainer() {
+    public @NonNull DataContainer toContainer() {
         final ResourceKey resourceKey = Sponge.game().registries().registry(RegistryTypes.FLUID_TYPE).valueKey(this.fluidType);
         final DataContainer container = DataContainer.createNew()
             .set(Queries.CONTENT_VERSION, this.contentVersion())
@@ -120,8 +117,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
-    @NonNull
-    public FluidStackSnapshot copy() {
+    public @NonNull FluidStackSnapshot copy() {
         return new SpongeFluidStackSnapshot(this.fluidType, this.volume, this.extraData);
     }
 
@@ -131,8 +127,7 @@ public class SpongeFluidStackSnapshot implements FluidStackSnapshot, SpongeImmut
     }
 
     @Override
-    @NonNull
-    public FluidStackSnapshot withRawData(@NonNull final DataView container) throws InvalidDataException {
+    public @NonNull FluidStackSnapshot withRawData(final @NonNull DataView container) throws InvalidDataException {
         final FluidStack stack = this.createStack();
         stack.setRawData(container);
         return stack.createSnapshot();

@@ -44,20 +44,17 @@ public abstract class ResourceKeyedZeroAdvanceValueParameter<T> extends Resource
     }
 
     @Override
-    @NonNull
-    public final List<String> complete(final @NonNull CommandCause cause, @NonNull final String currentInput) {
+    public final @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
         return Collections.emptyList();
     }
 
     @Override
-    @NonNull
-    public final List<ClientCompletionType> clientCompletionType() {
+    public final @NonNull List<ClientCompletionType> clientCompletionType() {
         return ResourceKeyedZeroAdvanceValueParameter.NONE_KEY;
     }
 
     @Override
-    @NonNull
-    public final List<ArgumentType<?>> getClientCompletionArgumentType() {
+    public final @NonNull List<ArgumentType<?>> getClientCompletionArgumentType() {
         // need this as a dummy
         return Collections.singletonList(Constants.Command.STANDARD_STRING_ARGUMENT_TYPE);
     }

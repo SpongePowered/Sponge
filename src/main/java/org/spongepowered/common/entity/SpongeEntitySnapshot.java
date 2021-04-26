@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity;
 
 import com.google.common.base.MoreObjects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -56,19 +57,18 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 
 public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableDataHolder<EntitySnapshot>, DataContainerHolder.Immutable<EntitySnapshot> {
 
-    @Nullable private final UUID uniqueId;
+    private final @Nullable UUID uniqueId;
     private final ResourceKey worldKey;
     private final EntityType<?> entityType;
     private final Vector3d position;
     private final Vector3d rotation;
     private final Vector3d scale;
-    @Nullable private final CompoundTag compound;
-    @Nullable private final WeakReference<Entity> entityReference;
+    private final @Nullable CompoundTag compound;
+    private final @Nullable WeakReference<Entity> entityReference;
 
     SpongeEntitySnapshot(final SpongeEntitySnapshotBuilder builder) {
         this.entityType = builder.entityType;

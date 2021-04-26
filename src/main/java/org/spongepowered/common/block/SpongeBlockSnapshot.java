@@ -77,7 +77,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     private final BlockState blockState;
     private final ResourceKey worldKey;
     private final Vector3i pos;
-    @Nullable final CompoundTag compound;
+    final @Nullable CompoundTag compound;
     // Internal use only
     private final BlockPos blockPos;
     private final SpongeBlockChangeFlag changeFlag;

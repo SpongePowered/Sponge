@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.network.status;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.network.status.StatusClient;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 
 public class SpongeLegacyStatusClient implements StatusClient {
 

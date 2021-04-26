@@ -30,11 +30,9 @@ import org.spongepowered.api.world.server.ServerLocation;
 
 public interface ServerGamePacketListenerImplBridge {
 
-    @Nullable
-    ResourcePack bridge$popReceivedResourcePack(boolean markAccepted);
+    @Nullable ResourcePack bridge$popReceivedResourcePack(boolean markAccepted);
 
-    @Nullable
-    ResourcePack bridge$popAcceptedResourcePack();
+    @Nullable ResourcePack bridge$popAcceptedResourcePack();
 
     void bridge$resendLatestResourcePackRequest();
 

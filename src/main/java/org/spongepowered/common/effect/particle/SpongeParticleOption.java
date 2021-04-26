@@ -24,19 +24,18 @@
  */
 package org.spongepowered.common.effect.particle;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.effect.particle.ParticleOption;
 
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
-
 public final class SpongeParticleOption<V> implements ParticleOption<V> {
 
     private final Class<V> valueType;
-    @Nullable private final Function<V, IllegalArgumentException> valueValidator;
+    private final @Nullable Function<V, IllegalArgumentException> valueValidator;
 
     public SpongeParticleOption(final Class<V> valueType,
-                                @Nullable final Function<V, IllegalArgumentException> valueValidator) {
+                                final @Nullable Function<V, IllegalArgumentException> valueValidator) {
         this.valueValidator = valueValidator;
         this.valueType = valueType;
     }
@@ -45,8 +44,7 @@ public final class SpongeParticleOption<V> implements ParticleOption<V> {
         this(valueType, null);
     }
 
-    @Nullable
-    public IllegalArgumentException validateValue(V value) {
+    public @Nullable IllegalArgumentException validateValue(V value) {
         if (this.valueValidator != null) {
             return this.valueValidator.apply(value);
         }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.custom;
 
 import org.apache.commons.lang3.Validate;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.ContainerTypes;
@@ -43,7 +44,6 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.math.vector.Vector2i;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
@@ -399,8 +399,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @FunctionalInterface
     public interface CustomInventoryContainerProvider {
-        @Nullable
-        AbstractContainerMenu createMenu(int id, net.minecraft.world.entity.player.Inventory inv, Player player, ViewableCustomInventory customInv);
+        @Nullable AbstractContainerMenu createMenu(int id, net.minecraft.world.entity.player.Inventory inv, Player player, ViewableCustomInventory customInv);
     }
 
     public static class ContainerTypeInfo {

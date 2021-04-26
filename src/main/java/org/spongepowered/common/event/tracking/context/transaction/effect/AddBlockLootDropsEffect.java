@@ -60,7 +60,7 @@ public final class AddBlockLootDropsEffect implements ProcessingSideEffect {
         final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
 
         final ServerLevel world = pipeline.getServerWorld();
-        @Nullable final BlockEntity existingTile = oldState.tileEntity;
+        final @Nullable BlockEntity existingTile = oldState.tileEntity;
         final BlockPos pos = oldState.pos;
 
         final LootContext.Builder lootBuilder = (new LootContext.Builder(world))
