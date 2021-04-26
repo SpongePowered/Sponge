@@ -32,8 +32,8 @@ import org.spongepowered.common.adventure.VanillaBossBarListener;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
 
-@Mixin(targets = "net.kyori.adventure.bossbar.BossBarImpl")
-public abstract class BossBarImplMixin implements BossBarBridge {
+@Mixin(targets = "net.kyori.adventure.bossbar.HackyBossBarPlatformBridge")
+public abstract class HackyBossBarPlatformBridgeMixin implements BossBarBridge {
 
     private ServerBossEvent bridge$vanillaServerBar;
 

@@ -73,6 +73,7 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.adventure.CallbackCommand;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
@@ -585,8 +586,8 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
 
         registrar.register(
                 Launch.getInstance().getCommonPlugin(),
-                SpongeAdventure.CALLBACK_COMMAND.createCommand(),
-                "callback");
+                CallbackCommand.INSTANCE.createCommand(),
+                CallbackCommand.NAME);
     }
 
     public Collection<CommandNode<SharedSuggestionProvider>> getNonBrigadierSuggestions(final CommandCause cause) {
