@@ -54,6 +54,7 @@ import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTyp
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.util.CommandUtil;
 import org.spongepowered.common.util.Constants;
@@ -75,6 +76,11 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
     private static SuggestionProvider<CommandSourceStack> createSuggestionProvider(final @Nullable ValueCompleter completer) {
         if (completer == null) {
             return null;
+        }
+
+        // We don't need to go through everything if we're passing through to the native completer.
+        if (completer instanceof ResourceKeyedArgumentValueParser.ClientNativeCompletions<?>) {
+            return ((ResourceKeyedArgumentValueParser.ClientNativeCompletions<?>) completer)::listSuggestions;
         }
 
         return (context, builder) -> {
