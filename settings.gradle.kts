@@ -2,11 +2,6 @@ import org.spongepowered.gradle.vanilla.repository.MinecraftRepositoryExtension
 
 pluginManagement {
     repositories {
-        mavenLocal {
-            content {
-                includeGroup("org.spongepowered")
-            }
-        }
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
