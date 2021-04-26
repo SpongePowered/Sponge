@@ -64,6 +64,10 @@ tasks {
         useJUnitPlatform()
     }
 
+    check {
+        dependsOn(gradle.includedBuild("SpongeAPI").task(":check"))
+    }
+
 }
 
 version = spongeImpl.generateImplementationVersionString(apiVersion, minecraftVersion, recommendedVersion)
