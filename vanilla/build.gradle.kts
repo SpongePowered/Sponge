@@ -133,14 +133,11 @@ minecraft {
             if (org.spongepowered.gradle.vanilla.util.IdeConfigurer.isIdeaImport()) {
                 // IntelliJ does not properly report its compatibility
                 jvmArgs("-Dterminal.ansi=true", "-Djansi.mode=force")
-            } else if (org.spongepowered.gradle.vanilla.util.IdeConfigurer.isEclipseImport()) {
-                // Eclipse doesn't handle ansi, even if the "process escape sequences" option is enabled...
-                // jvmArgs("-Dspongevanilla.disableAnsi=true")
             }
-            jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
+            jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml", "-Dmixin.dumpTargetOnFailure=true")
             allJvmArgumentProviders += CommandLineArgumentProvider {
                 // Resolve the Mixin artifact for use as a reload agent
-                val mixinJar = vanillaAppLaunchConfig.resolvedConfiguration
+                val mixinJar = vanillaAppLaunchConfig.get().resolvedConfiguration
                         .getFiles { it.name == "mixin" && it.group == "org.spongepowered" }
                         .firstOrNull()
 
@@ -152,7 +149,7 @@ minecraft {
                 }
 
                 // Then add necessary module cracks
-                if (!this.name.contains("Java8")) {
+                if (!this.name.contains("integrationTest") && !this.name.contains("Java8")) {
                     base + listOf(
                         "--illegal-access=deny", // enable strict mode in prep for Java 16
                         "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
