@@ -80,7 +80,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
                     target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Ljava/util/function/Function;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"),
             cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vanilla$onProcessChatMessage(final TextFilter.FilteredText message, final CallbackInfo ci, final String plain, final net.minecraft.network.chat.Component filtered, final net.minecraft.network.chat.Component unfiltered) {
+    private void vanilla$onProcessChatMessage(final TextFilter.FilteredText message, final CallbackInfo ci, final String plain, final String filteredPlain, final net.minecraft.network.chat.Component filtered, final net.minecraft.network.chat.Component unfiltered) {
         // todo(zml): See where mojang takes these chat filtering changes
         ChatFormatter.formatChatComponent((net.minecraft.network.chat.TranslatableComponent) unfiltered);
         final PlayerChatRouter chatRouter = ((ServerPlayer) this.player).chatRouter();
