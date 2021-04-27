@@ -53,12 +53,11 @@ import java.net.SocketAddress;
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge, ConnectionHolderBridge {
 
-    @Shadow @Final private static Logger LOGGER;
     @Shadow @Final public Connection connection;
     @Shadow private com.mojang.authlib.GameProfile gameProfile;
 
-    @Shadow public abstract String shadow$getUserName();
     @Shadow protected abstract com.mojang.authlib.GameProfile shadow$createFakeProfile(com.mojang.authlib.GameProfile profile);
+    @Shadow public abstract void shadow$disconnect(net.minecraft.network.chat.Component reason);
 
     @Override
     public Connection bridge$getConnection() {
@@ -73,19 +72,9 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         return null; // We handle disconnecting
     }
 
-    private void impl$closeConnection(final net.minecraft.network.chat.Component reason) {
-        try {
-            ServerLoginPacketListenerImplMixin.LOGGER.info("Disconnecting " + this.shadow$getUserName() + ": " + reason.getString());
-            this.connection.send(new ClientboundDisconnectPacket(reason));
-            this.connection.disconnect(reason);
-        } catch (Exception exception) {
-            ServerLoginPacketListenerImplMixin.LOGGER.error("Error whilst disconnecting player", exception);
-        }
-    }
-
     private void impl$disconnectClient(final Component disconnectMessage) {
         final net.minecraft.network.chat.Component reason = SpongeAdventure.asVanilla(disconnectMessage);
-        this.impl$closeConnection(reason);
+        this.shadow$disconnect(reason);
     }
 
     @Override
