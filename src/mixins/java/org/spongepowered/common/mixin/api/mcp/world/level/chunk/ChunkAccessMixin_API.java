@@ -22,27 +22,48 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.world.gen;
+package org.spongepowered.common.mixin.api.mcp.world.level.chunk;
 
-import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.util.BlockReaderAwareMatcher;
-import org.spongepowered.api.world.HeightType;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.chunk.ChunkState;
+import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.ChunkUtil;
 
-import java.util.function.Predicate;
-import net.minecraft.world.level.levelgen.Heightmap;
+import javax.annotation.Nullable;
 
-@Mixin(value = Heightmap.Types.class)
-public abstract class Heightmap_TypeMixin_API implements HeightType {
+@Mixin(ChunkAccess.class)
+public interface ChunkAccessMixin_API<P extends ProtoChunk<P>> extends ProtoChunk<P> {
 
-    // @formatter:off
-    @Shadow @Final private Predicate<net.minecraft.world.level.block.state.BlockState> isOpaque;
     // @formatter:on
+    @Shadow ChunkStatus shadow$getStatus();
+    @Shadow @Nullable ChunkBiomeContainer shadow$getBiomes();
+    @Shadow void shadow$addEntity(net.minecraft.world.entity.Entity entity);
+    // @formatter:off
 
     @Override
-    public BlockReaderAwareMatcher<BlockState> matcher() {
-        return (state, volume, position) -> this.isOpaque.test((net.minecraft.world.level.block.state.BlockState) state);
+    default void addEntity(final Entity entity) {
+        this.shadow$addEntity((net.minecraft.world.entity.Entity) entity);
     }
+
+    @Override
+    default ChunkState state() {
+        return (ChunkState) this.shadow$getStatus();
+    }
+
+    @Override
+    default boolean isEmpty() {
+        return this.shadow$getStatus() == ChunkStatus.EMPTY;
+    }
+
+    @Override
+    default boolean setBiome(final int x, final int y, final int z, final Biome biome) {
+        return ChunkUtil.setBiome(this.shadow$getBiomes(), x, y, z, biome);
+    }
+
 }

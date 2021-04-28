@@ -39,15 +39,20 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
+import org.spongepowered.common.util.ChunkUtil;
+import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
@@ -61,6 +66,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
+@Implements(@Interface(iface = Chunk.class, prefix = "chunk$"))
 public abstract class LevelChunkMixin_API implements Chunk {
 
     //@formatter:off
@@ -69,37 +75,22 @@ public abstract class LevelChunkMixin_API implements Chunk {
     @Shadow @Final private ChunkPos chunkPos;
     @Shadow @Final private Level level;
 
-    @Shadow public abstract void shadow$setInhabitedTime(long p_177415_1_);
+    @Shadow public abstract boolean shadow$isEmpty();
     //@formatter:on
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        final net.minecraft.world.level.biome.Biome[] biomes = ((ChunkBiomeContainerAccessor) this.biomes).accessor$biomes();
-
-        int maskedX = x & ChunkBiomeContainer.HORIZONTAL_MASK;
-        int maskedY = Mth.clamp(y, 0, ChunkBiomeContainer.VERTICAL_MASK);
-        int maskedZ = z & ChunkBiomeContainer.HORIZONTAL_MASK;
-
-        final int WIDTH_BITS = ChunkBiomeContainerAccessor.accessor$WIDTH_BITS();
-        final int posKey = maskedY << WIDTH_BITS + WIDTH_BITS | maskedZ << WIDTH_BITS | maskedX;
-        biomes[posKey] = (net.minecraft.world.level.biome.Biome) (Object) biome;
-
-        return true;
-    }
-
-    @Intrinsic
-    public long impl$getInhabitedTime() {
-        return this.inhabitedTime;
-    }
-
-    @Intrinsic
-    public void impl$setInhabitedTime(long newInhabitedTime) {
-        this.shadow$setInhabitedTime(newInhabitedTime);
+        return ChunkUtil.setBiome(this.biomes, x, y, z, biome);
     }
 
     @Override
-    public long inhabitedTime() {
-        return this.inhabitedTime;
+    public Ticks inhabitedTime() {
+        return new SpongeTicks(this.inhabitedTime);
+    }
+
+    @Override
+    public void setInhabitedTime(final Ticks newInhabitedTime) {
+        this.inhabitedTime = newInhabitedTime.ticks();
     }
 
     @Override
@@ -110,13 +101,13 @@ public abstract class LevelChunkMixin_API implements Chunk {
     @Override
     public double regionalDifficultyFactor() {
         return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(),
-                this.inhabitedTime(), this.level.getMoonBrightness()).getEffectiveDifficulty();
+                this.inhabitedTime().ticks(), this.level.getMoonBrightness()).getEffectiveDifficulty();
     }
 
     @Override
     public double regionalDifficultyPercentage() {
         return new DifficultyInstance(this.level.getDifficulty(), this.level.getDayTime(),
-                this.inhabitedTime(), this.level.getMoonBrightness()).getSpecialMultiplier();
+                this.inhabitedTime().ticks(), this.level.getMoonBrightness()).getSpecialMultiplier();
     }
 
     @Override
@@ -124,9 +115,14 @@ public abstract class LevelChunkMixin_API implements Chunk {
         return ((org.spongepowered.api.world.World<?, ?>) this.level);
     }
 
+    @Intrinsic
+    public boolean chunk$isEmpty() {
+        return this.shadow$isEmpty();
+    }
+
     @Override
     public VolumeStream<Chunk, Entity> entityStream(
-        Vector3i min, Vector3i max, StreamOptions options
+        final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(
             Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
@@ -165,7 +161,7 @@ public abstract class LevelChunkMixin_API implements Chunk {
 
     @Override
     public VolumeStream<Chunk, BlockState> blockStateStream(
-        Vector3i min, Vector3i max, StreamOptions options
+        final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
             Objects.requireNonNull(options, "options"));
@@ -206,7 +202,7 @@ public abstract class LevelChunkMixin_API implements Chunk {
 
     @Override
     public VolumeStream<Chunk, BlockEntity> blockEntityStream(
-        Vector3i min, Vector3i max, StreamOptions options
+        final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
             Objects.requireNonNull(options, "options"));
@@ -242,13 +238,13 @@ public abstract class LevelChunkMixin_API implements Chunk {
         );
     }
 
-    private Stream<Map.Entry<BlockPos, net.minecraft.world.level.block.entity.BlockEntity>> impl$getBlockEntitiesStream(ChunkAccess chunk) {
+    private Stream<Map.Entry<BlockPos, net.minecraft.world.level.block.entity.BlockEntity>> impl$getBlockEntitiesStream(final ChunkAccess chunk) {
         return chunk instanceof LevelChunk ? ((LevelChunk) chunk).getBlockEntities().entrySet().stream() : Stream.empty();
     }
 
     @Override
     public VolumeStream<Chunk, Biome> biomeStream(
-        Vector3i min, Vector3i max, StreamOptions options
+        final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(Objects.requireNonNull(min, "min"), Objects.requireNonNull(max, "max"),
             Objects.requireNonNull(options, "options"));
