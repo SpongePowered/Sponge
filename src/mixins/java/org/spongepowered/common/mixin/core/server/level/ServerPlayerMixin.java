@@ -113,7 +113,6 @@ import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.type.SpongeSkinPart;
 import org.spongepowered.common.entity.EntityUtil;
-import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -275,12 +274,12 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             destinationWorld.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((net.minecraft.server.level.ServerPlayer) (Object) this).getId());
 
             if (this.shadow$getLevel() != destinationWorld) {
-                this.shadow$absMoveTo(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.yRot, this.xRot);
+                this.shadow$absMoveTo(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.shadow$getYRot(), this.shadow$getXRot());
 
                 EntityUtil.performPostChangePlayerWorldLogic((net.minecraft.server.level.ServerPlayer) (Object) this, this.shadow$getLevel(),
                         (net.minecraft.server.level.ServerLevel) location.world(), destinationWorld, false);
             } else {
-                this.connection.teleport(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.yRot, this.xRot,
+                this.connection.teleport(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.shadow$getYRot(), this.shadow$getXRot(),
                         new HashSet<>());
                 this.connection.resetPosition();
             }
@@ -512,8 +511,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                         actualPitch = (float) rotateEvent.toRotation().getY();
                     }
                 }
-                this.yRot = (float) actualYaw;
-                this.xRot = (float) actualPitch;
+                this.shadow$setYRot((float) actualYaw);
+                this.shadow$setXRot((float) actualPitch);
 
                 EntityUtil.performPostChangePlayerWorldLogic(player, (net.minecraft.server.level.ServerLevel) preEvent.originalWorld(),
                         (net.minecraft.server.level.ServerLevel) preEvent.originalDestinationWorld(),

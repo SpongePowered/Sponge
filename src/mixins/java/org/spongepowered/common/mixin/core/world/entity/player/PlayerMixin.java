@@ -486,9 +486,9 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                         if (knockbackModifier > 0) {
                             if (targetEntity instanceof LivingEntity) {
                                 ((LivingEntity) targetEntity).knockback((float) knockbackModifier * 0.5F, (double) Mth
-                                    .sin(this.yRot * 0.017453292F), (double) (-Mth.cos(this.yRot * 0.017453292F)));
+                                    .sin(this.shadow$getYRot() * 0.017453292F), (double) (-Mth.cos(this.shadow$getYRot() * 0.017453292F)));
                             } else {
-                                targetEntity.push((double) (-Mth.sin(this.yRot * 0.017453292F) * (float) knockbackModifier * 0.5F), 0.1D, (double) (Mth.cos(this.yRot
+                                targetEntity.push((double) (-Mth.sin(this.shadow$getYRot() * 0.017453292F) * (float) knockbackModifier * 0.5F), 0.1D, (double) (Mth.cos(this.shadow$getYRot()
                                         * 0.017453292F) * (float) knockbackModifier * 0.5F));
                             }
 
@@ -529,8 +529,8 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                                         SpongeCommon.postEvent(sweepingAttackEvent);
                                         if (!sweepingAttackEvent.isCancelled()) {
                                             livingEntity.knockback(sweepingAttackEvent.knockbackModifier() * 0.4F,
-                                                    (double) Mth.sin(this.yRot * ((float)Math.PI / 180F)),
-                                                    (double) -Mth.cos(this.yRot * ((float)Math.PI / 180F)));
+                                                    (double) Mth.sin(this.shadow$getYRot() * ((float)Math.PI / 180F)),
+                                                    (double) -Mth.cos(this.shadow$getYRot() * ((float)Math.PI / 180F)));
 
                                             livingEntity.hurt(DamageSource.playerAttack((net.minecraft.world.entity.player.Player) (Object) this),
                                                 (float) sweepingAttackEvent.finalOutputDamage());

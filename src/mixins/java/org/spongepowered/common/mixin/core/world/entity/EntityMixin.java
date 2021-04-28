@@ -117,8 +117,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     // @formatter:off
     @Shadow public net.minecraft.world.level.Level level;
-    @Shadow public float yRot;
-    @Shadow public float xRot;
+    @Shadow private float yRot;
+    @Shadow private float xRot;
     @Shadow public int invulnerableTime;
     @Shadow public float walkDistO;
     @Shadow public float walkDist;
@@ -190,6 +190,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract void shadow$removeAfterChangingDimensions();
     @Shadow public abstract void shadow$absMoveTo(double p_242281_1_, double p_242281_3_, double p_242281_5_);
     @Shadow protected abstract int shadow$getPermissionLevel();
+    @Shadow public abstract float shadow$getYRot();
+    @Shadow public abstract float shadow$getXRot();
+    @Shadow public abstract void shadow$setYRot(final float param0);
+    @Shadow public abstract void shadow$setXRot(final float param0);
     // @formatter:on
 
     private boolean impl$isConstructing = true;

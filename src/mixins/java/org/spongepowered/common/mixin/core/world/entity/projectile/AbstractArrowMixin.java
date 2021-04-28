@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.arrow.ArrowEntity;
 import org.spongepowered.api.projectile.source.ProjectileSource;
@@ -111,7 +110,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
 
                 // Deflect the arrow as if the entity was invulnerable
                 this.shadow$setDeltaMovement(this.shadow$getDeltaMovement().scale(-0.1D));
-                this.yRot += 180.0F;
+                this.shadow$setYRot(this.shadow$getYRot() + 180.0F);
                 this.yRotO += 180.0F;
                 this.life = 0;
                 if (!this.level.isClientSide && this.shadow$getDeltaMovement().lengthSqr() < 1.0E-7D) {

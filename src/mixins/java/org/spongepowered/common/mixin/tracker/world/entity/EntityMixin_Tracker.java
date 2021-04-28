@@ -71,8 +71,8 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Shadow @Final private EntityType<?> type;
     @Shadow public Level level;
     @Shadow private Vec3 position;
-    @Shadow public float yRot;
-    @Shadow public float xRot;
+    @Shadow private float yRot;
+    @Shadow private float xRot;
     @Shadow @Final protected Random random;
 
     @Shadow public abstract void shadow$clearFire();
@@ -88,9 +88,16 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Shadow public abstract double shadow$getEyeY();
     @Shadow public abstract double shadow$getX();
     @Shadow public abstract double shadow$getZ();
+    @Shadow public abstract float shadow$getXRot();
+    @Shadow public abstract float shadow$getYRot();
+    //@formatter:on
+
+    @Shadow public abstract float getXRot();
+
+    @Shadow public abstract float getYRot();
+
     private boolean tracker$trackedInWorld = false;
     @Nullable private Cause tracker$destructCause;
-    //@formatter:on
 
 
 //    @Inject(method = "<init>", at = @At("RETURN"))

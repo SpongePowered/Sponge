@@ -237,7 +237,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         if (attackSucceeded) {
             if (knockbackModifier > 0 && targetEntity instanceof LivingEntity) {
                 ((LivingEntity)targetEntity).knockback(knockbackModifier * 0.5F,
-                        Mth.sin(this.yRot * ((float)Math.PI / 180F)), -Mth.cos(this.yRot * ((float)Math.PI / 180F)));
+                        Mth.sin(this.shadow$getYRot() * ((float)Math.PI / 180F)), -Mth.cos(this.shadow$getYRot() * ((float)Math.PI / 180F)));
                 this.shadow$setDeltaMovement(this.shadow$getDeltaMovement().multiply(0.6D, 1.0D, 0.6D));
             }
 
