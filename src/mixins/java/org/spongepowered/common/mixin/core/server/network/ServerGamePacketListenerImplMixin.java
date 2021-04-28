@@ -293,7 +293,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         final boolean fireRotationEvent = goodMovementPacket && packetIn.hasRotation() && ShouldFire.ROTATE_ENTITY_EVENT;
 
         final ServerPlayer player = (ServerPlayer) this.player;
-        final Vector3d fromRotation = new Vector3d(this.player.yRot, this.player.xRot, 0);
+        final Vector3d fromRotation = new Vector3d(this.player.getYRot(), this.player.getXRot(), 0);
 
         // Use the position of the last movement with an event or the current player position if never called
         // We need this because we ignore very small position changes as to not spam as many move events.
@@ -301,8 +301,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
 
         Vector3d toPosition = new Vector3d(packetIn.getX(this.player.getX()),
                 packetIn.getY(this.player.getY()), packetIn.getZ(this.player.getZ()));
-        Vector3d toRotation = new Vector3d(packetIn.getYRot(this.player.yRot),
-                packetIn.getXRot(this.player.xRot), 0);
+        Vector3d toRotation = new Vector3d(packetIn.getYRot(this.player.getYRot()),
+                packetIn.getXRot(this.player.getXRot()), 0);
 
         final boolean significantRotation = fromRotation.distanceSquared(toRotation) > (.15f * .15f);
 

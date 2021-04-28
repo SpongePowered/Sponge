@@ -43,7 +43,7 @@ public interface NoiseGeneratorSettingsAccessor {
         final int bedrockRoofPosition,
         final int bedrockFloorPosition,
         final int seaLevel, final int minSurfaceLevel, final boolean disableMobGeneration, final boolean aquifersEnabled,
-        final boolean noiseCavesEnabled, final boolean deepslateEnabled, final boolean oreVeinsEnabled
+        final boolean noiseCavesEnabled, final boolean deepslateEnabled, final boolean oreVeinsEnabled, final boolean noodleCavesEnabled
     ) {
         throw new UntransformedInvokerError();
     }

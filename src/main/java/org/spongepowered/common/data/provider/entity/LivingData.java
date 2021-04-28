@@ -76,8 +76,8 @@ public final class LivingData {
                     .create(Keys.BODY_ROTATIONS)
                         .get(h -> {
                             final double headYaw = h.getYHeadRot();
-                            final double pitch = h.xRot;
-                            final double yaw = h.yRot;
+                            final double pitch = h.getXRot();
+                            final double yaw = h.getYRot();
 
                             return ImmutableMap.of(
                                     BodyParts.HEAD.get(), new Vector3d(pitch, headYaw, 0),
@@ -88,29 +88,29 @@ public final class LivingData {
                             final Vector3d bodyRotation = v.get(BodyParts.CHEST.get());
 
                             if (bodyRotation != null) {
-                                h.yRot = (float) bodyRotation.getY();
-                                h.xRot = (float) bodyRotation.getX();
+                                h.setYRot((float) bodyRotation.getY());
+                                h.setXRot((float) bodyRotation.getX());
                             }
                             if (headRotation != null) {
                                 h.yHeadRot = (float) headRotation.getY();
-                                h.xRot = (float) headRotation.getX();
+                                h.setXRot((float) headRotation.getX());
                             }
                         })
                     .create(Keys.CHEST_ROTATION)
-                        .get(h -> new Vector3d(h.xRot, h.yRot, 0))
+                        .get(h -> new Vector3d(h.getXRot(), h.getYRot(), 0))
                         .set((h, v) -> {
                             final float headYaw = (float) v.getY();
                             final float pitch = (float) v.getX();
                             h.setYHeadRot(headYaw);
-                            h.xRot = pitch;
+                            h.setXRot(pitch);
                         })
                     .create(Keys.HEAD_ROTATION)
-                        .get(h -> new Vector3d(h.xRot, h.getYHeadRot(), 0))
+                        .get(h -> new Vector3d(h.getXRot(), h.getYHeadRot(), 0))
                         .set((h, v) -> {
                             final float yaw = (float) v.getY();
                             final float pitch = (float) v.getX();
-                            h.yRot = yaw;
-                            h.xRot = pitch;
+                            h.setYRot(yaw);
+                            h.setXRot(pitch);
                         })
                     .create(Keys.HEALTH)
                         .get(h -> (double) h.getHealth())

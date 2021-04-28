@@ -185,8 +185,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     public void bridge$updateRotation(final net.minecraft.world.entity.Entity entityIn) {
         final Vector3d rotationUpdate = this.impl$rotationUpdates.get(entityIn);
         if (rotationUpdate != null) {
-            entityIn.xRot = (float) rotationUpdate.getX();
-            entityIn.yRot = (float) rotationUpdate.getY();
+            entityIn.setXRot((float) rotationUpdate.getX());
+            entityIn.setYRot((float) rotationUpdate.getY());
         }
         this.impl$rotationUpdates.remove(entityIn);
     }

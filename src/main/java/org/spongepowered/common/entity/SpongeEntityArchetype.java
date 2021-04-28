@@ -150,8 +150,8 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
         if (entity instanceof Mob) {
             final Mob mobentity = (Mob) entity;
-            mobentity.yHeadRot = mobentity.yRot;
-            mobentity.yBodyRot = mobentity.xRot;
+            mobentity.yHeadRot = mobentity.getYRot();
+            mobentity.yBodyRot = mobentity.getXRot();
             if (requiresInitialSpawn) {
                 // TODO null reason?
                 mobentity.finalizeSpawn(worldServer, worldServer.getCurrentDifficultyAt(mobentity.blockPosition()), null, null, null);

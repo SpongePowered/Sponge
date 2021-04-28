@@ -39,7 +39,7 @@ import org.spongepowered.common.util.SpongeTicks;
 import java.util.ArrayList;
 import java.util.List;
 import net.minecraft.network.protocol.game.ClientboundAddPaintingPacket;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntityPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.decoration.Motive;
@@ -75,7 +75,7 @@ public final class PaintingData {
 
                                 final List<ServerPlayer> players = new ArrayList<>();
                                 for (final ServerPlayer player : paintingTracker.accessor$seenBy()) {
-                                    final ClientboundRemoveEntitiesPacket packet = new ClientboundRemoveEntitiesPacket(h.getId());
+                                    final ClientboundRemoveEntityPacket packet = new ClientboundRemoveEntityPacket(h.getId());
                                     player.connection.send(packet);
                                     players.add(player);
                                 }

@@ -128,7 +128,7 @@ public final class EntityUtil {
         ((ServerPlayerAccessor) player).accessor$lastSentFood(-1);
 
         if (!isPortal) {
-            player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.yRot, player.xRot);
+            player.connection.teleport(player.getX(), player.getY(), player.getZ(), player.getYRot(), player.getXRot());
             player.connection.resetPosition();
         }
 
@@ -224,9 +224,9 @@ public final class EntityUtil {
             y = 0.20000000298023224D;
         } else {
             float f2 = 0.3F;
-            x = -Mth.sin(player.yRot * 0.017453292F) * Mth.cos(player.xRot * 0.017453292F) * f2;
-            z = Mth.cos(player.yRot * 0.017453292F) * Mth.cos(player.xRot * 0.017453292F) * f2;
-            y = - Mth.sin(player.xRot * 0.017453292F) * f2 + 0.1F;
+            x = -Mth.sin(player.getYRot() * 0.017453292F) * Mth.cos(player.getXRot() * 0.017453292F) * f2;
+            z = Mth.cos(player.getYRot() * 0.017453292F) * Mth.cos(player.getXRot() * 0.017453292F) * f2;
+            y = - Mth.sin(player.getXRot() * 0.017453292F) * f2 + 0.1F;
             final float f3 = random.nextFloat() * ((float) Math.PI * 2F);
             f2 = 0.02F * random.nextFloat();
             x += Math.cos(f3) * f2;

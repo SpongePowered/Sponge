@@ -443,7 +443,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         final Entity entity = this.shadow$getType().create(targetWorld);
         if (entity != null) {
             entity.restoreFrom((Entity) (Object) this);
-            entity.moveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z, portalinfo.yRot, entity.xRot);
+            entity.moveTo(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z, portalinfo.yRot, entity.getXRot());
             entity.setDeltaMovement(portalinfo.speed);
             targetWorld.addDuringTeleport(entity);
             if (createEndPlatform && targetWorld.dimension() == Level.END) {

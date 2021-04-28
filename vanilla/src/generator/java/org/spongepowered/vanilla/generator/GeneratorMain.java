@@ -144,11 +144,11 @@ public final class GeneratorMain {
                 "ChunkStates",
                 Registry.CHUNK_STATUS_REGISTRY
             ),*/
-            new RegistryEntriesValidator<>(
+            /*new RegistryEntriesValidator<>( // todo: has special ordering
                 "item.inventory",
                 "ContainerTypes",
                 Registry.MENU_REGISTRY
-            ),
+            ),*/
             new RegistryEntriesValidator<>(
                 "item.enchantment",
                 "EnchantmentTypes",

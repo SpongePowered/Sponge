@@ -44,7 +44,7 @@ public final class SpongeNoiseGeneratorConfig {
         public NoiseConfig noiseConfig;
         public BlockState defaultBlock, defaultFluid;
         public int bedrockRoofY, bedrockFloorY, seaLevel, minSurfaceLevel;
-        public boolean aquifers, noiseCaves, deepslate, oreVeins;
+        public boolean aquifers, noiseCaves, deepslate, oreVeins, noodleCaves;
 
         @Override
         public NoiseGeneratorConfig.Builder structureConfig(final StructureGenerationConfig config) {
@@ -119,6 +119,12 @@ public final class SpongeNoiseGeneratorConfig {
         }
 
         @Override
+        public NoiseGeneratorConfig.Builder noodleCaves(final boolean noodleCaves) {
+            this.noodleCaves = noodleCaves;
+            return this;
+        }
+
+        @Override
         public NoiseGeneratorConfig.Builder reset() {
             this.structureConfig = (StructureGenerationConfig) new StructureSettings(true);
             this.noiseConfig = NoiseConfig.overworld();
@@ -131,6 +137,7 @@ public final class SpongeNoiseGeneratorConfig {
             this.noiseCaves = false;
             this.deepslate = false;
             this.oreVeins = false;
+            this.noodleCaves = false;
             return this;
         }
 
@@ -155,7 +162,7 @@ public final class SpongeNoiseGeneratorConfig {
             final NoiseGeneratorSettings settings = NoiseGeneratorSettingsAccessor.invoker$new((StructureSettings) this.structureConfig,
                     (net.minecraft.world.level.levelgen.NoiseSettings) this.noiseConfig, (net.minecraft.world.level.block.state.BlockState) this.defaultBlock,
                     (net.minecraft.world.level.block.state.BlockState) this.defaultFluid, this.bedrockRoofY, this.bedrockFloorY, this.seaLevel, this.minSurfaceLevel, false,
-                    this.aquifers, this.noiseCaves, this.deepslate, this.oreVeins
+                    this.aquifers, this.noiseCaves, this.deepslate, this.oreVeins, this.noodleCaves
                 );
             return (NoiseGeneratorConfig) (Object) settings;
         }

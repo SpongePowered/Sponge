@@ -87,6 +87,12 @@ public abstract class ServerEntityMixin {
 //        };
 //    }
 
+    @Inject(method = "removePairing", at = @At("RETURN"))
+    private void impl$removeHumanFromPlayerClient(final ServerPlayer viewer, final CallbackInfo ci) {
+        if (this.entity instanceof HumanEntity) {
+            ((HumanEntity) this.entity).untrackFrom(viewer);
+        }
+    }
 
     /**
      * @author gabizou

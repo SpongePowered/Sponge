@@ -105,8 +105,8 @@ public abstract class TeleportCommandMixin {
                             new Vector3d(pitch, yaw, 0));
 
                     SpongeCommon.postEvent(rotateEvent);
-                    actualYaw = rotateEvent.isCancelled() ? entityIn.yRot : rotateEvent.toRotation().getY();
-                    actualPitch = rotateEvent.isCancelled() ? entityIn.xRot : rotateEvent.toRotation().getX();
+                    actualYaw = rotateEvent.isCancelled() ? entityIn.getYRot() : rotateEvent.toRotation().getY();
+                    actualPitch = rotateEvent.isCancelled() ? entityIn.getXRot() : rotateEvent.toRotation().getX();
                 }
 
                 if (entityIn instanceof ServerPlayer) {
@@ -166,7 +166,7 @@ public abstract class TeleportCommandMixin {
 
                     if (ShouldFire.ROTATE_ENTITY_EVENT) {
                         final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.currentCause(),
-                                (org.spongepowered.api.entity.Entity) entityIn, new Vector3d(entityIn.xRot, entityIn.yRot, 0),
+                                (org.spongepowered.api.entity.Entity) entityIn, new Vector3d(entityIn.getXRot(), entityIn.getYRot(), 0),
                                 new Vector3d(actualPitch, actualYaw, 0));
 
                         if (!SpongeCommon.postEvent(rotateEvent)) {
@@ -174,8 +174,8 @@ public abstract class TeleportCommandMixin {
                             actualPitch = Mth.wrapDegrees(rotateEvent.toRotation().getX());
                             actualPitch = Mth.clamp(actualPitch, -90.0F, 90.0F);
                         } else {
-                            actualYaw = entityIn.yRot;
-                            actualPitch = entityIn.xRot;
+                            actualYaw = entityIn.getYRot();
+                            actualPitch = entityIn.getXRot();
                         }
                     }
 

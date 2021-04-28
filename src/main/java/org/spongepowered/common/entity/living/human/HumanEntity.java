@@ -36,7 +36,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket.PlayerUpdate;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntityPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -242,8 +242,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         super.die(cause);
         this.reapplyPosition();
         if (cause != null) {
-            this.setDeltaMovement(-Mth.cos((this.hurtDir + this.yRot) * ((float)Math.PI / 180F)) * 0.1F, 0.1F,
-                    -Mth.sin((this.hurtDir + this.yRot) * ((float)Math.PI / 180F)) * 0.1F);
+            this.setDeltaMovement(-Mth.cos((this.hurtDir + this.getYRot()) * ((float)Math.PI / 180F)) * 0.1F, 0.1F,
+                    -Mth.sin((this.hurtDir + this.getYRot()) * ((float)Math.PI / 180F)) * 0.1F);
         } else {
             this.setDeltaMovement(0.0D, 0.1D, 0.0D);
         }
@@ -294,7 +294,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     protected float tickHeadTurn(final float p_110146_1_, final float p_110146_2_) {
         final float retValue = super.tickHeadTurn(p_110146_1_, p_110146_2_);
         // Make the body rotation follow head rotation
-        this.yRot = this.yHeadRot;
+        this.setYRot(this.getYHeadRot());
         return retValue;
     }
 
@@ -312,8 +312,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
         if (flag) {
             if (i > 0) {
-                entityIn.push(-Mth.sin(this.yRot * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
-                        Mth.cos(this.yRot * (float) Math.PI / 180.0F) * i * 0.5F);
+                entityIn.push(-Mth.sin(this.getYRot() * (float) Math.PI / 180.0F) * i * 0.5F, 0.1D,
+                        Mth.cos(this.getYRot() * (float) Math.PI / 180.0F) * i * 0.5F);
                 this.setDeltaMovement(this.getDeltaMovement().multiply(0.6, 1.0, 0.6));
             }
 
@@ -413,7 +413,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     private void respawnOnClient() {
-        this.pushPackets(new ClientboundRemoveEntitiesPacket(this.getId()), this.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER));
+        this.pushPackets(new ClientboundRemoveEntityPacket(this.getId()), this.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER));
         this.pushPackets(this.getAddEntityPacket());
         this.removeFromTabListDelayed(null, this.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER));
     }
@@ -457,8 +457,8 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
             this.getX(),
             this.getY(),
             this.getZ(),
-            (byte) ((int) (this.yRot * 256.0F / 360.0F)),
-            (byte) ((int) (this.xRot * 256.0F / 360.0F))
+            (byte) ((int) (this.getYRot() * 256.0F / 360.0F)),
+            (byte) ((int) (this.getXRot() * 256.0F / 360.0F))
         );
     }
 

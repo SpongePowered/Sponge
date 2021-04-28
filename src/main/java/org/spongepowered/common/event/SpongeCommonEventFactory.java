@@ -661,7 +661,7 @@ public final class SpongeCommonEventFactory {
      * @param entity The event
      */
     public static void callNaturalRotateEntityEvent(final net.minecraft.world.entity.Entity entity) {
-        if (entity.isRemoved() || (entity.xRot == entity.xRotO && entity.yRot == entity.yRotO)) {
+        if (entity.isRemoved() || (entity.getXRot() == entity.xRotO && entity.getYRot() == entity.yRotO)) {
             return;
         }
 
@@ -669,14 +669,14 @@ public final class SpongeCommonEventFactory {
             frame.pushCause(entity);
 
             final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(frame.currentCause(), (Entity) entity,
-                    new Vector3d(entity.xRotO, entity.yRotO, 0), new Vector3d(entity.xRot, entity.yRot, 0));
+                    new Vector3d(entity.xRotO, entity.yRotO, 0), new Vector3d(entity.getXRot(), entity.getYRot(), 0));
 
             if (SpongeCommon.postEvent(event)) {
-                entity.xRot = entity.xRotO;
-                entity.yRot = entity.yRotO;
+                entity.setXRot(entity.xRotO);
+                entity.setYRot(entity.yRotO);
             } else {
-                entity.xRot = (float) event.toRotation().getX();
-                entity.yRot = (float) event.toRotation().getY();
+                entity.setXRot((float) event.toRotation().getX());
+                entity.setYRot((float) event.toRotation().getY());
             }
         }
     }

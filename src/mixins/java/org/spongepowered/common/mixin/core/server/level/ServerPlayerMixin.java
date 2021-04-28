@@ -464,8 +464,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
                     SpongeCommon.postEvent(rotateEvent);
 
-                    actualYaw = rotateEvent.isCancelled() ? player.yRot : rotateEvent.toRotation().getY();
-                    actualPitch = rotateEvent.isCancelled() ? player.xRot : rotateEvent.toRotation().getX();
+                    actualYaw = rotateEvent.isCancelled() ? player.getYRot() : rotateEvent.toRotation().getY();
+                    actualPitch = rotateEvent.isCancelled() ? player.getXRot() : rotateEvent.toRotation().getX();
                 }
 
                 this.shadow$setCamera(player);
@@ -636,13 +636,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         // In this case, we just force it to return the empty optional by
         // claiming the optional is "present".
         return this.impl$dontCreateExitPortal || optional.isPresent();
-    }
-
-    @Inject(method = "sendRemoveEntity", at = @At("RETURN"))
-    private void impl$removeHumanFromPlayerClient(final Entity entityIn, final CallbackInfo ci) {
-        if (entityIn instanceof HumanEntity) {
-            ((HumanEntity) entityIn).untrackFrom((net.minecraft.server.level.ServerPlayer) (Object) this);
-        }
     }
 
     @Redirect(

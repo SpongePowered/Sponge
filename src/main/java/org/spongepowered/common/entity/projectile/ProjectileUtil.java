@@ -119,16 +119,16 @@ public final class ProjectileUtil {
 
     // From ThrowableEntity constructor
     private static void configureThrowable(final ThrowableProjectile entity) {
-        final double x = entity.getX() - Mth.cos(entity.yRot / 180.0F * (float) Math.PI) * 0.16F;
+        final double x = entity.getX() - Mth.cos(entity.getYRot() / 180.0F * (float) Math.PI) * 0.16F;
         final double y = entity.getY() - 0.1D;
-        final double z = entity.getZ() - Mth.sin(entity.yRot / 180.0F * (float) Math.PI) * 0.16F;
+        final double z = entity.getZ() - Mth.sin(entity.getYRot() / 180.0F * (float) Math.PI) * 0.16F;
         entity.setPos(x, y, z);
         final float f = 0.4F;
-        final double motionX = -Mth.sin(entity.yRot / 180.0F * (float) Math.PI)
-                * Mth.cos(entity.xRot / 180.0F * (float) Math.PI) * f;
-        final double motionZ = Mth.cos(entity.yRot / 180.0F * (float) Math.PI)
-                * Mth.cos(entity.xRot / 180.0F * (float) Math.PI) * f;
-        final double motionY = -Mth.sin((entity.xRot) / 180.0F * (float) Math.PI) * f;
+        final double motionX = -Mth.sin(entity.getYRot() / 180.0F * (float) Math.PI)
+                * Mth.cos(entity.getXRot() / 180.0F * (float) Math.PI) * f;
+        final double motionZ = Mth.cos(entity.getYRot() / 180.0F * (float) Math.PI)
+                * Mth.cos(entity.getXRot() / 180.0F * (float) Math.PI) * f;
+        final double motionY = -Mth.sin((entity.getXRot()) / 180.0F * (float) Math.PI) * f;
         entity.setDeltaMovement(motionX, motionY, motionZ);
     }
 
@@ -178,7 +178,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<Arrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.entity.projectile.Arrow arrow = new net.minecraft.world.entity.projectile.Arrow(source.level, source);
-                arrow.shoot(source.xRot, source.yRot, 0.0F, 3.0F, 0);
+                arrow.shoot(source.getXRot(), source.getYRot(), 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Arrow) arrow);
             }
         });
@@ -188,7 +188,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<SpectralArrow> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.entity.projectile.SpectralArrow arrow = new net.minecraft.world.entity.projectile.SpectralArrow(source.level, source);
-                arrow.shoot(source.xRot, source.yRot, 0.0F, 3.0F, 0);
+                arrow.shoot(source.getXRot(), source.getYRot(), 0.0F, 3.0F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (SpectralArrow) arrow);
             }
         });
@@ -197,7 +197,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<Egg> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final ThrownEgg egg = new ThrownEgg(source.level, source);
-                egg.shoot(source.xRot, source.yRot, 0.0F, 1.5F, 0);
+                egg.shoot(source.getXRot(), source.getYRot(), 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Egg) egg);
             }
         });
@@ -227,7 +227,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<Snowball> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.entity.projectile.Snowball snowball = new net.minecraft.world.entity.projectile.Snowball(source.level, source);
-                snowball.shoot(source.xRot, source.yRot, 0.0F, 1.5F, 0);
+                snowball.shoot(source.getXRot(), source.getYRot(), 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Snowball) snowball);
             }
         });
@@ -237,7 +237,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<ExperienceBottle> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final ThrownExperienceBottle expBottle = new ThrownExperienceBottle(source.level, source);
-                expBottle.shoot(source.xRot, source.yRot, -20.0F, 0.7F, 0);
+                expBottle.shoot(source.getXRot(), source.getYRot(), -20.0F, 0.7F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (ExperienceBottle) expBottle);
             }
         });
@@ -248,7 +248,7 @@ public final class ProjectileUtil {
             @Override
             protected Optional<EnderPearl> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final ThrownEnderpearl pearl = new ThrownEnderpearl(source.level, source);
-                pearl.shoot(source.xRot, source.yRot, 0.0F, 1.5F, 0);
+                pearl.shoot(source.getXRot(), source.getYRot(), 0.0F, 1.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (EnderPearl) pearl);
             }
         });
@@ -313,7 +313,7 @@ public final class ProjectileUtil {
             protected Optional<Potion> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final ThrownPotion potion = new ThrownPotion(source.level, source);
                 potion.setItem(new ItemStack(Items.SPLASH_POTION, 1));
-                potion.shoot(source.xRot, source.yRot, -20.0F, 0.5F, 0);
+                potion.shoot(source.getXRot(), source.getYRot(), -20.0F, 0.5F, 0);
                 return ProjectileUtil.doLaunch(loc.world(), (Potion) potion);
             }
         });
