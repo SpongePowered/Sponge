@@ -7,13 +7,13 @@ dependencies {
 }
 
 license {
-    (this as ExtensionAware).extra.apply {
+    properties {
         this["name"] = "Sponge"
         this["organization"] = organization
         this["url"] = projectUrl
     }
-    header = rootProject.file("HEADER.txt")
+    header(rootProject.file("HEADER.txt"))
 
     include("**/*.java")
-    newLine = false
+    newLine(false)
 }

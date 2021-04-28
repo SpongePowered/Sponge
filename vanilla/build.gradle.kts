@@ -1,7 +1,10 @@
+import org.jetbrains.gradle.ext.TaskTriggersConfig
+
 plugins {
     id("org.spongepowered.gradle.vanilla")
     id("com.github.johnrengelman.shadow")
     id("implementation-structure")
+    eclipse
 }
 
 val commonProject = parent!!
@@ -351,6 +354,14 @@ tasks {
     }
     vanillaInstaller.java.srcDir(generateInstallerTemplates.map { it.outputs })
 
+    // Generate templates on IDE import as well
+    (rootProject.idea.project as? ExtensionAware)?.also {
+        (it.extensions["settings"] as ExtensionAware).extensions.getByType(TaskTriggersConfig::class).afterSync(generateInstallerTemplates)
+    }
+    project.eclipse {
+        synchronizationTasks(generateInstallerTemplates)
+    }
+
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
     vanillaInstaller.resources.srcDir(installerResources)
 
@@ -418,15 +429,15 @@ tasks {
 }
 
 license {
-    (this as ExtensionAware).extra.apply {
+    properties {
         this["name"] = "Sponge"
         this["organization"] = organization
         this["url"] = projectUrl
     }
-    header = rootProject.file("HEADER.txt")
+    header(rootProject.file("HEADER.txt"))
 
     include("**/*.java")
-    newLine = false
+    newLine(false)
 }
 
 val shadowJar by tasks.existing
