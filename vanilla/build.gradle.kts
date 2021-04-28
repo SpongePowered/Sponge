@@ -119,6 +119,7 @@ minecraft {
             }
             client("runJava${it}Client") {
                 args("--launchTarget", "sponge_client_dev")
+                jvmArgs("-Dmixin.debug.export=true", "-Dmixin.debug=true")
                 targetVersion(it)
             }
         }
