@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import net.minecraft.world.level.BlockEventData;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -34,9 +36,8 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
-import net.minecraft.world.level.BlockEventData;
-import net.minecraft.world.level.block.state.BlockState;
 
 public class AddBlockEventTransaction extends BlockEventBasedTransaction {
 
@@ -78,5 +79,17 @@ public class AddBlockEventTransaction extends BlockEventBasedTransaction {
     @Override
     public void restore() {
         this.original.getServerWorld().ifPresent(world -> ((ServerLevelAccessor) world).accessor$blockEvents().remove(this.blockEvent));
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", AddBlockEventTransaction.class.getSimpleName() + "[", "]")
+            .add("blockEvent=" + this.blockEvent)
+            .add("original=" + this.original)
+            .add("affectedPosition=" + this.affectedPosition)
+            .add("originalState=" + this.originalState)
+            .add("worldKey=" + this.worldKey)
+            .add("cancelled=" + this.cancelled)
+            .toString();
     }
 }

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -47,9 +49,8 @@ import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 
 @DefaultQualifier(NonNull.class)
 public final class ChangeBlock extends BlockEventBasedTransaction {
@@ -90,6 +91,21 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
         builder.addEffect(BlockAddedEffect.getInstance());
         builder.addEffect(UpdateOrCreateNewTileEntityPostPlacementEffect.getInstance());
         builder.addEffect(ChunkChangeCompleteEffect.getInstance());
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", ChangeBlock.class.getSimpleName() + "[", "]")
+            .add("affectedPosition=" + this.affectedPosition)
+            .add("originalState=" + this.originalState)
+            .add("originalOpacity=" + this.originalOpacity)
+            .add("newState=" + this.newState)
+            .add("blockChangeFlag=" + this.blockChangeFlag)
+            .add("queuedRemoval=" + this.queuedRemoval)
+            .add("queuedAdd=" + this.queuedAdd)
+            .add("worldKey=" + this.worldKey)
+            .add("cancelled=" + this.cancelled)
+            .toString();
     }
 
     @Override

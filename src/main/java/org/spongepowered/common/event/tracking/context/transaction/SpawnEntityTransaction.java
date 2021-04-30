@@ -26,6 +26,9 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -44,11 +47,9 @@ import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 
 @DefaultQualifier(NonNull.class)
 public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEvent> {
@@ -143,5 +144,14 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     @Override
     public void postProcessEvent(final PhaseContext<@NonNull ?> context, final SpawnEntityEvent event) {
 
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", SpawnEntityTransaction.class.getSimpleName() + "[", "]")
+            .add("worldKey=" + this.worldKey)
+            .add("entityToSpawn=" + this.entityToSpawn)
+            .add("originalPosition=" + this.originalPosition)
+            .toString();
     }
 }

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -37,10 +40,8 @@ import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 
 @DefaultQualifier(NonNull.class)
 public final class RemoveTileEntity extends BlockEventBasedTransaction {
@@ -87,5 +88,16 @@ public final class RemoveTileEntity extends BlockEventBasedTransaction {
     @Override
     protected SpongeBlockSnapshot getOriginalSnapshot() {
         return this.tileSnapshot;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", RemoveTileEntity.class.getSimpleName() + "[", "]")
+            .add("affectedPosition=" + this.affectedPosition)
+            .add("originalState=" + this.originalState)
+            .add("worldKey=" + this.worldKey)
+            .add("cancelled=" + this.cancelled)
+            .add("removed=" + this.removed)
+            .toString();
     }
 }

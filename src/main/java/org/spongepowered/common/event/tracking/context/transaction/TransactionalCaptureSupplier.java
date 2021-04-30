@@ -65,6 +65,7 @@ import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.lang.ref.WeakReference;
+import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -175,6 +176,17 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             final boolean newRecorded = this.tail.acceptTileRemoval(tileentity);
             if (newRecorded) {
                 return true;
+            }
+            if (this.tail.hasChildTransactions()) {
+                for (final ResultingTransactionBySideEffect sideEffect : ((LinkedList<ResultingTransactionBySideEffect>) this.tail.sideEffects)) {
+                    @Nullable GameTransaction<@NonNull ?> pointer = sideEffect.head;
+                    while (pointer != null) {
+                        if (pointer.acceptTileRemoval(tileentity)) {
+                            return true;
+                        }
+                        pointer = pointer.next;
+                    }
+                }
             }
         }
         this.logTransaction(this.createTileRemovalTransaction(tileentity, worldSupplier));
@@ -499,7 +511,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         ) {
             final Optional<E> event = pointer.generateEvent(context, parent, transactions, instance.currentCause(), transactionPostEventBuilder);
             if (!event.isPresent()) {
-                transactions.forEach(GameTransaction::markCancelled);
+                transactions.forEach(GameTransaction::handleEmptyEvent);
                 return;
             }
             final EventByTransaction<E> element = new EventByTransaction<>(event.get(), transactions, parent, pointer);

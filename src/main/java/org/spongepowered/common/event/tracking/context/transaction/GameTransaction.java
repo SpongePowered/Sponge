@@ -26,6 +26,8 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -43,8 +45,6 @@ import java.util.LinkedList;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 @DefaultQualifier(NonNull.class)
 public abstract class GameTransaction<E extends Event & Cancellable> {
@@ -136,6 +136,10 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
         Cause currentCause,
         ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     );
+
+    void handleEmptyEvent() {
+        this.markCancelled();
+    }
 
     public abstract void restore();
 
