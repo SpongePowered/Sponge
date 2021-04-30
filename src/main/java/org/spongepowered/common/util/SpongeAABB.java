@@ -40,13 +40,13 @@ public final class SpongeAABB implements AABB {
     public SpongeAABB(final Vector3d v1, final Vector3d v2) {
         this.min = v1.min(v2);
         this.max = v1.max(v2);
-        if (this.min.getX() == this.max.getX()) {
+        if (this.min.x() == this.max.x()) {
             throw new IllegalArgumentException("The box is generate on x!");
         }
-        if (this.min.getY() == this.max.getY()) {
+        if (this.min.y() == this.max.y()) {
             throw new IllegalArgumentException("The box is generate on y!");
         }
-        if (this.min.getZ() == this.max.getZ()) {
+        if (this.min.z() == this.max.z()) {
             throw new IllegalArgumentException("The box is generate on z!");
         }
     }
@@ -81,9 +81,9 @@ public final class SpongeAABB implements AABB {
     public boolean contains(final double x, final double y, final double z) {
         final Vector3d min = this.min;
         final Vector3d max = this.max;
-        return min.getX() <= x && max.getX() >= x
-          && min.getY() <= y && max.getY() >= y
-          && min.getZ() <= z && max.getZ() >= z;
+        return min.x() <= x && max.x() >= x
+          && min.y() <= y && max.y() >= y
+          && min.z() <= z && max.z() >= z;
     }
 
     @Override
@@ -93,9 +93,9 @@ public final class SpongeAABB implements AABB {
         final Vector3d maxs = this.max;
         final Vector3d mino = other.min();
         final Vector3d maxo = other.max();
-        return maxs.getX() >= mino.getX() && maxo.getX() >= mins.getX()
-          && maxs.getY() >= mino.getY() && maxo.getY() >= mins.getY()
-          && maxs.getZ() >= mino.getZ() && maxo.getZ() >= mins.getZ();
+        return maxs.x() >= mino.x() && maxo.x() >= mins.x()
+          && maxs.y() >= mino.y() && maxo.y() >= mins.y()
+          && maxs.z() >= mino.z() && maxo.z() >= mins.z();
     }
 
     @Override
@@ -109,26 +109,26 @@ public final class SpongeAABB implements AABB {
         final double txMin;
         final double txMax;
         final Vector3d xNormal;
-        if (Math.copySign(1, direction.getX()) > 0) {
-            txMin = (this.min.getX() - start.getX()) / direction.getX();
-            txMax = (this.max.getX() - start.getX()) / direction.getX();
+        if (Math.copySign(1, direction.x()) > 0) {
+            txMin = (this.min.x() - start.x()) / direction.x();
+            txMax = (this.max.x() - start.x()) / direction.x();
             xNormal = Vector3d.UNIT_X;
         } else {
-            txMin = (this.max.getX() - start.getX()) / direction.getX();
-            txMax = (this.min.getX() - start.getX()) / direction.getX();
+            txMin = (this.max.x() - start.x()) / direction.x();
+            txMax = (this.min.x() - start.x()) / direction.x();
             xNormal = Vector3d.UNIT_X.negate();
         }
         // Find the intersections on the -y and +y planes, oriented by direction
         final double tyMin;
         final double tyMax;
         final Vector3d yNormal;
-        if (Math.copySign(1, direction.getY()) > 0) {
-            tyMin = (this.min.getY() - start.getY()) / direction.getY();
-            tyMax = (this.max.getY() - start.getY()) / direction.getY();
+        if (Math.copySign(1, direction.y()) > 0) {
+            tyMin = (this.min.y() - start.y()) / direction.y();
+            tyMax = (this.max.y() - start.y()) / direction.y();
             yNormal = Vector3d.UNIT_Y;
         } else {
-            tyMin = (this.max.getY() - start.getY()) / direction.getY();
-            tyMax = (this.min.getY() - start.getY()) / direction.getY();
+            tyMin = (this.max.y() - start.y()) / direction.y();
+            tyMax = (this.min.y() - start.y()) / direction.y();
             yNormal = Vector3d.UNIT_Y.negate();
         }
         // The ray should intersect the -x plane before the +y plane and intersect
@@ -167,13 +167,13 @@ public final class SpongeAABB implements AABB {
         final double tzMin;
         final double tzMax;
         final Vector3d zNormal;
-        if (Math.copySign(1, direction.getZ()) > 0) {
-            tzMin = (this.min.getZ() - start.getZ()) / direction.getZ();
-            tzMax = (this.max.getZ() - start.getZ()) / direction.getZ();
+        if (Math.copySign(1, direction.z()) > 0) {
+            tzMin = (this.min.z() - start.z()) / direction.z();
+            tzMax = (this.max.z() - start.z()) / direction.z();
             zNormal = Vector3d.UNIT_Z;
         } else {
-            tzMin = (this.max.getZ() - start.getZ()) / direction.getZ();
-            tzMax = (this.min.getZ() - start.getZ()) / direction.getZ();
+            tzMin = (this.max.z() - start.z()) / direction.z();
+            tzMax = (this.min.z() - start.z()) / direction.z();
             zNormal = Vector3d.UNIT_Z.negate();
         }
         // The ray intersects only the furthest min plane on the box and only the closest
@@ -217,26 +217,26 @@ public final class SpongeAABB implements AABB {
         final double x;
         final double y;
         final double z;
-        if (normal.getX() > 0) {
-            x = this.max.getX();
-        } else if (normal.getX() < 0) {
-            x = this.min.getX();
+        if (normal.x() > 0) {
+            x = this.max.x();
+        } else if (normal.x() < 0) {
+            x = this.min.x();
         } else {
-            x = direction.getX() * t + start.getX();
+            x = direction.x() * t + start.x();
         }
-        if (normal.getY() > 0) {
-            y = this.max.getY();
-        } else if (normal.getY() < 0) {
-            y = this.min.getY();
+        if (normal.y() > 0) {
+            y = this.max.y();
+        } else if (normal.y() < 0) {
+            y = this.min.y();
         } else {
-            y = direction.getY() * t + start.getY();
+            y = direction.y() * t + start.y();
         }
-        if (normal.getZ() > 0) {
-            z = this.max.getZ();
-        } else if (normal.getZ() < 0) {
-            z = this.min.getZ();
+        if (normal.z() > 0) {
+            z = this.max.z();
+        } else if (normal.z() < 0) {
+            z = this.min.z();
         } else {
-            z = direction.getZ() * t + start.getZ();
+            z = direction.z() * t + start.z();
         }
         return Optional.of(new Tuple<>(new Vector3d(x, y, z), normal));
     }

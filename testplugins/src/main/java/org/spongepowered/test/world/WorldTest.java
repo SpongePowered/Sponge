@@ -310,8 +310,8 @@ public final class WorldTest {
                             player.sendMessage(Identity.nil(),
                                     Component.text("You are in World ").append(player.world().properties().displayName().orElseGet(() -> Component.text(player.world().key().toString(),
                                             NamedTextColor.AQUA)))
-                                            .append(Component.text(" at (" + player.position().getFloorX() + ", " + player.position().getFloorY() +
-                                                    ", " + player.position().getFloorZ() + ")")));
+                                            .append(Component.text(" at (" + player.position().floorX() + ", " + player.position().floorY() +
+                                                    ", " + player.position().floorZ() + ")")));
                             return CommandResult.success();
                         })
                         .build()

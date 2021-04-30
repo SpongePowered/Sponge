@@ -179,9 +179,9 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
                     final NeighborNotification blockTransaction = (NeighborNotification) gameTransaction;
                     final Vector3i position = transaction.targetPosition();
                     final BlockPos affectedPosition = blockTransaction.affectedPosition;
-                    if (position.getX() == affectedPosition.getX()
-                            && position.getY() == affectedPosition.getY()
-                            && position.getZ() == affectedPosition.getZ()
+                    if (position.x() == affectedPosition.getX()
+                            && position.y() == affectedPosition.getY()
+                            && position.z() == affectedPosition.getZ()
                     ) {
                         gameTransaction.markCancelled();
                     }

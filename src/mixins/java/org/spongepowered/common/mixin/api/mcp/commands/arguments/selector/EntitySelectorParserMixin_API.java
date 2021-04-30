@@ -178,12 +178,12 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
                                                final org.spongepowered.math.vector.@NonNull Vector3d corner2) {
         final org.spongepowered.math.vector.Vector3d minPoint = corner1.min(corner2);
         final org.spongepowered.math.vector.Vector3d distance = corner1.max(corner2).sub(minPoint);
-        this.shadow$setX(minPoint.getX());
-        this.shadow$setY(minPoint.getY());
-        this.shadow$setZ(minPoint.getZ());
-        this.shadow$setDeltaX(distance.getX());
-        this.shadow$setDeltaY(distance.getY());
-        this.shadow$setDeltaZ(distance.getZ());
+        this.shadow$setX(minPoint.x());
+        this.shadow$setY(minPoint.y());
+        this.shadow$setZ(minPoint.z());
+        this.shadow$setDeltaX(distance.x());
+        this.shadow$setDeltaY(distance.y());
+        this.shadow$setDeltaZ(distance.z());
         return this;
     }
 

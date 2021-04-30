@@ -642,7 +642,7 @@ public final class SpongeCommonEventFactory {
             if (SpongeCommon.postEvent(event)) {
                 entity.setPos(entity.xOld, entity.yOld, entity.zOld);
             } else {
-                entity.setPos(event.destinationPosition().getX(), event.destinationPosition().getY(), event.destinationPosition().getZ());
+                entity.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
             }
         }
     }
@@ -667,8 +667,8 @@ public final class SpongeCommonEventFactory {
                 entity.xRot = entity.xRotO;
                 entity.yRot = entity.yRotO;
             } else {
-                entity.xRot = (float) event.toRotation().getX();
-                entity.yRot = (float) event.toRotation().getY();
+                entity.xRot = (float) event.toRotation().x();
+                entity.yRot = (float) event.toRotation().y();
             }
         }
     }

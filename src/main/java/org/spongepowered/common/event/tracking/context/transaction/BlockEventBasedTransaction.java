@@ -140,9 +140,9 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
                     final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) gameTransaction;
                     final Vector3i position = transaction.original().position();
                     final BlockPos affectedPosition = blockTransaction.affectedPosition;
-                    if (position.getX() == affectedPosition.getX()
-                        && position.getY() == affectedPosition.getY()
-                        && position.getZ() == affectedPosition.getZ()
+                    if (position.x() == affectedPosition.getX()
+                        && position.y() == affectedPosition.getY()
+                        && position.z() == affectedPosition.getZ()
                     ) {
                         gameTransaction.markCancelled();
                     }

@@ -53,7 +53,7 @@ public class GridQuery extends SpongeQuery {
         GridInventoryAdapter gridAdapter = (GridInventoryAdapter) adapter;
 
         Vector2i max = gridAdapter.dimensions();
-        if (max.getX() < this.offset.getX() + this.size.getX() && max.getY() < this.offset.getY() + this.size.getY()) {
+        if (max.x() < this.offset.x() + this.size.x() && max.y() < this.offset.y() + this.size.y()) {
             // queried grid does not fit inventory
             return new EmptyInventoryImpl(inventory);
         }
@@ -61,14 +61,14 @@ public class GridQuery extends SpongeQuery {
         // Get slots for new grid
         CompoundSlotLensProvider slotProvider = new CompoundSlotLensProvider();
 
-        for (int dy = 0; dy < this.size.getY(); dy++) {
-            for (int dx = 0; dx < this.size.getX(); dx++) {
-                slotProvider.add(gridAdapter.getSlotLens(this.offset.getX() + dx, this.offset.getY() + dy));
+        for (int dy = 0; dy < this.size.y(); dy++) {
+            for (int dx = 0; dx < this.size.x(); dx++) {
+                slotProvider.add(gridAdapter.getSlotLens(this.offset.x() + dx, this.offset.y() + dy));
             }
         }
 
         // build new grid lens
-        GridInventoryLens lens = new GridInventoryLens(0, this.size.getX(), this.size.getY(), slotProvider);
+        GridInventoryLens lens = new GridInventoryLens(0, this.size.x(), this.size.y(), slotProvider);
         return new GridInventoryAdapter(adapter.inventoryAdapter$getFabric(), lens, inventory);
     }
 

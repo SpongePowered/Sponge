@@ -114,7 +114,7 @@ public abstract class ChunkMapMixin {
 
         for (Direction dir : Constants.Chunk.CARDINAL_DIRECTIONS) {
             final Vector3i neighborPos = chunkPos.add(dir.asBlockOffset());
-            final ChunkAccess neighbor = this.level.getChunk(neighborPos.getX(), neighborPos.getZ(), ChunkStatus.EMPTY, true);
+            final ChunkAccess neighbor = this.level.getChunk(neighborPos.x(), neighborPos.z(), ChunkStatus.EMPTY, true);
             if (neighbor instanceof LevelChunk) {
                 final int index = SpongeCommon.directionToIndex(dir);
                 final int oppositeIndex = SpongeCommon.directionToIndex(dir.opposite());
@@ -182,7 +182,7 @@ public abstract class ChunkMapMixin {
 
         for (Direction dir : Constants.Chunk.CARDINAL_DIRECTIONS) {
             final Vector3i neighborPos = chunkPos.add(dir.asBlockOffset());
-            ChunkAccess neighbor = this.level.getChunk(neighborPos.getX(), neighborPos.getZ(), ChunkStatus.EMPTY, true);
+            ChunkAccess neighbor = this.level.getChunk(neighborPos.x(), neighborPos.z(), ChunkStatus.EMPTY, true);
             if (neighbor instanceof ImposterProtoChunk) {
                 neighbor = ((ImposterProtoChunk) neighbor).getWrapped();
             }

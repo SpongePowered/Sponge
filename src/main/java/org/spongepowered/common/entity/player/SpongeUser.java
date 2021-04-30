@@ -529,9 +529,9 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         }
 
         this.worldKey = key;
-        this.x = position.getX();
-        this.y = position.getY();
-        this.z = position.getZ();
+        this.x = position.x();
+        this.y = position.y();
+        this.z = position.z();
         this.markDirty();
         return true;
     }
@@ -552,8 +552,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             return;
         }
         this.markDirty();
-        this.pitch = ((float) rotation.getX()) % 360.0F;
-        this.yaw = ((float) rotation.getY()) % 360.0F;
+        this.pitch = ((float) rotation.x()) % 360.0F;
+        this.yaw = ((float) rotation.y()) % 360.0F;
     }
 
     @Override

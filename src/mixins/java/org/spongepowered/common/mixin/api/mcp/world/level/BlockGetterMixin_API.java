@@ -61,7 +61,7 @@ public interface BlockGetterMixin_API extends PrimitiveGameVolume {
 
     @Override
     default int emittedLight(final Vector3i position) {
-        return this.shadow$getLightEmission(new BlockPos(position.getX(), position.getY(), position.getZ()));
+        return this.shadow$getLightEmission(new BlockPos(position.x(), position.y(), position.z()));
     }
 
     @Override

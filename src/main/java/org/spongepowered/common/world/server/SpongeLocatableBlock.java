@@ -100,9 +100,9 @@ public final class SpongeLocatableBlock implements LocatableBlock {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, 1)
                 .set(Queries.WORLD_KEY, this.world)
-                .set(Queries.POSITION_X, this.position.getX())
-                .set(Queries.POSITION_Y, this.position.getY())
-                .set(Queries.POSITION_Z, this.position.getZ())
+                .set(Queries.POSITION_X, this.position.x())
+                .set(Queries.POSITION_Y, this.position.y())
+                .set(Queries.POSITION_Z, this.position.z())
                 .set(Constants.Block.BLOCK_STATE, this.blockState);
     }
 

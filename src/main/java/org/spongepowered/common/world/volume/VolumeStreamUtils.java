@@ -108,9 +108,9 @@ public final class VolumeStreamUtils {
     public static <T> Predicate<T> filterPositions(final Function<T, Vector3i> pos, final Vector3i min, final Vector3i max) {
         return (entity) -> {
             final Vector3i apply = pos.apply(entity);
-            return apply.getX() >= min.getX() && apply.getX() <= max.getX()
-                && apply.getY() >= min.getY() && apply.getY() <= max.getY()
-                && apply.getZ() >= min.getZ() && apply.getZ() <= max.getZ();
+            return apply.x() >= min.x() && apply.x() <= max.x()
+                && apply.y() >= min.y() && apply.y() <= max.y()
+                && apply.z() >= min.z() && apply.z() <= max.z();
         };
     }
 
@@ -152,13 +152,13 @@ public final class VolumeStreamUtils {
         Objects.requireNonNull(max, "Maximum coordinates cannot be null");
         Objects.requireNonNull(options, "StreamOptions cannot be null!");
 
-        if (min.getX() > max.getX()) {
+        if (min.x() > max.x()) {
             throw new IllegalArgumentException("Min(x) must be greater than max(x)!");
         }
-        if (min.getY() > max.getY()) {
+        if (min.y() > max.y()) {
             throw new IllegalArgumentException("Min(y) must be greater than max y!");
         }
-        if (min.getZ() > max.getZ()) {
+        if (min.z() > max.z()) {
             throw new IllegalArgumentException("Min(z) must be greater than max z!");
         }
     }
@@ -329,8 +329,8 @@ public final class VolumeStreamUtils {
         final BiFunction<KeyReference, R, Tuple<BlockPos, MC>> filteredPositionEntityAccessor
     ) {
         final Supplier<R> worldSupplier = VolumeStreamUtils.createWeaklyReferencedSupplier(ref, "World");
-        final BlockPos chunkMin = new BlockPos(min.getX() >> 4, 0, min.getZ() >> 4);
-        final BlockPos chunkMax = new BlockPos(max.getX() >> 4, 0, max.getZ() >> 4);
+        final BlockPos chunkMin = new BlockPos(min.x() >> 4, 0, min.z() >> 4);
+        final BlockPos chunkMax = new BlockPos(max.x() >> 4, 0, max.z() >> 4);
 
         // Generate the chunk position stream to iterate on, whether they're accessed immediately
         // or lazily is up to the stream options.

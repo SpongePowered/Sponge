@@ -161,7 +161,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
     }
 
     private int area() {
-        return this.size.getX() * this.size.getY() * this.size.getZ();
+        return this.size.x() * this.size.y() * this.size.z();
     }
 
     @Override
@@ -196,9 +196,9 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         } else {
             buffer = this;
         }
-        final Stream<VolumeElement<ArrayMutableBlockBuffer, BlockState>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
-            .mapToObj(x -> IntStream.range(blockMin.getZ(), blockMax.getZ() + 1)
-                .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
+        final Stream<VolumeElement<ArrayMutableBlockBuffer, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
+            .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
+                .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
                     .mapToObj(y -> VolumeElement.of(this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());

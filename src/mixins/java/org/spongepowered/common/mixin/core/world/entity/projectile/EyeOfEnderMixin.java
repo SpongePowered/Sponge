@@ -47,9 +47,9 @@ public abstract class EyeOfEnderMixin extends EntityMixin implements LocationTar
 
     @Override
     public void bridge$setTargetedPosition(Vector3d vec) {
-        this.tx = vec.getX();
-        this.ty = vec.getY();
-        this.tz = vec.getZ();
+        this.tx = vec.x();
+        this.ty = vec.y();
+        this.tz = vec.z();
     }
 
 }

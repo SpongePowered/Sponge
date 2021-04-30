@@ -85,7 +85,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
         this.scale = builder.scale;
         this.entityReference = builder.entityReference;
         if (this.compound != null) {
-            this.compound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.position.getX(), this.position.getY(), this.position.getZ()));
+            this.compound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(this.position.x(), this.position.y(), this.position.z()));
             // TODO should ensure other elements are within the compound as well
         }
     }
@@ -133,19 +133,19 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Queries.WORLD_KEY, this.worldKey.formatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
-                .set(Queries.POSITION_X, this.position.getX())
-                .set(Queries.POSITION_Y, this.position.getY())
-                .set(Queries.POSITION_Z, this.position.getZ())
+                .set(Queries.POSITION_X, this.position.x())
+                .set(Queries.POSITION_Y, this.position.y())
+                .set(Queries.POSITION_Z, this.position.z())
                 .container()
                 .createView(Constants.Entity.ROTATION)
-                .set(Queries.POSITION_X, this.rotation.getX())
-                .set(Queries.POSITION_Y, this.rotation.getY())
-                .set(Queries.POSITION_Z, this.rotation.getZ())
+                .set(Queries.POSITION_X, this.rotation.x())
+                .set(Queries.POSITION_Y, this.rotation.y())
+                .set(Queries.POSITION_Z, this.rotation.z())
                 .container()
                 .createView(Constants.Entity.SCALE)
-                .set(Queries.POSITION_X, this.scale.getX())
-                .set(Queries.POSITION_Y, this.scale.getY())
-                .set(Queries.POSITION_Z, this.scale.getZ())
+                .set(Queries.POSITION_X, this.scale.x())
+                .set(Queries.POSITION_Y, this.scale.y())
+                .set(Queries.POSITION_Z, this.scale.z())
                 .container()
                 .set(Constants.Entity.TYPE, net.minecraft.world.entity.EntityType.getKey((net.minecraft.world.entity.EntityType<?>) this.entityType))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);

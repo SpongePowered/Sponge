@@ -167,7 +167,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         Preconditions.checkNotNull(transform, "The transform cannot be null!");
         final Vector3d position = transform.position();
-        this.shadow$setPos(position.getX(), position.getY(), position.getZ());
+        this.shadow$setPos(position.x(), position.y(), position.z());
         this.setRotation(transform.rotation());
         this.setScale(transform.scale());
         if (!((WorldBridge) this.shadow$getCommandSenderWorld()).bridge$isFake()) {
@@ -198,15 +198,15 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         if (((Entity) (Object) this) instanceof ServerPlayer && ((ServerPlayer) (Entity) (Object) this).connection != null) {
             // Force an update, this also set the rotation in this entity
-            ((ServerPlayer) (Entity) (Object) this).connection.teleport(this.position().getX(), this.position().getY(),
-                    this.position().getZ(), (float) rotation.getY(), (float) rotation.getX(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class));
+            ((ServerPlayer) (Entity) (Object) this).connection.teleport(this.position().x(), this.position().y(),
+                    this.position().z(), (float) rotation.y(), (float) rotation.x(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class));
         } else {
             if (!this.shadow$getCommandSenderWorld().isClientSide) { // We can't set the rotation update on client worlds.
                 ((ServerLevelBridge) this.world()).bridge$addEntityRotationUpdate((Entity) (Object) this, rotation);
             }
 
             // Let the entity tracker do its job, this just updates the variables
-            this.shadow$setRot((float) rotation.getY(), (float) rotation.getX());
+            this.shadow$setRot((float) rotation.y(), (float) rotation.x());
         }
     }
 
@@ -250,6 +250,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         return this.shadow$hurt((DamageSource) damageSource, (float) damage);
     }
 
+    @Override
     public EntityType type() {
         return (EntityType) this.type;
     }
@@ -275,19 +276,19 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 .set(Constants.Entity.CLASS, this.getClass().getName())
                 .set(Queries.WORLD_KEY, ((org.spongepowered.api.world.server.ServerWorld) this.world()).key().formatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
-                .set(Queries.POSITION_X, transform.position().getX())
-                .set(Queries.POSITION_Y, transform.position().getY())
-                .set(Queries.POSITION_Z, transform.position().getZ())
+                .set(Queries.POSITION_X, transform.position().x())
+                .set(Queries.POSITION_Y, transform.position().y())
+                .set(Queries.POSITION_Z, transform.position().z())
                 .container()
                 .createView(Constants.Entity.ROTATION)
-                .set(Queries.POSITION_X, transform.rotation().getX())
-                .set(Queries.POSITION_Y, transform.rotation().getY())
-                .set(Queries.POSITION_Z, transform.rotation().getZ())
+                .set(Queries.POSITION_X, transform.rotation().x())
+                .set(Queries.POSITION_Y, transform.rotation().y())
+                .set(Queries.POSITION_Z, transform.rotation().z())
                 .container()
                 .createView(Constants.Entity.SCALE)
-                .set(Queries.POSITION_X, transform.scale().getX())
-                .set(Queries.POSITION_Y, transform.scale().getY())
-                .set(Queries.POSITION_Z, transform.scale().getZ())
+                .set(Queries.POSITION_X, transform.scale().x())
+                .set(Queries.POSITION_Y, transform.scale().y())
+                .set(Queries.POSITION_Z, transform.scale().z())
                 .container()
                 .set(Constants.Entity.TYPE, Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) this.type()))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);

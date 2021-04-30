@@ -46,8 +46,8 @@ public class AbstractVolumeBuffer implements Volume {
         this.size = size;
         this.end = this.start.add(this.size).sub(Vector3i.ONE);
 
-        this.yLine = size.getY();
-        this.yzSlice = this.yLine * size.getZ();
+        this.yLine = size.y();
+        this.yzSlice = this.yLine * size.z();
     }
 
     protected void checkRange(final int x, final int y, final int z) {
@@ -57,7 +57,7 @@ public class AbstractVolumeBuffer implements Volume {
     }
 
     protected int getIndex(final int x, final int y, final int z) {
-        return (x - this.start.getX()) * this.yzSlice + (z - this.start.getZ()) * this.yLine + (y - this.start.getY());
+        return (x - this.start.x()) * this.yzSlice + (z - this.start.z()) * this.yLine + (y - this.start.y());
     }
 
     @Override

@@ -113,7 +113,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     default boolean containsAnyLiquids(final AABB aabb) {
         final Vector3d max = Objects.requireNonNull(aabb, "aabb").max();
         final Vector3d min = aabb.min();
-        return this.shadow$containsAnyLiquid(new net.minecraft.world.phys.AABB(min.getX(), min.getY(), min.getZ(), max.getX(), max.getY(), max.getZ()));
+        return this.shadow$containsAnyLiquid(new net.minecraft.world.phys.AABB(min.x(), min.y(), min.z(), max.x(), max.y(), max.z()));
     }
 
     @Override

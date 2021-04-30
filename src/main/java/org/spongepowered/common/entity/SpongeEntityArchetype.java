@@ -188,7 +188,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         builder.entityType = this.type;
         final CompoundTag newCompound = this.data.copy();
         final Vector3d pos = location.position();
-        newCompound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(pos.getX(), pos.getY(), pos.getZ()));
+        newCompound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(pos.x(), pos.y(), pos.z()));
         newCompound.putString(Constants.Sponge.World.WORLD_KEY, location.worldKey().formatted());
         builder.compound = newCompound;
         builder.worldKey = location.world().properties().key();

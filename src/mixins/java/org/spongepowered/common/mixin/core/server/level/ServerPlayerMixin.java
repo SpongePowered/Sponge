@@ -273,16 +273,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 ((net.minecraft.server.level.ServerPlayer) (Object) this).stopSleepInBed(true, true);
             }
 
-            final ChunkPos chunkPos = new ChunkPos((int) toPosition.getX() >> 4, (int) toPosition.getZ() >> 4);
+            final ChunkPos chunkPos = new ChunkPos((int) toPosition.x() >> 4, (int) toPosition.z() >> 4);
             destinationWorld.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((net.minecraft.server.level.ServerPlayer) (Object) this).getId());
 
             if (this.shadow$getLevel() != destinationWorld) {
-                this.shadow$absMoveTo(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.yRot, this.xRot);
+                this.shadow$absMoveTo(toPosition.x(), toPosition.y(), toPosition.z(), this.yRot, this.xRot);
 
                 EntityUtil.performPostChangePlayerWorldLogic((net.minecraft.server.level.ServerPlayer) (Object) this, this.shadow$getLevel(),
                         (net.minecraft.server.level.ServerLevel) location.world(), destinationWorld, false);
             } else {
-                this.connection.teleport(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.yRot, this.xRot,
+                this.connection.teleport(toPosition.x(), toPosition.y(), toPosition.z(), this.yRot, this.xRot,
                         new HashSet<>());
                 this.connection.resetPosition();
             }
@@ -454,9 +454,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                         return;
                     }
 
-                    actualX = posEvent.destinationPosition().getX();
-                    actualY = posEvent.destinationPosition().getY();
-                    actualZ = posEvent.destinationPosition().getZ();
+                    actualX = posEvent.destinationPosition().x();
+                    actualY = posEvent.destinationPosition().y();
+                    actualZ = posEvent.destinationPosition().z();
                 }
 
                 if (ShouldFire.ROTATE_ENTITY_EVENT) {
@@ -466,8 +466,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
                     SpongeCommon.postEvent(rotateEvent);
 
-                    actualYaw = rotateEvent.isCancelled() ? player.yRot : rotateEvent.toRotation().getY();
-                    actualPitch = rotateEvent.isCancelled() ? player.xRot : rotateEvent.toRotation().getX();
+                    actualYaw = rotateEvent.isCancelled() ? player.yRot : rotateEvent.toRotation().y();
+                    actualPitch = rotateEvent.isCancelled() ? player.xRot : rotateEvent.toRotation().x();
                 }
 
                 this.shadow$setCamera(player);
@@ -498,9 +498,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                         return;
                     }
 
-                    actualX = posEvent.destinationPosition().getX();
-                    actualY = posEvent.destinationPosition().getY();
-                    actualZ = posEvent.destinationPosition().getZ();
+                    actualX = posEvent.destinationPosition().x();
+                    actualY = posEvent.destinationPosition().y();
+                    actualZ = posEvent.destinationPosition().z();
                 }
                 this.shadow$setPos(actualX, actualY, actualZ);
 
@@ -510,8 +510,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                             new Vector3d(yaw, pitch, 0));
 
                     if (!SpongeCommon.postEvent(rotateEvent)) {
-                        actualYaw = (float) rotateEvent.toRotation().getX();
-                        actualPitch = (float) rotateEvent.toRotation().getY();
+                        actualYaw = (float) rotateEvent.toRotation().x();
+                        actualPitch = (float) rotateEvent.toRotation().y();
                     }
                 }
                 this.yRot = (float) actualYaw;

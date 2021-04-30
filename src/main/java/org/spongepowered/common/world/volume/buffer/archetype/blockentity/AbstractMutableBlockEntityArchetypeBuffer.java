@@ -110,9 +110,9 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer<M extends Abstra
         } else {
             buffer = this.blockBuffer;
         }
-        final Stream<VolumeElement<M, BlockState>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
-            .mapToObj(x -> IntStream.range(blockMin.getZ(), blockMax.getZ() + 1)
-                .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
+        final Stream<VolumeElement<M, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
+            .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
+                .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
                     .mapToObj(y -> VolumeElement.of((M) this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());

@@ -175,14 +175,14 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector2d obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y());
             }
 
             @Override
             public DataView addTo(Vector2d obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY());
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y());
             }
         };
         VECTOR_2_F_DATA_SERIALIZER = new DataTranslator<Vector2f>() {
@@ -203,14 +203,14 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector2f obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y());
             }
 
             @Override
             public DataView addTo(Vector2f obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY());
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y());
             }
         };
         VECTOR_2_I_DATA_SERIALIZER = new DataTranslator<Vector2i>() {
@@ -231,14 +231,14 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector2i obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y());
             }
 
             @Override
             public DataView addTo(Vector2i obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
                     ;
             }
         };
@@ -260,14 +260,14 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector2l obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y());
             }
 
             @Override
             public DataView addTo(Vector2l obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY());
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y());
             }
         };
         VECTOR_3_D_DATA_SERIALIZER = new DataTranslator<Vector3d>() {
@@ -289,16 +289,16 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector3d obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY())
-                        .set(Constants.DataSerializers.Z_POS, obj.getZ());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y())
+                        .set(Constants.DataSerializers.Z_POS, obj.z());
             }
 
             @Override
             public DataView addTo(Vector3d obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
-                    .set(Constants.DataSerializers.Z_POS, obj.getZ())
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
+                    .set(Constants.DataSerializers.Z_POS, obj.z())
                     ;
             }
         };
@@ -321,16 +321,16 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector3f obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY())
-                        .set(Constants.DataSerializers.Z_POS, obj.getZ());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y())
+                        .set(Constants.DataSerializers.Z_POS, obj.z());
             }
 
             @Override
             public DataView addTo(Vector3f obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
-                    .set(Constants.DataSerializers.Z_POS, obj.getZ())
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
+                    .set(Constants.DataSerializers.Z_POS, obj.z())
                     ;
             }
         };
@@ -353,16 +353,16 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector3i obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY())
-                        .set(Constants.DataSerializers.Z_POS, obj.getZ());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y())
+                        .set(Constants.DataSerializers.Z_POS, obj.z());
             }
 
             @Override
             public DataView addTo(Vector3i obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
-                    .set(Constants.DataSerializers.Z_POS, obj.getZ())
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
+                    .set(Constants.DataSerializers.Z_POS, obj.z())
                     ;
             }
         };
@@ -385,16 +385,16 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector3l obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY())
-                        .set(Constants.DataSerializers.Z_POS, obj.getZ());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y())
+                        .set(Constants.DataSerializers.Z_POS, obj.z());
             }
 
             @Override
             public DataView addTo(Vector3l obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
-                    .set(Constants.DataSerializers.Z_POS, obj.getZ())
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
+                    .set(Constants.DataSerializers.Z_POS, obj.z())
                     ;
             }
         };
@@ -418,18 +418,18 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector4f obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY())
-                        .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                        .set(Constants.DataSerializers.W_POS, obj.getW());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y())
+                        .set(Constants.DataSerializers.Z_POS, obj.z())
+                        .set(Constants.DataSerializers.W_POS, obj.w());
             }
 
             @Override
             public DataView addTo(Vector4f obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
-                    .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                    .set(Constants.DataSerializers.W_POS, obj.getW())
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
+                    .set(Constants.DataSerializers.Z_POS, obj.z())
+                    .set(Constants.DataSerializers.W_POS, obj.w())
                     ;
             }
         };
@@ -453,18 +453,18 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector4i obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY())
-                        .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                        .set(Constants.DataSerializers.W_POS, obj.getW());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y())
+                        .set(Constants.DataSerializers.Z_POS, obj.z())
+                        .set(Constants.DataSerializers.W_POS, obj.w());
             }
 
             @Override
             public DataView addTo(Vector4i obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
-                    .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                    .set(Constants.DataSerializers.W_POS, obj.getW())
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
+                    .set(Constants.DataSerializers.Z_POS, obj.z())
+                    .set(Constants.DataSerializers.W_POS, obj.w())
                     ;
             }
         };
@@ -488,18 +488,18 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector4l obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY())
-                        .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                        .set(Constants.DataSerializers.W_POS, obj.getW());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y())
+                        .set(Constants.DataSerializers.Z_POS, obj.z())
+                        .set(Constants.DataSerializers.W_POS, obj.w());
             }
 
             @Override
             public DataView addTo(Vector4l obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
-                    .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                    .set(Constants.DataSerializers.W_POS, obj.getW())
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
+                    .set(Constants.DataSerializers.Z_POS, obj.z())
+                    .set(Constants.DataSerializers.W_POS, obj.w())
                     ;
             }
         };
@@ -523,18 +523,18 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Vector4d obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY())
-                        .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                        .set(Constants.DataSerializers.W_POS, obj.getW());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y())
+                        .set(Constants.DataSerializers.Z_POS, obj.z())
+                        .set(Constants.DataSerializers.W_POS, obj.w());
             }
 
             @Override
             public DataView addTo(Vector4d obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
-                    .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                    .set(Constants.DataSerializers.W_POS, obj.getW())
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
+                    .set(Constants.DataSerializers.Z_POS, obj.z())
+                    .set(Constants.DataSerializers.W_POS, obj.w())
                     ;
             }
         };
@@ -556,14 +556,14 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Complexd obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y());
             }
 
             @Override
             public DataView addTo(Complexd obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
                     ;
             }
         };
@@ -585,14 +585,14 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Complexf obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y());
             }
 
             @Override
             public DataView addTo(Complexf obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY());
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y());
             }
         };
         QUATERNIOND_DATA_SERIALIZER = new DataTranslator<Quaterniond>() {
@@ -615,18 +615,18 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Quaterniond obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY())
-                        .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                        .set(Constants.DataSerializers.W_POS, obj.getW());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y())
+                        .set(Constants.DataSerializers.Z_POS, obj.z())
+                        .set(Constants.DataSerializers.W_POS, obj.w());
             }
 
             @Override
             public DataView addTo(Quaterniond obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
-                    .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                    .set(Constants.DataSerializers.W_POS, obj.getW());
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
+                    .set(Constants.DataSerializers.Z_POS, obj.z())
+                    .set(Constants.DataSerializers.W_POS, obj.w());
             }
         };
         QUATERNIONF_DATA_SERIALIZER = new DataTranslator<Quaternionf>() {
@@ -649,18 +649,18 @@ public final class DataSerializers {
             @Override
             public DataContainer translate(Quaternionf obj) throws InvalidDataException {
                 return DataContainer.createNew()
-                        .set(Constants.DataSerializers.X_POS, obj.getX())
-                        .set(Constants.DataSerializers.Y_POS, obj.getY())
-                        .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                        .set(Constants.DataSerializers.W_POS, obj.getW());
+                        .set(Constants.DataSerializers.X_POS, obj.x())
+                        .set(Constants.DataSerializers.Y_POS, obj.y())
+                        .set(Constants.DataSerializers.Z_POS, obj.z())
+                        .set(Constants.DataSerializers.W_POS, obj.w());
             }
 
             @Override
             public DataView addTo(Quaternionf obj, DataView dataView) {
-                return dataView.set(Constants.DataSerializers.X_POS, obj.getX())
-                    .set(Constants.DataSerializers.Y_POS, obj.getY())
-                    .set(Constants.DataSerializers.Z_POS, obj.getZ())
-                    .set(Constants.DataSerializers.W_POS, obj.getW());
+                return dataView.set(Constants.DataSerializers.X_POS, obj.x())
+                    .set(Constants.DataSerializers.Y_POS, obj.y())
+                    .set(Constants.DataSerializers.Z_POS, obj.z())
+                    .set(Constants.DataSerializers.W_POS, obj.w());
             }
         };
         LOCAL_TIME_DATA_SERIALIZER = new DataTranslator<LocalTime>() {

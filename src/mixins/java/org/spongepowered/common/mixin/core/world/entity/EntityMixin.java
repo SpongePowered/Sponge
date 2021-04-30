@@ -252,8 +252,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
                 destinationWorld = (net.minecraft.server.level.ServerLevel) event.destinationWorld();
 
-                this.shadow$setPos(repositionEvent.destinationPosition().getX(),
-                        repositionEvent.destinationPosition().getY(), repositionEvent.destinationPosition().getZ());
+                this.shadow$setPos(repositionEvent.destinationPosition().x(),
+                        repositionEvent.destinationPosition().y(), repositionEvent.destinationPosition().z());
             } else {
                 final Vector3d destination;
                 if (ShouldFire.MOVE_ENTITY_EVENT) {
@@ -267,7 +267,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 } else {
                     destination = location.position();
                 }
-                this.shadow$setPos(destination.getX(), destination.getY(), destination.getZ());
+                this.shadow$setPos(destination.x(), destination.y(), destination.z());
             }
 
             if (!destinationWorld.getChunkSource().hasChunk((int) this.shadow$getX() >> 4, (int) this.shadow$getZ() >> 4)) {
@@ -411,7 +411,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public void bridge$setTransform(final Transform transform) {
-        this.shadow$setPos(transform.position().getX(), transform.position().getY(), transform.position().getZ());
+        this.shadow$setPos(transform.position().x(), transform.position().y(), transform.position().z());
         this.shadow$setRot((float) transform.yaw(), (float) transform.pitch());
     }
 
@@ -561,7 +561,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                                 final BlockPos ticketPos = VecHelper.toBlockPos(finalPosition);
                                 targetWorld.getChunkSource().addRegionTicket(TicketType.PORTAL, new ChunkPos(ticketPos), 3, ticketPos);
 
-                                this.shadow$absMoveTo(finalPosition.getX(), finalPosition.getY(), finalPosition.getZ());
+                                this.shadow$absMoveTo(finalPosition.x(), finalPosition.y(), finalPosition.z());
                             }
                         }
 
@@ -718,11 +718,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 destinationPosition = new Vector3d(x, y, z);
             }
             // Sponge end
-            final ChunkPos chunkpos = new ChunkPos(new BlockPos(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ()));
+            final ChunkPos chunkpos = new ChunkPos(new BlockPos(destinationPosition.x(), destinationPosition.y(), destinationPosition.z()));
             ((net.minecraft.server.level.ServerLevel)this.level).getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 0,
                     this.shadow$getId());
             this.level.getChunk(chunkpos.x, chunkpos.z);
-            this.shadow$teleportTo(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ());
+            this.shadow$teleportTo(destinationPosition.x(), destinationPosition.y(), destinationPosition.z());
         }
     }
 
@@ -765,7 +765,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         at = @At("HEAD"),
         cancellable = true)
     private void impl$onSpongeMoveEntity(final MoverType type, final Vec3d vec3d, final CallbackInfo ci) {
-        if (!this.world.isClientSide && !SpongeHooks.checkEntitySpeed(((Entity) (Object) this), vec3d.getX(), vec3d.getY(), vec3d.getZ())) {
+        if (!this.world.isClientSide && !SpongeHooks.checkEntitySpeed(((Entity) (Object) this), vec3d.x(), vec3d.y(), vec3d.z())) {
             ci.cancel();
         }
     }

@@ -43,7 +43,7 @@ public final class VecHelper {
         if (vector == null) {
             return null;
         }
-        return new BlockPos(vector.getX(), vector.getY(), vector.getZ());
+        return new BlockPos(vector.x(), vector.y(), vector.z());
     }
 
     // === Flow Vector3i --> BlockPos ===
@@ -52,7 +52,7 @@ public final class VecHelper {
         if (vector == null) {
             return null;
         }
-        return new BlockPos(vector.getX(), vector.getY(), vector.getZ());
+        return new BlockPos(vector.x(), vector.y(), vector.z());
     }
 
     // === SpongeAPI Location --> BlockPos ===
@@ -104,7 +104,7 @@ public final class VecHelper {
         if (vector == null) {
             return null;
         }
-        return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
+        return new Vec3i(vector.x(), vector.y(), vector.z());
     }
 
     // === Flow Vector3d --> MC Vector3d ===
@@ -113,7 +113,7 @@ public final class VecHelper {
         if (vector == null) {
             return null;
         }
-        return new Vec3(vector.getX(), vector.getY(), vector.getZ());
+        return new Vec3(vector.x(), vector.y(), vector.z());
     }
 
     // === MC BlockPos --> MC Vector3d
@@ -158,7 +158,7 @@ public final class VecHelper {
         if (vector == null) {
             return null;
         }
-        return new Vec3i(vector.getX(), vector.getY(), vector.getZ());
+        return new Vec3i(vector.x(), vector.y(), vector.z());
     }
 
     // === Flow Vector --> Rotations ===
@@ -166,11 +166,11 @@ public final class VecHelper {
         if (vector == null) {
             return null;
         }
-        return new Rotations((float) vector.getX(), (float) vector.getY(), (float) vector.getZ());
+        return new Rotations((float) vector.x(), (float) vector.y(), (float) vector.z());
     }
 
     public static boolean inBounds(final int x, final int y, final Vector2i min, final Vector2i max) {
-        return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY();
+        return x >= min.x() && x <= max.x() && y >= min.y() && y <= max.y();
     }
 
     public static boolean inBounds(final int x, final int y, final int z, final Vec3i min, final Vec3i max) {
@@ -183,12 +183,12 @@ public final class VecHelper {
 
     public static boolean inBounds(final org.spongepowered.math.vector.Vector3d pos, final org.spongepowered.math.vector.Vector3i min,
                                    final org.spongepowered.math.vector.Vector3i max) {
-        return VecHelper.inBounds(pos.getX(), pos.getY(), pos.getZ(), min, max);
+        return VecHelper.inBounds(pos.x(), pos.y(), pos.z(), min, max);
     }
 
     public static boolean inBounds(final double x, final double y, final double z, final org.spongepowered.math.vector.Vector3i min,
                                    final org.spongepowered.math.vector.Vector3i max) {
-        return x >= min.getX() && x <= max.getX() && y >= min.getY() && y <= max.getY() && z >= min.getZ() && z <= max.getZ();
+        return x >= min.x() && x <= max.x() && y >= min.y() && y <= max.y() && z >= min.z() && z <= max.z();
     }
 
     public static net.minecraft.world.phys.AABB toMinecraftAABB(final AABB box) {
@@ -198,8 +198,8 @@ public final class VecHelper {
         final org.spongepowered.math.vector.Vector3d min = box.min();
         final org.spongepowered.math.vector.Vector3d max = box.max();
         return new net.minecraft.world.phys.AABB(
-            min.getX(), min.getY(), min.getZ(),
-            max.getX(), max.getY(), max.getZ()
+            min.x(), min.y(), min.z(),
+            max.x(), max.y(), max.z()
         );
     }
 
@@ -215,9 +215,9 @@ public final class VecHelper {
 
     public static CompoundTag toCompound(final org.spongepowered.math.vector.Vector3d vector) {
         final CompoundTag compound = new CompoundTag();
-        compound.putDouble("x", vector.getX());
-        compound.putDouble("y", vector.getY());
-        compound.putDouble("z", vector.getZ());
+        compound.putDouble("x", vector.x());
+        compound.putDouble("y", vector.y());
+        compound.putDouble("z", vector.z());
         return compound;
     }
 

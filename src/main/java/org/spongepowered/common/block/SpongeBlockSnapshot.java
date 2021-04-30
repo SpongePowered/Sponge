@@ -254,9 +254,9 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
                 .set(Queries.CONTENT_VERSION, contentVersion())
                 .set(Queries.WORLD_KEY, this.worldKey.asString())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
-                .set(Queries.POSITION_X, this.pos.getX())
-                .set(Queries.POSITION_Y, this.pos.getY())
-                .set(Queries.POSITION_Z, this.pos.getZ())
+                .set(Queries.POSITION_X, this.pos.x())
+                .set(Queries.POSITION_Y, this.pos.y())
+                .set(Queries.POSITION_Z, this.pos.z())
                 .container()
                 .set(Constants.Block.BLOCK_STATE, this.blockState);
         if (this.compound != null) {

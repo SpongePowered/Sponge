@@ -35,7 +35,7 @@ public final class MathCodecs {
     // TODO DFU compliment lib for Math?
 
     public static final Codec<Vector3i> VECTOR_3i = Codec.INT_STREAM.comapFlatMap(f -> Util.fixedSize(f, 3).map((f1) ->
-            new Vector3i(f1[0], f1[1], f1[2])), v -> IntStream.of(v.getX(), v.getY(), v.getZ())).stable();
+            new Vector3i(f1[0], f1[1], f1[2])), v -> IntStream.of(v.x(), v.y(), v.z())).stable();
 
     private MathCodecs() {
     }

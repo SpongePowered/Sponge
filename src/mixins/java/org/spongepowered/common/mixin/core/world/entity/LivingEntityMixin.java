@@ -667,14 +667,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     new Vector3d(x, y, z));
 
             if (SpongeCommon.postEvent(event)) {
-                this.shadow$teleportTo(this.impl$preTeleportPosition.getX(), this.impl$preTeleportPosition.getY(),
-                        this.impl$preTeleportPosition.getZ());
+                this.shadow$teleportTo(this.impl$preTeleportPosition.x(), this.impl$preTeleportPosition.y(),
+                        this.impl$preTeleportPosition.z());
                 cir.setReturnValue(false);
                 return;
             }
 
-            this.shadow$teleportTo(event.destinationPosition().getX(), event.destinationPosition().getY(),
-                    event.destinationPosition().getZ());
+            this.shadow$teleportTo(event.destinationPosition().x(), event.destinationPosition().y(),
+                    event.destinationPosition().z());
         }
     }
 

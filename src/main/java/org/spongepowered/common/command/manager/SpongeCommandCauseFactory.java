@@ -84,7 +84,7 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
                         context.get(EventContextKeys.LOCATION).map(x -> VecHelper.toVanillaVector3d(x.position()))
                                 .orElseGet(() -> locatable == null ? Vec3.ZERO : VecHelper.toVanillaVector3d(locatable.location().position())),
                         context.get(EventContextKeys.ROTATION)
-                                .map(x -> new Vec2((float) x.getX(), (float) x.getY()))
+                                .map(rot -> new Vec2((float) rot.x(), (float) rot.y()))
                                 .orElse(Vec2.ZERO),
                         context.get(EventContextKeys.LOCATION).map(x -> (ServerLevel) x.world())
                                 .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getLevel(Level.OVERWORLD) :

@@ -102,11 +102,11 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
         final StreamOptions options
     ) {
         final Stream<VolumeElement<ObjectArrayMutableEntityBuffer, BlockState>> stateStream = IntStream.range(
-            this.blockMin().getX(),
-            this.blockMax().getX() + 1
+            this.blockMin().x(),
+            this.blockMax().x() + 1
         )
-            .mapToObj(x -> IntStream.range(this.blockMin().getZ(), this.blockMax().getZ() + 1)
-                .mapToObj(z -> IntStream.range(this.blockMin().getY(), this.blockMax().getY() + 1)
+            .mapToObj(x -> IntStream.range(this.blockMin().z(), this.blockMax().z() + 1)
+                .mapToObj(z -> IntStream.range(this.blockMin().y(), this.blockMax().y() + 1)
                     .mapToObj(y -> VolumeElement.of(
                         this,
                         () -> this.blockBuffer.block(x, y, z),

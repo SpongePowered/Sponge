@@ -110,7 +110,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
             this.level = (ServerLevel) x.world();
         });
 
-        context.get(EventContextKeys.ROTATION).ifPresent(x -> this.rotation = new Vec2((float) x.getX(), (float) x.getY()));
+        context.get(EventContextKeys.ROTATION).ifPresent(x -> this.rotation = new Vec2((float) x.x(), (float) x.y()));
         context.get(EventContextKeys.SUBJECT).ifPresent(x -> {
             if (x instanceof EntityAccessor) {
                 this.permissionLevel = ((EntityAccessor) x).invoker$getPermissionLevel();

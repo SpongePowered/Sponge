@@ -80,20 +80,20 @@ public final class SpongeTeleportHelper implements TeleportHelper {
         int worldBorderMaxZ = GenericMath.floor(worldBorder.getMaxZ());
 
         // Get the World and get the maximum Y value.
-        int worldMaxY = worldLocation.world().blockMax().getY();
+        int worldMaxY = worldLocation.world().blockMax().y();
 
         Vector3i vectorLocation = worldLocation.blockPosition();
 
         // We use clamp to remain within the world confines, so we don't waste time checking blocks outside of the
         // world border and the world height.
-        int minY = GenericMath.clamp(vectorLocation.getY() - height, 0, worldMaxY);
-        int maxY = GenericMath.clamp(vectorLocation.getY() + height, 0, worldMaxY);
+        int minY = GenericMath.clamp(vectorLocation.y() - height, 0, worldMaxY);
+        int maxY = GenericMath.clamp(vectorLocation.y() + height, 0, worldMaxY);
 
-        int minX = GenericMath.clamp(vectorLocation.getX() - width, worldBorderMinX, worldBorderMaxX);
-        int maxX = GenericMath.clamp(vectorLocation.getX() + width, worldBorderMinX, worldBorderMaxX);
+        int minX = GenericMath.clamp(vectorLocation.x() - width, worldBorderMinX, worldBorderMaxX);
+        int maxX = GenericMath.clamp(vectorLocation.x() + width, worldBorderMinX, worldBorderMaxX);
 
-        int minZ = GenericMath.clamp(vectorLocation.getZ() - width, worldBorderMinZ, worldBorderMaxZ);
-        int maxZ = GenericMath.clamp(vectorLocation.getZ() + width, worldBorderMinZ, worldBorderMaxZ);
+        int minZ = GenericMath.clamp(vectorLocation.z() - width, worldBorderMinZ, worldBorderMaxZ);
+        int maxZ = GenericMath.clamp(vectorLocation.z() + width, worldBorderMinZ, worldBorderMaxZ);
 
         // We now iterate over all possible x, y and z positions to get all possible vectors.
         List<Vector3i> vectors = new ArrayList<>();
@@ -109,7 +109,7 @@ public final class SpongeTeleportHelper implements TeleportHelper {
 
         // The compiler seems to need this to be a new line.
         // We check to see what the y location is, preferring changes in Y over X and Z, and higher over lower locations.
-        c = c.thenComparing(x -> -Math.abs(vectorLocation.getY() - x.getY())).thenComparing(x -> -x.getY());
+        c = c.thenComparing(x -> -Math.abs(vectorLocation.y() - x.y())).thenComparing(x -> -x.y());
 
         // Sort them according to the distance to the provided worldLocation.
         return vectors.stream().sorted(c);
@@ -181,7 +181,7 @@ public final class SpongeTeleportHelper implements TeleportHelper {
     }
 
     private BlockData getBlockData(Vector3i vector3i, World world, Map<Vector3i, BlockData> cache, Collection<TeleportHelperFilter> filters) {
-        if (vector3i.getY() < 0) {
+        if (vector3i.y() < 0) {
             // Anything below this isn't safe, no point going further.
             return new BlockData();
         }

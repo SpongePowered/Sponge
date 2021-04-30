@@ -39,12 +39,12 @@ final class ChunkCursor {
     final int yOffset;
 
     ChunkCursor(final Vector3i pos) {
-        this.chunkX = pos.getX() >> 4;
-        this.xOffset = pos.getX() & 15;
-        this.chunkZ = pos.getZ() >> 4;
-        this.zOffset = pos.getZ() & 15;
-        this.ySection = pos.getY() >> 4 << 4;
-        this.yOffset = pos.getY() & 15;
+        this.chunkX = pos.x() >> 4;
+        this.xOffset = pos.x() & 15;
+        this.chunkZ = pos.z() >> 4;
+        this.zOffset = pos.z() & 15;
+        this.ySection = pos.y() >> 4 << 4;
+        this.yOffset = pos.y() & 15;
     }
 
     @Override

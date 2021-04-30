@@ -57,7 +57,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
 
     public ObjectArrayMutableBiomeBuffer(final Vector3i start, final Vector3i size) {
         super(start, size);
-        this.biomes = new Biome[size.getX() * size.getY() * size.getZ()];
+        this.biomes = new Biome[size.x() * size.y() * size.z()];
         Arrays.fill(this.biomes, Biomes.OCEAN);
     }
 
@@ -150,9 +150,9 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         } else {
             buffer = this.biomes;
         }
-        final Stream<VolumeElement<ObjectArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
-            .mapToObj(x -> IntStream.range(blockMin.getZ(), blockMax.getZ() + 1)
-                .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
+        final Stream<VolumeElement<ObjectArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
+            .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
+                .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
                     .mapToObj(y -> VolumeElement.of(this, () -> buffer[this.getIndex(x, y, z)], new Vector3i(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());

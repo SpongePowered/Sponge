@@ -70,9 +70,9 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
                 predicate.test(
                     this.volumeSupplier.get(),
                     element::type,
-                    element.position().getX(),
-                    element.position().getY(),
-                    element.position().getZ()
+                    element.position().x(),
+                    element.position().y(),
+                    element.position().z()
                 )
             ), this.volumeSupplier);
     }
@@ -88,9 +88,9 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
             VolumeElement.of(this.volumeSupplier.get(), mapper.map(
                 this.volumeSupplier.get(),
                 element::type,
-                element.position().getX(),
-                element.position().getY(),
-                element.position().getZ()
+                element.position().x(),
+                element.position().y(),
+                element.position().z()
             ), element.position())
         ), this.volumeSupplier);
     }
@@ -104,9 +104,9 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
                     mapper.map(
                         this.volumeSupplier.get(),
                         element::type,
-                        element.position().getX(),
-                        element.position().getY(),
-                        element.position().getZ()
+                        element.position().x(),
+                        element.position().y(),
+                        element.position().z()
                     ),
                     element.position()
                 )
@@ -135,9 +135,9 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
             .allMatch(element -> predicate.test(
                 this.volume(),
                 element::type,
-                element.position().getX(),
-                element.position().getY(),
-                element.position().getZ()
+                element.position().x(),
+                element.position().y(),
+                element.position().z()
             ));
     }
 
@@ -151,9 +151,9 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
         return this.stream.noneMatch(element -> predicate.test(
             this.volume(),
             element::type,
-            element.position().getX(),
-            element.position().getY(),
-            element.position().getZ()
+            element.position().x(),
+            element.position().y(),
+            element.position().z()
         ));
     }
 
@@ -167,9 +167,9 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
         return this.stream.anyMatch(element -> predicate.test(
             this.volume(),
             element::type,
-            element.position().getX(),
-            element.position().getY(),
-            element.position().getZ()
+            element.position().x(),
+            element.position().y(),
+            element.position().z()
         ));
     }
 
@@ -232,9 +232,9 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
         this.stream.forEach(element -> visitor.consume(
             element.volume(),
             element.type(),
-            element.position().getX(),
-            element.position().getY(),
-            element.position().getZ()
+            element.position().x(),
+            element.position().y(),
+            element.position().z()
         ));
     }
 
