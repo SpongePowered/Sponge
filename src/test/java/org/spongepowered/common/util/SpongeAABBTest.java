@@ -200,9 +200,9 @@ final class SpongeAABBTest {
     private static AABB newIntersectingAABB(AABB with) {
         final Vector3d wMin = with.min();
         final Vector3d wSize = with.size();
-        final double iSizeX = RANDOM.nextDouble() * wSize.getX();
-        final double iSizeY = RANDOM.nextDouble() * wSize.getY();
-        final double iSizeZ = RANDOM.nextDouble() * wSize.getZ();
+        final double iSizeX = RANDOM.nextDouble() * wSize.x();
+        final double iSizeY = RANDOM.nextDouble() * wSize.y();
+        final double iSizeZ = RANDOM.nextDouble() * wSize.z();
         final double eSizeX = RANDOM.nextDouble() * 4 + 4;
         final double eSizeY = RANDOM.nextDouble() * 4 + 4;
         final double eSizeZ = RANDOM.nextDouble() * 4 + 4;
