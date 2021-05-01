@@ -24,8 +24,9 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.network;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.TranslatableComponent;
+import net.kyori.adventure.text.TextComponent;
 import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.protocol.game.ServerGamePacketListener;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
@@ -33,7 +34,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.PlayerChatRouter;
+import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -79,20 +80,27 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
                     target = "Lnet/minecraft/server/players/PlayerList;broadcastMessage(Lnet/minecraft/network/chat/Component;Lnet/minecraft/network/chat/ChatType;Ljava/util/UUID;)V"),
             cancellable = true,
             locals = LocalCapture.CAPTURE_FAILHARD)
-    private void vanilla$onProcessChatMessage(String p_244548_1_, CallbackInfo ci, net.minecraft.network.chat.Component component) {
+    private void vanilla$onProcessChatMessage(String var1, CallbackInfo ci, net.minecraft.network.chat.Component component) {
         ChatFormatter.formatChatComponent((net.minecraft.network.chat.TranslatableComponent) component);
-        final PlayerChatRouter chatRouter = ((ServerPlayer) this.player).chatRouter();
-        Component adventure = SpongeAdventure.asAdventure(component);
-        adventure = ((TranslatableComponent) adventure).args().get(1);
+        final ServerPlayer player = (ServerPlayer) this.player;
+        final PlayerChatFormatter chatFormatter = player.chatFormatter();
+        final TextComponent rawMessage = Component.text(var1);
 
         try (CauseStackManager.StackFrame frame = PhaseTracker.SERVER.pushCauseFrame()) {
             frame.pushCause(this.player);
-            final PlayerChatEvent event = SpongeEventFactory
-                    .createPlayerChatEvent(PhaseTracker.SERVER.currentCause(), chatRouter, Optional.of(chatRouter), adventure, adventure);
+            final Audience audience = (Audience) this.server;
+            final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), audience, Optional.of(audience), chatFormatter, Optional.of(chatFormatter), rawMessage, rawMessage);
             if (SpongeCommon.postEvent(event)) {
                 ci.cancel();
             } else {
-                event.chatRouter().ifPresent(router -> router.chat((ServerPlayer) this.player, event.message()));
+                event.chatFormatter().ifPresent(formatter ->
+                    event.audience().map(SpongeAdventure::unpackAudiences).ifPresent(targets -> {
+                        for (Audience target : targets) {
+                            formatter.format(player, target, event.message(), event.originalMessage()).ifPresent(formattedMessage ->
+                                target.sendMessage(player, formattedMessage));
+                        }
+                    })
+                );
             }
         }
     }

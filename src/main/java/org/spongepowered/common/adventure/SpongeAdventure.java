@@ -89,6 +89,7 @@ import org.spongepowered.common.launch.Launch;
 
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
@@ -729,6 +730,17 @@ public final class SpongeAdventure {
             return null;
         }
         return SpongeAdventure.asVanilla(source);
+    }
+
+    public static Iterable<? extends Audience> unpackAudiences(Audience audience) {
+        if (audience instanceof ForwardingAudience) {
+            List<Audience> list = new ArrayList<>();
+            for (Audience subAudience : ((ForwardingAudience) audience).audiences()) {
+                SpongeAdventure.unpackAudiences(subAudience).forEach(list::add);
+            }
+            return list;
+        }
+        return Collections.singletonList(audience);
     }
 
     public static class Factory implements SpongeComponents.Factory {

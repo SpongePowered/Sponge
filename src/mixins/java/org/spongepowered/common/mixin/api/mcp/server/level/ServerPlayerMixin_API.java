@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.level;
 
+import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identity;
@@ -49,7 +50,6 @@ import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvent;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.Server;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -58,7 +58,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.entity.living.player.CooldownTracker;
-import org.spongepowered.api.entity.living.player.PlayerChatRouter;
+import org.spongepowered.api.entity.living.player.PlayerChatFormatter;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
@@ -81,8 +81,8 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
@@ -118,7 +118,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     // @formatter:on
 
     private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
-    @Nullable private PlayerChatRouter api$chatRouter;
+    @Nullable private PlayerChatFormatter api$chatRouter;
     @Nullable private WorldBorder api$worldBorder;
 
     @Override
@@ -283,16 +283,16 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
-    public PlayerChatRouter chatRouter() {
+    public PlayerChatFormatter chatFormatter() {
         if (this.api$chatRouter == null) {
-            this.api$chatRouter = (player, message) -> ((Server) this.server).sendMessage(player,
-                    Component.translatable("chat.type.text", SpongeAdventure.asAdventure(this.shadow$getDisplayName()), message));
+            this.api$chatRouter = (player, audience, message, originalMessage) ->
+                    Optional.of(Component.translatable("chat.type.text", SpongeAdventure.asAdventure(this.shadow$getDisplayName()), message));
         }
         return this.api$chatRouter;
     }
 
     @Override
-    public void setChatRouter(final PlayerChatRouter router) {
+    public void setChatFormatter(final PlayerChatFormatter router) {
         this.api$chatRouter = Objects.requireNonNull(router, "router");
     }
 
@@ -301,10 +301,18 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         Objects.requireNonNull(message, "message");
         Objects.requireNonNull(cause, "cause");
 
-        final PlayerChatRouter originalRouter = this.chatRouter();
-        final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(cause, originalRouter, Optional.of(originalRouter), message, message);
+        final PlayerChatFormatter originalRouter = this.chatFormatter();
+        final Audience audience = (Audience) this.server;
+        final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(cause, audience, Optional.of(audience), originalRouter, Optional.of(originalRouter), message, message);
         if (!SpongeCommon.postEvent(event)) {
-            event.chatRouter().ifPresent(channel -> channel.chat(this, event.message()));
+            event.chatFormatter().ifPresent(formatter ->
+                event.audience().map(SpongeAdventure::unpackAudiences).ifPresent(targets -> {
+                    for (Audience target : targets) {
+                        formatter.format(this, target, event.message(), event.originalMessage()).ifPresent(formattedMessage ->
+                            target.sendMessage(this, formattedMessage));
+                    }
+                })
+            );
         }
         return event;
     }
