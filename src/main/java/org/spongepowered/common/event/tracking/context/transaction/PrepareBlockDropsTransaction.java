@@ -74,9 +74,8 @@ public final class PrepareBlockDropsTransaction extends BlockEventBasedTransacti
 
     @Override
     void handleEmptyEvent() {
-        if (this.hasChildTransactions()) {
-            this.markCancelled();
-        }
+        // this can mean that there were no possible block changes to associate
+        // but the spawns were still captured, maybe...
     }
 
     @Override

@@ -136,6 +136,9 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
         final ImmutableList<? extends GameTransaction<ChangeBlockEvent.All>> blockTransactions
     ) {
         boolean cancelledAny = false;
+        if (event.isCancelled()) {
+            event.transactions().forEach(BlockTransaction::invalidate);
+        }
         for (final Transaction<BlockSnapshot> transaction : event.transactions()) {
             if (!transaction.isValid()) {
                 cancelledAny = true;
@@ -154,5 +157,11 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
         }
 
         return cancelledAny;
+    }
+
+    @Override
+    public void markEventAsCancelledIfNecessary(final ChangeBlockEvent.All event) {
+        super.markEventAsCancelledIfNecessary(event);
+        event.transactions().forEach(BlockTransaction::invalidate);
     }
 }

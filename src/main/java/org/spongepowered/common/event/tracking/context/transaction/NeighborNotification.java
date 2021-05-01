@@ -192,4 +192,9 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
         return cancelledAny;
     }
 
+    @Override
+    public void markEventAsCancelledIfNecessary(final NotifyNeighborBlockEvent event) {
+        super.markEventAsCancelledIfNecessary(event);
+        event.tickets().forEach(NotificationTicket::invalidate);
+    }
 }

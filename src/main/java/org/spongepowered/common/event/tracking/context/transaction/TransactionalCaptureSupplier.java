@@ -65,6 +65,7 @@ import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.lang.ref.WeakReference;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
@@ -168,6 +169,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return true;
     }
 
+    @SuppressWarnings({"ConstantConditions", "unchecked"})
     public boolean logTileRemoval(final @Nullable BlockEntity tileentity, final Supplier<ServerLevel> worldSupplier) {
         if (tileentity == null) {
             return false;
@@ -177,14 +179,20 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             if (newRecorded) {
                 return true;
             }
+            // Need to traverse children by "most recent" transactions to "oldest"
+            // to verify which transaction could potentially absorb the tile removed
             if (this.tail.hasChildTransactions()) {
-                for (final ResultingTransactionBySideEffect sideEffect : ((LinkedList<ResultingTransactionBySideEffect>) this.tail.sideEffects)) {
-                    @Nullable GameTransaction<@NonNull ?> pointer = sideEffect.head;
+                final LinkedList<ResultingTransactionBySideEffect> sideEffects = this.tail.sideEffects;
+                final Iterator<ResultingTransactionBySideEffect> iter = sideEffects.descendingIterator();
+                // Nasty way at doing it with an iterator....
+                for (ResultingTransactionBySideEffect sideEffect = iter.next(); iter.hasNext(); sideEffect = iter.next()) {
+                    // Then we traverse our own manual doubly linked nodes.
+                    @Nullable GameTransaction<@NonNull ?> pointer = sideEffect.tail;
                     while (pointer != null) {
                         if (pointer.acceptTileRemoval(tileentity)) {
                             return true;
                         }
-                        pointer = pointer.next;
+                        pointer = pointer.previous;
                     }
                 }
             }
@@ -215,7 +223,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         this.logTransaction(notificationTransaction);
     }
 
-    @SuppressWarnings({"unchecked", "ConstantConditions"})
+    @SuppressWarnings({"ConstantConditions"})
     public void logEntitySpawn(final PhaseContext<@NonNull ?> current, final TrackedWorldBridge serverWorld,
         final Entity entityIn) {
         final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
@@ -409,6 +417,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 cancelledAny = true;
             }
             for (final GameTransaction<@NonNull ?> transaction : eventWithTransactions.transactions) {
+                if (transaction.cancelled) {
+                    ((GameTransaction) transaction).markEventAsCancelledIfNecessary(eventWithTransactions.event);
+                }
                 if (!transaction.cancelled) {
                     ((GameTransaction) transaction).postProcessEvent(context, event);
                 }
@@ -416,6 +427,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
         if (cancelledAny) {
             for (final EventByTransaction<@NonNull ?> eventByTransaction : batched.reverse()) {
+                if (eventByTransaction.decider.cancelled) {
+                    ((GameTransaction) eventByTransaction.decider).markEventAsCancelledIfNecessary(eventByTransaction.event);
+                }
                 for (final GameTransaction<@NonNull ?> gameTransaction : eventByTransaction.transactions.reverse()) {
                     if (gameTransaction.cancelled) {
                         gameTransaction.restore();
@@ -509,17 +523,21 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 })
                 .orElse(null)
         ) {
-            final Optional<E> event = pointer.generateEvent(context, parent, transactions, instance.currentCause(), transactionPostEventBuilder);
-            if (!event.isPresent()) {
-                transactions.forEach(GameTransaction::handleEmptyEvent);
-                return;
-            }
-            final EventByTransaction<E> element = new EventByTransaction<>(event.get(), transactions, parent, pointer);
-            builder.add(element);
-            ((ImmutableMultimap.Builder) transactionPostEventBuilder).put(pointer.getTransactionType(), event.get());
-            if (frame != null) {
-                frame.pushCause(event.get());
-            }
+            pointer.generateEvent(context, parent, transactions, instance.currentCause(), transactionPostEventBuilder)
+                // It's not guaranteed that a transaction has a valid world or some other artifact,
+                // and in those cases, we don't want to treat the transaction as being "cancellable"
+                .ifPresent(e -> {
+                    final EventByTransaction<E> element = new EventByTransaction<>(e, transactions, parent, pointer);
+                    builder.add(element);
+                    ((ImmutableMultimap.Builder) transactionPostEventBuilder).put(pointer.getTransactionType(), e);
+                    if (frame != null) {
+                        // Note that by having the event in the cause, any mutations of the event by way of the cause
+                        // is not supported and *may* lead to unsupportable side effects, because by virtue, the event
+                        // was already posted for modifications.
+                        frame.pushCause(e);
+                    }
+                });
+
             for (final GameTransaction<E> transaction : transactions) {
                 if (transaction.sideEffects == null) {
                     continue;

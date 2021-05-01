@@ -164,4 +164,9 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
 
     }
 
+    public void markEventAsCancelledIfNecessary(final E event) {
+        if (this.cancelled) {
+            event.setCancelled(true);
+        }
+    }
 }
