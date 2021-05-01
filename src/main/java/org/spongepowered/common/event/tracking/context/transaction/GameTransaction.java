@@ -169,4 +169,8 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
             event.setCancelled(true);
         }
     }
+
+    boolean acceptDrops(final PrepareBlockDropsTransaction transaction) {
+        return false;
+    }
 }

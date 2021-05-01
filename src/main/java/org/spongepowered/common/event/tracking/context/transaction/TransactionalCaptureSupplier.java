@@ -267,7 +267,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         original.blockChange = BlockChange.MODIFY;
         final PrepareBlockDropsTransaction transaction = new PrepareBlockDropsTransaction(pos, state, original);
-        this.logTransaction(transaction);
+        if (this.tail == null || !this.tail.acceptDrops(transaction)) {
+            this.logTransaction(transaction);
+        }
         return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
     }
 

@@ -46,6 +46,7 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.Update
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
+import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.util.Optional;
@@ -181,5 +182,12 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
     @Override
     protected SpongeBlockSnapshot getOriginalSnapshot() {
         return this.original;
+    }
+
+    @Override
+    boolean acceptDrops(final PrepareBlockDropsTransaction transaction) {
+        return this.original.blockChange == BlockChange.BREAK
+            && this.affectedPosition.equals(transaction.affectedPosition)
+            && this.original.state() == transaction.getOriginalSnapshot().state();
     }
 }

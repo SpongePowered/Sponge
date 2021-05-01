@@ -59,6 +59,7 @@ public final class ChangeBlockTest implements LoadableModule {
 
     final PluginContainer plugin;
     boolean cancelAll = false;
+    boolean cancelTransactions = false;
     boolean waterProofRedstone = false;
     boolean printEntityHarvests = false;
     boolean printEntitySpawns = false;
@@ -123,6 +124,15 @@ public final class ChangeBlockTest implements LoadableModule {
                 return CommandResult.success();
             })
             .build(), "toggleEntitySpawnPrinting"
+        );
+        event.register(this.plugin, Command.builder()
+            .executor(context -> {
+                this.cancelTransactions = !this.cancelTransactions;
+                final Component newState = Component.text(this.cancelTransactions ? "ON" : "OFF", this.cancelTransactions ? NamedTextColor.GREEN : NamedTextColor.RED);
+                context.sendMessage(Identity.nil(), Component.text("Invalidating Transactions : ").append(newState));
+                return CommandResult.success();
+            })
+            .build(), "toggleBlockTransactions"
         );
     }
 
@@ -207,6 +217,9 @@ public final class ChangeBlockTest implements LoadableModule {
             }
             if (ChangeBlockTest.this.cancelAll) {
                 post.setCancelled(true);
+            }
+            if (ChangeBlockTest.this.cancelTransactions) {
+                post.transactions().forEach(BlockTransaction::invalidate);
             }
             if (ChangeBlockTest.this.waterProofRedstone) {
                 for (final BlockTransaction transaction : post.transactions()) {
