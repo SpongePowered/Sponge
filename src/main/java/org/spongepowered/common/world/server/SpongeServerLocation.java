@@ -33,6 +33,8 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
@@ -281,6 +283,20 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
             return Arrays.asList(this, be.get(), this.block(), this.block().type());
         }
         return Arrays.asList(this, this.block(), this.block().type());
+    }
+
+    @Override
+    public int contentVersion() {
+        return 1;
+    }
+
+    @Override
+    public DataContainer toContainer() {
+        return DataContainer.createNew()
+                .set(Queries.WORLD_KEY, this.worldKey())
+                .set(Queries.POSITION_X, this.x())
+                .set(Queries.POSITION_Y, this.y())
+                .set(Queries.POSITION_Z, this.z());
     }
 
     @Override
