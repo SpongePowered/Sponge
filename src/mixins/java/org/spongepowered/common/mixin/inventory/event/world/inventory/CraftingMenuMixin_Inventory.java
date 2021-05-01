@@ -73,8 +73,11 @@ public abstract class CraftingMenuMixin_Inventory {
         // This is to prevent infinite loops when a client mod re-requests the recipe result after we modified/cancelled it
         if (trackedContainer.bridge$capturingInventory()) {
             List<SlotTransaction> craftPreviewTransactions = container.bridge$getPreviewTransactions();
+            ItemStackSnapshot orig = ItemStackUtil.snapshotOf(p_217066_4_.getItem(0));
+            if (!craftPreviewTransactions.isEmpty()) {
+                orig = craftPreviewTransactions.get(0).original();
+            }
             craftPreviewTransactions.clear();
-            final ItemStackSnapshot orig = ItemStackUtil.snapshotOf(p_217066_4_.getItem(0));
             final ItemStackSnapshot repl = ItemStackUtil.snapshotOf(itemStack);
             Slot slot = ((InventoryAdapter) p_217066_2_.containerMenu).inventoryAdapter$getSlot(0).get();
             craftPreviewTransactions.add(new SlotTransaction(slot, orig, repl));
