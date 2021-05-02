@@ -223,7 +223,7 @@ public final class SpongeEventManager implements EventManager {
         checkNotNull(listenerObject, "listener");
 
         if (this.registeredListeners.contains(listenerObject)) {
-            this.logger.warn("Plugin {} attempted to register an already registered listener ({})", plugin.getMetadata().getId(),
+            this.logger.warn("Plugin {} attempted to register an already registered listener ({})", plugin.metadata().id(),
                     listenerObject.getClass().getName());
             Thread.dumpStack();
             return;
@@ -430,7 +430,7 @@ public final class SpongeEventManager implements EventManager {
                 SpongeCommon.setActivePlugin(handler.getPlugin());
                 handler.handle(event);
             } catch (Throwable e) {
-                this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().getMetadata().getId(), e);
+                this.logger.error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().metadata().id(), e);
             } finally {
                 SpongeCommon.setActivePlugin(null);
             }

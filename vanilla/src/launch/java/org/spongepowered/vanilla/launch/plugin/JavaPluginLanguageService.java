@@ -31,12 +31,12 @@ public final class JavaPluginLanguageService extends JVMPluginLanguageService {
     private final static String NAME = "java_plain";
 
     @Override
-    public String getName() {
+    public String name() {
         return JavaPluginLanguageService.NAME;
     }
 
     @Override
-    public String getPluginLoader() {
+    public String pluginLoader() {
         return "org.spongepowered.vanilla.launch.plugin.JavaPluginLoader";
     }
 }

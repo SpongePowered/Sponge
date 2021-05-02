@@ -143,7 +143,7 @@ public final class ChangeBlockTest implements LoadableModule {
             if (!ChangeBlockTest.this.printEntityHarvests) {
                 return;
             }
-            final Logger pluginLogger = ChangeBlockTest.this.plugin.getLogger();
+            final Logger pluginLogger = ChangeBlockTest.this.plugin.logger();
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/*************");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* HarvestEntityEvent");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
@@ -161,7 +161,7 @@ public final class ChangeBlockTest implements LoadableModule {
             if (!ChangeBlockTest.this.printEntitySpawns) {
                 return;
             }
-            final Logger pluginLogger = ChangeBlockTest.this.plugin.getLogger();
+            final Logger pluginLogger = ChangeBlockTest.this.plugin.logger();
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/*************");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* SpawnEntityEvent");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
@@ -179,7 +179,7 @@ public final class ChangeBlockTest implements LoadableModule {
             if (!ChangeBlockTest.this.printEntityDeaths) {
                 return;
             }
-            final Logger pluginLogger = ChangeBlockTest.this.plugin.getLogger();
+            final Logger pluginLogger = ChangeBlockTest.this.plugin.logger();
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/*************");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* DestructEntityEvent.Death");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");
@@ -194,7 +194,7 @@ public final class ChangeBlockTest implements LoadableModule {
     public class ChangeBlockListener {
         @Listener
         public void onChangeBlock(final ChangeBlockEvent.All post) {
-            final Logger pluginLogger = ChangeBlockTest.this.plugin.getLogger();
+            final Logger pluginLogger = ChangeBlockTest.this.plugin.logger();
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/*************");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* ChangeBlockEvent");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/");

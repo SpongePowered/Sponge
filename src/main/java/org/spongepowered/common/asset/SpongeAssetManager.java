@@ -49,7 +49,7 @@ public final class SpongeAssetManager implements AssetManager {
         checkNotNull(name);
         checkArgument(!name.isEmpty(), "name cannot be empty");
 
-        URL url = SpongeAssetManager.CLASS_LOADER.getResource(SpongeAssetManager.DEFAULT_ASSET_DIR + container.getMetadata().getId() + '/' + name);
+        URL url = SpongeAssetManager.CLASS_LOADER.getResource(SpongeAssetManager.DEFAULT_ASSET_DIR + container.metadata().id() + '/' + name);
         if (url == null) {
             return Optional.empty();
         }

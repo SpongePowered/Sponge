@@ -267,8 +267,8 @@ public final class PluginConfigurationModule extends AbstractModule {
             reference.errors().subscribe(error -> {
                 final ConfigurationReference.ErrorPhase phase = error.getKey();
                 final Throwable cause = error.getValue();
-                this.container.getLogger().error("Failed to perform a {} in the configuration for {} at {}:",
-                                  phase, this.container.getMetadata().getId(), file, cause);
+                this.container.logger().error("Failed to perform a {} in the configuration for {} at {}:",
+                                  phase, this.container.metadata().id(), file, cause);
             });
             return reference;
         }

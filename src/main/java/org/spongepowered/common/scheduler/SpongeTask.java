@@ -97,7 +97,7 @@ public final class SpongeTask implements Task {
                 .add("name", this.name)
                 .add("delay", this.delay)
                 .add("interval", this.interval)
-                .add("owner", this.owner.getMetadata().getId())
+                .add("owner", this.owner.metadata().id())
                 .toString();
     }
 
@@ -254,7 +254,7 @@ public final class SpongeTask implements Task {
 
             final String name;
             if (this.name == null) {
-                name = this.plugin.getMetadata().getId() + "-" + org.spongepowered.common.scheduler.SpongeTask.Builder.taskCounter.incrementAndGet();
+                name = this.plugin.metadata().id() + "-" + org.spongepowered.common.scheduler.SpongeTask.Builder.taskCounter.incrementAndGet();
             } else {
                 name = this.name;
             }

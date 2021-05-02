@@ -48,7 +48,7 @@ public final class SpongePluginContainerValueParameter extends ResourceKeyedArgu
 
     @Override
     public @NonNull List<String> complete(final @NonNull CommandCause context, final String currentInput) {
-        return Launch.getInstance().getPluginManager().plugins().stream().map(x -> x.getMetadata().getId()).filter(x -> x.startsWith(currentInput))
+        return Launch.getInstance().getPluginManager().plugins().stream().map(x -> x.metadata().id()).filter(x -> x.startsWith(currentInput))
                 .collect(Collectors.toList());
     }
 

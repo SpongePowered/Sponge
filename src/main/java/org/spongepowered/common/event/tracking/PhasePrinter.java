@@ -344,7 +344,7 @@ public final class PhasePrinter {
 
     static void generateVersionInfo(final PrettyPrinter printer) {
         for (final PluginContainer pluginContainer : Launch.getInstance().getLauncherPlugins()) {
-            printer.add("%s : %s", pluginContainer.getMetadata().getName().get(), pluginContainer.getMetadata().getVersion());
+            printer.add("%s : %s", pluginContainer.metadata().name().get(), pluginContainer.metadata().version());
         }
     }
 

@@ -180,7 +180,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
         final List<String> aliases = new ArrayList<>();
         aliases.add(primaryAlias);
         Collections.addAll(aliases, secondaryAliases);
-        final String namespaced = container.getMetadata().getId() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
+        final String namespaced = container.metadata().id() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
         return this.registerAliasWithNamespacing(registrar, container, namespaced, aliases, parameterTree);
     }
 
@@ -198,7 +198,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
 
         if (!this.knownRegistrars.containsKey(GenericTypeReflector.erase(registrar.type().handledType().getType()))) {
             throw new IllegalArgumentException(String.format("Plugin '%s' is trying to register command %s with unknown registrar %s",
-                    container.getMetadata().getId(),
+                    container.metadata().id(),
                     namespacedAlias,
                     registrar
             ));
@@ -228,7 +228,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                 .aliases
                 .entrySet()
                 .stream()
-                .filter(x -> !x.getValue().equalsIgnoreCase(container.getMetadata().getId()))
+                .filter(x -> !x.getValue().equalsIgnoreCase(container.metadata().id()))
                 .filter(x -> aliases.contains(x.getKey()))
                 .forEach(x -> aliases.remove(x.getKey()));
 
@@ -453,7 +453,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                 .hr()
                 .add()
                 .add("Command: %s", commandString)
-                .add("Owning Plugin: %s", mapping.plugin().getMetadata().getId())
+                .add("Owning Plugin: %s", mapping.plugin().metadata().id())
                 .add("Owning Registrar: %s", mapping.registrar().getClass().getName())
                 .add()
                 .add("Exception Details: ");

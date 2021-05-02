@@ -58,7 +58,7 @@ public final class PluginModule extends AbstractModule {
         this.install(new InjectionPointProvider());
 
         this.bind(PluginContainer.class).toInstance(this.container);
-        this.bind(Logger.class).toInstance(this.container.getLogger());
+        this.bind(Logger.class).toInstance(this.container.logger());
 
         this.bind(Asset.class).annotatedWith(AssetId.class).toProvider(PluginAssetProvider.class);
 

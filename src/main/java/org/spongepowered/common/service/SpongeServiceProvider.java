@@ -185,7 +185,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
                 this.services.put(candidate.getServiceClass(), registration);
                 SpongeCommon.getLogger().info("Registered service [{}] to plugin '{}'.",
                         registration.clazz.getSimpleName(),
-                        registration.pluginContainer.getMetadata().getId());
+                        registration.pluginContainer.metadata().id());
             }
         }
 
@@ -220,7 +220,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
             } catch (final Throwable e) { // if the service can't be created
                 SpongeCommon.getLogger().error("Could not create service {} from plugin {}.",
                         service.getServiceClass().getSimpleName(),
-                        container.getMetadata().getId(),
+                        container.metadata().id(),
                         e);
             }
         }

@@ -69,9 +69,9 @@ public final class Main {
     public void run() throws IOException {
         final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
 
-        this.pluginEngine.getPluginEnvironment().getBlackboard()
+        this.pluginEngine.getPluginEnvironment().blackboard()
                 .getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
-        this.pluginEngine.getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> AppCommandLine.gameDirectory);
+        this.pluginEngine.getPluginEnvironment().blackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> AppCommandLine.gameDirectory);
 
         SpongeConfigs.initialize(this.pluginEngine.getPluginEnvironment());
         final Path modsDirectory = AppCommandLine.gameDirectory.resolve("mods");
@@ -84,7 +84,7 @@ public final class Main {
         if (Files.exists(pluginsDirectory)) {
             pluginDirectories.add(pluginsDirectory);
         }
-        this.pluginEngine.getPluginEnvironment().getBlackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> pluginDirectories);
+        this.pluginEngine.getPluginEnvironment().blackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> pluginDirectories);
 
         this.logger.info("Transitioning to ModLauncher, please wait...");
         final ArgumentList lst = ArgumentList.from(AppCommandLine.RAW_ARGS);

@@ -135,13 +135,13 @@ public abstract class SpongeScheduler implements Scheduler {
     @Override
     public Set<ScheduledTask> tasks(final PluginContainer plugin) {
         Objects.requireNonNull(plugin, "plugin");
-        final String testOwnerId = plugin.getMetadata().getId();
+        final String testOwnerId = plugin.metadata().id();
 
         final Set<ScheduledTask> allTasks = this.tasks();
         final Iterator<ScheduledTask> it = allTasks.iterator();
 
         while (it.hasNext()) {
-            final String taskOwnerId = it.next().owner().getMetadata().getId();
+            final String taskOwnerId = it.next().owner().metadata().id();
             if (!testOwnerId.equals(taskOwnerId)) {
                 it.remove();
             }
@@ -269,7 +269,7 @@ public abstract class SpongeScheduler implements Scheduler {
                     task.task.consumer().accept(task);
                 } catch (final Throwable t) {
                     SpongeCommon.getLogger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
-                            task.name(), task.owner().getMetadata().getId(), t);
+                            task.name(), task.owner().metadata().id(), t);
                 }
             } finally {
                 if (!task.isCancelled()) {

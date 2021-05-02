@@ -115,15 +115,15 @@ public final class SpongeTimings {
     }
 
     public static Timing getModTimings(PluginContainer plugin, String context) {
-        return SpongeTimingsFactory.ofSafe(plugin.getMetadata().getId(), context, TimingsManager.MOD_EVENT_HANDLER);
+        return SpongeTimingsFactory.ofSafe(plugin.metadata().id(), context, TimingsManager.MOD_EVENT_HANDLER);
     }
 
     public static Timing getPluginTimings(PluginContainer plugin, String context) {
-        return SpongeTimingsFactory.ofSafe(plugin.getMetadata().getId(), context, TimingsManager.PLUGIN_EVENT_HANDLER);
+        return SpongeTimingsFactory.ofSafe(plugin.metadata().id(), context, TimingsManager.PLUGIN_EVENT_HANDLER);
     }
 
     public static Timing getPluginSchedulerTimings(PluginContainer plugin) {
-        return SpongeTimingsFactory.ofSafe(plugin.getMetadata().getName().orElse(plugin.getMetadata().getId()), TimingsManager.PLUGIN_SCHEDULER_HANDLER);
+        return SpongeTimingsFactory.ofSafe(plugin.metadata().name().orElse(plugin.metadata().id()), TimingsManager.PLUGIN_SCHEDULER_HANDLER);
     }
 
     public static Timing getCancelTasksTimer() {

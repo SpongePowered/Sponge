@@ -216,12 +216,12 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                         if (this.resources.hasNext()) {
                             final PluginResource resource = this.resources.next();
                             if (resource instanceof JVMPluginResource) {
-                                if (((JVMPluginResource) resource).getType() != ResourceType.JAR) {
+                                if (((JVMPluginResource) resource).type() != ResourceType.JAR) {
                                     continue;
                                 }
                             }
 
-                            final Path resolved = resource.getFileSystem().getPath(s);
+                            final Path resolved = resource.fileSystem().getPath(s);
                             if (Files.exists(resolved)) {
                                 try {
                                     return resolved.toUri().toURL();
@@ -249,8 +249,8 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                             if (resource instanceof JVMPluginResource) {
                                 final JVMPluginResource jvmResource = (JVMPluginResource) resource;
                                 try {
-                                    if (jvmResource.getType() == ResourceType.JAR && resource.getPath().toAbsolutePath().normalize().equals(Paths.get(key.toURI()).toAbsolutePath().normalize())) {
-                                        return jvmResource.getManifest();
+                                    if (jvmResource.type() == ResourceType.JAR && resource.path().toAbsolutePath().normalize().equals(Paths.get(key.toURI()).toAbsolutePath().normalize())) {
+                                        return jvmResource.manifest();
                                     }
                                 } catch (final URISyntaxException ex) {
                                     this.logger.error("Failed to load manifest from jar {}: ", key, ex);

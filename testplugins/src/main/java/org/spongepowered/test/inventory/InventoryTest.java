@@ -92,29 +92,29 @@ public final class InventoryTest implements LoadableModule {
             final Inventory stoneFromPrimary = hotbarFromPrimary.query(QueryTypes.ITEM_TYPE, ItemTypes.STONE.get());
 
             final Inventory slotIndex0 = container.query(KeyValueMatcher.of(Keys.SLOT_INDEX, 0));
-            this.plugin.getLogger().info("{} slots: {}", "SlotIndex 0 ", slotIndex0.capacity());
+            this.plugin.logger().info("{} slots: {}", "SlotIndex 0 ", slotIndex0.capacity());
             final Inventory slotPos1_1 = container.query(KeyValueMatcher.of(Keys.SLOT_POSITION, Vector2i.from(1,1)));
-            this.plugin.getLogger().info("{} slots: {}", "SlotPos 1 1", slotPos1_1.capacity());
+            this.plugin.logger().info("{} slots: {}", "SlotPos 1 1", slotPos1_1.capacity());
             final Inventory slotPos0_6 = container.query(PrimaryPlayerInventory.class).get().query(KeyValueMatcher.of(Keys.SLOT_POSITION, Vector2i.from(0, 6)));
-            this.plugin.getLogger().info("{} slots: {}", "SlotPos 0 6", slotPos0_6.capacity());
+            this.plugin.logger().info("{} slots: {}", "SlotPos 0 6", slotPos0_6.capacity());
 
             // TODO equality check fails with the default TextComponent
             final Inventory foobarInv = container.query(KeyValueMatcher.of(Keys.DISPLAY_NAME, Component.text("Foobar")));
-            this.plugin.getLogger().info("{} slots: {}", "Foobar Title", foobarInv.capacity());
+            this.plugin.logger().info("{} slots: {}", "Foobar Title", foobarInv.capacity());
             final Inventory max1Quantity = container.query(KeyValueMatcher.of(Keys.MAX_STACK_SIZE, 1));
-            this.plugin.getLogger().info("{} slots: {}", "Max quantity 1", max1Quantity.capacity());
+            this.plugin.logger().info("{} slots: {}", "Max quantity 1", max1Quantity.capacity());
             final Inventory grids = container.query(QueryTypes.INVENTORY_TYPE, GridInventory.class);
-            this.plugin.getLogger().info("{} count: {}", "grids ", grids.children().size()); // contains duplicate slots
+            this.plugin.logger().info("{} count: {}", "grids ", grids.children().size()); // contains duplicate slots
             final Optional<Component> component = container.get(Keys.DISPLAY_NAME);
 
             final String title = component.map(c -> PlainComponentSerializer.plain().serialize(c)).orElse("No Title");
-            this.plugin.getLogger().info("{} [{}]", event.getClass().getSimpleName(), title);
+            this.plugin.logger().info("{} [{}]", event.getClass().getSimpleName(), title);
         }
 
         @Listener
         public void onInteractContainer(final InteractContainerEvent event) {
             if (event instanceof EnchantItemEvent) {
-                this.plugin.getLogger().info("{} [{}] S:{}", event.getClass().getSimpleName(), ((EnchantItemEvent) event).option(),
+                this.plugin.logger().info("{} [{}] S:{}", event.getClass().getSimpleName(), ((EnchantItemEvent) event).option(),
                         ((EnchantItemEvent) event).seed());
             }
             final Optional<Component> component = event.container().get(Keys.DISPLAY_NAME);
@@ -128,16 +128,16 @@ public final class InventoryTest implements LoadableModule {
         public void onInteract(final ChangeInventoryEvent event) {
 
             if (event instanceof ClickContainerEvent) {
-                this.plugin.getLogger().info("{} {}", event.getClass().getSimpleName(), ((ClickContainerEvent) event).container().getClass().getSimpleName());
+                this.plugin.logger().info("{} {}", event.getClass().getSimpleName(), ((ClickContainerEvent) event).container().getClass().getSimpleName());
                 final Transaction<ItemStackSnapshot> cursor = ((ClickContainerEvent) event).cursorTransaction();
-                this.plugin.getLogger().info("  Cursor: {}x{}->{}x{}", cursor.original().type(), cursor.original().quantity(),
+                this.plugin.logger().info("  Cursor: {}x{}->{}x{}", cursor.original().type(), cursor.original().quantity(),
                         cursor.finalReplacement().type(), cursor.finalReplacement().quantity());
             } else {
-                this.plugin.getLogger().info("{} {}", event.getClass().getSimpleName(), event.inventory().getClass().getSimpleName());
+                this.plugin.logger().info("{} {}", event.getClass().getSimpleName(), event.inventory().getClass().getSimpleName());
             }
             for (final SlotTransaction slotTrans : event.transactions()) {
                 final Optional<Integer> integer = slotTrans.slot().get(Keys.SLOT_INDEX);
-                this.plugin.getLogger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.original().type(), slotTrans.original().quantity(),
+                this.plugin.logger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.original().type(), slotTrans.original().quantity(),
                         slotTrans.finalReplacement().type(), slotTrans.finalReplacement().quantity(), integer.get());
             }
         }
@@ -145,18 +145,18 @@ public final class InventoryTest implements LoadableModule {
         @Listener
         public void onTransfer(final TransferInventoryEvent event) {
             if (event instanceof TransferInventoryEvent.Post) {
-                this.plugin.getLogger().info("{} {}=>{}", event.getClass().getSimpleName(), event.sourceInventory().getClass().getSimpleName(), event.targetInventory()
+                this.plugin.logger().info("{} {}=>{}", event.getClass().getSimpleName(), event.sourceInventory().getClass().getSimpleName(), event.targetInventory()
                         .getClass().getSimpleName());
                 final Integer sourceIdx = ((TransferInventoryEvent.Post) event).sourceSlot().get(Keys.SLOT_INDEX).get();
                 final Integer targetIdx = ((TransferInventoryEvent.Post) event).targetSlot().get(Keys.SLOT_INDEX).get();
                 final ItemStackSnapshot item = ((TransferInventoryEvent.Post) event).transferredItem();
-                this.plugin.getLogger().info("[{}] -> [{}] {}x{}", sourceIdx, targetIdx, item.type(), item.quantity());
+                this.plugin.logger().info("[{}] -> [{}] {}x{}", sourceIdx, targetIdx, item.type(), item.quantity());
             }
         }
 
         @Listener
         public void onCraft(CraftItemEvent event) {
-//            this.plugin.getLogger().info("{} size: {} recipe: {} ",
+//            this.plugin.logger().info("{} size: {} recipe: {} ",
 //                    event.getClass().getSimpleName(),
 //                    event.craftingInventory().capacity(),
 //                    event.recipe().map(Recipe::getKey).map(ResourceKey::asString).orElse("no recipe"));

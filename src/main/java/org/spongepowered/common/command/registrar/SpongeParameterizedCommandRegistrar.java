@@ -85,7 +85,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
             final @NonNull String primaryAlias,
             final @NonNull String @NonNull... secondaryAliases) throws CommandFailedRegistrationException {
         // Get the builder and the first literal.
-        final String namespacedCommand = container.getMetadata().getId() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
+        final String namespacedCommand = container.metadata().id() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
 
         final ArrayList<String> aliases = new ArrayList<>();
         aliases.add(primaryAlias);

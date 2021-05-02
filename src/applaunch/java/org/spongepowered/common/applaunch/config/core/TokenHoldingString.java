@@ -56,7 +56,7 @@ public final class TokenHoldingString {
         TokenHoldingString.register("CANONICAL_GAME_DIR", PluginKeys.BASE_DIRECTORY);
         TokenHoldingString.register("CANONICAL_MODS_DIR", env -> {
             // TODO: this is wrong, need to decide what configurability will be provided.
-            final List<Path> directories = env.getBlackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElse(Collections.emptyList());
+            final List<Path> directories = env.blackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElse(Collections.emptyList());
             return directories.isEmpty() ? null : directories.get(0).toString();
         });
     }
@@ -73,7 +73,7 @@ public final class TokenHoldingString {
 
     private static void register(final String token, final Blackboard.Key<?> getter) {
         TokenHoldingString.register(token, env -> {
-            final Object value = env.getBlackboard().get(getter).orElse(null);
+            final Object value = env.blackboard().get(getter).orElse(null);
             return value == null ? null : value.toString();
         });
     }

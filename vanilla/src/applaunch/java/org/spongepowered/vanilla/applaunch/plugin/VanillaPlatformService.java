@@ -85,11 +85,11 @@ public final class VanillaPlatformService implements ITransformationService {
                 if ((accessWidener != null || mixin != null) && resource instanceof JVMPluginResource) {
                     if (mixin != null) {
                         // Offer jar to the Mixin service
-                        mixin.offerResource(resource.getPath(), resource.getPath().getFileName().toString());
+                        mixin.offerResource(resource.path(), resource.path().getFileName().toString());
                     }
 
                     // Offer jar to the AW service
-                        ((JVMPluginResource) resource).getManifest().ifPresent(manifest -> {
+                        ((JVMPluginResource) resource).manifest().ifPresent(manifest -> {
                             if (accessWidener != null) {
                                 final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.ACCESS_WIDENER);
                                 if (atFiles != null) {
@@ -97,20 +97,20 @@ public final class VanillaPlatformService implements ITransformationService {
                                         if (!atFile.endsWith(".accesswidener")) {
                                             continue;
                                         }
-                                        accessWidener.offerResource(resource.getFileSystem().getPath(atFile), atFile);
+                                        accessWidener.offerResource(resource.fileSystem().getPath(atFile), atFile);
                                     }
                                 }
                             }
                             if (mixin != null && manifest.getMainAttributes().getValue(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS) != null) {
-                                VanillaPlatformService.pluginEngine.getPluginEnvironment().getLogger().warn(
+                                VanillaPlatformService.pluginEngine.getPluginEnvironment().logger().warn(
                                     "Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the "
-                                    + "problem to Sponge!", resource.getPath()
+                                    + "problem to Sponge!", resource.path()
                                 );
                             }
                         });
                 }
 
-                final Map.Entry<String, Path> entry = Maps.immutableEntry(resource.getPath().getFileName().toString(), resource.getPath());
+                final Map.Entry<String, Path> entry = Maps.immutableEntry(resource.path().getFileName().toString(), resource.path());
                 launchResources.add(entry);
             }
         }
@@ -122,15 +122,15 @@ public final class VanillaPlatformService implements ITransformationService {
     public void onLoad(final IEnvironment env, final Set<String> otherServices) {
         final VanillaPluginEngine pluginEngine = VanillaPlatformService.pluginEngine;
 
-        pluginEngine.getPluginEnvironment().getLogger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
-            pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.VERSION).get(), this.getCodeSource());
+        pluginEngine.getPluginEnvironment().logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
+            pluginEngine.getPluginEnvironment().blackboard().get(PluginKeys.VERSION).get(), this.getCodeSource());
 
         pluginEngine.discoverLocatorServices();
         pluginEngine.getLocatorServices().forEach((k, v) -> pluginEngine.getPluginEnvironment()
-                .getLogger().info("Plugin resource locator '{}' found.", k));
+                .logger().info("Plugin resource locator '{}' found.", k));
         pluginEngine.discoverLanguageServices();
         pluginEngine.getLanguageServices().forEach((k, v) -> pluginEngine.getPluginEnvironment()
-                .getLogger().info("Plugin language loader '{}' found.", k));
+                .logger().info("Plugin language loader '{}' found.", k));
     }
 
     @Override

@@ -55,18 +55,18 @@ public final class TestPlugin {
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<PluginContainer> pluginKey = Parameter.plugin().key("plugin").suggestions(
                 (context, currentInput) -> Sponge.pluginManager().plugins().stream()
-                        .filter(pc -> pc.getInstance() instanceof LoadableModule)
-                        .filter(x -> x.getMetadata().getId().startsWith(currentInput))
-                        .map(x -> x.getMetadata().getId()).collect(Collectors.toList())).build();
+                        .filter(pc -> pc.instance() instanceof LoadableModule)
+                        .filter(x -> x.metadata().id().startsWith(currentInput))
+                        .map(x -> x.metadata().id()).collect(Collectors.toList())).build();
         final Command.Parameterized enableCommand = Command.builder().addParameter(pluginKey)
                 .executor(context -> {
                     final PluginContainer pc = context.requireOne(pluginKey);
-                    if (pc.getInstance() instanceof LoadableModule) {
-                        if (this.enabledPlugins.add(pc.getMetadata().getId())) {
-                            ((LoadableModule) pc.getInstance()).enable(context);
-                            context.sendMessage(Identity.nil(), Component.text("Enabled " + pc.getMetadata().getId()));
+                    if (pc.instance() instanceof LoadableModule) {
+                        if (this.enabledPlugins.add(pc.metadata().id())) {
+                            ((LoadableModule) pc.instance()).enable(context);
+                            context.sendMessage(Identity.nil(), Component.text("Enabled " + pc.metadata().id()));
                         } else {
-                            context.sendMessage(Identity.nil(), Component.text("Already enabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Identity.nil(), Component.text("Already enabled " + pc.metadata().id()));
                         }
                     }
                     return CommandResult.success();
@@ -74,12 +74,12 @@ public final class TestPlugin {
         final Command.Parameterized disableCommand = Command.builder().addParameter(pluginKey)
                 .executor(context -> {
                     final PluginContainer pc = context.requireOne(pluginKey);
-                    if (pc.getInstance() instanceof LoadableModule) {
-                        if (this.enabledPlugins.remove(pc.getMetadata().getId())) {
-                            ((LoadableModule) pc.getInstance()).disable(context);
-                            context.sendMessage(Identity.nil(), Component.text("Disabled " + pc.getMetadata().getId()));
+                    if (pc.instance() instanceof LoadableModule) {
+                        if (this.enabledPlugins.remove(pc.metadata().id())) {
+                            ((LoadableModule) pc.instance()).disable(context);
+                            context.sendMessage(Identity.nil(), Component.text("Disabled " + pc.metadata().id()));
                         } else {
-                            context.sendMessage(Identity.nil(), Component.text("Already disabled " + pc.getMetadata().getId()));
+                            context.sendMessage(Identity.nil(), Component.text("Already disabled " + pc.metadata().id()));
                         }
                     }
                     return CommandResult.success();
@@ -87,15 +87,15 @@ public final class TestPlugin {
         final Command.Parameterized toggleCommand = Command.builder().addParameter(pluginKey)
                 .executor(context -> {
                     final PluginContainer pc = context.requireOne(pluginKey);
-                    if (pc.getInstance() instanceof LoadableModule) {
-                        if (this.enabledPlugins.contains(pc.getMetadata().getId())) {
-                            this.enabledPlugins.remove(pc.getMetadata().getId());
-                            ((LoadableModule) pc.getInstance()).disable(context);
-                            context.sendMessage(Identity.nil(), Component.text("Disabled " + pc.getMetadata().getId()));
+                    if (pc.instance() instanceof LoadableModule) {
+                        if (this.enabledPlugins.contains(pc.metadata().id())) {
+                            this.enabledPlugins.remove(pc.metadata().id());
+                            ((LoadableModule) pc.instance()).disable(context);
+                            context.sendMessage(Identity.nil(), Component.text("Disabled " + pc.metadata().id()));
                         } else {
-                            this.enabledPlugins.add(pc.getMetadata().getId());
-                            ((LoadableModule) pc.getInstance()).enable(context);
-                            context.sendMessage(Identity.nil(), Component.text("Enabled " + pc.getMetadata().getId()));
+                            this.enabledPlugins.add(pc.metadata().id());
+                            ((LoadableModule) pc.instance()).enable(context);
+                            context.sendMessage(Identity.nil(), Component.text("Enabled " + pc.metadata().id()));
                         }
                     }
                     return CommandResult.success();

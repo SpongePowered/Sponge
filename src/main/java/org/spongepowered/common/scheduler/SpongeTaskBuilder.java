@@ -145,7 +145,7 @@ public final class SpongeTaskBuilder implements Task.Builder {
 
         final String name;
         if (this.name == null) {
-            name = this.plugin.getMetadata().getId() + "-" + SpongeTaskBuilder.taskCounter.incrementAndGet();
+            name = this.plugin.metadata().id() + "-" + SpongeTaskBuilder.taskCounter.incrementAndGet();
         } else {
             name = this.name;
         }

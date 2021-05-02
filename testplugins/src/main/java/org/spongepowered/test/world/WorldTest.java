@@ -101,7 +101,7 @@ public final class WorldTest {
                 .register(this.plugin, Command
                         .builder()
                         .addParameters(CommonParameters.LOCATION_ONLINE_ONLY, portalTypeParameter)
-                        .permission(this.plugin.getMetadata().getId() + ".command.portal.create")
+                        .permission(this.plugin.metadata().id() + ".command.portal.create")
                         .executor(context -> {
                             final ServerLocation location = context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY);
                             final PortalType portalType = context.requireOne(portalTypeParameter);
@@ -113,7 +113,7 @@ public final class WorldTest {
                 .register(this.plugin, Command
                         .builder()
                         .addParameters(optPlayerParameter, CommonParameters.LOCATION_ONLINE_ONLY, portalTypeParameter)
-                        .permission(this.plugin.getMetadata().getId() + ".command.portal.use")
+                        .permission(this.plugin.metadata().id() + ".command.portal.use")
                         .executor(context -> {
                             final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
                             final ServerLocation location = context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY);
@@ -125,7 +125,7 @@ public final class WorldTest {
                 .register(this.plugin, Command
                         .builder()
                         .addParameters(optPlayerParameter, worldTypeParameter)
-                        .permission(this.plugin.getMetadata().getId() + ".command.environment.change")
+                        .permission(this.plugin.metadata().id() + ".command.environment.change")
                         .executor(context -> {
                             final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
                             final WorldType worldType = context.requireOne(worldTypeParameter);
@@ -137,7 +137,7 @@ public final class WorldTest {
                 .register(this.plugin, Command
                         .builder()
                         .addParameters(CommonParameters.WORLD, worldTypeParameter)
-                        .permission(this.plugin.getMetadata().getId() + ".command.worldtype.change")
+                        .permission(this.plugin.metadata().id() + ".command.worldtype.change")
                         .executor(context -> {
                             final ServerWorld world = context.requireOne(CommonParameters.WORLD);
                             final WorldType worldType = context.requireOne(worldTypeParameter);
@@ -149,7 +149,7 @@ public final class WorldTest {
                 .register(this.plugin, Command
                         .builder()
                         .addParameters(optPlayerParameter, optWorldParameter, optPositionParameter)
-                        .permission(this.plugin.getMetadata().getId() + ".command.location.change")
+                        .permission(this.plugin.metadata().id() + ".command.location.change")
                         .executor(context -> {
                             final ServerPlayer player = context.one(optPlayerParameter).orElse(this.getSourcePlayer(context));
                             final ServerWorld world = context.one(optWorldParameter).orElse(player.world());
@@ -161,7 +161,7 @@ public final class WorldTest {
                 .register(this.plugin, Command
                         .builder()
                         .addParameter(worldKeyParameter)
-                        .permission(this.plugin.getMetadata().getId() + ".command.world.load")
+                        .permission(this.plugin.metadata().id() + ".command.world.load")
                         .executor(context -> {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
 
@@ -184,7 +184,7 @@ public final class WorldTest {
                 .register(this.plugin, Command
                         .builder()
                         .addParameters(worldKeyParameter, worldTypeParameter)
-                        .permission(this.plugin.getMetadata().getId() + ".command.world.create")
+                        .permission(this.plugin.metadata().id() + ".command.world.create")
                         .executor(context -> {
                             final ResourceKey key = context.requireOne(worldKeyParameter);
                             final ResourceKey worldType = RegistryTypes.WORLD_TYPE.get().valueKey(context.requireOne(worldTypeParameter));

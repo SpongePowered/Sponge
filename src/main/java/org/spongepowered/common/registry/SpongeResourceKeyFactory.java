@@ -44,7 +44,7 @@ public final class SpongeResourceKeyFactory implements ResourceKey.Factory {
     @Override
     public ResourceKey of(final PluginContainer plugin, final String value) {
         try {
-            final ResourceLocation resourceLocation = new ResourceLocation(plugin.getMetadata().getId(), value);
+            final ResourceLocation resourceLocation = new ResourceLocation(plugin.metadata().id(), value);
             return (ResourceKey) (Object) resourceLocation;
         } catch (ResourceLocationException e) {
             throw new IllegalStateException(e);

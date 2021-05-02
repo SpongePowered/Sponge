@@ -207,14 +207,14 @@ public final class CustomDataTest {
     @Listener
     public void onJoin(final ServerSideConnectionEvent.Join event) {
         final Optional<Integer> myValue = event.player().get(this.myDataKey);
-        myValue.ifPresent(integer -> this.plugin.getLogger().info("CustomData: {}", integer));
+        myValue.ifPresent(integer -> this.plugin.logger().info("CustomData: {}", integer));
     }
 
     private void customUserData(final UUID playerUUID, final int number) {
         final Optional<User> user = Sponge.server().userManager().find(playerUUID);
         if (user.isPresent()) {
             final Integer integer = user.get().get(this.myDataKey).orElse(0);
-            this.plugin.getLogger().info("Custom data on user {}: {}", user.get().name(), integer);
+            this.plugin.logger().info("Custom data on user {}: {}", user.get().name(), integer);
             user.get().offer(this.myDataKey, number);
         }
     }

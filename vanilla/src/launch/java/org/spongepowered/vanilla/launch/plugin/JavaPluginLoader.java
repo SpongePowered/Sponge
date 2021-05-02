@@ -49,16 +49,16 @@ public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginContainer> 
     @Override
     protected Object createPluginInstance(final PluginEnvironment environment, final JVMPluginContainer container, final ClassLoader targetClassLoader) throws InvalidPluginException {
         try {
-            final String mainClass = container.getMetadata().getMainClass();
+            final String mainClass = container.metadata().mainClass();
             final Class<?> pluginClass = Class.forName(mainClass, true, targetClassLoader);
-            final Injector parentInjector = environment.getBlackboard().get(SpongeBootstrap.PARENT_INJECTOR).orElse(null);
+            final Injector parentInjector = environment.blackboard().get(SpongeBootstrap.PARENT_INJECTOR).orElse(null);
             if (parentInjector != null) {
                 final Injector childInjector = parentInjector.createChildInjector(new PluginModule(container, pluginClass));
                 return childInjector.getInstance(pluginClass);
             }
             return pluginClass.newInstance();
         } catch (final Exception ex) {
-            throw new InvalidPluginException("An error occurred creating an instance of plugin '" + container.getMetadata().getId() + "'!", ex);
+            throw new InvalidPluginException("An error occurred creating an instance of plugin '" + container.metadata().id() + "'!", ex);
         }
     }
 }

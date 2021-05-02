@@ -157,7 +157,7 @@ public final class SpongeLifecycle {
 
     public void registerPluginListeners() {
         for (final PluginContainer plugin : this.filterInternalPlugins(this.game.pluginManager().plugins())) {
-            this.game.eventManager().registerListeners(plugin, plugin.getInstance());
+            this.game.eventManager().registerListeners(plugin, plugin.instance());
         }
     }
 
