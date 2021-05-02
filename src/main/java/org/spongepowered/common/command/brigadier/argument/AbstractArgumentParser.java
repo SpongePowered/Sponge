@@ -30,6 +30,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -38,16 +39,16 @@ import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+import org.spongepowered.common.util.CommandUtil;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 import java.util.Locale;
 import java.util.concurrent.CompletableFuture;
 import java.util.regex.Pattern;
 
 public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, SuggestionProvider<CommandSourceStack>, ValueParameter<T> {
-
-    private static final Pattern INTEGER_PATTERN = Pattern.compile("\\d+");
 
     @Override
     public final T parse(final Parameter.Key<? super T> key,
@@ -75,18 +76,9 @@ public abstract class AbstractArgumentParser<T> implements ArgumentParser<T>, Su
     public CompletableFuture<Suggestions> listSuggestions(
             final CommandContext<?> context,
             final SuggestionsBuilder builder) {
-        for (final String s : this.complete((SpongeCommandContext) context, builder.getRemaining())) {
-            if (AbstractArgumentParser.INTEGER_PATTERN.matcher(s).matches()) {
-                try {
-                    builder.suggest(Integer.parseInt(s));
-                } catch (final NumberFormatException ex) {
-                    builder.suggest(s);
-                }
-            } else if (s.toLowerCase(Locale.ROOT).startsWith(builder.getRemaining())) {
-                builder.suggest(s);
-            }
-        }
-        return builder.buildFuture();
+
+        final List<CommandCompletion> completions = this.complete((SpongeCommandContext) context, builder.getRemaining());
+        return CommandUtil.buildSuggestionsFromCompletions(completions, builder);
     }
 
     @Override

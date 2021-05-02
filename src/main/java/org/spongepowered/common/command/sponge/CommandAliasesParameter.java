@@ -26,6 +26,7 @@ package org.spongepowered.common.command.sponge;
 
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -34,6 +35,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 
 import java.util.Collections;
 import java.util.List;
@@ -44,8 +46,11 @@ import java.util.stream.Collectors;
 public final class CommandAliasesParameter implements ValueParameter<CommandMapping> {
 
     @Override
-    public List<String> complete(final CommandContext context, final String input) {
-        return Sponge.game().server().commandManager().knownAliases().stream().filter(x -> x.startsWith(input)).collect(Collectors.toList());
+    public List<CommandCompletion> complete(final CommandContext context, final String input) {
+        return Sponge.game().server().commandManager().knownAliases().stream()
+                .filter(x -> x.startsWith(input))
+                .map(SpongeCommandCompletion::new)
+                .collect(Collectors.toList());
     }
 
     @Override

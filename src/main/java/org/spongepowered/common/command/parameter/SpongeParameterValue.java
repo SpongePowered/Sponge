@@ -30,6 +30,7 @@ import net.minecraft.network.chat.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -151,9 +152,9 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     }
 
     @Override
-    public @NonNull List<String> complete(final ArgumentReader.@NonNull Immutable reader, final @NonNull CommandContext context) {
+    public List<CommandCompletion> complete(final ArgumentReader.@NonNull Immutable reader, final @NonNull CommandContext context) {
         final String currentInput = reader.remaining();
-        final List<String> result = this.completer.complete(context, currentInput);
+        final List<CommandCompletion> result = this.completer.complete(context, currentInput);
         if (this.modifier != null) {
             return this.modifier.modifyCompletion(context, currentInput, result);
         }

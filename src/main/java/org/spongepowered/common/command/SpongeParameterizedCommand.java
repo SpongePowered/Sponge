@@ -34,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -92,12 +93,12 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     }
 
     @Override
-    public @NonNull List<String> suggestions(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
+    public List<CommandCompletion> complete(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
         final SpongeCommandDispatcher dispatcher = this.getCachedDispatcher();
         final String input = arguments.remaining();
         final ParseResults<CommandSourceStack> parseResults = dispatcher.parse((StringReader) arguments, (CommandSourceStack) cause);
         final Suggestions suggestions = dispatcher.getCompletionSuggestions(parseResults).join();
-        return suggestions.getList().stream().map(x -> x.apply(input)).collect(Collectors.toList());
+        return suggestions.getList().stream().map(SpongeCommandCompletion::from).collect(Collectors.toList());
     }
 
     @Override

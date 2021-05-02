@@ -29,12 +29,14 @@ import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
 
@@ -94,7 +96,7 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
     }
 
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+    public List<CommandCompletion> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         final Registry<? extends T> registry = this.registryFunction.apply(context);
         if (registry == null) {
             return Collections.emptyList();
@@ -109,7 +111,10 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
                         return x.value();
                     }
                     return null;
-                }).filter(Objects::nonNull).collect(Collectors.toList());
+                })
+                .filter(Objects::nonNull)
+                .map(SpongeCommandCompletion::new)
+                .collect(Collectors.toList());
     }
 
     @Override

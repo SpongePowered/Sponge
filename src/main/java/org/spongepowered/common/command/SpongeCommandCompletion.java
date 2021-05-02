@@ -22,43 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.parameter.managed.standard;
+package org.spongepowered.common.command;
 
-import com.google.common.collect.ImmutableList;
-import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.suggestion.Suggestion;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.CommandCause;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCompletion;
-import org.spongepowered.api.command.exception.ArgumentParseException;
-import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 
-public final class SpongeDataContainerValueParameter extends ResourceKeyedArgumentValueParser<DataContainer> {
+public final class SpongeCommandCompletion implements CommandCompletion {
 
-    public SpongeDataContainerValueParameter(final ResourceKey key) {
-        super(key);
+    public static SpongeCommandCompletion from(final @NonNull Suggestion suggestion) {
+        @Nullable Component tooltip = null;
+        if (suggestion.getTooltip() != null) {
+            tooltip = SpongeAdventure.asAdventure(suggestion.getTooltip());
+        }
+        return new SpongeCommandCompletion(suggestion.getText(), tooltip);
+    }
+
+    final String completion;
+    final @Nullable Component tooltip;
+
+    public SpongeCommandCompletion(final String completion) {
+        this(completion, null);
+    }
+
+    public SpongeCommandCompletion(final String completion, final @Nullable Component tooltip) {
+        this.completion = completion;
+        this.tooltip = tooltip;
     }
 
     @Override
-    public List<CommandCompletion> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
-        return ImmutableList.of();
+    public String completion() {
+        return this.completion;
     }
 
     @Override
-    public List<ArgumentType<?>> getClientCompletionArgumentType() {
-        return Collections.singletonList(Constants.Command.NBT_ARGUMENT_TYPE);
+    public Optional<Component> tooltip() {
+        return Optional.ofNullable(this.tooltip);
     }
 
-    @Override
-    public @NonNull Optional<? extends DataContainer> parseValue(
-            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
-        return Optional.of(reader.parseDataContainer());
-    }
 }

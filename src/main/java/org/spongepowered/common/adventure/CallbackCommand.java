@@ -30,6 +30,7 @@ import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -37,6 +38,7 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.util.TypeTokens;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 
 import java.time.Duration;
 import java.util.List;
@@ -79,13 +81,14 @@ public final class CallbackCommand {
 
     private final class CallbackValueParameter implements ValueParameter<Consumer<CommandCause>> {
         @Override
-        public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+        public List<CommandCompletion> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
             return CallbackCommand.this.callbacks
                     .asMap()
                     .keySet()
                     .stream()
                     .map(UUID::toString)
                     .filter(string -> string.startsWith(currentInput))
+                    .map(SpongeCommandCompletion::new)
                     .collect(Collectors.toList());
         }
 

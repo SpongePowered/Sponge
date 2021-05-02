@@ -26,10 +26,12 @@ package org.spongepowered.common.command.parameter.managed.standard;
 
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 
 import java.util.Collection;
@@ -72,8 +74,10 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
     }
 
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandContext context, final String currentInput) {
-        return this.choices.get().stream().filter(x -> x.startsWith(currentInput)).collect(Collectors.toList());
+    public List<CommandCompletion> complete(final @NonNull CommandContext context, final String currentInput) {
+        return this.choices.get().stream().filter(x -> x.startsWith(currentInput))
+                .map(SpongeCommandCompletion::new)
+                .collect(Collectors.toList());
     }
 
     @Override

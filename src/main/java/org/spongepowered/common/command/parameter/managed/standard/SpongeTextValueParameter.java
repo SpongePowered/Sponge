@@ -30,6 +30,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.serializer.ComponentSerializer;
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -60,7 +61,7 @@ public final class SpongeTextValueParameter extends AbstractArgumentParser<Compo
     }
 
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+    public List<CommandCompletion> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         return ImmutableList.of();
     }
 

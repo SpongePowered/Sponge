@@ -29,6 +29,7 @@ import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
@@ -154,7 +155,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
                 completer = completers.get(0);
             } else {
                 completer = (context, currentInput) -> {
-                    final ImmutableList.Builder<String> builder = ImmutableList.builder();
+                    final ImmutableList.Builder<CommandCompletion> builder = ImmutableList.builder();
                     for (final ValueCompleter valueCompleter : completers) {
                         builder.addAll(valueCompleter.complete(context, currentInput));
                     }

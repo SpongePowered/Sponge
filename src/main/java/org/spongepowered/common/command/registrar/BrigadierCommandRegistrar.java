@@ -35,6 +35,7 @@ import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
@@ -43,6 +44,7 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.brigadier.tree.SpongeLiteralCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongePermissionWrappedLiteralCommandNode;
@@ -187,16 +189,16 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     }
 
     @Override
-    public @NonNull List<String> suggestions(
+    public List<CommandCompletion> complete(
             final @NonNull CommandCause cause,
             final @NonNull CommandMapping mapping,
             final @NonNull String command,
             final @NonNull String arguments) {
+
         final CompletableFuture<Suggestions> suggestionsCompletableFuture =
                 this.dispatcher.getCompletionSuggestions(
                         this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause, true));
-        // TODO: Fix so that we keep suggestions in the Mojang format?
-        return suggestionsCompletableFuture.join().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
+        return suggestionsCompletableFuture.join().getList().stream().map(SpongeCommandCompletion::from).collect(Collectors.toList());
     }
 
     @Override

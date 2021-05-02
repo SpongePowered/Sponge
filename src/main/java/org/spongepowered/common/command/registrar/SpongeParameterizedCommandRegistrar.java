@@ -32,6 +32,7 @@ import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
@@ -39,6 +40,7 @@ import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.SpongeParameterizedCommand;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
@@ -126,7 +128,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
     }
 
     @Override
-    public @NonNull List<String> suggestions(
+    public List<CommandCompletion> complete(
             final @NonNull CommandCause cause,
             final @NonNull CommandMapping mapping,
             final @NonNull String command,
@@ -136,7 +138,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
             return dispatcher.getCompletionSuggestions(
                     dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause)
             ).join().getList().stream()
-                    .map(Suggestion::getText)
+                    .map(SpongeCommandCompletion::from)
                     .collect(Collectors.toList());
         } catch (final Exception e) {
             return Collections.emptyList();

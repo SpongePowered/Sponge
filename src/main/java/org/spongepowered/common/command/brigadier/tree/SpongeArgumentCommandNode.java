@@ -36,7 +36,6 @@ import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
@@ -46,11 +45,14 @@ import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
@@ -83,9 +85,9 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
         }
 
         return (context, builder) -> {
-            final List<String> suggestions = completer.complete((org.spongepowered.api.command.parameter.CommandContext) context, builder.getRemaining());
-            for (final String suggestion : suggestions) {
-                builder.suggest(suggestion);
+            final List<CommandCompletion> suggestions = completer.complete((org.spongepowered.api.command.parameter.CommandContext) context, builder.getRemaining());
+            for (final CommandCompletion suggestion : suggestions) {
+                builder.suggest(suggestion.completion(), suggestion.tooltip().map(SpongeAdventure::asVanilla).orElse(null));
             }
             return builder.buildFuture();
         };
@@ -345,16 +347,16 @@ public final class SpongeArgumentCommandNode<T> extends ArgumentCommandNode<Comm
             final CompletableFuture<Suggestions> suggestions) {
         if (this.modifier != null) {
             return suggestions.thenApply(x -> {
-                final List<String> originalSuggestions =
-                        x.getList().stream().map(Suggestion::getText).collect(Collectors.toList());
-                final List<String> modifiedSuggestions =
+                final List<CommandCompletion> originalSuggestions =
+                        x.getList().stream().map(SpongeCommandCompletion::from).collect(Collectors.toList());
+                final List<CommandCompletion> modifiedSuggestions =
                         this.modifier.modifyCompletion((org.spongepowered.api.command.parameter.CommandContext) context, suggestionsBuilder.getRemaining(), new ArrayList<>(originalSuggestions));
                 if (originalSuggestions.equals(modifiedSuggestions)) {
                     return x;
                 }
                 final SuggestionsBuilder newBuilder = suggestionsBuilder.restart();
-                for (final String suggestion : modifiedSuggestions) {
-                    newBuilder.suggest(suggestion);
+                for (final CommandCompletion suggestion : modifiedSuggestions) {
+                    newBuilder.suggest(suggestion.completion(), suggestion.tooltip().map(SpongeAdventure::asVanilla).orElse(null));
                 }
                 return newBuilder.build();
             });

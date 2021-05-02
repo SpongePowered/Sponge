@@ -36,6 +36,7 @@ import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
@@ -131,6 +132,7 @@ import org.spongepowered.common.advancement.criterion.SpongeScoreCriterionBuilde
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
+import org.spongepowered.common.command.SpongeCommandCompletionFactory;
 import org.spongepowered.common.command.SpongeParameterizedCommandBuilder;
 import org.spongepowered.common.command.parameter.SpongeParameterKeyBuilder;
 import org.spongepowered.common.command.parameter.flag.SpongeFlagBuilder;

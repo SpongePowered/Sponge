@@ -35,6 +35,7 @@ import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -42,6 +43,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
@@ -126,11 +128,11 @@ public class StandardArgumentParser<S, T> implements ArgumentParser<T>, ValuePar
     }
 
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
+    public List<CommandCompletion> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
         final SuggestionsBuilder suggestionsBuilder = new SuggestionsBuilder(currentInput, 0);
         this.listSuggestions(
                 new SpongeCommandContextBuilder(null, (CommandSourceStack) context, new RootCommandNode<>(), 0).build(currentInput), suggestionsBuilder);
-        return suggestionsBuilder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
+        return suggestionsBuilder.build().getList().stream().map(SpongeCommandCompletion::from).collect(Collectors.toList());
     }
 
     @Override

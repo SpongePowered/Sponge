@@ -108,6 +108,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.command.registrar.BrigadierBasedRegistrar;
 import org.spongepowered.common.data.value.ImmutableSpongeListValue;
@@ -197,7 +198,9 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
                 if (mapping.registrar().canExecute(cause, mapping)) {
                     try {
                         final SuggestionsBuilder builder = new SuggestionsBuilder(rawCommand, rawCommand.lastIndexOf(" ") + 1);
-                        mapping.registrar().suggestions(cause, mapping, command[0], command[1]).forEach(builder::suggest);
+                        mapping.registrar().complete(cause, mapping, command[0], command[1])
+                                .forEach(completion -> builder.suggest(completion.completion(),
+                                            completion.tooltip().map(SpongeAdventure::asVanilla).orElse(null)));
                         this.connection.send(new ClientboundCommandSuggestionsPacket(packet.getId(), builder.build()));
                     } catch (final CommandException e) {
                         cause.sendMessage(Identity.nil(), Component.text("Unable to create suggestions for your tab completion"));

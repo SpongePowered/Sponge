@@ -31,10 +31,12 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.registrar.tree.ClientSuggestionProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 
 import java.util.Collections;
 import java.util.List;
@@ -51,10 +53,11 @@ public abstract class SuggestionProviders_WrapperMixin_API implements ClientSugg
 
     @SuppressWarnings("unchecked")
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+    public List<CommandCompletion> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         try {
             return this.shadow$getSuggestions((com.mojang.brigadier.context.CommandContext<SharedSuggestionProvider>) context,
-                    new SuggestionsBuilder(currentInput, 0)).join().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
+                    new SuggestionsBuilder(currentInput, 0)).join().getList().stream()
+                        .map(SpongeCommandCompletion::from).collect(Collectors.toList());
         } catch (final Exception e) {
             return Collections.emptyList();
         }

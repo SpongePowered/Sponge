@@ -28,6 +28,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
 import org.spongepowered.common.util.Constants;
@@ -44,7 +45,7 @@ public abstract class ResourceKeyedZeroAdvanceValueParameter<T> extends Resource
     }
 
     @Override
-    public final @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+    public final List<CommandCompletion> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
         return Collections.emptyList();
     }
 

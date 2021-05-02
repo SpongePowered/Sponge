@@ -27,6 +27,7 @@ package org.spongepowered.common.command.parameter.managed.standard;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
@@ -44,7 +45,7 @@ public final class SpongeNoneValueParameter extends ResourceKeyedArgumentValuePa
     }
 
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+    public List<CommandCompletion> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
         return Collections.emptyList();
     }
 

@@ -28,6 +28,7 @@ import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.exception.CommandPermissionException;
@@ -92,10 +93,10 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
     }
 
     @Override
-    public List<String> suggestions(final CommandCause cause, final CommandMapping mapping, final String command, final String arguments) throws CommandException {
+    public List<CommandCompletion> complete(final CommandCause cause, final CommandMapping mapping, final String command, final String arguments) throws CommandException {
         final Command.Raw commandToExecute = this.commands.get(mapping);
         if (commandToExecute.canExecute(cause)) {
-            return commandToExecute.suggestions(cause, new SpongeStringReader(arguments));
+            return commandToExecute.complete(cause, new SpongeStringReader(arguments));
         }
         return Collections.emptyList();
     }

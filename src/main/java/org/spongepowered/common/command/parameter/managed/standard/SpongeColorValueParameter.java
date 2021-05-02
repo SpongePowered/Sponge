@@ -27,7 +27,6 @@ package org.spongepowered.common.command.parameter.managed.standard;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.Component;
@@ -36,12 +35,12 @@ import net.minecraft.commands.arguments.ColorArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.accessor.ChatFormattingAccessor;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.util.Constants;
 
@@ -130,10 +129,11 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
     }
 
     @Override
-    public List<String> complete(final CommandCause context, final String currentInput) {
+    public List<CommandCompletion> complete(final CommandCause context, final String currentInput) {
         return SpongeColorValueParameter.CHAT_FORMATTING_NAMES
                 .stream()
                 .filter(x -> x.startsWith(currentInput.toLowerCase(Locale.ROOT)))
+                .map(SpongeCommandCompletion::new)
                 .collect(Collectors.toList());
     }
 

@@ -22,42 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.parameter.managed.standard;
+package org.spongepowered.common.command;
 
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.CommandCause;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCompletion;
-import org.spongepowered.api.command.exception.ArgumentParseException;
-import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
-import java.math.BigInteger;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-
-public final class SpongeBigIntegerValueParameter extends ResourceKeyedArgumentValueParser<BigInteger> {
-
-    public SpongeBigIntegerValueParameter(final ResourceKey key) {
-        super(key);
-    }
+public final class SpongeCommandCompletionFactory implements CommandCompletion.Factory {
 
     @Override
-    public @NonNull Optional<? extends BigInteger> parseValue(
-            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
-        final String result = reader.parseString();
-        try {
-            return Optional.of(new BigInteger(result));
-        } catch (final NumberFormatException ex) {
-            throw reader.createException(Component.text(ex.getMessage()));
+    @NonNull
+    public CommandCompletion completion(final @NonNull String completion, final @Nullable Component tooltip) {
+        if (completion == null || completion.isEmpty()) {
+            throw new IllegalStateException("The completion may not be null or empty.");
         }
+        return new SpongeCommandCompletion(completion, tooltip);
     }
-
-    @Override
-    public List<CommandCompletion> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
-        return Collections.emptyList();
-    }
-
 }

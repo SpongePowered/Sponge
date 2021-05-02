@@ -24,18 +24,20 @@
  */
 package org.spongepowered.common.command.sponge;
 
-import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.List;
+import java.util.Locale;
 import java.util.Map;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -43,6 +45,7 @@ import java.util.stream.Collectors;
 public final class FilteredPluginContainerParameter implements ValueParameter<PluginContainer> {
 
     private final Map<String, PluginContainer> validPluginContainers = FilteredPluginContainerParameter.getValidContainers();
+    private final List<CommandCompletion> completions = FilteredPluginContainerParameter.createCompletions(this.validPluginContainers);
 
     private static Map<String, PluginContainer> getValidContainers() {
         return Launch.getInstance().getPluginManager().plugins()
@@ -51,9 +54,19 @@ public final class FilteredPluginContainerParameter implements ValueParameter<Pl
                 .collect(Collectors.toMap(x -> x.metadata().id(), x -> x));
     }
 
+    private static List<CommandCompletion> createCompletions(final Map<String, PluginContainer> pluginContainers) {
+        return pluginContainers.entrySet()
+                .stream()
+                .map(entry -> {
+                    final Component tooltip = Component.text(entry.getValue().metadata().name().orElse(entry.getKey()));
+                    return new SpongeCommandCompletion(entry.getKey(), tooltip);
+                })
+                .collect(Collectors.toList());
+    }
+
     @Override
-    public List<String> complete(final CommandContext context, String currentInput) {
-        return ImmutableList.copyOf(this.validPluginContainers.keySet());
+    public List<CommandCompletion> complete(final CommandContext context, final String currentInput) {
+        return this.completions.stream().filter(x -> x.completion().startsWith(currentInput.toLowerCase(Locale.ROOT))).collect(Collectors.toList());
     }
 
     @Override
