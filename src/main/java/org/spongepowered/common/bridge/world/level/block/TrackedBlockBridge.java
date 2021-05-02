@@ -28,4 +28,6 @@ public interface TrackedBlockBridge {
 
     boolean bridge$overridesNeighborNotificationLogic();
 
+    boolean bridge$hasEntityInsideLogic();
+
 }

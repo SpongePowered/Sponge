@@ -24,23 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.CombatEntry;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -63,6 +46,25 @@ import org.spongepowered.common.event.tracking.context.transaction.type.Transact
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.CombatEntry;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
@@ -292,6 +294,26 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final AddBlockEventTransaction transaction = new AddBlockEventTransaction(original, blockEvent);
         this.logTransaction(transaction);
     }
+
+    public void logScheduledUpdate(final ServerLevel serverWorld, final TickNextTickData<?> data) {
+        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
+        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
+        final @Nullable BlockEntity tileEntity = serverWorld.getBlockEntity(data.pos);
+        final BlockState existing = serverWorld.getBlockState(data.pos);
+        final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
+            existing,
+            data.pos,
+            BlockChangeFlags.NONE,
+            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
+            tileEntity,
+            worldSupplier,
+            Optional::empty, Optional::empty
+        );
+        original.blockChange = BlockChange.MODIFY;
+        final ScheduleUpdateTransaction transaction = new ScheduleUpdateTransaction(original, data);
+        this.logTransaction(transaction);
+    }
+
     @SuppressWarnings({"ConstantConditions"})
     public @Nullable EffectTransactor ensureEntityDropTransactionEffect(final Entity entity) {
         if (this.tail != null) {

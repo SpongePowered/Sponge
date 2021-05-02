@@ -24,6 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -48,12 +54,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.chunk.LevelChunk;
 
 public abstract class PacketState<P extends PacketContext<P>> extends PooledPhaseState<P> implements IPhaseState<P> {
 
@@ -109,6 +109,13 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         final P context, final net.minecraft.world.entity.Entity entityToSpawn
     ) {
         return SpawnTypes.PLACEMENT;
+    }
+
+    @Override
+    public void associateScheduledTickUpdate(
+        final P asContext, final ServerLevel level, final TickNextTickData<?> entry
+    ) {
+        asContext.getTransactor().logScheduledUpdate(level, entry);
     }
 
     public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet, final P context) {

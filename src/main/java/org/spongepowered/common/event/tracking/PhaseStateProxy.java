@@ -25,6 +25,15 @@
 package org.spongepowered.common.event.tracking;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.loot.LootContext;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -39,9 +48,9 @@ import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
@@ -56,15 +65,6 @@ import java.util.Random;
 import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.TickNextTickData;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.storage.loot.LootContext;
 
 public interface PhaseStateProxy<C extends PhaseContext<C>> {
 
@@ -480,19 +480,19 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().recordsEntitySpawns(this.asContext());
     }
 
-    default void populateLootContext(LootContext.Builder lootBuilder) {
+    default void populateLootContext(final LootContext.Builder lootBuilder) {
         this.getState().populateLootContext(this.asContext(), lootBuilder);
     }
 
-    default Operation getBlockOperation(SpongeBlockSnapshot original, BlockChange blockChange) {
+    default Operation getBlockOperation(final SpongeBlockSnapshot original, final BlockChange blockChange) {
         return this.getState().getBlockOperation(original, blockChange);
     }
 
-    default void foldContextForThread(TickTaskBridge returnValue) {
+    default void foldContextForThread(final TickTaskBridge returnValue) {
         this.getState().foldContextForThread(this.asContext(), returnValue);
     }
 
-    default void associateScheduledTickUpdate(TickNextTickData<?> entry) {
-        this.getState().associateScheduledTickUpdate(this.asContext(), entry);
+    default void associateScheduledTickUpdate(final ServerLevel level, final TickNextTickData<?> entry) {
+        this.getState().associateScheduledTickUpdate(this.asContext(), level, entry);
     }
 }
