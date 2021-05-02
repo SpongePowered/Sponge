@@ -141,6 +141,9 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.20.0")
     implementation("javax.inject:javax.inject:1")
 
+    // Timings
+    implementation("org.spongepowered:timings:1.0-SNAPSHOT")
+
     // ASM - required for generating event listeners
     implementation("org.ow2.asm:asm-util:$asmVersion")
     implementation("org.ow2.asm:asm-tree:$asmVersion")
