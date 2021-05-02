@@ -60,7 +60,7 @@ public final class AppCommandLine {
         boolean manifestTarget = false;
         if (launchTarget == null) {
             final Path executionJar = Paths.get(AppCommandLine.class.getProtectionDomain().getCodeSource().getLocation().toURI());
-            try (final FileSystem system = FileSystems.newFileSystem(executionJar, null)) {
+            try (final FileSystem system = FileSystems.newFileSystem(executionJar, (ClassLoader) null)) {
                 final Path manifestFile = system.getPath("META-INF", "MANIFEST.MF");
                 if (Files.notExists(manifestFile)) {
                     throw new RuntimeException("The installer contains no manifest!");
