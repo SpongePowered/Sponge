@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.commands.arguments.selector;
 
-import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 
 @Mixin(EntitySelectorParser.class)
 public interface EntitySelectorParserAccessor {

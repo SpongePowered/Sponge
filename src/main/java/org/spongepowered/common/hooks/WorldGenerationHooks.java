@@ -25,11 +25,13 @@
 package org.spongepowered.common.hooks;
 
 import com.google.common.collect.ImmutableList;
-import java.util.List;
+
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.levelgen.structure.LegacyStructureDataHandler;
 import net.minecraft.world.level.storage.DimensionDataStorage;
+
+import java.util.List;
 
 public interface WorldGenerationHooks {
 

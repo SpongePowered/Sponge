@@ -24,16 +24,18 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import net.minecraft.world.level.BlockEventData;
-import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.PrettyPrinter;
+
+import net.minecraft.world.level.BlockEventData;
+import net.minecraft.world.level.block.state.BlockState;
 
 import java.util.Optional;
 import java.util.StringJoiner;

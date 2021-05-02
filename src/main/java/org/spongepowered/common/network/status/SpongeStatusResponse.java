@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.network.status;
 
-import net.minecraft.network.protocol.status.ServerStatus;
-import net.minecraft.server.MinecraftServer;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -38,6 +37,9 @@ import org.spongepowered.api.network.status.StatusResponse;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.util.NetworkUtil;
+
+import net.minecraft.network.protocol.status.ServerStatus;
+import net.minecraft.server.MinecraftServer;
 
 import java.net.InetSocketAddress;
 

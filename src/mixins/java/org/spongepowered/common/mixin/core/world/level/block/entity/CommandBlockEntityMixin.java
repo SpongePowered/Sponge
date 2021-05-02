@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.world.level.BaseCommandBlock;
-import net.minecraft.world.level.block.entity.CommandBlockEntity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
@@ -35,6 +32,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.level.BaseCommandBlock;
+import net.minecraft.world.level.block.entity.CommandBlockEntity;
 
 // TODO: dualspiral - should this go on the child CommandBlockLogic?
 @Mixin(CommandBlockEntity.class)

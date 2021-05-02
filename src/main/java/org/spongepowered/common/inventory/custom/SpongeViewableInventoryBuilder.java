@@ -26,6 +26,7 @@ package org.spongepowered.common.inventory.custom;
 
 import org.apache.commons.lang3.Validate;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.ContainerTypes;
@@ -70,6 +71,7 @@ import net.minecraft.world.inventory.SimpleContainerData;
 import net.minecraft.world.inventory.SmokerMenu;
 import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.trading.Merchant;
+
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;

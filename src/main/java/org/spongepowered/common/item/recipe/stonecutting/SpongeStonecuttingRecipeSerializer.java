@@ -25,12 +25,12 @@
 package org.spongepowered.common.item.recipe.stonecutting;
 
 import com.google.gson.JsonObject;
+
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
 import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
 import org.spongepowered.common.util.Constants;
 
-import java.util.function.Function;
 import net.minecraft.core.Registry;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.resources.ResourceLocation;
@@ -40,6 +40,8 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.item.crafting.SingleItemRecipe;
+
+import java.util.function.Function;
 
 public class SpongeStonecuttingRecipeSerializer<R extends SingleItemRecipe> implements RecipeSerializer<R> {
 

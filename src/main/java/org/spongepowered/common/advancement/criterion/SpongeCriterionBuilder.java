@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.advancement.criterion;
 
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
+
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionTriggerInstance;
 
 public class SpongeCriterionBuilder extends AbstractCriterionBuilder<AdvancementCriterion, AdvancementCriterion.Builder>
         implements AdvancementCriterion.Builder {

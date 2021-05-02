@@ -29,8 +29,9 @@ import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.common.accessor.world.entity.animal.FoxAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-import java.util.Optional;
 import net.minecraft.world.entity.animal.Fox;
+
+import java.util.Optional;
 
 public final class FoxData {
 

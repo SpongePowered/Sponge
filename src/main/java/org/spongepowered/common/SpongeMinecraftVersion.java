@@ -25,6 +25,7 @@
 package org.spongepowered.common;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.common.util.Constants;
 

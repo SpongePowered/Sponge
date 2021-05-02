@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.server.permission;
 
 import com.google.common.base.Preconditions;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;

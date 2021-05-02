@@ -25,8 +25,10 @@
 package org.spongepowered.common.relocate.co.aikar.timings;
 
 import co.aikar.timings.Timing;
-import net.minecraft.world.level.Level;
+
 import org.spongepowered.api.world.server.ServerWorld;
+
+import net.minecraft.world.level.Level;
 
 /**
  * Set of timers per world, to track world specific Timings.

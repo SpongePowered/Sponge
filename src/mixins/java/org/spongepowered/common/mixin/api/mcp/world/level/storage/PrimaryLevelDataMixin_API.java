@@ -25,12 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.world.level.storage;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
-import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
@@ -45,6 +41,12 @@ import org.spongepowered.common.accessor.world.level.LevelSettingsAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.server.BootstrapProperties;
+
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
+import net.minecraft.world.level.storage.PrimaryLevelData;
 
 import java.util.Objects;
 import java.util.Optional;

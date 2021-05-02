@@ -25,8 +25,8 @@
 package org.spongepowered.common.profile;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
-import net.minecraft.server.MinecraftServer;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Server;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
@@ -37,6 +37,8 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCache_GameProfileInfoBridge;
 import org.spongepowered.common.util.UsernameCache;
+
+import net.minecraft.server.MinecraftServer;
 
 import java.time.Instant;
 import java.util.ArrayList;

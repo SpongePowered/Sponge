@@ -24,14 +24,8 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.ImmutableStringReader;
-import com.mojang.brigadier.arguments.ArgumentType;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import com.mojang.brigadier.suggestion.Suggestions;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.kyori.adventure.text.Component;
-import net.minecraft.commands.arguments.OperationArgument;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -40,6 +34,14 @@ import org.spongepowered.api.command.parameter.managed.operator.Operator;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.accessor.commands.arguments.OperationArgumentAccessor;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.ImmutableStringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import com.mojang.brigadier.suggestion.Suggestions;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.commands.arguments.OperationArgument;
 
 import java.util.Collections;
 import java.util.List;

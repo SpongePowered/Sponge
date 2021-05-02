@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 import org.spongepowered.api.block.entity.EndPortal;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.TheEndPortalBlockEntity;
 
 @Mixin(TheEndPortalBlockEntity.class)
 public abstract class TheEndPortalBlockEntityMixin_API extends BlockEntityMixin_API implements EndPortal {

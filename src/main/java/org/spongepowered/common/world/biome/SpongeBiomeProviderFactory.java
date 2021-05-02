@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.world.biome;
 
-import com.mojang.datafixers.util.Pair;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.AttributedBiome;
@@ -40,11 +39,7 @@ import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSource
 import org.spongepowered.common.accessor.world.level.biome.TheEndBiomeSourceAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.function.Supplier;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Registry;
 import net.minecraft.core.WritableRegistry;
 import net.minecraft.resources.ResourceLocation;
@@ -53,6 +48,12 @@ import net.minecraft.world.level.biome.FixedBiomeSource;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
 import net.minecraft.world.level.biome.TheEndBiomeSource;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {

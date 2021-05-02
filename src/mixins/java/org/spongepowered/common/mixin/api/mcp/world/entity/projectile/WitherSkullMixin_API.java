@@ -29,9 +29,10 @@ import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.entity.projectile.WitherSkullBridge;
 
-import java.util.Set;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.GameRules;
+
+import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.projectile.WitherSkull.class)
 public abstract class WitherSkullMixin_API extends AbstractHurtingProjectileMixin_API implements WitherSkull {

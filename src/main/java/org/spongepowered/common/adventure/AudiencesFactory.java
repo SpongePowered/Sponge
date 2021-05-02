@@ -26,6 +26,7 @@ package org.spongepowered.common.adventure;
 
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.ForwardingAudience;
+
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;

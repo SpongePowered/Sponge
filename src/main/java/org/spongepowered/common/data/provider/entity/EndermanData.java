@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.monster.EnderMan;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.monster.EnderManAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.entity.monster.EnderMan;
 
 public final class EndermanData {
 

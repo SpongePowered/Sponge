@@ -27,9 +27,10 @@ package org.spongepowered.common.accessor.world.entity.raid;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.Map;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
+
+import java.util.Map;
 
 @Mixin(Raids.class)
 public interface RaidsAccessor {

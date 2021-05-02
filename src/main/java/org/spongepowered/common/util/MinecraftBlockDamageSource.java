@@ -25,11 +25,13 @@
 package org.spongepowered.common.util;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.world.server.ServerLocation;
 
-import java.util.Objects;
 import net.minecraft.world.damagesource.DamageSource;
+
+import java.util.Objects;
 
 public final class MinecraftBlockDamageSource extends DamageSource {
 

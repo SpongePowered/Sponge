@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.BannerPattern;
 import org.spongepowered.api.data.type.BannerPatternShape;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.BannerPattern;
 
 @Mixin(BannerPattern.class)
 public abstract class BannerPatternMixin_API implements BannerPatternShape {

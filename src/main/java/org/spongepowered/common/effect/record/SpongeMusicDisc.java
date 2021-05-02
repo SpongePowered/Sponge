@@ -27,6 +27,7 @@ package org.spongepowered.common.effect.record;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.accessor.world.item.RecordItemAccessor;

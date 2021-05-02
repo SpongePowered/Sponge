@@ -26,6 +26,7 @@ package org.spongepowered.common.state;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.state.State;
 import org.spongepowered.api.state.StateContainer;

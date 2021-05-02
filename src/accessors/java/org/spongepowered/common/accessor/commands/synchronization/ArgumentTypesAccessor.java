@@ -28,9 +28,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.Map;
 import net.minecraft.commands.synchronization.ArgumentTypes;
 import net.minecraft.resources.ResourceLocation;
+
+import java.util.Map;
 
 @Mixin(ArgumentTypes.class)
 public interface ArgumentTypesAccessor {

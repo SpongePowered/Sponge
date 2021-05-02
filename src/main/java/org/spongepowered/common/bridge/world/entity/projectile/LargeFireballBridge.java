@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.entity.projectile;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface LargeFireballBridge {
 

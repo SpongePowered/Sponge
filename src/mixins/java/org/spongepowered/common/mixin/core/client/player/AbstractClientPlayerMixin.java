@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.client.player;
 
-import net.minecraft.client.player.AbstractClientPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
+
+import net.minecraft.client.player.AbstractClientPlayer;
 
 @Mixin(AbstractClientPlayer.class)
 public abstract class AbstractClientPlayerMixin extends PlayerMixin {

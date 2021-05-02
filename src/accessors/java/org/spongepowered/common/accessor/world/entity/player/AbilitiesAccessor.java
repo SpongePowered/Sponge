@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.entity.player;
 
-import net.minecraft.world.entity.player.Abilities;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.entity.player.Abilities;
 
 @Mixin(Abilities.class)
 public interface AbilitiesAccessor {

@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.TropicalFish;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.data.type.TropicalFishShape;
 import org.spongepowered.common.accessor.world.entity.animal.TropicalFishAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.entity.animal.TropicalFish;
 
 public final class TropicalFishData {
 

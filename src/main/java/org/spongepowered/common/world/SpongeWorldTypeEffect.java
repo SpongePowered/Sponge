@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.world;
 
-import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
+
+import net.minecraft.world.level.dimension.DimensionType;
 
 public final class SpongeWorldTypeEffect extends AbstractResourceKeyed implements WorldTypeEffect {
 

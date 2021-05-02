@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,6 +36,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin_Timings;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 
 import java.util.function.BooleanSupplier;
 

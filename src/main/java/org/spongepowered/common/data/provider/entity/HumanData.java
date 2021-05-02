@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import com.mojang.authlib.properties.Property;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.living.human.HumanEntity;
+
+import com.mojang.authlib.properties.Property;
 
 public final class HumanData {
 

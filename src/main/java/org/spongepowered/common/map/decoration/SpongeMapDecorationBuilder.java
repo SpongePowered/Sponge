@@ -27,6 +27,7 @@ package org.spongepowered.common.map.decoration;
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;

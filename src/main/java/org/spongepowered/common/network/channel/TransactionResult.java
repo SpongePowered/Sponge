@@ -25,6 +25,7 @@
 package org.spongepowered.common.network.channel;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.ChannelException;
 

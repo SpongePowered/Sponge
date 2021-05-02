@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.server;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
 

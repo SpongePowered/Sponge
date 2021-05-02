@@ -24,21 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import net.minecraft.core.Registry;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityTypeBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.config.tracker.BlockEntityTrackerCategory;
 import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.plugin.PluginContainer;
+
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 @Mixin(BlockEntityType.class)
 public abstract class BlockEntityTypeMixin implements ResourceKeyBridge, BlockEntityTypeBridge {

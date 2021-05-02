@@ -27,6 +27,7 @@ package org.spongepowered.common.entity.ai.goal.builtin.creature.horse;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.Preconditions;
+
 import org.spongepowered.api.entity.ai.goal.builtin.creature.horse.RunAroundLikeCrazyGoal;
 import org.spongepowered.api.entity.living.animal.horse.HorseLike;
 

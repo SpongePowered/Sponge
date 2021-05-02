@@ -31,9 +31,10 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.player.SpongeUser;
 
+import net.minecraft.world.entity.player.Player;
+
 import java.time.Instant;
 import java.util.UUID;
-import net.minecraft.world.entity.player.Player;
 
 public final class IdentifiableData {
 

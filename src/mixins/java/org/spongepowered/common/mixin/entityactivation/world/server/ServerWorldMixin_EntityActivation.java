@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.entityactivation.world.server;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -34,6 +32,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 
 import java.util.function.BooleanSupplier;
 

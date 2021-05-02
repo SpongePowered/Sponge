@@ -29,8 +29,9 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.BlockEntityInventory;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Optional;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+
+import java.util.Optional;
 
 @Mixin(BaseContainerBlockEntity.class)
 public abstract class BaseContainerBlockEntityMixin_Carried_Inventory_API<T extends BlockEntity & Carrier> implements BlockEntityInventory<T> {

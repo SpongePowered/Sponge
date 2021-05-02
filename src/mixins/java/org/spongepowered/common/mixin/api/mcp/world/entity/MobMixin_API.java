@@ -33,10 +33,11 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Optional;
-import java.util.Set;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
+
+import java.util.Optional;
+import java.util.Set;
 
 @SuppressWarnings("unchecked")
 @Mixin(Mob.class)

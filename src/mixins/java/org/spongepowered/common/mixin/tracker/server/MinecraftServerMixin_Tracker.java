@@ -24,12 +24,8 @@
  */
 package org.spongepowered.common.mixin.tracker.server;
 
-import net.minecraft.CrashReport;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.TickTask;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,6 +40,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.util.thread.BlockableEventLoopMixin_Tracker;
+
+import net.minecraft.CrashReport;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.TickTask;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
+
 import java.util.function.BooleanSupplier;
 
 @SuppressWarnings("rawtypes")

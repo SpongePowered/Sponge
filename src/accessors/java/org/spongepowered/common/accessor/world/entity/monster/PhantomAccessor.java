@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.entity.monster;
 
-import net.minecraft.world.entity.monster.Phantom;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.entity.monster.Phantom;
 
 @Mixin(Phantom.class)
 public interface PhantomAccessor {

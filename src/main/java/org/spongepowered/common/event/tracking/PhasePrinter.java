@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
@@ -44,6 +45,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
+
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.List;

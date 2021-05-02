@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.util.PositionOutOfBoundsException;
 import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.common.util.VecHelper;

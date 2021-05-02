@@ -25,15 +25,17 @@
 package org.spongepowered.common.accessor.world.item.crafting;
 
 import com.google.gson.JsonArray;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.Map;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.ShapedRecipe;
+
+import java.util.Map;
 
 @Mixin(ShapedRecipe.class)
 public interface ShapedRecipeAccessor {

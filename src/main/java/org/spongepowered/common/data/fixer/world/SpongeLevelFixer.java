@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.data.fixer.world;
 
+import org.spongepowered.common.util.Constants;
+
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.OpticFinder;
@@ -33,7 +35,6 @@ import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import com.mojang.datafixers.types.templates.List;
 import net.minecraft.util.datafix.fixes.References;
-import org.spongepowered.common.util.Constants;
 
 public final class SpongeLevelFixer extends DataFix {
 

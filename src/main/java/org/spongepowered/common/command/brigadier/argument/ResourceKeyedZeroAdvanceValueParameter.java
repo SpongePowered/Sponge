@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.command.brigadier.argument;
 
-import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionType;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
 import org.spongepowered.common.util.Constants;
+
+import com.mojang.brigadier.arguments.ArgumentType;
 
 import java.util.Collections;
 import java.util.List;

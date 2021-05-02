@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.network.protocol.game;
 
-import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.network.protocol.game.ServerboundResourcePackPacket;
 
 @Mixin(ServerboundResourcePackPacket.class)
 public interface ServerboundResourcePackPacketAccessor {

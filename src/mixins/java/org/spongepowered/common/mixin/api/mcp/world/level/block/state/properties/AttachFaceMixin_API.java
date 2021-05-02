@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.state.properties;
 
-import net.minecraft.world.level.block.state.properties.AttachFace;
 import org.spongepowered.api.data.type.AttachmentSurface;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.state.properties.AttachFace;
 
 @Mixin(AttachFace.class)
 public abstract class AttachFaceMixin_API implements AttachmentSurface {

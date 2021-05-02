@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.boss.enderdragon;
 
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.ImmutableSet.Builder;
+
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragon;
 import org.spongepowered.api.entity.living.monster.boss.dragon.EnderDragonPart;
@@ -34,8 +35,10 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.world.entity.MobMixin_API;
-import java.util.Set;
+
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhaseManager;
+
+import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.boss.enderdragon.EnderDragon.class)
 public abstract class EnderDragonMixin_API extends MobMixin_API implements EnderDragon {

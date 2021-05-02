@@ -26,8 +26,9 @@ package org.spongepowered.common.effect.particle;
 
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.List;
 import net.minecraft.network.protocol.Packet;
+
+import java.util.List;
 
 interface CachedParticlePacket {
 

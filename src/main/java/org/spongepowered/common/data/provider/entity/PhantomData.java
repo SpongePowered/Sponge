@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.monster.Phantom;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.common.accessor.world.entity.monster.PhantomAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.entity.monster.Phantom;
 
 public final class PhantomData {
 

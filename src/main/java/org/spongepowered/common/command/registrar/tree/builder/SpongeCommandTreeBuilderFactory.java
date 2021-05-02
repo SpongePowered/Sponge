@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.registrar.tree.builder;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
 public final class SpongeCommandTreeBuilderFactory implements CommandTreeNode.NodeFactory {

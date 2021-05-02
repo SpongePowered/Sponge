@@ -25,9 +25,8 @@
 package org.spongepowered.common.map;
 
 import com.google.common.collect.BiMap;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.saveddata.maps.MapIndex;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.MapStorage;
@@ -38,6 +37,9 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.saveddata.maps.MapIndex;
 
 import java.util.Collection;
 import java.util.HashMap;

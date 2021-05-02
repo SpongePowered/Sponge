@@ -26,8 +26,9 @@ package org.spongepowered.common.command.brigadier.tree;
 
 import com.mojang.brigadier.builder.RequiredArgumentBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
-import java.util.Objects;
 import net.minecraft.commands.SharedSuggestionProvider;
+
+import java.util.Objects;
 
 // Used to differentiate between custom suggestions
 public final class SuggestionArgumentNode<T> extends ArgumentCommandNode<SharedSuggestionProvider, T> {

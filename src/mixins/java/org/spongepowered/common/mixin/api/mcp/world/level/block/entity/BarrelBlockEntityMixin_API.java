@@ -25,10 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
 import org.spongepowered.api.block.entity.carrier.Barrel;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
 import net.minecraft.world.level.block.entity.BarrelBlockEntity;
 
 @Mixin(BarrelBlockEntity.class)

@@ -28,8 +28,9 @@ import org.spongepowered.api.block.entity.Bed;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
 import net.minecraft.world.level.block.entity.BedBlockEntity;
+
+import java.util.Set;
 
 @Mixin(BedBlockEntity.class)
 public abstract class BedBlockEntityMixin_API extends BlockEntityMixin_API implements Bed {

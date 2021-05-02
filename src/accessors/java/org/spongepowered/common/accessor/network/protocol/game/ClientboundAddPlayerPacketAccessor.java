@@ -27,8 +27,9 @@ package org.spongepowered.common.accessor.network.protocol.game;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.UUID;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
+
+import java.util.UUID;
 
 @Mixin(ClientboundAddPlayerPacket.class)
 public interface ClientboundAddPlayerPacketAccessor {

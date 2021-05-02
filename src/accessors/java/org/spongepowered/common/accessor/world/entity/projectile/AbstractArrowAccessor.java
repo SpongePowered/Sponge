@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.entity.projectile;
 
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.entity.projectile.AbstractArrow;
 
 @Mixin(AbstractArrow.class)
 public interface AbstractArrowAccessor {

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.entitycollision.entity;
 
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
@@ -44,6 +42,9 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.config.inheritable.EntityCollisionCategory;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
+
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.item.ItemStack;
 
 @Mixin(value = net.minecraft.world.entity.Entity.class, priority = 1002)
 public abstract class EntityMixin_EntityCollision implements CollisionCapabilityBridge {

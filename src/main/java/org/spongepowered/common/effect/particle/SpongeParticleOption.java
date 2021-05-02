@@ -25,6 +25,7 @@
 package org.spongepowered.common.effect.particle;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.effect.particle.ParticleOption;
 
 import java.util.function.Function;

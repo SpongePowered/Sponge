@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.projectile;
 
-import net.minecraft.world.entity.projectile.ThrownTrident;
 import org.spongepowered.api.entity.projectile.arrow.Trident;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.projectile.ThrownTrident;
 
 @Mixin(ThrownTrident.class)
 public abstract class ThrownTridentMixin_API extends AbstractArrowMixin_API implements Trident {

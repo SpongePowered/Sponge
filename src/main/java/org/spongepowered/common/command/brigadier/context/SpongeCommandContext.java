@@ -26,6 +26,18 @@ package org.spongepowered.common.command.brigadier.context;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.kyori.adventure.identity.Identified;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.api.service.permission.Subject;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.context.CommandContext;
@@ -33,17 +45,7 @@ import com.mojang.brigadier.context.ParsedArgument;
 import com.mojang.brigadier.context.ParsedCommandNode;
 import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.tree.CommandNode;
-import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.kyori.adventure.identity.Identified;
-import net.kyori.adventure.identity.Identity;
-import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.parameter.managed.Flag;
-import org.spongepowered.api.service.permission.Subject;
 
 import java.util.Collection;
 import java.util.List;

@@ -25,10 +25,12 @@
 package org.spongepowered.common.entity.ai.goal.builtin.creature;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+
 import org.spongepowered.api.entity.ai.goal.builtin.creature.AttackLivingGoal;
 import org.spongepowered.api.entity.living.Creature;
+
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 
 public final class SpongeAttackLivingGoalBuilder implements AttackLivingGoal.Builder {
 

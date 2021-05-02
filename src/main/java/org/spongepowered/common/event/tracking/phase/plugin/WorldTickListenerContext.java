@@ -27,11 +27,12 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import net.minecraft.world.level.Level;
 

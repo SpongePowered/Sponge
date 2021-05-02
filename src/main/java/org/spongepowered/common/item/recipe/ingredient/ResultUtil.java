@@ -27,6 +27,7 @@ package org.spongepowered.common.item.recipe.ingredient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -34,14 +35,15 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
-import java.io.IOException;
-import java.text.MessageFormat;
-import java.util.Map;
-import java.util.function.Function;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.GsonHelper;
 import net.minecraft.world.Container;
+
+import java.io.IOException;
+import java.text.MessageFormat;
+import java.util.Map;
+import java.util.function.Function;
 
 public final class ResultUtil {
 

@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.resourcepack;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class SpongeWorldResourcePack extends SpongeResourcePack {
 

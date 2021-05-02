@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.network.protocol.status;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.protocol.status.ServerStatus;
+
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.event.server.ClientPingServerEvent;
 import org.spongepowered.api.network.status.Favicon;
@@ -36,9 +36,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.protocol.status.ServerStatusBridge;
 
-import java.util.Optional;
+import net.minecraft.network.protocol.status.ServerStatus;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(ServerStatus.class)
 public abstract class ServerStatusMixin_API implements ClientPingServerEvent.Response {

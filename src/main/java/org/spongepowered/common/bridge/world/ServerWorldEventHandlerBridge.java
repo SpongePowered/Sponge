@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.bridge.world;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import net.minecraft.sounds.SoundSource;
 import net.minecraft.world.entity.player.Player;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface ServerWorldEventHandlerBridge {
 

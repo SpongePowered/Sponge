@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.stream;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 
 import java.util.Objects;

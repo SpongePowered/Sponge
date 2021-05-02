@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.world.entity.animal.Cat;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.CatType;
@@ -33,6 +31,9 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.MissingImplementationException;
+
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.world.entity.animal.Cat;
 
 public final class CatData {
 

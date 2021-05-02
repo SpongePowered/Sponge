@@ -25,12 +25,12 @@
 package org.spongepowered.common.bridge.advancements;
 
 import org.spongepowered.api.advancement.Advancement;
-import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 
-import java.util.Map;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
+
+import java.util.Map;
 
 public interface AdvancementProgressBridge {
 

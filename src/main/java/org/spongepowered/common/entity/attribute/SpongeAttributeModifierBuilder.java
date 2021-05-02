@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity.attribute;
 
 import com.google.common.base.Preconditions;
+
 import org.spongepowered.api.entity.attribute.AttributeModifier;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
 

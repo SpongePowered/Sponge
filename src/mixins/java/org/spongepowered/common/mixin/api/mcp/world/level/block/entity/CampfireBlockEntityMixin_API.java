@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 import org.spongepowered.api.block.entity.carrier.Campfire;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.CampfireBlockEntity;
 
 @Mixin(CampfireBlockEntity.class)
 public abstract class CampfireBlockEntityMixin_API extends BlockEntityMixin_API implements Campfire {

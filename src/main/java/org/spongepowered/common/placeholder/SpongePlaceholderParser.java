@@ -25,6 +25,7 @@
 package org.spongepowered.common.placeholder;
 
 import net.kyori.adventure.text.Component;
+
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 

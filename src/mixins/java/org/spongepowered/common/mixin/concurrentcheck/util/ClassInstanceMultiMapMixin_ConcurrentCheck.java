@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.concurrentcheck.util;
 
-import net.minecraft.util.ClassInstanceMultiMap;
 import org.spongepowered.api.Platform;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,6 +31,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.hooks.PlatformHooks;
+
+import net.minecraft.util.ClassInstanceMultiMap;
 
 @Mixin(ClassInstanceMultiMap.class)
 public abstract class ClassInstanceMultiMapMixin_ConcurrentCheck {

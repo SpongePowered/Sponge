@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
@@ -34,6 +33,8 @@ import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.DyeColorUtil;
+
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class TerracottaData {
 

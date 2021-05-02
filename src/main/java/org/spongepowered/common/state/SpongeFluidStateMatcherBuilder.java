@@ -25,6 +25,7 @@
 package org.spongepowered.common.state;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.state.StateMatcher;

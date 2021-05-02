@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.projectile.ThrowableProjectile;
-import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
-import net.minecraft.world.phys.HitResult;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,6 +32,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.projectile.ThrowableProjectile;
+import net.minecraft.world.level.block.entity.TheEndGatewayBlockEntity;
+import net.minecraft.world.phys.HitResult;
 
 @Mixin(ThrowableProjectile.class)
 public abstract class ThrowableProjectileMixin extends ProjectileMixin {

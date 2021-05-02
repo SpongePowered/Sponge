@@ -26,12 +26,14 @@ package org.spongepowered.common.registry.provider;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.world.biome.BiomeSampler;
+
 import net.minecraft.world.level.biome.FuzzyOffsetBiomeZoomer;
 import net.minecraft.world.level.biome.FuzzyOffsetConstantColumnBiomeZoomer;
 import net.minecraft.world.level.biome.NearestNeighborBiomeZoomer;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.world.biome.BiomeSampler;
 
 public final class BiomeSamplerProvider {
 

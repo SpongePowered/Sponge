@@ -29,6 +29,14 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import com.google.gson.JsonSyntaxException;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.accessor.world.item.crafting.IngredientAccessor;
+import org.spongepowered.common.item.util.ItemStackUtil;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.ItemTags;
 import net.minecraft.tags.Tag;
@@ -36,12 +44,6 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.ItemType;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.accessor.world.item.crafting.IngredientAccessor;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Arrays;
 import java.util.function.Predicate;

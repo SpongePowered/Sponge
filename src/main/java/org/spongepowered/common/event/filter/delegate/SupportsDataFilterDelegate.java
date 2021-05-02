@@ -36,6 +36,7 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.event.filter.data.Supports;
 

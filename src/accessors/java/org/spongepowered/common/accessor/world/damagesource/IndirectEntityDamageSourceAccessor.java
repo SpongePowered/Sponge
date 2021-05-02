@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.damagesource;
 
-import net.minecraft.world.damagesource.IndirectEntityDamageSource;
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.damagesource.IndirectEntityDamageSource;
+import net.minecraft.world.entity.Entity;
 
 @Mixin(IndirectEntityDamageSource.class)
 public interface IndirectEntityDamageSourceAccessor {

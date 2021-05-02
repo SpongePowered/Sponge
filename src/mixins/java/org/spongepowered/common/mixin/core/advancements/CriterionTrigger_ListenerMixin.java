@@ -25,10 +25,7 @@
 package org.spongepowered.common.mixin.core.advancements;
 
 import io.leangen.geantyref.TypeToken;
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.CriterionTrigger;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.server.PlayerAdvancements;
+
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
@@ -50,6 +47,11 @@ import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
+
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.server.PlayerAdvancements;
 
 @Mixin(CriterionTrigger.Listener.class)
 public abstract class CriterionTrigger_ListenerMixin {

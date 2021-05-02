@@ -25,9 +25,9 @@
 package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonObject;
-import com.mojang.serialization.JsonOps;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
@@ -42,8 +42,7 @@ import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
-import java.util.OptionalLong;
-import java.util.function.BiFunction;
+import com.mojang.serialization.JsonOps;
 import net.minecraft.data.recipes.FinishedRecipe;
 import net.minecraft.resources.RegistryWriteOps;
 import net.minecraft.resources.ResourceLocation;
@@ -51,6 +50,9 @@ import net.minecraft.world.level.biome.BiomeZoomer;
 import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
+
+import java.util.OptionalLong;
+import java.util.function.BiFunction;
 
 public final class SpongeDataPackType<T extends DataPackSerializable, U extends DataPackSerializedObject> implements DataPackType {
 

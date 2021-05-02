@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.command.registrar.tree.builder;
 
-import com.mojang.brigadier.arguments.ArgumentType;
-import net.minecraft.commands.arguments.EntityArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+
+import com.mojang.brigadier.arguments.ArgumentType;
+import net.minecraft.commands.arguments.EntityArgument;
 
 // TODO
 public final class EntityCommandTreeNode

@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.accessor.world.entity.projectile;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
+
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.ItemStack;
 
 @Mixin(FireworkRocketEntity.class)
 public interface FireworkRocketEntityAccessor {

@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.RandomizableContainerBlockEntity;
 
 @Mixin(RandomizableContainerBlockEntity.class)
 public abstract class RandomizableContainerBlockEntityMixin_API<T extends BlockEntity & Carrier> extends BaseContainerBlockEntityMixin_API {

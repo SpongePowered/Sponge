@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.Lists;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -37,6 +38,7 @@ import net.minecraft.Util;
 import net.minecraft.util.WeighedRandom;
 import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
+
 import java.util.List;
 import java.util.Random;
 import java.util.stream.Collectors;

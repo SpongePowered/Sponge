@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
-import net.minecraft.world.level.TickNextTickData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
+
+import net.minecraft.world.level.TickNextTickData;
 
 @Mixin(TickNextTickData.class)
 public abstract class TickNextTickDataMixin_Tracker implements TickNextTickDataBridge {

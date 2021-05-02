@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.animal;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.AgableMob;
-import net.minecraft.world.entity.animal.Animal;
 import org.spongepowered.api.entity.living.Ageable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -39,6 +36,10 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.AgableMobMixin;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.AgableMob;
+import net.minecraft.world.entity.animal.Animal;
 
 @Mixin(Animal.class)
 public abstract class AnimalMixin extends AgableMobMixin {

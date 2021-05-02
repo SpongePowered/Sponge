@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.state.properties;
 
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 
 @Mixin(NoteBlockInstrument.class)
 public abstract class NoteBlockInstrumentMixin_API implements InstrumentType {

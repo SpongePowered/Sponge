@@ -28,6 +28,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeCommon;
 

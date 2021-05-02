@@ -25,6 +25,7 @@
 package org.spongepowered.common.network.channel.packet;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.network.channel.packet.Packet;
 import org.spongepowered.api.network.channel.packet.PacketBinding;
 import org.spongepowered.common.network.channel.PacketUtil;

@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.entity.projectile;
 
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 
 @Mixin(AbstractHurtingProjectile.class)
 public interface AbstractHurtingProjectileAccessor {

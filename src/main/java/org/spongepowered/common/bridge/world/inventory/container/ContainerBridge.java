@@ -25,15 +25,17 @@
 package org.spongepowered.common.bridge.world.inventory.container;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.world.server.ServerLocation;
+
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.Container;
+import net.minecraft.world.entity.player.Player;
 
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Set;
 import java.util.function.Predicate;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.Container;
-import net.minecraft.world.entity.player.Player;
 
 public interface ContainerBridge {
 

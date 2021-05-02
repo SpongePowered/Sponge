@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.network.protocol.handshake;
 
-import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 
 @Mixin(ClientIntentionPacket.class)
 public interface ClientIntentionPacketAccessor {

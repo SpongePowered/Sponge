@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.accessor.world.scores;
 
-import net.minecraft.world.scores.PlayerTeam;
-import net.minecraft.world.scores.Scoreboard;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.scores.PlayerTeam;
+import net.minecraft.world.scores.Scoreboard;
 
 @Mixin(PlayerTeam.class)
 public interface PlayerTeamAccessor {

@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
@@ -41,6 +42,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerPlayer;
+
 import java.util.function.BiConsumer;
 
 public final class AttackEntityPacketState extends BasicPacketState {

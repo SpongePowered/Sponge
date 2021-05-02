@@ -28,8 +28,8 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identified;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandCause;
@@ -43,6 +43,8 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.math.vector.Vector3d;
+
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.Optional;
 

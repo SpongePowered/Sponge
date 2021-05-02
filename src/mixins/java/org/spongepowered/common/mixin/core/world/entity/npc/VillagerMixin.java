@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.npc;
 
-import net.minecraft.world.entity.npc.Villager;
 import org.apache.logging.log4j.Logger;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+
+import net.minecraft.world.entity.npc.Villager;
 
 @Mixin(Villager.class)
 public abstract class VillagerMixin extends AbstractVillagerMixin {

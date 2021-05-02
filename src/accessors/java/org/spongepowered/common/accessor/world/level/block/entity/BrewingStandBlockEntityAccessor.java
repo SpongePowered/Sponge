@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
 
 @Mixin(BrewingStandBlockEntity.class)
 public interface BrewingStandBlockEntityAccessor {

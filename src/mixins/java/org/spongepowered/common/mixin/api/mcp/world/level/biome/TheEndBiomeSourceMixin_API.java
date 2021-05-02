@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.biome;
 
-import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.api.world.biome.provider.ConfigurableBiomeProvider;
 import org.spongepowered.api.world.biome.provider.EndStyleBiomeConfig;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.biome.TheEndBiomeSource;
 
 @Mixin(TheEndBiomeSource.class)
 public abstract class TheEndBiomeSourceMixin_API extends BiomeSourceMixin_API implements ConfigurableBiomeProvider<EndStyleBiomeConfig> {

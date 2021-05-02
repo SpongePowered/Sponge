@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.levelgen.flat;
 
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 
 @Mixin(FlatLayerInfo.class)
 public abstract class FlatLayerInfoMixin_API implements LayerConfig {

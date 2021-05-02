@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.map.canvas;
 
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.map.MapCanvas;
+
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 // This interface means that both canvases backed by a byte array
 // and the empty version can be applied

@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.CommandExecutor;
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.Collection;
-import net.minecraft.commands.CommandSourceStack;
 
 public final class SpongeRootCommandNode extends RootCommandNode<CommandSourceStack> implements SpongeNode {
 

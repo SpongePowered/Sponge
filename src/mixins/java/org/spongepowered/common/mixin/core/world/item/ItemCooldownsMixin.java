@@ -34,9 +34,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.item.ItemCooldownsBridge;
 
-import java.util.Map;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemCooldowns;
+
+import java.util.Map;
 
 @Mixin(ItemCooldowns.class)
 public abstract class ItemCooldownsMixin implements ItemCooldownsBridge {

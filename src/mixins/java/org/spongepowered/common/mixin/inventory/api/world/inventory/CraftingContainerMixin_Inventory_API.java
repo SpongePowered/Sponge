@@ -39,9 +39,10 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.comp.CraftingGridInventoryLens;
 
-import java.util.Optional;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.CraftingContainer;
+
+import java.util.Optional;
 
 @Mixin(CraftingContainer.class)
 public abstract class CraftingContainerMixin_Inventory_API implements CraftingGridInventory {

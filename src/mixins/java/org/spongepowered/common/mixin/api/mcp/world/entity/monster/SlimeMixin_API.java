@@ -27,9 +27,8 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.monster;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.slime.Slime;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.world.entity.MobMixin_API;
-import java.util.Collection;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.monster.Slime.class)

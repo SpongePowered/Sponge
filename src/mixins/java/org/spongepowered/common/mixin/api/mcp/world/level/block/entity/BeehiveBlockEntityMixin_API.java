@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 import org.spongepowered.api.block.entity.Beehive;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.BeehiveBlockEntity;
 
 @Mixin(BeehiveBlockEntity.class)
 public abstract class BeehiveBlockEntityMixin_API implements Beehive {

@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.monster.Endermite;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.monster.EndermiteAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
+
+import net.minecraft.world.entity.monster.Endermite;
 
 public final class EndermiteData {
 

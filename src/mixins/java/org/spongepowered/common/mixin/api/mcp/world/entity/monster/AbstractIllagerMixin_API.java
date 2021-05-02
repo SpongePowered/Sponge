@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.monster;
 
-import net.minecraft.world.entity.monster.AbstractIllager;
 import org.spongepowered.api.entity.living.monster.raider.illager.Illager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.world.entity.raid.RaiderMixin_API;
+
+import net.minecraft.world.entity.monster.AbstractIllager;
 
 @Mixin(AbstractIllager.class)
 public abstract class AbstractIllagerMixin_API extends RaiderMixin_API implements Illager {

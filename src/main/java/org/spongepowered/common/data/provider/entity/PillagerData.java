@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.monster.Pillager;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.monster.PillagerAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.entity.monster.Pillager;
 
 public final class PillagerData {
 

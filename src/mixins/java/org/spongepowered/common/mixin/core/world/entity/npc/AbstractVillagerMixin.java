@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.npc;
 
-import net.minecraft.world.entity.npc.AbstractVillager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.world.entity.AgableMobMixin;
+
+import net.minecraft.world.entity.npc.AbstractVillager;
 
 @Mixin(AbstractVillager.class)
 public abstract class AbstractVillagerMixin extends AgableMobMixin {

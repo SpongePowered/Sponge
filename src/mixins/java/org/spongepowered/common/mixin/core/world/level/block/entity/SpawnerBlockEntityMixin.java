@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 
 @Mixin(SpawnerBlockEntity.class)
 public abstract class SpawnerBlockEntityMixin extends BlockEntityMixin {

@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.item;
 
-import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.nbt.CompoundTag;
 
 public final class ItemStackSnapshotDuplicateManipulatorUpdater implements DataContentUpdater {
 

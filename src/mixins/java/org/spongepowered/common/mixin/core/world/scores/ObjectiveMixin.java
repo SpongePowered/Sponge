@@ -37,11 +37,12 @@ import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.bridge.world.scores.ScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 
-import javax.annotation.Nullable;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
+
+import javax.annotation.Nullable;
 
 @Mixin(Objective.class)
 public abstract class ObjectiveMixin implements ObjectiveBridge {

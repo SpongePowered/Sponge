@@ -26,8 +26,9 @@ package org.spongepowered.common.advancement.criterion;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.advancements.CriterionTriggerInstance;
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
+
+import net.minecraft.advancements.CriterionTriggerInstance;
 
 public class SpongeScoreCriterionBuilder extends AbstractCriterionBuilder<ScoreAdvancementCriterion, ScoreAdvancementCriterion.Builder>
         implements ScoreAdvancementCriterion.Builder {

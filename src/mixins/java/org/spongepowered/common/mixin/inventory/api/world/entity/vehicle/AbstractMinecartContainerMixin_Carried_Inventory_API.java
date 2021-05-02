@@ -28,8 +28,9 @@ import org.spongepowered.api.entity.vehicle.minecart.carrier.CarrierMinecart;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Optional;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+
+import java.util.Optional;
 
 @Mixin(AbstractMinecartContainer.class)
 public abstract class AbstractMinecartContainerMixin_Carried_Inventory_API<M extends CarrierMinecart<M>> implements CarriedInventory<M> {

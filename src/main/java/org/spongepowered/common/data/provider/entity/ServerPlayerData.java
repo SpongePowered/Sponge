@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.stats.Stat;
-import net.minecraft.world.level.GameType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibilities;
@@ -41,6 +38,10 @@ import org.spongepowered.common.bridge.stats.StatsCounterBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.stats.Stat;
+import net.minecraft.world.level.GameType;
 
 import java.util.stream.Collectors;
 

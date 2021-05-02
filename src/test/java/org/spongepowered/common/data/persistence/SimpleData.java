@@ -26,6 +26,7 @@ package org.spongepowered.common.data.persistence;
 
 import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
+
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;

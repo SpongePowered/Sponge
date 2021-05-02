@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.util;
 
-import java.util.Map;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.Property;
+
+import java.util.Map;
 
 @SuppressWarnings(value = {"unchecked", "rawtypes"})
 public final class StateUtil {

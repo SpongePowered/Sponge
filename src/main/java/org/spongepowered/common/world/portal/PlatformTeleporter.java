@@ -25,14 +25,16 @@
 package org.spongepowered.common.world.portal;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.function.Function;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.portal.PortalInfo;
+
+import java.util.function.Function;
 
 /**
  * For wrapping around Forge's ITeleporter

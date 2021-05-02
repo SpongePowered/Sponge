@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.event.filter;
 
+import static com.google.common.base.Preconditions.checkArgument;
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
+
 import org.spongepowered.common.event.gen.DefineableClassLoader;
 
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
-
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
 
 public class FilterFactory {
 

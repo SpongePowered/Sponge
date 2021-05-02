@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.monster;
 
-import net.minecraft.world.entity.monster.Monster;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.core.world.entity.MobMixin;
+
+import net.minecraft.world.entity.monster.Monster;
 
 @Mixin(Monster.class)
 public abstract class MonsterMixin extends MobMixin {

@@ -27,10 +27,11 @@ package org.spongepowered.common.entity.ai.goal.builtin.creature;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
-import net.minecraft.world.entity.monster.RangedAttackMob;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.RangedAttackAgainstAgentGoal;
 import org.spongepowered.api.entity.living.Ranger;
+
+import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
+import net.minecraft.world.entity.monster.RangedAttackMob;
 
 public final class SpongeRangedAttackAgainstAgentGoalBuilder implements RangedAttackAgainstAgentGoal.Builder {
 

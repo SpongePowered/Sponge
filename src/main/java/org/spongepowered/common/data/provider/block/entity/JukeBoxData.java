@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.RecordItem;
-import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.RecordItem;
+import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 
 public final class JukeBoxData {
 

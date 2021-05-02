@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.biome;
 
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 import org.spongepowered.api.world.biome.provider.ConfigurableBiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 
 @Mixin(MultiNoiseBiomeSource.class)
 public abstract class MultiNoiseBiomeSourceMixin_API extends BiomeSourceMixin_API implements ConfigurableBiomeProvider<MultiNoiseBiomeConfig> {

@@ -29,13 +29,13 @@ import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter.Holder;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.function.Function;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.portal.PortalInfo;
+
+import java.util.function.Function;
 
 public abstract class VanillaPortalPlatformTeleporter implements PlatformTeleporter {
 

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.inventory.api;
 
 import com.google.common.base.Preconditions;
+
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.item.inventory.ArmorEquipable;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -38,15 +39,15 @@ import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.Optional;
-
-import javax.annotation.Nullable;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
+
+import javax.annotation.Nullable;
+import java.util.Optional;
 
 // All living implementors of ArmorEquipable
 @Mixin({ArmorStand.class, Mob.class, Player.class})

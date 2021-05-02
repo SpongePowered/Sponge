@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.player.SpongeUser;
+
+import net.minecraft.world.entity.Entity;
 
 public final class InvulnerableData {
 

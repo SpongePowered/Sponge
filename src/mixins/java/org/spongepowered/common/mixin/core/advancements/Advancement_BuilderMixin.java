@@ -25,11 +25,13 @@
 package org.spongepowered.common.mixin.core.advancements;
 
 import com.google.gson.JsonObject;
-import net.minecraft.advancements.Advancement;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.advancements.AdvancementBridge;
+
+import net.minecraft.advancements.Advancement;
 
 @Mixin(Advancement.Builder.class)
 public abstract class Advancement_BuilderMixin implements AdvancementBridge {

@@ -25,15 +25,17 @@
 package org.spongepowered.common.mixin.core.world;
 
 import net.kyori.adventure.bossbar.BossBar;
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.BossEvent;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.BossEventBridge;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.BossEvent;
 
 @Mixin(BossEvent.class)
 public abstract class BossEventMixin implements BossEventBridge {

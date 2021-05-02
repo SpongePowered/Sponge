@@ -26,31 +26,32 @@ package org.spongepowered.common.advancement;
 
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
-import io.leangen.geantyref.TypeToken;
 import com.google.gson.JsonObject;
+import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.CriterionEvent;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.advancements.CriterionTrigger_ListenerAccessor;
 import org.spongepowered.common.bridge.advancements.CriterionTriggerBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.lang.reflect.Type;
-import java.util.ArrayList;
-import java.util.function.Consumer;
-import java.util.function.Function;
-
 import net.minecraft.advancements.CriterionTrigger;
 import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.PlayerAdvancements;
+
+import java.lang.reflect.Type;
+import java.util.ArrayList;
+import java.util.function.Consumer;
+import java.util.function.Function;
 
 @SuppressWarnings("rawtypes")
 public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTrigger>, CriterionTriggerBridge {

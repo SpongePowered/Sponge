@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.registry;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.api.ResourceKey;
+
 import java.util.Map;
 import java.util.OptionalInt;
 import java.util.function.Supplier;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 
 abstract class InitialRegistryData<T> {
     abstract Map<ResourceKey, T> keyToValue();

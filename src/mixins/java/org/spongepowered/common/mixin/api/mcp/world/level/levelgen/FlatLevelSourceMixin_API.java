@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.levelgen;
 
-import net.minecraft.world.level.levelgen.FlatLevelSource;
-import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 import org.spongepowered.api.world.generation.ConfigurableChunkGenerator;
 import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.world.level.chunk.ChunkGeneratorMixin_API;
+
+import net.minecraft.world.level.levelgen.FlatLevelSource;
+import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
 
 @Mixin(FlatLevelSource.class)
 public abstract class FlatLevelSourceMixin_API extends ChunkGeneratorMixin_API implements ConfigurableChunkGenerator<FlatGeneratorConfig> {

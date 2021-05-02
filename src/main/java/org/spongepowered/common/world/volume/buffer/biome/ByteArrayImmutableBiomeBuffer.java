@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer.biome;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.biome.Biome;

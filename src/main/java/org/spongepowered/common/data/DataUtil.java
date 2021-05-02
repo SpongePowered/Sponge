@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.data;
 
-import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
@@ -34,11 +33,13 @@ import org.spongepowered.api.data.persistence.DataStore;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.persistence.datastore.SpongeDataStore;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.nbt.CompoundTag;
 
 import java.lang.reflect.Type;
 import java.util.Collections;

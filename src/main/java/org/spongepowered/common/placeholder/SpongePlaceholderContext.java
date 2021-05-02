@@ -25,6 +25,7 @@
 package org.spongepowered.common.placeholder;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.placeholder.PlaceholderContext;
 
 import java.util.Optional;

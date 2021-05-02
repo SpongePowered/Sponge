@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.hooks;
 
+import org.spongepowered.api.data.persistence.DataContainer;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.Enchantment;
-import org.spongepowered.api.data.persistence.DataContainer;
 
 public interface ItemHooks {
 

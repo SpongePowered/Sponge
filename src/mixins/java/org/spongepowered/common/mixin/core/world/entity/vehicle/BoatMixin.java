@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
-import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,6 +34,10 @@ import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.world.entity.vehicle.BoatBridge;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.world.entity.vehicle.Boat;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
 
 @Mixin(Boat.class)
 public abstract class BoatMixin extends EntityMixin implements BoatBridge {

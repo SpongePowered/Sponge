@@ -25,10 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.util.PrettyPrinter;
+
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.PrettyPrinter;
 
 
 public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext> {

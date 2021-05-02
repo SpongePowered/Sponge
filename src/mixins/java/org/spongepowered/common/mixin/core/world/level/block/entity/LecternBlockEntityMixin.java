@@ -24,14 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
+
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
 
 @Mixin(LecternBlockEntity.class)
 public abstract class LecternBlockEntityMixin implements CommandSourceProviderBridge {

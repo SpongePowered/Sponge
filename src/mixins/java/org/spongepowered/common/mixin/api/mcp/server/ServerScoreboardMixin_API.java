@@ -25,9 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.server;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.server.ServerScoreboard;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Scoreboard;
@@ -35,15 +34,16 @@ import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.objective.Objective;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.accessor.world.scores.ScoreboardAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
+import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
+
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.server.ServerScoreboard;
 
 import java.util.Collection;
 import java.util.HashSet;

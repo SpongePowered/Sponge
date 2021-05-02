@@ -34,8 +34,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileUtil;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.Optional;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+
+import java.util.Optional;
 
 @Mixin(DispenserBlockEntity.class)
 public abstract class DispenserBlockEntityMixin_API extends RandomizableContainerBlockEntityMixin_API<Dispenser> implements Dispenser {

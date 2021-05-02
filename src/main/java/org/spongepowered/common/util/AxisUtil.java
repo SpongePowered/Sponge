@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.core.Direction;
 import org.spongepowered.api.util.Axis;
+
+import net.minecraft.core.Direction;
 
 public final class AxisUtil {
 

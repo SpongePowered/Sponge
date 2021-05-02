@@ -25,12 +25,14 @@
 package org.spongepowered.common.mixin.core.map;
 
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
-import net.minecraft.world.level.saveddata.maps.MapIndex;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.world.level.saveddata.maps.MapIndex;
 
 import java.util.Optional;
 

@@ -27,9 +27,8 @@ package org.spongepowered.common.fluid;
 import static net.minecraft.commands.arguments.blocks.BlockStateParser.ERROR_INVALID_VALUE;
 import static org.spongepowered.common.util.DataUtil.checkDataExists;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -38,8 +37,8 @@ import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.fluid.FluidTypes;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Objects;
-import java.util.Optional;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.minecraft.commands.arguments.blocks.BlockStateParser;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
@@ -47,6 +46,9 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.material.FluidState;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public final class SpongeFluidStateBuilder implements org.spongepowered.api.fluid.FluidState.Builder {
 

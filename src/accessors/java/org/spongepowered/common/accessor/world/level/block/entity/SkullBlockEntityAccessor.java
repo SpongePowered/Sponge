@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import com.mojang.authlib.GameProfile;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
 
 @Mixin(SkullBlockEntity.class)
 public interface SkullBlockEntityAccessor {

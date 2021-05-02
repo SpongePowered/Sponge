@@ -26,6 +26,7 @@ package org.spongepowered.common.item;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;

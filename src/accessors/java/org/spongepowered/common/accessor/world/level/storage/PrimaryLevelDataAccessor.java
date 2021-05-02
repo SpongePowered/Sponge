@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.level.storage;
 
-import net.minecraft.world.level.LevelSettings;
-import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.level.LevelSettings;
+import net.minecraft.world.level.storage.PrimaryLevelData;
 
 @Mixin(PrimaryLevelData.class)
 public interface PrimaryLevelDataAccessor {

@@ -33,17 +33,19 @@ import com.google.gson.Gson;
 import com.google.gson.JsonArray;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
-import com.mojang.authlib.Agent;
-import com.mojang.authlib.ProfileLookupCallback;
-import com.mojang.util.UUIDTypeAdapter;
 import org.apache.commons.io.IOUtils;
 import org.apache.logging.log4j.core.util.Throwables;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileProvider;
 import org.spongepowered.api.profile.ProfileNotFoundException;
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.SpongeCommon;
+
+import com.mojang.authlib.Agent;
+import com.mojang.authlib.ProfileLookupCallback;
+import com.mojang.util.UUIDTypeAdapter;
 
 import java.io.IOException;
 import java.io.InputStream;

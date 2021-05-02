@@ -27,8 +27,6 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.animal;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Panda;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.Constants;
 
 import java.util.Set;
 

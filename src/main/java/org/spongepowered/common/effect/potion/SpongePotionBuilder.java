@@ -38,8 +38,9 @@ import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Optional;
 import net.minecraft.world.effect.MobEffect;
+
+import java.util.Optional;
 
 public final class SpongePotionBuilder extends AbstractDataBuilder<PotionEffect> implements PotionEffect.Builder {
 

@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.accessor.commands.arguments;
 
-import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
-import net.minecraft.commands.arguments.DimensionArgument;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
+
+import com.mojang.brigadier.exceptions.DynamicCommandExceptionType;
+import net.minecraft.commands.arguments.DimensionArgument;
 
 @Mixin(DimensionArgument.class)
 public interface DimensionArgumentAccessor {

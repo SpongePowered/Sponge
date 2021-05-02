@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world;
 
-import net.minecraft.world.CompoundContainer;
-import net.minecraft.world.Container;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.Container;
 
 @Mixin(CompoundContainer.class)
 public interface CompoundContainerAccessor {

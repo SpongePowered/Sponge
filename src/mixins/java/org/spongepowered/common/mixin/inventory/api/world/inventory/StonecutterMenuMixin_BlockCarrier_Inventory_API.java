@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
-import org.spongepowered.api.world.server.ServerLocation;
-import net.minecraft.world.inventory.ContainerLevelAccess;
-import net.minecraft.world.inventory.StonecutterMenu;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
 import org.spongepowered.math.vector.Vector3i;
+
+import net.minecraft.world.inventory.ContainerLevelAccess;
+import net.minecraft.world.inventory.StonecutterMenu;
 
 @Mixin(StonecutterMenu.class)
 public abstract class StonecutterMenuMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {

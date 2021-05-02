@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.state.properties;
 
-import net.minecraft.world.level.block.state.properties.PistonType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.state.properties.PistonType;
 
 @Mixin(PistonType.class)
 public abstract class PistonTypeMixin_API implements org.spongepowered.api.data.type.PistonType {

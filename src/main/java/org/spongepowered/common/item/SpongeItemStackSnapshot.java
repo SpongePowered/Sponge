@@ -31,9 +31,8 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.text.event.HoverEvent;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.item.Item;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
@@ -54,6 +53,9 @@ import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.item.Item;
 
 import java.util.Optional;
 import java.util.Set;

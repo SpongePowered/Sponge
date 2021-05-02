@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -33,16 +34,17 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.Effect
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Objects;
 import java.util.function.Supplier;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
 
 public final class TileEntityPipeline implements BlockPipeline {
 

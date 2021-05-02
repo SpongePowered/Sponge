@@ -25,6 +25,7 @@
 package org.spongepowered.common.registry.provider;
 
 import net.kyori.adventure.text.Component;
+
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.common.data.persistence.DataSerializers;
 import org.spongepowered.math.imaginary.Complexd;

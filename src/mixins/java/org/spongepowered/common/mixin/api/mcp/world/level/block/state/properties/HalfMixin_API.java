@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.state.properties;
 
-import net.minecraft.world.level.block.state.properties.Half;
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.state.properties.Half;
 
 @Mixin(Half.class)
 public abstract class HalfMixin_API implements PortionType {

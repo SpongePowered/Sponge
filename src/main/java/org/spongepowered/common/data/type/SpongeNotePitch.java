@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.type;
 
-import net.minecraft.core.MappedRegistry;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.NotePitch;
 import org.spongepowered.api.data.type.NotePitches;
 import org.spongepowered.api.registry.RegistryTypes;
+
+import net.minecraft.core.MappedRegistry;
 
 public final class SpongeNotePitch implements NotePitch {
 

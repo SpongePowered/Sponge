@@ -26,6 +26,7 @@ package org.spongepowered.common.command.registrar;
 
 import io.leangen.geantyref.TypeToken;
 import org.jetbrains.annotations.NotNull;
+
 import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;

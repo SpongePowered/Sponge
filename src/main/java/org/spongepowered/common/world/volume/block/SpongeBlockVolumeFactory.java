@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.block;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.registry.RegistryReference;

@@ -25,11 +25,13 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.kyori.adventure.bossbar.BossBar;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.boss.wither.WitherBoss;
+
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.boss.wither.WitherBossAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.boss.wither.WitherBoss;
 
 import java.util.stream.Collectors;
 import java.util.stream.Stream;

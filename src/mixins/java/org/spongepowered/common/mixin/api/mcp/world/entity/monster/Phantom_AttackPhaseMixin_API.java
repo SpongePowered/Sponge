@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.monster;
 
-import net.minecraft.world.entity.monster.Phantom;
 import org.spongepowered.api.data.type.PhantomPhase;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.monster.Phantom;
 
 @Mixin(Phantom.AttackPhase.class)
 public abstract class Phantom_AttackPhaseMixin_API implements PhantomPhase {

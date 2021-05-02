@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.command.selector;
 
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.command.selector.SelectorType;
 import org.spongepowered.common.accessor.commands.arguments.selector.EntitySelectorParserAccessor;
+
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 
 public final class SpongeSelectorType implements SelectorType {
 

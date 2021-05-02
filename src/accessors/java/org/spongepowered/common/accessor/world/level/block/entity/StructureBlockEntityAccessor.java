@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import net.minecraft.world.level.block.state.properties.StructureMode;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(StructureBlockEntity.class)
 public interface StructureBlockEntityAccessor {

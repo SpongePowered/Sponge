@@ -24,14 +24,16 @@
  */
 package org.spongepowered.common.accessor.network.chat;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.network.chat.HoverEvent;
-import net.minecraft.world.item.Item;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.HoverEvent;
+import net.minecraft.world.item.Item;
 
 @Mixin(HoverEvent.ItemStackInfo.class)
 public interface HoverEvent_ItemStackInfoAccessor {

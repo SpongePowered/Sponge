@@ -24,20 +24,18 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.player;
 
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.mixin.api.mcp.world.entity.LivingEntityMixin_API;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemCooldowns;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.mixin.api.mcp.world.entity.LivingEntityMixin_API;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
 public abstract class PlayerMixin_API extends LivingEntityMixin_API implements Player {

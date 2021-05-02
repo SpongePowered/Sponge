@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.command.brigadier.dispatcher;
 
+import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
+
 import com.mojang.brigadier.AmbiguityConsumer;
 import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.ParseResults;
@@ -35,12 +37,11 @@ import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.Collection;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
-import net.minecraft.commands.CommandSourceStack;
 
 public final class DelegatingCommandDispatcher extends CommandDispatcher<CommandSourceStack> {
     private final BrigadierCommandRegistrar brigadier;

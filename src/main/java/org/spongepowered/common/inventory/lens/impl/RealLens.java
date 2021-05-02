@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.inventory.lens.impl;
 
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
+
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 
 /**
  * Lenses for real Inventories like {@link BaseContainerBlockEntity} and {@link AbstractContainerMenu}.

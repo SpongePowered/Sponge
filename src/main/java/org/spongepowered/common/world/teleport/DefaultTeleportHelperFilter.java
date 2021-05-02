@@ -25,10 +25,10 @@
 package org.spongepowered.common.world.teleport;
 
 import com.google.common.collect.ImmutableSet;
+
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 
-import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.EmptyBlockGetter;
 import net.minecraft.world.level.block.AnvilBlock;
@@ -38,6 +38,8 @@ import net.minecraft.world.level.block.FenceBlock;
 import net.minecraft.world.level.block.SlabBlock;
 import net.minecraft.world.level.block.SnowLayerBlock;
 import net.minecraft.world.level.material.Material;
+
+import java.util.Set;
 
 public class DefaultTeleportHelperFilter implements TeleportHelperFilter {
 

@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
-import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,6 +34,10 @@ import org.spongepowered.common.accessor.network.protocol.handshake.ClientIntent
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.util.NetworkUtil;
+
+import net.minecraft.network.Connection;
+import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
+import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
 
 @Mixin(ServerHandshakePacketListenerImpl.class)
 public abstract class ServerHandshakePacketListenerImplMixin implements ConnectionHolderBridge {

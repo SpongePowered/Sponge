@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.service.permission;
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.service.server.permission.BridgeSubject;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.rcon.RconConsoleSource;
 import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.service.server.permission.BridgeSubject;
 
 /**
  * Mixin to provide a common implementation of subject that refers to the

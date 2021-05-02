@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.serialization;
 
-import com.mojang.serialization.Codec;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.stream.IntStream;
+import com.mojang.serialization.Codec;
 import net.minecraft.Util;
+
+import java.util.stream.IntStream;
 
 public final class MathCodecs {
 

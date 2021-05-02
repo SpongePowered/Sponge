@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.entity;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;

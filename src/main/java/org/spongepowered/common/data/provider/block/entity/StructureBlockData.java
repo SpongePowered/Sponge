@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.world.level.block.entity.StructureBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.StructureMode;
 import org.spongepowered.common.accessor.world.level.block.entity.StructureBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
+
+import net.minecraft.world.level.block.entity.StructureBlockEntity;
 
 public final class StructureBlockData {
 

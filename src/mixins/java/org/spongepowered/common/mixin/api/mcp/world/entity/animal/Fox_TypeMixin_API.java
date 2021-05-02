@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.animal;
 
-import net.minecraft.world.entity.animal.Fox;
 import org.spongepowered.api.data.type.FoxType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.animal.Fox;
 
 @Mixin(Fox.Type.class)
 public abstract class Fox_TypeMixin_API implements FoxType {

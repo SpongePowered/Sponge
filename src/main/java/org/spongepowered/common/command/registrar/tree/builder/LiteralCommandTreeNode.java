@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.command.registrar.tree.builder;
 
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.commands.SharedSuggestionProvider;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.command.brigadier.tree.ForcedRedirectLiteralCommandNode;
+
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 public final class LiteralCommandTreeNode extends AbstractCommandTreeNode<CommandTreeNode.Basic, LiteralCommandNode<SharedSuggestionProvider>>
         implements CommandTreeNode.Basic {

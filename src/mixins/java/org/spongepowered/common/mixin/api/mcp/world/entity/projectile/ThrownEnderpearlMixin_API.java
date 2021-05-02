@@ -27,8 +27,10 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.projectile;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.asm.mixin.Mixin;
-import java.util.Set;
+
 import net.minecraft.world.entity.projectile.ThrownEnderpearl;
+
+import java.util.Set;
 
 @Mixin(ThrownEnderpearl.class)
 public abstract class ThrownEnderpearlMixin_API extends ThrowableProjectileMixin_API implements EnderPearl {

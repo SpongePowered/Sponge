@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.level.block.entity;
 
-import com.mojang.authlib.GameProfile;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import com.mojang.authlib.GameProfile;
 
 public interface SkullBlockEntityBridge {
 

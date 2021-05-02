@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.level.dimension;
 
-import com.mojang.serialization.Codec;
 import net.kyori.adventure.text.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.dimension.LevelStem;
-import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -43,6 +40,11 @@ import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3i;
+
+import com.mojang.serialization.Codec;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.dimension.LevelStem;
+import net.minecraft.world.level.storage.PrimaryLevelData;
 
 import java.util.Optional;
 import java.util.function.Function;

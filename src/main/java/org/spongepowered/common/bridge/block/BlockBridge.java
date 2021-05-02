@@ -31,10 +31,11 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 
+import net.minecraft.world.level.block.Block;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
-import net.minecraft.world.level.block.Block;
 
 /**
  * A quasi interface to mix into every possible {@link Block} such that their

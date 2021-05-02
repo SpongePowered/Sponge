@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.dedicated;
 
-import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.Server;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,6 +31,8 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.server.MinecraftServerMixin_API;
+
+import net.minecraft.server.dedicated.DedicatedServer;
 
 import java.net.InetSocketAddress;
 import java.util.Optional;

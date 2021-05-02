@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.hooks;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 
 /**
  * Event hooks for when there is no specific event translation between Sponge

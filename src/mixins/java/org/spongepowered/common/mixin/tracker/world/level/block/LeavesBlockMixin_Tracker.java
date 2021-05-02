@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.tracker.world.level.block;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
@@ -39,12 +40,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.LeavesBlock;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
+
+import java.util.Random;
 
 @Mixin(LeavesBlock.class)
 public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {

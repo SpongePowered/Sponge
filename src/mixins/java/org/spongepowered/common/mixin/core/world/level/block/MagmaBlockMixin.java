@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.MagmaBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,6 +33,12 @@ import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.mixin.core.block.BlockMixin;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.MagmaBlock;
 
 @Mixin(MagmaBlock.class)
 public abstract class MagmaBlockMixin extends BlockMixin {

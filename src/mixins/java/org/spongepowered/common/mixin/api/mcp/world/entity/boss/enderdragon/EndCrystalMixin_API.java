@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.explosive.EndCrystal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.entity.boss.enderdragon.EndCrystalBridge;
 import org.spongepowered.common.mixin.api.mcp.world.entity.EntityMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.boss.enderdragon.EndCrystal.class)

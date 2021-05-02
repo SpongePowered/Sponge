@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.mixin.api.mcp.item;
 
-import net.minecraft.world.item.AirItem;
-import net.minecraft.world.item.BlockItem;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.mixin.api.mcp.world.item.ItemMixin_API;
+
+import net.minecraft.world.item.AirItem;
+import net.minecraft.world.item.BlockItem;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.level.block.Block;
 
 @Mixin(value = { BlockItem.class, AirItem.class })
 public abstract class BlockItemMixin_API extends ItemMixin_API {

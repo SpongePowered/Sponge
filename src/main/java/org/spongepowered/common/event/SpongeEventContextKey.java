@@ -25,6 +25,7 @@
 package org.spongepowered.common.event;
 
 import io.leangen.geantyref.GenericTypeReflector;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.EventContextKey;
 

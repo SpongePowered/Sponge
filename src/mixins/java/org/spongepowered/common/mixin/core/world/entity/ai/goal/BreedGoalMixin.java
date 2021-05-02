@@ -37,8 +37,9 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.entity.ai.goal.BreedGoal;
+
+import javax.annotation.Nullable;
 
 @Mixin(BreedGoal.class)
 public abstract class BreedGoalMixin {

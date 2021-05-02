@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.network;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -32,9 +33,10 @@ import org.spongepowered.asm.mixin.injection.ModifyVariable;
 import org.spongepowered.common.adventure.NativeComponentRenderer;
 import org.spongepowered.common.bridge.network.FriendlyByteBufBridge;
 
-import java.util.Locale;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
+
+import java.util.Locale;
 
 @Mixin(FriendlyByteBuf.class)
 public abstract class FriendlyByteBufMixin implements FriendlyByteBufBridge {

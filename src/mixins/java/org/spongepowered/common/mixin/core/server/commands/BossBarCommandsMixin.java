@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.commands;
 
-import com.mojang.brigadier.context.CommandContext;
-import com.mojang.brigadier.suggestion.SuggestionProvider;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.bossevents.CustomBossEvents;
-import net.minecraft.server.commands.BossBarCommands;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -38,6 +31,14 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+
+import com.mojang.brigadier.context.CommandContext;
+import com.mojang.brigadier.suggestion.SuggestionProvider;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.bossevents.CustomBossEvents;
+import net.minecraft.server.commands.BossBarCommands;
 
 @Mixin(BossBarCommands.class)
 public abstract class BossBarCommandsMixin {

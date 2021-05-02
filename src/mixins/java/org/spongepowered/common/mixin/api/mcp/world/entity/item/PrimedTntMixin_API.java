@@ -29,8 +29,10 @@ import org.spongepowered.api.entity.explosive.fused.PrimedTNT;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.world.entity.EntityMixin_API;
-import java.util.Set;
+
 import net.minecraft.world.entity.item.PrimedTnt;
+
+import java.util.Set;
 
 @Mixin(PrimedTnt.class)
 public abstract class PrimedTntMixin_API extends EntityMixin_API implements PrimedTNT {

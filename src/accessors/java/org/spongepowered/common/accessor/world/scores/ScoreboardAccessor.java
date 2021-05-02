@@ -26,15 +26,16 @@ package org.spongepowered.common.accessor.world.scores;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.List;
-import java.util.Map;
 import net.minecraft.world.scores.Objective;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Score;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
-import org.spongepowered.common.UntransformedAccessorError;
+
+import java.util.List;
+import java.util.Map;
 
 @Mixin(Scoreboard.class)
 public interface ScoreboardAccessor {

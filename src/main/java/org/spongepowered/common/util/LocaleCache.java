@@ -26,6 +26,7 @@ package org.spongepowered.common.util;
 
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.LocaleUtils;
+
 import org.spongepowered.common.SpongeCommon;
 
 import java.util.Locale;

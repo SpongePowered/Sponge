@@ -27,9 +27,9 @@ package org.spongepowered.common;
 import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
-import net.minecraft.server.MinecraftServer;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.util.Direction;
@@ -41,6 +41,8 @@ import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginKeys;
+
+import net.minecraft.server.MinecraftServer;
 
 import java.io.IOException;
 import java.nio.file.Path;

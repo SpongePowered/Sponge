@@ -27,6 +27,7 @@ package org.spongepowered.common.block.entity;
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
@@ -45,12 +46,13 @@ import org.spongepowered.common.data.provider.DataProviderLookup;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 
-import java.util.Objects;
-import java.util.Optional;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+
+import java.util.Objects;
+import java.util.Optional;
 
 public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEntityType, BlockSnapshot, BlockEntity> implements
         org.spongepowered.api.block.entity.BlockEntityArchetype {

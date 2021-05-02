@@ -24,11 +24,27 @@
  */
 package org.spongepowered.common.entity.living.human;
 
+import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.profile.property.ProfileProperty;
+import org.spongepowered.api.scheduler.Task;
+import org.spongepowered.api.scoreboard.TeamMember;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.network.protocol.game.ClientboundAddPlayerPacketAccessor;
+import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoPacketAccessor;
+import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
+import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
+import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.SpongeTicks;
+
 import com.mojang.authlib.GameProfile;
 import com.mojang.authlib.properties.Property;
 import com.mojang.authlib.properties.PropertyMap;
 import com.mojang.serialization.Lifecycle;
-import net.kyori.adventure.text.Component;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
@@ -65,20 +81,6 @@ import net.minecraft.world.item.enchantment.Enchantments;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.scores.Team;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.profile.property.ProfileProperty;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.scoreboard.TeamMember;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundAddPlayerPacketAccessor;
-import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayerInfoPacketAccessor;
-import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
-import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
-import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.SpongeTicks;
 
 import java.util.ArrayList;
 import java.util.Collection;

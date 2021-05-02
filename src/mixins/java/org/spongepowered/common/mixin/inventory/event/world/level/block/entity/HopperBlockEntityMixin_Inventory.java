@@ -40,13 +40,14 @@ import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.Direction;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.Hopper;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+
+import javax.annotation.Nullable;
 
 @Mixin(HopperBlockEntity.class)
 public abstract class HopperBlockEntityMixin_Inventory {

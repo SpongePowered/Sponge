@@ -26,6 +26,27 @@ package org.spongepowered.common.mixin.plugin.entityactivation;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
+
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.phys.AABBAccessor;
+import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.config.inheritable.EntityActivationRangeCategory;
+import org.spongepowered.common.config.inheritable.GlobalConfig;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
+
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -54,25 +75,6 @@ import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.phys.AABB;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.explosive.fused.FusedExplosive;
-import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.accessor.world.phys.AABBAccessor;
-import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
-import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
-import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.common.config.inheritable.EntityActivationRangeCategory;
-import org.spongepowered.common.config.inheritable.GlobalConfig;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.config.inheritable.WorldConfig;
 
 import java.util.Map;
 

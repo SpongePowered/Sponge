@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.BlockGetterBridge;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(net.minecraft.world.level.BlockGetter.class)
 public interface BlockGetterMixin extends BlockGetterBridge {

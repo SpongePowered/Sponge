@@ -46,12 +46,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.List;
-import java.util.Optional;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.crafting.RecipeManager;
+
+import java.util.List;
+import java.util.Optional;
 
 public final class PlaceRecipePacketState extends BasicInventoryPacketState {
 

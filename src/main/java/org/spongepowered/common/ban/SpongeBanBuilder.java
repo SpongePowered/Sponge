@@ -25,9 +25,8 @@
 package org.spongepowered.common.ban;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.server.players.IpBanListEntry;
-import net.minecraft.server.players.UserBanListEntry;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
@@ -35,6 +34,9 @@ import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.BanUtil;
+
+import net.minecraft.server.players.IpBanListEntry;
+import net.minecraft.server.players.UserBanListEntry;
 
 import java.net.InetAddress;
 import java.time.Instant;

@@ -25,12 +25,8 @@
 package org.spongepowered.common.mixin.core.server.network;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import net.minecraft.server.players.PlayerList;
-import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
+
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -47,6 +43,10 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
+
+import net.minecraft.network.Connection;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.server.players.PlayerList;
 
 import java.net.SocketAddress;
 

@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.plugin;
 import com.google.common.collect.ImmutableList;
 import org.apache.logging.log4j.Level;
 import org.objectweb.asm.tree.ClassNode;
+
 import org.spongepowered.asm.mixin.extensibility.IMixinInfo;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.entity;
 
 import net.kyori.adventure.text.Component;
+
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;

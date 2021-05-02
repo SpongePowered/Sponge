@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.world.entity.player;
 
 import com.google.common.collect.ImmutableMap;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.util.RespawnLocation;
 

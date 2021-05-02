@@ -26,6 +26,7 @@ package org.spongepowered.common.data.persistence;
 
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
+
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;

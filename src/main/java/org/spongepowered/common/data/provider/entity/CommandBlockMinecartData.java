@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.level.BaseCommandBlockAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 
 public final class CommandBlockMinecartData {
 

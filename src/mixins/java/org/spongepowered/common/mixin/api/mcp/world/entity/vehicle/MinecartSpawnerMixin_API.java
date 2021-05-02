@@ -26,12 +26,11 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.vehicle;
 
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.SpawnerMinecart;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.entity.vehicle.MinecartSpawner;
 
 import java.util.Set;
-import net.minecraft.world.entity.vehicle.MinecartSpawner;
 
 @Mixin(MinecartSpawner.class)
 public abstract class MinecartSpawnerMixin_API extends AbstractMinecartMixin_API implements SpawnerMinecart {

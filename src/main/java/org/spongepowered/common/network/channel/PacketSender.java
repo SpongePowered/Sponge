@@ -27,16 +27,18 @@ package org.spongepowered.common.network.channel;
 import io.netty.util.concurrent.Future;
 import io.netty.util.concurrent.GenericFutureListener;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 
-import java.util.concurrent.CompletableFuture;
-import java.util.function.Consumer;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.util.thread.BlockableEventLoop;
+
+import java.util.concurrent.CompletableFuture;
+import java.util.function.Consumer;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class PacketSender {

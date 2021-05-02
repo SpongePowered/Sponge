@@ -24,14 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.animal;
 
-import net.minecraft.world.entity.animal.Panda;
 import org.spongepowered.api.data.type.PandaGene;
-import org.spongepowered.api.entity.living.animal.Fox;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.entity.animal.Panda;
 
 @Mixin(Panda.Gene.class)
 @Implements(@Interface(iface = PandaGene.class, prefix = "pandaGene$"))

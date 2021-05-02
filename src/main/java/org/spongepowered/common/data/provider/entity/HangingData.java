@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.decoration.HangingEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.accessor.world.entity.decoration.HangingEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.world.entity.decoration.HangingEntity;
 
 public final class HangingData {
 

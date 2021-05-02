@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.value;
 
 import com.google.common.collect.ImmutableList;
+
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.CollectionValue;
 import org.spongepowered.api.data.value.ListValue;

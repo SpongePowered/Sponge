@@ -36,7 +36,6 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedInventor
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSourceImpl;
 import net.minecraft.core.Direction;
@@ -47,6 +46,8 @@ import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.DropperBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+
+import javax.annotation.Nullable;
 
 @Mixin(DropperBlock.class)
 public abstract class DropperBlockMixin_Inventory {

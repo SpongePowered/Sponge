@@ -28,8 +28,8 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryReference;
+import org.spongepowered.api.registry.RegistryType;
 
 import java.util.Objects;
 import java.util.StringJoiner;

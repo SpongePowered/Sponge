@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.server.network;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import com.mojang.authlib.GameProfile;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
 public interface ServerLoginPacketListenerImplAccessor {

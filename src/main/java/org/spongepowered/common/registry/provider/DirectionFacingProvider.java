@@ -27,6 +27,7 @@ package org.spongepowered.common.registry.provider;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableBiMap;
+
 import org.spongepowered.api.util.Direction;
 
 import java.util.Optional;

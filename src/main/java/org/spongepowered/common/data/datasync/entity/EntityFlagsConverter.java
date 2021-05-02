@@ -31,9 +31,10 @@ import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 
+import net.minecraft.world.entity.Entity;
+
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.world.entity.Entity;
 
 public final class EntityFlagsConverter extends DataParameterConverter<Byte> {
 

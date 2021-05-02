@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.command.brigadier;
 
-import com.mojang.brigadier.ImmutableStringReader;
-import com.mojang.brigadier.StringReader;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
+
+import com.mojang.brigadier.ImmutableStringReader;
+import com.mojang.brigadier.StringReader;
 
 public final class SpongeImmutableArgumentReader implements ArgumentReader.Immutable, ImmutableStringReader {
 

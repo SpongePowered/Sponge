@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.item;
 
-import net.minecraft.world.item.crafting.Ingredient;
 import org.spongepowered.api.data.type.ItemTier;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.item.crafting.Ingredient;
 
 @Mixin(net.minecraft.world.item.Tiers.class)
 public abstract class TiersMixin_API implements ItemTier {

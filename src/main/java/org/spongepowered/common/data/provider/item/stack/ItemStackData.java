@@ -25,7 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.ImmutableSet;
-import com.mojang.datafixers.util.Pair;
+
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -39,8 +39,7 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NBTCollectors;
 
-import java.util.List;
-import java.util.Set;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -53,6 +52,9 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.PickaxeItem;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.AbstractFurnaceBlockEntity;
+
+import java.util.List;
+import java.util.Set;
 
 @SuppressWarnings({"unchecked", "UnstableApiUsage"})
 public final class ItemStackData {

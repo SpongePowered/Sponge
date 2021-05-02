@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.levelgen.feature.configurations;
 
-import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
 import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
 
 @Mixin(StrongholdConfiguration.class)
 @Implements(@Interface(iface = SpacedStructureConfig.class, prefix = "spacedStructureConfig$"))

@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.mcp.core;
 
-import com.mojang.serialization.Lifecycle;
-import net.minecraft.core.Registry;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
+
+import com.mojang.serialization.Lifecycle;
+import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Objects;
 import java.util.Optional;

@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.advancements;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.TreeNodePosition;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.TreeLayout;
 import org.spongepowered.api.event.Cause;
@@ -38,6 +36,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.advancement.SpongeTreeLayout;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.TreeNodePosition;
 
 @Mixin(TreeNodePosition.class)
 public abstract class TreeNodePositionMixin {

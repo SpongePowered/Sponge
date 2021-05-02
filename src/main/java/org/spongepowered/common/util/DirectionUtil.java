@@ -28,8 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.util.Direction;
 
-import java.util.Objects;
 import net.minecraft.world.level.block.state.properties.DirectionProperty;
+
+import java.util.Objects;
 
 public final class DirectionUtil {
 

@@ -31,9 +31,10 @@ import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.common.SpongeCommon;
 
+import net.minecraft.server.ServerScoreboard;
+
 import java.util.ArrayList;
 import java.util.List;
-import net.minecraft.server.ServerScoreboard;
 
 public final class SpongeScoreboardBuilder implements Scoreboard.Builder {
 

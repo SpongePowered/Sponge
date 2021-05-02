@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.TickNextTickData;
-import net.minecraft.world.level.TickPriority;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
@@ -38,6 +33,12 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ServerTickList;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.TickPriority;
 
 import java.time.Duration;
 import java.util.Collection;

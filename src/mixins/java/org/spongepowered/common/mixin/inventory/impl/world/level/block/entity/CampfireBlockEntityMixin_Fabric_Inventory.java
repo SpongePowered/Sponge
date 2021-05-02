@@ -30,11 +30,12 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.fabric.Fabric;
 
-import java.util.Collection;
-import java.util.Collections;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+
+import java.util.Collection;
+import java.util.Collections;
 
 @Mixin(CampfireBlockEntity.class)
 public abstract class CampfireBlockEntityMixin_Fabric_Inventory implements Fabric, InventoryBridge {

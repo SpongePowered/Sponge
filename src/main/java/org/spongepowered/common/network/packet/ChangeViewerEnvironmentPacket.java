@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.network.packet;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.api.network.channel.packet.Packet;
 import org.spongepowered.common.SpongeCommon;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.dimension.DimensionType;
 
 public final class ChangeViewerEnvironmentPacket implements Packet {
 

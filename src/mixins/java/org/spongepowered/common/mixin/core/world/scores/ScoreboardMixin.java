@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.scores;
 
-import net.minecraft.server.ServerScoreboard;
-import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.scores.ScoreboardBridge;
+
+import net.minecraft.server.ServerScoreboard;
+import net.minecraft.world.scores.Scoreboard;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(Scoreboard.class)

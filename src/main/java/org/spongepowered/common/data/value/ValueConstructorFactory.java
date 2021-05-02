@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.value;
 
 import io.leangen.geantyref.GenericTypeReflector;
+
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.ListValue;
 import org.spongepowered.api.data.value.MapValue;

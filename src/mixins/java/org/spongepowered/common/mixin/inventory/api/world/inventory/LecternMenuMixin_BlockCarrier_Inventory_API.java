@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
-import net.minecraft.world.Container;
-import net.minecraft.world.inventory.LecternMenu;
-import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -35,6 +32,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.level.block.entity.LecternBlockEntity_Accessor;
 import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
+
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.LecternMenu;
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
 
 @Mixin(LecternMenu.class)
 public abstract class LecternMenuMixin_BlockCarrier_Inventory_API implements DefaultSingleBlockCarrier {

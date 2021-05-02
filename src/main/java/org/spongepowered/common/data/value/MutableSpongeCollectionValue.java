@@ -26,6 +26,7 @@ package org.spongepowered.common.data.value;
 
 import com.google.common.collect.Iterables;
 import com.google.common.collect.Streams;
+
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.CollectionValue;
 

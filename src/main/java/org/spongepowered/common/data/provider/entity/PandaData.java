@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.Panda;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PandaGene;
 import org.spongepowered.common.accessor.world.entity.animal.PandaAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.SpongeTicks;
+
+import net.minecraft.world.entity.animal.Panda;
 
 public final class PandaData {
 

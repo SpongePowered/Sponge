@@ -27,16 +27,18 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
+import org.apache.logging.log4j.Marker;
+import org.apache.logging.log4j.MarkerManager;
+
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.launch.Launch;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.block.state.BlockState;
-import org.apache.logging.log4j.Marker;
-import org.apache.logging.log4j.MarkerManager;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.launch.Launch;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;

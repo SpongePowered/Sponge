@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.world;
 
 import net.kyori.adventure.bossbar.BossBar;
+
 import net.minecraft.server.level.ServerPlayer;
 
 public interface BossEventBridge {

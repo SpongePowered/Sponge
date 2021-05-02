@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.entity.monster;
 
-import net.minecraft.world.entity.monster.Vindicator;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.entity.monster.Vindicator;
 
 @Mixin(Vindicator.class)
 public interface VindicatorAccessor {

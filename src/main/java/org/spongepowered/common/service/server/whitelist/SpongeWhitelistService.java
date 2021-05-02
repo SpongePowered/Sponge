@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.server.whitelist;
 
 import com.google.inject.Singleton;
+
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.SpongeCommon;
@@ -33,13 +34,13 @@ import org.spongepowered.common.accessor.server.players.StoredUserListAccessor;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.util.UserListUtil;
 
+import net.minecraft.server.players.UserWhiteList;
+import net.minecraft.server.players.UserWhiteListEntry;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
-
-import net.minecraft.server.players.UserWhiteList;
-import net.minecraft.server.players.UserWhiteListEntry;
 
 @Singleton
 public final class SpongeWhitelistService implements WhitelistService {

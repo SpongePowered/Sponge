@@ -27,8 +27,10 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.projectile;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.DamagingProjectile;
 import org.spongepowered.asm.mixin.Mixin;
-import java.util.Set;
+
 import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+
+import java.util.Set;
 
 @Mixin(AbstractHurtingProjectile.class)
 public abstract class AbstractHurtingProjectileMixin_API extends ProjectileMixin_API implements DamagingProjectile {

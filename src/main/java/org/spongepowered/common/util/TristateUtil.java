@@ -25,8 +25,10 @@
 package org.spongepowered.common.util;
 
 import com.google.common.collect.EnumBiMap;
-import net.minecraft.world.InteractionResult;
+
 import org.spongepowered.api.util.Tristate;
+
+import net.minecraft.world.InteractionResult;
 
 public final class TristateUtil {
 

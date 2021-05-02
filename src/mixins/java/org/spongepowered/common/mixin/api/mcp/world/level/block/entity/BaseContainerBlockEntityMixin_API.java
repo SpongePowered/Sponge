@@ -25,11 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
 import com.google.common.collect.Lists;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.Container;
-import net.minecraft.world.LockCode;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
+
 import org.spongepowered.api.block.entity.carrier.NameableCarrierBlockEntity;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
@@ -40,10 +36,15 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.LockCodeAccessor;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
-import java.util.Set;
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.Container;
+import net.minecraft.world.LockCode;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 
 import javax.annotation.Nullable;
+import java.util.List;
+import java.util.Set;
 
 @Mixin(BaseContainerBlockEntity.class)
 public abstract class BaseContainerBlockEntityMixin_API extends BlockEntityMixin_API implements NameableCarrierBlockEntity {

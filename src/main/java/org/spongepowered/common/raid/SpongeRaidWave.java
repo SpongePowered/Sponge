@@ -27,10 +27,12 @@ package org.spongepowered.common.raid;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.entity.living.monster.raider.Raider;
 import org.spongepowered.api.raid.Raid;
 import org.spongepowered.api.raid.RaidWave;
 import org.spongepowered.common.accessor.world.entity.raid.RaidAccessor;
+
 import java.util.Optional;
 
 public final class SpongeRaidWave implements RaidWave {

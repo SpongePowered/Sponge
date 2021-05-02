@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.world.entity.Entity;
 
 public final class VanishableData {
 

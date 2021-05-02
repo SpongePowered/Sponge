@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.rcon;
 
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.server.rcon.RconConsoleSource;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
@@ -33,6 +31,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.server.rcon.RconConsoleSource;
 
 @Mixin(RconConsoleSource.class)
 public abstract class RconConsoleSourceMixin implements CommandSourceProviderBridge, SubjectBridge {

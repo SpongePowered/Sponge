@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BannerBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.world.level.block.entity.BannerBlockEntityBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BannerBlockEntity;
 
 public final class BannerData {
 

@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.raid;
 
-import net.minecraft.world.entity.raid.Raid;
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.raid.Raid;
 
 @Mixin(Raid.RaidStatus.class)
 public abstract class Raid_RaidStatusMixin_API implements RaidStatus {

@@ -28,10 +28,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.Map;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.DispenserBlock;
+
+import java.util.Map;
 
 @Mixin(DispenserBlock.class)
 public interface DispenserBlockAccessor {

@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
+
+import net.minecraft.server.level.ServerPlayer;
 
 public final class CreativeInventoryPacketState extends BasicPacketState {
 

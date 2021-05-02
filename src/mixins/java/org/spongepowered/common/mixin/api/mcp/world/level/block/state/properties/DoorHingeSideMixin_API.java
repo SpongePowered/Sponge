@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.state.properties;
 
-import net.minecraft.world.level.block.state.properties.BlockStateProperties;
-import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 import org.spongepowered.api.data.type.DoorHinge;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.accessor.world.level.block.state.StateHolderAccessor;
+
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
+import net.minecraft.world.level.block.state.properties.DoorHingeSide;
 
 @Mixin(DoorHingeSide.class)
 public abstract class DoorHingeSideMixin_API implements DoorHinge {

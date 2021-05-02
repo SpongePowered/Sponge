@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.boss.enderdragon.phases;
 
-import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
 
 @Mixin(EnderDragonPhase.class)
 public abstract class EnderDragonPhaseMixin_API implements DragonPhaseType {

@@ -24,17 +24,19 @@
  */
 package org.spongepowered.common.mixin.api.mcp.commands.synchronization;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.registrar.tree.ClientSuggestionProvider;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.command.registrar.tree.ClientSuggestionProvider;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Collections;
 import java.util.List;

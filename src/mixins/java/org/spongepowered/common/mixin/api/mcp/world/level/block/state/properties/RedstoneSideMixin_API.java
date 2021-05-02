@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.state.properties;
 
-import net.minecraft.world.level.block.state.properties.RedstoneSide;
 import org.spongepowered.api.data.type.WireAttachmentType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.state.properties.RedstoneSide;
 
 @Mixin(RedstoneSide.class)
 public abstract class RedstoneSideMixin_API implements WireAttachmentType {

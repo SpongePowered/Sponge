@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.registry;
 
-import java.util.function.Consumer;
-import java.util.function.Supplier;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryKey;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Supplier;
 
 public final class RegistryLoader<T> extends InitialRegistryData<T> {
 

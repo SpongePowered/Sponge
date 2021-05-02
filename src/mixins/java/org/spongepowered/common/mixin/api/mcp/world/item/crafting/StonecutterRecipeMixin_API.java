@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.item.crafting;
 
-import net.minecraft.world.item.crafting.StonecutterRecipe;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.item.crafting.StonecutterRecipe;
 
 @Mixin(StonecutterRecipe.class)
 public abstract class StonecutterRecipeMixin_API extends SingleItemRecipeMixin_API implements StoneCutterRecipe {

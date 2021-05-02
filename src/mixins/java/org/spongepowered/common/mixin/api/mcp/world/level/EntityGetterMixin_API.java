@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level;
 
-import net.minecraft.world.level.EntityGetter;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.util.AABB;
@@ -34,6 +33,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
+
+import net.minecraft.world.level.EntityGetter;
 
 import javax.annotation.Nullable;
 import java.util.Collection;

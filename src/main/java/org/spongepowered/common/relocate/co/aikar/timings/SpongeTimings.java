@@ -25,7 +25,7 @@
 package org.spongepowered.common.relocate.co.aikar.timings;
 
 import co.aikar.timings.Timing;
-import net.minecraft.world.entity.EntityType;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
@@ -35,6 +35,8 @@ import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.SpongeScheduledTask;
 import org.spongepowered.plugin.PluginContainer;
+
+import net.minecraft.world.entity.EntityType;
 
 public final class SpongeTimings {
 

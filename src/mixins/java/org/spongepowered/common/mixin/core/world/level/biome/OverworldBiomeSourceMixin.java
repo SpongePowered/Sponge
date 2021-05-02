@@ -24,17 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.world.level.biome;
 
-import com.mojang.serialization.Codec;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.world.biome.provider.SpongeLayeredBiomeProviderHelper;
 
-import java.util.List;
-import java.util.function.Function;
+import com.mojang.serialization.Codec;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
+
+import java.util.List;
+import java.util.function.Function;
 
 @Mixin(OverworldBiomeSource.class)
 public abstract class OverworldBiomeSourceMixin extends BiomeSource {

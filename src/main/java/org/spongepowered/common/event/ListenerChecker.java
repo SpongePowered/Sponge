@@ -27,6 +27,7 @@ package org.spongepowered.common.event;
 import com.google.common.base.CaseFormat;
 import io.leangen.geantyref.GenericTypeReflector;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.configurate.util.Types;

@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.inventory.impl.world;
 
-import net.minecraft.world.Container;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.fabric.UniversalFabric;
+
+import net.minecraft.world.Container;
 
 @Mixin(Container.class)
 public interface ContainerMixin_Fabric_Inventory extends UniversalFabric, InventoryBridge {

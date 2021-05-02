@@ -26,6 +26,7 @@ package org.spongepowered.common.world.volume.buffer.biome;
 
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.volume.biome.BiomeVolume;
@@ -36,12 +37,13 @@ import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3i;
 
+import net.minecraft.core.BlockPos;
+
 import java.util.Arrays;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import net.minecraft.core.BlockPos;
 
 /**
  * Mutable view of a {@link net.minecraft.world.level.biome.Biome} array.

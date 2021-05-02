@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.stats;
 
-import net.minecraft.stats.Stat;
-import net.minecraft.stats.StatType;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticCategory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.stats.Stat;
+import net.minecraft.stats.StatType;
 
 import java.util.Collection;
 import java.util.Collections;

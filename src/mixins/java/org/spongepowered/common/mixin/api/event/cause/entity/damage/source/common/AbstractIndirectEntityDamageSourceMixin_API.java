@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.event.cause.entity.damage.source.common;
 
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.event.cause.entity.damage.source.IndirectEntityDamageSource;
 import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractIndirectEntityDamageSource;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,6 +31,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.event.cause.entity.damage.SpongeCommonIndirectEntityDamageSource;
+
+import net.minecraft.world.entity.Entity;
 
 /*
  * @author gabizou

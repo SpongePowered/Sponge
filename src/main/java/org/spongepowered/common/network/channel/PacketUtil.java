@@ -25,6 +25,7 @@
 package org.spongepowered.common.network.channel;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnectionSide;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -33,15 +34,17 @@ import org.spongepowered.common.accessor.network.protocol.game.ClientboundCustom
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundCustomPayloadPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.login.ClientboundCustomQueryPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.login.ServerboundCustomQueryPacketAccessor;
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.util.function.Supplier;
+
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
 import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
 import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
 import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
 import net.minecraft.resources.ResourceLocation;
+
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.util.function.Supplier;
 
 public final class PacketUtil {
 

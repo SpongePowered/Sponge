@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.commands.arguments;
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
+
 import com.mojang.brigadier.arguments.ArgumentType;
 import net.minecraft.commands.arguments.DimensionArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.resources.ResourceLocation;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
 
 @Mixin(DimensionArgument.class)
 public abstract class DimensionArgumentMixin implements CompletionsArgumentTypeBridge<ResourceLocation>  {

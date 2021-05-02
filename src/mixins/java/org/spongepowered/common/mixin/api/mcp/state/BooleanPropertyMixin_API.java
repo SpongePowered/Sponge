@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.state;
 
-import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import org.spongepowered.api.state.BooleanStateProperty;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.state.properties.BooleanProperty;
 
 @Mixin(value = BooleanProperty.class)
 public abstract class BooleanPropertyMixin_API extends PropertyMixin_API<Boolean> implements BooleanStateProperty {

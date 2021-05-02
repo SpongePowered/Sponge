@@ -26,6 +26,7 @@ package org.spongepowered.common.placeholder;
 
 import com.google.common.base.Preconditions;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.placeholder.PlaceholderComponent;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;

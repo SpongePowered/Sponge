@@ -26,14 +26,16 @@ package org.spongepowered.common.bridge.world.level.storage;
 
 import com.google.common.collect.BiMap;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.api.world.SerializationBehavior;
+import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
+import org.spongepowered.common.config.inheritable.WorldConfig;
+
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
-import org.spongepowered.common.config.inheritable.WorldConfig;
 
 import java.util.Optional;
 import java.util.UUID;

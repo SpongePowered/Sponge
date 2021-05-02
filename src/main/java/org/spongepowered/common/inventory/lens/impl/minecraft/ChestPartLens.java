@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.inventory.lens.impl.minecraft;
 
-import net.minecraft.world.CompoundContainer;
-import net.minecraft.world.inventory.ChestMenu;
-import net.minecraft.world.level.block.entity.ChestBlockEntity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.accessor.world.CompoundContainerAccessor;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.RealLens;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.inventory.ChestMenu;
+import net.minecraft.world.level.block.entity.ChestBlockEntity;
 
 /**
  * A lens for a part of a double chest inventory

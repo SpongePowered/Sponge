@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block;
 
-import net.minecraft.world.level.block.Mirror;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.Mirror;
 
 @Mixin(Mirror.class)
 public abstract class MirrorMixin_API implements org.spongepowered.api.util.mirror.Mirror {

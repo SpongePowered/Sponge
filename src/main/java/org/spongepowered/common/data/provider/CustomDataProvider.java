@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider;
 
 import io.leangen.geantyref.GenericTypeReflector;
+
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;

@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -47,6 +48,7 @@ import org.spongepowered.common.world.BlockChange;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
+
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;

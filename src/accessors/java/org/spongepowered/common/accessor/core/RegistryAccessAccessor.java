@@ -28,10 +28,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.Map;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
+
+import java.util.Map;
 
 @Mixin(RegistryAccess.class)
 public interface RegistryAccessAccessor {

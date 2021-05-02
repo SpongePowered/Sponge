@@ -26,8 +26,9 @@ package org.spongepowered.common.bridge.world.item;
 
 import org.spongepowered.api.data.DataManipulator.Mutable;
 
-import java.util.List;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
 
 public interface ItemBridge {
 

@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.accessor.entity.passive;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
+
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.animal.horse.AbstractChestedHorse;
 
 @Mixin(AbstractChestedHorse.class)
 public interface AbstractChestedHorseEntityAccessor {

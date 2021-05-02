@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.map.decoration;
 
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import org.spongepowered.api.map.decoration.MapDecorationType;
+
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 
 import java.util.HashMap;
 import java.util.Map;

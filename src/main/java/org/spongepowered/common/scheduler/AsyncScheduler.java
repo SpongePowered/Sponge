@@ -26,6 +26,7 @@ package org.spongepowered.common.scheduler;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import org.apache.logging.log4j.Level;
+
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.util.Functional;
 import org.spongepowered.common.SpongeCommon;

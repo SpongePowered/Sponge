@@ -25,12 +25,14 @@
 package org.spongepowered.common.world.generation.config.noise;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
 import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 
-import java.util.Objects;
 import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
+
+import java.util.Objects;
 
 public final class SpongeNoiseConfig {
 

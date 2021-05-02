@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.FireworkUtil;
+
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
 
 public final class FireworkItemStackData {
 

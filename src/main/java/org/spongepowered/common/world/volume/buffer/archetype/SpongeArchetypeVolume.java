@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer.archetype;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;

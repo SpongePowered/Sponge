@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import com.mojang.authlib.GameProfile;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.profile.SpongeGameProfile;
+
+import com.mojang.authlib.GameProfile;
 
 import java.util.Collection;
 import java.util.UUID;

@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.entity.animal;
 
-import net.minecraft.world.entity.animal.MushroomCow;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.entity.animal.MushroomCow;
 
 @Mixin(MushroomCow.MushroomType.class)
 public interface MushroomCow_MushroomTypeAccessor {

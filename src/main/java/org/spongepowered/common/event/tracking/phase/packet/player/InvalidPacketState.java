@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
+
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
-import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
 public final class InvalidPacketState extends BasicPacketState {
 

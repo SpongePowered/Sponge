@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.sponge;
 
 import net.kyori.adventure.text.Component;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.manager.CommandMapping;

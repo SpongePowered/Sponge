@@ -26,8 +26,8 @@ package org.spongepowered.common.scoreboard;
 
 import com.google.common.collect.Maps;
 import net.kyori.adventure.text.Component;
-import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
@@ -39,6 +39,8 @@ import org.spongepowered.common.accessor.world.scores.ScoreAccessor;
 import org.spongepowered.common.accessor.world.scores.ScoreboardAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
+
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 import java.util.Collection;
 import java.util.HashMap;

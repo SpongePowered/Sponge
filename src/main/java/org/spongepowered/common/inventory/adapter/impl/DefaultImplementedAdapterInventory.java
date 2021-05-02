@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.adapter.impl;
 
 import com.google.common.collect.ImmutableSet;
+
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;

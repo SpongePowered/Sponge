@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.recipe.ingredient;
 
 import com.google.gson.JsonObject;
+
 import net.minecraft.world.item.ItemStack;
 
 public class SpongeStackItemList extends SpongeItemList {

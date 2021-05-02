@@ -27,10 +27,7 @@ package org.spongepowered.common.mixin.core.data;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.Multimap;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataProvider;
@@ -46,6 +43,11 @@ import org.spongepowered.common.data.holder.SimpleNBTDataHolder;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.entity.player.SpongeUser;
+
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 @Mixin({BlockEntity.class, Entity.class, SpongeUser.class, ItemStack.class,
         SpongeEntityArchetype.class,

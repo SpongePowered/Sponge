@@ -34,11 +34,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.entity.raid.RaidBridge;
 import org.spongepowered.common.raid.SpongeRaidWave;
 
+import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.entity.raid.Raider;
+
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.world.entity.raid.Raid;
-import net.minecraft.world.entity.raid.Raider;
 
 @Mixin(Raid.class)
 public abstract class RaidMixin implements RaidBridge {

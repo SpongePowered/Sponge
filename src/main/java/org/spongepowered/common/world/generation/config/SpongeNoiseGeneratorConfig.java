@@ -30,10 +30,12 @@ import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.common.accessor.world.level.levelgen.NoiseGeneratorSettingsAccessor;
-import java.util.Objects;
+
 import net.minecraft.data.BuiltinRegistries;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.StructureSettings;
+
+import java.util.Objects;
 
 public final class SpongeNoiseGeneratorConfig {
 

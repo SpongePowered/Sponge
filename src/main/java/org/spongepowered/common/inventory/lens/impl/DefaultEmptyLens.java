@@ -32,11 +32,12 @@ import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
+import net.minecraft.world.item.ItemStack;
+
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import net.minecraft.world.item.ItemStack;
 
 public class DefaultEmptyLens implements Lens {
 

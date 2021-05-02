@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.TickNextTickData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.ServerTickList;
+import net.minecraft.world.level.TickNextTickData;
 
 @Mixin(ServerTickList.class)
 public abstract class ServerTickListMixin_Tracker<T> {

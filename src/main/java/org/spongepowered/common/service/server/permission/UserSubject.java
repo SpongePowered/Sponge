@@ -25,7 +25,7 @@
 package org.spongepowered.common.service.server.permission;
 
 import com.google.common.base.Preconditions;
-import com.mojang.authlib.GameProfile;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.MemorySubjectData;
@@ -35,9 +35,11 @@ import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeCommon;
 
+import com.mojang.authlib.GameProfile;
+import net.minecraft.server.players.ServerOpListEntry;
+
 import java.util.Optional;
 import java.util.Set;
-import net.minecraft.server.players.ServerOpListEntry;
 
 /**
  * An implementation of vanilla minecraft's 4 op groups.

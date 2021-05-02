@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.network.protocol.game;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.game.ClientboundTabListPacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.game.ClientboundTabListPacket;
 
 @Mixin(ClientboundTabListPacket.class)
 public interface ClientboundTabListPacketAccessor {

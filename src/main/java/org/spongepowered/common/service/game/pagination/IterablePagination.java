@@ -30,6 +30,7 @@ import com.google.common.collect.PeekingIterator;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.command.exception.CommandException;
 
 import java.util.ArrayList;

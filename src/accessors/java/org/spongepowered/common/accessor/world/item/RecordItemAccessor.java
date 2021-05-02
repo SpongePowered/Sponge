@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.item;
 
-import net.minecraft.sounds.SoundEvent;
-import net.minecraft.world.item.RecordItem;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.item.RecordItem;
 
 @Mixin(RecordItem.class)
 public interface RecordItemAccessor {

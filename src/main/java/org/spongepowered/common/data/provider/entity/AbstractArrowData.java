@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.common.accessor.world.entity.projectile.AbstractArrowAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.entity.projectile.AbstractArrow;
 
 public final class AbstractArrowData {
 

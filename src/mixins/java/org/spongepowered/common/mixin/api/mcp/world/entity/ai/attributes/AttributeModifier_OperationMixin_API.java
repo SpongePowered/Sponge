@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.ai.attributes;
 
-import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 import org.spongepowered.api.entity.attribute.AttributeOperation;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.ai.attributes.AttributeModifier;
 
 @Mixin(AttributeModifier.Operation.class)
 public abstract class AttributeModifier_OperationMixin_API implements AttributeOperation {

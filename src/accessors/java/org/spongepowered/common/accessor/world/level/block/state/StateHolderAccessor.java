@@ -28,8 +28,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.Collection;
 import net.minecraft.world.level.block.state.StateHolder;
+
+import java.util.Collection;
 
 @Mixin(StateHolder.class)
 public interface StateHolderAccessor {

@@ -27,17 +27,19 @@ package org.spongepowered.common.util;
 import com.google.common.collect.Lists;
 import net.kyori.adventure.inventory.Book;
 import net.kyori.adventure.translation.GlobalTranslator;
+
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.item.ItemTypes;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.common.item.util.ItemStackUtil;
+
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.network.protocol.game.ClientboundOpenBookPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Inventory;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.item.ItemTypes;
-import org.spongepowered.api.item.inventory.ItemStack;
-import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collection;
 import java.util.Locale;

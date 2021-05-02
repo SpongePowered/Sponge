@@ -24,11 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.raid;
 
+import static com.google.common.base.Preconditions.checkNotNull;
+
 import net.kyori.adventure.bossbar.BossBar;
-import net.minecraft.server.level.ServerBossEvent;
-import net.minecraft.world.entity.raid.Raid;
-import net.minecraft.world.entity.raid.Raider;
-import net.minecraft.world.level.Level;
+
 import org.spongepowered.api.data.type.RaidStatus;
 import org.spongepowered.api.raid.RaidWave;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -39,13 +38,16 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.entity.raid.RaidBridge;
 
+import net.minecraft.server.level.ServerBossEvent;
+import net.minecraft.world.entity.raid.Raid;
+import net.minecraft.world.entity.raid.Raider;
+import net.minecraft.world.level.Level;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
-
-import static com.google.common.base.Preconditions.checkNotNull;
 
 @Mixin(Raid.class)
 public abstract class RaidMixin_API implements org.spongepowered.api.raid.Raid {

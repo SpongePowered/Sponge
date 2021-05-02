@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.entity.animal.horse;
 
-import net.minecraft.world.entity.animal.horse.Horse;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import net.minecraft.world.entity.animal.horse.Horse;
 
 @Mixin(Horse.class)
 public interface HorseAccessor {

@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.entity.animal;
 
-import net.minecraft.world.entity.animal.Pufferfish;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
+
+import net.minecraft.world.entity.animal.Pufferfish;
 
 @Mixin(Pufferfish.class)
 public interface PufferfishAccessor {

@@ -25,6 +25,7 @@
 package org.spongepowered.common.util.raytrace;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.entity.Entity;

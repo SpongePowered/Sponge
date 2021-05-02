@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.living.player.ResourcePackStatusEvent;
@@ -35,6 +34,8 @@ import org.spongepowered.common.bridge.server.network.ServerGamePacketListenerIm
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
+
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
 public final class ResourcePackState extends BasicPacketState {
 

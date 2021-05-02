@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.map.decoration;
 
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.map.decoration.MapDecorationBannerType;
+
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
 
 import java.util.function.Supplier;
 

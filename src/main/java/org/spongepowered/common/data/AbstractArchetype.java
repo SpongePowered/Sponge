@@ -28,11 +28,9 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataProvider;
-import org.spongepowered.api.data.Key;
+
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.Archetype;
 import org.spongepowered.api.world.LocatableSnapshot;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
@@ -42,9 +40,9 @@ import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 
-import java.util.Collection;
-import java.util.Objects;
 import net.minecraft.nbt.CompoundTag;
+
+import java.util.Objects;
 
 public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> implements Archetype<S, E>,
         SpongeMutableDataHolder {

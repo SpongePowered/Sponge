@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.commands.SharedSuggestionProvider;
 
 import java.util.Objects;
-import net.minecraft.commands.SharedSuggestionProvider;
 
 public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentCommandNode<SharedSuggestionProvider, T> implements ForcedRedirectNode {
 

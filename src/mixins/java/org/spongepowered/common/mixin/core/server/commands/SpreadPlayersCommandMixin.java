@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.commands;
 
-import net.minecraft.server.commands.SpreadPlayersCommand;
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -33,6 +31,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import net.minecraft.server.commands.SpreadPlayersCommand;
+import net.minecraft.world.entity.Entity;
 
 @Mixin(SpreadPlayersCommand.class)
 public abstract class SpreadPlayersCommandMixin {

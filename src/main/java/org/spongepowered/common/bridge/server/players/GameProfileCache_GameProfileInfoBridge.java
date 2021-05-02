@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.server.players;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.profile.GameProfile;
 
 public interface GameProfileCache_GameProfileInfoBridge {

@@ -25,12 +25,14 @@
 package org.spongepowered.common.registry;
 
 import com.google.inject.Singleton;
-import net.minecraft.server.MinecraftServer;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.AdventureRegistry;
 import org.spongepowered.api.item.recipe.RecipeRegistry;
 import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.common.adventure.AdventureRegistryImpl;
+
+import net.minecraft.server.MinecraftServer;
 
 @Singleton
 public final class SpongeGameRegistry implements GameRegistry {

@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.ai.goal;
 
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.ai.goal.BreakDoorGoal;
-import net.minecraft.world.entity.ai.goal.DoorInteractGoal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
+
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.ai.goal.BreakDoorGoal;
+import net.minecraft.world.entity.ai.goal.DoorInteractGoal;
 
 @Mixin(BreakDoorGoal.class)
 public abstract class BreakDoorGoalMixin extends DoorInteractGoal {

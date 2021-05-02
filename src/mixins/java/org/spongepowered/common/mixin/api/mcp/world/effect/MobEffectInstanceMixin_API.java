@@ -24,20 +24,18 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.effect;
 
-import net.minecraft.core.Registry;
-import net.minecraft.world.effect.MobEffect;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.core.Registry;
+import net.minecraft.world.effect.MobEffect;
 
 @Mixin(net.minecraft.world.effect.MobEffectInstance.class)
 public abstract class MobEffectInstanceMixin_API implements PotionEffect {

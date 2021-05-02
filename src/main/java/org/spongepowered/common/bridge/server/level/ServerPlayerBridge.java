@@ -25,6 +25,15 @@
 package org.spongepowered.common.bridge.server.level;
 
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.scoreboard.Scoreboard;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.world.border.PlayerOwnBorderListener;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
@@ -37,13 +46,6 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.common.bridge.network.ConnectionBridge;
-import org.spongepowered.common.entity.player.ClientType;
-import org.spongepowered.common.world.border.PlayerOwnBorderListener;
 
 import java.util.Locale;
 import java.util.Set;

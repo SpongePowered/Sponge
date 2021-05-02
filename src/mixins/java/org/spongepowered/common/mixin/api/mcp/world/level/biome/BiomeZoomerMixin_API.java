@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.biome;
 
-import net.minecraft.world.level.biome.BiomeZoomer;
 import org.spongepowered.api.world.biome.BiomeSampler;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.biome.BiomeZoomer;
 
 @Mixin(BiomeZoomer.class)
 public interface BiomeZoomerMixin_API extends BiomeSampler {

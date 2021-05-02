@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer.biome;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.volume.biome.BiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;

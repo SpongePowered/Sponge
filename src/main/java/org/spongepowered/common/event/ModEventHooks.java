@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.event;
 
+import org.spongepowered.common.util.Constants;
+
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import org.spongepowered.common.util.Constants;
 
 /**
  * Static methods for events where Forge would have called them in common code we overwrite of Forge's.

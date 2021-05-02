@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.monster;
 
-import net.minecraft.world.entity.PathfinderMob;
-import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
-import net.minecraft.world.level.block.InfestedBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
+
+import net.minecraft.world.entity.PathfinderMob;
+import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
+import net.minecraft.world.level.block.InfestedBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(targets = "net/minecraft/world/entity/monster/Silverfish$SilverfishMergeWithStoneGoal")
 public abstract class Silverfish_SilverfishMergeWithStoneGoalMixin extends RandomStrollGoal {

@@ -27,6 +27,7 @@ package org.spongepowered.common.world.schematic;
 import com.google.common.collect.BiMap;
 import com.google.common.collect.ImmutableBiMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;

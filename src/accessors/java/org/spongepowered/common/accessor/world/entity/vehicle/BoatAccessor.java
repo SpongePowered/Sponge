@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.entity.vehicle;
 
-import net.minecraft.world.entity.vehicle.Boat;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.entity.vehicle.Boat;
 
 @Mixin(Boat.class)
 public interface BoatAccessor {

@@ -25,18 +25,20 @@
 package org.spongepowered.common.mixin.core.service.permission;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.service.server.permission.SubjectHelper;
 
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.rcon.RconConsoleSource;
 import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 import net.minecraft.world.level.block.entity.CommandBlockEntity;
+
+import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 /**
  * Mixin to provide a common implementation of subject that refers to the

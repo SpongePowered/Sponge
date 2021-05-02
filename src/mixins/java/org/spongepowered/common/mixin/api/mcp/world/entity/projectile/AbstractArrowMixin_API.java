@@ -28,8 +28,10 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.arrow.ArrowEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.world.entity.EntityMixin_API;
-import java.util.Set;
+
 import net.minecraft.world.entity.projectile.AbstractArrow;
+
+import java.util.Set;
 
 @Mixin(AbstractArrow.class)
 public abstract class AbstractArrowMixin_API extends EntityMixin_API implements ArrowEntity {

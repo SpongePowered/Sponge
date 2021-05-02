@@ -27,17 +27,18 @@ package org.spongepowered.common.data.provider.block.state;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.level.block.AbstractSkullBlockAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.StateUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.StateUtil;
 
-import java.util.HashMap;
-import java.util.Map;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.AbstractSkullBlock;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SkullBlock;
 import net.minecraft.world.level.block.WallSkullBlock;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.HashMap;
+import java.util.Map;
 
 public final class WallSkullBlockData {
 

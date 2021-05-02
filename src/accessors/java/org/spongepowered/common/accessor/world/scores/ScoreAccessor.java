@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.scores;
 
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.Score;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.Score;
 
 @Mixin(Score.class)
 public interface ScoreAccessor {

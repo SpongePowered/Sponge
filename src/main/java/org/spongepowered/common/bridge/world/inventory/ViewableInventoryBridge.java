@@ -26,8 +26,9 @@ package org.spongepowered.common.bridge.world.inventory;
 
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 
-import java.util.Set;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+
+import java.util.Set;
 
 public interface ViewableInventoryBridge {
 

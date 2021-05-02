@@ -25,13 +25,15 @@
 package org.spongepowered.common.mixin.api.mcp.core.particles;
 
 import com.google.common.collect.ImmutableMap;
+
 import org.spongepowered.api.effect.particle.ParticleOption;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.util.ParticleOptionUtil;
 
+import net.minecraft.core.particles.ParticleType;
+
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.core.particles.ParticleType;
 
 @Mixin(net.minecraft.core.particles.ParticleType.class)
 public abstract class ParticleTypeMixin_API implements org.spongepowered.api.effect.particle.ParticleType {

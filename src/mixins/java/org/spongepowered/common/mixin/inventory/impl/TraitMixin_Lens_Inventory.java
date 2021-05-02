@@ -24,17 +24,18 @@
  */
 package org.spongepowered.common.mixin.inventory.impl;
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.bridge.world.inventory.LensGeneratorBridge;
+import org.spongepowered.common.inventory.lens.Lens;
+import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
+import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
 import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.inventory.LensGeneratorBridge;
-import org.spongepowered.common.inventory.lens.Lens;
-import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
-import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
 @Mixin(value = {
         BaseContainerBlockEntity.class,

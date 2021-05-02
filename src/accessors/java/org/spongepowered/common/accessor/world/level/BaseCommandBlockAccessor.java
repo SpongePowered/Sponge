@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.level;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.BaseCommandBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.BaseCommandBlock;
 
 @Mixin(BaseCommandBlock.class)
 public interface BaseCommandBlockAccessor {

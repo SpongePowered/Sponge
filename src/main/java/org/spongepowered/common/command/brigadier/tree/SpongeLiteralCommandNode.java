@@ -24,18 +24,20 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.api.command.Command;
+import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.Command;
-import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.Collection;
-import net.minecraft.commands.CommandSourceStack;
 
 public class SpongeLiteralCommandNode extends LiteralCommandNode<CommandSourceStack> implements SpongeNode {
 

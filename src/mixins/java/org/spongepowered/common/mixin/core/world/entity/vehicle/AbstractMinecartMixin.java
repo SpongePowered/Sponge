@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.vehicle.AbstractMinecart;
-import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.vehicle.minecart.MinecartLike;
 import org.spongepowered.api.event.CauseStackManager;
@@ -46,6 +43,10 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
+
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.vehicle.AbstractMinecart;
+import net.minecraft.world.phys.Vec3;
 
 import java.util.ArrayList;
 

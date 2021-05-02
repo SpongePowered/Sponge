@@ -24,12 +24,9 @@
  */
 package org.spongepowered.common.command.brigadier;
 
-import com.mojang.brigadier.builder.LiteralArgumentBuilder;
-import com.mojang.brigadier.tree.CommandNode;
-import com.mojang.brigadier.tree.LiteralCommandNode;
-import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
@@ -44,6 +41,11 @@ import org.spongepowered.common.command.parameter.SpongeParameterKey;
 import org.spongepowered.common.command.parameter.SpongeParameterValue;
 import org.spongepowered.common.command.parameter.multi.SpongeFirstOfParameter;
 import org.spongepowered.common.command.parameter.multi.SpongeMultiParameter;
+
+import com.mojang.brigadier.builder.LiteralArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+import com.mojang.brigadier.tree.LiteralCommandNode;
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.ArrayList;
 import java.util.Collection;

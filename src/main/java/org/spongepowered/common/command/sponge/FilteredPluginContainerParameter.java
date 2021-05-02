@@ -26,6 +26,7 @@ package org.spongepowered.common.command.sponge;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
+
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;

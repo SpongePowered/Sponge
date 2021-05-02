@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.server.players;
 
-import net.minecraft.server.players.PlayerList;
-import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.server.players.PlayerList;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 
 @Mixin(PlayerList.class)
 public interface PlayerListAccessor {

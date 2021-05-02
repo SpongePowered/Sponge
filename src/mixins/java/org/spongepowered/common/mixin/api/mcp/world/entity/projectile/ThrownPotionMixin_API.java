@@ -28,8 +28,9 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.Potion;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
 import net.minecraft.world.entity.projectile.ThrownPotion;
+
+import java.util.Set;
 
 @Mixin(ThrownPotion.class)
 public abstract class ThrownPotionMixin_API extends ThrowableProjectileMixin_API implements Potion {

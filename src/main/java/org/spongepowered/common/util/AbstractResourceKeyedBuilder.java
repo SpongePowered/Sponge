@@ -25,6 +25,7 @@
 package org.spongepowered.common.util;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.ResourceKeyed;
 import org.spongepowered.api.util.ResourceKeyedBuilder;

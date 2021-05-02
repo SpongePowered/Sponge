@@ -25,6 +25,7 @@
 package org.spongepowered.common.placeholder;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;

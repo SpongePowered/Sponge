@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.bridge.world.entity.boss.enderdragon;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Explosion;
 import net.minecraft.world.level.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EndCrystalBridge {
 

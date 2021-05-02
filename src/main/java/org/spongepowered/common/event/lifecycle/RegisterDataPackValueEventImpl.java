@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.lifecycle;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+
 import org.spongepowered.api.Game;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.event.Cause;

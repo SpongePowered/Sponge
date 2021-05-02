@@ -31,6 +31,7 @@ import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
+
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cause;
@@ -46,6 +47,9 @@ import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.BlockChange;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.player.Player;
+
 import java.util.Collections;
 import java.util.Deque;
 import java.util.List;
@@ -53,8 +57,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.player.Player;
 
 /**
  * Similar to {@link Cause} except it can be built continuously and retains no

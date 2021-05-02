@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
-import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.InventoryMenu;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
 import org.spongepowered.common.accessor.world.inventory.CraftingMenuAccessor;
@@ -33,6 +31,9 @@ import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.property.KeyValuePair;
+
+import net.minecraft.world.inventory.CraftingMenu;
+import net.minecraft.world.inventory.InventoryMenu;
 
 public class CraftingGridInventoryLens extends AbstractLens {
 

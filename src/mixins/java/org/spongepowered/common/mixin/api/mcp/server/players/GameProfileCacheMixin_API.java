@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.server.players;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Maps;
+
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileCache;
 import org.spongepowered.asm.mixin.Final;
@@ -36,6 +37,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.server.players.GameProfileCache_GameProfileInfoAccessor;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
@@ -48,8 +50,6 @@ import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Predicate;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.server.players.GameProfileCache.class)
 public abstract class GameProfileCacheMixin_API implements GameProfileCache {

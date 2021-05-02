@@ -25,6 +25,7 @@
 package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonObject;
+
 import org.spongepowered.api.ResourceKey;
 
 public class DataPackSerializedObject {

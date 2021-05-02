@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.state.properties;
 
-import net.minecraft.world.level.block.state.properties.SlabType;
 import org.spongepowered.api.data.type.SlabPortion;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.state.properties.SlabType;
 
 @Mixin(SlabType.class)
 public abstract class SlabTypeMixin_API implements SlabPortion {

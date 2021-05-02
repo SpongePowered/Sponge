@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.storage;
 
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.storage.ServerLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.util.MinecraftDayTime;
@@ -45,6 +44,9 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.world.weather.SpongeWeather;
 import org.spongepowered.common.world.weather.SpongeWeatherType;
+
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.storage.ServerLevelData;
 
 import java.util.Objects;
 import java.util.UUID;

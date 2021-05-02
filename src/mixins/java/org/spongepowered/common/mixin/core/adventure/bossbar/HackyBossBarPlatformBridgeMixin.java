@@ -25,12 +25,14 @@
 package org.spongepowered.common.mixin.core.adventure.bossbar;
 
 import net.kyori.adventure.bossbar.BossBar;
-import net.minecraft.server.level.ServerBossEvent;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.adventure.VanillaBossBarListener;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
+
+import net.minecraft.server.level.ServerBossEvent;
 
 @Mixin(targets = "net.kyori.adventure.bossbar.HackyBossBarPlatformBridge")
 public abstract class HackyBossBarPlatformBridgeMixin implements BossBarBridge {

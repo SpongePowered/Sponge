@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.common.command.registrar.tree.builder.AbstractCommandTreeNode;
+
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import net.minecraft.commands.SharedSuggestionProvider;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.command.registrar.tree.builder.AbstractCommandTreeNode;
 
 public final class ForcedRedirectLiteralCommandNode extends LiteralCommandNode<SharedSuggestionProvider> implements ForcedRedirectNode {
 

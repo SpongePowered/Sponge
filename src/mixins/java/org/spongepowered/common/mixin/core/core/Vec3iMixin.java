@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.core;
 
-import net.minecraft.core.Vec3i;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.core.Vec3iBridge;
+
+import net.minecraft.core.Vec3i;
 
 @Mixin(Vec3i.class)
 public abstract class Vec3iMixin implements Vec3iBridge {

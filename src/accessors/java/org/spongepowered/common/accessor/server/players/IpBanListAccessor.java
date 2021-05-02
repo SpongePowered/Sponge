@@ -27,8 +27,9 @@ package org.spongepowered.common.accessor.server.players;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 
-import java.net.SocketAddress;
 import net.minecraft.server.players.IpBanList;
+
+import java.net.SocketAddress;
 
 @Mixin(IpBanList.class)
 public interface IpBanListAccessor {

@@ -36,7 +36,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.core.Registry;
+
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -50,6 +50,8 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
 import org.spongepowered.configurate.ConfigurationNode;
+
+import net.minecraft.core.Registry;
 
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;

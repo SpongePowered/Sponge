@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.util;
 
-import net.minecraft.util.ClassInstanceMultiMap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+
+import net.minecraft.util.ClassInstanceMultiMap;
 
 @Mixin(ClassInstanceMultiMap.class)
 public abstract class ClassInstanceMultiMapMixin {

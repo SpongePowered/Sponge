@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import net.minecraft.world.entity.projectile.ThrownEgg;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
+
+import net.minecraft.world.entity.projectile.ThrownEgg;
 
 @Mixin(ThrownEgg.class)
 public abstract class ThrownEggMixin extends ThrowableProjectileMixin {

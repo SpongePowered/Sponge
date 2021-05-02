@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
-import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.TickNextTickData;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -35,6 +32,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
+
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.world.level.ServerTickList;
+import net.minecraft.world.level.TickNextTickData;
 
 import java.util.Iterator;
 import java.util.Queue;

@@ -24,14 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.monster;
 
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Enderman;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Collection;
-import java.util.Set;
 import net.minecraft.world.entity.monster.EnderMan;
+
+import java.util.Set;
 
 @Mixin(EnderMan.class)
 public abstract class EnderManMixin_API extends MonsterMixin_API implements Enderman {

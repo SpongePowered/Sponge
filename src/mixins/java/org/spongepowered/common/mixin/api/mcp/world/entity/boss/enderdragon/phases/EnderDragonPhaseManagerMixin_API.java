@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.boss.enderdragon.phases;
 
-import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance;
-import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
-import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhaseManager;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhase;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseManager;
 import org.spongepowered.api.entity.living.monster.boss.dragon.phase.DragonPhaseType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance;
+import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
+import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhaseManager;
 
 @Mixin(EnderDragonPhaseManager.class)
 public abstract class EnderDragonPhaseManagerMixin_API implements DragonPhaseManager {

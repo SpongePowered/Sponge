@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.RedstoneTorchBlock;
@@ -31,8 +34,6 @@ import net.minecraft.world.level.block.RedstoneWallTorchBlock;
 import net.minecraft.world.level.block.TorchBlock;
 import net.minecraft.world.level.block.WallTorchBlock;
 import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class TorchData {
 

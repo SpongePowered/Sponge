@@ -31,10 +31,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.entity.ai.GoalBridge;
 
-import java.util.EnumSet;
-import java.util.Optional;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.Goal.Flag;
+
+import java.util.EnumSet;
+import java.util.Optional;
 
 @SuppressWarnings("unchecked")
 @Mixin(Goal.class)

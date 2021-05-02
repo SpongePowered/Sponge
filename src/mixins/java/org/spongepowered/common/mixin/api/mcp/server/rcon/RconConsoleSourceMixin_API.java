@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.server.rcon;
 
-import net.minecraft.server.rcon.RconConsoleSource;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.server.rcon.RconConsoleSource;
 
 @Mixin(RconConsoleSource.class)
 public abstract class RconConsoleSourceMixin_API implements Subject {

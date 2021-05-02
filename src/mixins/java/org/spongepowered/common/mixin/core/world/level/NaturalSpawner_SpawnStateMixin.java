@@ -25,9 +25,7 @@
 package org.spongepowered.common.mixin.core.world.level;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.MobCategory;
-import net.minecraft.world.level.NaturalSpawner;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -35,6 +33,10 @@ import org.spongepowered.common.accessor.world.level.NaturalSpawnerAccessor;
 import org.spongepowered.common.bridge.world.level.NaturalSpawner_SpawnStateBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.config.inheritable.SpawnerCategory;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.MobCategory;
+import net.minecraft.world.level.NaturalSpawner;
 
 @Mixin(NaturalSpawner.SpawnState.class)
 public abstract class NaturalSpawner_SpawnStateMixin implements NaturalSpawner_SpawnStateBridge {

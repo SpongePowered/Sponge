@@ -28,13 +28,14 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DirectionUtil;
 
-import java.util.Collections;
 import net.minecraft.world.level.block.ChestBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.ChestType;
+
+import java.util.Collections;
 
 public final class ChestData {
 

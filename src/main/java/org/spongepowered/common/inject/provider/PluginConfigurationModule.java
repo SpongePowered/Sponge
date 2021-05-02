@@ -32,6 +32,7 @@ import com.google.inject.ProvisionException;
 import com.google.inject.Scopes;
 import com.google.inject.TypeLiteral;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.config.ConfigRoot;
 import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.configurate.CommentedConfigurationNode;

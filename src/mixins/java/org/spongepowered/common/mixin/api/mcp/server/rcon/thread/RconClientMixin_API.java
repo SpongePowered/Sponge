@@ -30,11 +30,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 
+import net.minecraft.server.rcon.thread.GenericThread;
+import net.minecraft.server.rcon.thread.RconClient;
+
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.net.Socket;
-import net.minecraft.server.rcon.thread.GenericThread;
-import net.minecraft.server.rcon.thread.RconClient;
 
 @Mixin(RconClient.class)
 public abstract class RconClientMixin_API extends GenericThread implements RemoteConnection {

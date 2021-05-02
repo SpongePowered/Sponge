@@ -25,16 +25,18 @@
 package org.spongepowered.common.data.provider.entity;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
-import net.minecraft.world.item.ItemStack;
+
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.projectile.FireworkRocketEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.FireworkUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.FireworkUtil;
 import org.spongepowered.common.util.SpongeTicks;
+
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
+import net.minecraft.world.item.ItemStack;
 
 public final class FireworkRocketData {
 

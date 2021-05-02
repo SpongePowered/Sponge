@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.tileentityactivation.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
+
+import net.minecraft.world.level.block.entity.BlockEntity;
 
 @Mixin(BlockEntity.class)
 public abstract class BlockEntityMixin_TileEntityActivation implements ActivationCapabilityBridge {

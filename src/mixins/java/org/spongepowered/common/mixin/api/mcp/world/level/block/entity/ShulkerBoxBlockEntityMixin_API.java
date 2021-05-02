@@ -25,12 +25,12 @@
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
 import org.spongepowered.api.block.entity.carrier.ShulkerBox;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
 import net.minecraft.world.level.block.entity.ShulkerBoxBlockEntity;
+
+import java.util.Set;
 
 @Mixin(ShulkerBoxBlockEntity.class)
 public abstract class ShulkerBoxBlockEntityMixin_API extends RandomizableContainerBlockEntityMixin_API<ShulkerBox> implements ShulkerBox {

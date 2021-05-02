@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.bridge.world.level;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * A bridge onto {@link net.minecraft.world.level.BlockGetter} to allow for

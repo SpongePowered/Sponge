@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.query.type;
 
 import com.google.common.collect.ImmutableSet;
+
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.lens.Lens;

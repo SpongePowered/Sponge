@@ -24,11 +24,8 @@
  */
 package org.spongepowered.common.command.brigadier.argument;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.suggestion.Suggestion;
-import com.mojang.brigadier.suggestion.SuggestionsBuilder;
-import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -39,6 +36,11 @@ import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedValueParameter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.suggestion.Suggestion;
+import com.mojang.brigadier.suggestion.SuggestionsBuilder;
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.List;
 import java.util.Optional;

@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.npc;
 
-import net.minecraft.world.entity.npc.VillagerProfession;
 import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.npc.VillagerProfession;
 
 @Mixin(VillagerProfession.class)
 public abstract class VillagerProfessionMixin_API implements ProfessionType {

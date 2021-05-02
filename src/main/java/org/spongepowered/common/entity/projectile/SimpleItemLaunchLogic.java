@@ -29,10 +29,11 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 
-import java.util.Optional;
-import java.util.function.Supplier;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public class SimpleItemLaunchLogic<P extends Projectile> extends SimpleEntityLaunchLogic<P> {
 

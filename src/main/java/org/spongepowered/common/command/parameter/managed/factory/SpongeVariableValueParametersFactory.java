@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.command.parameter.managed.factory;
 
-import com.mojang.brigadier.arguments.StringArgumentType;
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
@@ -36,12 +35,16 @@ import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.command.brigadier.argument.StandardArgumentParser;
-import org.spongepowered.common.command.parameter.managed.builder.SpongeRegistryEntryParameterBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeDynamicChoicesBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeLiteralBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeNumberRangeBuilder;
+import org.spongepowered.common.command.parameter.managed.builder.SpongeRegistryEntryParameterBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeStaticChoicesBuilder;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeChoicesValueParameter;
+
+import com.mojang.brigadier.arguments.StringArgumentType;
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.Collections;
 import java.util.HashMap;
@@ -50,7 +53,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import net.minecraft.network.chat.TextComponent;
 
 public final class SpongeVariableValueParametersFactory implements VariableValueParameters.Factory {
 

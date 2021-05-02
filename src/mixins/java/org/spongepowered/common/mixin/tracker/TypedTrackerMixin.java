@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.tracker;
 
-import net.minecraft.world.entity.EntityType;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.TrackableBridge;
+
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 
 @Mixin({EntityType.class, BlockEntityType.class})
 public class TypedTrackerMixin implements TrackableBridge {

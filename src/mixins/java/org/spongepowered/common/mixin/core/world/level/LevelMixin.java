@@ -24,6 +24,19 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.entity.projectile.EnderPearl;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.entity.MobAccessor;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
+import org.spongepowered.math.vector.Vector3d;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.world.DifficultyInstance;
@@ -42,18 +55,6 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelData;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.entity.projectile.EnderPearl;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.world.entity.MobAccessor;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
-import org.spongepowered.math.vector.Vector3d;
 
 @Mixin(net.minecraft.world.level.Level.class)
 public abstract class LevelMixin implements WorldBridge, LevelAccessor {

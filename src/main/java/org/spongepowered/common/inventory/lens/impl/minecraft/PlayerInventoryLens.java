@@ -41,10 +41,11 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.inventory.property.KeyValuePair;
 
+import net.minecraft.world.inventory.AbstractContainerMenu;
+
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Optional;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class PlayerInventoryLens extends AbstractLens {
 

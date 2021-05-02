@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.client;
 
-import net.minecraft.client.KeyMapping;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
+
+import net.minecraft.client.KeyMapping;
 
 import java.util.Map;
 

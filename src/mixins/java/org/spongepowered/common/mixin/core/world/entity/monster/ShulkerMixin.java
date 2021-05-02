@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.monster;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.monster.Shulker;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
@@ -35,6 +34,9 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.entity.monster.ShulkerBridge;
 import org.spongepowered.common.mixin.core.world.entity.MobMixin;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.monster.Shulker;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(Shulker.class)

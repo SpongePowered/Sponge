@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.bridge.world.level.chunk;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.common.event.tracking.context.transaction.pipeline.ChunkPipeline;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 /**
  * Due to the split of implementation mixins implementing the {@link org.spongepowered.common.event.tracking.PhaseTracker}

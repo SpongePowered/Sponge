@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server.players;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;

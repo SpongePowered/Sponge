@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -44,12 +45,13 @@ import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
 public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoundHolder, TimingBridge {

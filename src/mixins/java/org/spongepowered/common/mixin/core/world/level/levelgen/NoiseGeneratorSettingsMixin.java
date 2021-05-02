@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.level.levelgen;
 
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
+
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 
 @Mixin(NoiseGeneratorSettings.class)
 public abstract class NoiseGeneratorSettingsMixin implements ResourceKeyBridge {

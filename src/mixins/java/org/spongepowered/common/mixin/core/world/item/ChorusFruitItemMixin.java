@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.item;
 
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.item.ChorusFruitItem;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
@@ -33,6 +31,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.item.ChorusFruitItem;
 
 @Mixin(ChorusFruitItem.class)
 public abstract class ChorusFruitItemMixin {

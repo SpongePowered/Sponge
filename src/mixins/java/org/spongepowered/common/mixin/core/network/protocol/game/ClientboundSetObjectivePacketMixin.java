@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.network.protocol.game;
 
-import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
-import net.minecraft.world.scores.Objective;
-import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+
+import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
+import net.minecraft.world.scores.Objective;
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 @Mixin(ClientboundSetObjectivePacket.class)
 public abstract class ClientboundSetObjectivePacketMixin {

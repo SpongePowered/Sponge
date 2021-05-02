@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.server.dedicated;
 
-import net.minecraft.server.dedicated.DedicatedServer;
-import net.minecraft.server.rcon.thread.RconThread;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.server.rcon.thread.RconThread;
 
 @Mixin(DedicatedServer.class)
 public interface DedicatedServerAccessor {

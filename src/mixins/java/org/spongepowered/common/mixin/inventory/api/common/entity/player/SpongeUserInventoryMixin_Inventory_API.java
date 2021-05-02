@@ -39,9 +39,8 @@ import org.spongepowered.common.inventory.adapter.impl.comp.PrimaryPlayerInvento
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 
-import java.util.Optional;
-
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(value = SpongeUserInventory.class, remap = false)
 public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInventory, InventoryAdapter {

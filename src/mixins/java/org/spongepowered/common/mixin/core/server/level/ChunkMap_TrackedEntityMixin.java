@@ -34,11 +34,12 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
-import java.util.stream.Stream;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.world.entity.Entity;
+
+import java.util.stream.Stream;
 
 @Mixin(targets = "net/minecraft/server/level/ChunkMap$TrackedEntity")
 public abstract class ChunkMap_TrackedEntityMixin {

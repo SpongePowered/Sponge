@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.world.teleport;
 
-import net.minecraft.world.level.material.Material;
 import org.spongepowered.api.block.BlockState;
+
+import net.minecraft.world.level.material.Material;
 
 public final class FlyingTeleportHelperFilter extends DefaultTeleportHelperFilter {
 

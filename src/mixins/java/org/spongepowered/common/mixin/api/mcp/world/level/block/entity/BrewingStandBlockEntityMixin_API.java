@@ -28,8 +28,9 @@ import org.spongepowered.api.block.entity.carrier.BrewingStand;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
 import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
+
+import java.util.Set;
 
 @Mixin(BrewingStandBlockEntity.class)
 public abstract class BrewingStandBlockEntityMixin_API extends BaseContainerBlockEntityMixin_API implements BrewingStand {

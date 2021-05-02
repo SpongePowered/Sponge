@@ -26,14 +26,15 @@ package org.spongepowered.common.event.tracking.context.transaction.pipeline;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.StringJoiner;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Collections;
+import java.util.List;
+import java.util.StringJoiner;
 
 public final class PipelineCursor {
     public final BlockState state;

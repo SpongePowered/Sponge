@@ -29,6 +29,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;

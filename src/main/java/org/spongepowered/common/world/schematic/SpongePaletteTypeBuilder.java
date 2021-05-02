@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.schematic;
 
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.world.schematic.PaletteType;
 

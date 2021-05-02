@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.optimization.mcp.world.level.saveddata.maps;
 
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.optimization.OptimizedMapInfoBridge;
+
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 @Mixin(MapItemSavedData.HoldingPlayer.class)
 public abstract class MapItemSavedData_HoldingPlayerMixin_Optimization_Map implements OptimizedMapInfoBridge {

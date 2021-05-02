@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.phys;
 
-import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.phys.AABB;
 
 @Mixin(AABB.class)
 public interface AABBAccessor {

@@ -25,15 +25,15 @@
 package org.spongepowered.common.mixin.api.mcp.world;
 
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.volume.game.GenerationVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.function.Predicate;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.LevelSimulatedReader;
 import net.minecraft.world.level.levelgen.Heightmap;
+
+import java.util.function.Predicate;
 
 @Mixin(LevelSimulatedReader.class)
 public interface IWorldGenerationBaseReaderMixin_API extends GenerationVolume {

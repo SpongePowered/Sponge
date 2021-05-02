@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.accessor.network.protocol.login;
 
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
 
 @Mixin(ServerboundCustomQueryPacket.class)
 public interface ServerboundCustomQueryPacketAccessor {

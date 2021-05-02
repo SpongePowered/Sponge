@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.accessor.world.level.biome;
 
-import net.minecraft.core.Registry;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
+
+import net.minecraft.core.Registry;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.biome.TheEndBiomeSource;
 
 @Mixin(TheEndBiomeSource.class)
 public interface TheEndBiomeSourceAccessor {

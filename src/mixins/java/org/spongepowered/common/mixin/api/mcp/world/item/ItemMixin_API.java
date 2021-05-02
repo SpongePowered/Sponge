@@ -25,17 +25,18 @@
 package org.spongepowered.common.mixin.api.mcp.world.item;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.world.item.Item;
+
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import net.minecraft.world.item.Item;
+
+import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Optional;
 import java.util.function.Supplier;
-
-import javax.annotation.Nullable;
 
 @Mixin(Item.class)
 public abstract class ItemMixin_API implements ItemType {

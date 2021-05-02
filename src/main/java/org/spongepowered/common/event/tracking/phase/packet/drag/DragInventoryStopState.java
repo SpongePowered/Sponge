@@ -33,12 +33,13 @@ import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
-import java.util.Optional;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.crafting.RecipeType;
+
+import java.util.List;
+import java.util.Optional;
 
 public abstract class DragInventoryStopState extends NamedInventoryState {
 

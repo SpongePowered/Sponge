@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.monster;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.raider.illager.Vindicator;
 import org.spongepowered.asm.mixin.Mixin;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.monster.Vindicator.class)

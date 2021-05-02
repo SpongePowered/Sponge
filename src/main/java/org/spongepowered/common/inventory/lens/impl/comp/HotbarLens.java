@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
-import net.minecraft.world.InteractionHand;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.bridge.world.entity.player.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.impl.comp.HotbarAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
+import net.minecraft.world.InteractionHand;
 
 public class HotbarLens extends InventoryRowLens {
 

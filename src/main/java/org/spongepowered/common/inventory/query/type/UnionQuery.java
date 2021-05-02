@@ -27,9 +27,9 @@ package org.spongepowered.common.inventory.query.type;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.fabric.CompoundFabric;
 import org.spongepowered.common.inventory.lens.CompoundSlotLensProvider;
 import org.spongepowered.common.inventory.lens.impl.CompoundLens;
-import org.spongepowered.common.inventory.fabric.CompoundFabric;
 import org.spongepowered.common.inventory.query.SpongeQuery;
 
 public final class UnionQuery extends SpongeQuery {

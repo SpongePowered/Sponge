@@ -31,8 +31,9 @@ import org.spongepowered.common.bridge.world.inventory.CarriedBridge;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
 import org.spongepowered.common.inventory.custom.CustomInventory;
 
-import java.util.Optional;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+
+import java.util.Optional;
 
 /**
  * Implements {@link CarriedInventory} using {@link CarriedBridge}

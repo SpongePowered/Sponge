@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.common.inventory.adapter.impl.comp.CraftingInventoryAdapter;
@@ -34,6 +33,8 @@ import org.spongepowered.common.inventory.lens.impl.slot.CraftingOutputSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.FilteringSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.property.KeyValuePair;
+
+import net.minecraft.world.item.ItemStack;
 
 public class CraftingInventoryLens extends DefaultIndexedLens {
 

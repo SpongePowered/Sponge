@@ -25,12 +25,14 @@
 package org.spongepowered.common.bridge.server;
 
 import com.google.inject.Injector;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.Difficulty;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Game;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.Difficulty;
 
 public interface MinecraftServerBridge {
 

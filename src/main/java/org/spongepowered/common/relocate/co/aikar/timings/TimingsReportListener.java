@@ -30,7 +30,7 @@ import net.kyori.adventure.audience.ForwardingAudience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.apache.commons.lang3.Validate;
-import org.spongepowered.api.Server;
+
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.common.server.ServerConsoleSystemSubject;
 

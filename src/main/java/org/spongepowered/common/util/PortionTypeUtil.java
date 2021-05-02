@@ -25,6 +25,7 @@
 package org.spongepowered.common.util;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.data.type.PortionType;
 import org.spongepowered.api.data.type.PortionTypes;
 

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.tracker.world.level.block;
 
 import com.google.common.collect.ImmutableList;
+
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.DropItemEvent;
@@ -46,8 +47,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.ArrayList;
-import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.BlockSourceImpl;
 import net.minecraft.core.dispenser.DispenseItemBehavior;
@@ -55,6 +54,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.DispenserBlock;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(DispenserBlock.class)
 public class DispenserBlockMixin_Tracker {

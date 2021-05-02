@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.inventory.container;
 
-import net.minecraft.world.inventory.Slot;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
+
+import net.minecraft.world.inventory.Slot;
 
 public interface MenuBridge {
 

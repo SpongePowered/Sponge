@@ -30,8 +30,10 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
-import java.util.Set;
+
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+
+import java.util.Set;
 
 @Mixin(HopperBlockEntity.class)
 public abstract class HopperBlockEntityMixin_API extends RandomizableContainerBlockEntityMixin_API<Hopper> implements Hopper {

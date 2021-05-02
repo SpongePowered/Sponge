@@ -25,8 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.User;
@@ -44,6 +44,8 @@ import org.spongepowered.common.event.tracking.context.transaction.GameTransacti
 import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.world.BlockChange;
+
+import net.minecraft.world.entity.Entity;
 
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;

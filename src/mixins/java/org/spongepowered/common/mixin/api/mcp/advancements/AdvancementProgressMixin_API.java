@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.advancements.AdvancementProgress;
+
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.CriterionProgress;
@@ -34,6 +34,8 @@ import org.spongepowered.api.advancement.criteria.ScoreCriterionProgress;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.advancement.criterion.ImplementationBackedCriterionProgress;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
+
+import net.minecraft.advancements.AdvancementProgress;
 
 import java.time.Instant;
 import java.util.Map;

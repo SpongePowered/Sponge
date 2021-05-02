@@ -26,16 +26,12 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.decoration;
 
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.hanging.Hanging;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.api.mcp.world.entity.EntityMixin_API;
-import org.spongepowered.common.util.Constants;
 
-import java.util.Collection;
-import java.util.Set;
-import javax.annotation.Nullable;
 import net.minecraft.world.entity.decoration.HangingEntity;
+
+import java.util.Set;
 
 @Mixin(HangingEntity.class)
 public abstract class HangingEntityMixin_API extends EntityMixin_API implements Hanging {

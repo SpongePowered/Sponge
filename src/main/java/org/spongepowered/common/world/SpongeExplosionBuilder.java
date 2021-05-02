@@ -25,13 +25,15 @@
 package org.spongepowered.common.world;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.world.entity.Entity;
+
 import org.spongepowered.api.entity.explosive.Explosive;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.bridge.world.level.ExplosionBridge;
 import org.spongepowered.math.vector.Vector3d;
+
+import net.minecraft.world.entity.Entity;
 
 public class SpongeExplosionBuilder implements Explosion.Builder {
 

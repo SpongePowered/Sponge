@@ -27,9 +27,6 @@ package org.spongepowered.common.registry.provider;
 import org.spongepowered.api.entity.ai.goal.GoalType;
 import org.spongepowered.api.entity.ai.goal.GoalTypes;
 
-import java.util.IdentityHashMap;
-import java.util.Map;
-import java.util.Optional;
 import net.minecraft.world.entity.ai.goal.AvoidEntityGoal;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
@@ -40,6 +37,10 @@ import net.minecraft.world.entity.ai.goal.RandomStrollGoal;
 import net.minecraft.world.entity.ai.goal.RangedAttackGoal;
 import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
 import net.minecraft.world.entity.ai.goal.target.NearestAttackableTargetGoal;
+
+import java.util.IdentityHashMap;
+import java.util.Map;
+import java.util.Optional;
 
 public final class GoalTypeProvider {
 

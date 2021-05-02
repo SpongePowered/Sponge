@@ -35,9 +35,10 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedInventor
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
-import java.util.List;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
+
+import java.util.List;
 
 public final class SwapHandItemsState extends BasicInventoryPacketState {
 

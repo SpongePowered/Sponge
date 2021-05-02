@@ -25,10 +25,6 @@
 package org.spongepowered.common.service.game.pagination;
 
 import com.google.common.annotations.VisibleForTesting;
-
-import java.text.MessageFormat;
-import java.util.ArrayDeque;
-
 import com.google.common.base.Strings;
 import net.kyori.adventure.text.BuildableComponent;
 import net.kyori.adventure.text.Component;
@@ -37,15 +33,19 @@ import net.kyori.adventure.text.TranslatableComponent;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.translation.GlobalTranslator;
-import net.minecraft.locale.Language;
 import org.apache.commons.lang3.ArrayUtils;
+
 import org.spongepowered.api.util.locale.Locales;
-import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.CommentedConfigurationNode;
+import org.spongepowered.configurate.ConfigurateException;
 import org.spongepowered.configurate.hocon.HoconConfigurationLoader;
 import org.spongepowered.configurate.loader.ConfigurationLoader;
 import org.spongepowered.math.GenericMath;
 
+import net.minecraft.locale.Language;
+
+import java.text.MessageFormat;
+import java.util.ArrayDeque;
 import java.util.Collections;
 import java.util.Deque;
 import java.util.PrimitiveIterator;

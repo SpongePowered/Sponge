@@ -24,20 +24,23 @@
  */
 package org.spongepowered.common.world.biome.provider;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.common.accessor.world.level.biome.BiomeSourceAccessor;
+import org.spongepowered.common.accessor.world.level.biome.OverworldBiomeSourceAccessor;
+
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.common.accessor.world.level.biome.BiomeSourceAccessor;
-import org.spongepowered.common.accessor.world.level.biome.OverworldBiomeSourceAccessor;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryLookupCodec;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public final class SpongeLayeredBiomeProviderHelper {
 

@@ -34,12 +34,13 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import net.minecraft.world.entity.ai.attributes.AttributeInstance;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
-import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 
 @Mixin(AttributeInstance.class)
 @Implements(@Interface(iface = Attribute.class, prefix = "attribute$"))

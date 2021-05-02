@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.entity.monster;
 
-import net.minecraft.world.entity.monster.Endermite;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.entity.monster.Endermite;
 
 @Mixin(Endermite.class)
 public interface EndermiteAccessor {

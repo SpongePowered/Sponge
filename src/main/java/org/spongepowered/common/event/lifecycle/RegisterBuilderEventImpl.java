@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.lifecycle;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;

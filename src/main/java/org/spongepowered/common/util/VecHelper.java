@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.util;
 
+import org.spongepowered.api.util.AABB;
+import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.common.world.server.SpongeServerLocation;
+import org.spongepowered.math.vector.Vector2i;
+
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Rotations;
 import net.minecraft.core.Vec3i;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.phys.Vec3;
-import org.spongepowered.api.util.AABB;
-import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.common.world.server.SpongeServerLocation;
-import org.spongepowered.math.vector.Vector2i;
 
 public final class VecHelper {
 

@@ -25,6 +25,7 @@
 package org.spongepowered.common.block;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Key;
@@ -32,8 +33,8 @@ import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DataUtil;
 
 import java.util.Objects;
 import java.util.Optional;

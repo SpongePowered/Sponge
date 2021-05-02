@@ -28,12 +28,14 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.advancements.FrameType;
+
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.AdvancementTypes;
 import org.spongepowered.api.advancement.DisplayInfo;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.adventure.SpongeAdventure;
+
+import net.minecraft.advancements.FrameType;
 
 public final class SpongeDisplayInfoBuilder implements DisplayInfo.Builder {
 

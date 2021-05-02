@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.entity.raid;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.raid.Raider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
+
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.raid.Raider;
 
 @Mixin(Raider.class)
 public interface RaiderAccessor {

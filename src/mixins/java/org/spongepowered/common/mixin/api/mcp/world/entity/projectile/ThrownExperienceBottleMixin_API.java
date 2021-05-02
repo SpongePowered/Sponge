@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.projectile;
 
-import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
 import org.spongepowered.api.entity.projectile.ExperienceBottle;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.projectile.ThrownExperienceBottle;
 
 @Mixin(ThrownExperienceBottle.class)
 public abstract class ThrownExperienceBottleMixin_API extends ThrowableProjectileMixin_API implements ExperienceBottle {

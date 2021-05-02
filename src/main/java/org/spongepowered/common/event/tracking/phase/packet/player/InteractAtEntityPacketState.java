@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.Entity;

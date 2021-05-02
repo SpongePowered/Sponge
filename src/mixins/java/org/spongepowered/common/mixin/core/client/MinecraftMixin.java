@@ -24,6 +24,20 @@
  */
 package org.spongepowered.common.mixin.core.client;
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeBootstrap;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.client.MinecraftBridge;
+import org.spongepowered.common.client.SpongeClient;
+import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.server.BootstrapProperties;
+
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
@@ -38,19 +52,6 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.client.MinecraftBridge;
-import org.spongepowered.common.client.SpongeClient;
-import org.spongepowered.common.entity.player.ClientType;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
 

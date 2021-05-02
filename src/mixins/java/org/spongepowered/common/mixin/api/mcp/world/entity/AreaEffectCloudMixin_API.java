@@ -25,17 +25,10 @@
 package org.spongepowered.common.mixin.api.mcp.world.entity;
 
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.effect.particle.ParticleTypes;
-import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.AreaEffectCloud;
-import org.spongepowered.api.util.Color;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.List;
 import java.util.Set;
-import java.util.UUID;
 
 @SuppressWarnings("unchecked")
 @Mixin(net.minecraft.world.entity.AreaEffectCloud.class)

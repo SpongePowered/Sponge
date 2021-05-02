@@ -27,10 +27,11 @@ package org.spongepowered.common.util;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 
-import java.util.function.Supplier;
 import net.minecraft.world.level.block.state.StateHolder;
 import net.minecraft.world.level.block.state.properties.IntegerProperty;
 import net.minecraft.world.level.block.state.properties.Property;
+
+import java.util.function.Supplier;
 
 public final class BoundedUtil {
 

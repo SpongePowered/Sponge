@@ -25,15 +25,17 @@
 package org.spongepowered.common.data.provider.inventory;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.world.Nameable;
+
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.inventory.custom.CustomInventory;
 import org.spongepowered.common.inventory.util.InventoryUtil;
+
+import net.minecraft.world.Nameable;
 
 public final class InventoryData {
 

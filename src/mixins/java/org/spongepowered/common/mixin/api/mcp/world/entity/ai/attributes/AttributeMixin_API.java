@@ -24,13 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.ai.attributes;
 
-import net.minecraft.world.entity.ai.attributes.Attribute;
 import org.spongepowered.api.entity.attribute.type.AttributeType;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.entity.ai.attributes.Attribute;
 
 @Mixin(Attribute.class)
 public abstract class AttributeMixin_API implements AttributeType {

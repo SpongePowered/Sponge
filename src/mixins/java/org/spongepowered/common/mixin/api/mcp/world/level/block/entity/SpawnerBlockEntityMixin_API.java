@@ -30,9 +30,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.BaseSpawnerBridge;
 
-import java.util.Set;
 import net.minecraft.world.level.BaseSpawner;
 import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+
+import java.util.Set;
 
 @Mixin(SpawnerBlockEntity.class)
 public abstract class SpawnerBlockEntityMixin_API extends BlockEntityMixin_API implements MobSpawner {

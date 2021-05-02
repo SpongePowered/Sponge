@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mcp.block;
 
-import net.minecraft.world.level.block.SoundType;
-import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.api.block.BlockSoundGroup;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.level.block.SoundType;
+import net.minecraft.world.level.block.state.BlockBehaviour;
 
 @Mixin(value = BlockBehaviour.class)
 public abstract class AbstractBlockMixin_API implements BlockType {

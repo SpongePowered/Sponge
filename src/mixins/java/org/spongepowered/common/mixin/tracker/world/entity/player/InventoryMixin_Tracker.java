@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity.player;
 
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -37,6 +36,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
+import net.minecraft.world.item.ItemStack;
 
 @Mixin(net.minecraft.world.entity.player.Inventory.class)
 public abstract class InventoryMixin_Tracker implements TrackedInventoryBridge {

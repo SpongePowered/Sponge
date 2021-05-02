@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.entityactivation.entity.projectile;
 
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_EntityActivation;
+
+import net.minecraft.world.entity.projectile.AbstractArrow;
 
 @Mixin(AbstractArrow.class)
 public abstract class AbstractArrowEntityMixin_EntityActivation extends EntityMixin_EntityActivation {

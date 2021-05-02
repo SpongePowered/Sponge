@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.level.block;
 
-import net.minecraft.world.level.block.AbstractSkullBlock;
-import net.minecraft.world.level.block.SkullBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.level.block.AbstractSkullBlock;
+import net.minecraft.world.level.block.SkullBlock;
 
 @Mixin(AbstractSkullBlock.class)
 public interface AbstractSkullBlockAccessor {

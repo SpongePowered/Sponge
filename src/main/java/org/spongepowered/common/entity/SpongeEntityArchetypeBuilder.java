@@ -41,9 +41,10 @@ import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.util.Constants;
 
+import net.minecraft.nbt.CompoundTag;
+
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.nbt.CompoundTag;
 
 public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArchetype> implements EntityArchetype.Builder {
 

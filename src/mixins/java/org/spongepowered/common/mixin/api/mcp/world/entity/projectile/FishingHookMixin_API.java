@@ -28,8 +28,10 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.FishingBobber;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.world.entity.EntityMixin_API;
-import java.util.Set;
+
 import net.minecraft.world.entity.projectile.FishingHook;
+
+import java.util.Set;
 
 @Mixin(FishingHook.class)
 public abstract class FishingHookMixin_API extends EntityMixin_API implements FishingBobber {

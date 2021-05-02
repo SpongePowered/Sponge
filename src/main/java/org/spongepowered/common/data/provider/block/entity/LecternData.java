@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.world.level.block.entity.LecternBlockEntity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
+import net.minecraft.world.level.block.entity.LecternBlockEntity;
 
 public final class LecternData {
 

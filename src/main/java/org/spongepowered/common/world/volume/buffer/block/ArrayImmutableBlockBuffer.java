@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer.block;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;

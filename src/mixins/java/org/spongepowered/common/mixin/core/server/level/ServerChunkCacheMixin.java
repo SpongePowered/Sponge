@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
-import net.minecraft.server.level.ChunkMap;
-import net.minecraft.server.level.ServerChunkCache;
-import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Final;
@@ -35,6 +32,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
+
+import net.minecraft.server.level.ChunkMap;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.server.level.ServerLevel;
 
 @Mixin(ServerChunkCache.class)
 public abstract class ServerChunkCacheMixin {

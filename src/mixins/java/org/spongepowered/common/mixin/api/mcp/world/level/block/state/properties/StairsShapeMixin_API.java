@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.state.properties;
 
-import net.minecraft.world.level.block.state.properties.StairsShape;
 import org.spongepowered.api.data.type.StairShape;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.state.properties.StairsShape;
 
 @Mixin(StairsShape.class)
 public abstract class StairsShapeMixin_API implements StairShape {

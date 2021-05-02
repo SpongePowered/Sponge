@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.world.entity.monster;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.api.util.Direction;
 

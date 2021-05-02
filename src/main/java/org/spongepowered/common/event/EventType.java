@@ -25,6 +25,7 @@
 package org.spongepowered.common.event;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.event.Event;
 
 import java.lang.reflect.Type;

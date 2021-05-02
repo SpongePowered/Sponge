@@ -29,17 +29,14 @@ import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Optional;
+import net.minecraft.world.item.trading.MerchantOffer;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.item.trading.MerchantOffer;
+import java.util.Optional;
 
 @Mixin(MerchantOffer.class)
 public abstract class MerchantOfferMixin_API implements TradeOffer {

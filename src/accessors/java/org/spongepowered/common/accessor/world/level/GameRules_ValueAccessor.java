@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.level;
 
-import net.minecraft.world.level.GameRules;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import net.minecraft.world.level.GameRules;
 
 @Mixin(GameRules.Value.class)
 public interface GameRules_ValueAccessor {

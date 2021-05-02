@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.decoration.ItemFrame;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
+import net.minecraft.world.entity.decoration.ItemFrame;
 
 public final class ItemFrameData {
 

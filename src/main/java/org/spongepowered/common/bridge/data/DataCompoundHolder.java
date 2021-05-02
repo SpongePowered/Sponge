@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.bridge.data;
 
-import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
-import org.spongepowered.common.util.Constants;
+
+import net.minecraft.nbt.CompoundTag;
 
 public interface DataCompoundHolder {
 

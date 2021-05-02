@@ -35,11 +35,13 @@ import org.spongepowered.common.bridge.world.entity.AggressiveEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.entity.AgableMobMixin;
-import java.util.Random;
+
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.NeutralMob;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Random;
 
 @Mixin(net.minecraft.world.entity.animal.Wolf.class)
 public abstract class WolfMixin extends AgableMobMixin implements AggressiveEntityBridge {

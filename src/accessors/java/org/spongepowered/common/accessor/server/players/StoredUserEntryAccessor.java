@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.server.players;
 
-import net.minecraft.server.players.StoredUserEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.server.players.StoredUserEntry;
 
 @Mixin(StoredUserEntry.class)
 public interface StoredUserEntryAccessor<T> {

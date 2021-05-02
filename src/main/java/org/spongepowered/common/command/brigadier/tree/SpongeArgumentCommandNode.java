@@ -24,6 +24,21 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueCompleter;
+import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
+import org.spongepowered.api.command.parameter.managed.ValueUsage;
+import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
+import org.spongepowered.common.command.brigadier.SpongeStringReader;
+import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
+import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
+import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
+import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+import org.spongepowered.common.util.CommandUtil;
+import org.spongepowered.common.util.Constants;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.RedirectModifier;
 import com.mojang.brigadier.StringReader;
@@ -45,19 +60,6 @@ import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.parameter.Parameter;
-import org.spongepowered.api.command.parameter.managed.ValueCompleter;
-import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
-import org.spongepowered.api.command.parameter.managed.ValueUsage;
-import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
-import org.spongepowered.common.command.brigadier.SpongeStringReader;
-import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
-import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
-import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
-import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
-import org.spongepowered.common.util.CommandUtil;
-import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
 import java.util.Collection;

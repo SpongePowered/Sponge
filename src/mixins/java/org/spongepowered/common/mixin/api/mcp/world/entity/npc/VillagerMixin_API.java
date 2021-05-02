@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.npc;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.trader.Villager;
 import org.spongepowered.asm.mixin.Mixin;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.npc.Villager.class)

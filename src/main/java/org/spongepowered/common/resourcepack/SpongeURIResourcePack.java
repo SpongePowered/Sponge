@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.resourcepack;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.net.URI;
 import java.net.URISyntaxException;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 
 public final class SpongeURIResourcePack extends SpongeResourcePack {

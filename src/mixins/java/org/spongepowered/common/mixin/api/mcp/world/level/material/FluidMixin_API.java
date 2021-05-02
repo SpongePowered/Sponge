@@ -25,15 +25,17 @@
 package org.spongepowered.common.mixin.api.mcp.world.level.material;
 
 import com.google.common.collect.ImmutableList;
+
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
+import net.minecraft.world.level.material.Fluid;
+
 import java.util.Collection;
 import java.util.Optional;
-import net.minecraft.world.level.material.Fluid;
 
 @Mixin(Fluid.class)
 public abstract class FluidMixin_API implements FluidType {

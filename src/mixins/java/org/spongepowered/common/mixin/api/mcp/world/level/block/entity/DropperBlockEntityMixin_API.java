@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.DropperBlockEntity;
 import org.spongepowered.api.block.entity.carrier.Dropper;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.DropperBlockEntity;
 
 @Mixin(DropperBlockEntity.class)
 public abstract class DropperBlockEntityMixin_API extends DispenserBlockEntityMixin_API implements Dropper {

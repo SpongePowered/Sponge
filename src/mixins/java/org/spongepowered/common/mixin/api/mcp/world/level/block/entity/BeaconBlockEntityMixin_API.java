@@ -31,11 +31,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
-import java.util.Set;
-
-import javax.annotation.Nullable;
 import net.minecraft.world.effect.MobEffect;
 import net.minecraft.world.level.block.entity.BeaconBlockEntity;
+
+import javax.annotation.Nullable;
+import java.util.Set;
 
 @Mixin(BeaconBlockEntity.class)
 public abstract class BeaconBlockEntityMixin_API extends BlockEntityMixin_API implements Beacon {

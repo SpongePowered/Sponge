@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;

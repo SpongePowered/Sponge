@@ -24,19 +24,21 @@
  */
 package org.spongepowered.common.adventure;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.translation.GlobalTranslator;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.network.chat.ComponentUtils;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.adventure.ResolveOperation;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
+
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.network.chat.ComponentUtils;
 
 import java.util.Locale;
 

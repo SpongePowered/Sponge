@@ -25,6 +25,7 @@
 package org.spongepowered.common.network.channel;
 
 import io.netty.handler.codec.CodecException;
+
 import org.spongepowered.api.network.channel.ChannelException;
 import org.spongepowered.api.network.channel.ChannelIOException;
 

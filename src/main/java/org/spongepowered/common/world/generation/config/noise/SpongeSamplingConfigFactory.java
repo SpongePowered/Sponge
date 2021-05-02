@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.world.generation.config.noise;
 
-import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
+
+import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 
 public final class SpongeSamplingConfigFactory implements SamplingConfig.Factory {
 

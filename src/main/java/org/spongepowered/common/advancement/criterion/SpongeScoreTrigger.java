@@ -25,13 +25,15 @@
 package org.spongepowered.common.advancement.criterion;
 
 import com.google.gson.JsonObject;
+
+import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
+
 import net.minecraft.advancements.critereon.AbstractCriterionTriggerInstance;
 import net.minecraft.advancements.critereon.DeserializationContext;
 import net.minecraft.advancements.critereon.EntityPredicate;
 import net.minecraft.advancements.critereon.SerializationContext;
 import net.minecraft.advancements.critereon.SimpleCriterionTrigger;
 import net.minecraft.resources.ResourceLocation;
-import org.spongepowered.common.accessor.advancements.CriteriaTriggersAccessor;
 
 public final class SpongeScoreTrigger extends SimpleCriterionTrigger<SpongeScoreTrigger.Instance> {
 

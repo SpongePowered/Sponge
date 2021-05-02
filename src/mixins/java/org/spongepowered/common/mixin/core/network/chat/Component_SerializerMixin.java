@@ -30,6 +30,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializationContext;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;

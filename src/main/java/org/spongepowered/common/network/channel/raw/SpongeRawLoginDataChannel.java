@@ -39,12 +39,13 @@ import org.spongepowered.common.network.channel.SpongeChannel;
 import org.spongepowered.common.network.channel.TransactionResult;
 import org.spongepowered.common.network.channel.TransactionStore;
 
+import net.minecraft.network.protocol.Packet;
+
 import java.util.Map;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Consumer;
-import net.minecraft.network.protocol.Packet;
 
 @SuppressWarnings("unchecked")
 public class SpongeRawLoginDataChannel implements RawHandshakeDataChannel {

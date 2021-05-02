@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.food;
 
-import net.minecraft.world.food.FoodData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.food.FoodData;
 
 @Mixin(FoodData.class)
 public interface FoodDataAccessor {

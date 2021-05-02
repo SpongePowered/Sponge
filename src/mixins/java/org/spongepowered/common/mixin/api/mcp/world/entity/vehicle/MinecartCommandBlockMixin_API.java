@@ -29,9 +29,10 @@ import org.spongepowered.api.entity.vehicle.minecart.CommandBlockMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Set;
 import net.minecraft.world.entity.vehicle.MinecartCommandBlock;
 import net.minecraft.world.level.BaseCommandBlock;
+
+import java.util.Set;
 
 @Mixin(MinecartCommandBlock.class)
 public abstract class MinecartCommandBlockMixin_API extends AbstractMinecartMixin_API implements CommandBlockMinecart {

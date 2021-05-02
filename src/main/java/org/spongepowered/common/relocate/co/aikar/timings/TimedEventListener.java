@@ -26,6 +26,7 @@ package org.spongepowered.common.relocate.co.aikar.timings;
 
 import co.aikar.timings.Timing;
 import co.aikar.timings.Timings;
+
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.common.SpongeCommon;

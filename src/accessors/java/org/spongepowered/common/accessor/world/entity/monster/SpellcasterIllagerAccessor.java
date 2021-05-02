@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.entity.monster;
 
-import net.minecraft.world.entity.monster.SpellcasterIllager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import net.minecraft.world.entity.monster.SpellcasterIllager;
 
 @Mixin(SpellcasterIllager.class)
 public interface SpellcasterIllagerAccessor {

@@ -26,6 +26,7 @@ package org.spongepowered.common.entity.projectile;
 
 import com.google.common.collect.Maps;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.block.entity.carrier.Dispenser;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
@@ -48,13 +49,9 @@ import org.spongepowered.api.entity.projectile.explosive.fireball.DragonFireball
 import org.spongepowered.api.entity.projectile.explosive.fireball.ExplosiveFireball;
 import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3d;
-
-import java.util.Map;
-import java.util.Optional;
-import java.util.function.Supplier;
 
 import net.minecraft.core.Direction;
 import net.minecraft.util.Mth;
@@ -73,6 +70,10 @@ import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.entity.DispenserBlockEntity;
+
+import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public final class ProjectileUtil {
 

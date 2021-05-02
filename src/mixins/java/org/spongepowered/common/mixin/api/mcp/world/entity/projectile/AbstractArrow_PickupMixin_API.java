@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.projectile;
 
-import net.minecraft.world.entity.projectile.AbstractArrow;
 import org.spongepowered.api.data.type.PickupRule;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.projectile.AbstractArrow;
 
 @Mixin(AbstractArrow.Pickup.class)
 public abstract class AbstractArrow_PickupMixin_API implements PickupRule {

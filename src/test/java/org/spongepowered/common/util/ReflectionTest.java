@@ -28,17 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.spongepowered.common.util.ReflectionUtil.createInstance;
 import static org.spongepowered.common.util.ReflectionUtil.findConstructor;
 
-import io.leangen.geantyref.TypeToken;
 import org.junit.jupiter.api.Test;
-import org.spongepowered.api.data.DataHolder;
-import org.spongepowered.api.data.Key;
-import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.event.EventListener;
-import org.spongepowered.api.event.data.ChangeDataHolderEvent;
-import org.spongepowered.common.data.value.ImmutableSpongeValue;
-
-import java.lang.reflect.Type;
 
 public class ReflectionTest {
 

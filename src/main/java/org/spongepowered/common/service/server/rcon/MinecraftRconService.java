@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.service.server.rcon;
 
-import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.api.service.rcon.RconService;
 import org.spongepowered.common.accessor.server.dedicated.DedicatedServerAccessor;
+
+import net.minecraft.server.dedicated.DedicatedServer;
 
 public class MinecraftRconService implements RconService {
     private final DedicatedServer server;

@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.manipulator;
 
 import com.google.common.collect.ImmutableMap;
+
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.MergeFunction;

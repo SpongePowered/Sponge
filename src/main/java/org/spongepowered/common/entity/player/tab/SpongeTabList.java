@@ -30,13 +30,9 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.Maps;
-import com.mojang.authlib.GameProfile;
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
-import net.minecraft.network.protocol.game.ClientboundTabListPacket;
-import net.minecraft.world.level.GameType;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.entity.living.player.tab.TabList;
@@ -45,6 +41,12 @@ import org.spongepowered.common.accessor.network.protocol.game.ClientboundPlayer
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundTabListPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
+
+import com.mojang.authlib.GameProfile;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
+import net.minecraft.network.protocol.game.ClientboundTabListPacket;
+import net.minecraft.world.level.GameType;
 
 import java.util.Collection;
 import java.util.Collections;

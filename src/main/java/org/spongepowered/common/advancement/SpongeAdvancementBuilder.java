@@ -26,11 +26,8 @@ package org.spongepowered.common.advancement;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import net.minecraft.advancements.AdvancementRewards;
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.FrameType;
-import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.DisplayInfo;
@@ -41,6 +38,11 @@ import org.spongepowered.common.bridge.advancements.AdvancementBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.SpongeCriterionUtil;
+
+import net.minecraft.advancements.AdvancementRewards;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.FrameType;
+import net.minecraft.resources.ResourceLocation;
 
 import java.util.Map;
 

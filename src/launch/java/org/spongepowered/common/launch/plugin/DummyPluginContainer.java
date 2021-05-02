@@ -26,6 +26,7 @@ package org.spongepowered.common.launch.plugin;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Logger;
+
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 

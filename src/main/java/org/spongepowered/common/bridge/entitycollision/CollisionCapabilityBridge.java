@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.bridge.entitycollision;
 
-import net.minecraft.world.level.Level;
 import org.spongepowered.api.ResourceKey;
+
+import net.minecraft.world.level.Level;
 
 public interface CollisionCapabilityBridge {
 

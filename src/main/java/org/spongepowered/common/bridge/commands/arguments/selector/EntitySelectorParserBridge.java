@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.bridge.commands.arguments.selector;
 
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import org.spongepowered.api.command.selector.SelectorType;
 import org.spongepowered.api.util.Tristate;
+
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 public interface EntitySelectorParserBridge {
 

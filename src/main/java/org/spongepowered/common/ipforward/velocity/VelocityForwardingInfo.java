@@ -25,14 +25,11 @@
 package org.spongepowered.common.ipforward.velocity;
 
 import com.google.common.net.InetAddresses;
-import com.mojang.authlib.GameProfile;
-import com.mojang.authlib.properties.Property;
 import io.netty.buffer.ByteBuf;
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.FriendlyByteBuf;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.network.EngineConnection;
@@ -45,15 +42,19 @@ import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.server.network.ServerLoginPacketListenerImplAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 
+import com.mojang.authlib.GameProfile;
+import com.mojang.authlib.properties.Property;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+
+import javax.crypto.Mac;
+import javax.crypto.spec.SecretKeySpec;
 import java.net.InetAddress;
 import java.net.InetSocketAddress;
 import java.nio.charset.StandardCharsets;
 import java.security.InvalidKeyException;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-
-import javax.crypto.Mac;
-import javax.crypto.spec.SecretKeySpec;
 
 public class VelocityForwardingInfo {
     private static final int SUPPORTED_FORWARDING_VERSION = 1;

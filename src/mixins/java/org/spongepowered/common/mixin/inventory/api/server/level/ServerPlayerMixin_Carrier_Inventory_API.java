@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.inventory.api.server.level;
 
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin_Carrier_Inventory_API implements Carrier {

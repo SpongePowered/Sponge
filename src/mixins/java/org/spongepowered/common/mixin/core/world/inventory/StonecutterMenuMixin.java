@@ -33,7 +33,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.world.inventory.AbstractContainerMenuAccessor;
 import org.spongepowered.common.item.recipe.stonecutting.SpongeStonecuttingRecipe;
 
-import java.util.List;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.DataSlot;
@@ -41,6 +40,8 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.inventory.StonecutterMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.StonecutterRecipe;
+
+import java.util.List;
 
 @Mixin(StonecutterMenu.class)
 public abstract class StonecutterMenuMixin {

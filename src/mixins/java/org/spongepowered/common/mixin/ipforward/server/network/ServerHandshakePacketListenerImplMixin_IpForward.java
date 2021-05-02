@@ -25,11 +25,7 @@
 package org.spongepowered.common.mixin.ipforward.server.network;
 
 import com.google.gson.Gson;
-import com.mojang.authlib.properties.Property;
-import com.mojang.util.UUIDTypeAdapter;
-import net.minecraft.ChatFormatting;
-import net.minecraft.network.chat.Component;
-import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -42,12 +38,18 @@ import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.network.ConnectionBridge_IpForward;
 
-import java.net.InetSocketAddress;
+import com.mojang.authlib.properties.Property;
+import com.mojang.util.UUIDTypeAdapter;
+import net.minecraft.ChatFormatting;
 import net.minecraft.network.Connection;
 import net.minecraft.network.ConnectionProtocol;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
+import net.minecraft.network.protocol.login.ClientboundLoginDisconnectPacket;
 import net.minecraft.server.network.ServerHandshakePacketListenerImpl;
+
+import java.net.InetSocketAddress;
 
 @Mixin(ServerHandshakePacketListenerImpl.class)
 public abstract class ServerHandshakePacketListenerImplMixin_IpForward {

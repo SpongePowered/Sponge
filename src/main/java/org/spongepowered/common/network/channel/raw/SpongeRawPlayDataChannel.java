@@ -35,11 +35,12 @@ import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.PacketUtil;
 import org.spongepowered.common.network.channel.SpongeChannel;
 
+import net.minecraft.network.protocol.Packet;
+
 import java.util.Collection;
 import java.util.Objects;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.Consumer;
-import net.minecraft.network.protocol.Packet;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public class SpongeRawPlayDataChannel implements RawPlayDataChannel {

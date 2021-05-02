@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.data;
 
 import com.google.common.collect.Multimap;
+
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Key;

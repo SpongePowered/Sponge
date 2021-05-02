@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
-import net.minecraft.world.inventory.MenuType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.inventory.MenuType;
 
 @Mixin(MenuType.class)
 public class MenuTypeMixin_Inventory_API implements org.spongepowered.api.item.inventory.ContainerType {

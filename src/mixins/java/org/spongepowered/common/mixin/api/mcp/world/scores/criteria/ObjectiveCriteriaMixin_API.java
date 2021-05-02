@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.scores.criteria;
 
-import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.api.scoreboard.criteria.Criterion;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 @Mixin(ObjectiveCriteria.class)
 public abstract class ObjectiveCriteriaMixin_API implements Criterion {

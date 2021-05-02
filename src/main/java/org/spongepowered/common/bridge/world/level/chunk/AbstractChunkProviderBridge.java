@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.bridge.world.level.chunk;
 
-import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
+import net.minecraft.world.level.chunk.LevelChunk;
 
 public interface AbstractChunkProviderBridge {
 

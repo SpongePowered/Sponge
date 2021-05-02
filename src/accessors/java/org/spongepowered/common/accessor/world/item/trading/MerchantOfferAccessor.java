@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.item.trading;
 
-import net.minecraft.world.item.trading.MerchantOffer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.item.trading.MerchantOffer;
 
 @Mixin(MerchantOffer.class)
 public interface MerchantOfferAccessor {

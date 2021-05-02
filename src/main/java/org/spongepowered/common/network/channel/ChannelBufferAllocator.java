@@ -27,6 +27,7 @@ package org.spongepowered.common.network.channel;
 import io.netty.buffer.ByteBufAllocator;
 import io.netty.buffer.PooledByteBufAllocator;
 import io.netty.buffer.UnpooledByteBufAllocator;
+
 import org.spongepowered.api.network.channel.ChannelBuf;
 
 public final class ChannelBufferAllocator {

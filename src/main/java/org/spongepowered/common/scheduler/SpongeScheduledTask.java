@@ -25,6 +25,7 @@
 package org.spongepowered.common.scheduler;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 

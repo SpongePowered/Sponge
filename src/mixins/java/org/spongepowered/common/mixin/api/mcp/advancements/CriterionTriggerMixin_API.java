@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.advancements.CriterionTrigger;
-import net.minecraft.resources.ResourceLocation;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
@@ -35,6 +34,9 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.advancements.CriterionTriggerBridge;
+
+import net.minecraft.advancements.CriterionTrigger;
+import net.minecraft.resources.ResourceLocation;
 
 @Mixin(CriterionTrigger.class)
 public interface CriterionTriggerMixin_API<C extends FilteredTriggerConfiguration> extends Trigger<C> {

@@ -25,10 +25,9 @@
 package org.spongepowered.common.command.parameter;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.commands.CommandRuntimeException;
-import net.minecraft.network.chat.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
@@ -39,6 +38,9 @@ import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.api.command.parameter.managed.ValueParser;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
+
+import net.minecraft.commands.CommandRuntimeException;
+import net.minecraft.network.chat.TextComponent;
 
 import java.util.ArrayList;
 import java.util.Collection;

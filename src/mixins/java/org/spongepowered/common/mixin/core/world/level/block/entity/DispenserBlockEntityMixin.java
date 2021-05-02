@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.DispenserBlockEntity;
 
 @Mixin(DispenserBlockEntity.class)
 public abstract class DispenserBlockEntityMixin extends RandomizableContainerBlockEntityMixin {

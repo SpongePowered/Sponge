@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.item;
 
-import net.minecraft.world.item.FireworkRocketItem;
 import org.spongepowered.api.item.FireworkShape;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.item.FireworkRocketItem;
 
 @Mixin(FireworkRocketItem.Shape.class)
 public abstract class FireworkRocketItem_ShapeMixin_API implements FireworkShape {

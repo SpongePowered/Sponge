@@ -25,9 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.advancements.FrameType;
-import net.minecraft.world.item.ItemStack;
+
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.api.advancement.TreeLayoutElement;
@@ -42,6 +40,10 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.math.vector.Vector2d;
+
+import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.advancements.FrameType;
+import net.minecraft.world.item.ItemStack;
 
 @Mixin(DisplayInfo.class)
 @Implements(@Interface(iface = org.spongepowered.api.advancement.DisplayInfo.class, prefix = "displayInfo$"))

@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity.player;
 
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -33,11 +32,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 
-import java.util.OptionalInt;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+
+import java.util.OptionalInt;
 
 @Mixin(value = ServerPlayer.class)
 public class ServerPlayerEntityMixin_Inventory extends PlayerEntityMixin_Inventory {

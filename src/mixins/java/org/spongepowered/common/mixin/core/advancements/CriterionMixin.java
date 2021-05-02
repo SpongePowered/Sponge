@@ -25,10 +25,8 @@
 package org.spongepowered.common.mixin.core.advancements;
 
 import com.google.gson.JsonObject;
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.CriterionTriggerInstance;
-import net.minecraft.advancements.critereon.DeserializationContext;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -38,6 +36,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.advancement.criterion.SpongeScoreCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeScoreTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
+
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionTriggerInstance;
+import net.minecraft.advancements.critereon.DeserializationContext;
 
 import java.util.UUID;
 

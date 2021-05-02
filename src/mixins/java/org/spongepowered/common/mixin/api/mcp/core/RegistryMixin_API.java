@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.core;
 
-import com.mojang.serialization.Lifecycle;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
@@ -42,12 +41,13 @@ import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 import org.spongepowered.common.registry.SpongeRegistryType;
 
+import com.mojang.serialization.Lifecycle;
+import net.minecraft.resources.ResourceLocation;
+
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
-import net.minecraft.resources.ResourceLocation;
 
 @Mixin(net.minecraft.core.Registry.class)
 @Implements(@Interface(iface = Registry.class, prefix = "registry$"))

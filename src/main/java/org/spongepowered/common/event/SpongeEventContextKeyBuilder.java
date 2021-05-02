@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.TypeTokenUtil;

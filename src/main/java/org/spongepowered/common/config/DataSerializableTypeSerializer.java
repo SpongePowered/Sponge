@@ -25,17 +25,17 @@
 package org.spongepowered.common.config;
 
 import io.leangen.geantyref.GenericTypeReflector;
+
 import org.spongepowered.api.data.DataManager;
+import org.spongepowered.api.data.persistence.DataSerializable;
+import org.spongepowered.common.data.persistence.ConfigurateTranslator;
 import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.serialize.SerializationException;
 import org.spongepowered.configurate.serialize.TypeSerializer;
-import org.spongepowered.api.data.persistence.DataSerializable;
-import org.spongepowered.common.data.persistence.ConfigurateTranslator;
-
-import java.lang.reflect.Type;
 
 import javax.inject.Inject;
+import java.lang.reflect.Type;
 
 /**
  * An implementation of {@link TypeSerializer} so that DataSerializables can be

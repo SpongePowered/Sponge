@@ -32,8 +32,6 @@ import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.inventory.custom.ViewableCustomInventory;
 
-import java.util.Collections;
-import java.util.Set;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.npc.AbstractVillager;
@@ -42,6 +40,9 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.LecternBlockEntity;
+
+import java.util.Collections;
+import java.util.Set;
 
 /**
  * {@link org.spongepowered.common.mixin.inventory.impl.TraitMixin_ViewableBridge_Inventory}

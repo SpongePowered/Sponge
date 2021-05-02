@@ -26,9 +26,11 @@ package org.spongepowered.common.world.biome.provider.multinoise;
 
 import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
 import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
+
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+
 import java.util.List;
 import java.util.Objects;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 
 public final class SpongeMultiNoiseConfigFactory implements MultiNoiseConfig.Factory {
 

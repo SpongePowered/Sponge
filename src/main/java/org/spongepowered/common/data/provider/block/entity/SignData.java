@@ -25,9 +25,7 @@
 package org.spongepowered.common.data.provider.block.entity;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.world.level.block.StandingSignBlock;
-import net.minecraft.world.level.block.WallSignBlock;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
+
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.accessor.world.level.block.entity.SignBlockEntityAccessor;
@@ -35,6 +33,10 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.common.util.RotationUtils;
+
+import net.minecraft.world.level.block.StandingSignBlock;
+import net.minecraft.world.level.block.WallSignBlock;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 
 import java.util.ArrayList;
 import java.util.Collections;

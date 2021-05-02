@@ -26,11 +26,13 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.player;
 
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.text.Component;
-import net.minecraft.world.entity.player.ChatVisiblity;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.entity.player.ChatVisiblityBridge;
+
+import net.minecraft.world.entity.player.ChatVisiblity;
 
 @Mixin(ChatVisiblity.class)
 public abstract class ChatVisiblityMixin_API implements org.spongepowered.api.entity.living.player.chat.ChatVisibility {

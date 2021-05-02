@@ -28,6 +28,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.Parrot;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.world.entity.TamableAnimalMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.animal.Parrot.class)

@@ -25,11 +25,13 @@
 package org.spongepowered.common.mixin.core.world.item.enchantment;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.core.Registry;
-import net.minecraft.world.item.enchantment.Enchantment;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.core.Registry;
+import net.minecraft.world.item.enchantment.Enchantment;
 
 @Mixin(Enchantment.class)
 public abstract class EnchantmentMixin {

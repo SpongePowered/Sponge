@@ -25,12 +25,14 @@
 package org.spongepowered.common.bridge.commands;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 
-import java.util.function.Supplier;
 import net.minecraft.commands.CommandSource;
+
+import java.util.function.Supplier;
 
 public interface CommandSourceStackBridge {
 

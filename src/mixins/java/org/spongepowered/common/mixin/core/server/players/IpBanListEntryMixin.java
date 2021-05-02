@@ -25,14 +25,16 @@
 package org.spongepowered.common.mixin.core.server.players;
 
 import com.google.gson.JsonObject;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.players.IpBanListEntryBridge;
 
-import javax.annotation.Nullable;
 import net.minecraft.server.players.IpBanListEntry;
+
+import javax.annotation.Nullable;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
 

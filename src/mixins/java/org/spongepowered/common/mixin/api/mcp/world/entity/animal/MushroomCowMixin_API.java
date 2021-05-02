@@ -28,8 +28,9 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.cow.Mooshroom;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
 import net.minecraft.world.entity.animal.MushroomCow;
+
+import java.util.Set;
 
 @Mixin(MushroomCow.class)
 public abstract class MushroomCowMixin_API extends AnimalMixin_API implements Mooshroom {

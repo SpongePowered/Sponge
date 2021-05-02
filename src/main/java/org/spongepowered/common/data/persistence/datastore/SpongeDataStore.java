@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.persistence.datastore;
 
 import com.google.common.collect.ImmutableList;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataContentUpdater;

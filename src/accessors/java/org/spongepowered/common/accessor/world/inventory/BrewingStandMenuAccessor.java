@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.inventory;
 
-import net.minecraft.world.Container;
-import net.minecraft.world.inventory.BrewingStandMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.BrewingStandMenu;
 
 @Mixin(BrewingStandMenu.class)
 public interface BrewingStandMenuAccessor {

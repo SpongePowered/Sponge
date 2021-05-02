@@ -25,17 +25,19 @@
 package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.google.common.collect.ImmutableMap;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.registrar.tree.ClientSuggestionProvider;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.command.brigadier.tree.ForcedRedirectNode;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.SharedSuggestionProvider;
 import net.minecraft.commands.synchronization.SuggestionProviders;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.command.registrar.tree.ClientSuggestionProvider;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
-import org.spongepowered.common.command.brigadier.tree.ForcedRedirectNode;
 
 import java.util.HashMap;
 import java.util.Map;

@@ -28,8 +28,10 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.Item;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.world.entity.EntityMixin_API;
-import java.util.Set;
+
 import net.minecraft.world.entity.item.ItemEntity;
+
+import java.util.Set;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin_API extends EntityMixin_API implements Item {

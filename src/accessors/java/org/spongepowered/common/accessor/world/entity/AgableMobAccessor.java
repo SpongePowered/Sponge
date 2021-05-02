@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.entity;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.AgableMob;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
+
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.AgableMob;
 
 @Mixin(AgableMob.class)
 public interface AgableMobAccessor {

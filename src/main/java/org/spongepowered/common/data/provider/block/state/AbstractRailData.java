@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.RailDirection;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
 import net.minecraft.world.level.block.BaseRailBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.Property;
 import net.minecraft.world.level.block.state.properties.RailShape;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.RailDirection;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class AbstractRailData {
 

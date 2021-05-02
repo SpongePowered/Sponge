@@ -28,11 +28,8 @@ import com.google.common.base.Charsets;
 import io.netty.buffer.ByteBuf;
 import io.netty.channel.ChannelHandlerContext;
 import io.netty.channel.ChannelInboundHandlerAdapter;
-import net.minecraft.network.protocol.status.ServerStatus;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.network.LegacyQueryHandler;
-import net.minecraft.server.network.ServerConnectionListener;
 import org.apache.logging.log4j.Logger;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -40,6 +37,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.network.status.SpongeLegacyMinecraftVersion;
 import org.spongepowered.common.network.status.SpongeStatusResponse;
 import org.spongepowered.common.util.NetworkUtil;
+
+import net.minecraft.network.protocol.status.ServerStatus;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.network.LegacyQueryHandler;
+import net.minecraft.server.network.ServerConnectionListener;
 
 import java.net.InetSocketAddress;
 

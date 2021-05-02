@@ -47,14 +47,15 @@ import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.EnumMap;
-import java.util.Map;
-import java.util.Optional;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.EnumMap;
+import java.util.Map;
+import java.util.Optional;
 
 @Mixin(value = LivingEntity.class)
 public abstract class LivingEntityMixin_Inventory {

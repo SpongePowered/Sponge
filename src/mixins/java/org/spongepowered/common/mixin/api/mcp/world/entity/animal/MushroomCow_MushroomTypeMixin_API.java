@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.animal;
 
-import net.minecraft.world.entity.animal.MushroomCow;
 import org.spongepowered.api.data.type.MooshroomType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.animal.MushroomCow;
 
 @Mixin(MushroomCow.MushroomType.class)
 public abstract class MushroomCow_MushroomTypeMixin_API implements MooshroomType {

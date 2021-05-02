@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.relocate.co.aikar.timings;
 
-import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import com.google.gson.JsonArray;
+
+import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 
 import java.util.function.Function;
 

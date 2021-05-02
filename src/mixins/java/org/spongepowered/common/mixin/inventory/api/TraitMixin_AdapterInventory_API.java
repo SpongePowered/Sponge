@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
+
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
 @Mixin({ArmorStand.class, Mob.class, Player.class, CampfireBlockEntity.class})
 public abstract class TraitMixin_AdapterInventory_API implements DefaultImplementedAdapterInventory.WithClear {

@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.monster.Shulker;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.bridge.world.entity.monster.ShulkerBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.entity.monster.Shulker;
 
 public final class ShulkerData {
 

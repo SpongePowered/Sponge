@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.EndPortalBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.EndPortalBlock;
 
 @Mixin(EndPortalBlock.class)
 public abstract class EndPortalBlockMixin {

@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.command.parameter.managed.builder;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import org.spongepowered.api.command.parameter.managed.ValueParameter;
+import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
+import org.spongepowered.common.command.brigadier.argument.StandardArgumentParser;
+
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.DoubleArgumentType;
 import com.mojang.brigadier.arguments.FloatArgumentType;
 import com.mojang.brigadier.arguments.IntegerArgumentType;
 import com.mojang.brigadier.arguments.LongArgumentType;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.command.parameter.managed.ValueParameter;
-import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
-import org.spongepowered.common.command.brigadier.argument.StandardArgumentParser;
 
 import java.util.Objects;
 

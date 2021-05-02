@@ -26,10 +26,11 @@ package org.spongepowered.common.command.selector;
 
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
 
-import java.util.List;
-import java.util.function.BiConsumer;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec3;
+
+import java.util.List;
+import java.util.function.BiConsumer;
 
 public final class SpongeSelectorSortAlgorithm implements SelectorSortAlgorithm {
 

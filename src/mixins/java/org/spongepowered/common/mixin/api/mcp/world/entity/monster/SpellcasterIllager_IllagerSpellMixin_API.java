@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.monster;
 
-import net.minecraft.world.entity.monster.SpellcasterIllager;
 import org.spongepowered.api.data.type.SpellType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.monster.SpellcasterIllager;
 
 @Mixin(SpellcasterIllager.IllagerSpell.class)
 public abstract class SpellcasterIllager_IllagerSpellMixin_API implements SpellType {

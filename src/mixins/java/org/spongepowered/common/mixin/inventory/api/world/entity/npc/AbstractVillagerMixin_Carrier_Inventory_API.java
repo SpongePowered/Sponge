@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.entity.npc;
 
-import net.minecraft.world.SimpleContainer;
-import net.minecraft.world.entity.npc.AbstractVillager;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.util.InventoryUtil;
+
+import net.minecraft.world.SimpleContainer;
+import net.minecraft.world.entity.npc.AbstractVillager;
 
 @Mixin(AbstractVillager.class)
 public abstract class AbstractVillagerMixin_Carrier_Inventory_API implements Carrier {

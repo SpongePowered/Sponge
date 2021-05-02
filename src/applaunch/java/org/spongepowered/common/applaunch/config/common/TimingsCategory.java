@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
-import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
+import org.spongepowered.configurate.objectmapping.meta.Setting;
 
 import java.util.Collections;
 import java.util.List;

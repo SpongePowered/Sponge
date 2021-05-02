@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.bridge.world;
 
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.math.vector.Vector3d;
+
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.dimension.DimensionType;
 
 public interface WorldBridge {
 

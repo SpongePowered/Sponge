@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.animal;
 
-import net.minecraft.world.entity.animal.AbstractFish;
 import org.spongepowered.api.entity.living.aquatic.fish.Fish;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.animal.AbstractFish;
 
 @Mixin(AbstractFish.class)
 public abstract class AbstractFishMixin_API extends WaterAnimalMixin_API implements Fish {

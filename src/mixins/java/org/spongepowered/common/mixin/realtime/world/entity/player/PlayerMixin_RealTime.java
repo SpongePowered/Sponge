@@ -24,17 +24,19 @@
  */
 package org.spongepowered.common.mixin.realtime.world.entity.player;
 
-import net.minecraft.world.entity.player.Player;
 import org.objectweb.asm.Opcodes;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.mixin.realtime.world.entity.LivingEntityMixin_RealTime;
+
+import net.minecraft.world.entity.player.Player;
 
 @Mixin(Player.class)
 public abstract class PlayerMixin_RealTime extends LivingEntityMixin_RealTime {

@@ -30,10 +30,12 @@ import org.spongepowered.api.util.mirror.Mirror;
 import org.spongepowered.api.util.rotation.Rotation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import java.util.Objects;
+
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import net.minecraft.world.level.material.FluidState;
+
+import java.util.Objects;
 
 @Mixin(BlockBehaviour.BlockStateBase.class)
 public abstract class BlockBehaviour_BlockStateBaseMixin_API extends StateHolderMixin_API<BlockState, net.minecraft.world.level.block.state.BlockState> implements BlockState {

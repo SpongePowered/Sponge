@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.levelgen;
 
-import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
-import net.minecraft.world.level.levelgen.StructureSettings;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
@@ -35,6 +33,9 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
+import net.minecraft.world.level.levelgen.StructureSettings;
 
 @Mixin(NoiseGeneratorSettings.class)
 @Implements(@Interface(iface = NoiseGeneratorConfig.class, prefix = "noiseGeneratorConfig$"))

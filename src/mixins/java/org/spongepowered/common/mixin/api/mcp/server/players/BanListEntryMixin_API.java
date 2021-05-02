@@ -25,12 +25,14 @@
 package org.spongepowered.common.mixin.api.mcp.server.players;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.server.players.BanListEntry;
+
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.server.players.BanListEntryBridge;
+
+import net.minecraft.server.players.BanListEntry;
 
 import java.time.Instant;
 import java.util.Date;

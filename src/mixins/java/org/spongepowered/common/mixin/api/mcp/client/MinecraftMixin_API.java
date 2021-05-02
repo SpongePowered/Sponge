@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.client;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.server.IntegratedServer;
-import net.minecraft.network.Connection;
-import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.client.LocalServer;
@@ -45,9 +41,13 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ClientScheduler;
 
-import java.util.Optional;
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.network.Connection;
+import net.minecraft.util.thread.ReentrantBlockableEventLoop;
 
 import javax.annotation.Nullable;
+import java.util.Optional;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Runnable> implements SpongeClient {

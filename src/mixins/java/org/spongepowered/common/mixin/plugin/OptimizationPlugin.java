@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.plugin;
 
 import com.google.common.collect.ImmutableMap;
+
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.common.applaunch.config.common.OptimizationCategory;

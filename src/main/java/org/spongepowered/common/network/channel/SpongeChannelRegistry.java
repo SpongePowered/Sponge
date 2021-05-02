@@ -26,6 +26,7 @@ package org.spongepowered.common.network.channel;
 
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -55,6 +56,13 @@ import org.spongepowered.common.network.channel.packet.SpongePacketChannel;
 import org.spongepowered.common.network.channel.raw.SpongeRawDataChannel;
 import org.spongepowered.common.util.Constants;
 
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
@@ -64,12 +72,6 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
 @SuppressWarnings("unchecked")
 public class SpongeChannelRegistry implements ChannelRegistry {

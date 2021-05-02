@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.level;
 
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.ServerTickList;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.world.server.ServerLocation;
+
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerTickList;
 
 import java.time.Duration;
 

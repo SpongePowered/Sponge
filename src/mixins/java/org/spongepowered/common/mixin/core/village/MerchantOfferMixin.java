@@ -29,8 +29,9 @@ import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.item.trading.MerchantOffer;
+
+import javax.annotation.Nullable;
 
 @Mixin(MerchantOffer.class)
 public abstract class MerchantOfferMixin {

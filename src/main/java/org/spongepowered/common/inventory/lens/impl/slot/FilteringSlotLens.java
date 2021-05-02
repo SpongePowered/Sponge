@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import net.minecraft.world.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.Slot;
@@ -33,6 +32,8 @@ import org.spongepowered.common.inventory.adapter.impl.slots.FilteringSlotAdapte
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
+import net.minecraft.world.Container;
 
 public class FilteringSlotLens extends DelegatingSlotLens {
 

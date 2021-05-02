@@ -25,6 +25,7 @@
 package org.spongepowered.common.network.status;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.network.status.StatusClient;
 

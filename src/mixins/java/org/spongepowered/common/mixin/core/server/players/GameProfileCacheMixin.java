@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.server.players;
 
-import com.mojang.authlib.Agent;
-import com.mojang.authlib.GameProfileRepository;
-import com.mojang.authlib.ProfileLookupCallback;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileManager;
@@ -43,6 +40,11 @@ import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCache_GameProfileInfoBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
+import com.mojang.authlib.Agent;
+import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.ProfileLookupCallback;
+import net.minecraft.server.players.GameProfileCache;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
@@ -50,7 +52,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-import net.minecraft.server.players.GameProfileCache;
 
 @Mixin(GameProfileCache.class)
 public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {

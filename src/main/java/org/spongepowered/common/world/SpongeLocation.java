@@ -38,11 +38,12 @@ import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import net.minecraft.core.BlockPos;
+
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
-import net.minecraft.core.BlockPos;
 
 public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> implements Location<W, L> {
 

@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.inventory;
 
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.inventory.HorseInventoryMenu;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.inventory.HorseInventoryMenu;
 
 @Mixin(HorseInventoryMenu.class)
 public interface HorseInventoryMenuAccessor {

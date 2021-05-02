@@ -24,6 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.server.network;
 
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.network.status.SpongeStatusClient;
+import org.spongepowered.common.network.status.SpongeStatusResponse;
+
 import net.minecraft.network.Connection;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
@@ -31,12 +38,6 @@ import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.network.protocol.status.ServerboundStatusRequestPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.network.ServerStatusPacketListenerImpl;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.network.status.SpongeStatusClient;
-import org.spongepowered.common.network.status.SpongeStatusResponse;
 
 @Mixin(ServerStatusPacketListenerImpl.class)
 public abstract class ServerStatusPacketListenerImplMixin {

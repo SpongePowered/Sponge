@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.world.biome;
 
-import net.minecraft.world.level.biome.Biome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
+
+import net.minecraft.world.level.biome.Biome;
 
 public final class SpongeBiomeAttributesFactory implements BiomeAttributes.Factory {
 

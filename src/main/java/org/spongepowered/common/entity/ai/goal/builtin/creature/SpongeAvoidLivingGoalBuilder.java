@@ -25,13 +25,15 @@
 package org.spongepowered.common.entity.ai.goal.builtin.creature;
 
 import com.google.common.base.Preconditions;
+
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ai.goal.builtin.creature.AvoidLivingGoal;
 import org.spongepowered.api.entity.living.Creature;
+import org.spongepowered.api.entity.living.Living;
+
+import net.minecraft.world.entity.PathfinderMob;
 
 import java.util.function.Predicate;
-import net.minecraft.world.entity.PathfinderMob;
-import org.spongepowered.api.entity.living.Living;
 
 public final class SpongeAvoidLivingGoalBuilder implements AvoidLivingGoal.Builder {
 

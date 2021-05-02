@@ -24,6 +24,20 @@
  */
 package org.spongepowered.common.command.brigadier.dispatcher;
 
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.manager.CommandManager;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
+import org.spongepowered.common.command.brigadier.SpongeStringReader;
+import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
+import org.spongepowered.common.command.brigadier.tree.SpongeNode;
+import org.spongepowered.common.command.brigadier.tree.SpongeRootCommandNode;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 import com.mojang.brigadier.AmbiguityConsumer;
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.CommandDispatcher;
@@ -40,19 +54,7 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
-import org.spongepowered.api.command.exception.CommandException;
-import org.spongepowered.api.command.manager.CommandManager;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
-import org.spongepowered.common.command.brigadier.SpongeStringReader;
-import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
-import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
-import org.spongepowered.common.command.brigadier.tree.SpongeNode;
-import org.spongepowered.common.command.brigadier.tree.SpongeRootCommandNode;
-import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -62,7 +64,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
-import net.minecraft.commands.CommandSourceStack;
 
 // For use on the Brigadier dispatcher
 public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSourceStack> {

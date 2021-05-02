@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 
 @SuppressWarnings("rawtypes")

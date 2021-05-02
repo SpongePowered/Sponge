@@ -25,7 +25,7 @@
 package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonElement;
-import com.google.gson.JsonObject;
+
 import org.spongepowered.api.datapack.DataPackSerializable;
 
 interface DataPackSerializableSerializer<T extends DataPackSerializable> {

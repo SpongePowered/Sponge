@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.mojang.authlib.properties;
 
-import com.mojang.authlib.properties.Property;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import com.mojang.authlib.properties.Property;
 
 import java.util.Objects;
 import java.util.Optional;

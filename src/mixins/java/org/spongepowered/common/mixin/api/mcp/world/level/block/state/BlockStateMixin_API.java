@@ -42,11 +42,12 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.util.Constants;
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
 
 @Mixin(net.minecraft.world.level.block.state.BlockState.class)
 public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseMixin_API {

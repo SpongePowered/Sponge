@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
-import net.minecraft.world.entity.vehicle.MinecartFurnace;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.world.entity.vehicle.MinecartFurnace;
 
 @Mixin(MinecartFurnace.class)
 public abstract class MinecartFurnaceMixin extends AbstractMinecartMixin {

@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.item.DiggerItemAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.item.ItemStack;
 
 public final class ToolItemStackData {
 

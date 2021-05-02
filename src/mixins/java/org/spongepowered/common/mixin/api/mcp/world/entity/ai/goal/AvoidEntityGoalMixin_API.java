@@ -32,9 +32,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.entity.ai.targeting.TargetingConditionsAccessor;
-import java.util.function.Predicate;
+
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.targeting.TargetingConditions;
+
+import java.util.function.Predicate;
 
 @SuppressWarnings({"unchecked"})
 @Mixin(net.minecraft.world.entity.ai.goal.AvoidEntityGoal.class)

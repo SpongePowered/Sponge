@@ -26,6 +26,7 @@ package org.spongepowered.common.inventory.adapter.impl;
 
 import com.google.common.base.MoreObjects;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;

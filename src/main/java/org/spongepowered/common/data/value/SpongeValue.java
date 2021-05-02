@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.value;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.common.data.key.SpongeKey;

@@ -26,7 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.world.item.enchantment;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.world.item.enchantment.Enchantment;
+
 import org.spongepowered.api.item.enchantment.EnchantmentType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Final;
@@ -37,6 +37,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
+import net.minecraft.world.item.enchantment.Enchantment;
 
 @Mixin(net.minecraft.world.item.enchantment.Enchantment.class)
 @Implements(@Interface(iface = EnchantmentType.class, prefix = "enchantment$"))

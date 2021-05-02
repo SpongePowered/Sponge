@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.network.chat;
 
-import net.minecraft.network.chat.TextColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.network.chat.TextColor;
 
 @Mixin(TextColor.class)
 public interface TextColorAccessor {

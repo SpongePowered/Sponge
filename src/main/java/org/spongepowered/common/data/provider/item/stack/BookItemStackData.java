@@ -25,6 +25,13 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.NBTCollectors;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
@@ -32,11 +39,6 @@ import net.minecraft.nbt.StringTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.NBTCollectors;
 
 import java.util.List;
 import java.util.function.Function;

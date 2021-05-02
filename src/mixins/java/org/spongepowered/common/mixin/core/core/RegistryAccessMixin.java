@@ -25,17 +25,19 @@
 package org.spongepowered.common.mixin.core.core;
 
 import com.google.common.collect.ImmutableMap;
-import com.mojang.serialization.Codec;
-import net.minecraft.core.Registry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.objectweb.asm.Opcodes;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
+
+import com.mojang.serialization.Codec;
+import net.minecraft.core.Registry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.dimension.DimensionType;
 
 @Mixin(RegistryAccess.class)
 public abstract class RegistryAccessMixin {

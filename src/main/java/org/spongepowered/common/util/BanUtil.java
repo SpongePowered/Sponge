@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.util;
 
-import net.minecraft.server.players.IpBanList;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.players.IpBanListAccessor;
+
+import net.minecraft.server.players.IpBanList;
 
 import java.net.InetAddress;
 import java.net.InetSocketAddress;

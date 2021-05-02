@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.persistence;
 
 import com.google.common.collect.ImmutableList;
+
 import org.spongepowered.api.data.DataManipulator.Mutable;
 import org.spongepowered.api.data.persistence.DataView;
 

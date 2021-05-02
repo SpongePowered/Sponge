@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.command.result;
 
-import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.command.CommandResult;
 
 public final class SpongeCommandResultBuilder implements CommandResult.Builder {

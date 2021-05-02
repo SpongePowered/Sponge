@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -55,6 +56,7 @@ import org.spongepowered.common.util.Constants;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;

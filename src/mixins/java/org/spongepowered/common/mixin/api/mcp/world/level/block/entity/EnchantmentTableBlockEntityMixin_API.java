@@ -30,9 +30,11 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
-import java.util.Set;
+
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.EnchantmentTableBlockEntity;
+
+import java.util.Set;
 
 @Mixin(EnchantmentTableBlockEntity.class)
 public abstract class EnchantmentTableBlockEntityMixin_API extends BlockEntityMixin_API implements EnchantmentTable {

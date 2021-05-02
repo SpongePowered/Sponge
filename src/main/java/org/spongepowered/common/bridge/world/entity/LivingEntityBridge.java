@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.entity;
 
+import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
+
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 
 public interface LivingEntityBridge {
 

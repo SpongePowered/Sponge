@@ -24,18 +24,19 @@
  */
 package org.spongepowered.common.mixin.realtime.server.level;
 
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.storage.ServerLevelData;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.realtime.world.level.LevelMixin_RealTime;
-import org.spongepowered.common.bridge.RealTimeTrackingBridge;
+
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.storage.ServerLevelData;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin_RealTime extends LevelMixin_RealTime implements RealTimeTrackingBridge {

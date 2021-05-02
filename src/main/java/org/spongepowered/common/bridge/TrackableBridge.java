@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.bridge;
 
-import net.minecraft.world.entity.Entity;
 import org.spongepowered.common.config.tracker.TrackerConfig;
+
+import net.minecraft.world.entity.Entity;
 
 public interface TrackableBridge {
 

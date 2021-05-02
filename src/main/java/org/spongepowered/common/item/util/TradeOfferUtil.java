@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.item.util;
 
-import net.minecraft.world.item.trading.MerchantOffer;
 import org.spongepowered.api.item.merchant.TradeOffer;
+
+import net.minecraft.world.item.trading.MerchantOffer;
 
 public class TradeOfferUtil {
 

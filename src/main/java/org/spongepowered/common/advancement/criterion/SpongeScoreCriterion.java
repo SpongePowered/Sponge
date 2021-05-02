@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.advancement.criterion;
 
-import net.minecraft.advancements.Criterion;
-import net.minecraft.advancements.CriterionTriggerInstance;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.advancement.criteria.ScoreAdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.common.bridge.advancements.CriterionBridge;
+
+import net.minecraft.advancements.Criterion;
+import net.minecraft.advancements.CriterionTriggerInstance;
 
 import java.util.ArrayList;
 import java.util.List;

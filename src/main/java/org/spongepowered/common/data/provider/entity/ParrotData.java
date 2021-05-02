@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.world.entity.animal.Parrot;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ParrotType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.world.entity.animal.Parrot;
 
 public final class ParrotData {
 

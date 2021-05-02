@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.mixin.ipforward.server.dedicated;
 
-import net.minecraft.server.dedicated.DedicatedServer;
 import org.apache.logging.log4j.Logger;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -34,6 +34,8 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.applaunch.config.common.IpForwardingCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+
+import net.minecraft.server.dedicated.DedicatedServer;
 
 @Mixin(DedicatedServer.class)
 public class DedicatedServerMixin_IpForward {

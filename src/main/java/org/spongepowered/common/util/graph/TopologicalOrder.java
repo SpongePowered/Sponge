@@ -25,6 +25,7 @@
 package org.spongepowered.common.util.graph;
 
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+
 import org.spongepowered.common.util.graph.DirectedGraph.DataNode;
 
 import java.util.ArrayDeque;

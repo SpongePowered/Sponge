@@ -28,12 +28,7 @@ import com.google.common.collect.ImmutableSet;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.advancements.CriterionProgress;
-import net.minecraft.network.chat.ChatType;
-import net.minecraft.server.PlayerAdvancements;
-import net.minecraft.server.players.PlayerList;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
@@ -55,6 +50,13 @@ import org.spongepowered.common.bridge.advancements.CriterionBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.CriterionProgress;
+import net.minecraft.network.chat.ChatType;
+import net.minecraft.server.PlayerAdvancements;
+import net.minecraft.server.players.PlayerList;
 
 import javax.annotation.Nullable;
 import java.time.Instant;

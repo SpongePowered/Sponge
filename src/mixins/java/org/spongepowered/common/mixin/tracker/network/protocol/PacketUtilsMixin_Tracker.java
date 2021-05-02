@@ -24,17 +24,19 @@
  */
 package org.spongepowered.common.mixin.tracker.network.protocol;
 
-import net.minecraft.network.PacketListener;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.PacketUtils;
-import net.minecraft.util.thread.BlockableEventLoop;
 import org.apache.logging.log4j.Logger;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+
+import net.minecraft.network.PacketListener;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.PacketUtils;
+import net.minecraft.util.thread.BlockableEventLoop;
 
 @Mixin(PacketUtils.class)
 public abstract class PacketUtilsMixin_Tracker {

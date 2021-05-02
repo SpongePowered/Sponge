@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.world.generation.config.flat;
 
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.common.accessor.world.level.levelgen.flat.FlatLayerInfoAccessor;
+
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 
 public final class SpongeLayerConfigFactory implements LayerConfig.Factory {
 

@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.client.multiplayer;
 
-import net.minecraft.client.Minecraft;
-import net.minecraft.client.multiplayer.ClientLevel;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
+
+import net.minecraft.client.Minecraft;
+import net.minecraft.client.multiplayer.ClientLevel;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin_API implements org.spongepowered.api.world.client.ClientWorld {

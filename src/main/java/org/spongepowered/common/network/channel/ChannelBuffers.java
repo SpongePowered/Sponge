@@ -26,8 +26,10 @@ package org.spongepowered.common.network.channel;
 
 import io.netty.buffer.ByteBuf;
 import io.netty.buffer.Unpooled;
-import net.minecraft.network.FriendlyByteBuf;
+
 import org.spongepowered.api.network.channel.ChannelBuf;
+
+import net.minecraft.network.FriendlyByteBuf;
 
 public final class ChannelBuffers {
 

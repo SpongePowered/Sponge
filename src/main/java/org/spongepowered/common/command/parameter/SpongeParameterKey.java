@@ -27,6 +27,7 @@ package org.spongepowered.common.command.parameter;
 import io.leangen.geantyref.GenericTypeReflector;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.command.parameter.Parameter;
 
 import java.lang.reflect.Type;

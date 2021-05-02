@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.bridge.core;
 
-import com.mojang.serialization.Lifecycle;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.registry.RegistryEntry;
 
+import com.mojang.serialization.Lifecycle;
 import net.minecraft.resources.ResourceKey;
 
 public interface WritableRegistryBridge<T> {

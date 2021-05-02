@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.common.util;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.FallingBlock;

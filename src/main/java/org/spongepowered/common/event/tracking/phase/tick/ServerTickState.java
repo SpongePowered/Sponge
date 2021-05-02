@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.server.MinecraftServer;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+
+import net.minecraft.server.MinecraftServer;
 
 import java.lang.ref.WeakReference;
 import java.util.function.BiConsumer;

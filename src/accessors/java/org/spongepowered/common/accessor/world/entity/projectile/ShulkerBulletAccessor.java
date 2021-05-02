@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.accessor.world.entity.projectile;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+
 import net.minecraft.core.Direction;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.projectile.ShulkerBullet;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ShulkerBullet.class)
 public interface ShulkerBulletAccessor {

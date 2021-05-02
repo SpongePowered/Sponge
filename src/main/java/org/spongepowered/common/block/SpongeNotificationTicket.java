@@ -25,6 +25,7 @@
 package org.spongepowered.common.block;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.NotificationTicket;
 import org.spongepowered.api.world.LocatableBlock;

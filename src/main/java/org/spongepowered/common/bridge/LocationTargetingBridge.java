@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.math.vector.Vector3d;
 
 public interface LocationTargetingBridge {

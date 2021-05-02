@@ -34,6 +34,7 @@ import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.entity.projectile.ProjectileUtil;
 import org.spongepowered.common.mixin.api.mcp.world.entity.animal.AbstractGolemMixin_API;
+
 import java.util.Optional;
 import java.util.Set;
 

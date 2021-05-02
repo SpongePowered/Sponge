@@ -26,6 +26,7 @@ package org.spongepowered.common.inventory.util;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.item.inventory.BlockCarrier;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Container;
@@ -47,8 +48,8 @@ import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.inventory.SpongeLocationCarrier;
 import org.spongepowered.common.inventory.SpongeBlockEntityCarrier;
+import org.spongepowered.common.inventory.SpongeLocationCarrier;
 import org.spongepowered.common.inventory.custom.CustomContainer;
 import org.spongepowered.common.inventory.lens.CompoundSlotLensProvider;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -76,6 +77,7 @@ import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.ChestBlockEntity;
+
 import java.util.ArrayList;
 import java.util.LinkedHashMap;
 import java.util.List;

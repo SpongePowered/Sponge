@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.advancements;
 
-import net.minecraft.advancements.Advancement;
-import net.minecraft.advancements.CriterionProgress;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,11 +31,13 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
 import org.spongepowered.common.bridge.advancements.CriterionProgressBridge;
 
+import net.minecraft.advancements.Advancement;
+import net.minecraft.advancements.CriterionProgress;
+
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.Date;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(CriterionProgress.class)
 public abstract class CriterionProgressMixin_API implements org.spongepowered.api.advancement.criteria.CriterionProgress {

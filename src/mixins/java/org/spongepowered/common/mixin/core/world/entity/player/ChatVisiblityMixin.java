@@ -25,9 +25,11 @@
 package org.spongepowered.common.mixin.core.world.entity.player;
 
 import net.kyori.adventure.audience.MessageType;
-import net.minecraft.world.entity.player.ChatVisiblity;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.entity.player.ChatVisiblityBridge;
+
+import net.minecraft.world.entity.player.ChatVisiblity;
 
 import java.util.HashSet;
 import java.util.Set;

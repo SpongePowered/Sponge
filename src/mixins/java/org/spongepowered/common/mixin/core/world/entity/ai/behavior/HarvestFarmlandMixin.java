@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.ai.behavior;
 
-import net.minecraft.world.entity.ai.behavior.HarvestFarmland;
-import net.minecraft.world.entity.npc.Villager;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
+
+import net.minecraft.world.entity.ai.behavior.HarvestFarmland;
+import net.minecraft.world.entity.npc.Villager;
 
 @Mixin(HarvestFarmland.class)
 public abstract class HarvestFarmlandMixin {

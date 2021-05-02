@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.entity.monster;
 
-import net.minecraft.world.entity.animal.Sheep;
-import net.minecraft.world.entity.monster.Evoker;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.entity.animal.Sheep;
+import net.minecraft.world.entity.monster.Evoker;
 
 @Mixin(Evoker.class)
 public interface EvokerAccessor {

@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.bridge.client;
 
-import net.minecraft.client.server.IntegratedServer;
 import org.spongepowered.common.entity.player.ClientType;
+
+import net.minecraft.client.server.IntegratedServer;
 
 public interface MinecraftBridge {
 

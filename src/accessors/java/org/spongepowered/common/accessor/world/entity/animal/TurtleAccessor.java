@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.entity.animal;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.animal.Turtle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.animal.Turtle;
 
 @Mixin(Turtle.class)
 public interface TurtleAccessor {

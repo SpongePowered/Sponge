@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.server.level;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerPlayerGameMode;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerPlayerGameMode;
 
 @Mixin(ServerPlayerGameMode.class)
 public interface ServerPlayerGameModeAccessor {

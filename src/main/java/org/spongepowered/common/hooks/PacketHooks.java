@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.hooks;
 
-import java.util.Set;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.protocol.game.ClientboundLoginPacket;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
@@ -33,6 +32,8 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
+
+import java.util.Set;
 
 public interface PacketHooks {
 

@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.world.entity;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.weather.LightningBolt;
 import org.spongepowered.asm.mixin.Mixin;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.LightningBolt.class)

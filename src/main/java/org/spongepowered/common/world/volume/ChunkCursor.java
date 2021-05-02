@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Objects;

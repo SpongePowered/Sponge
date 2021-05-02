@@ -24,6 +24,15 @@
  */
 package org.spongepowered.common.item.recipe.crafting.custom;
 
+import net.minecraftforge.api.distmarker.Dist;
+import net.minecraftforge.api.distmarker.OnlyIn;
+
+import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
+import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.common.inventory.util.InventoryUtil;
+import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.MissingImplementationException;
+
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.inventory.CraftingContainer;
@@ -31,14 +40,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.CustomRecipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.api.distmarker.Dist;
-import net.minecraftforge.api.distmarker.OnlyIn;
-import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.inventory.util.InventoryUtil;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.MissingImplementationException;
 
 import java.util.List;
 import java.util.function.BiPredicate;

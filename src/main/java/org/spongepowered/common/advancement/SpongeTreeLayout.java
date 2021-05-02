@@ -25,6 +25,7 @@
 package org.spongepowered.common.advancement;
 
 import com.google.common.collect.ImmutableSet;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementTree;

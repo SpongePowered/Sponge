@@ -24,20 +24,22 @@
  */
 package org.spongepowered.common.command.brigadier;
 
-import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.StringReader;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
-import net.minecraft.nbt.TagParser;
-import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.persistence.NBTTranslator;
+
+import com.mojang.brigadier.CommandDispatcher;
+import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
+import net.minecraft.nbt.TagParser;
+import net.minecraft.resources.ResourceLocation;
 
 // ArgumentReader.Mutable specifies a non null read() method, StringReader suggests its
 // nullable - but it isn't. So we just need to suppress the warning.

@@ -25,10 +25,12 @@
 package org.spongepowered.common.data.type;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.core.MappedRegistry;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.registry.RegistryTypes;
+
+import net.minecraft.core.MappedRegistry;
 
 public final class SpongeSkinPart implements SkinPart {
 

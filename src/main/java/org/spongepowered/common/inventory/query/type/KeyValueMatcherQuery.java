@@ -35,11 +35,12 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.DelegatingLens;
 import org.spongepowered.common.inventory.query.SpongeQuery;
 
+import net.minecraft.world.inventory.AbstractContainerMenu;
+
 import java.util.HashSet;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Set;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 @SuppressWarnings("unchecked")
 public final class KeyValueMatcherQuery<T> extends SpongeQuery {

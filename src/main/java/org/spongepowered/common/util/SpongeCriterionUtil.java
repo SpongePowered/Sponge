@@ -27,7 +27,7 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableSet;
-import net.minecraft.advancements.Criterion;
+
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.OperatorCriterion;
 import org.spongepowered.api.util.Tuple;
@@ -37,6 +37,8 @@ import org.spongepowered.common.advancement.criterion.SpongeEmptyCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeOperatorCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeScoreCriterion;
+
+import net.minecraft.advancements.Criterion;
 
 import java.util.ArrayList;
 import java.util.Collections;

@@ -25,11 +25,13 @@
 package org.spongepowered.common.mixin.core.adventure.text.format;
 
 import net.kyori.adventure.text.format.TextDecoration;
-import net.minecraft.network.chat.Style;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.accessor.network.chat.StyleAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
+
+import net.minecraft.network.chat.Style;
 
 @Mixin(targets = "net.kyori.adventure.text.format.StyleImpl")
 public abstract class StyleImplMixin implements StyleBridge {

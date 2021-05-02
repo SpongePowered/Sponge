@@ -24,19 +24,20 @@
  */
 package org.spongepowered.common.accessor.world.level.biome;
 
-import com.mojang.datafixers.util.Pair;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
 import org.spongepowered.common.UntransformedInvokerError;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.function.Supplier;
+import com.mojang.datafixers.util.Pair;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.function.Supplier;
 
 @Mixin(MultiNoiseBiomeSource.class)
 public interface MultiNoiseBiomeSourceAccessor {

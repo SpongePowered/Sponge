@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.world.generation.config.structure;
 
-import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
+
+import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 
 public final class SpongeSeparatedStructureConfigFactory  implements SeparatedStructureConfig.Factory {
 

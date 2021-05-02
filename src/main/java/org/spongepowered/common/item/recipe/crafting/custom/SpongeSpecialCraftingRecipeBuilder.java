@@ -31,10 +31,11 @@ import org.spongepowered.api.item.recipe.crafting.SpecialCraftingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.util.List;
 import java.util.function.BiPredicate;
 import java.util.function.Function;
-import net.minecraft.resources.ResourceLocation;
 
 public final class SpongeSpecialCraftingRecipeBuilder extends AbstractResourceKeyedBuilder<RecipeRegistration, SpecialCraftingRecipe.Builder>
         implements SpecialCraftingRecipe.Builder, SpecialCraftingRecipe.Builder.ResultStep, SpecialCraftingRecipe.Builder.EndStep {

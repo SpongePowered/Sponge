@@ -28,10 +28,10 @@ import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
 
-import java.util.Optional;
+import net.minecraft.world.level.block.Block;
 
 import javax.annotation.Nullable;
-import net.minecraft.world.level.block.Block;
+import java.util.Optional;
 
 @Mixin(value = {
         Block.Properties.class,

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.relocate.co.aikar.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.lang.reflect.Constructor;
 import java.util.AbstractMap;
 import java.util.Collection;
@@ -32,7 +34,6 @@ import java.util.IdentityHashMap;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Allows you to pass a Loader function that when a key is accessed that doesn't

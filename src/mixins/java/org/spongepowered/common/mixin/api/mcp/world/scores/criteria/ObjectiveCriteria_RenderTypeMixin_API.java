@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.scores.criteria;
 
-import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.spongepowered.api.scoreboard.objective.displaymode.ObjectiveDisplayMode;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 
 @Mixin(ObjectiveCriteria.RenderType.class)
 public abstract class ObjectiveCriteria_RenderTypeMixin_API implements ObjectiveDisplayMode {

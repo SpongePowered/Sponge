@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world;
 
-import net.minecraft.world.InteractionHand;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.InteractionHand;
 
 @Mixin(InteractionHand.class)
 public abstract class InteractionHandMixin_API implements HandType {

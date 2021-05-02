@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.state.properties;
 
-import net.minecraft.world.level.block.state.properties.ChestType;
 import org.spongepowered.api.data.type.ChestAttachmentType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.state.properties.ChestType;
 
 @Mixin(ChestType.class)
 public abstract class ChestTypeMixin_API implements ChestAttachmentType {

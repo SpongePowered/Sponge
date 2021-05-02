@@ -26,9 +26,10 @@ package org.spongepowered.common.inventory.fabric;
 
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 
-import java.util.Collection;
 import net.minecraft.world.Container;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Collection;
 
 /**
  * A {@link Fabric} implementation that uses registered {@link InventoryTranslator}s.

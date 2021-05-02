@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import org.spongepowered.api.block.entity.carrier.CarrierBlockEntity;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.type.BlockEntityInventory;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
+
+import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 
 @Mixin(BaseContainerBlockEntity.class)
 public abstract class BaseContainerBlockEntityMixin_Carrier_Inventory_API implements CarrierBlockEntity {

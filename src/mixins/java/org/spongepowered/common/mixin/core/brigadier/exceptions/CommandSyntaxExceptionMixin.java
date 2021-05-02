@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.brigadier.exceptions;
 
-import com.mojang.brigadier.Message;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.util.ComponentMessageThrowable;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
+
+import com.mojang.brigadier.Message;
+import com.mojang.brigadier.exceptions.CommandSyntaxException;
 
 @Mixin(CommandSyntaxException.class)
 public abstract class CommandSyntaxExceptionMixin implements ComponentMessageThrowable {

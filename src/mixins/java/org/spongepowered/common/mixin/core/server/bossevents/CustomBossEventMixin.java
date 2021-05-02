@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.server.bossevents;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.bossevents.CustomBossEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.mixin.core.server.level.ServerBossEventMixin;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.bossevents.CustomBossEvent;
 
 @Mixin(CustomBossEvent.class)
 public abstract class CustomBossEventMixin extends ServerBossEventMixin {

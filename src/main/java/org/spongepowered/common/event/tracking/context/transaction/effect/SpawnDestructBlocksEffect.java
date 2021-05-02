@@ -28,12 +28,13 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Bloc
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-import java.util.List;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.List;
 
 public final class SpawnDestructBlocksEffect implements ProcessingSideEffect {
 

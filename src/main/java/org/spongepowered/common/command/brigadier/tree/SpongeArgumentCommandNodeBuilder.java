@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
-import com.mojang.brigadier.builder.ArgumentBuilder;
-import com.mojang.brigadier.tree.CommandNode;
-import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.api.command.parameter.managed.ValueUsage;
 import org.spongepowered.common.command.brigadier.argument.ArgumentParser;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
+
+import com.mojang.brigadier.builder.ArgumentBuilder;
+import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.commands.CommandSourceStack;
 
 // We use the ArgumentBuilder primarily for setting redirects properly.
 public final class SpongeArgumentCommandNodeBuilder<T> extends ArgumentBuilder<CommandSourceStack, SpongeArgumentCommandNodeBuilder<T>> {

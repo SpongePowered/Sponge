@@ -26,9 +26,8 @@ package org.spongepowered.common.user;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Server;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.profile.GameProfile;
@@ -38,6 +37,9 @@ import org.spongepowered.common.accessor.server.players.PlayerListAccessor;
 import org.spongepowered.common.accessor.world.level.storage.PlayerDataStorageAccessor;
 import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.profile.SpongeGameProfile;
+
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.world.level.storage.PlayerDataStorage;
 
 import java.io.IOException;
 import java.nio.file.FileSystems;

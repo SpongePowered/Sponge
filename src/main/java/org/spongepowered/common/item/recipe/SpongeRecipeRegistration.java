@@ -25,6 +25,15 @@
 package org.spongepowered.common.item.recipe;
 
 import com.google.gson.JsonObject;
+
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataFormats;
+import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPackTypes;
+import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
+
 import net.minecraft.advancements.Advancement;
 import net.minecraft.advancements.AdvancementRewards;
 import net.minecraft.advancements.critereon.RecipeUnlockedTrigger;
@@ -39,13 +48,6 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeSerializer;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.api.data.persistence.DataFormats;
-import org.spongepowered.api.datapack.DataPackType;
-import org.spongepowered.api.datapack.DataPackTypes;
-import org.spongepowered.api.item.recipe.RecipeRegistration;
-import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
 import java.io.IOException;
 import java.util.Collection;

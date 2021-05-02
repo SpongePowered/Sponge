@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.realtime.server.level;
 
-import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.realtime.world.entity.player.PlayerMixin_RealTime;
+
+import net.minecraft.server.level.ServerPlayer;
 
 @Mixin(ServerPlayer.class)
 public abstract class ServerPlayerMixin_RealTime extends PlayerMixin_RealTime {

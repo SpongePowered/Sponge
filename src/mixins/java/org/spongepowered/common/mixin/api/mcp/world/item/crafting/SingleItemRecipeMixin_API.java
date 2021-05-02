@@ -24,13 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.item.crafting;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.crafting.SingleItemRecipe;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.recipe.single.StoneCutterRecipe;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.item.crafting.SingleItemRecipe;
 
 @Mixin(SingleItemRecipe.class)
 public abstract class SingleItemRecipeMixin_API {

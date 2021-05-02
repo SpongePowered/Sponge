@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import net.minecraft.server.level.ServerPlayer;
 
 public class BasicPacketState extends PacketState<BasicPacketContext> {
 

@@ -28,8 +28,9 @@ import org.spongepowered.api.item.inventory.MultiBlockCarrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Optional;
 import net.minecraft.world.CompoundContainer;
+
+import java.util.Optional;
 
 @Mixin(CompoundContainer.class)
 public abstract class CompoundContainerMixin_Carried_Inventory_API implements CarriedInventory<MultiBlockCarrier> {

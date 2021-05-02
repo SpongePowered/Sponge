@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.LevelWriter;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.volume.game.MutableGameVolume;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.LevelWriter;
+import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(LevelWriter.class)
 public interface LevelWriterMixin_API extends MutableGameVolume {

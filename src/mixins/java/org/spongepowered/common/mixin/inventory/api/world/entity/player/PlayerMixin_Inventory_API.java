@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.entity.player;
 
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
@@ -34,6 +32,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.PlayerEnderChestContainer;
 
 @Mixin(net.minecraft.world.entity.player.Player.class)
 public abstract class PlayerMixin_Inventory_API implements Player, InventoryBridge {

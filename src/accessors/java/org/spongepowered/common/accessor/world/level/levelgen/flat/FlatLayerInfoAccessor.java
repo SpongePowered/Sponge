@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.level.levelgen.flat;
 
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 
 @Mixin(FlatLayerInfo.class)
 public interface FlatLayerInfoAccessor {

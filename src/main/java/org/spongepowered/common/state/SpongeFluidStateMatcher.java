@@ -25,17 +25,19 @@
 package org.spongepowered.common.state;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.state.StateProperty;
 
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.StateHolder;
+
 import java.util.Collection;
 import java.util.HashMap;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.StateHolder;
 
 public final class SpongeFluidStateMatcher extends AbstractSpongeStateMatcher<FluidState, FluidType> {
 

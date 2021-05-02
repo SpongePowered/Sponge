@@ -26,6 +26,7 @@ package org.spongepowered.common.data.value;
 
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Streams;
+
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.MapValue;
 import org.spongepowered.api.data.value.Value;

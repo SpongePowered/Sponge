@@ -34,8 +34,9 @@ import org.spongepowered.api.event.cause.entity.damage.source.common.AbstractDam
 import org.spongepowered.common.accessor.world.damagesource.DamageSourceAccessor;
 import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
-import java.lang.ref.WeakReference;
 import net.minecraft.world.entity.item.FallingBlockEntity;
+
+import java.lang.ref.WeakReference;
 
 public final class SpongeFallingBlockDamgeSourceBuilder extends AbstractDamageSourceBuilder<FallingBlockDamageSource, FallingBlockDamageSource.Builder> implements FallingBlockDamageSource.Builder {
 

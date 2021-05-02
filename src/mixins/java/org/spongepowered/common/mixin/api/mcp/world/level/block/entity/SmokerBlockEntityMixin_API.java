@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.SmokerBlockEntity;
 import org.spongepowered.api.block.entity.carrier.furnace.Smoker;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.SmokerBlockEntity;
 
 @Mixin(SmokerBlockEntity.class)
 public abstract class SmokerBlockEntityMixin_API extends AbstractFurnaceBlockEntityMixin_API implements Smoker {

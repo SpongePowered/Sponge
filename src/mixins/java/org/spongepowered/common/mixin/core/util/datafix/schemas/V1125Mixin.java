@@ -24,15 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.util.datafix.schemas;
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.accessor.util.datafix.schemas.V100Accessor;
+
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.templates.TypeTemplate;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.accessor.util.datafix.schemas.V100Accessor;
-import java.util.Map;
-import java.util.function.Supplier;
 import net.minecraft.util.datafix.schemas.NamespacedSchema;
 import net.minecraft.util.datafix.schemas.V1125;
+
+import java.util.Map;
+import java.util.function.Supplier;
 
 @Mixin(V1125.class)
 public abstract class V1125Mixin extends NamespacedSchema {

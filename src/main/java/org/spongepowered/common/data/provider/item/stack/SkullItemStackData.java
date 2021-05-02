@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.profile.SpongeGameProfile;
+import org.spongepowered.common.util.Constants;
+
 import com.mojang.authlib.GameProfile;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtUtils;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.PlayerHeadItem;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.profile.SpongeGameProfile;
-import org.spongepowered.common.util.Constants;
 
 public final class SkullItemStackData {
 

@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.animal.horse;
 
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.world.entity.animal.horse.Llama;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.type.LlamaType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.entity.animal.horse.LlamaBridge;
+
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.world.entity.animal.horse.Llama;
 
 @Mixin(Llama.class)
 public abstract class LlamaMixin implements LlamaBridge {

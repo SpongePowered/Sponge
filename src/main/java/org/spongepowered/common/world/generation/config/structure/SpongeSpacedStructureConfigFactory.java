@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.world.generation.config.structure;
 
-import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
 import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
+
+import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfiguration;
 
 public final class SpongeSpacedStructureConfigFactory implements SpacedStructureConfig.Factory {
 

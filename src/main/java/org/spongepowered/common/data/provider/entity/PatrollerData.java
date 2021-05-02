@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.monster.PatrollingMonster;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.monster.PatrollingMonsterAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
+
+import net.minecraft.world.entity.monster.PatrollingMonster;
 
 public final class PatrollerData {
 

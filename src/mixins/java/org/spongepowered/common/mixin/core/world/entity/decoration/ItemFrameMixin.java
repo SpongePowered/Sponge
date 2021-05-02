@@ -29,18 +29,15 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.util.ArrayList;
-
-import javax.annotation.Nullable;
 import net.minecraft.world.damagesource.DamageSource;
+
+import java.util.ArrayList;
 
 @Mixin(net.minecraft.world.entity.decoration.ItemFrame.class)
 public abstract class ItemFrameMixin extends HangingEntityMixin {

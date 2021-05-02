@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.accessor.util.datafix.schemas;
 
-import com.mojang.datafixers.schemas.Schema;
-import com.mojang.datafixers.types.templates.TypeTemplate;
-import net.minecraft.util.datafix.schemas.V100;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
+
+import com.mojang.datafixers.schemas.Schema;
+import com.mojang.datafixers.types.templates.TypeTemplate;
+import net.minecraft.util.datafix.schemas.V100;
 
 @Mixin(V100.class)
 public interface V100Accessor {

@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.data.fixer.entity;
 
+import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
+import org.spongepowered.common.util.Constants;
+
 import com.mojang.datafixers.DSL;
 import com.mojang.datafixers.DataFix;
 import com.mojang.datafixers.OpticFinder;
@@ -32,8 +35,6 @@ import com.mojang.datafixers.Typed;
 import com.mojang.datafixers.schemas.Schema;
 import com.mojang.datafixers.types.Type;
 import net.minecraft.util.datafix.fixes.References;
-import org.spongepowered.common.data.fixer.world.SpongeLevelFixer;
-import org.spongepowered.common.util.Constants;
 
 public final class EntityTrackedUser extends DataFix {
 

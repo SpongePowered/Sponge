@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.server.permission;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;

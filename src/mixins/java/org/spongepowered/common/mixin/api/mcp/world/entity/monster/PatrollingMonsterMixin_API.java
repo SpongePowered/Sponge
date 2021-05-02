@@ -32,8 +32,9 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Set;
 import net.minecraft.world.entity.monster.PatrollingMonster;
+
+import java.util.Set;
 
 @Mixin(PatrollingMonster.class)
 @Implements(@Interface(iface = Patroller.class, prefix = "patroller$"))

@@ -24,6 +24,11 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.Constants;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.LockCode;
 import net.minecraft.world.item.BannerItem;
@@ -33,10 +38,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.EntityBlock;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.Constants;
 
 public final class BlockItemStackData {
 

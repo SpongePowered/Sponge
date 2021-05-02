@@ -27,6 +27,7 @@ package org.spongepowered.common.network.channel;
 import com.google.common.base.Joiner;
 import com.google.common.base.Splitter;
 import io.netty.buffer.Unpooled;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.channel.ChannelBuf;
 

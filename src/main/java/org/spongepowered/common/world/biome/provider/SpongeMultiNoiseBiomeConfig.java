@@ -26,6 +26,7 @@ package org.spongepowered.common.world.biome.provider;
 
 import com.google.common.collect.Lists;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.Biome;
@@ -36,12 +37,13 @@ import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
 import org.spongepowered.common.accessor.world.level.biome.MultiNoiseBiomeSourceAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+
 import java.util.ArrayList;
 import java.util.Iterator;
 import java.util.List;
 import java.util.Objects;
 import java.util.stream.Collectors;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
 
 public final class SpongeMultiNoiseBiomeConfig extends AbstractBiomeProviderConfig implements MultiNoiseBiomeConfig {
 

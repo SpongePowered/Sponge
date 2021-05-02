@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.Pig;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.animal.PigAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.entity.animal.Pig;
 
 public final class PigData {
 

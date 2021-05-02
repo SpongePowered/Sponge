@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.damagesource;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -32,8 +33,9 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.damagesource.EntityDamageSource;
+
+import javax.annotation.Nullable;
 
 @Mixin(EntityDamageSource.class)
 public abstract class EntityDamageSourceMixin extends DamageSourceMixin {

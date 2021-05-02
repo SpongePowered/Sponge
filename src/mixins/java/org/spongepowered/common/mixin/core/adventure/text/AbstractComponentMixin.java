@@ -35,12 +35,14 @@ import net.kyori.adventure.text.SelectorComponent;
 import net.kyori.adventure.text.StorageNBTComponent;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.TranslatableComponent;
-import net.minecraft.network.chat.MutableComponent;
-import net.minecraft.network.chat.NbtComponent;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
+
+import net.minecraft.network.chat.MutableComponent;
+import net.minecraft.network.chat.NbtComponent;
 
 import java.util.ArrayList;
 import java.util.List;

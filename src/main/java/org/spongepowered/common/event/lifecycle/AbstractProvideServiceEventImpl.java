@@ -27,6 +27,7 @@ package org.spongepowered.common.event.lifecycle;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.event.Cause;

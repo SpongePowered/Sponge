@@ -26,15 +26,17 @@ package org.spongepowered.common.accessor.server.level;
 
 import it.unimi.dsi.fastutil.objects.ObjectLinkedOpenHashSet;
 import org.apache.logging.log4j.Logger;
+
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.Queue;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.BlockEventData;
+
+import java.util.Queue;
 
 @Mixin(ServerLevel.class)
 public interface ServerLevelAccessor {

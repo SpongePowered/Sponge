@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.biome.provider;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;

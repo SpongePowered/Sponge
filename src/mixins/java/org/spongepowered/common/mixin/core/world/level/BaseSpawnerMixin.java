@@ -24,16 +24,17 @@
  */
 package org.spongepowered.common.mixin.core.world.level;
 
-import net.minecraft.world.entity.EntitySelector;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.level.BaseSpawner;
-import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.world.level.BaseSpawnerBridge;
+
+import net.minecraft.world.entity.EntitySelector;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.level.BaseSpawner;
+import net.minecraft.world.level.Level;
 
 @Mixin(BaseSpawner.class)
 public abstract class BaseSpawnerMixin implements BaseSpawnerBridge {

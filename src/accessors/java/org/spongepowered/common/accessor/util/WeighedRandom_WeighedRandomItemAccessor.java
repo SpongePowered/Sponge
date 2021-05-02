@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.util;
 
-import net.minecraft.util.WeighedRandom;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.util.WeighedRandom;
 
 @Mixin(WeighedRandom.WeighedRandomItem.class)
 public interface WeighedRandom_WeighedRandomItemAccessor {

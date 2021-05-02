@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.server.commands;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.server.commands.KickCommand;
-import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.server.commands.KickCommand;
+import net.minecraft.server.network.ServerGamePacketListenerImpl;
 
 @Mixin(KickCommand.class)
 public abstract class KickCommandMixin {

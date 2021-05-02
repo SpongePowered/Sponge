@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.npc;
 
-import net.minecraft.world.entity.npc.VillagerType;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.npc.VillagerType;
 
 @Mixin(VillagerType.class)
 public abstract class VillagerTypeMixin_API implements org.spongepowered.api.data.type.VillagerType {

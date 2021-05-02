@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer.entity;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.persistence.DataContainer;

@@ -30,9 +30,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
-import java.util.Optional;
+
 import net.minecraft.world.entity.boss.enderdragon.phases.DragonPhaseInstance;
 import net.minecraft.world.entity.boss.enderdragon.phases.EnderDragonPhase;
+
+import java.util.Optional;
 
 @Mixin(DragonPhaseInstance.class)
 public interface DragonPhaseInstanceMixin_API extends DragonPhase {

@@ -24,23 +24,26 @@
  */
 package org.spongepowered.common.server;
 
-import java.util.UUID;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.commands.CommandSourceBridge;
+import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
+import org.spongepowered.common.service.server.permission.SpongeSystemSubject;
+
 import net.minecraft.commands.CommandSource;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.commands.CommandSourceBridge;
-import org.spongepowered.common.service.server.permission.SpongeSystemSubject;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
+
+import java.util.UUID;
 
 public final class ServerConsoleSystemSubject extends SpongeSystemSubject implements CommandSourceProviderBridge, CommandSource, CommandSourceBridge {
 

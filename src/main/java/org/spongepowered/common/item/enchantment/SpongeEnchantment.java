@@ -25,6 +25,7 @@
 package org.spongepowered.common.item.enchantment;
 
 import com.google.common.base.Objects;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataContainer;

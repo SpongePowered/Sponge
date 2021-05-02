@@ -24,6 +24,13 @@
  */
 package org.spongepowered.common.mixin.core.core.dispenser;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.projectile.Projectile;
+import org.spongepowered.api.projectile.source.ProjectileSource;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+
 import net.minecraft.core.BlockSource;
 import net.minecraft.core.dispenser.AbstractProjectileDispenseBehavior;
 import net.minecraft.core.dispenser.DefaultDispenseItemBehavior;
@@ -31,12 +38,6 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.projectile.Projectile;
-import org.spongepowered.api.projectile.source.ProjectileSource;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
 
 @Mixin(AbstractProjectileDispenseBehavior.class)
 public abstract class AbstractProjectileDispenseBehaviorMixin extends DefaultDispenseItemBehavior {

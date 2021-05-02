@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.accessor.commands.arguments;
 
-import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
-import net.minecraft.commands.arguments.OperationArgument;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
+
+import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.commands.arguments.OperationArgument;
 
 @Mixin(OperationArgument.class)
 public interface OperationArgumentAccessor {

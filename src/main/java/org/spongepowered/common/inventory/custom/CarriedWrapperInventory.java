@@ -28,12 +28,13 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.common.bridge.world.inventory.CarriedBridge;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 
-import java.util.Optional;
-import java.util.Set;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.Optional;
+import java.util.Set;
 
 /**
  * A wrapper Inventory providing a carrier for an inventory

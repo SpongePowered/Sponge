@@ -24,16 +24,15 @@
  */
 package org.spongepowered.common.map.canvas;
 
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.color.MapColor;
 import org.spongepowered.api.map.color.MapColorTypes;
 import org.spongepowered.common.util.Constants;
 
-import java.awt.Color;
-import java.awt.Graphics;
-import java.awt.Image;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+
+import java.awt.*;
 import java.awt.image.BufferedImage;
 import java.util.Arrays;
 import java.util.Collections;

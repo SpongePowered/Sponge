@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 import org.spongepowered.api.block.entity.carrier.furnace.Furnace;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.FurnaceBlockEntity;
 
 @Mixin(FurnaceBlockEntity.class)
 public abstract class FurnaceBlockEntityMixin_API extends AbstractFurnaceBlockEntityMixin_API implements Furnace {

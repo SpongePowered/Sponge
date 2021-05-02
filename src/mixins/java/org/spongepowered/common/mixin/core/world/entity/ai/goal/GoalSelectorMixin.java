@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.entity.ai.goal;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.entity.ai.goal.GoalExecutor;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.living.Agent;
@@ -43,13 +44,13 @@ import org.spongepowered.common.bridge.world.entity.ai.goal.GoalSelectorBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
-import java.util.Set;
-
-import javax.annotation.Nullable;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.ai.goal.GoalSelector;
 import net.minecraft.world.entity.ai.goal.WrappedGoal;
+
+import javax.annotation.Nullable;
+import java.util.Set;
 
 @Mixin(GoalSelector.class)
 public abstract class GoalSelectorMixin implements GoalSelectorBridge {

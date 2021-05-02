@@ -31,15 +31,16 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NBTCollectors;
 import org.spongepowered.common.util.NBTStreams;
 
-import java.util.Objects;
-import java.util.Set;
-import java.util.stream.Collectors;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.Block;
+
+import java.util.Objects;
+import java.util.Set;
+import java.util.stream.Collectors;
 
 public final class BlockTypeItemStackData {
 

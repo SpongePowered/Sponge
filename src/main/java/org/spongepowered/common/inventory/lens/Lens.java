@@ -25,13 +25,14 @@
 package org.spongepowered.common.inventory.lens;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
-import java.util.List;
-
 import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
 
 /**
  * Base Lens interface. A lens presents an indexed view of a number of child

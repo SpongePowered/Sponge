@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;

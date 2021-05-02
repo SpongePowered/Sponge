@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.util.AxisUtil;
+
 import net.minecraft.core.Direction;
 import net.minecraft.world.level.block.RotatedPillarBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.util.AxisUtil;
 
 public final class RotatedPillarData {
 

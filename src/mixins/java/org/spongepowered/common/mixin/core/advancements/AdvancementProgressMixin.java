@@ -26,10 +26,6 @@ package org.spongepowered.common.mixin.core.advancements;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.advancements.AdvancementProgress;
-import net.minecraft.advancements.Criterion;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.PlayerAdvancements;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.AndCriterion;
@@ -63,13 +59,17 @@ import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 
+import net.minecraft.advancements.AdvancementProgress;
+import net.minecraft.advancements.Criterion;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.PlayerAdvancements;
+
+import javax.annotation.Nullable;
 import java.time.Instant;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @Mixin(AdvancementProgress.class)
 public abstract class AdvancementProgressMixin implements AdvancementProgressBridge {

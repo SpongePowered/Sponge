@@ -26,6 +26,14 @@ package org.spongepowered.common.item.recipe.crafting.shapeless;
 
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
 
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Ingredient;
+import net.minecraft.world.item.crafting.ShapelessRecipe;
+import net.minecraft.world.level.Level;
+
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Comparator;
@@ -35,13 +43,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Set;
 import java.util.function.Function;
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Ingredient;
-import net.minecraft.world.item.crafting.ShapelessRecipe;
-import net.minecraft.world.level.Level;
 
 /**
  * Customized matching algorithm matching with ingredient predicate instead of packed item in vanilla

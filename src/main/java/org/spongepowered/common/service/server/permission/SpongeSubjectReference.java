@@ -25,6 +25,7 @@
 package org.spongepowered.common.service.server.permission;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 

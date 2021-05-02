@@ -29,8 +29,9 @@ import org.spongepowered.api.entity.living.monster.raider.illager.spellcaster.Sp
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
-import java.util.Set;
 import net.minecraft.world.entity.monster.SpellcasterIllager;
+
+import java.util.Set;
 
 @Mixin(SpellcasterIllager.class)
 public abstract class SpellcasterIllagerMixin_API extends AbstractIllagerMixin_API implements Spellcaster {

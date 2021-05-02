@@ -25,15 +25,17 @@
 package org.spongepowered.common.data.datasync;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.bridge.network.syncher.EntityDataAccessorBridge;
 
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.Entity;
+
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.Entity;
 
 public abstract class DataParameterConverter<E> {
 

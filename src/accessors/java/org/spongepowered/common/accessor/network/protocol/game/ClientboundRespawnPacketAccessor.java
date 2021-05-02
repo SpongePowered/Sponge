@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.accessor.network.protocol.game;
 
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
+
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ClientboundRespawnPacket.class)
 public interface ClientboundRespawnPacketAccessor {

@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NumericTag;
 import net.minecraft.nbt.Tag;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class NBTUtil {
 

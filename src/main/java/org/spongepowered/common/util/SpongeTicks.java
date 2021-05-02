@@ -25,6 +25,7 @@
 package org.spongepowered.common.util;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.util.Ticks;
 

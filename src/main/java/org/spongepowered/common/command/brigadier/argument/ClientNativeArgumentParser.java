@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.command.brigadier.argument;
 
-import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedValueParameter;
+
+import com.mojang.brigadier.arguments.ArgumentType;
 
 /**
  * For use with ArgumentTypes in the base game

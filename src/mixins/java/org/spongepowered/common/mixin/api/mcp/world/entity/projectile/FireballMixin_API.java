@@ -28,8 +28,9 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.fireball.FireballEntity;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
 import net.minecraft.world.entity.projectile.Fireball;
+
+import java.util.Set;
 
 @Mixin(Fireball.class)
 public abstract class FireballMixin_API extends AbstractHurtingProjectileMixin_API implements FireballEntity {

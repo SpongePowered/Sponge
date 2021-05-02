@@ -28,11 +28,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.Map;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.world.entity.animal.Sheep;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.level.ItemLike;
+
+import java.util.Map;
 
 @Mixin(Sheep.class)
 public interface SheepAccessor {

@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.entity.animal;
 
-import net.minecraft.world.entity.animal.TropicalFish;
-import net.minecraft.world.item.DyeColor;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
+
+import net.minecraft.world.entity.animal.TropicalFish;
+import net.minecraft.world.item.DyeColor;
 
 @Mixin(TropicalFish.class)
 public interface TropicalFishAccessor {

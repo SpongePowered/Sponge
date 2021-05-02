@@ -29,8 +29,9 @@ import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.BlockEntityInventory;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Optional;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+
+import java.util.Optional;
 
 @Mixin(CampfireBlockEntity.class)
 public abstract class CampfireBlockEntityMixin_Carried_Inventory_API<T extends BlockEntity & Carrier> implements BlockEntityInventory<T> {

@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.tracker.world.item;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -36,13 +37,14 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.event.tracking.phase.block.GrowablePhaseContext;
 
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.item.BoneMealItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.BonemealableBlock;
 import net.minecraft.world.level.block.state.BlockState;
+
+import java.util.Random;
 
 @Mixin(BoneMealItem.class)
 public abstract class BoneMealItemMixin_Tracker {

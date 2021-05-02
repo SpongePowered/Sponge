@@ -29,8 +29,9 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.minecart.carrier.CarrierMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+
+import java.util.Set;
 
 @Mixin(AbstractMinecartContainer.class)
 public abstract class AbstractMinecartContainerMixin_API<M extends CarrierMinecart<M>> extends AbstractMinecartMixin_API implements CarrierMinecart<M> {

@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.entity.animal;
 
-import net.minecraft.network.syncher.EntityDataAccessor;
-import net.minecraft.world.entity.animal.Wolf;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
+
+import net.minecraft.network.syncher.EntityDataAccessor;
+import net.minecraft.world.entity.animal.Wolf;
 
 @Mixin(Wolf.class)
 public interface WolfAccessor {

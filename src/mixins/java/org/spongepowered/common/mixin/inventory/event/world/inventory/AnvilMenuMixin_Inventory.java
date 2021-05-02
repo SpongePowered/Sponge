@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
-import net.minecraft.world.inventory.AnvilMenu;
-import net.minecraft.world.inventory.DataSlot;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Final;
@@ -39,6 +36,10 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
+import net.minecraft.world.inventory.AnvilMenu;
+import net.minecraft.world.inventory.DataSlot;
+import net.minecraft.world.item.ItemStack;
 
 @Mixin(AnvilMenu.class)
 public abstract class AnvilMenuMixin_Inventory extends ItemCombinerMenuMixin_Inventory {

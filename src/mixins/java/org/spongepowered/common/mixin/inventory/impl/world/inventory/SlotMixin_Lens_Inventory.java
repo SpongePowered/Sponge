@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.impl.world.inventory;
 
-import net.minecraft.world.Container;
-import net.minecraft.world.inventory.Slot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,6 +34,9 @@ import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.slot.BasicSlotLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
+
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.Slot;
 
 @Mixin(Slot.class)
 public abstract class SlotMixin_Lens_Inventory implements InventoryAdapter, LensGeneratorBridge {

@@ -37,9 +37,11 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
-import java.util.ArrayList;
+
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.decoration.HangingEntity;
+
+import java.util.ArrayList;
 
 @Mixin(HangingEntity.class)
 public abstract class HangingEntityMixin extends EntityMixin {

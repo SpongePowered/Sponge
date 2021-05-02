@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.custom;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
@@ -36,13 +37,13 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
-
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public class CustomInventory implements Container, CarriedBridge {
 

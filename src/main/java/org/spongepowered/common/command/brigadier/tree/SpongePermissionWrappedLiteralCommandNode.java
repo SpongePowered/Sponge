@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import net.minecraft.commands.CommandSourceStack;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 /**
  * Used as a marker to indicate that this root node is not Sponge native.

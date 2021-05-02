@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.storage;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.saveddata.maps.MapDecoration;
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -34,6 +31,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.storage.MapDecorationBridge;
 import org.spongepowered.common.util.Constants;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 import java.util.HashSet;
 import java.util.Set;

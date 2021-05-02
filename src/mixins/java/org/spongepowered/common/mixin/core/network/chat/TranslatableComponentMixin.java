@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.core.network.chat;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.chat.TranslatableComponent;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -33,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.adventure.SpongeAdventure;
+
+import net.minecraft.network.chat.TranslatableComponent;
 
 @Mixin(TranslatableComponent.class)
 public class TranslatableComponentMixin {

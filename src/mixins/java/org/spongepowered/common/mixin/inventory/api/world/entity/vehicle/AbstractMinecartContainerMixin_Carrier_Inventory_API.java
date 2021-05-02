@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.entity.vehicle;
 
-import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 import org.spongepowered.api.entity.vehicle.minecart.carrier.CarrierMinecart;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
 
 @Mixin(AbstractMinecartContainer.class)
 public abstract class AbstractMinecartContainerMixin_Carrier_Inventory_API<M extends CarrierMinecart<M>> implements Carrier {

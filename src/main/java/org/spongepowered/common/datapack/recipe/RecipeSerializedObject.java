@@ -26,6 +26,7 @@ package org.spongepowered.common.datapack.recipe;
 
 import com.google.gson.JsonObject;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.common.datapack.DataPackSerializedObject;
 

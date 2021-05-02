@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.client.multiplayer;
 
-import net.minecraft.client.multiplayer.ClientLevel;
 import org.spongepowered.api.world.client.ClientWorldProperties;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.client.multiplayer.ClientLevel;
 
 @Mixin(ClientLevel.ClientLevelData.class)
 public abstract class ClientLevel_ClientLevelDataMixin_API implements ClientWorldProperties {

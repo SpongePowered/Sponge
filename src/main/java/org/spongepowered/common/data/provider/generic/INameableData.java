@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.generic;
 
-import net.minecraft.world.Nameable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.Nameable;
 
 public final class INameableData {
 

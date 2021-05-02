@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.monster.Vex;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.accessor.world.entity.monster.VexAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.entity.monster.Vex;
 
 public final class VexData {
 

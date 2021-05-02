@@ -25,15 +25,17 @@
 package org.spongepowered.common.util;
 
 import com.google.common.collect.ImmutableMap;
+
 import org.spongepowered.api.util.Direction;
 
-import java.util.HashSet;
-import java.util.Map;
-import java.util.Set;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BooleanProperty;
 import net.minecraft.world.level.block.state.properties.EnumProperty;
 import net.minecraft.world.level.block.state.properties.WallSide;
+
+import java.util.HashSet;
+import java.util.Map;
+import java.util.Set;
 
 public final class DirectionalUtil {
 

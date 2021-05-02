@@ -26,6 +26,7 @@ package org.spongepowered.common.util;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+
 import org.spongepowered.common.data.Copyable;
 
 import java.util.ArrayList;

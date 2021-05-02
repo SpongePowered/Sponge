@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.entity;
 
-import net.minecraft.world.entity.EquipmentSlot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentGroup;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.entity.EquipmentSlot;
 
 @Mixin(EquipmentSlot.class)
 public abstract class EquipmentSlotMixin_Inventory_API implements EquipmentType {

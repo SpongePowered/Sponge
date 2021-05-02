@@ -32,11 +32,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.item.ItemCooldowns_CooldownInstanceAccessor;
 import org.spongepowered.common.bridge.world.item.ItemCooldownsBridge;
+
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemCooldowns;
+
 import java.util.Map;
 import java.util.OptionalDouble;
 import java.util.OptionalInt;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.ItemCooldowns;
 
 @Mixin(ItemCooldowns.class)
 public abstract class ItemCooldownsMixin_API implements org.spongepowered.api.entity.living.player.CooldownTracker {

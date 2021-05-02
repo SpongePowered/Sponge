@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.level.Level;
 
 @Mixin(SmallFireball.class)
 public abstract class SmallFireballMixin extends AbstractHurtingProjectileMixin {

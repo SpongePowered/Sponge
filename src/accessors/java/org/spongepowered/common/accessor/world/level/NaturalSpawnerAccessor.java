@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.level;
 
-import net.minecraft.world.level.NaturalSpawner;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
+
+import net.minecraft.world.level.NaturalSpawner;
 
 @Mixin(NaturalSpawner.class)
 public interface NaturalSpawnerAccessor {

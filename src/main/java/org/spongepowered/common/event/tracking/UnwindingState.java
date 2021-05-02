@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 

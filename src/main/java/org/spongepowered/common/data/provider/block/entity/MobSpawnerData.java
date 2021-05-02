@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.BaseSpawner;
-import net.minecraft.world.level.SpawnData;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -45,6 +40,12 @@ import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
+
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.BaseSpawner;
+import net.minecraft.world.level.SpawnData;
 
 public final class MobSpawnerData {
 

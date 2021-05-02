@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.projectile.LargeFireball;
-import net.minecraft.world.entity.projectile.SmallFireball;
-import net.minecraft.world.entity.projectile.WitherSkull;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
+
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.projectile.LargeFireball;
+import net.minecraft.world.entity.projectile.SmallFireball;
+import net.minecraft.world.entity.projectile.WitherSkull;
 
 @Mixin({LivingEntity.class, LargeFireball.class, WitherSkull.class, SmallFireball.class})
 public abstract class GrieferBridgeMixin implements GrieferBridge {

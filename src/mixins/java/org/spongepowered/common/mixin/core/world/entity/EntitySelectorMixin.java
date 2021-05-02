@@ -30,10 +30,11 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 
-import java.util.function.Predicate;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EntitySelector;
 import net.minecraft.world.entity.player.Player;
+
+import java.util.function.Predicate;
 
 @Mixin(EntitySelector.class)
 public abstract class EntitySelectorMixin {

@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.data.provider.item.stack;
 
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.type.ItemTier;
+import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Tier;
 import net.minecraft.world.item.TieredItem;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.type.ItemTier;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 public final class TieredItemStackData {
 

@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.ConduitBlockEntity;
 import org.spongepowered.api.block.entity.Conduit;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.ConduitBlockEntity;
 
 @Mixin(ConduitBlockEntity.class)
 public abstract class ConduitBlockEntityMixin_API extends BlockEntityMixin_API implements Conduit {

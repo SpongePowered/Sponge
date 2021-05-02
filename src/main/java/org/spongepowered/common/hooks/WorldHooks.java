@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.hooks;
 
+import org.spongepowered.common.event.tracking.PhaseTracker;
+
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public interface WorldHooks {
 

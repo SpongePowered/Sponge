@@ -28,8 +28,10 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.world.entity.EntityMixin_API;
-import java.util.Set;
+
 import net.minecraft.world.entity.item.FallingBlockEntity;
+
+import java.util.Set;
 
 @Mixin(FallingBlockEntity.class)
 public abstract class FallingBlockEntityMixin_API extends EntityMixin_API implements FallingBlock {

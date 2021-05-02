@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.core.world.level.storage;
 
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.storage.LevelData;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.storage.LevelData;
 
 @Mixin(LevelData.class)
 public interface LevelDataMixin {

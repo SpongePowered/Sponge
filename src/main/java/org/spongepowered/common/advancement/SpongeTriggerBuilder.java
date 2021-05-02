@@ -32,6 +32,7 @@ import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
@@ -47,6 +48,8 @@ import org.spongepowered.configurate.ConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
 import org.spongepowered.configurate.gson.GsonConfigurationLoader;
 
+import net.minecraft.resources.ResourceLocation;
+
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.io.StringReader;
@@ -55,8 +58,6 @@ import java.util.Objects;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
-
-import net.minecraft.resources.ResourceLocation;
 
 @SuppressWarnings("unchecked")
 public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> extends AbstractResourceKeyedBuilder<Trigger<C>,

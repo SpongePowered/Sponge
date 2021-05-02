@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.commands;
 
-import net.minecraft.commands.CommandSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.commands.CommandSourceBridge;
+
+import net.minecraft.commands.CommandSource;
 
 @Mixin(CommandSource.class)
 public interface CommandSourceMixin extends CommandSourceBridge {

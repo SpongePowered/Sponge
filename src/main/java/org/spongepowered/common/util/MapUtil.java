@@ -25,8 +25,7 @@
 package org.spongepowered.common.util;
 
 import com.google.common.primitives.Bytes;
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.nbt.CompoundTag;
+
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -36,6 +35,9 @@ import org.spongepowered.api.map.color.MapShade;
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.map.color.SpongeMapColor;
+
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.nbt.CompoundTag;
 
 import java.util.HashSet;
 import java.util.List;

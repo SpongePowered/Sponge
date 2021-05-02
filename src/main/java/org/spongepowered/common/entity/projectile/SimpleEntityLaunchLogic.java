@@ -30,9 +30,10 @@ import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.world.server.ServerLocation;
 
+import net.minecraft.world.entity.LivingEntity;
+
 import java.util.Optional;
 import java.util.function.Supplier;
-import net.minecraft.world.entity.LivingEntity;
 
 public class SimpleEntityLaunchLogic<P extends Projectile> implements ProjectileLogic<P> {
 

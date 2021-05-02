@@ -36,12 +36,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.server.BootstrapProperties;
 
-import java.util.List;
-import java.util.Optional;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.StructureSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLayerInfo;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+
+import java.util.List;
+import java.util.Optional;
 
 @Mixin(FlatLevelGeneratorSettings.class)
 public abstract class FlatLevelGeneratorSettingsMixin_API implements FlatGeneratorConfig {

@@ -28,11 +28,12 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.common.UntransformedAccessorError;
 
-import java.util.List;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
+
+import java.util.List;
 
 @Mixin(OverworldBiomeSource.class)
 public interface OverworldBiomeSourceAccessor {

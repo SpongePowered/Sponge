@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.entity.DaylightDetectorBlockEntity;
 import org.spongepowered.api.block.entity.DaylightDetector;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.block.entity.DaylightDetectorBlockEntity;
 
 @Mixin(DaylightDetectorBlockEntity.class)
 public abstract class DaylightDetectorBlockEntityMixin_API extends BlockEntityMixin_API implements DaylightDetector {

@@ -26,17 +26,20 @@ package org.spongepowered.common.world.teleport;
 
 import com.google.common.collect.Sets;
 import com.google.inject.Singleton;
+
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.util.Tristate;
-import org.spongepowered.api.world.server.ServerLocation;
-import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.api.world.World;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.api.world.teleport.TeleportHelperFilter;
 import org.spongepowered.api.world.teleport.TeleportHelperFilters;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.math.GenericMath;
 import org.spongepowered.math.vector.Vector3i;
+
+import net.minecraft.world.level.border.WorldBorder;
 
 import java.util.ArrayList;
 import java.util.Collection;
@@ -47,7 +50,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Stream;
-import net.minecraft.world.level.border.WorldBorder;
 
 @Singleton
 public final class SpongeTeleportHelper implements TeleportHelper {

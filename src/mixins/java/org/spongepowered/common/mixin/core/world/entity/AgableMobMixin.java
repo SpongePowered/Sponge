@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
-import net.minecraft.world.entity.AgableMob;
 import org.spongepowered.api.entity.living.animal.Animal;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.BreedingEvent;
@@ -35,6 +34,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import net.minecraft.world.entity.AgableMob;
 
 @Mixin(AgableMob.class)
 public abstract class AgableMobMixin extends MobMixin {

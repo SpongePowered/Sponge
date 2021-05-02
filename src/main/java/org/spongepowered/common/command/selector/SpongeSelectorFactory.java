@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.command.selector;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import org.spongepowered.api.command.selector.Selector;
+
 import com.mojang.brigadier.StringReader;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.command.selector.Selector;
 
 public final class SpongeSelectorFactory implements Selector.Factory {
 

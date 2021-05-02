@@ -25,6 +25,7 @@
 package org.spongepowered.common.world;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.util.Constants;

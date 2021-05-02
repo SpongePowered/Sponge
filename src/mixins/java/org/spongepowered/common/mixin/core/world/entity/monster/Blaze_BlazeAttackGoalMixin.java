@@ -24,15 +24,16 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.monster;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.monster.Blaze;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.ModifyArg;
 import org.spongepowered.common.bridge.world.entity.GrieferBridge;
+
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.monster.Blaze;
 
 @Mixin(targets = "net/minecraft/world/entity/monster/Blaze$BlazeAttackGoal")
 public abstract class Blaze_BlazeAttackGoalMixin extends Goal {

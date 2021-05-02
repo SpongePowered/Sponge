@@ -30,12 +30,14 @@ import static com.google.common.base.Preconditions.checkState;
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.GameProfile;
+
+import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 
 import java.util.Optional;
 

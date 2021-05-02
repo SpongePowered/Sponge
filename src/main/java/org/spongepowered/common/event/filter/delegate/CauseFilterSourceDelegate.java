@@ -31,8 +31,9 @@ import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.spongepowered.api.event.Event;
+
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.Event;
 import org.spongepowered.api.util.Tuple;
 
 import java.lang.reflect.Method;

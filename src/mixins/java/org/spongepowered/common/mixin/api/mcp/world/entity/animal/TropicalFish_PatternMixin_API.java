@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.entity.animal;
 
-import net.minecraft.world.entity.animal.TropicalFish;
 import org.spongepowered.api.data.type.TropicalFishShape;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.entity.animal.TropicalFish;
 
 @Mixin(TropicalFish.Pattern.class)
 public abstract class TropicalFish_PatternMixin_API implements TropicalFishShape {

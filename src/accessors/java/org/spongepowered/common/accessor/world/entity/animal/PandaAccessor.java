@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.world.entity.animal;
 
-import net.minecraft.world.entity.animal.Panda;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import net.minecraft.world.entity.animal.Panda;
 
 @Mixin(Panda.class)
 public interface PandaAccessor {

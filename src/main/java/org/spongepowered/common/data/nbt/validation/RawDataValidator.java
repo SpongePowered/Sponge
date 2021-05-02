@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.data.nbt.validation;
 
-import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.api.data.persistence.DataView;
+
+import net.minecraft.nbt.CompoundTag;
 
 public interface RawDataValidator {
 

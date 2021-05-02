@@ -26,15 +26,15 @@ package org.spongepowered.common.mixin.api.mcp.world.item.crafting;
 
 import org.spongepowered.api.item.recipe.RecipeType;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.item.crafting.ShapedRecipeAccessor;
 import org.spongepowered.common.accessor.world.item.crafting.ShapelessRecipeAccessor;
-import java.util.Optional;
+
 import net.minecraft.world.item.crafting.ShapedRecipe;
 import net.minecraft.world.item.crafting.ShapelessRecipe;
+
+import java.util.Optional;
 
 @Mixin(net.minecraft.world.item.crafting.CraftingRecipe.class)
 public interface CraftingRecipeMixin_API extends CraftingRecipe {

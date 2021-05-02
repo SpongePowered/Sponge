@@ -28,8 +28,10 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.world.entity.EntityMixin_API;
-import java.util.Set;
+
 import net.minecraft.world.entity.projectile.ThrowableProjectile;
+
+import java.util.Set;
 
 @Mixin(ThrowableProjectile.class)
 public abstract class ThrowableProjectileMixin_API extends EntityMixin_API implements Projectile {

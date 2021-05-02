@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.projectile;
 
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
-import net.minecraft.world.phys.HitResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.projectile.DamagingProjectile;
 import org.spongepowered.asm.mixin.Mixin;
@@ -33,6 +31,9 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import net.minecraft.world.phys.HitResult;
 
 @Mixin(AbstractHurtingProjectile.class)
 public abstract class AbstractHurtingProjectileMixin extends ProjectileMixin {

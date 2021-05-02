@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.core.client.multiplayer;
 
-import net.minecraft.client.multiplayer.ClientLevel;
-import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
+
+import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.world.level.dimension.DimensionType;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin extends LevelMixin implements WorldBridge {

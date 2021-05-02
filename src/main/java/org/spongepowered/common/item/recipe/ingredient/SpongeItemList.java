@@ -26,10 +26,12 @@ package org.spongepowered.common.item.recipe.ingredient;
 
 import com.google.gson.JsonArray;
 import com.google.gson.JsonObject;
-import java.util.Arrays;
-import java.util.Collection;
+
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Ingredient;
+
+import java.util.Arrays;
+import java.util.Collection;
 
 public abstract class SpongeItemList implements Ingredient.Value {
 

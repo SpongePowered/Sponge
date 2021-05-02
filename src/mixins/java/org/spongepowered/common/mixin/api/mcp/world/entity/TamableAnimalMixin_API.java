@@ -28,8 +28,10 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.TameableAnimal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.mcp.world.entity.animal.AnimalMixin_API;
-import java.util.Set;
+
 import net.minecraft.world.entity.TamableAnimal;
+
+import java.util.Set;
 
 @Mixin(TamableAnimal.class)
 public abstract class TamableAnimalMixin_API extends AnimalMixin_API implements TameableAnimal {

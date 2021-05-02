@@ -25,9 +25,11 @@
 package org.spongepowered.common.entity.ai.goal.builtin.creature;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.world.entity.PathfinderMob;
+
 import org.spongepowered.api.entity.ai.goal.builtin.creature.RandomWalkingGoal;
 import org.spongepowered.api.entity.living.Creature;
+
+import net.minecraft.world.entity.PathfinderMob;
 
 public final class SpongeRandomWalkingGoalBuilder implements RandomWalkingGoal.Builder {
 

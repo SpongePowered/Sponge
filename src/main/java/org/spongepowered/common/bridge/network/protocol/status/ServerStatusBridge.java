@@ -25,9 +25,11 @@
 package org.spongepowered.common.bridge.network.protocol.status;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.protocol.status.ServerStatus;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.network.status.Favicon;
+
+import net.minecraft.network.protocol.status.ServerStatus;
 
 public interface ServerStatusBridge {
 

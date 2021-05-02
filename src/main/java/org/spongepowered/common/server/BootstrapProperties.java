@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.server;
 
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.resources.RegistryReadOps;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
@@ -36,6 +32,11 @@ import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
+
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.resources.RegistryReadOps;
+import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.levelgen.WorldGenSettings;
 
 public final class BootstrapProperties {
 

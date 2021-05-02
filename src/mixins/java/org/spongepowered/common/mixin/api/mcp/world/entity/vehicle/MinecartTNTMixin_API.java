@@ -29,8 +29,9 @@ import org.spongepowered.api.entity.vehicle.minecart.TNTMinecart;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 
-import java.util.Set;
 import net.minecraft.world.entity.vehicle.MinecartTNT;
+
+import java.util.Set;
 
 @Mixin(MinecartTNT.class)
 public abstract class MinecartTNTMixin_API extends AbstractMinecartMixin_API implements TNTMinecart {

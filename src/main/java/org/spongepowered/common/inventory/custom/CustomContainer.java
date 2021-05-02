@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.inventory.custom;
 
+import org.spongepowered.api.item.inventory.ContainerType;
+
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.spongepowered.api.item.inventory.ContainerType;
 
 public class CustomContainer extends AbstractContainerMenu {
 

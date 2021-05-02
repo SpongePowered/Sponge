@@ -26,10 +26,11 @@ package org.spongepowered.common.util;
 
 import org.spongepowered.api.effect.potion.PotionEffect;
 
+import net.minecraft.world.effect.MobEffectInstance;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.stream.Collectors;
-import net.minecraft.world.effect.MobEffectInstance;
 
 public final class PotionEffectUtil {
 

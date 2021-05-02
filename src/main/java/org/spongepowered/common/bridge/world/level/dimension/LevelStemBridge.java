@@ -25,17 +25,15 @@
 package org.spongepowered.common.bridge.world.level.dimension;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.storage.PrimaryLevelData;
-import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3i;
 
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.storage.PrimaryLevelData;
+
 import java.util.Optional;
-import java.util.UUID;
 
 public interface LevelStemBridge {
 

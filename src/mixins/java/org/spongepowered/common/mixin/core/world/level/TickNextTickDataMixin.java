@@ -27,9 +27,8 @@ package org.spongepowered.common.mixin.core.world.level;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.util.Ticks;
-import net.minecraft.world.level.ServerTickList;
-import net.minecraft.world.level.TickNextTickData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -41,11 +40,9 @@ import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerTickList;
 
 import java.time.Duration;
-import java.util.Iterator;
-import java.util.Queue;
-import java.util.Set;
 
 @Mixin(net.minecraft.world.level.TickNextTickData.class)
 public abstract class TickNextTickDataMixin<T> implements TickNextTickDataBridge<T> {

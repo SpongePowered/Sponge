@@ -25,11 +25,13 @@
 package org.spongepowered.common.mixin.core.adventure;
 
 import net.kyori.adventure.key.Key;
-import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+
+import net.minecraft.resources.ResourceLocation;
 
 @Mixin(value = Key.class, remap = false)
 public interface KeyMixin {

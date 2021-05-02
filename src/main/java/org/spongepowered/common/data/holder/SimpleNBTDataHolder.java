@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.data.holder;
 
-import net.minecraft.nbt.CompoundTag;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
+
+import net.minecraft.nbt.CompoundTag;
 
 /**
  * Simple mutable data holder wrapper around a nbt compound. {@link SpongeDataHolderBridge} is mixed in.

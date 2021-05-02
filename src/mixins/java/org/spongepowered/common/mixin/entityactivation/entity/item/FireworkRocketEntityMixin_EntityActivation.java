@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.mixin.entityactivation.entity.item;
 
-import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.mixin.entityactivation.entity.EntityMixin_EntityActivation;
+
+import net.minecraft.world.entity.projectile.FireworkRocketEntity;
 
 @Mixin(FireworkRocketEntity.class)
 public abstract class FireworkRocketEntityMixin_EntityActivation extends EntityMixin_EntityActivation {

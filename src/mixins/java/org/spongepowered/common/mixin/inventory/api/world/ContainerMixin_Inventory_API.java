@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world;
 
-import net.minecraft.world.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
@@ -32,6 +31,8 @@ import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
+
+import net.minecraft.world.Container;
 
 @Mixin(Container.class)
 @Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))

@@ -25,8 +25,7 @@
 package org.spongepowered.common.mixin.core.network.protocol.status;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.chat.TextComponent;
-import net.minecraft.network.protocol.status.ServerStatus;
+
 import org.spongepowered.api.network.status.Favicon;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -38,9 +37,11 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.protocol.status.ServerStatusBridge;
 import org.spongepowered.common.network.status.SpongeFavicon;
 
-import java.io.IOException;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.protocol.status.ServerStatus;
 
 import javax.annotation.Nullable;
+import java.io.IOException;
 
 @Mixin(ServerStatus.class)
 public abstract class ServerStatusMixin implements ServerStatusBridge {

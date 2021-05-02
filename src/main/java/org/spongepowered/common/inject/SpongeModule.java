@@ -25,13 +25,10 @@
 package org.spongepowered.common.inject;
 
 import com.google.inject.AbstractModule;
-import com.google.inject.Inject;
-import com.google.inject.Provider;
-import org.spongepowered.api.config.ConfigDir;
+
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.inject.provider.ConfigDirAnnotation;
 
-import java.io.File;
 import java.nio.file.Path;
 
 public final class SpongeModule extends AbstractModule {

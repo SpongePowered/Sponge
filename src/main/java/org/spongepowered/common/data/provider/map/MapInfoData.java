@@ -24,9 +24,8 @@
  */
 package org.spongepowered.common.data.provider.map;
 
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
@@ -36,6 +35,9 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.map.canvas.SpongeMapByteCanvas;
 import org.spongepowered.common.map.canvas.SpongeMapCanvas;
 import org.spongepowered.math.vector.Vector2i;
+
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 
 public final class MapInfoData {
 

@@ -26,15 +26,17 @@ package org.spongepowered.common.mixin.core.advancements;
 
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.advancements.DisplayInfo;
-import net.minecraft.resources.ResourceLocation;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.advancements.DisplayInfoBridge;
+
+import net.minecraft.advancements.DisplayInfo;
+import net.minecraft.resources.ResourceLocation;
 
 @Mixin(DisplayInfo.class)
 public abstract class DisplayInfoMixin implements DisplayInfoBridge {

@@ -25,14 +25,16 @@
 package org.spongepowered.common.mixin.api.mcp.advancements;
 
 import net.kyori.adventure.text.format.TextColor;
-import net.minecraft.ChatFormatting;
-import net.minecraft.advancements.FrameType;
+
 import org.spongepowered.api.advancement.AdvancementType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.adventure.SpongeAdventure;
+
+import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.FrameType;
 
 import javax.annotation.Nullable;
 

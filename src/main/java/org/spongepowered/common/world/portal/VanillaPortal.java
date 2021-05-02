@@ -25,9 +25,10 @@
 package org.spongepowered.common.world.portal;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.server.ServerLocation;
+
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.world.server.ServerLocation;
 
 import java.util.Optional;
 

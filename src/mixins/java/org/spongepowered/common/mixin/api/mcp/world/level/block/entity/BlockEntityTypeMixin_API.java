@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
-import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import net.minecraft.world.level.block.Block;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntityType.class)
 public abstract class BlockEntityTypeMixin_API implements BlockEntityType {

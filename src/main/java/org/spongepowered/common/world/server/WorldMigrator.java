@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.server;
 
 import org.apache.commons.io.FileUtils;
+
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.util.file.CopyFileVisitor;
 import org.spongepowered.common.SpongeCommon;

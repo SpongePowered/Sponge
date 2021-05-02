@@ -25,6 +25,7 @@
 package org.spongepowered.common.inject.provider;
 
 import com.google.common.base.MoreObjects;
+
 import org.spongepowered.api.config.ConfigDir;
 
 import java.lang.annotation.Annotation;

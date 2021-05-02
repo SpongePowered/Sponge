@@ -24,12 +24,6 @@
  */
 package org.spongepowered.common.data.provider.block.location;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.Nameable;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LightLayer;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.NameableBlockEntity;
 import org.spongepowered.api.data.Keys;
@@ -38,6 +32,13 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.CustomNameableBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.Nameable;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LightLayer;
+import net.minecraft.world.level.biome.Biome;
+import net.minecraft.world.level.block.state.BlockState;
 
 public final class ServerLocationData {
 

@@ -24,8 +24,9 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.levelgen.feature;
 
-import net.minecraft.world.level.levelgen.feature.StructureFeature;
 import org.spongepowered.asm.mixin.Mixin;
+
+import net.minecraft.world.level.levelgen.feature.StructureFeature;
 
 @Mixin(StructureFeature.class)
 public abstract class StructureFeatureMixin_API implements org.spongepowered.api.world.generation.structure.Structure {

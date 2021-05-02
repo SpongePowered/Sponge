@@ -27,6 +27,13 @@ package org.spongepowered.common.mixin.core.network.chat;
 import net.kyori.adventure.text.BlockNBTComponent;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.ComponentBuilder;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
+import org.spongepowered.common.bridge.network.chat.StyleBridge;
+
 import net.minecraft.network.chat.BaseComponent;
 import net.minecraft.network.chat.KeybindComponent;
 import net.minecraft.network.chat.NbtComponent;
@@ -34,11 +41,6 @@ import net.minecraft.network.chat.ScoreComponent;
 import net.minecraft.network.chat.SelectorComponent;
 import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.network.chat.StyleBridge;
-import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
 
 import java.util.ArrayList;
 import java.util.List;

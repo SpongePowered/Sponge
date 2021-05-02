@@ -30,12 +30,13 @@ import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
-import java.util.stream.Collectors;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.projectile.ThrownPotion;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.alchemy.PotionUtils;
+
+import java.util.stream.Collectors;
 
 public final class PotionData {
 

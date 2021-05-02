@@ -27,9 +27,10 @@ package org.spongepowered.common.registry;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.spongepowered.api.ResourceKey;
+
 import net.minecraft.ResourceLocationException;
 import net.minecraft.resources.ResourceLocation;
-import org.spongepowered.api.ResourceKey;
 
 public final class SpongeResourceKeyBuilder implements ResourceKey.Builder {
 

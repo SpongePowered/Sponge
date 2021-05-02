@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;

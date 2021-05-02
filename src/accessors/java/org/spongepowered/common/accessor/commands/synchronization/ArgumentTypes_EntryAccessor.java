@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.accessor.commands.synchronization;
 
-import net.minecraft.commands.synchronization.ArgumentSerializer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.commands.synchronization.ArgumentSerializer;
 
 // It's a bit of a hack as the field is actually public, but this is being used
 // because the target type is non-public - this is in the absence of shadow

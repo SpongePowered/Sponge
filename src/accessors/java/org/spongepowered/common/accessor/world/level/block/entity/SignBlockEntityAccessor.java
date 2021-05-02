@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.level.block.entity;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
+
+import net.minecraft.network.chat.Component;
+import net.minecraft.world.level.block.entity.SignBlockEntity;
 
 @Mixin(SignBlockEntity.class)
 public interface SignBlockEntityAccessor {

@@ -26,12 +26,13 @@ package org.spongepowered.common.world.portal;
 
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Axis;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
+import org.spongepowered.api.world.server.ServerLocation;
+
+import net.minecraft.server.level.ServerLevel;
 
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.server.level.ServerLevel;
 
 public final class EndPortalType extends VanillaPortalType {
 

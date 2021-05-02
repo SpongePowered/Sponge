@@ -26,6 +26,7 @@ package org.spongepowered.common.util;
 
 import com.google.common.base.MoreObjects;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.math.imaginary.Quaterniond;
 import org.spongepowered.math.matrix.Matrix4d;

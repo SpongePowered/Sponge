@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.projectile.AbstractHurtingProjectileAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.math.vector.Vector3d;
+
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 
 public final class DamagingProjectileData {
 

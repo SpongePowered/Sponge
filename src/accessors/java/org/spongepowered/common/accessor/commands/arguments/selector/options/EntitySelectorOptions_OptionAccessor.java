@@ -27,9 +27,10 @@ package org.spongepowered.common.accessor.commands.arguments.selector.options;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
-import java.util.function.Predicate;
 import net.minecraft.commands.arguments.selector.EntitySelectorParser;
 import net.minecraft.commands.arguments.selector.options.EntitySelectorOptions;
+
+import java.util.function.Predicate;
 
 @Mixin(targets = "net.minecraft.commands.arguments.selector.options.EntitySelectorOptions$Option")
 public interface EntitySelectorOptions_OptionAccessor {

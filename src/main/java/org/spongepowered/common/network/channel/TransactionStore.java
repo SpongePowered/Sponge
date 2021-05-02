@@ -28,6 +28,7 @@ import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.RemovalCause;
 import com.github.benmanes.caffeine.cache.RemovalListener;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.channel.TimeoutException;
 

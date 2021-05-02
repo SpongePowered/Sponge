@@ -26,13 +26,15 @@ package org.spongepowered.common.network.status;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
+
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.network.status.StatusClient;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 
+import net.minecraft.network.Connection;
+
 import java.net.InetSocketAddress;
 import java.util.Optional;
-import net.minecraft.network.Connection;
 
 public class SpongeStatusClient implements StatusClient {
 

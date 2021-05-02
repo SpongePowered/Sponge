@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.inventory.api;
 
-import net.minecraft.world.entity.Mob;
-import net.minecraft.world.entity.decoration.ArmorStand;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
+
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.decoration.ArmorStand;
 
 @Mixin(value = {ArmorStand.class, Mob.class})
 public abstract class TraitMixin_Equipable_Inventory_API implements Equipable {

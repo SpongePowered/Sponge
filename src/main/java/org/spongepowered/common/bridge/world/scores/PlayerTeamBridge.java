@@ -27,6 +27,7 @@ package org.spongepowered.common.bridge.world.scores;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+
 import net.minecraft.server.level.ServerPlayer;
 
 public interface PlayerTeamBridge {

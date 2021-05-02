@@ -36,8 +36,9 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.MissingImplementationException;
 
-import java.util.Arrays;
 import net.minecraft.world.WorldlyContainer;
+
+import java.util.Arrays;
 
 public interface DefaultSingleBlockCarrier extends SingleBlockCarrier {
 

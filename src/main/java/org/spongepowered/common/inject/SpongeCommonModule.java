@@ -27,6 +27,7 @@ package org.spongepowered.common.inject;
 import com.google.inject.PrivateModule;
 import com.google.inject.binder.AnnotatedBindingBuilder;
 import org.apache.logging.log4j.Logger;
+
 import org.spongepowered.api.Game;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;

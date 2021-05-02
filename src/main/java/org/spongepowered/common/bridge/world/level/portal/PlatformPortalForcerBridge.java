@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.level.portal;
 
-import java.util.function.Function;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.portal.PortalForcer;
+
+import java.util.function.Function;
 
 /**
  * Bridge methods designed as hooks for various methods called on a {@link PortalForcer}.

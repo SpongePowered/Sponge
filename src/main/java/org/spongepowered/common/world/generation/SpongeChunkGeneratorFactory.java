@@ -32,13 +32,14 @@ import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.server.BootstrapProperties;
 
-import java.util.Objects;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.levelgen.FlatLevelSource;
 import net.minecraft.world.level.levelgen.NoiseBasedChunkGenerator;
 import net.minecraft.world.level.levelgen.NoiseGeneratorSettings;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.levelgen.flat.FlatLevelGeneratorSettings;
+
+import java.util.Objects;
 
 @SuppressWarnings("unchecked")
 public final class SpongeChunkGeneratorFactory implements ChunkGenerator.Factory {

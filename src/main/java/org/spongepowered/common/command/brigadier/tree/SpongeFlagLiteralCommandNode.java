@@ -24,17 +24,18 @@
  */
 package org.spongepowered.common.command.brigadier.tree;
 
+import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+
 import com.mojang.brigadier.Command;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.context.CommandContextBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.tree.CommandNode;
-import org.spongepowered.api.command.parameter.managed.Flag;
-import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+import net.minecraft.commands.CommandSourceStack;
 
 import java.util.Objects;
-import net.minecraft.commands.CommandSourceStack;
 
 public final class SpongeFlagLiteralCommandNode extends SpongeLiteralCommandNode {
 

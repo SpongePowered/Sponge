@@ -33,8 +33,9 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.network.protocol.game.ClientboundResourcePackPacketBridge;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 
-import java.net.URISyntaxException;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
+
+import java.net.URISyntaxException;
 
 @Mixin(ClientboundResourcePackPacket.class)
 public abstract class ClientboundResourcePackPacketMixin implements ClientboundResourcePackPacketBridge {

@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.animal.horse.Llama;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.animal.horse.LlamaAccessor;
 import org.spongepowered.common.bridge.world.entity.animal.horse.LlamaBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.entity.animal.horse.Llama;
 
 public final class LlamaData {
 

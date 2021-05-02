@@ -26,10 +26,12 @@ package org.spongepowered.common.mixin.core.authlib.properties;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.base.Objects;
-import com.mojang.authlib.properties.Property;
+
 import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+
+import com.mojang.authlib.properties.Property;
 
 import javax.annotation.Nullable;
 

@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.query.type;
 
 import org.spongepowered.api.item.inventory.ItemStack;
+
 import java.util.function.Predicate;
 
 public final class ItemStackCustomQuery extends ItemStackQuery<Predicate<ItemStack>> {

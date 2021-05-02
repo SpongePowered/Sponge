@@ -36,12 +36,13 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.DefaultSingleBlockCarrier;
 
+import net.minecraft.world.CompoundContainer;
+import net.minecraft.world.Container;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.world.CompoundContainer;
-import net.minecraft.world.Container;
 
 @Mixin(CompoundContainer.class)
 public abstract class CompoundContainerMixin_Carrier_Inventory_API implements MultiBlockCarrier {

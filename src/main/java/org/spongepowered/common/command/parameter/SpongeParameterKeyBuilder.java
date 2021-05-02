@@ -26,6 +26,7 @@ package org.spongepowered.common.command.parameter;
 
 import io.leangen.geantyref.TypeToken;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.command.parameter.Parameter;
 
 public final class SpongeParameterKeyBuilder implements Parameter.Key.Builder {

@@ -27,9 +27,7 @@ package org.spongepowered.common.mixin.api.mcp.server.network;
 import static java.util.Objects.requireNonNull;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.Connection;
-import net.minecraft.network.chat.TranslatableComponent;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Final;
@@ -38,6 +36,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.profile.SpongeGameProfile;
+
+import net.minecraft.network.Connection;
+import net.minecraft.network.chat.TranslatableComponent;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
 import java.net.InetSocketAddress;
 

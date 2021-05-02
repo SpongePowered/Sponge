@@ -25,10 +25,12 @@
 package org.spongepowered.common.scoreboard;
 
 import net.kyori.adventure.text.format.NamedTextColor;
-import net.minecraft.ChatFormatting;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.common.adventure.SpongeAdventure;
+
+import net.minecraft.ChatFormatting;
 
 import java.util.Optional;
 import java.util.function.Function;

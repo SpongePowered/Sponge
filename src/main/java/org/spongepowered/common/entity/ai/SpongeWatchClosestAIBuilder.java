@@ -25,10 +25,12 @@
 package org.spongepowered.common.entity.ai;
 
 import com.google.common.base.Preconditions;
-import net.minecraft.world.entity.Mob;
+
 import org.spongepowered.api.entity.ai.goal.builtin.LookAtGoal;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
+
+import net.minecraft.world.entity.Mob;
 
 @SuppressWarnings({"unchecked", "rawtypes"})
 public final class SpongeWatchClosestAIBuilder implements LookAtGoal.Builder {

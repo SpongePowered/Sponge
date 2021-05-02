@@ -24,9 +24,10 @@
  */
 package org.spongepowered.common.hooks;
 
+import org.spongepowered.api.Sponge;
+
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import org.spongepowered.api.Sponge;
 
 public interface GeneralHooks {
 

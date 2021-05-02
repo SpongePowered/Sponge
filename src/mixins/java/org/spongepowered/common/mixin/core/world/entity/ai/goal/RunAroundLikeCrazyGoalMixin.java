@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.ai.goal;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
-import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.player.Player;
 import org.spongepowered.api.entity.living.animal.horse.HorseLike;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -40,6 +36,11 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.ai.goal.RunAroundLikeCrazyGoal;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.entity.player.Player;
 
 @Mixin(RunAroundLikeCrazyGoal.class)
 public abstract class RunAroundLikeCrazyGoalMixin extends GoalMixin {

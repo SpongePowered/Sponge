@@ -26,6 +26,7 @@ package org.spongepowered.common.command.parameter.multi;
 
 import com.google.common.base.Preconditions;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.command.parameter.Parameter;
 
 import java.util.ArrayList;

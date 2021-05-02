@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.impl.common.entity.player;
 
-import net.minecraft.core.NonNullList;
-import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,6 +35,9 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensCollection;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
+
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemStack;
 
 @Mixin(SpongeUserInventory.class)
 public abstract class SpongeUserInventoryMixin_Lens_Bridge implements LensGeneratorBridge {

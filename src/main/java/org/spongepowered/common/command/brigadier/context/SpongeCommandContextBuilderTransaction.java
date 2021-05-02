@@ -24,22 +24,24 @@
  */
 package org.spongepowered.common.command.brigadier.context;
 
-import com.mojang.brigadier.Command;
-import com.mojang.brigadier.context.CommandContextBuilder;
-import com.mojang.brigadier.context.ParsedArgument;
-import com.mojang.brigadier.context.StringRange;
-import com.mojang.brigadier.tree.CommandNode;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
 
+import com.mojang.brigadier.Command;
+import com.mojang.brigadier.context.CommandContextBuilder;
+import com.mojang.brigadier.context.ParsedArgument;
+import com.mojang.brigadier.context.StringRange;
+import com.mojang.brigadier.tree.CommandNode;
+import net.minecraft.commands.CommandSourceStack;
+
 import java.lang.ref.WeakReference;
 import java.util.LinkedList;
-import net.minecraft.commands.CommandSourceStack;
 
 public final class SpongeCommandContextBuilderTransaction implements CommandContext.Builder.Transaction {
 

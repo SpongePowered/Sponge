@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.world.border;
 
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
+
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
 import net.minecraft.world.level.border.BorderChangeListener;
 import net.minecraft.world.level.border.WorldBorder;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.common.accessor.world.level.border.WorldBorderAccessor;
 
 public final class PlayerOwnBorderListener implements BorderChangeListener {
 

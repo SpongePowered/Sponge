@@ -35,7 +35,6 @@ import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.CompoundContainer;
 import net.minecraft.world.Container;
 import net.minecraft.world.SimpleContainer;
@@ -50,6 +49,8 @@ import net.minecraft.world.inventory.ResultContainer;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.level.block.entity.BaseContainerBlockEntity;
 import net.minecraft.world.level.block.entity.CampfireBlockEntity;
+
+import javax.annotation.Nullable;
 
 /**
  * Mixin into all known vanilla {@link Container} and {@link AbstractContainerMenu}

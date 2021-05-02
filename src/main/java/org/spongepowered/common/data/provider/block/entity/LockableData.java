@@ -24,11 +24,12 @@
  */
 package org.spongepowered.common.data.provider.block.entity;
 
-import net.minecraft.world.LockCode;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.LockCodeAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.BaseContainerBlockEntityAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.LockCode;
 
 public final class LockableData {
 

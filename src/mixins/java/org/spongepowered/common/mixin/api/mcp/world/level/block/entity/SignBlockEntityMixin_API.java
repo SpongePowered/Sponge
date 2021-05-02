@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
 import com.google.common.collect.Lists;
+
 import org.spongepowered.api.block.entity.Sign;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
@@ -33,10 +34,11 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
-import java.util.Set;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.level.block.entity.SignBlockEntity;
+
+import java.util.List;
+import java.util.Set;
 
 @Mixin(SignBlockEntity.class)
 public abstract class SignBlockEntityMixin_API extends BlockEntityMixin_API implements Sign {

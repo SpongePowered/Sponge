@@ -25,6 +25,7 @@
 package org.spongepowered.common.util.raytrace;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.math.vector.Vector3d;

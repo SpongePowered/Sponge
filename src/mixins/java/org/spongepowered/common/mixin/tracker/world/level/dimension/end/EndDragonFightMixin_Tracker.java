@@ -34,8 +34,6 @@ import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.world.dragon.DragonPhase;
 import org.spongepowered.common.event.tracking.phase.world.dragon.SpawnDragonContext;
 
-import java.util.List;
-import java.util.Random;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
@@ -45,6 +43,9 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.end.DragonRespawnAnimation;
 import net.minecraft.world.level.dimension.end.EndDragonFight;
 import net.minecraft.world.level.levelgen.feature.ConfiguredFeature;
+
+import java.util.List;
+import java.util.Random;
 
 @Mixin(EndDragonFight.class)
 public abstract class EndDragonFightMixin_Tracker {

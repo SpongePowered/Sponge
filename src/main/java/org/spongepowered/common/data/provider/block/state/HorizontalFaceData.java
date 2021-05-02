@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.block.state.properties.AttachFace;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.AttachmentSurface;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import net.minecraft.world.level.block.FaceAttachedHorizontalDirectionalBlock;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.AttachFace;
 
 public final class HorizontalFaceData {
 

@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.mixin.inventory.api.world.inventory;
 
-import net.minecraft.world.Container;
-import net.minecraft.world.inventory.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
+
+import net.minecraft.world.Container;
+import net.minecraft.world.inventory.Slot;
 
 @Mixin(Slot.class)
 public abstract class SlotMixin_Inventory_API implements org.spongepowered.api.item.inventory.Slot, DefaultImplementedAdapterInventory.WithClear {

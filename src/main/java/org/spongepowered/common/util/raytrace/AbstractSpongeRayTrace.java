@@ -26,6 +26,7 @@ package org.spongepowered.common.util.raytrace;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
@@ -41,12 +42,13 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import net.minecraft.world.level.Level;
+import net.minecraft.world.phys.AABB;
+
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.Predicate;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.phys.AABB;
 
 public abstract class AbstractSpongeRayTrace<T extends Locatable> implements RayTrace<@NonNull T> {
 

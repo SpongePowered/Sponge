@@ -24,10 +24,11 @@
  */
 package org.spongepowered.common.accessor.world.entity.decoration;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.decoration.ItemFrame;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
+
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ItemFrame;
 
 @Mixin(ItemFrame.class)
 public interface ItemFrameAccessor {

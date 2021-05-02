@@ -24,11 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.storage;
 
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.GameRules;
-import net.minecraft.world.level.storage.LevelData;
 import org.spongepowered.api.util.MinecraftDayTime;
-import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
@@ -40,6 +36,10 @@ import org.spongepowered.common.accessor.world.level.GameRulesAccessor;
 import org.spongepowered.common.accessor.world.level.GameRules_ValueAccessor;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import org.spongepowered.math.vector.Vector3i;
+
+import net.minecraft.world.Difficulty;
+import net.minecraft.world.level.GameRules;
+import net.minecraft.world.level.storage.LevelData;
 
 import java.util.HashMap;
 import java.util.Map;
