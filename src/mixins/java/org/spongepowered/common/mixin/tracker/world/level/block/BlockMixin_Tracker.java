@@ -48,6 +48,7 @@ import org.spongepowered.common.util.ReflectionUtil;
 public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
 
     private final boolean tracker$hasNeighborLogicOverridden = ReflectionUtil.isNeighborChangedDeclared(this.getClass());
+    private final boolean tracker$hasEntityInsideLogicOverridden = ReflectionUtil.isEntityInsideDeclared(this.getClass());
 
     @Nullable private static EffectTransactor tracker$effectTransactorForDrops = null;
 
@@ -55,6 +56,11 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
     @Override
     public boolean bridge$overridesNeighborNotificationLogic() {
         return this.tracker$hasNeighborLogicOverridden;
+    }
+
+    @Override
+    public boolean bridge$hasEntityInsideLogic() {
+        return this.tracker$hasEntityInsideLogicOverridden;
     }
 
     /**
