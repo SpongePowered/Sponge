@@ -91,8 +91,8 @@ public final class VanillaPluginManager implements SpongePluginManager {
     public void addPlugin(final PluginContainer plugin) {
         Objects.requireNonNull(plugin);
 
-        this.plugins.put(plugin.getMetadata().getId(), plugin);
-        this.instancesToPlugins.put(plugin.getInstance(), plugin);
+        this.plugins.put(plugin.metadata().id(), plugin);
+        this.instancesToPlugins.put(plugin.instance(), plugin);
         this.sortedPlugins.add(plugin);
     }
 
@@ -100,7 +100,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
     public void addDummyPlugin(final DummyPluginContainer plugin) {
         Objects.requireNonNull(plugin);
 
-        this.plugins.put(plugin.getMetadata().getId(), plugin);
+        this.plugins.put(plugin.metadata().id(), plugin);
         this.sortedPlugins.add(plugin);
     }
 
@@ -108,7 +108,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
         for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> languageCandidates : engine.getCandidates().entrySet()) {
             final PluginLanguageService<PluginResource> languageService = languageCandidates.getKey();
             final Collection<PluginCandidate<PluginResource>> candidates = languageCandidates.getValue();
-            final String loaderClass = languageService.getPluginLoader();
+            final String loaderClass = languageService.pluginLoader();
             final PluginLoader<PluginResource, PluginContainer> pluginLoader;
             try {
                 pluginLoader =  (PluginLoader<PluginResource, PluginContainer>) Class.forName(loaderClass).getConstructor().newInstance();
@@ -116,7 +116,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
                 throw new RuntimeException(e);
             }
             for (final PluginCandidate<PluginResource> candidate : candidates) {
-                PluginContainer plugin = this.plugins.get(candidate.getMetadata().getId());
+                PluginContainer plugin = this.plugins.get(candidate.metadata().id());
                 if (plugin != null) {
                     if (plugin instanceof DummyPluginContainer) {
                         continue;
@@ -127,8 +127,8 @@ public final class VanillaPluginManager implements SpongePluginManager {
 
                 plugin = pluginLoader.createPluginContainer(candidate, engine.getPluginEnvironment()).orElse(null);
                 if (plugin == null) {
-                    engine.getPluginEnvironment().getLogger().debug("Language service '{}' returned a null plugin container for '{}'.",
-                            languageService.getName(), candidate.getMetadata().getId());
+                    engine.getPluginEnvironment().logger().debug("Language service '{}' returned a null plugin container for '{}'.",
+                            languageService.name(), candidate.metadata().id());
                     continue;
                 }
 
@@ -141,7 +141,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
             }
         }
 
-        engine.getPluginEnvironment().getLogger().info("Loaded plugin(s): {}",
-                this.sortedPlugins.stream().map(p -> p.getMetadata().getId()).collect(Collectors.toList()));
+        engine.getPluginEnvironment().logger().info("Loaded plugin(s): {}",
+                this.sortedPlugins.stream().map(p -> p.metadata().id()).collect(Collectors.toList()));
     }
 }

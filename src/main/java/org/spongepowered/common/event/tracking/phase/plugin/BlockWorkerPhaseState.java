@@ -45,8 +45,7 @@ public class BlockWorkerPhaseState extends BasicPluginState {
         return true;
     }
 
-    @Nullable
-    public PhaseContext<@NonNull ?> switchIfNecessary(final PhaseTracker server) {
+    public @Nullable PhaseContext<@NonNull ?> switchIfNecessary(final PhaseTracker server) {
 
         final PhaseTracker instance = PhaseTracker.getInstance();
         if (!server.onSidedThread()) {

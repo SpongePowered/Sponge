@@ -54,7 +54,7 @@ public final class SpongeStoneCutterRecipeBuilder extends AbstractResourceKeyedB
     private ItemStack result;
     private Ingredient ingredient;
     private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
-    @Nullable private String group;
+    private @Nullable String group;
 
     @Override
     public ResultStep ingredient(ItemType ingredient) {

@@ -37,17 +37,17 @@ import java.util.function.Supplier;
 
 public final class SpongeTextParameterBuilder implements VariableValueParameters.TextBuilder {
 
-    @Nullable private ComponentSerializer<Component, ? extends Component, String> textSerializer;
+    private @Nullable ComponentSerializer<Component, ? extends Component, String> textSerializer;
     private boolean consumeAllArguments;
 
     @Override
-    public VariableValueParameters.@NonNull TextBuilder serializer(@NonNull final ComponentSerializer<Component, ? extends Component, String> serializer) {
+    public VariableValueParameters.@NonNull TextBuilder serializer(final @NonNull ComponentSerializer<Component, ? extends Component, String> serializer) {
         Preconditions.checkNotNull(serializer, "The serializer cannot be null");
         return this.serializerSupplier(() -> serializer);
     }
 
     @Override
-    public VariableValueParameters.@NonNull TextBuilder serializerSupplier(@NonNull final Supplier<ComponentSerializer<Component, ? extends Component, String>> serializerSupplier) {
+    public VariableValueParameters.@NonNull TextBuilder serializerSupplier(final @NonNull Supplier<ComponentSerializer<Component, ? extends Component, String>> serializerSupplier) {
         this.textSerializer = serializerSupplier.get();
         return this;
     }

@@ -26,6 +26,7 @@ package org.spongepowered.common.scheduler;
 
 import co.aikar.timings.Timing;
 import com.google.common.collect.Sets;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
@@ -35,7 +36,6 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.Objects;
@@ -135,13 +135,13 @@ public abstract class SpongeScheduler implements Scheduler {
     @Override
     public Set<ScheduledTask> tasks(final PluginContainer plugin) {
         Objects.requireNonNull(plugin, "plugin");
-        final String testOwnerId = plugin.getMetadata().getId();
+        final String testOwnerId = plugin.metadata().id();
 
         final Set<ScheduledTask> allTasks = this.tasks();
         final Iterator<ScheduledTask> it = allTasks.iterator();
 
         while (it.hasNext()) {
-            final String taskOwnerId = it.next().owner().getMetadata().getId();
+            final String taskOwnerId = it.next().owner().metadata().id();
             if (!testOwnerId.equals(taskOwnerId)) {
                 it.remove();
             }
@@ -258,7 +258,7 @@ public abstract class SpongeScheduler implements Scheduler {
     private void startTask(final SpongeScheduledTask task) {
         this.executeTaskRunnable(task, () -> {
             task.setState(SpongeScheduledTask.ScheduledTaskState.EXECUTING);
-            try (@Nullable final PhaseContext<?> context = this.createContext(task, task.owner());
+            try (final @Nullable PhaseContext<?> context = this.createContext(task, task.owner());
                     final Timing timings = task.task.getTimingsHandler()) {
                 timings.startTimingIfSync();
                 if (context != null) {
@@ -269,7 +269,7 @@ public abstract class SpongeScheduler implements Scheduler {
                     task.task.consumer().accept(task);
                 } catch (final Throwable t) {
                     SpongeCommon.getLogger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
-                            task.name(), task.owner().getMetadata().getId(), t);
+                            task.name(), task.owner().metadata().id(), t);
                 }
             } finally {
                 if (!task.isCancelled()) {
@@ -281,8 +281,7 @@ public abstract class SpongeScheduler implements Scheduler {
         });
     }
 
-    @Nullable
-    protected PhaseContext<?> createContext(final SpongeScheduledTask task, final PluginContainer container) {
+    protected @Nullable PhaseContext<?> createContext(final SpongeScheduledTask task, final PluginContainer container) {
         return null;
     }
 

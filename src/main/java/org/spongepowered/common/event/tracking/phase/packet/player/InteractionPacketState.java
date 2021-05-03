@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
@@ -43,7 +44,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
@@ -114,7 +114,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
             final boolean hasBlocks = !phaseContext.getTransactor().isEmpty();
             final List<SpongeBlockSnapshot> capturedBlcoks = phaseContext.getCapturedOriginalBlocksChanged();
-            final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.isEmpty()? null : capturedBlcoks.get(0) : null;
+            final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.isEmpty() ? null : capturedBlcoks.get(0) : null;
             if (hasBlocks) {
                 if (!TrackingUtil.processBlockCaptures(phaseContext)) {
                     return;

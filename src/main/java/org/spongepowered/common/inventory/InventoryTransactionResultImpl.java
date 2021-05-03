@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Lists;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
@@ -39,7 +40,6 @@ import java.util.Arrays;
 import java.util.Collections;
 import java.util.List;
 
-import javax.annotation.Nullable;
 
 public class InventoryTransactionResultImpl implements InventoryTransactionResult, InventoryTransactionResult.Poll {
 
@@ -115,7 +115,7 @@ public class InventoryTransactionResultImpl implements InventoryTransactionResul
 
     public static class Builder implements InventoryTransactionResult.Builder, InventoryTransactionResult.Builder.PollBuilder {
 
-        @Nullable InventoryTransactionResult.Type resultType;
+        InventoryTransactionResult.@Nullable Type resultType;
         @Nullable List<ItemStackSnapshot> rejected;
         @Nullable List<SlotTransaction> slotTransactions;
         @Nullable List<ItemStackSnapshot> polled;

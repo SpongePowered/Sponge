@@ -88,27 +88,27 @@ public final class LivingData {
                             final Vector3d bodyRotation = v.get(BodyParts.CHEST.get());
 
                             if (bodyRotation != null) {
-                                h.setYRot((float) bodyRotation.getY());
-                                h.setXRot((float) bodyRotation.getX());
+                                h.setYRot((float) bodyRotation.y());
+                                h.setXRot((float) bodyRotation.x());
                             }
                             if (headRotation != null) {
-                                h.yHeadRot = (float) headRotation.getY();
-                                h.setXRot((float) headRotation.getX());
+                                h.yHeadRot = (float) headRotation.y();
+                                h.setXRot((float) headRotation.x());
                             }
                         })
                     .create(Keys.CHEST_ROTATION)
                         .get(h -> new Vector3d(h.getXRot(), h.getYRot(), 0))
                         .set((h, v) -> {
-                            final float headYaw = (float) v.getY();
-                            final float pitch = (float) v.getX();
+                            final float headYaw = (float) v.y();
+                            final float pitch = (float) v.x();
                             h.setYHeadRot(headYaw);
                             h.setXRot(pitch);
                         })
                     .create(Keys.HEAD_ROTATION)
                         .get(h -> new Vector3d(h.getXRot(), h.getYHeadRot(), 0))
                         .set((h, v) -> {
-                            final float yaw = (float) v.getY();
-                            final float pitch = (float) v.getX();
+                            final float yaw = (float) v.y();
+                            final float pitch = (float) v.x();
                             h.setYRot(yaw);
                             h.setXRot(pitch);
                         })

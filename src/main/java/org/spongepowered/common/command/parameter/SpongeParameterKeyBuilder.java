@@ -31,12 +31,12 @@ import org.spongepowered.api.command.parameter.Parameter;
 public final class SpongeParameterKeyBuilder implements Parameter.Key.Builder {
 
     @Override
-    public <T> Parameter.@NonNull Key<T> build(@NonNull final String key, @NonNull final TypeToken<T> typeToken) {
+    public <T> Parameter.@NonNull Key<T> build(final @NonNull String key, final @NonNull TypeToken<T> typeToken) {
         return new SpongeParameterKey<>(key, typeToken.getType());
     }
 
     @Override
-    public <T> Parameter.@NonNull Key<T> build(@NonNull final String key, @NonNull final Class<T> type) {
+    public <T> Parameter.@NonNull Key<T> build(final @NonNull String key, final @NonNull Class<T> type) {
         return new SpongeParameterKey<>(key, type);
     }
 

@@ -22,56 +22,58 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.api.mcp.world;
+package org.spongepowered.common.mixin.api.mcp.world.level;
 
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.NextTickListEntry;
-import net.minecraft.world.World;
-import org.spongepowered.api.world.ServerLocation;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.TickPriority;
+import org.spongepowered.api.scheduler.ScheduledUpdate;
+import org.spongepowered.api.scheduler.TaskPriority;
+import org.spongepowered.api.world.Location;
+import org.spongepowered.api.world.World;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.NextTickListEntryBridge;
+import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
 
-@Mixin(NextTickListEntry.class)
-public abstract class NextTickListEntryMixin_API implements ScheduledBlockUpdate {
+import java.time.Duration;
 
-    @Shadow @Final public BlockPos position;
-    @Shadow public int priority;
-    @Shadow public long scheduledTime;
-
-    private ServerLocation<org.spongepowered.api.world.World> location;
-    private World world;
+@Mixin(TickNextTickData.class)
+public class TickNextTickDataMixin_API<T> implements ScheduledUpdate<T> {
+    @Shadow @Final private T type;
+    @Shadow @Final public TickPriority priority;
 
     @Override
-    public ServerLocation<org.spongepowered.api.world.World> getLocation() {
-        return ((NextTickListEntryBridge) this).bridge$getLocation();
+    public T target() {
+        return this.type;
     }
 
     @Override
-    public int getTicks() {
-        if (this.world == null) {
-            return Integer.MAX_VALUE;
-        }
-        return (int) (this.scheduledTime - this.world.getWorldInfo().getGameTime());
+    public Duration delay() {
+        return ((TickNextTickDataBridge) this).bridge$getScheduledDelayWhenCreated();
     }
 
     @Override
-    public void setTicks(int ticks) {
-        if (this.world == null) {
-            return;
-        }
-        this.scheduledTime = this.world.getWorldInfo().getGameTime() + ticks;
+    public TaskPriority priority() {
+        return (TaskPriority) (Object) this.priority;
     }
 
     @Override
-    public int getPriority() {
-        return this.priority;
+    public State state() {
+        return ((TickNextTickDataBridge) this).bridge$internalState();
     }
 
     @Override
-    public void setPriority(int priority) {
-        this.priority = priority;
+    public boolean cancel() {
+        return ((TickNextTickDataBridge) this).bridge$cancelForcibly();
     }
 
+    @Override
+    public World<?, ?> world() {
+        return ((TickNextTickDataBridge) this).bridge$getLocation().world();
+    }
+
+    @Override
+    public Location<?, ?> location() {
+        return ((TickNextTickDataBridge) this).bridge$getLocation();
+    }
 }

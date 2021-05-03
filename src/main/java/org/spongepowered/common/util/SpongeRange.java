@@ -30,10 +30,10 @@ import org.spongepowered.api.util.Range;
 
 public final class SpongeRange<T extends Number> implements Range<T> {
 
-    @Nullable private final T min;
-    @Nullable private final T max;
+    private final @Nullable T min;
+    private final @Nullable T max;
 
-    public SpongeRange(@Nullable final T min, @Nullable final T max) {
+    public SpongeRange(final @Nullable T min, final @Nullable T max) {
         if (min == null && max == null) {
             throw new IllegalArgumentException("At least one of min or max must not be null.");
         }
@@ -42,21 +42,19 @@ public final class SpongeRange<T extends Number> implements Range<T> {
     }
 
     @Override
-    @Nullable
-    public T min() {
+    public @Nullable T min() {
         return this.min;
     }
 
     @Override
-    @Nullable
-    public T max() {
+    public @Nullable T max() {
         return this.max;
     }
 
     public final static class FactoryImpl implements Range.Factory {
 
         @Override
-        public Range<Float> floatRange(@Nullable Float min, @Nullable Float max) {
+        public @NonNull Range<@NonNull Float> floatRange(final @Nullable Float min, final @Nullable Float max) {
             if (min != null && max != null && max < min) {
                 // nope
                 throw new IllegalArgumentException("min must be smaller or equal to max if both are defined");
@@ -65,8 +63,7 @@ public final class SpongeRange<T extends Number> implements Range<T> {
         }
 
         @Override
-        @NonNull
-        public Range<@NonNull Integer> intRange(@Nullable final Integer min, @Nullable final Integer max) {
+        public @NonNull Range<@NonNull Integer> intRange(final @Nullable Integer min, final @Nullable Integer max) {
             if (min != null && max != null && max < min) {
                 // nope
                 throw new IllegalArgumentException("min must be smaller or equal to max if both are defined");
@@ -75,8 +72,7 @@ public final class SpongeRange<T extends Number> implements Range<T> {
         }
 
         @Override
-        @NonNull
-        public Range<@NonNull Double> doubleRange(@Nullable final Double min, @Nullable final Double max) {
+        public @NonNull Range<@NonNull Double> doubleRange(final @Nullable Double min, final @Nullable Double max) {
             if (min != null && max != null && max < min) {
                 // nope
                 throw new IllegalArgumentException("min must be smaller or equal to max if both are defined");

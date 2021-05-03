@@ -62,7 +62,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     private final Function<CommandCause, Optional<Component>> shortDescription;
     private final Function<CommandCause, Optional<Component>> extendedDescription;
     private final Predicate<CommandCause> executionRequirements;
-    @Nullable private final CommandExecutor executor;
+    private final @Nullable CommandExecutor executor;
     private final boolean isTerminal;
     private @Nullable SpongeCommandManager commandManager;
     private @Nullable SpongeCommandDispatcher cachedDispatcher;
@@ -73,7 +73,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
             final Function<CommandCause, Optional<Component>> shortDescription,
             final Function<CommandCause, Optional<Component>> extendedDescription,
             final Predicate<CommandCause> executionRequirements,
-            @Nullable final CommandExecutor executor,
+            final @Nullable CommandExecutor executor,
             final List<Flag> flags,
             final boolean isTerminal) {
         this.subcommands = subcommands;
@@ -92,8 +92,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     }
 
     @Override
-    @NonNull
-    public List<String> suggestions(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
+    public @NonNull List<String> suggestions(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
         final SpongeCommandDispatcher dispatcher = this.getCachedDispatcher();
         final String input = arguments.remaining();
         final ParseResults<CommandSourceStack> parseResults = dispatcher.parse((StringReader) arguments, (CommandSourceStack) cause);
@@ -102,19 +101,17 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     }
 
     @Override
-    public boolean canExecute(@NonNull final CommandCause cause) {
+    public boolean canExecute(final @NonNull CommandCause cause) {
         return this.executionRequirements().test(cause);
     }
 
     @Override
-    @NonNull
-    public Optional<Component> shortDescription(@NonNull final CommandCause cause) {
+    public @NonNull Optional<Component> shortDescription(final @NonNull CommandCause cause) {
         return this.shortDescription.apply(cause);
     }
 
     @Override
-    @NonNull
-    public Optional<Component> extendedDescription(@NonNull final CommandCause cause) {
+    public @NonNull Optional<Component> extendedDescription(final @NonNull CommandCause cause) {
         return this.extendedDescription.apply(cause);
     }
 
@@ -132,8 +129,7 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     }
 
     @Override
-    @NonNull
-    public List<Parameter> parameters() {
+    public @NonNull List<Parameter> parameters() {
         return new ArrayList<>(this.parameters);
     }
 
@@ -148,14 +144,12 @@ public final class SpongeParameterizedCommand implements Command.Parameterized {
     }
 
     @Override
-    @NonNull
-    public Predicate<CommandCause> executionRequirements() {
+    public @NonNull Predicate<CommandCause> executionRequirements() {
         return this.executionRequirements;
     }
 
     @Override
-    @NonNull
-    public CommandContext parseArguments(@NonNull final CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
+    public @NonNull CommandContext parseArguments(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) {
         final ParseResults<CommandSourceStack> results = this.getCachedDispatcher().parse((SpongeStringReader) arguments, (CommandSourceStack) cause);
         return (CommandContext) results.getContext().build(arguments.input());
     }

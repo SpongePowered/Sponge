@@ -27,6 +27,12 @@ package org.spongepowered.common.util;
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockBehaviour;
+import net.minecraft.world.level.block.state.BlockState;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.spongepowered.common.SpongeCommon;
@@ -38,10 +44,6 @@ import java.lang.reflect.Modifier;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 
 /**
  * A handy utility for doing some neat things with generics and reflection.
@@ -64,6 +66,12 @@ public final class ReflectionUtil {
         BlockPos.class,
         boolean.class
     };
+    private static final Class<?>[] ENTITY_INSIDE_METHOD_ARGS = {
+        BlockState.class,
+        Level.class,
+        BlockPos.class,
+        Entity.class
+    };
 
     public static boolean isNeighborChangedDeclared(final Class<?> targetClass) {
         return ReflectionUtil.doesMethodExist(
@@ -71,6 +79,15 @@ public final class ReflectionUtil {
             Block.class,
             "neighborChanged",
             ReflectionUtil.NEIGHBOR_CHANGED_METHOD_ARGS
+        );
+    }
+
+    public static boolean isEntityInsideDeclared(final Class<?> targetClass) {
+        return ReflectionUtil.doesMethodExist(
+            targetClass,
+            BlockBehaviour.class,
+            "entityInside",
+            ReflectionUtil.ENTITY_INSIDE_METHOD_ARGS
         );
     }
 

@@ -56,9 +56,8 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
         this.registryFunction = registryFunction;
     }
 
-    @NonNull
     @Override
-    public Optional<? extends T> parseValue(final Parameter.@NonNull Key<? super T> parameterKey,
+    public @NonNull Optional<? extends T> parseValue(final Parameter.@NonNull Key<? super T> parameterKey,
                                           final ArgumentReader.@NonNull Mutable reader,
                                           final CommandContext.@NonNull Builder context) throws ArgumentParseException {
         final Registry<? extends T> registry = this.registryFunction.apply(context);
@@ -94,9 +93,8 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
         }
     }
 
-    @NonNull
     @Override
-    public List<String> complete(@NonNull final CommandContext context, @NonNull final String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         final Registry<? extends T> registry = this.registryFunction.apply(context);
         if (registry == null) {
             return Collections.emptyList();

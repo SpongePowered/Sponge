@@ -68,8 +68,8 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
             final Command<CommandSourceStack> command,
             final List<ParsedCommandNode<CommandSourceStack>> nodes,
             final StringRange range,
-            @Nullable final CommandContext<CommandSourceStack> child,
-            @Nullable final RedirectModifier<CommandSourceStack> modifier,
+            final @Nullable CommandContext<CommandSourceStack> child,
+            final @Nullable RedirectModifier<CommandSourceStack> modifier,
             final boolean forks,
             final org.spongepowered.api.command.Command.@Nullable Parameterized currentTargetCommand) {
         super(source,
@@ -89,34 +89,32 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
     }
 
     @Override
-    @NonNull
-    public Optional<org.spongepowered.api.command.Command.Parameterized> executedCommand() {
+    public @NonNull Optional<org.spongepowered.api.command.Command.Parameterized> executedCommand() {
         return Optional.ofNullable(this.targetCommand);
     }
 
     @Override
-    @NonNull
-    public CommandCause cause() {
+    public @NonNull CommandCause cause() {
         return (CommandCause) this.getSource();
     }
 
     @Override
-    public boolean hasFlag(@NonNull final String flagAlias) {
+    public boolean hasFlag(final @NonNull String flagAlias) {
         return this.flagMap.containsKey(flagAlias);
     }
 
     @Override
-    public boolean hasFlag(@NonNull final Flag flag) {
+    public boolean hasFlag(final @NonNull Flag flag) {
         return this.flagMap.containsKey(flag.unprefixedAliases().iterator().next());
     }
 
     @Override
-    public int flagInvocationCount(@NonNull final String flagKey) {
+    public int flagInvocationCount(final @NonNull String flagKey) {
         return this.flagMap.getOrDefault(flagKey, 0);
     }
 
     @Override
-    public int flagInvocationCount(@NonNull final Flag flag) {
+    public int flagInvocationCount(final @NonNull Flag flag) {
         return this.flagMap.getOrDefault(flag.unprefixedAliases().iterator().next(), 0);
     }
 
@@ -130,14 +128,12 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
     }
 
     @Override
-    @NonNull
-    public <T> Optional<T> one(final Parameter.@NonNull Key<T> key) {
+    public <T> @NonNull Optional<T> one(final Parameter.@NonNull Key<T> key) {
         return Optional.ofNullable(this.getValue(key));
     }
 
     @Override
-    @NonNull
-    public <T> T requireOne(final Parameter.@NonNull Key<T> key) throws NoSuchElementException {
+    public <T> @NonNull T requireOne(final Parameter.@NonNull Key<T> key) throws NoSuchElementException {
         final T value = this.getValue(key);
         if (value == null) {
             throw new NoSuchElementException("No value exists for key " + key.key());
@@ -147,9 +143,8 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
     }
 
     @Override
-    @NonNull
     @SuppressWarnings("unchecked")
-    public <T> Collection<? extends T> all(final Parameter.@NonNull Key<T> key) {
+    public <T> @NonNull Collection<? extends T> all(final Parameter.@NonNull Key<T> key) {
         final Collection<? extends T> values = (Collection<? extends T>) this.argumentMap.get(key);
         if (values == null) {
             return ImmutableList.of();
@@ -179,12 +174,12 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
     }
 
     @Override
-    public void sendMessage(@NonNull final Identified identity, @NonNull final Component message) {
+    public void sendMessage(final @NonNull Identified identity, final @NonNull Component message) {
         this.cause().sendMessage(identity, message);
     }
 
     @Override
-    public void sendMessage(@NonNull final Identity identity, @NonNull final Component message) {
+    public void sendMessage(final @NonNull Identity identity, final @NonNull Component message) {
         this.cause().sendMessage(identity, message);
     }
 
@@ -208,9 +203,8 @@ public final class SpongeCommandContext extends CommandContext<CommandSourceStac
                 this.targetCommand);
     }
 
-    @Nullable
     @SuppressWarnings("unchecked")
-    private <T> T getValue(final Parameter.Key<? super T> key) {
+    private <T> @Nullable T getValue(final Parameter.Key<? super T> key) {
         final Collection<?> values = this.argumentMap.get(key);
         if (values == null || values.isEmpty()) {
             return null;

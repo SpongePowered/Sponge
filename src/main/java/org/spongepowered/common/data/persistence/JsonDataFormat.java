@@ -30,6 +30,7 @@ import com.google.gson.Gson;
 import com.google.gson.stream.JsonReader;
 import com.google.gson.stream.JsonToken;
 import com.google.gson.stream.JsonWriter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataSerializable;
@@ -55,7 +56,6 @@ import java.util.Collection;
 import java.util.List;
 import java.util.Map;
 
-import javax.annotation.Nullable;
 
 public final class JsonDataFormat implements StringDataFormat {
 
@@ -123,8 +123,7 @@ public final class JsonDataFormat implements StringDataFormat {
         reader.endObject();
     }
 
-    @Nullable
-    private static Object read(JsonReader reader) throws IOException {
+    private static @org.checkerframework.checker.nullness.qual.Nullable Object read(JsonReader reader) throws IOException {
         JsonToken token = reader.peek();
         switch (token) {
             case BEGIN_OBJECT:

@@ -49,35 +49,35 @@ public final class DummyPluginContainer implements PluginContainer {
     }
 
     @Override
-    public PluginMetadata getMetadata() {
+    public PluginMetadata metadata() {
         return this.metadata;
     }
 
     @Override
-    public Path getPath() {
+    public Path path() {
         return this.path;
     }
 
     @Override
-    public Logger getLogger() {
+    public Logger logger() {
         return this.logger;
     }
 
     @Override
-    public Object getInstance() {
+    public Object instance() {
         return this.instance;
     }
 
     @Override
     public Optional<URL> locateResource(final URL relative) {
-        final ClassLoader classLoader = this.getInstance().getClass().getClassLoader();
+        final ClassLoader classLoader = this.instance().getClass().getClassLoader();
         final URL resolved = classLoader.getResource(relative.getPath());
         return Optional.ofNullable(resolved);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.getMetadata().getId());
+        return Objects.hash(this.metadata().id());
     }
 
     @Override
@@ -90,7 +90,7 @@ public final class DummyPluginContainer implements PluginContainer {
             return false;
         }
 
-        return this.getMetadata().getId().equals(((PluginContainer) that).getMetadata().getId());
+        return this.metadata().id().equals(((PluginContainer) that).metadata().id());
     }
 
     @Override

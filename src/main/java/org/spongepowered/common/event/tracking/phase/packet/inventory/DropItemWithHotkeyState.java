@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import com.google.common.collect.Lists;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -54,7 +55,6 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.world.InteractionHand;
@@ -141,7 +141,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     public ClickContainerEvent.Drop createInventoryEvent(final net.minecraft.server.level.ServerPlayer serverPlayer,
         final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
-        @Nullable final Slot slot) {
+        final @Nullable Slot slot) {
         try (final StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             for (final Entity currentEntity : capturedEntities) {

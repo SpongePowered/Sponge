@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.adapter.impl;
 
 import com.google.common.base.MoreObjects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
@@ -38,7 +39,6 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import java.util.List;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -49,21 +49,20 @@ public class BasicInventoryAdapter implements InventoryAdapter, DefaultImplement
     private final Fabric fabric;
     protected final SlotLensProvider slotLenses;
     protected final Lens lens;
-    @Nullable private SlotCollection slotCollection;
+    private @Nullable SlotCollection slotCollection;
 
-    @Nullable
-    protected List<Inventory> children;
+    protected @Nullable List<Inventory> children;
 
     protected Inventory parent;
 
-    public BasicInventoryAdapter(final Fabric fabric, @Nullable final Lens root, @Nullable final Inventory parent) {
+    public BasicInventoryAdapter(final Fabric fabric, final @Nullable Lens root, final @Nullable Inventory parent) {
         this.fabric = fabric;
         this.parent = parent == null ? this : parent;
         this.slotLenses = this.initSlotsLenses(fabric, parent);
         this.lens = root != null ? root : LensRegistrar.getLens(this, this.slotLenses, fabric.fabric$getSize()) ;
     }
 
-    private SlotLensProvider initSlotsLenses(final Fabric fabric, @Nullable final Inventory parent) {
+    private SlotLensProvider initSlotsLenses(final Fabric fabric, final @Nullable Inventory parent) {
         if (parent instanceof InventoryAdapter) {
             return ((InventoryAdapter) parent).inventoryAdapter$getSlotLensProvider();
         }

@@ -67,10 +67,10 @@ public abstract class MapDecorationMixin_API implements org.spongepowered.api.ma
 
     @Override
     public void setPosition(Vector2i position) {
-        Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.getX()), "x position out of bounds");
-        Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.getY()), "y position out of bounds");
-        this.x = (byte) position.getX();
-        this.y = (byte) position.getY();
+        Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.x()), "x position out of bounds");
+        Preconditions.checkState(MapUtil.isInMapDecorationBounds(position.y()), "y position out of bounds");
+        this.x = (byte) position.x();
+        this.y = (byte) position.y();
         ((MapDecorationBridge)this).bridge$markAllDirty();
     }
 

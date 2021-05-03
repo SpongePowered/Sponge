@@ -26,12 +26,12 @@ package org.spongepowered.common.effect.record;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.effect.sound.SoundType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.common.accessor.world.item.RecordItemAccessor;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
@@ -62,9 +62,9 @@ public final class SpongeMusicDisc implements MusicDisc {
         return (SoundType) ((RecordItemAccessor) this.item).accessor$sound();
     }
 
-    public static ClientboundLevelEventPacket createPacket(final Vector3i position, @Nullable final MusicDisc recordType) {
+    public static ClientboundLevelEventPacket createPacket(final Vector3i position, final @Nullable MusicDisc recordType) {
         checkNotNull(position, "position");
-        final BlockPos pos = new BlockPos(position.getX(), position.getY(), position.getZ());
+        final BlockPos pos = new BlockPos(position.x(), position.y(), position.z());
         return new ClientboundLevelEventPacket(SpongeMusicDisc.EFFECT_ID, pos, recordType == null ? 0 :
                 ((SpongeMusicDisc) recordType).getId(), false);
     }

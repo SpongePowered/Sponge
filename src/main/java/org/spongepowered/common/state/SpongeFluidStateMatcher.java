@@ -47,13 +47,12 @@ public final class SpongeFluidStateMatcher extends AbstractSpongeStateMatcher<Fl
     }
 
     @Override
-    public boolean matches(@NonNull final FluidState state) {
+    public boolean matches(final @NonNull FluidState state) {
         return this.isValid((StateHolder<?, ?>) state);
     }
 
     @Override
-    @NonNull
-    public List<FluidState> compatibleStates() {
+    public @NonNull List<FluidState> compatibleStates() {
         if (this.compatibleStates == null) {
             final Block blockType = (Block) this.type;
             this.compatibleStates = blockType.getStateDefinition().getPossibleStates()

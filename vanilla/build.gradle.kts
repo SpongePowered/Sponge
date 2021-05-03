@@ -1,7 +1,10 @@
+import org.jetbrains.gradle.ext.TaskTriggersConfig
+
 plugins {
     id("org.spongepowered.gradle.vanilla")
     id("com.github.johnrengelman.shadow")
     id("implementation-structure")
+    eclipse
 }
 
 val commonProject = parent!!
@@ -128,6 +131,7 @@ minecraft {
             }
             client("runJava${it}Client") {
                 args("--launchTarget", "sponge_client_dev")
+                jvmArgs("-Dmixin.debug.export=true", "-Dmixin.debug=true")
                 targetVersion(it)
             }
         }
@@ -145,13 +149,11 @@ minecraft {
             if (org.spongepowered.gradle.vanilla.util.IdeConfigurer.isIdeaImport()) {
                 // IntelliJ does not properly report its compatibility
                 jvmArgs("-Dterminal.ansi=true", "-Djansi.mode=force")
-            } else if (org.spongepowered.gradle.vanilla.util.IdeConfigurer.isEclipseImport()) {
-                // Eclipse doesn't handle ansi, even if the "process escape sequences" option is enabled...
             }
-            jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml")
+            jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml", "-Dmixin.dumpTargetOnFailure=true")
             allJvmArgumentProviders += CommandLineArgumentProvider {
                 // Resolve the Mixin artifact for use as a reload agent
-                val mixinJar = vanillaAppLaunchConfig.resolvedConfiguration
+                val mixinJar = vanillaAppLaunchConfig.get().resolvedConfiguration
                         .getFiles { it.name == "mixin" && it.group == "org.spongepowered" }
                         .firstOrNull()
 
@@ -163,7 +165,7 @@ minecraft {
                 }
 
                 // Then add necessary module cracks
-                if (!this.name.contains("Java8") && !this.name.contains("integrationTest")) {
+                if (!this.name.contains("integrationTest") && !this.name.contains("Java8") && !this.name.contains("integrationTest")) {
                     base + listOf(
                         "--illegal-access=deny", // enable strict mode in prep for Java 16
                         "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
@@ -370,6 +372,14 @@ tasks {
     }
     vanillaInstaller.java.srcDir(generateInstallerTemplates.map { it.outputs })
 
+    // Generate templates on IDE import as well
+    (rootProject.idea.project as? ExtensionAware)?.also {
+        (it.extensions["settings"] as ExtensionAware).extensions.getByType(TaskTriggersConfig::class).afterSync(generateInstallerTemplates)
+    }
+    project.eclipse {
+        synchronizationTasks(generateInstallerTemplates)
+    }
+
     val installerResources = project.layout.buildDirectory.dir("generated/resources/installer")
     vanillaInstaller.resources.srcDir(installerResources)
 
@@ -466,15 +476,15 @@ tasks {
 }
 
 license {
-    (this as ExtensionAware).extra.apply {
+    properties {
         this["name"] = "Sponge"
         this["organization"] = organization
         this["url"] = projectUrl
     }
-    header = rootProject.file("HEADER.txt")
+    header(rootProject.file("HEADER.txt"))
 
     include("**/*.java")
-    newLine = false
+    newLine(false)
 }
 
 val shadowJar by tasks.existing

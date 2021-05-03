@@ -87,34 +87,34 @@ public final class MetadataPanel extends ScrollPanel {
 
         // Details
         this.categories.add(new Category("Details")
-            .addEntry(new Entry("ID", metadata.getId())).addEntry(new Entry("Name", metadata.getName().orElse(null)))
-            .addEntry(new Entry("Version", metadata.getVersion())).addEntry(new Entry("Entry", metadata.getMainClass()))
-            .addEntry(new Entry("Description", metadata.getDescription().orElse(null))));
+            .addEntry(new Entry("ID", metadata.id())).addEntry(new Entry("Name", metadata.name().orElse(null)))
+            .addEntry(new Entry("Version", metadata.version())).addEntry(new Entry("Entry", metadata.mainClass()))
+            .addEntry(new Entry("Description", metadata.description().orElse(null))));
 
         // Contributors
         this.categories.add(new Category("Contributors",
-            metadata.getContributors().stream().map(c -> new Entry(c.getName(), c.getDescription().orElse(""))).collect(Collectors.toList())));
+            metadata.contributors().stream().map(c -> new Entry(c.name(), c.description().orElse(""))).collect(Collectors.toList())));
 
         // Dependencies
-        this.categories.add(new Category("Dependencies", metadata.getDependencies().stream()
+        this.categories.add(new Category("Dependencies", metadata.dependencies().stream()
             .map(d -> Lists.newArrayList(
-                new Entry(d.getId(), ""),
-                new Entry("Version", d.getVersion(), 1),
-                new Entry("Optional", String.valueOf(d.isOptional()), 1),
-                new Entry("Load Order", d.getLoadOrder().name(), 1)))
+                new Entry(d.id(), ""),
+                new Entry("Version", d.version(), 1),
+                new Entry("Optional", String.valueOf(d.optional()), 1),
+                new Entry("Load Order", d.loadOrder().name(), 1)))
             .flatMap(List::stream)
             .collect(Collectors.toList())));
 
         // Resources
         this.categories.add(
             new Category("Resources")
-                .addEntry(new Entry("Homepage", metadata.getLinks().getHomepage().map(URL::toString).orElse(null)))
-                .addEntry(new Entry("Issues", metadata.getLinks().getIssues().map(URL::toString).orElse(null)))
-                .addEntry(new Entry("Source", metadata.getLinks().getSource().map(URL::toString).orElse(null))));
+                .addEntry(new Entry("Homepage", metadata.links().homepage().map(URL::toString).orElse(null)))
+                .addEntry(new Entry("Issues", metadata.links().issues().map(URL::toString).orElse(null)))
+                .addEntry(new Entry("Source", metadata.links().source().map(URL::toString).orElse(null))));
 
         // Other
         this.categories.add(new Category("Other",
-            metadata.getExtraMetadata().entrySet().stream().map(e -> new Entry(e.getKey(), e.getValue().toString())).collect(Collectors.toList())));
+            metadata.extraMetadata().entrySet().stream().map(e -> new Entry(e.getKey(), e.getValue().toString())).collect(Collectors.toList())));
 
         this.categories.stream().flatMap(c -> c.getEntries().stream()).forEach(e -> {
             final int width = e.key == null ? 0 : this.minecraft.font.width(e.key);

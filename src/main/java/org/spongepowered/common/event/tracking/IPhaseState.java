@@ -25,6 +25,17 @@
 package org.spongepowered.common.event.tracking;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.storage.loot.LootContext;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -44,10 +55,10 @@ import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
@@ -67,17 +78,6 @@ import java.util.function.BiConsumer;
 import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.level.TickNextTickData;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.storage.loot.LootContext;
 
 /**
  * A literal phase state of which the {@link World} is currently running
@@ -389,7 +389,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @param minecraftWorld The world
      * @param notifier The tracker type (owner or notifier)
      */
-    default void associateNeighborStateNotifier(final C unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
+    default void associateNeighborStateNotifier(final C unwindingContext, final @Nullable BlockPos sourcePos, final Block block, final BlockPos notifyPos,
         final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
 
     }
@@ -577,7 +577,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void foldContextForThread(final C context, final TickTaskBridge returnValue) {
     }
 
-    default void associateScheduledTickUpdate(C asContext, TickNextTickData<?> entry) {
+    default void associateScheduledTickUpdate(final C asContext, final ServerLevel level,
+        final TickNextTickData<?> entry
+    ) {
 
     }
 }

@@ -29,29 +29,22 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.pagination.PaginationList;
 
-import javax.annotation.Nullable;
 
 public final class SpongePaginationBuilder implements PaginationList.Builder {
 
-    static final @NonNull Component DEFAULT_PADDING = Component.text("=");
+    static final Component DEFAULT_PADDING = Component.text("=");
 
     private final SpongePaginationService service;
-    @Nullable
-    private Iterable<Component> contents;
-    @Nullable
-    private Component title;
-    @Nullable
-    private Component header;
-    @Nullable
-    private Component footer;
+    private @Nullable Iterable<Component> contents;
+    private @Nullable Component title;
+    private @Nullable Component header;
+    private @Nullable Component footer;
     private Component paginationSpacer = SpongePaginationBuilder.DEFAULT_PADDING;
     private int linesPerPage = 20;
-
-    @Nullable
-    private PaginationList paginationList;
+    private @Nullable PaginationList paginationList;
 
     public SpongePaginationBuilder(final SpongePaginationService service) {
         this.service = service;
@@ -74,21 +67,21 @@ public final class SpongePaginationBuilder implements PaginationList.Builder {
     }
 
     @Override
-    public PaginationList.Builder title(@Nullable final Component title) {
+    public PaginationList.Builder title(final @Nullable Component title) {
         this.title = title;
         this.paginationList = null;
         return this;
     }
 
     @Override
-    public PaginationList.Builder header(@Nullable final Component header) {
+    public PaginationList.Builder header(final @Nullable Component header) {
         this.header = header;
         this.paginationList = null;
         return this;
     }
 
     @Override
-    public PaginationList.Builder footer(@Nullable final Component footer) {
+    public PaginationList.Builder footer(final @Nullable Component footer) {
         this.footer = footer;
         this.paginationList = null;
         return this;

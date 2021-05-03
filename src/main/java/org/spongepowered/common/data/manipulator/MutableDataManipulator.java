@@ -80,7 +80,7 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
                 if (overlap == MergeFunction.REPLACEMENT_PREFERRED) {
                     this.values.put(entry.getKey(), CopyHelper.copy(entry.getValue()));
                 } else {
-                    @Nullable final Object original = this.values.get(entry.getKey());
+                    final @Nullable Object original = this.values.get(entry.getKey());
                     if (overlap == MergeFunction.ORIGINAL_PREFERRED && original != null) {
                         // Prefer the original
                         continue;
@@ -97,7 +97,7 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
                 if (overlap == MergeFunction.REPLACEMENT_PREFERRED) {
                     this.values.put(key, CopyHelper.copy(valueContainer.require((Key) key)));
                 } else {
-                    @Nullable final Object original = this.values.get(key);
+                    final @Nullable Object original = this.values.get(key);
                     if (overlap == MergeFunction.ORIGINAL_PREFERRED && original != null) {
                         // Prefer the original
                         continue;
@@ -150,11 +150,11 @@ final class MutableDataManipulator extends SpongeDataManipulator implements Data
         final Iterable<Key<?>> keys,
         final Function<Key<?>, @Nullable Object> function) {
         for (final Key<?> key : keys) {
-            @Nullable final Object replacement = function.apply(key);
+            final @Nullable Object replacement = function.apply(key);
             if (overlap == MergeFunction.REPLACEMENT_PREFERRED && replacement != null) {
                 values.put(key, CopyHelper.copy(replacement));
             } else {
-                @Nullable final Object original = values.get(key);
+                final @Nullable Object original = values.get(key);
                 if (overlap == MergeFunction.ORIGINAL_PREFERRED && original != null) {
                     // Prefer the original
                     continue;

@@ -62,7 +62,7 @@ public class MutableMapBlockEntityArchetypeBuffer extends AbstractMutableBlockEn
 
     @Override
     public void addBlockEntity(final Vector3i pos, final BlockEntity blockEntity) {
-        this.checkRange(pos.getX(), pos.getY(), pos.getZ());
+        this.checkRange(pos.x(), pos.y(), pos.z());
         this.blockEntities.put(Objects.requireNonNull(pos, "Position cannot be null"), Objects.requireNonNull(blockEntity, "BlockEntity cannot be null").createArchetype());
     }
 
@@ -74,7 +74,7 @@ public class MutableMapBlockEntityArchetypeBuffer extends AbstractMutableBlockEn
 
     @Override
     public void addBlockEntity(final Vector3i pos, final BlockEntityArchetype archetype) {
-        this.checkRange(pos.getX(), pos.getY(), pos.getZ());
+        this.checkRange(pos.x(), pos.y(), pos.z());
         this.blockEntities.put(Objects.requireNonNull(pos, "Position cannot be null"), Objects.requireNonNull(archetype, "Archetype cannot be null"));
     }
 

@@ -40,7 +40,7 @@ public final class UnsortedNodeHolder {
     private final List<CommandNode<CommandSourceStack>> standardChildren = new LinkedList<>();
     private final List<CommandNode<CommandSourceStack>> redirectingChildren = new LinkedList<>();
 
-    @Nullable private List<CommandNode<CommandSourceStack>> cachedResult;
+    private @Nullable List<CommandNode<CommandSourceStack>> cachedResult;
 
     public void add(final CommandNode<CommandSourceStack> node) {
         this.cachedResult = null;

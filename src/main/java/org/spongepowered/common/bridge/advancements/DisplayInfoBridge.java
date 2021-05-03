@@ -33,8 +33,7 @@ public interface DisplayInfoBridge {
 
     void bridge$setAdvancement(Advancement advancement);
 
-    @Nullable
-    String bridge$getBackground();
+    @Nullable String bridge$getBackground();
 
     void bridge$setBackground(@Nullable String background);
 }

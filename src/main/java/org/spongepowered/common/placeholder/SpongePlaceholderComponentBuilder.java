@@ -25,16 +25,16 @@
 package org.spongepowered.common.placeholder;
 
 import com.google.common.base.Preconditions;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.placeholder.PlaceholderComponent;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 
-import javax.annotation.Nullable;
 
 public class SpongePlaceholderComponentBuilder implements PlaceholderComponent.Builder {
 
-    @Nullable private PlaceholderParser parser;
-    @Nullable private PlaceholderContext context;
+    private @Nullable PlaceholderParser parser;
+    private @Nullable PlaceholderContext context;
 
     @Override
     public PlaceholderComponent.Builder parser(final PlaceholderParser parser) {

@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking;
 
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.SpongeCommon;
@@ -39,7 +40,6 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.plugin.PluginContainer;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
@@ -234,11 +234,11 @@ public final class PhasePrinter {
         PhasePrinter.printMessageWithCaughtException(tracker.stack, header, subheader, tracker.getPhaseContext().state, tracker.getPhaseContext(), e);
     }
 
-    public static void printMessageWithCaughtException(final PhaseTracker tracker, final String header, final String subHeader, final IPhaseState<@NonNull ?> state, final PhaseContext<@NonNull ?> context, @Nullable final Throwable t) {
+    public static void printMessageWithCaughtException(final PhaseTracker tracker, final String header, final String subHeader, final IPhaseState<@NonNull ?> state, final PhaseContext<@NonNull ?> context, final @Nullable Throwable t) {
         PhasePrinter.printMessageWithCaughtException(tracker.stack, header, subHeader, state, context, t);
     }
 
-    public static void printMessageWithCaughtException(final PhaseStack stack, final String header, final String subHeader, final IPhaseState<@NonNull ?> state, final PhaseContext<@NonNull ?> context, @Nullable final Throwable t) {
+    public static void printMessageWithCaughtException(final PhaseStack stack, final String header, final String subHeader, final IPhaseState<@NonNull ?> state, final PhaseContext<@NonNull ?> context, final @Nullable Throwable t) {
         final PrettyPrinter printer = new PrettyPrinter(60);
         printer.add(header).centre().hr()
                 .add("%s %s", subHeader, state)
@@ -344,7 +344,7 @@ public final class PhasePrinter {
 
     static void generateVersionInfo(final PrettyPrinter printer) {
         for (final PluginContainer pluginContainer : Launch.getInstance().getLauncherPlugins()) {
-            printer.add("%s : %s", pluginContainer.getMetadata().getName().get(), pluginContainer.getMetadata().getVersion());
+            printer.add("%s : %s", pluginContainer.metadata().name().get(), pluginContainer.metadata().version());
         }
     }
 

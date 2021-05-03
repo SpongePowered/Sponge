@@ -26,6 +26,7 @@ package org.spongepowered.common.network.status;
 
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.MinecraftServer;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -38,7 +39,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.util.NetworkUtil;
 
-import javax.annotation.Nullable;
 import java.net.InetSocketAddress;
 
 public final class SpongeStatusResponse {
@@ -46,13 +46,11 @@ public final class SpongeStatusResponse {
     private SpongeStatusResponse() {
     }
 
-    @Nullable
-    public static ServerStatus post(final MinecraftServer server, final StatusClient client) {
+    public static @Nullable ServerStatus post(final MinecraftServer server, final StatusClient client) {
         return SpongeStatusResponse.call(SpongeStatusResponse.create(server), client);
     }
 
-    @Nullable
-    public static ServerStatus postLegacy(final MinecraftServer server, final InetSocketAddress address, final MinecraftVersion version,
+    public static @Nullable ServerStatus postLegacy(final MinecraftServer server, final InetSocketAddress address, final MinecraftVersion version,
             final InetSocketAddress virtualHost) {
         ServerStatus response = SpongeStatusResponse.create(server);
         response.setVersion(new ServerStatus.Version(response.getVersion().getName(), Byte.MAX_VALUE));
@@ -63,8 +61,7 @@ public final class SpongeStatusResponse {
         return response;
     }
 
-    @Nullable
-    private static ServerStatus call(final ServerStatus response, final StatusClient client) {
+    private static @Nullable ServerStatus call(final ServerStatus response, final StatusClient client) {
         if (!SpongeCommon.postEvent(SpongeEventFactory.createClientPingServerEvent(Cause.of(EventContext.empty(), Sponge.server()), client,
             (ClientPingServerEvent.Response) response))) {
             return response;
@@ -88,8 +85,7 @@ public final class SpongeStatusResponse {
         return clone;
     }
 
-    @Nullable
-    private static ServerStatus.Players clone(@Nullable final ServerStatus.Players original) {
+    private static ServerStatus.@Nullable Players clone(final ServerStatus.@Nullable Players original) {
         if (original != null) {
             final ServerStatus.Players clone = new ServerStatus.Players(original.getMaxPlayers(),
                     original.getNumPlayers());
@@ -99,8 +95,7 @@ public final class SpongeStatusResponse {
         return null;
     }
 
-    @Nullable
-    private static ServerStatus.Version clone(@Nullable final ServerStatus.Version original) {
+    private static ServerStatus.@Nullable Version clone(final ServerStatus.@Nullable Version original) {
         return original != null ? new ServerStatus.Version(original.getName(), original.getProtocol()) : null;
     }
 

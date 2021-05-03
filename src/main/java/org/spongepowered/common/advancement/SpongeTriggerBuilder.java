@@ -31,6 +31,7 @@ import static java.util.Objects.requireNonNull;
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import io.leangen.geantyref.TypeToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTriggerConfiguration;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
@@ -55,7 +56,6 @@ import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.UnaryOperator;
 
-import javax.annotation.Nullable;
 import net.minecraft.resources.ResourceLocation;
 
 @SuppressWarnings("unchecked")
@@ -68,10 +68,10 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
     private final static Function<JsonObject, FilteredTriggerConfiguration.Empty> EMPTY_TRIGGER_CONFIGURATION_CONSTRUCTOR =
             jsonObject -> SpongeTriggerBuilder.EMPTY_TRIGGER_CONFIGURATION;
 
-    @Nullable private Type configType;
-    @Nullable private Function<JsonObject, C> constructor;
-    @Nullable private Consumer<CriterionEvent.Trigger<C>> eventHandler;
-    @Nullable private String name;
+    private @Nullable Type configType;
+    private @Nullable Function<JsonObject, C> constructor;
+    private @Nullable Consumer<CriterionEvent.Trigger<C>> eventHandler;
+    private @Nullable String name;
 
     @Override
     @SuppressWarnings("rawtypes")

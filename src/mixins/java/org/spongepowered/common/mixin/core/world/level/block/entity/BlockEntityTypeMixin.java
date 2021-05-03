@@ -65,11 +65,11 @@ public abstract class BlockEntityTypeMixin implements ResourceKeyBridge, BlockEn
         final ConfigHandle<TrackerConfig> trackerConfigAdapter = SpongeGameConfigs.getTracker();
         final BlockEntityTrackerCategory blockEntityTracker = trackerConfigAdapter.get().blockEntity;
 
-        BlockEntityTrackerCategory.ModSubCategory modCapturing = blockEntityTracker.mods.get(plugin.getMetadata().getId());
+        BlockEntityTrackerCategory.ModSubCategory modCapturing = blockEntityTracker.mods.get(plugin.metadata().id());
 
         if (modCapturing == null) {
             modCapturing = new BlockEntityTrackerCategory.ModSubCategory();
-            blockEntityTracker.mods.put(plugin.getMetadata().getId(), modCapturing);
+            blockEntityTracker.mods.put(plugin.metadata().id(), modCapturing);
         }
 
         if (!modCapturing.enabled) {

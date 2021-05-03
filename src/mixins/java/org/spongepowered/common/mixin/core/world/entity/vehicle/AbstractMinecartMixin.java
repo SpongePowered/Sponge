@@ -82,7 +82,7 @@ public abstract class AbstractMinecartMixin extends EntityMixin implements Abstr
         require = 1
     )
     private Vec3 impl$applyDerailedModifierOnGround(final Vec3 vec3d, final double factor) {
-        return vec3d.multiply(this.impl$derailedMod.getX(), this.impl$derailedMod.getY(), this.impl$derailedMod.getZ());
+        return vec3d.multiply(this.impl$derailedMod.x(), this.impl$derailedMod.y(), this.impl$derailedMod.z());
     }
 
     @Redirect(method = "comeOffTrack",
@@ -97,7 +97,7 @@ public abstract class AbstractMinecartMixin extends EntityMixin implements Abstr
         require = 1
     )
     private Vec3 impl$applyDerailedModifierInAir(final Vec3 vec3d, final double factor) {
-        return vec3d.multiply(this.impl$airborneMod.getX(), this.impl$airborneMod.getY(), this.impl$airborneMod.getZ());
+        return vec3d.multiply(this.impl$airborneMod.x(), this.impl$airborneMod.y(), this.impl$airborneMod.z());
     }
 
     @Redirect(method = "applyNaturalSlowdown",

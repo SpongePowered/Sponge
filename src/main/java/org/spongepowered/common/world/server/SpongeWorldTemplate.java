@@ -295,11 +295,11 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         @Nullable public final Vector3i spawnPosition;
         @Nullable public final Boolean loadOnStartup, performsSpawnLogic, hardcore, commands, pvp;
 
-        public SpongeDataSection(@Nullable final Component displayName, @Nullable final ResourceLocation gameMode,
-            @Nullable final ResourceLocation difficulty, @Nullable final SerializationBehavior serializationBehavior,
-            @Nullable final Integer viewDistance, @Nullable final Vector3i spawnPosition, @Nullable final Boolean loadOnStartup,
-            @Nullable final Boolean performsSpawnLogic, @Nullable final Boolean hardcore, @Nullable final Boolean commands,
-            @Nullable final Boolean pvp)
+        public SpongeDataSection(final @Nullable Component displayName, final @Nullable ResourceLocation gameMode,
+            final @Nullable ResourceLocation difficulty, final @Nullable SerializationBehavior serializationBehavior,
+            final @Nullable Integer viewDistance, final @Nullable Vector3i spawnPosition, final @Nullable Boolean loadOnStartup,
+            final @Nullable Boolean performsSpawnLogic, final @Nullable Boolean hardcore, final @Nullable Boolean commands,
+            final @Nullable Boolean pvp)
         {
             this.displayName = displayName;
             this.gameMode = gameMode;
@@ -331,7 +331,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         protected boolean loadOnStartup, performsSpawnLogic;
 
         @Override
-        public Builder displayName(@Nullable final Component displayName) {
+        public Builder displayName(final @Nullable Component displayName) {
             this.displayName = displayName;
             return this;
         }
@@ -367,7 +367,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         }
 
         @Override
-        public Builder serializationBehavior(@Nullable final SerializationBehavior serializationBehavior) {
+        public Builder serializationBehavior(final @Nullable SerializationBehavior serializationBehavior) {
             this.serializationBehavior = serializationBehavior;
             return this;
         }
@@ -385,7 +385,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         }
 
         @Override
-        public Builder hardcore(@Nullable final Boolean hardcore) {
+        public Builder hardcore(final @Nullable Boolean hardcore) {
             this.hardcore = hardcore;
             return this;
         }
@@ -397,13 +397,13 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
         }
 
         @Override
-        public Builder pvp(@Nullable final Boolean pvp) {
+        public Builder pvp(final @Nullable Boolean pvp) {
             this.pvp = pvp;
             return this;
         }
 
         @Override
-        public Builder viewDistance(@Nullable final Integer distance) {
+        public Builder viewDistance(final @Nullable Integer distance) {
             this.viewDistance = distance;
             return this;
         }

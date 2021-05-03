@@ -32,7 +32,6 @@ import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.AssetManager;
-import org.spongepowered.api.command.manager.CommandManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.EventManager;
@@ -48,7 +47,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeGame;
 import org.spongepowered.common.SpongePlatform;
 import org.spongepowered.common.asset.SpongeAssetManager;
-import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -62,12 +60,9 @@ import org.spongepowered.common.service.game.SpongeGameScopedServiceProvider;
 import org.spongepowered.common.sql.SpongeSqlManager;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
 
-import javax.annotation.OverridingMethodsMustInvokeSuper;
-
 public final class SpongeCommonModule extends PrivateModule {
 
     @Override
-    @OverridingMethodsMustInvokeSuper
     protected void configure() {
         this.bind(Logger.class).toInstance(SpongeCommon.getLogger());
         this.bindAndExpose(Game.class).to(SpongeGame.class);

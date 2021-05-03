@@ -270,16 +270,16 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 ((net.minecraft.server.level.ServerPlayer) (Object) this).stopSleepInBed(true, true);
             }
 
-            final ChunkPos chunkPos = new ChunkPos((int) toPosition.getX() >> 4, (int) toPosition.getZ() >> 4);
+            final ChunkPos chunkPos = new ChunkPos((int) toPosition.x() >> 4, (int) toPosition.z() >> 4);
             destinationWorld.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((net.minecraft.server.level.ServerPlayer) (Object) this).getId());
 
             if (this.shadow$getLevel() != destinationWorld) {
-                this.shadow$absMoveTo(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.shadow$getYRot(), this.shadow$getXRot());
+                this.shadow$absMoveTo(toPosition.x(), toPosition.y(), toPosition.z(), this.shadow$getYRot(), this.shadow$getXRot());
 
                 EntityUtil.performPostChangePlayerWorldLogic((net.minecraft.server.level.ServerPlayer) (Object) this, this.shadow$getLevel(),
                         (net.minecraft.server.level.ServerLevel) location.world(), destinationWorld, false);
             } else {
-                this.connection.teleport(toPosition.getX(), toPosition.getY(), toPosition.getZ(), this.shadow$getYRot(), this.shadow$getXRot(),
+                this.connection.teleport(toPosition.x(), toPosition.y(), toPosition.z(), this.shadow$getYRot(), this.shadow$getXRot(),
                         new HashSet<>());
                 this.connection.resetPosition();
             }
@@ -451,9 +451,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                         return;
                     }
 
-                    actualX = posEvent.destinationPosition().getX();
-                    actualY = posEvent.destinationPosition().getY();
-                    actualZ = posEvent.destinationPosition().getZ();
+                    actualX = posEvent.destinationPosition().x();
+                    actualY = posEvent.destinationPosition().y();
+                    actualZ = posEvent.destinationPosition().z();
                 }
 
                 if (ShouldFire.ROTATE_ENTITY_EVENT) {
@@ -463,8 +463,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
                     SpongeCommon.postEvent(rotateEvent);
 
-                    actualYaw = rotateEvent.isCancelled() ? player.getYRot() : rotateEvent.toRotation().getY();
-                    actualPitch = rotateEvent.isCancelled() ? player.getXRot() : rotateEvent.toRotation().getX();
+                    actualYaw = rotateEvent.isCancelled() ? player.getYRot() : rotateEvent.toRotation().y();
+                    actualPitch = rotateEvent.isCancelled() ? player.getXRot() : rotateEvent.toRotation().x();
                 }
 
                 this.shadow$setCamera(player);
@@ -495,9 +495,9 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                         return;
                     }
 
-                    actualX = posEvent.destinationPosition().getX();
-                    actualY = posEvent.destinationPosition().getY();
-                    actualZ = posEvent.destinationPosition().getZ();
+                    actualX = posEvent.destinationPosition().x();
+                    actualY = posEvent.destinationPosition().y();
+                    actualZ = posEvent.destinationPosition().z();
                 }
                 this.shadow$setPos(actualX, actualY, actualZ);
 
@@ -507,8 +507,8 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                             new Vector3d(yaw, pitch, 0));
 
                     if (!SpongeCommon.postEvent(rotateEvent)) {
-                        actualYaw = (float) rotateEvent.toRotation().getX();
-                        actualPitch = (float) rotateEvent.toRotation().getY();
+                        actualYaw = (float) rotateEvent.toRotation().x();
+                        actualPitch = (float) rotateEvent.toRotation().y();
                     }
                 }
                 this.shadow$setYRot((float) actualYaw);

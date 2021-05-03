@@ -43,6 +43,7 @@ import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Transaction;
@@ -384,8 +385,7 @@ public final class TrackingUtil {
     private TrackingUtil() {
     }
 
-    @Nullable
-    public static User getNotifierOrOwnerFromBlock(final ServerLevel world, final BlockPos blockPos) {
+    public static @Nullable User getNotifierOrOwnerFromBlock(final ServerLevel world, final BlockPos blockPos) {
         final LevelChunkBridge mixinChunk = (LevelChunkBridge) world.getChunkAt(blockPos);
         final User notifier = mixinChunk.bridge$getBlockNotifier(blockPos).orElse(null);
         if (notifier != null) {
@@ -459,7 +459,7 @@ public final class TrackingUtil {
         return TrackingUtil.phaseStateToString(type, null, state);
     }
 
-    public static String phaseStateToString(final String type, @Nullable final String extra, final IPhaseState<?> state) {
+    public static String phaseStateToString(final String type, final @Nullable String extra, final IPhaseState<?> state) {
         String name = state.getClass().getSimpleName();
         name = name.replace("Phase", "");
         name = name.replace("State", "");
@@ -475,7 +475,7 @@ public final class TrackingUtil {
     }
 
     public static SpongeBlockSnapshot createPooledSnapshot(final net.minecraft.world.level.block.state.BlockState state, final BlockPos pos,
-        final BlockChangeFlag updateFlag, final int limit, @Nullable final net.minecraft.world.level.block.entity.BlockEntity blockEntity,
+        final BlockChangeFlag updateFlag, final int limit, final net.minecraft.world.level.block.entity.@Nullable BlockEntity blockEntity,
         final Supplier<ServerLevel> worldSupplier,
         final Supplier<Optional<UUID>> creatorSupplier,
         final Supplier<Optional<UUID>> notifierSupplier

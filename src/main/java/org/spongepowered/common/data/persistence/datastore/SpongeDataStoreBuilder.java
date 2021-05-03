@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
@@ -63,13 +64,12 @@ import java.util.function.BiConsumer;
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-import javax.annotation.Nullable;
 
 public final class SpongeDataStoreBuilder implements DataStore.Builder, DataStore.Builder.UpdaterStep, DataStore.Builder.HolderStep, DataStore.Builder.SerializersStep, DataStore.Builder.EndStep {
 
     private final Map<Key<?>, Tuple<BiConsumer<DataView, ?>, Function<DataView, Optional<?>>>> serializers = new IdentityHashMap<>();
     private final List<Type> dataHolderTypes = new ArrayList<>();
-    @Nullable private ResourceKey key;
+    private @Nullable ResourceKey key;
     private int version = 1;
     private DataContentUpdater[] updaters = new DataContentUpdater[0];
 

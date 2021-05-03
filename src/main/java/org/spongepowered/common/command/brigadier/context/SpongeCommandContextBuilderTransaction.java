@@ -138,16 +138,16 @@ public final class SpongeCommandContextBuilderTransaction implements CommandCont
         return builder;
     }
 
-    public <T> void putEntry(final Parameter.@NonNull Key<? super T> key, @NonNull final T object) {
+    public <T> void putEntry(final Parameter.@NonNull Key<? super T> key, final @NonNull T object) {
         this.getReference();
         this.putEntryCapture.add(Tuple.of(key, object));
         this.copyBuilder.putEntry(key, object);
     }
 
     @SuppressWarnings("unchecked")
-    private <T> void putEntryAbusingGenerics(@NonNull final SpongeCommandContextBuilder builderRef,
+    private <T> void putEntryAbusingGenerics(final @NonNull SpongeCommandContextBuilder builderRef,
             final Parameter.@NonNull Key<?> key,
-            @NonNull final T object) {
+            final @NonNull T object) {
         builderRef.putEntry((SpongeParameterKey<? super T>) key, object);
     }
 

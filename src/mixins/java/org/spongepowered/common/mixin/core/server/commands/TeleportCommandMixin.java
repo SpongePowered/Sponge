@@ -94,9 +94,9 @@ public abstract class TeleportCommandMixin {
                         return;
                     }
 
-                    actualX = posEvent.destinationPosition().getX();
-                    actualY = posEvent.destinationPosition().getY();
-                    actualZ = posEvent.destinationPosition().getZ();
+                    actualX = posEvent.destinationPosition().x();
+                    actualY = posEvent.destinationPosition().y();
+                    actualZ = posEvent.destinationPosition().z();
                 }
 
                 if (ShouldFire.ROTATE_ENTITY_EVENT) {
@@ -105,8 +105,8 @@ public abstract class TeleportCommandMixin {
                             new Vector3d(pitch, yaw, 0));
 
                     SpongeCommon.postEvent(rotateEvent);
-                    actualYaw = rotateEvent.isCancelled() ? entityIn.getYRot() : rotateEvent.toRotation().getY();
-                    actualPitch = rotateEvent.isCancelled() ? entityIn.getXRot() : rotateEvent.toRotation().getX();
+                    actualYaw = rotateEvent.isCancelled() ? entityIn.getYRot() : rotateEvent.toRotation().y();
+                    actualPitch = rotateEvent.isCancelled() ? entityIn.getXRot() : rotateEvent.toRotation().x();
                 }
 
                 if (entityIn instanceof ServerPlayer) {
@@ -170,8 +170,8 @@ public abstract class TeleportCommandMixin {
                                 new Vector3d(actualPitch, actualYaw, 0));
 
                         if (!SpongeCommon.postEvent(rotateEvent)) {
-                            actualYaw = Mth.wrapDegrees(rotateEvent.toRotation().getY());
-                            actualPitch = Mth.wrapDegrees(rotateEvent.toRotation().getX());
+                            actualYaw = Mth.wrapDegrees(rotateEvent.toRotation().y());
+                            actualPitch = Mth.wrapDegrees(rotateEvent.toRotation().x());
                             actualPitch = Mth.clamp(actualPitch, -90.0F, 90.0F);
                         } else {
                             actualYaw = entityIn.getYRot();
@@ -180,8 +180,8 @@ public abstract class TeleportCommandMixin {
                     }
 
                     result.restoreFrom(entityIn);
-                    result.moveTo(posEvent.destinationPosition().getX(), posEvent.destinationPosition().getY(),
-                            posEvent.destinationPosition().getZ(), (float) actualYaw, (float) actualPitch);
+                    result.moveTo(posEvent.destinationPosition().x(), posEvent.destinationPosition().y(),
+                            posEvent.destinationPosition().z(), (float) actualYaw, (float) actualPitch);
                     result.setYHeadRot((float) actualYaw);
                     worldIn.addDuringTeleport(result);
                     entityIn.setRemoved(Entity.RemovalReason.CHANGED_DIMENSION);

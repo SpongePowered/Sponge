@@ -55,9 +55,9 @@ public final class SpongeCookingRecipeBuilder extends AbstractResourceKeyedBuild
     private ItemStack result;
     private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
 
-    @Nullable private Float experience;
-    @Nullable private Integer cookingTime;
-    @Nullable private String group;
+    private @Nullable Float experience;
+    private @Nullable Integer cookingTime;
+    private @Nullable String group;
 
     @Override
     public ResultStep ingredient(final org.spongepowered.api.item.recipe.crafting.Ingredient ingredient) {

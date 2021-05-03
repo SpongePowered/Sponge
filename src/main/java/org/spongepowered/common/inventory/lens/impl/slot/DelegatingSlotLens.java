@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.AbstractLens;
@@ -31,7 +32,6 @@ import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.item.ItemStack;
 
 public abstract class DelegatingSlotLens extends AbstractLens implements SlotLens {
@@ -69,9 +69,8 @@ public abstract class DelegatingSlotLens extends AbstractLens implements SlotLen
         return this.delegate.getSlots(fabric);
     }
 
-    @Nullable
     @Override
-    public SlotLens getSlotLens(Fabric fabric, int ordinal) {
+    public @Nullable SlotLens getSlotLens(Fabric fabric, int ordinal) {
         return this.delegate.getSlotLens(fabric, ordinal);
     }
 }

@@ -44,27 +44,23 @@ public final class SpongeNoneValueParameter extends ResourceKeyedArgumentValuePa
     }
 
     @Override
-    @NonNull
-    public List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
         return Collections.emptyList();
     }
 
     @Override
-    @NonNull
-    public Optional<? extends Void> parseValue(
+    public @NonNull Optional<? extends Void> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         return Optional.empty();
     }
 
     @Override
-    @NonNull
-    public String usage(@NonNull final String key) {
+    public @NonNull String usage(final @NonNull String key) {
         return "";
     }
 
     @Override
-    @NonNull
-    public List<ClientCompletionType> clientCompletionType() {
+    public @NonNull List<ClientCompletionType> clientCompletionType() {
         return Collections.singletonList(ClientCompletionTypes.NONE.get());
     }
 

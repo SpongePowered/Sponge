@@ -64,8 +64,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     }
 
     @Override
-    @NonNull
-    public String input() {
+    public @NonNull String input() {
         return this.getString();
     }
 
@@ -146,13 +145,12 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     }
 
     @Override
-    public ResourceKey parseResourceKey(@NonNull final String defaultNamespace) throws ArgumentParseException {
+    public ResourceKey parseResourceKey(final @NonNull String defaultNamespace) throws ArgumentParseException {
         return this.readResourceLocation(defaultNamespace);
     }
 
     @Override
-    @NonNull
-    public String parseUnquotedString() {
+    public @NonNull String parseUnquotedString() {
         final int start = this.getCursor();
         while (this.canRead() && !Character.isWhitespace(this.peek())) {
             this.skip();
@@ -161,8 +159,7 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     }
 
     @Override
-    @NonNull
-    public String parseString() throws ArgumentParseException {
+    public @NonNull String parseString() throws ArgumentParseException {
         try {
             if (this.canRead() && this.peek() == SpongeStringReader.SYNTAX_QUOTE) {
                 return this.readQuotedString();
@@ -218,13 +215,12 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     }
 
     @Override
-    @NonNull
-    public SpongeImmutableArgumentReader immutable() {
+    public @NonNull SpongeImmutableArgumentReader immutable() {
         return new SpongeImmutableArgumentReader(this.getString(), this.getCursor());
     }
 
     @Override
-    public void setState(@NonNull final ArgumentReader state) throws IllegalArgumentException {
+    public void setState(final @NonNull ArgumentReader state) throws IllegalArgumentException {
         if (state.input().equals(this.getString())) {
             this.setCursor(state.cursor());
         } else {
@@ -233,17 +229,15 @@ public final class SpongeStringReader extends StringReader implements ArgumentRe
     }
 
     @Override
-    @NonNull
-    public ArgumentParseException createException(@Nullable final Component errorMessage) {
+    public @NonNull ArgumentParseException createException(final @Nullable Component errorMessage) {
         return new ArgumentParseException(errorMessage, this.input(), this.getCursor());
     }
 
-    @NonNull
-    public ArgumentParseException createException(@Nullable final Component errorMessage, @NonNull final Throwable inner) {
+    public @NonNull ArgumentParseException createException(final @Nullable Component errorMessage, final @NonNull Throwable inner) {
         return new ArgumentParseException(errorMessage, inner, this.input(), this.getCursor());
     }
 
-    private ResourceKey readResourceLocation(@Nullable final String defaultNamespace) throws ArgumentParseException {
+    private ResourceKey readResourceLocation(final @Nullable String defaultNamespace) throws ArgumentParseException {
         final int i = this.getCursor();
 
         while (this.canRead() && ResourceLocation.isAllowedInResourceLocation(this.peek())) {

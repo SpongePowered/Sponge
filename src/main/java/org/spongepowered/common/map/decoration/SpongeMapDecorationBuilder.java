@@ -26,6 +26,7 @@ package org.spongepowered.common.map.decoration;
 
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
@@ -41,16 +42,13 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.math.vector.Vector2i;
 
-import javax.annotation.Nullable;
 
 public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
-    @Nullable
-    private MapDecorationType type = null;
+    private @Nullable MapDecorationType type = null;
     private int x;
     private int y;
     private MapDecorationOrientation rot = MapDecorationOrientations.NORTH.get();
-    @Nullable
-    private Component customName = null;
+    private @Nullable Component customName = null;
 
     @Override
     public MapDecoration.Builder type(MapDecorationType type) {
@@ -72,8 +70,8 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     public MapDecoration.Builder from(MapDecoration value) {
         Preconditions.checkNotNull(value, "MapDecoration cannot be null");
         this.type = value.type();
-        this.x = value.position().getX();
-        this.y = value.position().getY();
+        this.x = value.position().x();
+        this.y = value.position().y();
         this.rot = value.rotation();
         return this;
     }
@@ -88,10 +86,10 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     @Override
     public MapDecoration.Builder position(Vector2i position) throws IllegalArgumentException {
         Preconditions.checkNotNull(position, "position cannot be null");
-        Preconditions.checkArgument(MapUtil.isInMapDecorationBounds(position.getX()), "x not in bounds");
-        Preconditions.checkArgument(MapUtil.isInMapDecorationBounds(position.getY()), "y not in bounds");
-        this.x = position.getX();
-        this.y = position.getY();
+        Preconditions.checkArgument(MapUtil.isInMapDecorationBounds(position.x()), "x not in bounds");
+        Preconditions.checkArgument(MapUtil.isInMapDecorationBounds(position.y()), "y not in bounds");
+        this.x = position.x();
+        this.y = position.y();
         return this;
     }
 

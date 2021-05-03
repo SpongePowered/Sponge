@@ -25,27 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.packet;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.accessor.entity.passive.AbstractChestedHorseEntityAccessor;
-import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePlayerPacketAccessor;
-import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.accessor.world.entity.animal.PigAccessor;
-import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
-import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
-import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.util.ItemStackUtil;
-
-import javax.annotation.Nullable;
+import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
@@ -71,13 +51,37 @@ import net.minecraft.world.item.DyeItem;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.phys.AABB;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.accessor.entity.passive.AbstractChestedHorseEntityAccessor;
+import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePlayerPacketAccessor;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.PigAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
+import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
+import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
+import org.spongepowered.common.event.tracking.IPhaseState;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
+import org.spongepowered.common.item.util.ItemStackUtil;
+
 import java.util.List;
 
 public final class PacketPhaseUtil {
 
     @SuppressWarnings("rawtypes")
-    public static boolean handleSlotRestore(final Player player, @Nullable final AbstractContainerMenu containerMenu, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
+    public static boolean handleSlotRestore(final Player player, final @Nullable AbstractContainerMenu containerMenu, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
         boolean restoredAny = false;
         for (final SlotTransaction slotTransaction : slotTransactions) {
 
@@ -172,7 +176,7 @@ public final class PacketPhaseUtil {
         return true;
     }
 
-    @SuppressWarnings({"rawtypes", "unchecked"})
+    @SuppressWarnings({"rawtypes", "unchecked", "deprecation"})
     public static void onProcessPacket(final Packet packetIn, final PacketListener netHandler) {
         if (netHandler instanceof ServerGamePacketListenerImpl) {
             net.minecraft.server.level.ServerPlayer packetPlayer = ((ServerGamePacketListenerImpl) netHandler).player;
@@ -187,7 +191,7 @@ public final class PacketPhaseUtil {
                 frame.pushCause(packetPlayer);
 
                 // Don't process movement capture logic if player hasn't moved
-                final boolean ignoreMovementCapture;
+                boolean ignoreMovementCapture;
                 if (packetIn instanceof ServerboundMovePlayerPacket) {
                     final ServerboundMovePlayerPacket movingPacket = ((ServerboundMovePlayerPacket) packetIn);
                     if (movingPacket instanceof ServerboundMovePlayerPacket.Rot) {
@@ -196,6 +200,29 @@ public final class PacketPhaseUtil {
                         ignoreMovementCapture = true;
                     } else {
                         ignoreMovementCapture = false;
+                    }
+                    // just a sanity check, if the entity is potentially colliding with some block
+                    // we cannot ignore movement capture
+                    if (ignoreMovementCapture) {
+                        // Basically, we need to sanity check the nearby blocks because if they have
+                        // any positional logic, we need to run captures
+                        final AABB boundingBox = packetPlayer.getBoundingBox();
+                        final BlockPos min = new BlockPos(boundingBox.minX + 0.001D, boundingBox.minY + 0.001D, boundingBox.minZ + 0.001D);
+                        final BlockPos max = new BlockPos(boundingBox.maxX - 0.001D, boundingBox.maxY - 0.001D, boundingBox.maxZ - 0.001D);
+                        final BlockPos.MutableBlockPos pos = new BlockPos.MutableBlockPos();
+                        if (packetPlayer.level.hasChunksAt(min, max)) {
+                            for(int x = min.getX(); x <= max.getX(); ++x) {
+                                for(int y = min.getY(); y <= max.getY(); ++y) {
+                                    for(int z = min.getZ(); z <= max.getZ(); ++z) {
+                                        pos.set(x, y, z);
+                                        final Block block = packetPlayer.level.getBlockState(pos).getBlock();
+                                        if (((TrackedBlockBridge) block).bridge$hasEntityInsideLogic()) {
+                                            ignoreMovementCapture = false;
+                                        }
+                                    }
+                                }
+                            }
+                        }
                     }
                 } else {
                     ignoreMovementCapture = false;
@@ -244,8 +271,7 @@ public final class PacketPhaseUtil {
      * @param entity The entity
      * @return A possible data parameter or null if unknown
      */
-    @Nullable
-    public static EntityDataAccessor<?> findModifiedEntityInteractDataParameter(final ItemStack stack, final Entity entity) {
+    public static @Nullable EntityDataAccessor<?> findModifiedEntityInteractDataParameter(final ItemStack stack, final Entity entity) {
         final Item item = stack.getItem();
 
         if (item instanceof DyeItem) {

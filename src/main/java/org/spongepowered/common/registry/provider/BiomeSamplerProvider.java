@@ -47,13 +47,11 @@ public final class BiomeSamplerProvider {
         this.mappings.put(ResourceKey.sponge("default"), (BiomeSampler) (Object) NearestNeighborBiomeZoomer.INSTANCE);
     }
 
-    @Nullable
-    public BiomeSampler get(final ResourceKey key) {
+    public @Nullable BiomeSampler get(final ResourceKey key) {
         return this.mappings.get(key);
     }
 
-    @Nullable
-    public ResourceKey get(final BiomeSampler biomeSampler) {
+    public @Nullable ResourceKey get(final BiomeSampler biomeSampler) {
         return this.mappings.inverse().get(biomeSampler);
     }
 }

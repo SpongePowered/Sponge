@@ -100,11 +100,10 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     }
 
     @Override
-    @NonNull
-    public CommandMapping register(
-            @NonNull final PluginContainer container,
-            @NonNull final LiteralArgumentBuilder<CommandSourceStack> command,
-            @NonNull final String primaryAlias,
+    public @NonNull CommandMapping register(
+            final @NonNull PluginContainer container,
+            final @NonNull LiteralArgumentBuilder<CommandSourceStack> command,
+            final @NonNull String primaryAlias,
             final String @NonNull... secondaryAliases) throws CommandFailedRegistrationException {
 
         return this.register(container, command, secondaryAliases).first();
@@ -174,12 +173,11 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     }
 
     @Override
-    @NonNull
-    public CommandResult process(
-            @NonNull final CommandCause cause,
-            @NonNull final CommandMapping mapping,
-            @NonNull final String command,
-            @NonNull final String arguments) throws CommandException {
+    public @NonNull CommandResult process(
+            final @NonNull CommandCause cause,
+            final @NonNull CommandMapping mapping,
+            final @NonNull String command,
+            final @NonNull String arguments) throws CommandException {
         try {
             final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause));
             return CommandResult.builder().result(result).build();
@@ -189,12 +187,11 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     }
 
     @Override
-    @NonNull
-    public List<String> suggestions(
-            @NonNull final CommandCause cause,
-            @NonNull final CommandMapping mapping,
-            @NonNull final String command,
-            @NonNull final String arguments) {
+    public @NonNull List<String> suggestions(
+            final @NonNull CommandCause cause,
+            final @NonNull CommandMapping mapping,
+            final @NonNull String command,
+            final @NonNull String arguments) {
         final CompletableFuture<Suggestions> suggestionsCompletableFuture =
                 this.dispatcher.getCompletionSuggestions(
                         this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause, true));
@@ -203,8 +200,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     }
 
     @Override
-    @NonNull
-    public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final CommandMapping mapping) {
+    public @NonNull Optional<Component> help(final @NonNull CommandCause cause, final @NonNull CommandMapping mapping) {
         final CommandNode<CommandSourceStack> node = this.dispatcher.findNode(Collections.singletonList(mapping.primaryAlias()));
         if (node != null) {
             return Optional.of(Component.text(this.dispatcher.getSmartUsage(node, (CommandSourceStack) cause).toString()));
@@ -238,7 +234,7 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
         }
 
         final LiteralArgumentBuilder<CommandSourceStack> replacementBuilder =
-                LiteralArgumentBuilder.<CommandSourceStack>literal(pluginContainer.getMetadata().getId() + ":" + builder.getLiteral())
+                LiteralArgumentBuilder.<CommandSourceStack>literal(pluginContainer.metadata().id() + ":" + builder.getLiteral())
                         .forward(builder.getRedirect(), builder.getRedirectModifier(), builder.isFork())
                         .executes(builder.getCommand())
                         .requires(builder.getRequirement());

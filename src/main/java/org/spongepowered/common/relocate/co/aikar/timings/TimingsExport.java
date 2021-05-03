@@ -85,7 +85,7 @@ class TimingsExport extends Thread {
     }
 
     private static String getServerName() {
-        return SpongeCommon.getPlugin().getMetadata().getName() + " " + SpongeCommon.getPlugin().getMetadata().getVersion();
+        return SpongeCommon.getPlugin().metadata().name() + " " + SpongeCommon.getPlugin().metadata().version();
     }
 
     /**
@@ -117,7 +117,7 @@ class TimingsExport extends Thread {
         Platform platform = SpongeCommon.getGame().platform();
         JsonObjectBuilder builder = JSONUtil.objectBuilder()
                 // Get some basic system details about the server
-                .add("version", platform.container(IMPLEMENTATION).getMetadata().getVersion())
+                .add("version", platform.container(IMPLEMENTATION).metadata().version())
                 .add("maxplayers", SpongeCommon.getGame().server().maxPlayers())
                 .add("start", TimingsManager.timingStart / 1000)
                 .add("end", System.currentTimeMillis() / 1000)
@@ -197,11 +197,11 @@ class TimingsExport extends Thread {
         // Information about loaded plugins
 
         builder.add("plugins", JSONUtil.mapArrayToObject(SpongeCommon.getGame().pluginManager().plugins(), (plugin) -> {
-            return JSONUtil.objectBuilder().add(plugin.getMetadata().getId(), JSONUtil.objectBuilder()
-                    .add("version", plugin.getMetadata().getVersion())
-                    .add("description", plugin.getMetadata().getDescription().orElse(""))
-                    .add("website", plugin.getMetadata().getLinks().getHomepage())
-                    .add("authors", TimingsExport.AUTHOR_LIST_JOINER.join(plugin.getMetadata().getContributors()))
+            return JSONUtil.objectBuilder().add(plugin.metadata().id(), JSONUtil.objectBuilder()
+                    .add("version", plugin.metadata().version())
+                    .add("description", plugin.metadata().description().orElse(""))
+                    .add("website", plugin.metadata().links().homepage())
+                    .add("authors", TimingsExport.AUTHOR_LIST_JOINER.join(plugin.metadata().contributors()))
             ).build();
         }));
 

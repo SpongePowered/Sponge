@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.entity;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import javax.annotation.Nullable;
 
 public class EntityContext<E extends EntityContext<E>> extends PhaseContext<E> {
 
@@ -46,8 +46,7 @@ public class EntityContext<E extends EntityContext<E>> extends PhaseContext<E> {
         this.damageSource = null;
     }
 
-    @Nullable
-    public DamageSource getDamageSource() {
+    public @Nullable DamageSource getDamageSource() {
         return this.damageSource;
     }
 

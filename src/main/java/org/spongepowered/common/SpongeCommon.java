@@ -57,9 +57,9 @@ public final class SpongeCommon {
             Constants.MINECRAFT_PROTOCOL_VERSION
     );
 
-    @Inject @Nullable private static SpongeGame game;
+    @Inject private @Nullable static SpongeGame game;
 
-    @Nullable private static PluginContainer activePlugin;
+    private @Nullable static PluginContainer activePlugin;
 
     private SpongeCommon() {
     }
@@ -111,7 +111,7 @@ public final class SpongeCommon {
     }
 
     public static Path getGameDirectory() {
-        return Launch.getInstance().getPluginEngine().getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
+        return Launch.getInstance().getPluginEngine().getPluginEnvironment().blackboard().get(PluginKeys.BASE_DIRECTORY)
                 .orElseThrow(() -> new IllegalStateException("No game directory has been set in the launcher!"));
     }
 
@@ -146,7 +146,7 @@ public final class SpongeCommon {
         return SpongeCommon.activePlugin;
     }
 
-    public static void setActivePlugin(@Nullable final PluginContainer plugin) {
+    public static void setActivePlugin(final @Nullable PluginContainer plugin) {
         SpongeCommon.activePlugin = plugin;
     }
 

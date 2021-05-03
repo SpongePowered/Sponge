@@ -35,8 +35,7 @@ import java.util.HashMap;
 public final class SpongeFluidStateMatcherBuilder extends AbstractStateMatcherBuilder<FluidState, FluidType> {
 
     @Override
-    @NonNull
-    public StateMatcher<@NonNull FluidState> build() throws IllegalStateException {
+    public @NonNull StateMatcher<@NonNull FluidState> build() throws IllegalStateException {
         if (this.type == null) {
             throw new IllegalStateException("BlockType cannot be null");
         }
@@ -47,7 +46,7 @@ public final class SpongeFluidStateMatcherBuilder extends AbstractStateMatcherBu
     }
 
     @Override
-    public StateMatcher.Builder<@NonNull FluidState, @NonNull FluidType> from(@NonNull final StateMatcher<@NonNull FluidState> value) {
+    public StateMatcher.Builder<@NonNull FluidState, @NonNull FluidType> from(final @NonNull StateMatcher<@NonNull FluidState> value) {
         if (!(value instanceof SpongeFluidStateMatcher)) {
             throw new IllegalArgumentException("BlockStateMatcher must be a SpongeBlockStateMatcher");
         }

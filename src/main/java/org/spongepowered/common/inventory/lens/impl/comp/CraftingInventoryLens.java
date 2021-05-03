@@ -43,10 +43,10 @@ public class CraftingInventoryLens extends DefaultIndexedLens {
     private final CraftingGridInventoryLens craftingGrid;
 
     public CraftingInventoryLens(int outputSlotIndex, int gridBase, int width, int height, SlotLensProvider slots) {
-        super(gridBase, width * height + 1, 1, CraftingInventory.class, slots);
+        super(0, width * height + 1, 1, CraftingInventory.class, slots);
         this.outputSlotIndex = outputSlotIndex;
         this.outputSlot = new CraftingOutputSlotLens(slots.getSlotLens(this.outputSlotIndex), FilteringSlotLens.ItemStackFilter.filterNone());;
-        this.craftingGrid = new CraftingGridInventoryLens(this.base, width, height, slots);
+        this.craftingGrid = new CraftingGridInventoryLens(gridBase, width, height, slots);
         this.addChild(this.outputSlot, KeyValuePair.slotIndex(0));
         this.addChild(this.craftingGrid);
     }

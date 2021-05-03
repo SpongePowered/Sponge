@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.adapter.impl;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -41,7 +42,6 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 
 public abstract class AdapterLogic {
 

@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.base.Preconditions;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
@@ -56,7 +57,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -70,8 +70,8 @@ import net.minecraft.world.level.block.Block;
 public final class SpongeItemStackBuilder extends AbstractDataBuilder<ItemStack> implements ItemStack.Builder {
     private ItemType type;
     private int quantity;
-    @Nullable private LinkedHashMap<Key<?>, Object> keyValues;
-    @Nullable private CompoundTag compound;
+    private @Nullable LinkedHashMap<Key<?>, Object> keyValues;
+    private @Nullable CompoundTag compound;
 
     public SpongeItemStackBuilder() {
         super(ItemStack.class, 1);

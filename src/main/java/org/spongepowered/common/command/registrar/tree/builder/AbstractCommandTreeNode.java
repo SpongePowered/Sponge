@@ -47,8 +47,8 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
 
     public final static Command<SharedSuggestionProvider> EXECUTABLE = isp -> 1;
 
-    @Nullable private CommandTreeNode<?> redirect = null;
-    @Nullable private Map<String, AbstractCommandTreeNode<?, ?>> children = null;
+    private @Nullable CommandTreeNode<?> redirect = null;
+    private @Nullable Map<String, AbstractCommandTreeNode<?, ?>> children = null;
     private boolean executable = false;
     private @Nullable ClientSuggestionProvider suggestionProvider = null;
     private Predicate<CommandCause> requirement = c -> true;
@@ -61,8 +61,7 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     }
 
     @Override
-    @NonNull
-    public T child(@NonNull final String key, final CommandTreeNode.@NonNull Argument<@NonNull ?> child) {
+    public @NonNull T child(final @NonNull String key, final CommandTreeNode.@NonNull Argument<@NonNull ?> child) {
         Objects.requireNonNull(key);
         Objects.requireNonNull(child);
         if (this.redirect != null) {
@@ -78,8 +77,7 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     }
 
     @Override
-    @NonNull
-    public T redirect(@NonNull final CommandTreeNode<@NonNull ?> to) {
+    public @NonNull T redirect(final @NonNull CommandTreeNode<@NonNull ?> to) {
         Objects.requireNonNull(to);
         if (this.redirect != null) {
             throw new IllegalStateException("There must be no children if using a redirect");
@@ -89,8 +87,7 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     }
 
     @Override
-    @NonNull
-    public T executable() {
+    public @NonNull T executable() {
         this.executable = true;
         return this.getThis();
     }
@@ -102,8 +99,7 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     }
 
     @Override
-    @NonNull
-    public T customSuggestions() {
+    public @NonNull T customSuggestions() {
         return this.suggestions((ClientSuggestionProvider) SuggestionProviders.ASK_SERVER);
     }
 
@@ -132,8 +128,7 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
         return (SuggestionProvider<SharedSuggestionProvider>) this.suggestionProvider;
     }
 
-    @Nullable
-    public CommandTreeNode<?> getRedirect() {
+    public @Nullable CommandTreeNode<?> getRedirect() {
         return this.redirect;
     }
 

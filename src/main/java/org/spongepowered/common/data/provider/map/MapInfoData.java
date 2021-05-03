@@ -69,7 +69,7 @@ public final class MapInfoData {
 				.create(Keys.MAP_LOCATION)
 					.get(mapData -> Vector2i.from(mapData.x, mapData.z))
 					/*.set((mapData, vector2i) -> {
-						mapData.setOrigin(vector2i.getX(), vector2i.getY(), mapData.scale);
+						mapData.setOrigin(vector2i.x(), vector2i.y(), mapData.scale);
 						mapData.setDirty();
 					})*/
 				.create(Keys.MAP_LOCKED)

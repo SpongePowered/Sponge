@@ -275,8 +275,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    @NonNull
-    public Optional<org.spongepowered.api.command.Command.Parameterized> executedCommand() {
+    public @NonNull Optional<org.spongepowered.api.command.Command.Parameterized> executedCommand() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().executedCommand();
         }
@@ -284,8 +283,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    @NonNull
-    public CommandCause cause() {
+    public @NonNull CommandCause cause() {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             return this.transaction.peek().getCopyBuilder().cause();
         }
@@ -293,22 +291,22 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public boolean hasFlag(@NonNull final String flagAlias) {
+    public boolean hasFlag(final @NonNull String flagAlias) {
         return this.flagMap.containsKey(flagAlias);
     }
 
     @Override
-    public boolean hasFlag(@NonNull final Flag flag) {
+    public boolean hasFlag(final @NonNull Flag flag) {
         return this.flagMap.containsKey(flag.unprefixedAliases().iterator().next());
     }
 
     @Override
-    public int flagInvocationCount(@NonNull final String flagKey) {
+    public int flagInvocationCount(final @NonNull String flagKey) {
         return this.flagMap.getOrDefault(flagKey, 0);
     }
 
     @Override
-    public int flagInvocationCount(@NonNull final Flag flag) {
+    public int flagInvocationCount(final @NonNull Flag flag) {
         return this.flagMap.getOrDefault(flag.unprefixedAliases().iterator().next(), 0);
     }
 
@@ -321,9 +319,8 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    @NonNull
     @SuppressWarnings("unchecked")
-    public <T> Optional<T> one(final Parameter.@NonNull Key<T> key) {
+    public <T> @NonNull Optional<T> one(final Parameter.@NonNull Key<T> key) {
         final SpongeParameterKey<T> spongeParameterKey = SpongeParameterKey.getSpongeKey(key);
         final Collection<?> collection = this.getFrom(spongeParameterKey);
         if (collection.size() > 1) {
@@ -336,9 +333,8 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    @NonNull
     @SuppressWarnings("unchecked")
-    public <T> T requireOne(final Parameter.@NonNull Key<T> key) throws NoSuchElementException, IllegalArgumentException {
+    public <T> @NonNull T requireOne(final Parameter.@NonNull Key<T> key) throws NoSuchElementException, IllegalArgumentException {
         final SpongeParameterKey<T> spongeParameterKey = SpongeParameterKey.getSpongeKey(key);
         final Collection<?> collection = this.getFrom(spongeParameterKey);
         if (collection.size() > 1) {
@@ -351,9 +347,8 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    @NonNull
     @SuppressWarnings("unchecked")
-    public <T> Collection<? extends T> all(final Parameter.@NonNull Key<T> key) {
+    public <T> @NonNull Collection<? extends T> all(final Parameter.@NonNull Key<T> key) {
         return (Collection<? extends T>) this.getFrom(SpongeParameterKey.getSpongeKey(key));
     }
 
@@ -378,12 +373,12 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public void sendMessage(@NonNull final Identified identity, @NonNull final Component message) {
+    public void sendMessage(final @NonNull Identified identity, final @NonNull Component message) {
         this.cause().sendMessage(identity, message);
     }
 
     @Override
-    public void sendMessage(@NonNull final Identity identity, @NonNull final Component message) {
+    public void sendMessage(final @NonNull Identity identity, final @NonNull Component message) {
         this.cause().sendMessage(identity, message);
     }
 
@@ -399,12 +394,12 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         return collection;
     }
 
-    void addFlagInvocation(@NonNull final String key, final int count) {
+    void addFlagInvocation(final @NonNull String key, final int count) {
         this.flagMap.addTo(key, count);
     }
 
     @Override
-    public void addFlagInvocation(@NonNull final Flag flag) {
+    public void addFlagInvocation(final @NonNull Flag flag) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             this.transaction.peek().addFlagInvocation(flag);
         } else {
@@ -413,7 +408,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public <T> void putEntry(final Parameter.@NonNull Key<T> key, @NonNull final T object) {
+    public <T> void putEntry(final Parameter.@NonNull Key<T> key, final @NonNull T object) {
         if (this.transaction != null && !this.transaction.isEmpty()) {
             this.transaction.peek().putEntry(key, object);
         } else {
@@ -430,8 +425,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    @NonNull
-    public Transaction startTransaction() {
+    public @NonNull Transaction startTransaction() {
         if (this.isTransactionCopy) {
             throw new IllegalStateException("Cannot start a transaction on a transaction!");
         }
@@ -444,8 +438,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    @NonNull
-    public SpongeCommandContext build(@NonNull final String input) {
+    public @NonNull SpongeCommandContext build(final @NonNull String input) {
         // Commit all transactions first.
         while (this.transaction != null && !this.transaction.isEmpty()) {
             this.commit(this.transaction.peek());
@@ -469,7 +462,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     }
 
     @Override
-    public void commit(@NonNull final Transaction transaction) throws IllegalArgumentException {
+    public void commit(final @NonNull Transaction transaction) throws IllegalArgumentException {
         if (this.transaction != null && this.transaction.peek() == transaction) {
             ((SpongeCommandContextBuilderTransaction) transaction).commit();
             this.removeTransaction(transaction);
@@ -488,7 +481,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         }
     }
 
-    private void removeTransaction(@NonNull final Transaction transaction) {
+    private void removeTransaction(final @NonNull Transaction transaction) {
         if (this.transaction != null && this.transaction.peek() == transaction) {
             this.transaction.pop();
         }

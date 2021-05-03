@@ -46,10 +46,10 @@ import java.util.Map;
 
 public final class SpongeAdvancementBuilder extends AbstractResourceKeyedBuilder<Advancement, Advancement.Builder> implements Advancement.Builder.RootStep {
 
-    @Nullable private Advancement parent;
+    private @Nullable Advancement parent;
     private AdvancementCriterion criterion;
-    @Nullable private DisplayInfo displayInfo;
-    @Nullable private ResourceLocation backgroundPath;
+    private @Nullable DisplayInfo displayInfo;
+    private @Nullable ResourceLocation backgroundPath;
 
     public SpongeAdvancementBuilder() {
         this.reset();

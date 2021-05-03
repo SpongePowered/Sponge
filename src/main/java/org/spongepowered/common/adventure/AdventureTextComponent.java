@@ -138,14 +138,14 @@ public class AdventureTextComponent implements net.minecraft.network.chat.Compon
         return this.deepConverted().copy();
     }
 
-    @Override
     @OnlyIn(Dist.CLIENT)
+    @Override
     public FormattedCharSequence getVisualOrderText() {
         return this.deepConvertedLocalized().getVisualOrderText();
     }
 
-    @Override
     @OnlyIn(Dist.CLIENT)
+    @Override
     public <T> Optional<T> visit(final StyledContentConsumer<T> visitor, final Style style) {
         return this.deepConvertedLocalized().visit(visitor, style);
     }

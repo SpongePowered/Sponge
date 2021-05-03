@@ -36,7 +36,7 @@ public final class SpongeSubcommandParameter implements Parameter.Subcommand {
     private final Set<String> aliases;
     private final Command.Parameterized command;
 
-    public SpongeSubcommandParameter(@NonNull final Set<String> aliases, final Command.@NonNull Parameterized command) {
+    public SpongeSubcommandParameter(final @NonNull Set<String> aliases, final Command.@NonNull Parameterized command) {
         this.aliases = aliases;
         this.command = command;
     }
@@ -58,8 +58,7 @@ public final class SpongeSubcommandParameter implements Parameter.Subcommand {
     }
 
     @Override
-    @NonNull
-    public Set<String> aliases() {
+    public @NonNull Set<String> aliases() {
         return ImmutableSet.copyOf(this.aliases);
     }
 

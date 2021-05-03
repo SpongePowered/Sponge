@@ -43,6 +43,7 @@ import org.spongepowered.vanilla.client.gui.widget.list.PluginSelectionList;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.List;
+import java.util.Locale;
 import java.util.stream.Collectors;
 
 public final class PluginScreen extends Screen {
@@ -58,7 +59,7 @@ public final class PluginScreen extends Screen {
         this.previousScreen = previousScreen;
         this.metadata = new ObjectArrayList<>();
         final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().plugins();
-        this.metadata.addAll(plugins.stream().map(PluginContainer::getMetadata).collect(Collectors.toList()));
+        this.metadata.addAll(plugins.stream().map(PluginContainer::metadata).collect(Collectors.toList()));
     }
 
     @Override
@@ -73,7 +74,7 @@ public final class PluginScreen extends Screen {
         // Add plugin list
         this.selectionList.setSelectConsumer(e -> this.contentPanel.setMetadata(e == null ? null : e.metadata));
         this.generateEntries(
-            Launch.getInstance().getPluginManager().plugins().stream().map(PluginContainer::getMetadata).collect(Collectors.toList()));
+            Launch.getInstance().getPluginManager().plugins().stream().map(PluginContainer::metadata).collect(Collectors.toList()));
 
         // Add search text field
         this.searchField = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, new TranslatableComponent(I18n.get("itemGroup.search")));
@@ -81,8 +82,8 @@ public final class PluginScreen extends Screen {
             this.selectionList.setFilterSupplier(() -> {
                 // Filter based on ID/Name
                 final List<PluginSelectionList.Entry> filteredList = this.selectionList.children().stream()
-                    .filter(entry -> entry.metadata.getName().orElse("").toLowerCase().contains(value.toLowerCase())
-                        || entry.metadata.getId().toLowerCase().contains(value.toLowerCase()))
+                    .filter(entry -> entry.metadata.name().orElse("").toLowerCase(Locale.ROOT).contains(value.toLowerCase(Locale.ROOT))
+                        || entry.metadata.id().toLowerCase(Locale.ROOT).contains(value.toLowerCase(Locale.ROOT)))
                     .collect(Collectors.toList());
 
                 // If the current selection doesn't exist, then select what we can at the top of the filtered list

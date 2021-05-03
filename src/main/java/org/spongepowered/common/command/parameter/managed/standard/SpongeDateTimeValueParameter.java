@@ -50,14 +50,12 @@ public final class SpongeDateTimeValueParameter extends ResourceKeyedArgumentVal
     }
 
     @Override
-    @NonNull
-    public List<String> complete(@NonNull final CommandCause context, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
         return Collections.emptyList();
     }
 
     @Override
-    @NonNull
-    public Optional<? extends LocalDateTime> parseValue(
+    public @NonNull Optional<? extends LocalDateTime> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         final String date = reader.parseString();
         try {

@@ -56,7 +56,7 @@ public class TimedEventListener<T extends Event> implements EventListener<T> {
         }
         id = method.getDeclaringClass().getName();
 
-        this.timings = SpongeTimingsFactory.ofSafe(plugin.getMetadata().getId(), "Event: " + id + " (" + eventClass.getSimpleName() + ")", null);
+        this.timings = SpongeTimingsFactory.ofSafe(plugin.metadata().id(), "Event: " + id + " (" + eventClass.getSimpleName() + ")", null);
     }
 
     @Override

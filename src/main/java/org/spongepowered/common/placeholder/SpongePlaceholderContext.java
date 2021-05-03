@@ -24,19 +24,19 @@
  */
 package org.spongepowered.common.placeholder;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.placeholder.PlaceholderContext;
 
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
 
 public final class SpongePlaceholderContext implements PlaceholderContext {
 
-    @Nullable final Supplier<Object> associatedObjectSupplier;
-    @Nullable private final String argument;
+    final @Nullable Supplier<Object> associatedObjectSupplier;
+    private final @Nullable String argument;
 
-    public SpongePlaceholderContext(@Nullable final Supplier<Object> associatedObjectSupplier, @Nullable final String argument) {
+    public SpongePlaceholderContext(final @Nullable Supplier<Object> associatedObjectSupplier, final @Nullable String argument) {
         this.associatedObjectSupplier = associatedObjectSupplier;
         this.argument = argument;
     }
@@ -54,8 +54,7 @@ public final class SpongePlaceholderContext implements PlaceholderContext {
         return Optional.ofNullable(this.argument);
     }
 
-    @Nullable
-    Supplier<Object> getAssociatedObjectSupplier() {
+    @Nullable Supplier<Object> getAssociatedObjectSupplier() {
         return this.associatedObjectSupplier;
     }
 

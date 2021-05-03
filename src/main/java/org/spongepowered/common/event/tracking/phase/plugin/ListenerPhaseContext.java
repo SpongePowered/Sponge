@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.plugin;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -35,7 +36,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerPlayer;
 
 public class ListenerPhaseContext<L extends ListenerPhaseContext<L>> extends PluginPhaseContext<L> {

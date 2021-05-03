@@ -40,13 +40,13 @@ import java.util.function.Predicate;
 
 public final class SpongeFlagBuilder implements Flag.Builder {
 
-    @Nullable private Parameter parameter;
+    private @Nullable Parameter parameter;
     private final Set<String> aliases = new HashSet<>();
     private final Set<String> keys = new HashSet<>();
     private Predicate<CommandCause> requirement = cause -> true;
 
     @Override
-    public Flag.@NonNull Builder alias(@NonNull final String alias) {
+    public Flag.@NonNull Builder alias(final @NonNull String alias) {
         Objects.requireNonNull(alias, "The alias cannot be null.");
         if (alias.startsWith("-")) {
             throw new IllegalArgumentException("Flag '" + alias + "' cannot start with a dash");
@@ -64,7 +64,7 @@ public final class SpongeFlagBuilder implements Flag.Builder {
     }
 
     @Override
-    public Flag.@NonNull Builder aliases(@NonNull final Iterable<String> aliases) {
+    public Flag.@NonNull Builder aliases(final @NonNull Iterable<String> aliases) {
         for (final String alias : aliases) {
             this.alias(alias);
         }
@@ -72,7 +72,7 @@ public final class SpongeFlagBuilder implements Flag.Builder {
     }
 
     @Override
-    public Flag.@NonNull Builder setPermission(@Nullable final String permission) {
+    public Flag.@NonNull Builder setPermission(final @Nullable String permission) {
         if (permission == null) {
             return this.setRequirement(null);
         } else {
@@ -81,7 +81,7 @@ public final class SpongeFlagBuilder implements Flag.Builder {
     }
 
     @Override
-    public Flag.@NonNull Builder setRequirement(@Nullable final Predicate<CommandCause> requirement) {
+    public Flag.@NonNull Builder setRequirement(final @Nullable Predicate<CommandCause> requirement) {
         if (requirement == null) {
             this.requirement = cause -> true;
         } else {
@@ -91,14 +91,13 @@ public final class SpongeFlagBuilder implements Flag.Builder {
     }
 
     @Override
-    public Flag.@NonNull Builder setParameter(@Nullable final Parameter parameter) {
+    public Flag.@NonNull Builder setParameter(final @Nullable Parameter parameter) {
         this.parameter = parameter;
         return this;
     }
 
     @Override
-    @NonNull
-    public Flag build() throws IllegalStateException {
+    public @NonNull Flag build() throws IllegalStateException {
         Preconditions.checkState(!this.aliases.isEmpty(), "Aliases cannot be empty.");
         return new SpongeFlag(
                 ImmutableSet.copyOf(this.keys),

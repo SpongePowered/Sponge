@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.TickNextTickData;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.function.BiConsumer;
-import net.minecraft.world.level.TickNextTickData;
 
 public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<ChunkLoadContext> {
 
@@ -53,7 +54,9 @@ public final class ChunkLoadPhaseState extends GeneralGenerationPhaseState<Chunk
     }
 
     @Override
-    public void associateScheduledTickUpdate(final ChunkLoadContext asContext, final TickNextTickData<?> entry) {
+    public void associateScheduledTickUpdate(
+        final ChunkLoadContext asContext, ServerLevel level, final TickNextTickData<?> entry
+    ) {
         ((TickNextTickDataBridge) entry).bridge$setIsPartOfWorldGeneration(true);
     }
 }

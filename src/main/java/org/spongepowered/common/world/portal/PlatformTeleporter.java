@@ -39,12 +39,10 @@ import net.minecraft.world.level.portal.PortalInfo;
  */
 public interface PlatformTeleporter {
 
-    @Nullable
-    PortalInfo getPortalInfo(Entity entity, ServerLevel currentWorld, ServerLevel targetWorld, Vector3d currentPosition);
+    @Nullable PortalInfo getPortalInfo(Entity entity, ServerLevel currentWorld, ServerLevel targetWorld, Vector3d currentPosition);
 
     // Implementor note: the final function Boolean is true if a portal exists
-    @Nullable
-    Entity performTeleport(Entity entity, ServerLevel currentWorld, ServerLevel targetWorld, float xRot, Function<Boolean, Entity> teleportLogic);
+    @Nullable Entity performTeleport(Entity entity, ServerLevel currentWorld, ServerLevel targetWorld, float xRot, Function<Boolean, Entity> teleportLogic);
 
     // This isn't if it's a vanilla portal - it's if it's vanilla(ish) logic.
     boolean isVanilla();

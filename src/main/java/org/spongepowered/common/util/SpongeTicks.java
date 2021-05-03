@@ -44,7 +44,7 @@ public final class SpongeTicks implements Ticks {
     }
 
     @Override
-    public long minecraftSeconds(@NonNull final Engine engine) {
+    public long minecraftSeconds(final @NonNull Engine engine) {
         // We do this to try to ensure we get the most accurate number of seconds we can.
         // We know the hour rate is 1000 ticks, we can get an accurate hour count. This reduces the potential
         // for error.
@@ -55,14 +55,12 @@ public final class SpongeTicks implements Ticks {
     }
 
     @Override
-    @NonNull
-    public Duration minecraftDayTimeDuration(@NonNull final Engine engine) {
+    public @NonNull Duration minecraftDayTimeDuration(final @NonNull Engine engine) {
         return Duration.of(this.minecraftSeconds(engine), ChronoUnit.SECONDS);
     }
 
     @Override
-    @NonNull
-    public Duration expectedDuration(@NonNull final Engine engine) {
+    public @NonNull Duration expectedDuration(final @NonNull Engine engine) {
         return this.effectiveMinimumDuration;
     }
 
@@ -103,8 +101,7 @@ public final class SpongeTicks implements Ticks {
         }
 
         @Override
-        @NonNull
-        public Ticks of(final long ticks) {
+        public @NonNull Ticks of(final long ticks) {
             if (ticks < 0) {
                 throw new IllegalArgumentException("Tick must be greater than 0!");
             }
@@ -112,8 +109,7 @@ public final class SpongeTicks implements Ticks {
         }
 
         @Override
-        @NonNull
-        public Ticks ofWallClockTime(@NonNull final Engine engine, final long time, @NonNull final TemporalUnit temporalUnit) {
+        public @NonNull Ticks ofWallClockTime(final @NonNull Engine engine, final long time, final @NonNull TemporalUnit temporalUnit) {
             Objects.requireNonNull(engine);
             if (time < 0) {
                 throw new IllegalArgumentException("Time must be greater than 0!");
@@ -125,8 +121,7 @@ public final class SpongeTicks implements Ticks {
         }
 
         @Override
-        @NonNull
-        public Ticks ofMinecraftSeconds(@NonNull final Engine engine, final long seconds) {
+        public @NonNull Ticks ofMinecraftSeconds(final @NonNull Engine engine, final long seconds) {
             Objects.requireNonNull(engine);
             if (seconds < 0) {
                 throw new IllegalArgumentException("Seconds must be greater than 0!");
@@ -135,8 +130,7 @@ public final class SpongeTicks implements Ticks {
         }
 
         @Override
-        @NonNull
-        public Ticks ofMinecraftHours(@NonNull final Engine engine, final long hours) {
+        public @NonNull Ticks ofMinecraftHours(final @NonNull Engine engine, final long hours) {
             Objects.requireNonNull(engine);
             if (hours < 0) {
                 throw new IllegalArgumentException("Hours must be greater than 0!");

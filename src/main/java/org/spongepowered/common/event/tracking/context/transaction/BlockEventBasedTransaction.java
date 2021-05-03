@@ -28,6 +28,8 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -51,8 +53,6 @@ import org.spongepowered.math.vector.Vector3i;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
 
 abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEvent.All> {
 
@@ -117,6 +117,9 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
             .map(Optional::get)
             .collect(ImmutableList.toImmutableList());
 
+        if (eventTransactions.isEmpty()) {
+            return Optional.empty();
+        }
         return Optional.of(SpongeEventFactory.createChangeBlockEventAll(
             currentCause,
             eventTransactions,
@@ -133,6 +136,9 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
         final ImmutableList<? extends GameTransaction<ChangeBlockEvent.All>> blockTransactions
     ) {
         boolean cancelledAny = false;
+        if (event.isCancelled()) {
+            event.transactions().forEach(BlockTransaction::invalidate);
+        }
         for (final Transaction<BlockSnapshot> transaction : event.transactions()) {
             if (!transaction.isValid()) {
                 cancelledAny = true;
@@ -140,9 +146,9 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
                     final BlockEventBasedTransaction blockTransaction = (BlockEventBasedTransaction) gameTransaction;
                     final Vector3i position = transaction.original().position();
                     final BlockPos affectedPosition = blockTransaction.affectedPosition;
-                    if (position.getX() == affectedPosition.getX()
-                        && position.getY() == affectedPosition.getY()
-                        && position.getZ() == affectedPosition.getZ()
+                    if (position.x() == affectedPosition.getX()
+                        && position.y() == affectedPosition.getY()
+                        && position.z() == affectedPosition.getZ()
                     ) {
                         gameTransaction.markCancelled();
                     }
@@ -151,5 +157,11 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
         }
 
         return cancelledAny;
+    }
+
+    @Override
+    public void markEventAsCancelledIfNecessary(final ChangeBlockEvent.All event) {
+        super.markEventAsCancelledIfNecessary(event);
+        event.transactions().forEach(BlockTransaction::invalidate);
     }
 }

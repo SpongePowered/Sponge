@@ -27,11 +27,11 @@ package org.spongepowered.common.data.persistence;
 import static com.google.common.base.Preconditions.checkState;
 
 import com.google.gson.stream.JsonWriter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 
-import javax.annotation.Nullable;
 import java.io.IOException;
 import java.io.Writer;
 import java.util.ArrayList;
@@ -60,7 +60,7 @@ public final class DataViewJsonWriter extends JsonWriter {
     };
 
     private final List<Object> stack = new ArrayList<>();
-    @Nullable private DataQuery pendingKey;
+    private @Nullable DataQuery pendingKey;
     private DataContainer result = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
 
     public DataViewJsonWriter() {

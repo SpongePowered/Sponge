@@ -85,7 +85,7 @@ public class SpongeCommand {
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", CommandMapping.class);
     private final Parameter.Key<ServerWorld> worldKey = Parameter.key("world", ServerWorld.class);
 
-    @Nullable private Component versionText = null;
+    private @Nullable Component versionText = null;
 
     public Command.Parameterized createSpongeCommand() {
         // /sponge audit
@@ -201,19 +201,18 @@ public class SpongeCommand {
         // no-op for vanilla, SF might like to add a /sponge mods command, for example.
     }
 
-    @NonNull
-    private CommandResult rootCommand(final CommandContext context) {
+    private @NonNull CommandResult rootCommand(final CommandContext context) {
         final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
         final PluginContainer apiPlugin = Launch.getInstance().getApiPlugin();
         final PluginContainer minecraftPlugin = Launch.getInstance().getMinecraftPlugin();
 
         context.sendMessage(Identity.nil(), Component.text().append(
                 Component.text("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(Component.space()),
-                Component.text("Plugin Platform (running on Minecraft " + minecraftPlugin.getMetadata().getVersion() + ")"),
+                Component.text("Plugin Platform (running on Minecraft " + minecraftPlugin.metadata().version() + ")"),
                 Component.newline(),
-                Component.text(apiPlugin.getMetadata().getName().get() + ": " + apiPlugin.getMetadata().getVersion()),
+                Component.text(apiPlugin.metadata().name().get() + ": " + apiPlugin.metadata().version()),
                 Component.newline(),
-                Component.text(platformPlugin.getMetadata().getName().get() + ": " + platformPlugin.getMetadata().getVersion())
+                Component.text(platformPlugin.metadata().name().get() + ": " + platformPlugin.metadata().version())
             ).build()
         );
 
@@ -238,8 +237,7 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    @NonNull
-    private CommandResult auditSubcommandExecutor(final CommandContext context) {
+    private @NonNull CommandResult auditSubcommandExecutor(final CommandContext context) {
         SpongeCommon.getLogger().info("Starting Mixin Audit");
         Launch.getInstance().auditMixins();
         return CommandResult.success();
@@ -288,8 +286,7 @@ public class SpongeCommand {
                 .build();
     }
 
-    @NonNull
-    private CommandResult heapSubcommandExecutor(final CommandContext context) {
+    private @NonNull CommandResult heapSubcommandExecutor(final CommandContext context) {
         final File file = new File(new File(new File("."), "dumps"),
                 "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.hprof");
         // src.sendMessage(Text.of("Writing JVM heap data to: ", file));
@@ -312,12 +309,11 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    @NonNull
-    private CommandResult pluginsListSubcommand(final CommandContext context) {
+    private @NonNull CommandResult pluginsListSubcommand(final CommandContext context) {
         final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().plugins();
         context.sendMessage(Identity.nil(), this.title("Plugins (" + plugins.size() + ")"));
         for (final PluginContainer specificContainer : plugins) {
-            final PluginMetadata metadata = specificContainer.getMetadata();
+            final PluginMetadata metadata = specificContainer.metadata();
             final TextComponent.Builder builder = Component.text();
             this.createShortContainerMeta(builder.append(SpongeCommand.INDENT_COMPONENT), metadata);
             // builder.clickEvent(SpongeComponents.executeCallback(cause ->
@@ -328,15 +324,13 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    @NonNull
-    private CommandResult pluginsInfoSubcommand(final CommandContext context) {
+    private @NonNull CommandResult pluginsInfoSubcommand(final CommandContext context) {
         final PluginContainer pluginContainer = context.requireOne(this.pluginContainerKey);
-        context.sendMessage(Identity.nil(), this.createContainerMeta(pluginContainer.getMetadata()));
+        context.sendMessage(Identity.nil(), this.createContainerMeta(pluginContainer.metadata()));
         return CommandResult.success();
     }
 
-    @NonNull
-    private CommandResult pluginsRefreshSubcommandExecutor(final CommandContext context) {
+    private @NonNull CommandResult pluginsRefreshSubcommandExecutor(final CommandContext context) {
         final Optional<PluginContainer> pluginContainer = context.one(this.pluginContainerKey);
         final RefreshGameEvent event = SpongeEventFactory.createRefreshGameEvent(
                 PhaseTracker.getCauseStackManager().currentCause(),
@@ -344,7 +338,7 @@ public class SpongeCommand {
         );
         if (pluginContainer.isPresent()) {
             // just send the reload event to that
-            context.sendMessage(Identity.nil(), Component.text("Sending refresh event to" + pluginContainer.get().getMetadata().getId() + ", please wait..."));
+            context.sendMessage(Identity.nil(), Component.text("Sending refresh event to" + pluginContainer.get().metadata().id() + ", please wait..."));
             ((SpongeEventManager) SpongeCommon.getGame().eventManager()).post(event, pluginContainer.get());
         } else {
             context.sendMessage(Identity.nil(), Component.text("Sending refresh event to all plugins, please wait..."));
@@ -462,25 +456,24 @@ public class SpongeCommand {
         return builder;
     }
 
-    @NonNull
-    private CommandResult versionExecutor(final CommandContext context) {
+    private @NonNull CommandResult versionExecutor(final CommandContext context) {
         if (this.versionText == null) {
             final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
 
             final TextComponent.Builder builder = Component.text()
                     .append(
-                            Component.text(platformPlugin.getMetadata().getName().get(), Style.style(NamedTextColor.YELLOW, TextDecoration.BOLD))
+                            Component.text(platformPlugin.metadata().name().get(), Style.style(NamedTextColor.YELLOW, TextDecoration.BOLD))
                     );
 
             final Component colon = Component.text(": ", NamedTextColor.GRAY);
             for (final PluginContainer container : Launch.getInstance().getLauncherPlugins()) {
-                final PluginMetadata metadata = container.getMetadata();
+                final PluginMetadata metadata = container.metadata();
                 builder.append(
                         Component.newline(),
                         SpongeCommand.INDENT_COMPONENT,
-                        Component.text(metadata.getName().orElseGet(metadata::getId), NamedTextColor.GRAY),
+                        Component.text(metadata.name().orElseGet(metadata::id), NamedTextColor.GRAY),
                         colon,
-                        Component.text(container.getMetadata().getVersion())
+                        Component.text(container.metadata().version())
                 );
             }
 
@@ -512,8 +505,7 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    @NonNull
-    private CommandResult whichExecutor(final CommandContext context) {
+    private @NonNull CommandResult whichExecutor(final CommandContext context) {
         final CommandMapping mapping = context.requireOne(this.commandMappingKey);
         context.sendMessage(Identity.nil(), Component.text().append(
                 this.title("Aliases: "),
@@ -521,7 +513,7 @@ public class SpongeCommand {
                     mapping.allAliases().stream().map(x -> Component.text(x, NamedTextColor.YELLOW)).collect(Collectors.toList())),
                 Component.newline(),
                 this.title("Owned by: "),
-                this.hl(mapping.plugin().getMetadata().getName().orElseGet(() -> mapping.plugin().getMetadata().getId())))
+                this.hl(mapping.plugin().metadata().name().orElseGet(() -> mapping.plugin().metadata().id())))
                 .build());
         return CommandResult.success();
     }
@@ -610,29 +602,29 @@ public class SpongeCommand {
     }
 
     private void createShortContainerMeta(final TextComponent.Builder builder, final PluginMetadata pluginMetadata) {
-        builder.append(this.title(pluginMetadata.getName().orElse(pluginMetadata.getId())));
-        builder.append(Component.text(" v" + pluginMetadata.getVersion()));
+        builder.append(this.title(pluginMetadata.name().orElse(pluginMetadata.id())));
+        builder.append(Component.text(" v" + pluginMetadata.version()));
     }
 
     private Component createContainerMeta(final PluginMetadata pluginMetadata) {
         final TextComponent.Builder builder = Component.text();
         this.createShortContainerMeta(builder, pluginMetadata);
 
-        this.appendPluginMeta(builder, "ID", pluginMetadata.getId());
-        pluginMetadata.getDescription().ifPresent(x -> this.appendPluginMeta(builder, "Description", x));
-        pluginMetadata.getLinks().getHomepage().ifPresent(x -> this.appendPluginMeta(builder, "Homepage", x));
-        pluginMetadata.getLinks().getIssues().ifPresent(x -> this.appendPluginMeta(builder, "Issues", x));
-        pluginMetadata.getLinks().getSource().ifPresent(x -> this.appendPluginMeta(builder, "Source", x));
-        final Collection<PluginContributor> contributors = pluginMetadata.getContributors();
+        this.appendPluginMeta(builder, "ID", pluginMetadata.id());
+        pluginMetadata.description().ifPresent(x -> this.appendPluginMeta(builder, "Description", x));
+        pluginMetadata.links().homepage().ifPresent(x -> this.appendPluginMeta(builder, "Homepage", x));
+        pluginMetadata.links().issues().ifPresent(x -> this.appendPluginMeta(builder, "Issues", x));
+        pluginMetadata.links().source().ifPresent(x -> this.appendPluginMeta(builder, "Source", x));
+        final Collection<PluginContributor> contributors = pluginMetadata.contributors();
         if (!contributors.isEmpty()) {
             builder.append(Component.newline()).append(SpongeCommand.INDENT_COMPONENT).append(this.title("Contributors:"));
             for (final PluginContributor contributor : contributors) {
-                builder.append(Component.newline()).append(SpongeCommand.LONG_INDENT_COMPONENT).append(Component.text(contributor.getName()));
-                contributor.getDescription().ifPresent(x -> builder.append(Component.text(" (" + x + ")")));
+                builder.append(Component.newline()).append(SpongeCommand.LONG_INDENT_COMPONENT).append(Component.text(contributor.name()));
+                contributor.description().ifPresent(x -> builder.append(Component.text(" (" + x + ")")));
             }
         }
 
-        this.appendPluginMeta(builder, "Main class", pluginMetadata.getMainClass());
+        this.appendPluginMeta(builder, "Main class", pluginMetadata.mainClass());
         return builder.build();
     }
 

@@ -108,7 +108,7 @@ public final class SpongeConfigs {
 
     public static Path getDirectory() {
         if (SpongeConfigs.configDir == null) {
-            SpongeConfigs.configDir = SpongeConfigs.getPluginEnvironment().getBlackboard()
+            SpongeConfigs.configDir = SpongeConfigs.getPluginEnvironment().blackboard()
                     .get(PluginKeys.BASE_DIRECTORY)
                     .orElseThrow(() -> new IllegalStateException("No base directory was set"))
                     .resolve("config")

@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.item.util;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -38,7 +38,7 @@ public abstract class ItemStackUtil {
     private ItemStackUtil() {
     }
 
-    public static net.minecraft.world.item.ItemStack toNative(@Nullable ItemStack stack) {
+    public static net.minecraft.world.item.ItemStack toNative(final @Nullable ItemStack stack) {
         if ((Object) stack instanceof net.minecraft.world.item.ItemStack || stack == null) {
             return stack == null ? ItemStackUtil.emptyNative() : (net.minecraft.world.item.ItemStack) (Object) stack;
         }

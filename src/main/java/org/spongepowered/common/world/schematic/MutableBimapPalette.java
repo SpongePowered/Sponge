@@ -164,8 +164,7 @@ public class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
         return id;
     }
 
-    @NonNull
-    static <T, R> PaletteReference<T, R> createPaletteReference(
+    static <T, R> @NonNull PaletteReference<T, R> createPaletteReference(
         final T state,
         final PaletteType<T, R> paletteType,
         final Registry<R> registry

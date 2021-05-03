@@ -62,7 +62,7 @@ public interface LevelWriterMixin_API extends MutableGameVolume {
 
     @Override
     default boolean destroyBlock(final Vector3i pos, final boolean performDrops) {
-        return this.shadow$destroyBlock(new BlockPos(pos.getX(), pos.getY(), pos.getZ()), performDrops);
+        return this.shadow$destroyBlock(new BlockPos(pos.x(), pos.y(), pos.z()), performDrops);
     }
 
 }

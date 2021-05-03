@@ -68,12 +68,12 @@ public final class SpongePlatform implements Platform {
 
         final PluginContainer common = Launch.getInstance().getCommonPlugin();
         this.platformMap.put("Type", this.type());
-        this.platformMap.put("ApiName", this.apiPlugin.getMetadata().getName());
-        this.platformMap.put("ApiVersion", this.apiPlugin.getMetadata().getVersion());
-        this.platformMap.put("CommonName", common.getMetadata().getName());
-        this.platformMap.put("CommonVersion", common.getMetadata().getVersion());
-        this.platformMap.put("ImplementationName", this.platformPlugin.getMetadata().getName());
-        this.platformMap.put("ImplementationVersion", this.platformPlugin.getMetadata().getVersion());
+        this.platformMap.put("ApiName", this.apiPlugin.metadata().name());
+        this.platformMap.put("ApiVersion", this.apiPlugin.metadata().version());
+        this.platformMap.put("CommonName", common.metadata().name());
+        this.platformMap.put("CommonVersion", common.metadata().version());
+        this.platformMap.put("ImplementationName", this.platformPlugin.metadata().name());
+        this.platformMap.put("ImplementationVersion", this.platformPlugin.metadata().version());
         this.platformMap.put("MinecraftVersion", this.minecraftVersion());
     }
 
@@ -123,8 +123,8 @@ public final class SpongePlatform implements Platform {
         return MoreObjects.toStringHelper(this)
                 .add("type", this.type())
                 .add("executionType", this.executionType())
-                .add("api", this.apiPlugin.getMetadata().getId())
-                .add("implementation", this.platformPlugin.getMetadata().getId())
+                .add("api", this.apiPlugin.metadata().id())
+                .add("implementation", this.platformPlugin.metadata().id())
                 .add("minecraftVersion", this.minecraftVersion())
                 .toString();
     }

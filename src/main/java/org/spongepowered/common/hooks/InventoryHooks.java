@@ -31,7 +31,7 @@ import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 
 public interface InventoryHooks {
 
-    default Inventory toInventory(final Object inventory, @Nullable final Object forgeItemHandler) {
+    default Inventory toInventory(final Object inventory, final @Nullable Object forgeItemHandler) {
         SpongeCommon.getLogger().error("Unknown inventory " + inventory.getClass().getName() + " report this to Sponge");
         throw new PlatformHookException("Unreachable case for retrieving a container's mod id: " + inventory.getClass());
     }

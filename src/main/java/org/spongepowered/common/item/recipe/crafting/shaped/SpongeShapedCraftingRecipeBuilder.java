@@ -29,6 +29,7 @@ import static com.google.common.base.Preconditions.checkState;
 
 import com.google.common.collect.Lists;
 import it.unimi.dsi.fastutil.chars.Char2ObjectArrayMap;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingGridInventory;
@@ -50,7 +51,6 @@ import java.util.Map;
 import java.util.function.Function;
 import java.util.stream.Collectors;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.item.crafting.RecipeSerializer;
@@ -166,7 +166,7 @@ public final class SpongeShapedCraftingRecipeBuilder extends AbstractResourceKey
     }
 
     @Override
-    public EndStep group(@Nullable final String name) {
+    public EndStep group(final @Nullable String name) {
         this.group = name;
         return this;
     }

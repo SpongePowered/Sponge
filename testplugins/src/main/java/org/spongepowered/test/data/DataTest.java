@@ -1344,7 +1344,7 @@ public final class DataTest  {
 
     private <V extends Value<?>> boolean checkResult(final DataHolder.Mutable holder, final Key<V> key, final Object value, final DataTransactionResult result) {
         if (!result.isSuccessful()) {
-            this.plugin.getLogger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.key()
+            this.plugin.logger().error("Failed offer on {} for {} with {}.", DataTest.getHolderName(holder), key.key()
                     .asString(), value);
             return true;
         }
@@ -1356,11 +1356,11 @@ public final class DataTest  {
         if (gotValue.isPresent()) {
             final List<T> actual = gotValue.get().get(new Random());
             if (!Objects.deepEquals(actual.toArray(), expected.toArray())) {
-                this.plugin.getLogger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
+                this.plugin.logger().error("Value differs om {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder),
                         key.key().asString(), expected, actual);
             }
         } else {
-            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder),
+            this.plugin.logger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder),
                     key.key().asString(), expected);
         }
     }
@@ -1384,11 +1384,11 @@ public final class DataTest  {
     private <T> void checkData(final DataHolder holder, final String key, final T expectedValue, @Nullable final T actualValue) {
         if (actualValue != null) {
             if (!Objects.equals(actualValue, expectedValue)) {
-                this.plugin.getLogger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder), key,
+                this.plugin.logger().error("Value differs on {} for {}.\nExpected: {}\nActual:   {}", DataTest.getHolderName(holder), key,
                         expectedValue, actualValue);
             }
         } else if (expectedValue != null) {
-            this.plugin.getLogger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder), key, expectedValue);
+            this.plugin.logger().error("Value is missing on {} for {}.\nExpected: {}", DataTest.getHolderName(holder), key, expectedValue);
         }
     }
 

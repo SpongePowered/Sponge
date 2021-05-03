@@ -31,6 +31,7 @@ import java.io.UnsupportedEncodingException;
 import java.net.URI;
 import java.net.URLDecoder;
 import java.net.URLEncoder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class SpongeWorldResourcePack extends SpongeResourcePack {
 
@@ -38,7 +39,7 @@ public final class SpongeWorldResourcePack extends SpongeResourcePack {
     private final URI uri;
     public static final String LEVEL_PACK_PROTOCOL = "level://";
 
-    public SpongeWorldResourcePack(final String levelUri, @Nullable final String hash, Component component) {
+    public SpongeWorldResourcePack(final String levelUri, final @Nullable String hash, Component component) {
         super(hash, component);
         this.path = levelUri.substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length());
         try {
@@ -48,7 +49,7 @@ public final class SpongeWorldResourcePack extends SpongeResourcePack {
         }
     }
 
-    public SpongeWorldResourcePack(final URI levelUri, @Nullable final String hash, Component component) {
+    public SpongeWorldResourcePack(final URI levelUri, final @Nullable String hash, Component component) {
         super(hash, component);
         String path = levelUri.toString().substring(SpongeWorldResourcePack.LEVEL_PACK_PROTOCOL.length());
         try {

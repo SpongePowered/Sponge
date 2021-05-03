@@ -24,13 +24,13 @@
  */
 package org.spongepowered.common.inventory.lens;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
 import java.util.List;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.item.ItemStack;
 
 /**
@@ -119,8 +119,7 @@ public interface Lens extends LensCollection {
      * @param ordinal slot ordinal
      * @return the item stack in the specified slot
      */
-    @Nullable 
-    default ItemStack getStack(Fabric fabric, int ordinal) {
+    default @Nullable ItemStack getStack(Fabric fabric, int ordinal) {
         SlotLens slot = this.getSlotLens(fabric, ordinal);
         if (slot != null) {
             return slot.getStack(fabric);

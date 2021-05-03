@@ -33,6 +33,7 @@ import com.google.common.base.Objects;
 import com.google.common.collect.ImmutableMap;
 import com.zaxxer.hikari.HikariConfig;
 import com.zaxxer.hikari.HikariDataSource;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
@@ -55,7 +56,6 @@ import java.util.function.BiFunction;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 
-import javax.annotation.Nullable;
 import javax.sql.DataSource;
 
 /**
@@ -103,7 +103,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
         });
     }
 
-    @Nullable private LoadingCache<ConnectionInfo, HikariDataSource> connectionCache;
+    private @Nullable LoadingCache<ConnectionInfo, HikariDataSource> connectionCache;
 
     public SpongeSqlManager() {
         this.buildConnectionCache();
@@ -162,8 +162,8 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
 
         private static final Pattern URL_REGEX = Pattern.compile("(?:jdbc:)?([^:]+):(//)?(?:([^:]+)(?::([^@]+))?@)?(.*)");
         private static final String UTF_8 = StandardCharsets.UTF_8.name();
-        @Nullable private final String user;
-        @Nullable private final String password;
+        private final @Nullable String user;
+        private final @Nullable String password;
         private final String driverClassName;
         private final String authlessUrl;
         private final String fullUrl;
@@ -176,7 +176,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
          * @param authlessUrl A JDBC url for this driver not containing authentication information
          * @param fullUrl The full jdbc url containing user, password, and database info
          */
-        public ConnectionInfo(@Nullable final String user, @Nullable final String password, final String driverClassName, final String authlessUrl, final String fullUrl) {
+        public ConnectionInfo(final @Nullable String user, final @Nullable String password, final String driverClassName, final String authlessUrl, final String fullUrl) {
             this.user = user;
             this.password = password;
             this.driverClassName = driverClassName;
@@ -184,13 +184,11 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
             this.fullUrl = fullUrl;
         }
 
-        @Nullable
-        public String getUser() {
+        public @Nullable String getUser() {
             return this.user;
         }
 
-        @Nullable
-        public String getPassword() {
+        public @Nullable String getPassword() {
             return this.password;
         }
 
@@ -237,7 +235,7 @@ public final class SpongeSqlManager implements SqlManager, Closeable {
          * @return A constructed ConnectionInfo object using the info from the provided URL
          * @throws SQLException If the driver for the given URL is not present
          */
-        public static ConnectionInfo fromUrl(@Nullable final PluginContainer container, final String fullUrl) throws SQLException {
+        public static ConnectionInfo fromUrl(final @Nullable PluginContainer container, final String fullUrl) throws SQLException {
             final Matcher match = ConnectionInfo.URL_REGEX.matcher(fullUrl);
             if (!match.matches()) {
                 throw new IllegalArgumentException("URL " + fullUrl + " is not a valid JDBC URL");

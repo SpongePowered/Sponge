@@ -68,8 +68,8 @@ public final class SpongeChunkLayout implements ChunkLayout {
     @Override
     public boolean isInChunk(final int x, final int y, final int z) {
         // no bits allowed outside the mask!
-        return (x & ~SpongeChunkLayout.CHUNK_MASK.getX()) == 0 && (y & ~SpongeChunkLayout.CHUNK_MASK.getY()) == 0 && (z & ~SpongeChunkLayout.CHUNK_MASK
-            .getZ()) == 0;
+        return (x & ~SpongeChunkLayout.CHUNK_MASK.x()) == 0 && (y & ~SpongeChunkLayout.CHUNK_MASK.y()) == 0 && (z & ~SpongeChunkLayout.CHUNK_MASK
+            .z()) == 0;
     }
 
     @Override

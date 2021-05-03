@@ -28,10 +28,10 @@ import com.google.common.base.MoreObjects;
 import com.google.common.hash.Hasher;
 import com.google.common.hash.Hashing;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.SpongeCommon;
 
-import javax.annotation.Nullable;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.InputStream;

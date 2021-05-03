@@ -32,6 +32,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.entity.living.player.Player;
@@ -46,7 +47,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.StreamSupport;
 
-import javax.annotation.Nullable;
 
 public final class SpongePaginationList implements PaginationList {
 
@@ -59,9 +59,9 @@ public final class SpongePaginationList implements PaginationList {
     private final int linesPerPage;
 
     public SpongePaginationList(
-            final SpongePaginationService service, final Iterable<Component> contents, @Nullable final Component title,
-            @Nullable final Component header,
-            @Nullable final Component footer, final Component paginationSpacer, final int linesPerPage) {
+            final SpongePaginationService service, final Iterable<Component> contents, final @Nullable Component title,
+            final @Nullable Component header,
+            final @Nullable Component footer, final Component paginationSpacer, final int linesPerPage) {
         this.service = service;
         this.contents = contents;
         this.title = title;

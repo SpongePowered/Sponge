@@ -44,8 +44,7 @@ public final class SpongeEntityClientCompletionKey implements ClientCompletionKe
     }
 
     @Override
-    @NonNull
-    public ResourceKey key() {
+    public @NonNull ResourceKey key() {
         return this.key;
     }
 

@@ -68,36 +68,33 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public final RayTrace<@NonNull T> world(@NonNull final ServerWorld serverWorld) {
+    public final @NonNull RayTrace<@NonNull T> world(final @NonNull ServerWorld serverWorld) {
         this.world = serverWorld.key();
         return this;
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull T> sourceEyePosition(@NonNull final Living entity) {
+    public @NonNull RayTrace<@NonNull T> sourceEyePosition(final @NonNull Living entity) {
         this.sourcePosition(entity.get(Keys.EYE_POSITION)
                 .orElseThrow(() -> new IllegalArgumentException("Entity does not have an eye position key")));
         return this.world(entity.serverLocation().world());
     }
 
     @Override
-    @NonNull
-    public final RayTrace<@NonNull T> sourcePosition(@NonNull final Vector3d sourcePosition) {
+    public final @NonNull RayTrace<@NonNull T> sourcePosition(final @NonNull Vector3d sourcePosition) {
         this.start = sourcePosition;
         return this;
     }
 
     @Override
-    public RayTrace<@NonNull T> direction(@NonNull final Vector3d direction) {
+    public @NonNull RayTrace<@NonNull T> direction(final @NonNull Vector3d direction) {
         this.end = null;
         this.direction = direction.normalize();
         return this;
     }
 
     @Override
-    public RayTrace<@NonNull T> limit(final int distance) {
+    public @NonNull RayTrace<@NonNull T> limit(final int distance) {
         if (distance < 1) {
             throw new IllegalArgumentException("distance limit must be positive");
         }
@@ -106,16 +103,14 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public final RayTrace<@NonNull T> continueUntil(@NonNull final Vector3d endPosition) {
+    public final @NonNull RayTrace<@NonNull T> continueUntil(final @NonNull Vector3d endPosition) {
         this.end = endPosition;
         this.direction = null;
         return this;
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull T> continueWhileLocation(@NonNull final Predicate<ServerLocation> continueWhileLocation) {
+    public @NonNull RayTrace<@NonNull T> continueWhileLocation(final @NonNull Predicate<ServerLocation> continueWhileLocation) {
         if (this.continueWhileLocation == null) {
             this.continueWhileLocation = continueWhileLocation;
         } else {
@@ -125,8 +120,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull T> continueWhileBlock(@NonNull final Predicate<LocatableBlock> continueWhileBlock) {
+    public @NonNull RayTrace<@NonNull T> continueWhileBlock(final @NonNull Predicate<LocatableBlock> continueWhileBlock) {
         if (this.continueWhileBlock == null) {
             this.continueWhileBlock = continueWhileBlock;
         } else {
@@ -136,8 +130,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull T> continueWhileEntity(@NonNull final Predicate<Entity> continueWhileEntity) {
+    public @NonNull RayTrace<@NonNull T> continueWhileEntity(final @NonNull Predicate<Entity> continueWhileEntity) {
         if (this.continueWhileEntity == null) {
             this.continueWhileEntity = continueWhileEntity;
         } else {
@@ -147,8 +140,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public final RayTrace<@NonNull T> select(@NonNull final Predicate<T> filter) {
+    public final @NonNull RayTrace<@NonNull T> select(final @NonNull Predicate<T> filter) {
         if (this.select == this.defaultFilter) {
             this.select = filter;
         } else {
@@ -158,7 +150,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    public Optional<RayTraceResult<@NonNull T>> execute() {
+    public @NonNull Optional<RayTraceResult<@NonNull T>> execute() {
         this.setupEnd();
 
         // get the direction
@@ -178,7 +170,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
         // The ray equation is, vec(u) + t vec(d). From a point (x, y), there is a t
         // that we need to traverse to get to a boundary. We work that out now...
         TData tData = this.createInitialTData(direction);
-        Vector3d currentLocation = new Vector3d(this.start.getX(), this.start.getY(), this.start.getZ());
+        Vector3d currentLocation = new Vector3d(this.start.x(), this.start.y(), this.start.z());
         final boolean requiresEntityTracking = this.requiresEntityTracking();
 
         boolean requireAdvancement = true;
@@ -197,9 +189,9 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
                 vec3dend = VecHelper.toVanillaVector3d(this.end);
             } else {
                 nextLocation = currentLocation.add(
-                        direction.getX() * tData.getNextStep(),
-                        direction.getY() * tData.getNextStep(),
-                        direction.getZ() * tData.getNextStep()
+                        direction.x() * tData.getNextStep(),
+                        direction.y() * tData.getNextStep(),
+                        direction.z() * tData.getNextStep()
                 );
                 vec3dend = VecHelper.toVanillaVector3d(nextLocation);
             }
@@ -256,8 +248,7 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
     }
 
     @Override
-    @NonNull
-    public RayTrace<@NonNull T> reset() {
+    public @NonNull RayTrace<@NonNull T> reset() {
         this.select = this.defaultFilter;
         this.world = null;
         this.start = null;
@@ -270,23 +261,23 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
     final Vector3i getNextBlock(final Vector3i current, final TData data, final Vector3i steps) {
         return current.add(
-                data.nextStepWillAdvanceX() ? steps.getX() : 0,
-                data.nextStepWillAdvanceY() ? steps.getY() : 0,
-                data.nextStepWillAdvanceZ() ? steps.getX() : 0
+                data.nextStepWillAdvanceX() ? steps.x() : 0,
+                data.nextStepWillAdvanceY() ? steps.y() : 0,
+                data.nextStepWillAdvanceZ() ? steps.x() : 0
         );
     }
 
     final Vector3i createSteps(final Vector3d direction) {
         return new Vector3i(
-                Math.signum(direction.getX()),
-                Math.signum(direction.getY()),
-                Math.signum(direction.getZ())
+                Math.signum(direction.x()),
+                Math.signum(direction.y()),
+                Math.signum(direction.z())
         );
     }
 
     final AABB getBlockAABB(final Vector3i currentBlock) {
-        return new AABB(currentBlock.getX(),
-                currentBlock.getY(), currentBlock.getZ(), currentBlock.getX() + 1, currentBlock.getY() + 1, currentBlock.getZ() + 1);
+        return new AABB(currentBlock.x(),
+                currentBlock.y(), currentBlock.z(), currentBlock.x() + 1, currentBlock.y() + 1, currentBlock.z() + 1);
     }
 
     private List<net.minecraft.world.entity.Entity> getFailingEntities(final ServerWorld serverWorld, final AABB targetAABB) {
@@ -349,18 +340,18 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
 
     final Vector3i initialBlock(final Vector3d direction) {
         return new Vector3i(
-                this.start.getX() - (direction.getX() < 0 && this.start.getX() == 0 ? 1 : 0),
-                this.start.getY() - (direction.getY() < 0 && this.start.getY() == 0 ? 1 : 0),
-                this.start.getZ() - (direction.getZ() < 0 && this.start.getZ() == 0 ? 1 : 0)
+                this.start.x() - (direction.x() < 0 && this.start.x() == 0 ? 1 : 0),
+                this.start.y() - (direction.y() < 0 && this.start.y() == 0 ? 1 : 0),
+                this.start.z() - (direction.z() < 0 && this.start.z() == 0 ? 1 : 0)
         );
     }
 
     final TData createInitialTData(final Vector3d direction) {
         return new TData(
                 0,
-                this.getT(this.start.getX(), direction.getX(), this.end.getX()),
-                this.getT(this.start.getY(), direction.getY(), this.end.getY()),
-                this.getT(this.start.getZ(), direction.getZ(), this.end.getZ())
+                this.getT(this.start.x(), direction.x(), this.end.x()),
+                this.getT(this.start.y(), direction.y(), this.end.y()),
+                this.getT(this.start.z(), direction.z(), this.end.z())
         );
     }
 
@@ -368,9 +359,9 @@ public abstract class AbstractSpongeRayTrace<T extends Locatable> implements Ray
         final double nextStep = data.getNextStep();
         return new TData(
                 data.getTotalTWithNextStep(),
-                data.nextStepWillAdvanceX() ? steps.getX() / direction.getX() : data.gettToX() - nextStep,
-                data.nextStepWillAdvanceY() ? steps.getY() / direction.getY() : data.gettToY() - nextStep,
-                data.nextStepWillAdvanceZ() ? steps.getZ() / direction.getZ() : data.gettToZ() - nextStep
+                data.nextStepWillAdvanceX() ? steps.x() / direction.x() : data.gettToX() - nextStep,
+                data.nextStepWillAdvanceY() ? steps.y() / direction.y() : data.gettToY() - nextStep,
+                data.nextStepWillAdvanceZ() ? steps.z() / direction.z() : data.gettToZ() - nextStep
         );
     }
 

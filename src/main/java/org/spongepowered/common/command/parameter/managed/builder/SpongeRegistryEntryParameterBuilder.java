@@ -48,14 +48,13 @@ public final class SpongeRegistryEntryParameterBuilder<T>
     }
 
     @Override
-    public VariableValueParameters.@NonNull RegistryEntryBuilder<T> defaultNamespace(@NonNull final String prefix) {
+    public VariableValueParameters.@NonNull RegistryEntryBuilder<T> defaultNamespace(final @NonNull String prefix) {
         this.prefixes.add(Objects.requireNonNull(prefix, "Prefix cannot be null!"));
         return this;
     }
 
-    @NonNull
     @Override
-    public ValueParameter<T> build() {
+    public @NonNull ValueParameter<T> build() {
         return new SpongeCatalogedElementValueParameter<>(new ArrayList<>(this.prefixes), this.registryFunction);
     }
 

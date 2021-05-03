@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory.custom;
 
 import org.apache.commons.lang3.Validate;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.item.inventory.Carrier;
 import org.spongepowered.api.item.inventory.ContainerType;
 import org.spongepowered.api.item.inventory.ContainerTypes;
@@ -43,7 +44,6 @@ import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 import org.spongepowered.math.vector.Vector2i;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.Container;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.player.Player;
@@ -110,7 +110,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     // Helpers
 
     private int posToIndex(Vector2i pos) {
-        return this.posToIndex(pos.getX(), pos.getY());
+        return this.posToIndex(pos.x(), pos.y());
     }
 
     private int posToIndex(int x, int y) {
@@ -170,16 +170,16 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     public DummyStep dummyGrid(Vector2i size, Vector2i offset) {
         Slot slot = this.newDummySlot();
-        List<Slot> source = Stream.generate(() -> slot).limit(size.getX() * size.getY()).collect(Collectors.toList());
+        List<Slot> source = Stream.generate(() -> slot).limit(size.x() * size.y()).collect(Collectors.toList());
         this.grid(source, size, offset);
         return this;
     }
 
     public BuildingStep grid(List<Slot> source, Vector2i size, Vector2i offset) {
-        int xMin = offset.getX();
-        int yMin = offset.getY();
-        int xMax = xMin + size.getX() - 1;
-        int yMax = yMin + size.getY() - 1;
+        int xMin = offset.x();
+        int yMin = offset.y();
+        int xMax = xMin + size.x() - 1;
+        int yMax = yMin + size.y() - 1;
 
         List<Integer> indizes = new ArrayList<>();
         for (int y = yMin; y <= yMax; y++) {
@@ -399,8 +399,7 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
     @FunctionalInterface
     public interface CustomInventoryContainerProvider {
-        @Nullable
-        AbstractContainerMenu createMenu(int id, net.minecraft.world.entity.player.Inventory inv, Player player, ViewableCustomInventory customInv);
+        @Nullable AbstractContainerMenu createMenu(int id, net.minecraft.world.entity.player.Inventory inv, Player player, ViewableCustomInventory customInv);
     }
 
     public static class ContainerTypeInfo {

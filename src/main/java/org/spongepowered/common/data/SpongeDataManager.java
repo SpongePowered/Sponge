@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -86,7 +87,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 
 @Singleton
 public final class SpongeDataManager implements DataManager {

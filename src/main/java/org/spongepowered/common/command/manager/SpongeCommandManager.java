@@ -73,6 +73,7 @@ import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.adventure.CallbackCommand;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
@@ -145,12 +146,11 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
         return ImmutableSet.copyOf(this.commandMappings.keySet());
     }
 
-    @NonNull
-    public CommandMapping registerNamespacedAlias(
-            @NonNull final CommandRegistrar<?> registrar,
-            @NonNull final PluginContainer container,
-            @NonNull final LiteralCommandNode<CommandSourceStack> rootArgument,
-            @NonNull final String @NonNull... secondaryAliases)
+    public @NonNull CommandMapping registerNamespacedAlias(
+            final @NonNull CommandRegistrar<?> registrar,
+            final @NonNull PluginContainer container,
+            final @NonNull LiteralCommandNode<CommandSourceStack> rootArgument,
+            final @NonNull String @NonNull... secondaryAliases)
             throws CommandFailedRegistrationException {
         final String namespaced = rootArgument.getLiteral();
         // We also need to denamespace
@@ -170,27 +170,25 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    @NonNull
-    public CommandMapping registerAlias(
-            @NonNull final CommandRegistrar<?> registrar,
-            @NonNull final PluginContainer container,
+    public @NonNull CommandMapping registerAlias(
+            final @NonNull CommandRegistrar<?> registrar,
+            final @NonNull PluginContainer container,
             final CommandTreeNode.@NonNull Root parameterTree,
-            @NonNull final String primaryAlias,
-            @NonNull final String @NonNull ... secondaryAliases)
+            final @NonNull String primaryAlias,
+            final @NonNull String @NonNull ... secondaryAliases)
             throws CommandFailedRegistrationException {
         final List<String> aliases = new ArrayList<>();
         aliases.add(primaryAlias);
         Collections.addAll(aliases, secondaryAliases);
-        final String namespaced = container.getMetadata().getId() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
+        final String namespaced = container.metadata().id() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
         return this.registerAliasWithNamespacing(registrar, container, namespaced, aliases, parameterTree);
     }
 
-    @NonNull
-    public CommandMapping registerAliasWithNamespacing(
-            @NonNull final CommandRegistrar<?> registrar,
-            @NonNull final PluginContainer container,
-            @NonNull final String namespacedAlias,
-            @NonNull final Collection<String> otherAliases,
+    public @NonNull CommandMapping registerAliasWithNamespacing(
+            final @NonNull CommandRegistrar<?> registrar,
+            final @NonNull PluginContainer container,
+            final @NonNull String namespacedAlias,
+            final @NonNull Collection<String> otherAliases,
             final CommandTreeNode.@Nullable Root parameterTree)
             throws CommandFailedRegistrationException {
         // Check it's been registered:
@@ -200,7 +198,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
 
         if (!this.knownRegistrars.containsKey(GenericTypeReflector.erase(registrar.type().handledType().getType()))) {
             throw new IllegalArgumentException(String.format("Plugin '%s' is trying to register command %s with unknown registrar %s",
-                    container.getMetadata().getId(),
+                    container.metadata().id(),
                     namespacedAlias,
                     registrar
             ));
@@ -230,7 +228,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                 .aliases
                 .entrySet()
                 .stream()
-                .filter(x -> !x.getValue().equalsIgnoreCase(container.getMetadata().getId()))
+                .filter(x -> !x.getValue().equalsIgnoreCase(container.metadata().id()))
                 .filter(x -> aliases.contains(x.getKey()))
                 .forEach(x -> aliases.remove(x.getKey()));
 
@@ -259,19 +257,17 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    @NonNull
-    public Collection<PluginContainer> plugins() {
+    public @NonNull Collection<PluginContainer> plugins() {
         return ImmutableSet.copyOf(this.pluginToCommandMap.keySet());
     }
 
     @Override
-    @NonNull
-    public Optional<CommandMapping> commandMapping(final String alias) {
+    public @NonNull Optional<CommandMapping> commandMapping(final String alias) {
         return Optional.ofNullable(this.commandMappings.get(alias.toLowerCase()));
     }
 
     @Override
-    public void updateCommandTreeForPlayer(@NonNull final ServerPlayer player) {
+    public void updateCommandTreeForPlayer(final @NonNull ServerPlayer player) {
         Objects.requireNonNull(player, "player");
         SpongeCommon.getServer().getCommands().sendCommands((net.minecraft.server.level.ServerPlayer) player);
     }
@@ -291,8 +287,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    @NonNull
-    public CommandResult process(@NonNull final String arguments) throws CommandException {
+    public @NonNull CommandResult process(final @NonNull String arguments) throws CommandException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.COMMAND, arguments);
             return this.process(CommandCause.create(), arguments);
@@ -401,10 +396,9 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    @NonNull
-    public <T extends Subject & Audience> CommandResult process(
-            @NonNull final T subjectReceiver,
-            @NonNull final String arguments) throws CommandException {
+    public <T extends Subject & Audience> @NonNull CommandResult process(
+            final @NonNull T subjectReceiver,
+            final @NonNull String arguments) throws CommandException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, subjectReceiver);
             frame.addContext(EventContextKeys.AUDIENCE, subjectReceiver);
@@ -413,11 +407,10 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    @NonNull
-    public CommandResult process(
-            @NonNull final Subject subject,
-            @NonNull final Audience receiver,
-            @NonNull final String arguments) throws CommandException {
+    public @NonNull CommandResult process(
+            final @NonNull Subject subject,
+            final @NonNull Audience receiver,
+            final @NonNull String arguments) throws CommandException {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, subject);
             frame.addContext(EventContextKeys.AUDIENCE, receiver);
@@ -460,7 +453,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                 .hr()
                 .add()
                 .add("Command: %s", commandString)
-                .add("Owning Plugin: %s", mapping.plugin().getMetadata().getId())
+                .add("Owning Plugin: %s", mapping.plugin().metadata().id())
                 .add("Owning Registrar: %s", mapping.registrar().getClass().getName())
                 .add()
                 .add("Exception Details: ");
@@ -476,8 +469,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    @NonNull
-    public List<String> suggest(@NonNull final String arguments) {
+    public @NonNull List<String> suggest(final @NonNull String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.COMMAND, arguments);
             final String[] splitArg = arguments.split(" ", 2);
@@ -504,10 +496,9 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    @NonNull
-    public <T extends Subject & Audience> List<String> suggest(
-            @NonNull final T subjectReceiver,
-            @NonNull final String arguments) {
+    public <T extends Subject & Audience> @NonNull List<String> suggest(
+            final @NonNull T subjectReceiver,
+            final @NonNull String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, subjectReceiver);
             frame.addContext(EventContextKeys.AUDIENCE, subjectReceiver);
@@ -516,11 +507,10 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    @NonNull
-    public List<String> suggest(
-            @NonNull final Subject subject,
-            @NonNull final Audience receiver,
-            @NonNull final String arguments) {
+    public @NonNull List<String> suggest(
+            final @NonNull Subject subject,
+            final @NonNull Audience receiver,
+            final @NonNull String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, subject);
             frame.addContext(EventContextKeys.AUDIENCE, receiver);
@@ -585,8 +575,8 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
 
         registrar.register(
                 Launch.getInstance().getCommonPlugin(),
-                SpongeAdventure.CALLBACK_COMMAND.createCommand(),
-                "callback");
+                CallbackCommand.INSTANCE.createCommand(),
+                CallbackCommand.NAME);
     }
 
     public Collection<CommandNode<SharedSuggestionProvider>> getNonBrigadierSuggestions(final CommandCause cause) {

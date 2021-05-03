@@ -35,7 +35,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
  */
 public final class SpongePermissionWrappedLiteralCommandNode extends SpongeLiteralCommandNode {
 
-    @Nullable private Command<CommandSourceStack> executor;
+    private @Nullable Command<CommandSourceStack> executor;
 
     public SpongePermissionWrappedLiteralCommandNode(
             final LiteralArgumentBuilder<CommandSourceStack> builder) {

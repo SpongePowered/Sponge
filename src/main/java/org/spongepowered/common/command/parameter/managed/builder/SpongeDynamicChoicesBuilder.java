@@ -38,12 +38,12 @@ import java.util.function.Supplier;
 
 public final class SpongeDynamicChoicesBuilder<T> implements VariableValueParameters.DynamicChoicesBuilder<T> {
 
-    @Nullable private Supplier<? extends Collection<String>> choices = null;
-    @Nullable private Function<String, ? extends T> results = null;
+    private @Nullable Supplier<? extends Collection<String>> choices = null;
+    private @Nullable Function<String, ? extends T> results = null;
     private boolean showInUsage = false;
 
     @Override
-    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> choicesAndResults(@NonNull final Supplier<Map<String, ? extends T>> choices) {
+    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> choicesAndResults(final @NonNull Supplier<Map<String, ? extends T>> choices) {
         this.choices = () -> choices.get().keySet();
         this.results = x -> choices.get().get(x);
         return this;
@@ -56,7 +56,7 @@ public final class SpongeDynamicChoicesBuilder<T> implements VariableValueParame
     }
 
     @Override
-    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> results(@NonNull final Function<String, ? extends T> results) {
+    public VariableValueParameters.@NonNull DynamicChoicesBuilder<T> results(final @NonNull Function<String, ? extends T> results) {
         this.results = results;
         return this;
     }
@@ -68,8 +68,7 @@ public final class SpongeDynamicChoicesBuilder<T> implements VariableValueParame
     }
 
     @Override
-    @NonNull
-    public ValueParameter<T> build() {
+    public @NonNull ValueParameter<T> build() {
         Preconditions.checkNotNull(this.choices, "choices must not be null");
         Preconditions.checkNotNull(this.results, "results must not be null");
         return new SpongeChoicesValueParameter<>(this.choices, this.results, this.showInUsage, false);

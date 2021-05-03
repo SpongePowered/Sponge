@@ -43,27 +43,27 @@ public final class VanillaBossBarListener implements BossBar.Listener {
     }
 
     @Override
-    public void bossBarNameChanged(@NonNull final BossBar bar, @NonNull final Component oldName, @NonNull final Component newName) {
+    public void bossBarNameChanged(final @NonNull BossBar bar, final @NonNull Component oldName, final @NonNull Component newName) {
         this.sendPacket(ClientboundBossEventPacket::createUpdateNamePacket);
     }
 
     @Override
-    public void bossBarProgressChanged(@NonNull final BossBar bar, final float oldProgress, final float newProgress) {
+    public void bossBarProgressChanged(final @NonNull BossBar bar, final float oldProgress, final float newProgress) {
         this.sendPacket(ClientboundBossEventPacket::createUpdateProgressPacket);
     }
 
     @Override
-    public void bossBarColorChanged(@NonNull final BossBar bar, final BossBar.@NonNull Color oldColor, final BossBar.@NonNull Color newColor) {
+    public void bossBarColorChanged(final @NonNull BossBar bar, final BossBar.@NonNull Color oldColor, final BossBar.@NonNull Color newColor) {
         this.sendPacket(ClientboundBossEventPacket::createUpdateStylePacket);
     }
 
     @Override
-    public void bossBarOverlayChanged(@NonNull final BossBar bar, final BossBar.@NonNull Overlay oldOverlay, final BossBar.@NonNull Overlay newOverlay) {
+    public void bossBarOverlayChanged(final @NonNull BossBar bar, final BossBar.@NonNull Overlay oldOverlay, final BossBar.@NonNull Overlay newOverlay) {
         this.sendPacket(ClientboundBossEventPacket::createUpdateStylePacket);
     }
 
     @Override
-    public void bossBarFlagsChanged(@NonNull final BossBar bar, @NonNull final Set<BossBar.Flag> flagsAdded, @NonNull final Set<BossBar.Flag> flagsRemoved) {
+    public void bossBarFlagsChanged(final @NonNull BossBar bar, final @NonNull Set<BossBar.Flag> flagsAdded, final @NonNull Set<BossBar.Flag> flagsRemoved) {
         this.sendPacket(ClientboundBossEventPacket::createUpdatePropertiesPacket);
     }
 

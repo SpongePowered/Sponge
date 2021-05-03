@@ -39,6 +39,7 @@ import net.kyori.adventure.util.UTF8ResourceBundleControl;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.adventure.ResolveOperations;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
@@ -84,7 +85,7 @@ public class ChatTest implements LoadableModule {
     @Listener
     public void constructed(final ConstructPluginEvent event) {
         // Register localization keys
-        final TranslationRegistry lang = TranslationRegistry.create(Key.key(this.container.getMetadata().getId(), "translations"));
+        final TranslationRegistry lang = TranslationRegistry.create(ResourceKey.of(this.container, "translations"));
         Arrays.asList(Locales.EN_US, new Locale("en", "UD")).forEach(it ->
                 lang.registerAll(it, ResourceBundle.getBundle("org.spongepowered.test.chat.messages", it,
                                                               UTF8ResourceBundleControl.get()), false));

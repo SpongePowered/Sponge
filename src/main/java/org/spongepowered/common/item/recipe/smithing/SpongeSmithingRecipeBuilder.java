@@ -59,7 +59,7 @@ public final class SpongeSmithingRecipeBuilder extends AbstractResourceKeyedBuil
     private Ingredient base;
     private Ingredient addition;
     private Function<Container, net.minecraft.world.item.ItemStack> resultFunction;
-    @Nullable private String group;
+    private @Nullable String group;
 
     @Override
     public AdditionStep base(ItemType ingredient) {

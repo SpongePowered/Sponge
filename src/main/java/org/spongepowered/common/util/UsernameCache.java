@@ -30,10 +30,10 @@ import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import com.google.gson.JsonSyntaxException;
 import io.leangen.geantyref.TypeToken;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.common.SpongeCommon;
 
-import javax.annotation.Nullable;
 import java.io.BufferedReader;
 import java.io.IOException;
 import java.lang.reflect.Type;
@@ -83,15 +83,13 @@ public final class UsernameCache {
         return false;
     }
 
-    @Nullable
-    public String getLastKnownUsername(final UUID uniqueId) {
+    public @Nullable String getLastKnownUsername(final UUID uniqueId) {
         Preconditions.checkNotNull(uniqueId);
 
         return this.usernameByUniqueId.get(uniqueId);
     }
 
-    @Nullable
-    public UUID getLastKnownUUID(final String username) {
+    public @Nullable UUID getLastKnownUUID(final String username) {
         Preconditions.checkNotNull(username);
 
         for (Map.Entry<UUID, String> mapEntry : this.usernameByUniqueId.entrySet()) {

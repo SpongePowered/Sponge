@@ -44,14 +44,12 @@ public final class SpongeBigDecimalValueParameter extends ResourceKeyedArgumentV
     }
 
     @Override
-    @NonNull
-    public List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
         return Collections.emptyList();
     }
 
     @Override
-    @NonNull
-    public Optional<? extends BigDecimal> parseValue(
+    public @NonNull Optional<? extends BigDecimal> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         final String result = reader.parseString();
         try {

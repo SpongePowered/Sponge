@@ -206,7 +206,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final ServerLocation toLocation = event.toLocation();
         final Vector3d toRotation = event.toRotation();
         mcPlayer.absMoveTo(toLocation.x(), toLocation.y(), toLocation.z(),
-                (float) toRotation.getY(), (float) toRotation.getX());
+                (float) toRotation.y(), (float) toRotation.x());
         return (net.minecraft.server.level.ServerLevel) toLocation.world();
     }
 
@@ -387,7 +387,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         final RespawnPlayerEvent.Recreate event = SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().currentCause(), destinationPosition, originalWorld, originalPosition, destinationWorld, originalDestinationWorld, destinationPosition, (ServerPlayer) originalPlayer, (ServerPlayer) recreatedPlayer, this.impl$isGameMechanicRespawn, !keepAllPlayerData);
         SpongeCommon.postEvent(event);
-        recreatedPlayer.setPos(event.destinationPosition().getX(), event.destinationPosition().getY(), event.destinationPosition().getZ());
+        recreatedPlayer.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
         this.impl$isGameMechanicRespawn = false;
         this.impl$originalDestination = null;
         this.impl$newDestination = null;

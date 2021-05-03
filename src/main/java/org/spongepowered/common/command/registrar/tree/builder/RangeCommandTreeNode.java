@@ -37,8 +37,8 @@ import java.util.function.BiFunction;
 public final class RangeCommandTreeNode<T extends Number>
         extends ArgumentCommandTreeNode<CommandTreeNode.Range<T>> implements CommandTreeNode.Range<T> {
 
-    @Nullable private T min;
-    @Nullable private T max;
+    private @Nullable T min;
+    private @Nullable T max;
     private final T defaultMin;
     private final T defaultMax;
     private final BiFunction<T, T, ArgumentType<?>> typeCreator;
@@ -55,15 +55,13 @@ public final class RangeCommandTreeNode<T extends Number>
     }
 
     @Override
-    @NonNull
-    public Range<T> min(@Nullable final T min) {
+    public @NonNull Range<T> min(final @Nullable T min) {
         this.min = min;
         return this.getThis();
     }
 
     @Override
-    @NonNull
-    public Range<T> max(@Nullable final T max) {
+    public @NonNull Range<T> max(final @Nullable T max) {
         this.max = max;
         return this.getThis();
     }

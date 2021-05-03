@@ -66,10 +66,10 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
 
     @Override
     public CommandMapping register(
-            @NonNull final PluginContainer container,
+            final @NonNull PluginContainer container,
             final Command.@NonNull Raw command,
-            @NonNull final String primaryAlias,
-            @NonNull final String @NonNull... secondaryAliases)
+            final @NonNull String primaryAlias,
+            final @NonNull String @NonNull... secondaryAliases)
             throws CommandFailedRegistrationException {
         final CommandMapping mapping = this.manager.registerAlias(
                 this,

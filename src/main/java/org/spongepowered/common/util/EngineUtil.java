@@ -30,8 +30,7 @@ import org.spongepowered.api.Sponge;
 
 public final class EngineUtil {
 
-    @Nullable
-    public static Engine determineEngine() {
+    public static @Nullable Engine determineEngine() {
         if (Sponge.isServerAvailable()) {
             if (Sponge.server().onMainThread()) {
                 return Sponge.server();

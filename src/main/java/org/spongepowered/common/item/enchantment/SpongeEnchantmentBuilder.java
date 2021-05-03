@@ -28,6 +28,7 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -38,12 +39,11 @@ import org.spongepowered.api.registry.RegistryTypes;
 
 import java.util.Optional;
 
-import javax.annotation.Nullable;
 
 public final class SpongeEnchantmentBuilder extends AbstractDataBuilder<Enchantment> implements Enchantment.Builder {
 
-    @Nullable private EnchantmentType enchantmentType;
-    @Nullable private Integer level;
+    private @Nullable EnchantmentType enchantmentType;
+    private @Nullable Integer level;
 
     public SpongeEnchantmentBuilder() {
         super(Enchantment.class, 1);

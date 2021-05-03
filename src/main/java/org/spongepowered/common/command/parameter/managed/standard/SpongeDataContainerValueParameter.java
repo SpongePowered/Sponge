@@ -51,8 +51,7 @@ public final class SpongeDataContainerValueParameter extends ResourceKeyedArgume
     }
 
     @Override
-    @NonNull
-    public List<String> complete(@NonNull final CommandCause context, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
         return ImmutableList.of();
     }
 
@@ -62,8 +61,7 @@ public final class SpongeDataContainerValueParameter extends ResourceKeyedArgume
     }
 
     @Override
-    @NonNull
-    public Optional<? extends DataContainer> parseValue(
+    public @NonNull Optional<? extends DataContainer> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         return Optional.of(reader.parseDataContainer());
     }

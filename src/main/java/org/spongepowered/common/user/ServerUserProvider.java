@@ -67,8 +67,8 @@ public final class ServerUserProvider {
 
     private final Map<String, MutableWatchEvent> watcherUpdateMap = new HashMap<>();
 
-    @Nullable private WatchService filesystemWatchService = null;
-    @Nullable private WatchKey watchKey = null;
+    private @Nullable WatchService filesystemWatchService = null;
+    private @Nullable WatchKey watchKey = null;
 
     public ServerUserProvider(final Server server) {
         this.userCache = Caffeine.newBuilder()
@@ -161,7 +161,7 @@ public final class ServerUserProvider {
         return this.getUser(gameProfile == null ? null : SpongeGameProfile.of(gameProfile));
     }
 
-    Optional<User> getUser(@Nullable final GameProfile profile) {
+    Optional<User> getUser(final @Nullable GameProfile profile) {
         this.pollFilesystemWatcher();
         if (profile != null && this.knownUUIDs.contains(profile.uniqueId())) {
             // This is okay, the file exists.

@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -34,9 +36,8 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
+import java.util.StringJoiner;
 import java.util.function.BiConsumer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.state.BlockState;
 
 public final class PrepareBlockDropsTransaction extends BlockEventBasedTransaction {
 
@@ -72,7 +73,24 @@ public final class PrepareBlockDropsTransaction extends BlockEventBasedTransacti
     }
 
     @Override
+    void handleEmptyEvent() {
+        // this can mean that there were no possible block changes to associate
+        // but the spawns were still captured, maybe...
+    }
+
+    @Override
     public void restore() {
         this.originalState.restore(true, BlockChangeFlagManager.fromNativeInt(Constants.BlockChangeFlags.FORCED_RESTORE));
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", PrepareBlockDropsTransaction.class.getSimpleName() + "[", "]")
+            .add("affectedPosition=" + this.affectedPosition)
+            .add("originalState=" + this.originalState)
+            .add("worldKey=" + this.worldKey)
+            .add("cancelled=" + this.cancelled)
+            .add("originalState=" + this.originalState)
+            .toString();
     }
 }

@@ -31,6 +31,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.jetbrains.annotations.NotNull;
@@ -63,6 +64,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.Color;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -554,6 +556,22 @@ public final class CommandTest {
                         })
                         .build(),
                 "testoperator");
+
+        final Parameter.Value<Color> colorParameter = Parameter.color().key("color").build();
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .addParameter(colorParameter)
+                        .executor(ctx -> {
+                            final Color color = ctx.requireOne(colorParameter);
+                            final TextColor textColor = TextColor.color(color);
+                            final String colorString = color.toString();
+                            ctx.sendMessage(Identity.nil(), Component.text().color(textColor).content(colorString).build());
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "textcolor"
+        );
     }
 
     @Listener

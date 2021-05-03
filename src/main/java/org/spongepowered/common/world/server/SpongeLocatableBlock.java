@@ -27,6 +27,7 @@ package org.spongepowered.common.world.server;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.data.Key;
@@ -43,7 +44,6 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
@@ -56,7 +56,7 @@ public final class SpongeLocatableBlock implements LocatableBlock {
     private final ResourceKey world;
     private final Vector3i position;
     private final WeakReference<ServerWorld> worldRef;
-    @Nullable private ServerLocation location;
+    private @Nullable ServerLocation location;
 
     SpongeLocatableBlock(final SpongeLocatableBlockBuilder builder) {
         this.blockState = checkNotNull(builder.blockState.get(), "blockstate");
@@ -100,9 +100,9 @@ public final class SpongeLocatableBlock implements LocatableBlock {
         return DataContainer.createNew()
                 .set(Queries.CONTENT_VERSION, 1)
                 .set(Queries.WORLD_KEY, this.world)
-                .set(Queries.POSITION_X, this.position.getX())
-                .set(Queries.POSITION_Y, this.position.getY())
-                .set(Queries.POSITION_Z, this.position.getZ())
+                .set(Queries.POSITION_X, this.position.x())
+                .set(Queries.POSITION_Y, this.position.y())
+                .set(Queries.POSITION_Z, this.position.z())
                 .set(Constants.Block.BLOCK_STATE, this.blockState);
     }
 

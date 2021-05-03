@@ -90,7 +90,7 @@ public final class VolumeStreamTest implements LoadableModule {
             this.plugin,
             Command.builder()
                 .shortDescription(Component.text("Copies a region of the world to your clipboard"))
-                .permission(this.plugin.getMetadata().getId() + ".command.copy")
+                .permission(this.plugin.metadata().id() + ".command.copy")
                 .executor(src -> {
                     if (!(src.cause().root() instanceof Player)) {
                         src.sendMessage(Identity.nil(), Component.text("Player only.", NamedTextColor.RED));
@@ -115,7 +115,7 @@ public final class VolumeStreamTest implements LoadableModule {
         event.register(this.plugin,
             Command.builder()
                 .shortDescription(Component.text("Pastes your clipboard to where you are standing"))
-                .permission(this.plugin.getMetadata().getId() + ".command.paste")
+                .permission(this.plugin.metadata().id() + ".command.paste")
                 .executor(src -> {
                     if (!(src.cause().root()  instanceof ServerPlayer)) {
                         src.sendMessage(Identity.nil(), Component.text("Player only.", NamedTextColor.RED));

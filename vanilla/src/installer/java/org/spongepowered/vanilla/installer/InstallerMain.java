@@ -41,6 +41,7 @@ import java.io.IOException;
 import java.io.InputStreamReader;
 import java.lang.reflect.InvocationTargetException;
 import java.net.URL;
+import java.net.URLConnection;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.AccessDeniedException;
 import java.nio.file.Files;
@@ -81,28 +82,34 @@ public final class InstallerMain {
     }
 
     public void downloadAndRun() throws Exception {
-        final Version mcVersion = this.downloadMinecraftManifest();
-        final CompletableFuture<Path> mappingsFuture = this.downloadMappings(mcVersion, LauncherCommandLine.librariesDirectory);
-        final CompletableFuture<Path> originalMcFuture = this.downloadMinecraft(mcVersion, LauncherCommandLine.librariesDirectory);
-        final CompletableFuture<Path> remappedMinecraftJarFuture = mappingsFuture.thenCombineAsync(originalMcFuture, (mappings, minecraft) -> {
-            try {
-                return this.remapMinecraft(minecraft, mappings, this.installer.getLibraryManager().preparationWorker());
-            } catch (final IOException ex) {
-                return AsyncUtils.sneakyThrow(ex);
-            }
-        }, this.installer.getLibraryManager().preparationWorker());
-        this.installer.getLibraryManager().validate();
-
-        final Path remappedMinecraftJar;
+        Path remappedMinecraftJar = null;
+        Version mcVersion = null;
         try {
-            remappedMinecraftJar = remappedMinecraftJarFuture.get();
+            mcVersion = this.downloadMinecraftManifest();
+        } catch (final IOException ex) {
+            remappedMinecraftJar = this.recoverFromMinecraftDownloadError(ex);
+            this.installer.getLibraryManager().validate();
+        }
+
+        try {
+            if (mcVersion != null) {
+                final CompletableFuture<Path> mappingsFuture = this.downloadMappings(mcVersion, LauncherCommandLine.librariesDirectory);
+                final CompletableFuture<Path> originalMcFuture = this.downloadMinecraft(mcVersion, LauncherCommandLine.librariesDirectory);
+                final CompletableFuture<Path> remappedMinecraftJarFuture = mappingsFuture.thenCombineAsync(originalMcFuture, (mappings, minecraft) -> {
+                    try {
+                        return this.remapMinecraft(minecraft, mappings, this.installer.getLibraryManager().preparationWorker());
+                    } catch (final IOException ex) {
+                        return AsyncUtils.sneakyThrow(ex);
+                    }
+                }, this.installer.getLibraryManager().preparationWorker());
+                this.installer.getLibraryManager().validate();
+                remappedMinecraftJar = remappedMinecraftJarFuture.get();
+            }
         } catch (final ExecutionException ex) {
             final /* @Nullable */ Throwable cause = ex.getCause();
-            if (cause instanceof Exception) {
-                throw (Exception) cause;
-            }
-            throw ex;
+            remappedMinecraftJar = this.recoverFromMinecraftDownloadError(cause instanceof Exception ? (Exception) cause : ex);
         }
+        assert remappedMinecraftJar != null; // always assigned or thrown
 
         this.installer.getLibraryManager().addLibrary(new LibraryManager.Library("minecraft", remappedMinecraftJar));
         this.installer.getLibraryManager().finishedProcessing();
@@ -126,6 +133,16 @@ public final class InstallerMain {
         InstallerMain.invokeMain(className, gameArgs.toArray(new String[0]));
     }
 
+    private <T extends Throwable> Path recoverFromMinecraftDownloadError(final T ex) throws T {
+        final Path expectedMinecraftJar = this.expectedRemappedLocation(this.expectedMinecraftLocation(LauncherCommandLine.librariesDirectory, Constants.Libraries.MINECRAFT_VERSION_TARGET));
+        if (Files.exists(expectedMinecraftJar)) {
+            Logger.warn(ex, "Failed to download and remap Minecraft. An existing jar exists, so we will attempt to use that instead.");
+            return expectedMinecraftJar;
+        } else {
+            throw ex;
+        }
+    }
+
     private static void invokeMain(final String className, final String[] args) {
         try {
             Class.forName(className)
@@ -146,8 +163,10 @@ public final class InstallerMain {
         VersionManifest.Version foundVersionManifest = null;
 
         final Gson gson = new Gson();
-        try (final JsonReader reader = new JsonReader(new InputStreamReader(new URL(Constants.Libraries.MINECRAFT_MANIFEST_URL)
-                .openStream()))) {
+        final URLConnection conn = new URL(Constants.Libraries.MINECRAFT_MANIFEST_URL)
+            .openConnection();
+        conn.setConnectTimeout(5 /* seconds */ * 1000);
+        try (final JsonReader reader = new JsonReader(new InputStreamReader(conn.getInputStream()))) {
             final VersionManifest manifest = gson.fromJson(reader, VersionManifest.class);
             for (final VersionManifest.Version version : manifest.versions) {
                 if (Constants.Libraries.MINECRAFT_VERSION_TARGET.equals(version.id)) {
@@ -175,11 +194,19 @@ public final class InstallerMain {
         return version;
     }
 
-    private CompletableFuture<Path> downloadMinecraft(final Version version, final Path librariesDirectory) throws Exception {
+    private Path expectedMinecraftLocation(final Path librariesDirectory, final String version) {
+        return librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX)
+            .resolve(version)
+            .resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
+    }
+
+    private Path expectedRemappedLocation(final Path originalLocation) {
+        return originalLocation.resolveSibling(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_remapped.jar");
+    }
+
+    private CompletableFuture<Path> downloadMinecraft(final Version version, final Path librariesDirectory) {
         return AsyncUtils.asyncFailableFuture(() -> {
-            final Path downloadTarget = librariesDirectory.resolve(Constants.Libraries.MINECRAFT_PATH_PREFIX)
-                    .resolve(version.id)
-                    .resolve(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + ".jar");
+            final Path downloadTarget = this.expectedMinecraftLocation(librariesDirectory, version.id);
 
             if (Files.notExists(downloadTarget)) {
                 if (!this.installer.getLauncherConfig().autoDownloadLibraries) {
@@ -257,7 +284,7 @@ public final class InstallerMain {
 
     private Path remapMinecraft(final Path inputJar, final Path serverMappings, final ExecutorService service) throws IOException {
         Logger.info("Checking if we need to remap Minecraft...");
-        final Path outputJar = inputJar.resolveSibling(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_remapped.jar");
+        final Path outputJar = this.expectedRemappedLocation(inputJar);
         final Path tempOutput = outputJar.resolveSibling(Constants.Libraries.MINECRAFT_SERVER_JAR_NAME + "_remapped.jar.tmp");
 
         if (Files.exists(outputJar)) {

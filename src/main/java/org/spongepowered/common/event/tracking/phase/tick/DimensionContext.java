@@ -24,17 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 
-import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 public final class DimensionContext extends TickContext<DimensionContext> {
 
-    @Nullable private World world;
+    private @Nullable World world;
 
     DimensionContext(PhaseTracker tracker) {
         super(TickPhase.Tick.DIMENSION, tracker);

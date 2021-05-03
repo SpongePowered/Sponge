@@ -88,7 +88,7 @@ public interface SpongeImmutableDataHolder<I extends DataHolder.Immutable<I>> ex
             for (final Value<?> value : that.getValues()) {
                 final Key<Value<Object>> key = (Key<Value<Object>>) value.key();
                 final DataProvider<?, Object> provider = this.impl$getProviderFor(key, this);
-                @Nullable final Value<Object> original = provider.value(this).map(Value::asImmutable).orElse(null);
+                final @Nullable Value<Object> original = provider.value(this).map(Value::asImmutable).orElse(null);
                 final Value<Object> merged = function.merge(original, (Value<Object>) value);
                 final Optional<I> optionalResult = result.with(merged);
                 if (optionalResult.isPresent()) {

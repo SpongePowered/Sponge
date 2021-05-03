@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
+import net.minecraft.core.BlockPos;
 import org.apache.logging.log4j.Marker;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
@@ -48,7 +49,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-import net.minecraft.core.BlockPos;
 
 public final class BlockTransactionType extends TransactionType<ChangeBlockEvent.All> {
 
@@ -82,6 +82,11 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
                     positions.put(original.getBlockPos(), (SpongeBlockSnapshot) transactions.finalReplacement());
                 });
 
+            // Do not bother turning the positions into receipts if it's empty
+            // just return.
+            if (positions.isEmpty()) {
+                return;
+            }
             final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
             final ImmutableList<BlockTransactionReceipt> transactions = positions.asMap()
                 .values()

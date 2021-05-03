@@ -81,8 +81,7 @@ Are you a talented programmer looking to contribute some code? We'd love the hel
 [IntelliJ]: http://www.jetbrains.com/idea/
 [Issues]: https://github.com/SpongePowered/Sponge/issues
 [Documentation]: https://docs.spongepowered.org/
-[Java]: http://www.oracle.com/technetwork/java/javase/downloads/jdk8-downloads-2133151.html
+[Java]: https://adoptopenjdk.net/?variant=openjdk8&jvmVariant=hotspot
 [Source]: https://github.com/SpongePowered/Sponge/
 [MIT License]: http://www.tldrlegal.com/license/mit-license
 [Discord]: https://discord.gg/sponge
-[Jenkins]: https://jenkins-ci.org/

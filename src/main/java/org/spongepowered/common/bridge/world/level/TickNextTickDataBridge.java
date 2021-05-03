@@ -25,11 +25,25 @@
 package org.spongepowered.common.bridge.world.level;
 
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.ServerTickList;
+import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.world.server.ServerLocation;
 
-public interface TickNextTickDataBridge {
+import java.time.Duration;
+
+public interface TickNextTickDataBridge<T> {
+
+    void bridge$createdByList(ServerTickList<T> tickList);
 
     void bridge$setWorld(Level world);
 
     ServerLocation bridge$getLocation();
+
+    ScheduledUpdate.State bridge$internalState();
+
+    boolean bridge$cancelForcibly();
+
+    Duration bridge$getScheduledDelayWhenCreated();
+
+    void bridge$setState(ScheduledUpdate.State finished);
 }

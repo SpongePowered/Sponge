@@ -48,7 +48,7 @@ public final class ScheduledTaskPhaseState extends BasicPluginState {
             final BasicPluginContext context,
             final TickTaskBridge returnValue
     ) {
-        @Nullable final Object source = context.getSource();
+        final @Nullable Object source = context.getSource();
         final PluginContainer plugin = Objects.requireNonNull(context.container, "Scheduled Task has a null plugin!");
 
         returnValue.bridge$contextShift(((context1, stackFrame) -> {

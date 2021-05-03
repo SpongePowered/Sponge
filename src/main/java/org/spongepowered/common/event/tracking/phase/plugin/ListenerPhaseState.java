@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
@@ -56,7 +56,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     @Override
-    public void associateNeighborStateNotifier(final L unwindingContext, @Nullable final BlockPos sourcePos, final Block block, final BlockPos notifyPos,
+    public void associateNeighborStateNotifier(final L unwindingContext, final @Nullable BlockPos sourcePos, final Block block, final BlockPos notifyPos,
         final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         unwindingContext.getCapturedPlayer().ifPresent(player ->
             ((LevelChunkBridge) minecraftWorld.getChunkAt(notifyPos))
@@ -65,7 +65,7 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     @Override
-    public void capturePlayerUsingStackToBreakBlock(@Nullable final ItemStack stack, final net.minecraft.server.level.ServerPlayer playerMP, final L context) {
+    public void capturePlayerUsingStackToBreakBlock(final @Nullable ItemStack stack, final net.minecraft.server.level.ServerPlayer playerMP, final L context) {
         context.getCapturedPlayerSupplier().addPlayer(playerMP);
     }
 

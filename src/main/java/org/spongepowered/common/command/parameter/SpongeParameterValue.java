@@ -52,7 +52,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     private final List<ValueParser<? extends T>> parsers;
     private final ValueCompleter completer;
     private final Predicate<CommandCause> requirement;
-    private @Nullable final ValueUsage usage;
+    private final @Nullable ValueUsage usage;
     private final Key<T> key;
     private final boolean isOptional;
     private final boolean consumeAll;
@@ -62,7 +62,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     public SpongeParameterValue(
             final List<ValueParser<? extends T>> parsers,
             final ValueCompleter completer,
-            @Nullable final ValueUsage usage,
+            final @Nullable ValueUsage usage,
             final Predicate<CommandCause> requirement,
             final Key<T> key,
             final boolean isOptional,
@@ -146,14 +146,12 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     }
 
     @Override
-    @NonNull
-    public Key<T> key() {
+    public @NonNull Key<T> key() {
         return this.key;
     }
 
     @Override
-    @NonNull
-    public List<String> complete(final ArgumentReader.@NonNull Immutable reader, @NonNull final CommandContext context) {
+    public @NonNull List<String> complete(final ArgumentReader.@NonNull Immutable reader, final @NonNull CommandContext context) {
         final String currentInput = reader.remaining();
         final List<String> result = this.completer.complete(context, currentInput);
         if (this.modifier != null) {
@@ -163,8 +161,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     }
 
     @Override
-    @NonNull
-    public String usage(@NonNull final CommandCause cause) {
+    public @NonNull String usage(final @NonNull CommandCause cause) {
         if (this.usage != null) {
             return this.usage.usage(this.key.key());
         }
@@ -178,32 +175,27 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     }
 
     @Override
-    @NonNull
-    public Collection<ValueParser<? extends T>> parsers() {
+    public @NonNull Collection<ValueParser<? extends T>> parsers() {
         return this.parsers;
     }
 
     @Override
-    @NonNull
-    public ValueCompleter completer() {
+    public @NonNull ValueCompleter completer() {
         return this.completer;
     }
 
     @Override
-    @NonNull
-    public Optional<ValueParameterModifier<T>> modifier() {
+    public @NonNull Optional<ValueParameterModifier<T>> modifier() {
         return Optional.ofNullable(this.modifier);
     }
 
     @Override
-    @NonNull
-    public Optional<ValueUsage> valueUsage() {
+    public @NonNull Optional<ValueUsage> valueUsage() {
         return Optional.ofNullable(this.usage);
     }
 
     @Override
-    @NonNull
-    public Predicate<CommandCause> requirement() {
+    public @NonNull Predicate<CommandCause> requirement() {
         return this.requirement;
     }
 
@@ -223,8 +215,7 @@ public final class SpongeParameterValue<T> implements Parameter.Value<T> {
     }
 
     @SuppressWarnings("unchecked")
-    @Nullable
-    public ArgumentParser<T> argumentTypeIfStandard() {
+    public @Nullable ArgumentParser<T> argumentTypeIfStandard() {
         if (this.parsers.size() == 1) {
             final ValueParser<? extends T> parser = this.parsers.get(0);
             if (parser instanceof ArgumentParser<?>) {

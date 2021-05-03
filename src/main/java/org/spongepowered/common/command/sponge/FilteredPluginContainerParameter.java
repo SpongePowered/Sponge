@@ -48,7 +48,7 @@ public final class FilteredPluginContainerParameter implements ValueParameter<Pl
         return Launch.getInstance().getPluginManager().plugins()
                 .stream()
                 .filter(x -> !(x instanceof DummyPluginContainer))
-                .collect(Collectors.toMap(x -> x.getMetadata().getId(), x -> x));
+                .collect(Collectors.toMap(x -> x.metadata().id(), x -> x));
     }
 
     @Override

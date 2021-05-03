@@ -88,7 +88,7 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
 
             // This seems odd but we move the pearl so that the pearl's logic will move the living entity later in the impact method
             final Vector3d destinationPosition = event.destinationPosition();
-            this.shadow$setPos(destinationPosition.getX(), destinationPosition.getY(), destinationPosition.getZ());
+            this.shadow$setPos(destinationPosition.x(), destinationPosition.y(), destinationPosition.z());
         }
     }
 

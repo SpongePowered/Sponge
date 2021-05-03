@@ -52,7 +52,7 @@ public final class MetricsConfig implements Config {
     public final Map<String, Tristate> plugins = new HashMap<>();
 
     public Tristate getCollectionState(final PluginContainer container) {
-        final Tristate pluginState = this.plugins.get(container.getMetadata().getId());
+        final Tristate pluginState = this.plugins.get(container.metadata().id());
         return pluginState == null ? Tristate.UNDEFINED : pluginState;
     }
 

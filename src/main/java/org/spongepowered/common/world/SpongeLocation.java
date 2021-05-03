@@ -61,7 +61,7 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
         this.chunkPosition = chunkLayout.forceToChunk(this.blockPosition);
         this.biomePosition = position.toInt().mul(1, 0, 1);
 
-        this.pos = new BlockPos(position.getX(), position.getY(), position.getZ());
+        this.pos = new BlockPos(position.x(), position.y(), position.z());
     }
 
     protected SpongeLocation(final W worldRef, final Vector3d position, final Vector3i chunkPosition, final Vector3i biomePosition) {
@@ -71,7 +71,7 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
         this.chunkPosition = chunkPosition;
         this.biomePosition = biomePosition;
 
-        this.pos = new BlockPos(position.getX(), position.getY(), position.getZ());
+        this.pos = new BlockPos(position.x(), position.y(), position.z());
     }
 
     @Override
@@ -120,32 +120,32 @@ public class SpongeLocation<W extends World<W, L>, L extends Location<W, L>> imp
 
     @Override
     public double x() {
-        return this.position.getX();
+        return this.position.x();
     }
 
     @Override
     public double y() {
-        return this.position.getY();
+        return this.position.y();
     }
 
     @Override
     public double z() {
-        return this.position().getZ();
+        return this.position.z();
     }
 
     @Override
     public int blockX() {
-        return this.blockPosition.getX();
+        return this.blockPosition.x();
     }
 
     @Override
     public int blockY() {
-        return this.blockPosition.getY();
+        return this.blockPosition.y();
     }
 
     @Override
     public int blockZ() {
-        return this.blockPosition.getZ();
+        return this.blockPosition.z();
     }
 
     @Override

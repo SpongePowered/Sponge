@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.placeholder;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -38,16 +39,15 @@ import java.lang.ref.WeakReference;
 import java.util.UUID;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
 
 public class SpongePlaceholderContextBuilder implements PlaceholderContext.Builder {
 
-    @Nullable private Supplier<Object> associatedObjectSupplier;
-    @Nullable private String argument = null;
+    private @Nullable Supplier<Object> associatedObjectSupplier;
+    private @Nullable String argument = null;
 
     @Override
     @SuppressWarnings("unchecked")
-    public PlaceholderContext.Builder associatedObject(@Nullable final Object associatedObject) {
+    public PlaceholderContext.Builder associatedObject(final @Nullable Object associatedObject) {
         if (associatedObject == null) {
             this.associatedObjectSupplier = null;
         } else if (associatedObject instanceof Supplier) {
@@ -76,13 +76,13 @@ public class SpongePlaceholderContextBuilder implements PlaceholderContext.Build
     }
 
     @Override
-    public PlaceholderContext.Builder associatedObject(@Nullable final Supplier<Object> associatedObjectSupplier) {
+    public PlaceholderContext.Builder associatedObject(final @Nullable Supplier<Object> associatedObjectSupplier) {
         this.associatedObjectSupplier = associatedObjectSupplier;
         return this;
     }
 
     @Override
-    public PlaceholderContext.Builder argumentString(@Nullable final String argument) {
+    public PlaceholderContext.Builder argumentString(final @Nullable String argument) {
         this.argument = argument == null || argument.isEmpty() ? null : argument;
         return this;
     }

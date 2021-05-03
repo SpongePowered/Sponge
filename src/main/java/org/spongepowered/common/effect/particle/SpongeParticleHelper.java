@@ -59,9 +59,9 @@ public final class SpongeParticleHelper {
         final List<Packet<?>> packets = SpongeParticleHelper.toPackets(particleEffect, position);
 
         if (!packets.isEmpty()) {
-            final double x = position.getX();
-            final double y = position.getY();
-            final double z = position.getZ();
+            final double x = position.x();
+            final double y = position.y();
+            final double z = position.z();
 
             for (final Packet<?> packet : packets) {
                 playerList.broadcast(null, x, y, z, radius, type, packet);
@@ -217,13 +217,13 @@ public final class SpongeParticleHelper {
 
         @Override
         public void process(final Vector3d position, final List<Packet<?>> output) {
-            final float posX = (float) position.getX();
-            final float posY = (float) position.getY();
-            final float posZ = (float) position.getZ();
+            final float posX = (float) position.x();
+            final float posY = (float) position.y();
+            final float posZ = (float) position.z();
 
-            final float offX = this.offset.getX();
-            final float offY = this.offset.getY();
-            final float offZ = this.offset.getZ();
+            final float offX = this.offset.x();
+            final float offY = this.offset.y();
+            final float offZ = this.offset.z();
 
             if (this.velocity.equals(Vector3f.ZERO)) {
                 final ClientboundLevelParticlesPacket packet = new ClientboundLevelParticlesPacket(
@@ -237,9 +237,9 @@ public final class SpongeParticleHelper {
 
                 output.add(packet);
             } else {
-                final float velocityX = this.velocity.getX();
-                final float velocityY = this.velocity.getY();
-                final float velocityZ = this.velocity.getZ();
+                final float velocityX = this.velocity.x();
+                final float velocityY = this.velocity.y();
+                final float velocityZ = this.velocity.z();
                 final Random random = new Random();
                 for (int i = 0; i < this.quantity; i++) {
                     final float px0 = posX + (random.nextFloat() * 2f - 1f) * offX;
@@ -273,7 +273,7 @@ public final class SpongeParticleHelper {
 
         @Override
         public void process(final Vector3d position, final List<Packet<?>> output) {
-            final BlockPos blockPos = new BlockPos(position.getFloorX(), position.getFloorY(), position.getFloorZ());
+            final BlockPos blockPos = new BlockPos(position.floorX(), position.floorY(), position.floorZ());
             final ClientboundLevelEventPacket packet = new ClientboundLevelEventPacket(this.type, blockPos, this.data, this.broadcast);
             output.add(packet);
         }

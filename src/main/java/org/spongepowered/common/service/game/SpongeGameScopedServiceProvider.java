@@ -65,8 +65,7 @@ public final class SpongeGameScopedServiceProvider extends SpongeServiceProvider
     }
 
     @Override
-    @NonNull
-    public final PaginationService paginationService() {
+    public final @NonNull PaginationService paginationService() {
         return this.provideUnchecked(PaginationService.class);
     }
 

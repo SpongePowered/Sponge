@@ -29,6 +29,7 @@ import com.google.common.collect.Lists;
 import com.google.common.collect.PeekingIterator;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.exception.CommandException;
 
 import java.util.ArrayList;
@@ -37,7 +38,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
 
 /**
  * Pagination occurring for an iterable -- we don't know its size.
@@ -48,8 +48,8 @@ final class IterablePagination extends ActivePagination {
     private int lastPage;
 
     public IterablePagination(final Supplier<Optional<? extends Audience>> src, final PaginationCalculator calc,
-            final Iterable<Map.Entry<Component, Integer>> counts, @Nullable final Component title,
-            @Nullable final Component header, @Nullable final Component footer, final Component padding) {
+            final Iterable<Map.Entry<Component, Integer>> counts, final @Nullable Component title,
+            final @Nullable Component header, final @Nullable Component footer, final Component padding) {
         super(src, calc, title, header, footer, padding);
         this.countIterator = Iterators.peekingIterator(counts.iterator());
     }

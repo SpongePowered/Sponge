@@ -337,10 +337,10 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             if (fromPosition.distanceSquared(toPosition) > 0) {
                 // Set the location, as if the player was teleporting
                 this.awaitingTeleportTime = this.tickCount;
-                this.shadow$teleport(fromPosition.getX(), fromPosition.getY(), fromPosition.getZ(), (float) toRotation.getX(), (float) toRotation.getY());
+                this.shadow$teleport(fromPosition.x(), fromPosition.y(), fromPosition.z(), (float) toRotation.x(), (float) toRotation.y());
             } else {
                 // If this is only rotation do not teleport back
-                this.player.absMoveTo(fromPosition.getX(), fromPosition.getY(), fromPosition.getZ(), (float) toRotation.getX(), (float) toRotation.getY());
+                this.player.absMoveTo(fromPosition.x(), fromPosition.y(), fromPosition.z(), (float) toRotation.x(), (float) toRotation.y());
             }
             ci.cancel();
             return;
@@ -364,15 +364,15 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             if (d11 - d10 > (double)(f2 * (float)i) && !this.shadow$isSingleplayerOwner()) {
                 // At this point, we need to set the target position so the teleport code forces it
                 this.awaitingPositionFromClient = VecHelper.toVanillaVector3d(toPosition);
-                ((EntityAccessor) this.player).invoker$setRot((float) toRotation.getX(), (float) toRotation.getY());
+                ((EntityAccessor) this.player).invoker$setRot((float) toRotation.x(), (float) toRotation.y());
                 // And reset the position update so the force set is done.
                 this.awaitingTeleportTime = this.tickCount - Constants.Networking.MAGIC_TRIGGER_TELEPORT_CONFIRM_DIFF;
             } else {
                 // otherwise, set the data back onto the packet
                 packetInAccessor.accessor$hasPos(true);
-                packetInAccessor.accessor$x(toPosition.getX());
-                packetInAccessor.accessor$y(toPosition.getY());
-                packetInAccessor.accessor$z(toPosition.getZ());
+                packetInAccessor.accessor$x(toPosition.x());
+                packetInAccessor.accessor$y(toPosition.y());
+                packetInAccessor.accessor$z(toPosition.z());
             }
         }
     }

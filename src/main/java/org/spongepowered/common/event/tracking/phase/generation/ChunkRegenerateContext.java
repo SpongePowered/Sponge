@@ -24,16 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import javax.annotation.Nullable;
 
 public class ChunkRegenerateContext extends GenerationContext<ChunkRegenerateContext> {
 
-    @Nullable private Chunk chunk;
+    private @Nullable Chunk chunk;
 
     public ChunkRegenerateContext(final IPhaseState<ChunkRegenerateContext> state, final PhaseTracker tracker) {
         super(state, tracker);

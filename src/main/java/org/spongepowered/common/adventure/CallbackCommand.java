@@ -27,13 +27,11 @@ package org.spongepowered.common.adventure;
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import net.kyori.adventure.text.Component;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.ArgumentParseException;
-import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -47,57 +45,60 @@ import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.stream.Collectors;
 
-public final class SpongeCallback {
+public final class CallbackCommand {
+    public static final String NAME = "callback";
 
-    private final Cache<UUID, Consumer<CommandCause>> executors = Caffeine.newBuilder()
+    public static final CallbackCommand INSTANCE = new CallbackCommand();
+
+    private final Cache<UUID, Consumer<CommandCause>> callbacks = Caffeine.newBuilder()
             .expireAfterWrite(Duration.ofMinutes(10))
             .build();
 
-    private Parameter.@MonotonicNonNull Key<Consumer<CommandCause>> executorKey;
+    private CallbackCommand() {
+    }
 
     public Command.Parameterized createCommand() {
-        if (this.executorKey == null) {
-            this.executorKey = Parameter.key("key", TypeTokens.COMMAND_CAUSE_CONSUMER);
-        }
+        this.callbacks.invalidateAll();
 
-        this.executors.invalidateAll();
+        final Parameter.Key<Consumer<CommandCause>> key = Parameter.key("key", TypeTokens.COMMAND_CAUSE_CONSUMER);
         return Command.builder()
                 .shortDescription(Component.text("Execute a callback registered as part of a TextComponent. Primarily for internal use"))
-                .addParameter(Parameter.builder(TypeTokens.COMMAND_CAUSE_CONSUMER).key(this.executorKey).addParser(new CallbackValueParameter()).build())
-                .executor(this::commandCallback)
+                .addParameter(Parameter.builder(TypeTokens.COMMAND_CAUSE_CONSUMER).key(key).addParser(new CallbackValueParameter()).build())
+                .executor(context -> {
+                    context.requireOne(key).accept(context.cause());
+                    return CommandResult.success();
+                })
                 .build();
     }
 
-    public UUID registerCallback(final Consumer<CommandCause> causeConsumer) {
-        final UUID newKey = UUID.randomUUID();
-        this.executors.put(newKey, causeConsumer);
-        return newKey;
-    }
-
-    public CommandResult commandCallback(@NonNull final CommandContext context) throws CommandException {
-        context.requireOne(this.executorKey).accept(context.cause());
-        return CommandResult.success();
+    public UUID registerCallback(final Consumer<CommandCause> callback) {
+        final UUID key = UUID.randomUUID();
+        this.callbacks.put(key, callback);
+        return key;
     }
 
     private final class CallbackValueParameter implements ValueParameter<Consumer<CommandCause>> {
-
         @Override
-        @NonNull
-        public List<String> complete(@NonNull final CommandContext context, final String currentInput) {
-            return SpongeCallback.this.executors.asMap().keySet().stream().map(UUID::toString).filter(x -> x.startsWith(currentInput))
+        public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+            return CallbackCommand.this.callbacks
+                    .asMap()
+                    .keySet()
+                    .stream()
+                    .map(UUID::toString)
+                    .filter(string -> string.startsWith(currentInput))
                     .collect(Collectors.toList());
         }
 
         @Override
-        @NonNull
-        public Optional<? extends Consumer<CommandCause>> parseValue(
+        public @NonNull Optional<? extends Consumer<CommandCause>> parseValue(
                 final Parameter.@NonNull Key<? super Consumer<CommandCause>> parameterKey,
                 final ArgumentReader.@NonNull Mutable reader,
-                final CommandContext.@NonNull Builder context) throws ArgumentParseException {
+                final CommandContext.@NonNull Builder context
+        ) throws ArgumentParseException {
             final String next = reader.parseString();
             try {
                 final UUID id = UUID.fromString(next);
-                final Consumer<CommandCause> ret = SpongeCallback.this.executors.getIfPresent(id);
+                final Consumer<CommandCause> ret = CallbackCommand.this.callbacks.getIfPresent(id);
                 if (ret == null) {
                     throw reader.createException(Component.text(
                             "The callback you provided was not valid. Keep in mind that callbacks will expire after 10 " +
@@ -108,7 +109,5 @@ public final class SpongeCallback {
                 throw reader.createException(Component.text("Input " + next + " was not a valid UUID"));
             }
         }
-
     }
-
 }

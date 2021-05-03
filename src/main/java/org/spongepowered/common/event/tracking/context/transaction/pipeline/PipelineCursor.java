@@ -45,8 +45,8 @@ public final class PipelineCursor {
     public final int limit;
 
     public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
-        @Nullable final BlockEntity tileEntity,
-        @Nullable final Entity destroyer, final int limit
+        final @Nullable BlockEntity tileEntity,
+        final @Nullable Entity destroyer, final int limit
     ) {
         this.state = state;
         this.opacity = opacity;
@@ -58,7 +58,7 @@ public final class PipelineCursor {
     }
 
     public PipelineCursor(final BlockState state, final int opacity, final BlockPos pos,
-        @Nullable final BlockEntity tileEntity,
+        final @Nullable BlockEntity tileEntity,
         final @Nullable Entity destroyer,
         final List<ItemStack> drops,
         final int limit

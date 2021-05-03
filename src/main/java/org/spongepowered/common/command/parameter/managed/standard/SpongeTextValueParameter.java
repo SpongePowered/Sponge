@@ -60,14 +60,12 @@ public final class SpongeTextValueParameter extends AbstractArgumentParser<Compo
     }
 
     @Override
-    @NonNull
-    public List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         return ImmutableList.of();
     }
 
     @Override
-    @NonNull
-    public Optional<? extends Component> parseValue(
+    public @NonNull Optional<? extends Component> parseValue(
             final Parameter.@NonNull Key<? super Component> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {

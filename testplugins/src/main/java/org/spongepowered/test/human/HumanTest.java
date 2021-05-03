@@ -72,7 +72,7 @@ public final class HumanTest {
                     .builder()
                     .addParameter(nameParameter)
                     .addParameter(mimicParameter)
-                    .permission(this.plugin.getMetadata().getId() + ".command.human.create")
+                    .permission(this.plugin.metadata().id() + ".command.human.create")
                     .executor(context -> {
                         final ServerPlayer player = context.cause().first(ServerPlayer.class).get();
                         final Optional<String> optName = context.one(nameParameter);

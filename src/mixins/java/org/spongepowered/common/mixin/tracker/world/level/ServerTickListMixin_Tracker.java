@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.TickNextTickData;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -37,9 +39,11 @@ public abstract class ServerTickListMixin_Tracker<T> {
 
     @Shadow protected abstract void shadow$addTickData(TickNextTickData<T> p_219504_1_);
 
+    @Shadow @Final private ServerLevel level;
+
     @Redirect(method = "scheduleTick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/ServerTickList;addTickData(Lnet/minecraft/world/level/TickNextTickData;)V"))
     private void tracker$associatePhaseContextWithTickEntry(final ServerTickList<T> thisList, final TickNextTickData<T> entry) {
-        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate(entry);
+        PhaseTracker.getInstance().getPhaseContext().associateScheduledTickUpdate(this.level, entry);
         this.shadow$addTickData(entry);
     }
 }

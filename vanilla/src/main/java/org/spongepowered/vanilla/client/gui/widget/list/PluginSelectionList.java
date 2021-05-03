@@ -55,12 +55,12 @@ public final class PluginSelectionList extends FilterableList<PluginSelectionLis
         public void render(final PoseStack stack, final int p_render_1_, final int renderY, final int renderX, final int p_render_4_,
                 final int p_render_5_, final int mouseX, final int mouseY, final boolean p_render_8_, final float p_render_9_) {
             // Draw the name, or ID if name is not present
-            Screen.drawString(stack, this.list.fontRenderer, this.metadata.getName().orElse(this.metadata.getId()), renderX + 2, renderY + 1,
+            Screen.drawString(stack, this.list.fontRenderer, this.metadata.name().orElse(this.metadata.id()), renderX + 2, renderY + 1,
                     16777215);
 
             // Draw the ID if the name is present
-            if (this.metadata.getName().isPresent()) {
-                Screen.drawString(stack, this.list.fontRenderer, this.metadata.getId(), renderX + 2, renderY + 12, 8421504);
+            if (this.metadata.name().isPresent()) {
+                Screen.drawString(stack, this.list.fontRenderer, this.metadata.id(), renderX + 2, renderY + 12, 8421504);
             }
         }
 

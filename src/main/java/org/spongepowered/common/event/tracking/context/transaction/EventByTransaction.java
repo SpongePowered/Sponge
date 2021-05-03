@@ -37,11 +37,11 @@ final class EventByTransaction<T extends Event & Cancellable> {
     final T event;
     final ImmutableList<GameTransaction<T>> transactions;
     final GameTransaction<T> decider;
-    @Nullable final GameTransaction<@NonNull ?> parent;
+    final @Nullable GameTransaction<@NonNull ?> parent;
 
     EventByTransaction(final T event,
         final ImmutableList<GameTransaction<T>> transactions,
-        @Nullable final GameTransaction<@NonNull ?> parent,
+        final @Nullable GameTransaction<@NonNull ?> parent,
         final GameTransaction<T> decider
     ) {
         this.parent = parent;

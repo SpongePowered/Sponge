@@ -36,7 +36,7 @@ import net.minecraft.commands.SharedSuggestionProvider;
 
 public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentCommandNode<SharedSuggestionProvider, T> implements ForcedRedirectNode {
 
-    @Nullable private CommandNode<SharedSuggestionProvider> forcedRedirect = null;
+    private @Nullable CommandNode<SharedSuggestionProvider> forcedRedirect = null;
 
     public ForcedRedirectArgumentSuggestionNode(final String name,
             final ArgumentType<T> type,
@@ -46,7 +46,7 @@ public final class ForcedRedirectArgumentSuggestionNode<T> extends ArgumentComma
     }
 
     @Override
-    public void setForcedRedirect(@Nullable final CommandNode<SharedSuggestionProvider> redirect) {
+    public void setForcedRedirect(final @Nullable CommandNode<SharedSuggestionProvider> redirect) {
         this.forcedRedirect = redirect;
     }
 

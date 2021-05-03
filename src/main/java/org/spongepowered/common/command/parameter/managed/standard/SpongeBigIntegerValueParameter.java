@@ -47,8 +47,7 @@ public final class SpongeBigIntegerValueParameter extends ResourceKeyedArgumentV
     }
 
     @Override
-    @NonNull
-    public Optional<? extends BigInteger> parseValue(
+    public @NonNull Optional<? extends BigInteger> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
         final String result = reader.parseString();
         try {
@@ -59,8 +58,7 @@ public final class SpongeBigIntegerValueParameter extends ResourceKeyedArgumentV
     }
 
     @Override
-    @NonNull
-    public List<String> complete(@NonNull final CommandCause context, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
         return Collections.emptyList();
     }
 

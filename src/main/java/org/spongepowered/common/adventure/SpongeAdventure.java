@@ -77,6 +77,7 @@ import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.client.KeyMappingAccessor;
 import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
@@ -100,7 +101,6 @@ import java.util.regex.Pattern;
 
 public final class SpongeAdventure {
     public static final AttributeKey<Locale> CHANNEL_LOCALE = AttributeKey.newInstance("sponge:locale");
-    public static final SpongeCallback CALLBACK_COMMAND = new SpongeCallback();
     public static final GsonComponentSerializer GSON = GsonComponentSerializer.builder()
         .legacyHoverEventSerializer(NbtLegacyHoverEventSerializer.INSTANCE)
         .build();
@@ -234,30 +234,6 @@ public final class SpongeAdventure {
     // ---- Component ----
     // -------------------
 
-    public static Component legacy(final char character, final String string) {
-        return LegacyComponentSerializer.legacy(character).deserialize(string);
-    }
-
-    public static String legacy(final char character, final Component component) {
-        return LegacyComponentSerializer.legacy(character).serialize(component);
-    }
-
-    public static String legacySection(final Component component) {
-        return LegacyComponentSerializer.legacySection().serialize(component);
-    }
-
-    public static Component legacySection(final String string) {
-        return LegacyComponentSerializer.legacySection().deserialize(string);
-    }
-
-    public static String legacyAmpersand(final Component component) {
-        return LegacyComponentSerializer.legacyAmpersand().serialize(component);
-    }
-
-    public static Component legacyAmpersand(final String string) {
-        return LegacyComponentSerializer.legacyAmpersand().deserialize(string);
-    }
-
     public static Component json(final String string) {
         return SpongeAdventure.GSON.deserialize(string);
     }
@@ -266,8 +242,44 @@ public final class SpongeAdventure {
         return SpongeAdventure.GSON.serialize(string);
     }
 
+    public static @NonNull LegacyComponentSerializer legacy(final char character) {
+        if (character == LegacyComponentSerializer.SECTION_CHAR) {
+            return SpongeAdventure.LEGACY_SECTION;
+        } else if (character == LegacyComponentSerializer.AMPERSAND_CHAR) {
+            return SpongeAdventure.LEGACY_AMPERSAND;
+        }
+        return LegacyComponentSerializer.builder()
+            .character(character)
+            .flattener(SpongeAdventure.FLATTENER)
+            .build();
+    }
+
+    public static Component legacy(final char character, final String string) {
+        return SpongeAdventure.legacy(character).deserialize(string);
+    }
+
+    public static String legacy(final char character, final Component component) {
+        return SpongeAdventure.legacy(character).serialize(component);
+    }
+
+    public static String legacySection(final Component component) {
+        return SpongeAdventure.LEGACY_SECTION.serialize(component);
+    }
+
+    public static Component legacySection(final String string) {
+        return SpongeAdventure.LEGACY_SECTION.deserialize(string);
+    }
+
+    public static String legacyAmpersand(final Component component) {
+        return SpongeAdventure.LEGACY_AMPERSAND.serialize(component);
+    }
+
+    public static Component legacyAmpersand(final String string) {
+        return SpongeAdventure.LEGACY_AMPERSAND.deserialize(string);
+    }
+
     public static String plain(final Component component) {
-        return PlainComponentSerializer.plain().serialize(component);
+        return SpongeAdventure.PLAIN.serialize(component);
     }
 
     public static net.minecraft.network.chat.@Nullable Component asVanillaNullable(final @Nullable Component component) {
@@ -719,13 +731,11 @@ public final class SpongeAdventure {
     }
 
     public static class Factory implements SpongeComponents.Factory {
-
         @Override
         public @NonNull ClickEvent callbackClickEvent(final @NonNull Consumer<CommandCause> callback) {
             Objects.requireNonNull(callback);
-
-            final UUID key = SpongeAdventure.CALLBACK_COMMAND.registerCallback(callback);
-            return ClickEvent.runCommand("/sponge:callback " + key.toString());
+            final UUID key = CallbackCommand.INSTANCE.registerCallback(callback);
+            return ClickEvent.runCommand(String.format("/%s:%s %s", SpongeCommon.ECOSYSTEM_ID, CallbackCommand.NAME, key));
         }
 
         @Override
@@ -739,17 +749,8 @@ public final class SpongeAdventure {
         }
 
         @Override
-        public @NonNull LegacyComponentSerializer legacySerializer(final char formatChar) {
-            if (formatChar == LegacyComponentSerializer.SECTION_CHAR) {
-                return this.legacySectionSerializer();
-            } else if (formatChar == LegacyComponentSerializer.AMPERSAND_CHAR) {
-                return this.legacyAmpersandSerializer();
-            }
-
-            return LegacyComponentSerializer.builder()
-                .character(formatChar)
-                .flattener(SpongeAdventure.FLATTENER)
-                .build();
+        public @NonNull LegacyComponentSerializer legacySerializer(final char character) {
+            return SpongeAdventure.legacy(character);
         }
 
         @Override

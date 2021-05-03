@@ -67,6 +67,7 @@ import java.util.jar.Manifest;
  */
 public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerService {
 
+    private static final String JAVA_HOME_PATH = System.getProperty("java.home");
     protected final Logger logger = LogManager.getLogger("Launch");
 
     /**
@@ -127,6 +128,13 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
 
     protected boolean isTransformable(final URI uri) throws URISyntaxException, IOException {
         final File file = new File(uri);
+
+        // in Java 8 ONLY, the system classpath contains JVM internals
+        // let's make sure those don't get transformed
+        if (file.getAbsolutePath().startsWith(AbstractVanillaLaunchHandler.JAVA_HOME_PATH)) {
+            return false;
+        }
+
         if (file.isDirectory()) {
             for (final String test : AbstractVanillaLaunchHandler.NON_TRANSFORMABLE_PATHS) {
                 if (new File(file, test).exists()) {
@@ -208,12 +216,12 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                         if (this.resources.hasNext()) {
                             final PluginResource resource = this.resources.next();
                             if (resource instanceof JVMPluginResource) {
-                                if (((JVMPluginResource) resource).getType() != ResourceType.JAR) {
+                                if (((JVMPluginResource) resource).type() != ResourceType.JAR) {
                                     continue;
                                 }
                             }
 
-                            final Path resolved = resource.getFileSystem().getPath(s);
+                            final Path resolved = resource.fileSystem().getPath(s);
                             if (Files.exists(resolved)) {
                                 try {
                                     return resolved.toUri().toURL();
@@ -241,8 +249,8 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                             if (resource instanceof JVMPluginResource) {
                                 final JVMPluginResource jvmResource = (JVMPluginResource) resource;
                                 try {
-                                    if (jvmResource.getType() == ResourceType.JAR && resource.getPath().toAbsolutePath().normalize().equals(Paths.get(key.toURI()).toAbsolutePath().normalize())) {
-                                        return jvmResource.getManifest();
+                                    if (jvmResource.type() == ResourceType.JAR && resource.path().toAbsolutePath().normalize().equals(Paths.get(key.toURI()).toAbsolutePath().normalize())) {
+                                        return jvmResource.manifest();
                                     }
                                 } catch (final URISyntaxException ex) {
                                     this.logger.error("Failed to load manifest from jar {}: ", key, ex);

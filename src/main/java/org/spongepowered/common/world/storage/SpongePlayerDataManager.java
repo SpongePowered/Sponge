@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.storage;
 
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -49,7 +50,6 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
 
-import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NbtIo;
 
@@ -145,7 +145,7 @@ public final class SpongePlayerDataManager {
             throw new IllegalArgumentException("Player unique id cannot be null!");
         }
 
-        @Nullable final SpongePlayerData data = this.playerDataByUniqueId.get(uniqueId);
+        final @Nullable SpongePlayerData data = this.playerDataByUniqueId.get(uniqueId);
         if (data != null) {
             this.saveFile(uniqueId.toString(), this.createCompoundFor(data));
         } else {

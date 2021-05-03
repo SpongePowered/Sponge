@@ -24,18 +24,18 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import javax.annotation.Nullable;
 
 public class PlayerCommandPhaseContext extends PacketContext<PlayerCommandPhaseContext> {
 
     @Nullable String command;
-    @Nullable private TrackedInventoryBridge inventory;
+    private @Nullable TrackedInventoryBridge inventory;
 
     PlayerCommandPhaseContext(final PacketState<PlayerCommandPhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);

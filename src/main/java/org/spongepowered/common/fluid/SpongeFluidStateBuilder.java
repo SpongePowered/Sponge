@@ -53,19 +53,19 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
     private org.spongepowered.api.fluid.FluidState state = FluidTypes.EMPTY.get().defaultState();
 
     @Override
-    public org.spongepowered.api.fluid.FluidState.@NonNull Builder fluid(@NonNull final FluidType fluidType) {
+    public org.spongepowered.api.fluid.FluidState.@NonNull Builder fluid(final @NonNull FluidType fluidType) {
         this.state = Objects.requireNonNull(fluidType).defaultState();
         return this;
     }
 
     @Override
-    public org.spongepowered.api.fluid.FluidState.@NonNull Builder fromString(@NonNull final String id) {
+    public org.spongepowered.api.fluid.FluidState.@NonNull Builder fromString(final @NonNull String id) {
         this.state = this.parseString(id);
         return this;
     }
 
     @Override
-    public <V> org.spongepowered.api.fluid.FluidState.@NonNull Builder add(@NonNull final Key<@NonNull ? extends Value<V>> key, @NonNull final V value) {
+    public <V> org.spongepowered.api.fluid.FluidState.@NonNull Builder add(final @NonNull Key<@NonNull ? extends Value<V>> key, final @NonNull V value) {
         Objects.requireNonNull(this.state, "The fluid type must be set first");
         Objects.requireNonNull(key, "The key must not be null");
         Objects.requireNonNull(key, "The value must not be null");
@@ -92,8 +92,7 @@ public final class SpongeFluidStateBuilder implements org.spongepowered.api.flui
     }
 
     @Override
-    @NonNull
-    public Optional<org.spongepowered.api.fluid.FluidState> build(@NonNull final DataView container) throws InvalidDataException {
+    public @NonNull Optional<org.spongepowered.api.fluid.FluidState> build(final @NonNull DataView container) throws InvalidDataException {
         if (!container.contains(Constants.Fluids.FLUID_STATE)) {
             return Optional.empty();
         }

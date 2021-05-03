@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.service.server.permission;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.service.context.Context;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectData;
@@ -34,7 +35,6 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-import javax.annotation.Nullable;
 
 public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
     private SubjectReference parent;
@@ -89,12 +89,11 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
         return this.clearParents();
     }
 
-    public void setParent(@Nullable SubjectReference parent) {
+    public void setParent(final @Nullable SubjectReference parent) {
         this.parent = parent;
     }
 
-    @Nullable
-    public SubjectReference getParent() {
+    public @Nullable SubjectReference getParent() {
         return this.parent;
     }
 }

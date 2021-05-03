@@ -118,9 +118,9 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
         final Vector3i blockMax = this.blockMax();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
 
-        final Stream<VolumeElement<Immutable, Biome>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
-            .mapToObj(x -> IntStream.range(blockMin.getZ(), blockMax.getZ() + 1)
-                .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
+        final Stream<VolumeElement<Immutable, Biome>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
+            .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
+                .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
                     .mapToObj(y -> VolumeElement.<Immutable, Biome>of(this, () -> {
                         final byte biomeId = this.biomes[this.getIndex(x, y, z)];
                         return this.palette.get(biomeId & 255, Sponge.server().registries())

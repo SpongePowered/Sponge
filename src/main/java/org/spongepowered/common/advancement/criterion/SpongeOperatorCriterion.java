@@ -25,11 +25,11 @@
 package org.spongepowered.common.advancement.criterion;
 
 import com.google.common.collect.ImmutableSet;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.advancement.criteria.OperatorCriterion;
 import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 
-import javax.annotation.Nullable;
 import java.util.Arrays;
 import java.util.Collection;
 import java.util.Objects;
@@ -40,8 +40,8 @@ public class SpongeOperatorCriterion implements OperatorCriterion, DefaultedAdva
     private final String name;
     private final Collection<AdvancementCriterion> criteria;
 
-    @Nullable private Collection<AdvancementCriterion> recursiveChildrenCriteria;
-    @Nullable private Collection<AdvancementCriterion> leafChildrenCriteria;
+    private @Nullable Collection<AdvancementCriterion> recursiveChildrenCriteria;
+    private @Nullable Collection<AdvancementCriterion> leafChildrenCriteria;
 
     SpongeOperatorCriterion(final String namePrefix, final Collection<AdvancementCriterion> criteria) {
         this.name = namePrefix + Arrays.toString(criteria.stream().map(AdvancementCriterion::name).toArray(String[]::new));

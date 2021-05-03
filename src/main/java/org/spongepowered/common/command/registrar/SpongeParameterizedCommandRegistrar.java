@@ -80,13 +80,12 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
     }
 
     @Override
-    @NonNull
-    public CommandMapping register(@NonNull final PluginContainer container,
+    public @NonNull CommandMapping register(final @NonNull PluginContainer container,
             final Command.@NonNull Parameterized command,
-            @NonNull final String primaryAlias,
-            @NonNull final String @NonNull... secondaryAliases) throws CommandFailedRegistrationException {
+            final @NonNull String primaryAlias,
+            final @NonNull String @NonNull... secondaryAliases) throws CommandFailedRegistrationException {
         // Get the builder and the first literal.
-        final String namespacedCommand = container.getMetadata().getId() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
+        final String namespacedCommand = container.metadata().id() + ":" + primaryAlias.toLowerCase(Locale.ROOT);
 
         final ArrayList<String> aliases = new ArrayList<>();
         aliases.add(primaryAlias);
@@ -107,13 +106,12 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
         return mapping;
     }
 
-    @NonNull
     @Override
-    public CommandResult process(
-            @NonNull final CommandCause cause,
-            @NonNull final CommandMapping mapping,
-            @NonNull final String command,
-            @NonNull final String arguments) throws CommandException {
+    public @NonNull CommandResult process(
+            final @NonNull CommandCause cause,
+            final @NonNull CommandMapping mapping,
+            final @NonNull String command,
+            final @NonNull String arguments) throws CommandException {
         try {
             final SpongeCommandDispatcher dispatcher = this.commandManager().getDispatcher();
             return CommandResult.builder().result(
@@ -128,12 +126,11 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
     }
 
     @Override
-    @NonNull
-    public List<String> suggestions(
-            @NonNull final CommandCause cause,
-            @NonNull final CommandMapping mapping,
-            @NonNull final String command,
-            @NonNull final String arguments) {
+    public @NonNull List<String> suggestions(
+            final @NonNull CommandCause cause,
+            final @NonNull CommandMapping mapping,
+            final @NonNull String command,
+            final @NonNull String arguments) {
         try {
             final SpongeCommandDispatcher dispatcher = this.commandManager().getDispatcher();
             return dispatcher.getCompletionSuggestions(
@@ -147,8 +144,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
     }
 
     @Override
-    @NonNull
-    public Optional<Component> help(@NonNull final CommandCause cause, @NonNull final CommandMapping command) {
+    public @NonNull Optional<Component> help(final @NonNull CommandCause cause, final @NonNull CommandMapping command) {
         final Command.Parameterized commandEntry = this.commandMap.get(command);
         if (commandEntry == null) {
             throw new IllegalArgumentException(command + " is not a valid a valid command!");
@@ -158,7 +154,7 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
     }
 
     @Override
-    public boolean canExecute(@NonNull final CommandCause cause, @NonNull final CommandMapping mapping) {
+    public boolean canExecute(final @NonNull CommandCause cause, final @NonNull CommandMapping mapping) {
         return this.commandMap.get(mapping).canExecute(cause);
     }
 

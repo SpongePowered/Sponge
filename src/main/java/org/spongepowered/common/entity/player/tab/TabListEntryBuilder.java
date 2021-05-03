@@ -28,20 +28,20 @@ import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.entity.living.player.tab.TabListEntry;
 import org.spongepowered.api.profile.GameProfile;
 
-import javax.annotation.Nullable;
 
 public final class TabListEntryBuilder implements TabListEntry.Builder {
 
-    @Nullable private TabList list;
-    @Nullable private GameProfile profile;
-    @Nullable private Component displayName;
+    private @Nullable TabList list;
+    private @Nullable GameProfile profile;
+    private @Nullable Component displayName;
     private int latency;
-    @Nullable private GameMode gameMode;
+    private @Nullable GameMode gameMode;
 
     @Override
     public TabListEntry.Builder list(TabList list) {

@@ -142,6 +142,6 @@ public final class PhaseTrackerCategory {
     public final Map<String, Boolean> autoFixNullSourceBlockProvidingBlockEntities = new HashMap<>();
 
     private boolean isVanilla() {
-        return SpongeConfigs.getPluginEnvironment().getBlackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
+        return SpongeConfigs.getPluginEnvironment().blackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
     }
 }

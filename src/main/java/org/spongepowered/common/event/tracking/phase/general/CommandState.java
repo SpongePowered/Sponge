@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.general;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.Player;
@@ -43,7 +44,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.world.BlockChange;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
@@ -84,7 +84,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
    }
 
     @Override
-    public void associateNeighborStateNotifier(final CommandPhaseContext context, @Nullable final BlockPos sourcePos, final Block block,
+    public void associateNeighborStateNotifier(final CommandPhaseContext context, final @Nullable BlockPos sourcePos, final Block block,
         final BlockPos notifyPos, final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         context.getSource(Player.class)
             .ifPresent(player -> ((LevelChunkBridge) minecraftWorld.getChunkAt(notifyPos))

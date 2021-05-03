@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.map.canvas;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.map.MapCanvas;
@@ -33,7 +34,6 @@ import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.map.color.SpongeMapColor;
 import org.spongepowered.common.util.Constants;
 
-import javax.annotation.Nullable;
 import java.awt.Graphics2D;
 import java.awt.Image;
 import java.awt.image.BufferedImage;
@@ -46,8 +46,7 @@ import java.util.Objects;
 public final class SpongeMapCanvasBuilder implements MapCanvas.Builder {
     // If its being used to build from a DataView, or is blank
     // We don't want to create a big array.
-    @Nullable
-    private byte[] canvas = null;
+    private byte@Nullable[] canvas = null;
 
     private byte[] getCanvas() {
         if (this.canvas == null) {

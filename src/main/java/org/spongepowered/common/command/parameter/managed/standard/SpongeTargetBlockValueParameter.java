@@ -47,8 +47,7 @@ public final class SpongeTargetBlockValueParameter extends ResourceKeyedZeroAdva
     }
 
     @Override
-    @NonNull
-    public Optional<? extends ServerLocation> parseValue(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader)
+    public @NonNull Optional<? extends ServerLocation> parseValue(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader)
             throws ArgumentParseException {
 
         final Object root = cause.cause().root();

@@ -90,9 +90,9 @@ public abstract class LevelMixin implements WorldBridge, LevelAccessor {
         }
 
         net.minecraft.world.entity.Entity entity = null;
-        final double x = position.getX();
-        final double y = position.getY();
-        final double z = position.getZ();
+        final double x = position.x();
+        final double y = position.y();
+        final double z = position.z();
         final net.minecraft.world.level.Level thisWorld = (net.minecraft.world.level.Level) (Object) this;
         // Not all entities have a single World parameter as their constructor
         if (type == net.minecraft.world.entity.EntityType.LIGHTNING_BOLT) {

@@ -36,7 +36,7 @@ import java.util.Set;
 
 final class ImmutableDataManipulator extends SpongeDataManipulator implements DataManipulator.Immutable {
 
-    @Nullable private Set<Value.Immutable<?>> cachedValues;
+    private @Nullable Set<Value.Immutable<?>> cachedValues;
 
     ImmutableDataManipulator(final Map<Key<?>, Object> values) {
         super(values);

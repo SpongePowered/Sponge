@@ -46,11 +46,11 @@ public abstract class CrashReportMixin_Vanilla {
         this.systemDetails.setDetail("Plugins", () -> {
             final StringBuilder result = new StringBuilder(64);
             for (final PluginContainer container : Sponge.pluginManager().plugins()) {
-                final PluginMetadata metadata = container.getMetadata();
+                final PluginMetadata metadata = container.metadata();
 
-                final String name = metadata.getName().orElse(metadata.getId());
+                final String name = metadata.name().orElse(metadata.id());
                 result.append("\n\t\t")
-                        .append(name).append(" (").append(metadata.getId()).append(") ").append(metadata.getVersion());
+                        .append(name).append(" (").append(metadata.id()).append(") ").append(metadata.version());
             }
             return result.toString();
         });

@@ -47,6 +47,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.Item;
@@ -83,7 +84,6 @@ import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -224,7 +224,7 @@ public class InventoryEventFactory {
         return !event.isCancelled();
     }
 
-    private static List<SlotTransaction> generateTransactions(@Nullable final Inventory inv, final Container inventory, final ItemStack[] previous) {
+    private static List<SlotTransaction> generateTransactions(final @Nullable Inventory inv, final Container inventory, final ItemStack[] previous) {
         if (inv == null) {
             return Collections.emptyList();
         }
@@ -309,8 +309,7 @@ public class InventoryEventFactory {
         return true;
     }
 
-    @Nullable
-    public static AbstractContainerMenu displayContainer(final ServerPlayer player, final Inventory inventory, final Component displayName) {
+    public static @org.checkerframework.checker.nullness.qual.Nullable AbstractContainerMenu displayContainer(final ServerPlayer player, final Inventory inventory, final Component displayName) {
         final net.minecraft.world.inventory.AbstractContainerMenu previousContainer = player.containerMenu;
         final net.minecraft.world.inventory.AbstractContainerMenu container;
 
@@ -383,8 +382,8 @@ public class InventoryEventFactory {
         return event;
     }
 
-    public static void callTransferPost(@Nullable final TrackedInventoryBridge captureSource, @Nullable final Inventory source,
-            @Nullable final Inventory destination, ItemStack sourceStack, SlotTransaction sourceSlotTransaction) {
+    public static void callTransferPost(final @Nullable TrackedInventoryBridge captureSource, final @Nullable Inventory source,
+            final @Nullable Inventory destination, ItemStack sourceStack, SlotTransaction sourceSlotTransaction) {
         // TODO make sure we never got null
         if (captureSource == null || source == null || destination == null || sourceSlotTransaction == null) {
             return;
@@ -423,7 +422,7 @@ public class InventoryEventFactory {
      * @param index the affected SlotIndex
      * @param originalStack the original Stack
      */
-    public static SlotTransaction captureTransaction(@Nullable final TrackedInventoryBridge captureIn, @Nullable final Inventory inv, final int index, final ItemStack originalStack) {
+    public static SlotTransaction captureTransaction(final @Nullable TrackedInventoryBridge captureIn, final @Nullable Inventory inv, final int index, final ItemStack originalStack) {
         // TODO make sure we never got null
         if (captureIn == null || inv == null) {
             return null;
@@ -453,7 +452,7 @@ public class InventoryEventFactory {
      * @param transaction the transaction to execute
      * @return the result if the transaction
      */
-    public static ItemStack captureTransaction(@Nullable final TrackedInventoryBridge captureIn, @Nullable final Inventory inv, final int index, final Supplier<ItemStack> transaction) {
+    public static ItemStack captureTransaction(final @Nullable TrackedInventoryBridge captureIn, final @Nullable Inventory inv, final int index, final Supplier<ItemStack> transaction) {
         // TODO make sure we never got null
         if (captureIn == null || inv == null) {
             return transaction.get();
@@ -474,7 +473,7 @@ public class InventoryEventFactory {
     }
 
     public static CraftItemEvent.Preview callCraftEventPre(final Player player, final CraftingInventory inventory,
-            final SlotTransaction previewTransaction, @Nullable final CraftingRecipe recipe, final AbstractContainerMenu container, final List<SlotTransaction> transactions) {
+            final SlotTransaction previewTransaction, final @Nullable CraftingRecipe recipe, final AbstractContainerMenu container, final List<SlotTransaction> transactions) {
         final CraftItemEvent.Preview event = SpongeEventFactory
                 .createCraftItemEventPreview(PhaseTracker.getCauseStackManager().currentCause(), inventory, (Inventory) container, previewTransaction, Optional.ofNullable(recipe), transactions);
         SpongeCommon.postEvent(event);
@@ -495,7 +494,7 @@ public class InventoryEventFactory {
 
 
     public static CraftItemEvent.Craft callCraftEventPost(final Player player, final CraftingInventory inventory, final ItemStackSnapshot result,
-            @Nullable final CraftingRecipe recipe, final AbstractContainerMenu container, final List<SlotTransaction> transactions) {
+            final @Nullable CraftingRecipe recipe, final AbstractContainerMenu container, final List<SlotTransaction> transactions) {
         // Get previous cursor if captured
         ItemStack previousCursor = ((TrackedContainerBridge) container).bridge$getPreviousCursor();
         if (previousCursor == null) {

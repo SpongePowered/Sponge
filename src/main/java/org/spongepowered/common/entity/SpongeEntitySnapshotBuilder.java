@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.entity;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
@@ -52,7 +53,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nullable;
 import net.minecraft.nbt.CompoundTag;
 
 public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<EntitySnapshot> implements EntitySnapshot.Builder {
@@ -64,7 +64,7 @@ public final class SpongeEntitySnapshotBuilder extends AbstractDataBuilder<Entit
     EntityType<?> entityType;
 
     @Nullable UUID uniqueId;
-    @Nullable DataManipulator.Mutable manipulator;
+    DataManipulator.@Nullable Mutable manipulator;
     @Nullable CompoundTag compound;
     @Nullable WeakReference<Entity> entityReference;
 

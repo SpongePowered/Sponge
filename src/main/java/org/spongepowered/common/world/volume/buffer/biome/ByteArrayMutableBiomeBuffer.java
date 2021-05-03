@@ -53,7 +53,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     private final Palette.Mutable<Biome, Biome> palette;
 
     public ByteArrayMutableBiomeBuffer(final Palette<Biome, Biome> palette, final Vector3i start, final Vector3i size) {
-        this(palette, new byte[size.getX() * size.getY() * size.getZ()], start, size);
+        this(palette, new byte[size.x() * size.y() * size.z()], start, size);
     }
 
     public ByteArrayMutableBiomeBuffer(final Palette<Biome, Biome> palette, final byte[] biomes, final Vector3i start, final Vector3i size) {
@@ -120,9 +120,9 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         } else {
             biomes = this.biomes;
         }
-        final Stream<VolumeElement<ByteArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.range(blockMin.getX(), blockMax.getX() + 1)
-            .mapToObj(x -> IntStream.range(blockMin.getZ(), blockMax.getZ() + 1)
-                .mapToObj(z -> IntStream.range(blockMin.getY(), blockMax.getY() + 1)
+        final Stream<VolumeElement<ByteArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
+            .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
+                .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
                     .mapToObj(y -> VolumeElement.of(this, () -> {
                         final byte biomeId = biomes[this.getIndex(x, y, z)];
                         return this.palette.get(biomeId & 255, Sponge.server().registries())

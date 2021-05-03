@@ -28,8 +28,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface ActiveChunkReferantBridge {
 
-    @Nullable
-    LevelChunkBridge bridge$getActiveChunk();
+    @Nullable LevelChunkBridge bridge$getActiveChunk();
 
     void bridge$setActiveChunk(@Nullable TrackedLevelChunkBridge chunk);
 }

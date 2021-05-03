@@ -58,7 +58,7 @@ public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEnt
     public void removeBlockEntity(final int x, final int y, final int z) {
         this.blockEntities.removeIf(be -> {
             final Vector3i pos = be.blockPosition();
-            return pos.getX() == x && pos.getZ() == z && pos.getY() == y;
+            return pos.x() == x && pos.z() == z && pos.y() == y;
         });
     }
 
@@ -82,7 +82,7 @@ public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEnt
     public Optional<? extends BlockEntity> blockEntity(final int x, final int y, final int z) {
         return this.blockEntities.stream().filter(be -> {
             final Vector3i pos = be.blockPosition();
-            return pos.getX() == x && pos.getY() == y && pos.getZ() == z;
+            return pos.x() == x && pos.y() == y && pos.z() == z;
         }).findFirst();
     }
 

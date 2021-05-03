@@ -42,11 +42,9 @@ public interface PrimaryLevelDataBridge {
 
     boolean bridge$valid();
 
-    @Nullable
-    ServerLevel bridge$world();
+    @Nullable ServerLevel bridge$world();
 
-    @Nullable
-    DimensionType bridge$dimensionType();
+    @Nullable DimensionType bridge$dimensionType();
 
     void bridge$dimensionType(DimensionType dimensionType, boolean updatePlayers);
 

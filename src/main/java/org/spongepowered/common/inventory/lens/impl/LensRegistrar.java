@@ -193,18 +193,16 @@ public class LensRegistrar {
         return new SingleIndexedLens(0, size, (Class<? extends Inventory>) inventory.getClass(), slotLensProvider);
     }
 
-    @Nullable
     @SuppressWarnings("unchecked")
-    private static Lens lensCraftingInventory(int size, int width, int height, SlotLensProvider slotLensProvider) {
+    private static @Nullable Lens lensCraftingInventory(int size, int width, int height, SlotLensProvider slotLensProvider) {
         if (size != width * height) {
             return null; // Wrong size
         }
         return new CraftingGridInventoryLens(0, width, height, slotLensProvider);
     }
 
-    @Nullable
     @SuppressWarnings("unchecked")
-    private static Lens lensGrid(Object inventory, int size, int width, int height, SlotLensProvider slotLensProvider) {
+    private static @Nullable Lens lensGrid(Object inventory, int size, int width, int height, SlotLensProvider slotLensProvider) {
         if (size != width * height) {
             return null; // Wrong size
         }

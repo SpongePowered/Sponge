@@ -55,8 +55,7 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
     }
 
     @Override
-    @NonNull
-    public Optional<? extends T> parseValue(
+    public @NonNull Optional<? extends T> parseValue(
             final Parameter.@NonNull Key<? super T> parameterKey,
             final ArgumentReader.@NonNull Mutable reader,
             final CommandContext.@NonNull Builder context) throws ArgumentParseException {
@@ -79,8 +78,7 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
     }
 
     @Override
-    @NonNull
-    public List<String> complete(@NonNull final CommandContext context, @NonNull final String input) {
+    public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String input) {
         final String literal = String.join(" ", this.literalSupplier.get());
         if (literal.startsWith(input)) {
             return Collections.singletonList(literal);
@@ -89,8 +87,7 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
     }
 
     @Override
-    @NonNull
-    public String usage(@NonNull final String key) {
+    public @NonNull String usage(final @NonNull String key) {
         return String.join(" ", this.literalSupplier.get());
     }
 

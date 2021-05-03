@@ -26,11 +26,11 @@ package org.spongepowered.common.inject;
 
 import com.google.common.base.MoreObjects;
 
-import javax.annotation.Nullable;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.AnnotatedElement;
 import java.lang.reflect.Type;
 import java.util.Arrays;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 public final class SpongeInjectionPoint implements AnnotatedElement {
 
@@ -53,9 +53,8 @@ public final class SpongeInjectionPoint implements AnnotatedElement {
     }
 
     @SuppressWarnings("unchecked")
-    @Nullable
     @Override
-    public <A extends Annotation> A getAnnotation(final Class<A> annotationClass) {
+    public <A extends Annotation> @Nullable A getAnnotation(final Class<A> annotationClass) {
         return (A) Arrays.stream(this.annotations).filter(annotationClass::isInstance).findFirst().orElse(null);
     }
 

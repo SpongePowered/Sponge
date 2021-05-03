@@ -32,7 +32,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 
 public interface EndCrystalBridge {
 
-    @Nullable
-    Explosion bridge$throwExplosionEventAndExplode(Level world, @Nullable Entity nil, double x,
+    @Nullable Explosion bridge$throwExplosionEventAndExplode(Level world, @Nullable Entity nil, double x,
         double y, double z, boolean smoking, @Nullable DamageSource source);
 }

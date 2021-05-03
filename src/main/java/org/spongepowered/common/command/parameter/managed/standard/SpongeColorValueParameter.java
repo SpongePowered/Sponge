@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.parameter.managed.standard;
 
 import com.mojang.brigadier.StringReader;
+import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -42,16 +43,35 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.common.accessor.ChatFormattingAccessor;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
+import org.spongepowered.common.util.Constants;
 
+import java.util.Arrays;
+import java.util.Collection;
+import java.util.Collections;
 import java.util.List;
+import java.util.Locale;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
+import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
 public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueParser<Color> {
 
-    private final static Pattern HEX_CODE = Pattern.compile("#[0-9A-Fa-f]{6}");
+    private final static Component EXCEPTION_MESSAGE = Component.text().content(
+            "The color is not in one of the expected formats:").append(Component.newline())
+            .append(Component.text("* Named color (such as \"black\")")).append(Component.newline())
+            .append(Component.text("* Hex encoded color consisting of six digits (such as \"000000\")"))
+            .append(Component.newline())
+            .append(Component.text("* Hex encoded color, surrounded by double quotes, starting with # and consisting of six digits (such as \"#000000\")"))
+            .append(Component.newline())
+            .append(Component.text("* Comma separated RGB color, surrounded by double quotes, with values from 0 to 255 (such as \"0,128,255\")"))
+            .build();
+    private final static Pattern HEX_CODE = Pattern.compile("(#?)(?<colorcode>[0-9A-Fa-f]{6})");
+    private final static Collection<String> CHAT_FORMATTING_NAMES = Arrays.stream(ChatFormatting.values())
+            .filter(x -> x.isColor())
+            .map(x -> x.getName().toLowerCase(Locale.ROOT))
+            .collect(Collectors.toList());
     private final ColorArgument colorArgumentType = ColorArgument.color();
 
     public SpongeColorValueParameter(final ResourceKey key) {
@@ -67,16 +87,7 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
     }
 
     @Override
-    @NonNull
-    public List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
-        final SuggestionsBuilder builder = new SuggestionsBuilder(currentInput, 0);
-        this.listSuggestions((com.mojang.brigadier.context.CommandContext<?>) context, builder);
-        return builder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
-    }
-
-    @Override
-    @NonNull
-    public Optional<? extends Color> parseValue(
+    public @NonNull Optional<? extends Color> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
         final ArgumentReader.Immutable state = reader.immutable();
@@ -87,16 +98,21 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
             if (colorCode != null) {
                 return Optional.of(Color.ofRgb(colorCode));
             }
+            // "reset" slips through the net here.
+            throw reader.createException(Component.text().content(String.format("%s is not a valid color", formatting.getName())).build());
         } catch (final CommandSyntaxException e) {
             // ignored
         }
         reader.setState(state);
-        final String string = reader.parseUnquotedString();
+        // Hex codes and comma separated RGB values require commas, so we need to parse the string,
+        // rather than use the unquoted string the ColorArgument does.
+        final String string = reader.parseString();
 
-        // Hex code?
-        if (SpongeColorValueParameter.HEX_CODE.matcher(string).matches()) {
+        // Hex code (with optional #)
+        final Matcher matcher = SpongeColorValueParameter.HEX_CODE.matcher(string);
+        if (matcher.matches()) {
             try {
-                return Optional.of(Color.ofRgb(Integer.parseInt(string.substring(1), 16)));
+                return Optional.of(Color.ofRgb(Integer.parseInt(matcher.group("colorcode"), 16)));
             } catch (final NumberFormatException ex) {
                 // handled below
             }
@@ -104,32 +120,45 @@ public final class SpongeColorValueParameter extends ResourceKeyedArgumentValueP
 
         final String[] rgb = string.split(",", 3);
         if (rgb.length == 3) {
-            try {
-                return Optional.of(Color.ofRgb(this.checkIntConversion(rgb[0]), this.checkIntConversion(rgb[1]), this.checkIntConversion(rgb[2])));
-            } catch (final Exception e) {
-                // ignored, handled below
+            final Optional<Color> result = this.checkIntConversion(rgb);
+            if (result.isPresent()) {
+                return result;
             }
         }
 
-        throw reader.createException(Component.text().content(
-                "The color is not in one of the expected formats:").append(Component.newline())
-                .append(Component.text("* Named color (such as \"black\")")).append(Component.newline())
-                .append(Component.text("* Hex encoded color, starting with # (such as \"#000000\")")).append(Component.newline())
-                .append(Component.text("* Comma separated RGB color, with values from 0 to 255 (such as \"0,128,255\")"))
-                .build());
+        throw reader.createException(SpongeColorValueParameter.EXCEPTION_MESSAGE);
     }
 
-    // The exceptions will get swallowed above.
-    private int checkIntConversion(final String entry) {
-        final int i;
-        try {
-             i = Integer.parseInt(entry);
-        } catch (final Exception e) {
-            throw new IllegalArgumentException();
-        }
-        if (i > 255 || i < 0) {
-            throw new IllegalArgumentException();
-        }
-        return i;
+    @Override
+    public List<String> complete(final CommandCause context, final String currentInput) {
+        return SpongeColorValueParameter.CHAT_FORMATTING_NAMES
+                .stream()
+                .filter(x -> x.startsWith(currentInput.toLowerCase(Locale.ROOT)))
+                .collect(Collectors.toList());
     }
+
+    private Optional<Color> checkIntConversion(final String[] entry) {
+        try {
+            final int r = Integer.parseInt(entry[0]);
+            final int g = Integer.parseInt(entry[1]);
+            final int b = Integer.parseInt(entry[2]);
+            if (this.isInRange(r) && this.isInRange(g) && this.isInRange(b)) {
+                return Optional.of(Color.ofRgb(r, g, b));
+            }
+        } catch (final Exception e) {
+            // ignored
+        }
+        return Optional.empty();
+    }
+
+    private boolean isInRange(final int i) {
+        return i >= 0 && i <= 255;
+    }
+
+    // Enforce the requirement for a quoted string
+    @Override
+    public List<ArgumentType<?>> getClientCompletionArgumentType() {
+        return Collections.singletonList(Constants.Command.STANDARD_STRING_ARGUMENT_TYPE);
+    }
+
 }

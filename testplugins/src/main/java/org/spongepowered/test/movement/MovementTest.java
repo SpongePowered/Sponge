@@ -104,7 +104,7 @@ public final class MovementTest implements LoadableModule {
             if (!MovementTest.this.printRotationEvents) {
                 return;
             }
-            final Logger pluginLogger = MovementTest.this.plugin.getLogger();
+            final Logger pluginLogger = MovementTest.this.plugin.logger();
             pluginLogger.log(Level.INFO, MovementTest.marker, "/*************");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/* RotateEntityEvent");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");
@@ -122,7 +122,7 @@ public final class MovementTest implements LoadableModule {
             if (!MovementTest.this.teleportOnMove) {
                 return;
             }
-            final Logger pluginLogger = MovementTest.this.plugin.getLogger();
+            final Logger pluginLogger = MovementTest.this.plugin.logger();
             pluginLogger.log(Level.INFO, MovementTest.marker, "/*************");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/* MoveEntityEvent testing with teleport");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");
@@ -154,7 +154,7 @@ public final class MovementTest implements LoadableModule {
             if (!MovementTest.this.printMoveEntityEvents) {
                 return;
             }
-            final Logger pluginLogger = MovementTest.this.plugin.getLogger();
+            final Logger pluginLogger = MovementTest.this.plugin.logger();
             pluginLogger.log(Level.INFO, MovementTest.marker, "/*************");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/* MoveEntityEvent");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");

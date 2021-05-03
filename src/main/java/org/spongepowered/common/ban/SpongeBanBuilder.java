@@ -27,6 +27,7 @@ package org.spongepowered.common.ban;
 import net.kyori.adventure.text.Component;
 import net.minecraft.server.players.IpBanListEntry;
 import net.minecraft.server.players.UserBanListEntry;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanType;
@@ -40,17 +41,16 @@ import java.time.Instant;
 import java.util.Date;
 import java.util.Objects;
 
-import javax.annotation.Nullable;
 
 public final class SpongeBanBuilder implements Ban.Builder {
 
     private GameProfile profile;
     private InetAddress address;
     private BanType banType;
-    @Nullable private Component reason;
+    private @Nullable Component reason;
     private Instant start = Instant.now();
-    @Nullable private Instant end;
-    @Nullable private Component source;
+    private @Nullable Instant end;
+    private @Nullable Component source;
 
     @Override
     public Ban.Builder profile(final GameProfile profile) {
@@ -85,7 +85,7 @@ public final class SpongeBanBuilder implements Ban.Builder {
     }
 
     @Override
-    public Ban.Builder reason(@Nullable final Component reason) {
+    public Ban.Builder reason(final @Nullable Component reason) {
         this.reason = reason;
         return this;
     }
@@ -98,13 +98,13 @@ public final class SpongeBanBuilder implements Ban.Builder {
     }
 
     @Override
-    public Ban.Builder expirationDate(@Nullable final Instant instant) {
+    public Ban.Builder expirationDate(final @Nullable Instant instant) {
         this.end = instant;
         return this;
     }
 
     @Override
-    public Ban.Builder source(@Nullable final Component source) {
+    public Ban.Builder source(final @Nullable Component source) {
         this.source = source;
         return this;
     }

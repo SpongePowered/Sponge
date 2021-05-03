@@ -38,8 +38,7 @@ public interface MinecraftServerBridge {
 
     SpongeServerScopedServiceProvider bridge$getServiceProvider();
 
-    @Nullable
-    ResourcePack bridge$getResourcePack();
+    @Nullable ResourcePack bridge$getResourcePack();
 
     void bridge$setDifficulty(ServerLevel world, Difficulty newDifficulty, boolean forceDifficulty);
 

@@ -34,6 +34,7 @@ import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
 import org.apache.commons.lang3.ArrayUtils;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManager;
@@ -61,7 +62,6 @@ import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-import javax.annotation.Nullable;
 
 /**
  * Default implementation of a {@link DataView} being used in memory.
@@ -767,7 +767,7 @@ public class MemoryDataView implements DataView {
         Objects.requireNonNull(registryType, "registry type");
         return this.getStringList(path).map(list ->
             list.stream()
-                .map(string -> holder.findRegistry(registryType).flatMap(r -> r.findValue(ResourceKey.resolve(string))))
+                .<Optional<T>>map(string -> holder.findRegistry(registryType).flatMap(r -> r.findValue(ResourceKey.resolve(string))))
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .collect(Collectors.toList())
@@ -857,7 +857,7 @@ public class MemoryDataView implements DataView {
     }
 
     @Override
-    public boolean equals(@Nullable final Object obj) {
+    public boolean equals(final @Nullable Object obj) {
         if (this == obj) {
             return true;
         }

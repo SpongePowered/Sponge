@@ -45,7 +45,7 @@ public final class SpongeStructureGenerationConfigBuilder implements StructureGe
     public final Map<Structure, SeparatedStructureConfig> structures = new Object2ObjectOpenHashMap<>();
 
     @Override
-    public StructureGenerationConfig.Builder stronghold(@Nullable final SpacedStructureConfig config) {
+    public StructureGenerationConfig.Builder stronghold(final @Nullable SpacedStructureConfig config) {
         this.stronghold = config;
         return this;
     }

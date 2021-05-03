@@ -45,7 +45,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
 
     final ItemStackGenerator firstItemGenerator;
     final ItemStackGenerator sellingItemGenerator;
-    @Nullable final ItemStackGenerator secondItemGenerator;
+    final @Nullable ItemStackGenerator secondItemGenerator;
     final double experience;
     final VariableAmount baseUses;
     final VariableAmount maxUses;
@@ -97,7 +97,7 @@ public final class SpongeTradeOfferGenerator implements TradeOfferGenerator {
         }
 
         @Override
-        public TradeOfferGenerator.Builder secondBuyingItemGenerator(@Nullable final ItemStackGenerator generator) {
+        public TradeOfferGenerator.Builder secondBuyingItemGenerator(final @Nullable ItemStackGenerator generator) {
             this.secondGenerator = generator;
             return this;
         }

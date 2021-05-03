@@ -25,6 +25,7 @@
 package org.spongepowered.common.inventory;
 
 import com.google.common.collect.ImmutableSet;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.KeyValueMatcher;
 import org.spongepowered.api.data.value.Value;
@@ -44,7 +45,6 @@ import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 
-import javax.annotation.Nullable;
 
 /**
  * Bottom type / empty results set for inventory queries.
@@ -53,7 +53,7 @@ public class EmptyInventoryImpl implements EmptyInventory {
 
     private final Inventory parent;
 
-    public EmptyInventoryImpl(@Nullable Inventory parent) {
+    public EmptyInventoryImpl(final @Nullable Inventory parent) {
         this.parent = parent == null ? this : parent;
     }
 

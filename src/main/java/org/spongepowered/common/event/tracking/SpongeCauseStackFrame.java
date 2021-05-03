@@ -25,12 +25,12 @@
 package org.spongepowered.common.event.tracking;
 
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.EventContextKey;
 
-import javax.annotation.Nullable;
 
 import java.util.Map;
 import java.util.Objects;
@@ -86,7 +86,7 @@ public final class SpongeCauseStackFrame implements CauseStackManager.StackFrame
     }
 
     // Note that a null object indicates that the context should be removed
-    void storeOriginalContext(final EventContextKey<?> key, @Nullable final Object value) {
+    void storeOriginalContext(final EventContextKey<?> key, final @Nullable Object value) {
         if (!this.storedContext.containsKey(key)) {
             this.storedContext.put(key, value);
         }

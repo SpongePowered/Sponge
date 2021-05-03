@@ -45,14 +45,12 @@ public final class SpongeIPAddressValueParameter extends ResourceKeyedArgumentVa
     }
 
     @Override
-    @NonNull
-    public List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
         return Collections.emptyList();
     }
 
     @Override
-    @NonNull
-    public Optional<? extends InetAddress> parseValue(
+    public @NonNull Optional<? extends InetAddress> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
         final String stringToParse = reader.parseString();

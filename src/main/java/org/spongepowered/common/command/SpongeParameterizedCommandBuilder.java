@@ -54,14 +54,14 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     private final List<Parameter> parameters = new ArrayList<>();
     private final List<Flag> flags = new ArrayList<>();
     private final Set<String> flagAliases = new HashSet<>();
-    @Nullable private CommandExecutor commandExecutor;
+    private @Nullable CommandExecutor commandExecutor;
     private Function<CommandCause, Optional<Component>> extendedDescription = cause -> Optional.empty();
     private Function<CommandCause, Optional<Component>> shortDescription = cause -> Optional.empty();
-    @Nullable private Predicate<CommandCause> executionRequirements;
+    private @Nullable Predicate<CommandCause> executionRequirements;
     private boolean isTerminal = false;
 
     @Override
-    public Command.@NonNull Builder addChild(final Command.@NonNull Parameterized child, @NonNull final Iterable<String> aliases) {
+    public Command.@NonNull Builder addChild(final Command.@NonNull Parameterized child, final @NonNull Iterable<String> aliases) {
         for (final String alias : aliases) {
             if (this.claimedSubcommands.contains(alias.toLowerCase())) {
                 throw new IllegalStateException("The alias " + alias + " already has an associated subcommand.");
@@ -76,7 +76,7 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder addFlag(@NonNull final Flag flag) {
+    public Command.@NonNull Builder addFlag(final @NonNull Flag flag) {
         for (final String alias : flag.aliases()) {
             if (this.flagAliases.contains(alias)) {
                 throw new IllegalArgumentException("The alias " + alias + " is already in use.");
@@ -89,19 +89,19 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder addParameter(@NonNull final Parameter parameter) {
+    public Command.@NonNull Builder addParameter(final @NonNull Parameter parameter) {
         this.parameters.add(parameter);
         return this;
     }
 
     @Override
-    public Command.@NonNull Builder executor(@NonNull final CommandExecutor executor) {
+    public Command.@NonNull Builder executor(final @NonNull CommandExecutor executor) {
         this.commandExecutor = executor;
         return this;
     }
 
     @Override
-    public Command.@NonNull Builder extendedDescription(@Nullable final Function<CommandCause, Optional<Component>> extendedDescriptionFunction) {
+    public Command.@NonNull Builder extendedDescription(final @Nullable Function<CommandCause, Optional<Component>> extendedDescriptionFunction) {
         if (extendedDescriptionFunction == null) {
             this.extendedDescription = cause -> Optional.empty();
         } else {
@@ -111,7 +111,7 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder shortDescription(@Nullable final Function<CommandCause, Optional<Component>> descriptionFunction) {
+    public Command.@NonNull Builder shortDescription(final @Nullable Function<CommandCause, Optional<Component>> descriptionFunction) {
         if (descriptionFunction == null) {
             this.shortDescription = cause -> Optional.empty();
         } else {
@@ -121,7 +121,7 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder permission(@Nullable final String permission) {
+    public Command.@NonNull Builder permission(final @Nullable String permission) {
         if (permission == null) {
             return this.executionRequirements(null);
         }
@@ -129,7 +129,7 @@ public final class SpongeParameterizedCommandBuilder implements Command.Paramete
     }
 
     @Override
-    public Command.@NonNull Builder executionRequirements(@Nullable final Predicate<CommandCause> executionRequirements) {
+    public Command.@NonNull Builder executionRequirements(final @Nullable Predicate<CommandCause> executionRequirements) {
         this.executionRequirements = executionRequirements;
         return this;
     }

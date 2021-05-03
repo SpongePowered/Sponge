@@ -26,24 +26,45 @@ package org.spongepowered.common.mixin.core.world.level;
 
 import static com.google.common.base.Preconditions.checkState;
 
+import net.kyori.adventure.util.Ticks;
+import net.minecraft.world.level.ServerTickList;
+import net.minecraft.world.level.TickNextTickData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.level.ServerTickListAccessor;
 import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
 
-import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.Level;
 
+import java.time.Duration;
+import java.util.Iterator;
+import java.util.Queue;
+import java.util.Set;
+
 @Mixin(net.minecraft.world.level.TickNextTickData.class)
-public abstract class TickNextTickDataMixin implements TickNextTickDataBridge {
+public abstract class TickNextTickDataMixin<T> implements TickNextTickDataBridge<T> {
 
     @Shadow @Final public BlockPos pos;
 
-    @Nullable @MonotonicNonNull private ServerLocation impl$location;
+    @Shadow @Final private T type;
+    @Shadow @Final public long triggerTick;
+    @MonotonicNonNull private ServerLocation impl$location;
+    @MonotonicNonNull private ServerTickList<T> impl$parentTickList;
+    private long impl$scheduledTime;
+    private ScheduledUpdate.State impl$state = ScheduledUpdate.State.WAITING;
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public void bridge$createdByList(final ServerTickList<T> tickList) {
+        this.impl$parentTickList = tickList;
+        this.impl$scheduledTime = ((ServerTickListAccessor<T>) tickList).accessor$level().getGameTime();
+    }
 
     @Override
     public void bridge$setWorld(Level world) {
@@ -56,6 +77,36 @@ public abstract class TickNextTickDataMixin implements TickNextTickDataBridge {
     public ServerLocation bridge$getLocation() {
         checkState(this.impl$location != null, "Unable to determine location at this time");
         return this.impl$location;
+    }
+
+    @Override
+    public ScheduledUpdate.State bridge$internalState() {
+        if (this.impl$parentTickList == null) {
+            return ScheduledUpdate.State.CANCELLED;
+        }
+        return this.impl$state;
+    }
+
+    @Override
+    public void bridge$setState(ScheduledUpdate.State state) {
+        this.impl$state = state;
+    }
+
+    @Override
+    public boolean bridge$cancelForcibly() {
+        if (this.impl$parentTickList == null) {
+            return false;
+        }
+        if (this.impl$state == ScheduledUpdate.State.FINISHED) {
+            return false;
+        }
+        this.impl$state = ScheduledUpdate.State.CANCELLED;
+        return true;
+    }
+
+    @Override
+    public Duration bridge$getScheduledDelayWhenCreated() {
+        return Ticks.duration(this.triggerTick - this.impl$scheduledTime);
     }
 
 

@@ -95,11 +95,11 @@ public final class VanillaPluginEngine implements PluginEngine {
             try {
                 next = iter.next();
             } catch (final ServiceConfigurationError e) {
-                this.pluginEnvironment.getLogger().error("Error encountered initializing plugin resource locator!", e);
+                this.pluginEnvironment.logger().error("Error encountered initializing plugin resource locator!", e);
                 continue;
             }
 
-            this.locatorServices.put(next.getName(), next);
+            this.locatorServices.put(next.name(), next);
         }
     }
 
@@ -113,11 +113,11 @@ public final class VanillaPluginEngine implements PluginEngine {
             try {
                 next = iter.next();
             } catch (final ServiceConfigurationError e) {
-                this.pluginEnvironment.getLogger().error("Error encountered initializing plugin language service!", e);
+                this.pluginEnvironment.logger().error("Error encountered initializing plugin language service!", e);
                 continue;
             }
 
-            this.languageServices.put(next.getName(), next);
+            this.languageServices.put(next.name(), next);
         }
     }
 

@@ -48,14 +48,12 @@ public final class SpongeDurationValueParameter extends ResourceKeyedArgumentVal
     }
 
     @Override
-    @NonNull
-    public List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
+    public @NonNull List<String> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
         return Collections.emptyList();
     }
 
     @Override
-    @NonNull
-    public Optional<? extends Duration> parseValue(
+    public @NonNull Optional<? extends Duration> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
         String s = reader.parseString().toUpperCase();

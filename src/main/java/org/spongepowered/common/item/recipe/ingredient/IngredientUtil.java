@@ -36,6 +36,7 @@ import net.minecraft.util.GsonHelper;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.crafting.Ingredient;
 import net.minecraft.world.level.ItemLike;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -47,7 +48,6 @@ import java.util.function.Predicate;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-import javax.annotation.Nullable;
 
 public class IngredientUtil {
 
@@ -65,8 +65,7 @@ public class IngredientUtil {
         return IngredientUtil.fromNative(Ingredient.of(providers));
     }
 
-    @Nullable
-    public static org.spongepowered.api.item.recipe.crafting.Ingredient of(ResourceKey tagKey) {
+    public static org.spongepowered.api.item.recipe.crafting.@Nullable Ingredient of(ResourceKey tagKey) {
         Tag<Item> itemTag = ItemTags.getAllTags().getTag(((ResourceLocation) (Object) tagKey));
         if (itemTag == null) {
             return null;

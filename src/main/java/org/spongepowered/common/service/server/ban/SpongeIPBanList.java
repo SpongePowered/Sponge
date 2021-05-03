@@ -26,6 +26,7 @@ package org.spongepowered.common.service.server.ban;
 
 import static org.spongepowered.common.util.NetworkUtil.LOCAL_ADDRESS;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.BanService;
 import org.spongepowered.api.service.ban.Ban;
@@ -42,7 +43,6 @@ import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 
-import javax.annotation.Nullable;
 import net.minecraft.server.players.IpBanList;
 import net.minecraft.server.players.IpBanListEntry;
 

@@ -52,7 +52,7 @@ public final class FireworkUtil {
 
     public static @Nullable FireworkEffect getStarEffect(final ItemStack item) {
         Preconditions.checkArgument(item.getItem() == Items.FIREWORK_STAR, "Item is not a firework star!");
-        @Nullable final CompoundTag tag = item.getTagElement(Constants.Entity.Firework.EXPLOSION);
+        final @Nullable CompoundTag tag = item.getTagElement(Constants.Entity.Firework.EXPLOSION);
         if (tag == null) {
             return null;
         }
@@ -70,7 +70,7 @@ public final class FireworkUtil {
         if (compound.contains(Constants.Item.Fireworks.SHAPE_TYPE)) {
             final byte type = compound.getByte(Constants.Item.Fireworks.SHAPE_TYPE);
             final MappedRegistry<FireworkShape> registry = (MappedRegistry<FireworkShape>) (Object) Sponge.game().registries().registry(RegistryTypes.FIREWORK_SHAPE);
-            @Nullable final FireworkShape shape = registry.byId(type);
+            final @Nullable FireworkShape shape = registry.byId(type);
             if (shape != null) {
                 builder.shape(shape);
             }
@@ -143,7 +143,7 @@ public final class FireworkUtil {
 
         final List<FireworkEffect> effects;
         if (item.getItem() == Items.FIREWORK_ROCKET) {
-            @Nullable final CompoundTag fireworks = item.getTagElement(Constants.Item.Fireworks.FIREWORKS);
+            final @Nullable CompoundTag fireworks = item.getTagElement(Constants.Item.Fireworks.FIREWORKS);
             if (fireworks == null || !fireworks.contains(Constants.Item.Fireworks.EXPLOSIONS)) {
                 return Optional.empty();
             }
@@ -153,7 +153,7 @@ public final class FireworkUtil {
                     .map(FireworkUtil::fromCompound)
                     .collect(Collectors.toList());
         } else {
-            @Nullable final FireworkEffect effect = FireworkUtil.getStarEffect(item);
+            final @Nullable FireworkEffect effect = FireworkUtil.getStarEffect(item);
             if (effect == null) {
                 return Optional.empty();
             }
@@ -170,7 +170,7 @@ public final class FireworkUtil {
         }
 
         if (item.getItem() == Items.FIREWORK_STAR) {
-            @Nullable final CompoundTag tag = item.getTag();
+            final @Nullable CompoundTag tag = item.getTag();
             if (tag == null) {
                 return true;
             }

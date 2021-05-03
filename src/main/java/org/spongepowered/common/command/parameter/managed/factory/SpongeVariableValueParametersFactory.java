@@ -55,8 +55,7 @@ import net.minecraft.network.chat.TextComponent;
 public final class SpongeVariableValueParametersFactory implements VariableValueParameters.Factory {
 
     @Override
-    @NonNull
-    public <T extends Enum<T>> ValueParameter<T> createEnumParameter(@NonNull final Class<T> enumClass) {
+    public <T extends Enum<T>> @NonNull ValueParameter<T> createEnumParameter(final @NonNull Class<T> enumClass) {
         final Map<String, Supplier<? extends T>> choices = new HashMap<>();
         for (final T e :  enumClass.getEnumConstants()) {
             choices.put(e.name().toLowerCase(), () -> e);
@@ -65,18 +64,18 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public <T> VariableValueParameters.@NonNull StaticChoicesBuilder<T> createStaticChoicesBuilder(@NonNull final Class<T> returnType) {
+    public <T> VariableValueParameters.@NonNull StaticChoicesBuilder<T> createStaticChoicesBuilder(final @NonNull Class<T> returnType) {
         return new SpongeStaticChoicesBuilder<>();
     }
 
     @Override
-    public <T> VariableValueParameters.@NonNull DynamicChoicesBuilder<T> createDynamicChoicesBuilder(@NonNull final Class<T> returnType) {
+    public <T> VariableValueParameters.@NonNull DynamicChoicesBuilder<T> createDynamicChoicesBuilder(final @NonNull Class<T> returnType) {
         return new SpongeDynamicChoicesBuilder<>();
     }
 
     @Override
     public <T> VariableValueParameters.@NonNull RegistryEntryBuilder<T> createRegistryEntryBuilder(
-            @NonNull final Function<CommandContext, @Nullable RegistryHolder> holderProvider,
+            final @NonNull Function<CommandContext, @Nullable RegistryHolder> holderProvider,
             final RegistryType<T> registryKey) {
         return new SpongeRegistryEntryParameterBuilder<>(in -> {
             final RegistryHolder holder = holderProvider.apply(in);
@@ -89,7 +88,7 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
 
     @Override
     public <T> VariableValueParameters.@NonNull RegistryEntryBuilder<T> createRegistryEntryBuilder(
-            @NonNull final Function<CommandContext, ? extends Registry<? extends T>> returnType) {
+            final @NonNull Function<CommandContext, ? extends Registry<? extends T>> returnType) {
         return new SpongeRegistryEntryParameterBuilder<>(returnType);
     }
 
@@ -99,7 +98,7 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public <T> VariableValueParameters.@NonNull LiteralBuilder<T> createLiteralBuilder(@NonNull final Class<T> returnType) {
+    public <T> VariableValueParameters.@NonNull LiteralBuilder<T> createLiteralBuilder(final @NonNull Class<T> returnType) {
         return new SpongeLiteralBuilder<>();
     }
 
@@ -124,7 +123,7 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public ValueParameter<String> createValidatedStringParameter(@NonNull final Pattern pattern) {
+    public ValueParameter<String> createValidatedStringParameter(final @NonNull Pattern pattern) {
         Objects.requireNonNull(pattern);
 
         return StandardArgumentParser.createConverter(StringArgumentType.string(), (reader, contextBuilder, input) -> {

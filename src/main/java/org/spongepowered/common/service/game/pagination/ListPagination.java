@@ -27,6 +27,7 @@ package org.spongepowered.common.service.game.pagination;
 import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.exception.CommandException;
 
 import java.util.ArrayList;
@@ -35,7 +36,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.function.Supplier;
 
-import javax.annotation.Nullable;
 
 /**
  * Pagination working with a list of values.
@@ -45,8 +45,8 @@ final class ListPagination extends ActivePagination {
     private final List<List<Component>> pages;
 
     public ListPagination(final Supplier<Optional<? extends Audience>> src, final PaginationCalculator calc,
-            final List<Map.Entry<Component, Integer>> lines, @Nullable final Component title,
-            @Nullable final Component header, @Nullable final Component footer, final Component padding) {
+            final List<Map.Entry<Component, Integer>> lines, final @Nullable Component title,
+            final @Nullable Component header, final @Nullable Component footer, final Component padding) {
         super(src, calc, title, header, footer, padding);
         final List<List<Component>> pages = new ArrayList<>();
         List<Component> currentPage = new ArrayList<>();

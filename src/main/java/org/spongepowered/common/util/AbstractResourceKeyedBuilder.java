@@ -43,7 +43,7 @@ public abstract class AbstractResourceKeyedBuilder<T extends ResourceKeyed, B ex
     }
 
     @Override
-    public @NonNull final T build() {
+    public final @NonNull T build() {
         Objects.requireNonNull(this.key, "key");
         return this.build0();
     }

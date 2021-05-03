@@ -84,7 +84,7 @@ public abstract class VanillaLaunch extends Launch {
 
     @Override
     protected final void createPlatformPlugins(final PluginEngine pluginEngine) {
-        final Path gameDirectory = this.pluginEngine.getPluginEnvironment().getBlackboard().get(PluginKeys.BASE_DIRECTORY)
+        final Path gameDirectory = this.pluginEngine.getPluginEnvironment().blackboard().get(PluginKeys.BASE_DIRECTORY)
                 .orElseThrow(() -> new RuntimeException("The game directory has not been added to the environment!"));
 
         try {

@@ -28,8 +28,8 @@ import net.kyori.adventure.text.Component;
 
 import java.net.URI;
 import java.net.URISyntaxException;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import javax.annotation.Nullable;
 
 public final class SpongeURIResourcePack extends SpongeResourcePack {
 
