@@ -27,7 +27,6 @@ package org.spongepowered.common.mixin.core.block;
 import co.aikar.timings.Timing;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -35,7 +34,7 @@ import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.block.DyeColorBlockBridge;
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
+import co.aikar.timings.sponge.SpongeTimings;
 
 import javax.annotation.Nullable;
 import net.minecraft.world.level.block.Block;

@@ -22,32 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.relocate.co.aikar.timings;
+package co.aikar.timings.sponge;
 
-import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
+import com.google.gson.JsonArray;
 
-class UnsafeTimingHandler extends TimingHandler {
+class TimingHistoryEntry {
 
-    UnsafeTimingHandler(TimingIdentifier id) {
-        super(id);
-    }
+    final TimingData data;
+    final TimingData[] children;
 
-    private static void checkThread() {
-        if (!SpongeCommon.getServer().isSameThread()) {
-            throw new IllegalStateException("Calling Timings from Async Operation");
+    TimingHistoryEntry(TimingHandler handler) {
+        this.data = handler.record.clone();
+        this.children = new TimingData[handler.children.size()];
+        int i = 0;
+        for (TimingData child : handler.children.values()) {
+            this.children[i++] = child.clone();
         }
     }
 
-    @Override
-    public TimingHandler startTiming() {
-        UnsafeTimingHandler.checkThread();
-        super.startTiming();
-        return this;
-    }
-
-    @Override
-    public void stopTiming() {
-        UnsafeTimingHandler.checkThread();
-        super.stopTiming();
+    JsonArray export() {
+        JsonArray result = this.data.export();
+        if (this.children.length > 0) {
+            result.add(JSONUtil.mapArray(this.children, TimingData::export));
+        }
+        return result;
     }
 }

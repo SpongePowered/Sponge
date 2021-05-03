@@ -31,8 +31,8 @@ import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.world.explosion.Explosion;
-import org.spongepowered.api.world.weather.WeatherType;
-import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
+
+import co.aikar.timings.sponge.WorldTimingsHandler;
 import org.spongepowered.math.vector.Vector3d;
 
 public interface ServerLevelBridge {

@@ -71,8 +71,8 @@ import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
+import co.aikar.timings.sponge.SpongeTimings;
+import co.aikar.timings.sponge.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
 

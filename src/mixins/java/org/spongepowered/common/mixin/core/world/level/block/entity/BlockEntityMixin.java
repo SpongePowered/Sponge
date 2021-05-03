@@ -42,7 +42,7 @@ import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridg
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
+import co.aikar.timings.sponge.SpongeTimings;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
