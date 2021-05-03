@@ -460,7 +460,7 @@ tasks {
 
         doFirst {
             // Write a template-expanded license header to the temporary file
-            license.header.bufferedReader(Charsets.UTF_8).use { reader ->
+            license.header.get().asReader().buffered().use { reader ->
                 val template = groovy.text.GStringTemplateEngine().createTemplate(reader)
 
                 val propertyMap = (license as ExtensionAware).extra.properties.toMutableMap()
