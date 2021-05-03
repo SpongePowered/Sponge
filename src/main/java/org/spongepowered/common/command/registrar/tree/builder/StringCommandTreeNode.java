@@ -27,14 +27,14 @@ package org.spongepowered.common.command.registrar.tree.builder;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
 public final class StringCommandTreeNode extends ArgumentCommandTreeNode<CommandTreeNode.StringParser> implements CommandTreeNode.StringParser {
 
     private Types type = Types.PHRASE;
 
-    public StringCommandTreeNode(final ClientCompletionKey<@NonNull StringParser> parameterType) {
+    public StringCommandTreeNode(final CommandTreeNodeType<@NonNull StringParser> parameterType) {
         super(parameterType);
     }
 

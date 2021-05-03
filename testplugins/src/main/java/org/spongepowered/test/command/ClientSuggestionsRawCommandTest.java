@@ -34,8 +34,8 @@ import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKeys;
-import org.spongepowered.api.command.registrar.tree.ClientSuggestionProviders;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
+import org.spongepowered.api.command.registrar.tree.CommandCompletionProviders;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
 import java.util.Collections;
@@ -79,9 +79,9 @@ public class ClientSuggestionsRawCommandTest implements Command.Raw {
     @Override
     public CommandTreeNode.Root commandTree() {
         return CommandTreeNode.root()
-                .child("s1", ClientCompletionKeys.RESOURCE_LOCATION.get().createNode()
+                .child("s1", CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode()
                 .executable()
-                .suggestions(ClientSuggestionProviders.ALL_RECIPES));
+                .completions(CommandCompletionProviders.ALL_RECIPES));
     }
 
 }

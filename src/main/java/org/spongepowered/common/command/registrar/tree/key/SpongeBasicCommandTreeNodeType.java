@@ -27,16 +27,16 @@ package org.spongepowered.common.command.registrar.tree.key;
 import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.command.registrar.tree.builder.BasicCommandTreeNode;
 
-public final class SpongeBasicClientCompletionKey extends AbstractResourceKeyed implements ClientCompletionKey<CommandTreeNode.@NonNull Basic> {
+public final class SpongeBasicCommandTreeNodeType extends AbstractResourceKeyed implements CommandTreeNodeType<CommandTreeNode.@NonNull Basic> {
 
     private final ArgumentType<?> argumentType;
 
-    public SpongeBasicClientCompletionKey(final ResourceKey key, final ArgumentType<?> argumentType) {
+    public SpongeBasicCommandTreeNodeType(final ResourceKey key, final ArgumentType<?> argumentType) {
         super(key);
 
         this.argumentType = argumentType;

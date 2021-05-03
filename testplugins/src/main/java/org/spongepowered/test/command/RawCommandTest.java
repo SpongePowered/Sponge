@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test.command;
 
-import com.google.common.collect.ImmutableList;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -34,8 +33,8 @@ import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKeys;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 
 import java.util.Arrays;
 import java.util.List;
@@ -45,7 +44,7 @@ import java.util.stream.Collectors;
 
 public class RawCommandTest implements Command.Raw {
 
-    private final List<CommandCompletion> suggestions = Arrays.asList("eggs", "bacon", "spam")
+    private final List<CommandCompletion> completions = Arrays.asList("eggs", "bacon", "spam")
             .stream()
             .map(CommandCompletion::of)
             .collect(Collectors.toList());
@@ -63,7 +62,7 @@ public class RawCommandTest implements Command.Raw {
     @Override
     public List<CommandCompletion> complete(final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) throws CommandException {
         if (arguments.remaining().endsWith(" ")) {
-            return this.suggestions;
+            return this.completions;
         }
 
         String word = "";
@@ -72,7 +71,7 @@ public class RawCommandTest implements Command.Raw {
             arguments.skipWhitespace();
         }
         final String finalWord = word;
-        return this.suggestions.stream().filter(x -> x.completion().startsWith(finalWord.toLowerCase(Locale.ROOT))).collect(Collectors.toList());
+        return this.completions.stream().filter(x -> x.completion().startsWith(finalWord.toLowerCase(Locale.ROOT))).collect(Collectors.toList());
     }
 
     @Override
@@ -100,10 +99,12 @@ public class RawCommandTest implements Command.Raw {
 
     @Override
     public CommandTreeNode.@NonNull Root commandTree() {
-        final CommandTreeNode.Argument<?> firstStringKey = ClientCompletionKeys.STRING.get().createNode().customSuggestions().executable();
+        final CommandTreeNode.Argument<?> firstStringKey = CommandTreeNodeTypes.STRING.get().createNode()
+                .customCompletions().executable();
         final CommandTreeNode.Argument<?> secondStringKey =
-                ClientCompletionKeys.STRING.get().createNode().customSuggestions().executable().redirect(firstStringKey);
+                CommandTreeNodeTypes.STRING.get().createNode().customCompletions().executable().redirect(firstStringKey);
         firstStringKey.child("s2", secondStringKey);
         return CommandTreeNode.root().executable().child("s1", firstStringKey);
     }
+
 }

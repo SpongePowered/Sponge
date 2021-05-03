@@ -33,7 +33,7 @@ import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.command.registrar.tree.ClientSuggestionProvider;
+import org.spongepowered.api.command.registrar.tree.CommandCompletionProvider;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.command.SpongeCommandCompletion;
@@ -44,7 +44,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 @Mixin(SuggestionProviders.Wrapper.class)
-public abstract class SuggestionProviders_WrapperMixin_API implements ClientSuggestionProvider {
+public abstract class SuggestionProviders_WrapperMixin_API implements CommandCompletionProvider {
 
     // @formatter:off
     @Shadow public abstract CompletableFuture<Suggestions> shadow$getSuggestions(

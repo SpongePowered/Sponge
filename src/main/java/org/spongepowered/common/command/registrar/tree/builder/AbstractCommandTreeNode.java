@@ -33,7 +33,7 @@ import net.minecraft.commands.synchronization.SuggestionProviders;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.command.registrar.tree.ClientSuggestionProvider;
+import org.spongepowered.api.command.registrar.tree.CommandCompletionProvider;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.command.brigadier.tree.ForcedRedirectNode;
 
@@ -50,7 +50,7 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     private @Nullable CommandTreeNode<?> redirect = null;
     private @Nullable Map<String, AbstractCommandTreeNode<?, ?>> children = null;
     private boolean executable = false;
-    private @Nullable ClientSuggestionProvider suggestionProvider = null;
+    private @Nullable CommandCompletionProvider completionProvider = null;
     private Predicate<CommandCause> requirement = c -> true;
 
     public ImmutableMap<String, AbstractCommandTreeNode<?, ?>> getChildren() {
@@ -93,14 +93,14 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
     }
 
     @Override
-    public @NonNull T suggestions(final @Nullable ClientSuggestionProvider suggestionProvider) {
-        this.suggestionProvider = suggestionProvider;
+    public @NonNull T completions(final @Nullable CommandCompletionProvider completionProvider) {
+        this.completionProvider = completionProvider;
         return this.getThis();
     }
 
     @Override
-    public @NonNull T customSuggestions() {
-        return this.suggestions((ClientSuggestionProvider) SuggestionProviders.ASK_SERVER);
+    public @NonNull T customCompletions() {
+        return this.completions((CommandCompletionProvider) SuggestionProviders.ASK_SERVER);
     }
 
     @Override
@@ -124,11 +124,12 @@ public abstract class AbstractCommandTreeNode<T extends CommandTreeNode<@NonNull
         return this.executable;
     }
 
+    @SuppressWarnings("unchecked")
     public SuggestionProvider<SharedSuggestionProvider> suggestionProvider() {
-        return (SuggestionProvider<SharedSuggestionProvider>) this.suggestionProvider;
+        return (SuggestionProvider<SharedSuggestionProvider>) this.completionProvider;
     }
 
-    public @Nullable CommandTreeNode<?> getRedirect() {
+    public @Nullable CommandTreeNode<@NonNull ?> getRedirect() {
         return this.redirect;
     }
 

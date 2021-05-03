@@ -26,15 +26,15 @@ package org.spongepowered.common.command.registrar.tree.key;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.command.registrar.tree.builder.EntityCommandTreeNode;
 
-public final class SpongeEntityClientCompletionKey implements ClientCompletionKey<CommandTreeNode.EntitySelection> {
+public final class SpongeEntityCommandTreeNodeType implements CommandTreeNodeType<CommandTreeNode.EntitySelection> {
 
     private final ResourceKey key;
 
-    public SpongeEntityClientCompletionKey(final ResourceKey key) {
+    public SpongeEntityCommandTreeNodeType(final ResourceKey key) {
         this.key = key;
     }
 

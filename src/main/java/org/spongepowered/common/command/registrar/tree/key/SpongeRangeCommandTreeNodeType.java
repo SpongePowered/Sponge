@@ -32,7 +32,7 @@ import com.mojang.brigadier.arguments.LongArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.command.registrar.tree.builder.RangeCommandTreeNode;
@@ -44,20 +44,20 @@ import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
 
-public final class SpongeRangeClientCompletionKey<N extends Number> extends AbstractResourceKeyed implements ClientCompletionKey<CommandTreeNode.@NonNull Range<@NonNull N>> {
+public final class SpongeRangeCommandTreeNodeType<N extends Number> extends AbstractResourceKeyed implements CommandTreeNodeType<CommandTreeNode.@NonNull Range<@NonNull N>> {
 
-    public static @Nullable SpongeRangeClientCompletionKey<?> createFrom(final ResourceKey key, final ArgumentSerializer<?> serializer) {
+    public static @Nullable SpongeRangeCommandTreeNodeType<?> createFrom(final ResourceKey key, final ArgumentSerializer<?> serializer) {
         if (serializer instanceof FloatArgumentSerializer) {
-            return new SpongeRangeClientCompletionKey<>(key, FloatArgumentType::floatArg, Float.MIN_VALUE, Float.MAX_VALUE);
+            return new SpongeRangeCommandTreeNodeType<>(key, FloatArgumentType::floatArg, Float.MIN_VALUE, Float.MAX_VALUE);
         }
         if (serializer instanceof DoubleArgumentSerializer) {
-            return new SpongeRangeClientCompletionKey<>(key, DoubleArgumentType::doubleArg, Double.MIN_VALUE, Double.MAX_VALUE);
+            return new SpongeRangeCommandTreeNodeType<>(key, DoubleArgumentType::doubleArg, Double.MIN_VALUE, Double.MAX_VALUE);
         }
         if (serializer instanceof IntegerArgumentSerializer) {
-            return new SpongeRangeClientCompletionKey<>(key, IntegerArgumentType::integer, Integer.MIN_VALUE, Integer.MAX_VALUE);
+            return new SpongeRangeCommandTreeNodeType<>(key, IntegerArgumentType::integer, Integer.MIN_VALUE, Integer.MAX_VALUE);
         }
         if (serializer instanceof LongArgumentSerializer) {
-            return new SpongeRangeClientCompletionKey<>(key, LongArgumentType::longArg, Long.MIN_VALUE, Long.MAX_VALUE);
+            return new SpongeRangeCommandTreeNodeType<>(key, LongArgumentType::longArg, Long.MIN_VALUE, Long.MAX_VALUE);
         }
         return null;
     }
@@ -66,7 +66,7 @@ public final class SpongeRangeClientCompletionKey<N extends Number> extends Abst
     private final N min;
     private final N max;
 
-    private SpongeRangeClientCompletionKey(final ResourceKey key, final BiFunction<N, N, ArgumentType<?>> typeCreator, final N min, final N max) {
+    private SpongeRangeCommandTreeNodeType(final ResourceKey key, final BiFunction<N, N, ArgumentType<?>> typeCreator, final N min, final N max) {
         super(key);
 
         this.typeCreator = typeCreator;
