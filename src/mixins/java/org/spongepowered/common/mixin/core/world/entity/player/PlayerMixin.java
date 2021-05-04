@@ -90,6 +90,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
@@ -97,6 +98,7 @@ import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.food.FoodDataBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
@@ -622,5 +624,10 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     @Override
     public boolean impl$canCallIgniteEntityEvent() {
         return !this.shadow$isSpectator() && !this.shadow$isCreative();
+    }
+
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    private void impl$foodData(final CallbackInfo ci) {
+        ((FoodDataBridge) this.shadow$getFoodData()).bridge$setPlayer((net.minecraft.world.entity.player.Player) (Object) this);
     }
 }
