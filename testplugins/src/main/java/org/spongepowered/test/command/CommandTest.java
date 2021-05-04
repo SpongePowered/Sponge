@@ -246,7 +246,7 @@ public final class CommandTest {
                 Command.builder()
                         .addParameter(Parameter.enumValue(TestEnum.class).key(enumParameterKey).build())
                         .addParameter(Parameter.string().key(stringKey)
-                                .suggestions((context, currentInput) ->
+                                .completer((context, currentInput) ->
                                         Arrays.asList("bacon", "eggs", "spam").stream().map(CommandCompletion::of).collect(Collectors.toList()))
                                 .build())
                         .executor(x -> {
@@ -351,11 +351,11 @@ public final class CommandTest {
 //        final ValueCompleter stringValueCompleter = null;
 
         final Parameter.Value<String> r_opt = Parameter.remainingJoinedStrings().key("r_def").optional().build();
-        final Parameter.Value<String> r_req = Parameter.remainingJoinedStrings().key("r_req").suggestions(stringValueCompleter).build();
+        final Parameter.Value<String> r_req = Parameter.remainingJoinedStrings().key("r_req").completer(stringValueCompleter).build();
         final Parameter.Value<String> opt1 = Parameter.string().optional().key("opt1").build();
         final Parameter.Value<String> opt2 = Parameter.string().optional().key("opt2").build();
         final Parameter.Value<String> topt = Parameter.string().optional().key("topt").terminal().build();
-        final Parameter.Value<String> req1 = Parameter.string().key("req1").suggestions(stringValueCompleter).build();
+        final Parameter.Value<String> req1 = Parameter.string().key("req1").completer(stringValueCompleter).build();
         final Parameter.Value<String> req2 = Parameter.string().key("req2").build();
         final Parameter.Value<Boolean> lit1 = Parameter.literal(Boolean.class, true, "lit1").key("lit1").build();
         final Parameter.Value<Boolean> lit2 = Parameter.literal(Boolean.class, true, "lit2").key("lit2").build();

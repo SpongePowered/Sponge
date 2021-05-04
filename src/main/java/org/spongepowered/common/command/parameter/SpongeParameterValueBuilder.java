@@ -80,7 +80,7 @@ public final class SpongeParameterValueBuilder<T> implements Parameter.Value.Bui
     }
 
     @Override
-    public Parameter.Value.@NonNull Builder<T> suggestions(final @Nullable ValueCompleter completer) {
+    public Parameter.Value.@NonNull Builder<T> completer(final @Nullable ValueCompleter completer) {
         this.completer = completer;
         return this;
     }
