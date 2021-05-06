@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.tracker.server;
 
 import net.minecraft.CrashReport;
+import net.minecraft.CrashReportCategory;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
@@ -37,6 +38,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.accessor.CrashReportCategoryAccessor;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -55,9 +57,9 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
     @Shadow protected abstract void shadow$tickChildren(BooleanSupplier hasTimeLeft);
 
     @Inject(method = "fillReport", at = @At("RETURN"), cancellable = true)
-    private void tracker$addPhaseTrackerToCrashReport(final CrashReport report, final CallbackInfoReturnable<CrashReport> cir) {
+    private void tracker$addPhaseTrackerToCrashReport(final CrashReportCategory category, final CallbackInfo ci) {
+        final CrashReport report = ((CrashReportCategoryAccessor) category).accessor$report();
         report.addCategory("Sponge PhaseTracker").setDetail("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
-        cir.setReturnValue(report);
     }
 
     @Inject(method = "tickServer", at = @At("RETURN"))

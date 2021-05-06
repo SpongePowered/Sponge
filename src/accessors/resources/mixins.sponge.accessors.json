@@ -146,7 +146,6 @@
         "world.level.ExplosionAccessor",
         "world.level.GameRules_ValueAccessor",
         "world.level.GameRulesAccessor",
-        "world.level.LevelAccessor",
         "world.level.LevelSettingsAccessor",
         "world.level.NaturalSpawner_SpawnStateAccessor",
         "world.level.NaturalSpawnerAccessor",
@@ -196,7 +195,8 @@
         "world.scores.ObjectiveAccessor",
         "world.scores.PlayerTeamAccessor",
         "world.scores.ScoreAccessor",
-        "world.scores.ScoreboardAccessor"
+        "world.scores.ScoreboardAccessor",
+        "CrashReportCategoryAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

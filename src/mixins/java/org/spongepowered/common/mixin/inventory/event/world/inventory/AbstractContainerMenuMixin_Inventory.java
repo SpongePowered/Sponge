@@ -240,13 +240,13 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Redirect(method = "doClick",
             at = @At(
                     value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/player/Inventory;setCarried(Lnet/minecraft/world/item/ItemStack;)V",
+                    target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;setCarried(Lnet/minecraft/world/item/ItemStack;)V",
                     ordinal = 1))
-    private void impl$ClearOnSlot(final net.minecraft.world.entity.player.Inventory inventoryPlayer, final ItemStack itemStackIn) {
-        if (!this.impl$dropCancelled || !((PlayerBridge) inventoryPlayer.player).bridge$shouldRestoreInventory()) {
-            inventoryPlayer.player.containerMenu.setCarried(itemStackIn); // original behaviour
+    private void impl$ClearOnSlot(final AbstractContainerMenu self, final ItemStack itemStackIn, final int doClickParam0, final int doClickParam1, final ClickType doClickParam2, final Player player) {
+        if (!this.impl$dropCancelled || !((PlayerBridge) player).bridge$shouldRestoreInventory()) {
+            self.setCarried(itemStackIn); // original behaviour
         }
-        ((PlayerBridge) inventoryPlayer.player).bridge$shouldRestoreInventory(false);
+        ((PlayerBridge) player).bridge$shouldRestoreInventory(false);
         this.impl$dropCancelled = false;
     }
 

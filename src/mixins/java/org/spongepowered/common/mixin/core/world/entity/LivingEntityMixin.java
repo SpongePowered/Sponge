@@ -117,7 +117,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Shadow public abstract AttributeInstance shadow$getAttribute(Attribute attribute);
     @Shadow public abstract void shadow$setHealth(float health);
-    @Shadow public abstract void shadow$knockback(float p_70653_2_, double p_70653_3_, double p_70653_5_);
+    @Shadow public abstract void shadow$knockback(double p_70653_2_, double p_70653_3_, double p_70653_5_);
     @Shadow public abstract void shadow$setLastHurtByMob(LivingEntity livingBase);
     @Shadow public abstract void shadow$setAbsorptionAmount(float amount);
     @Shadow public abstract void shadow$setItemInHand(InteractionHand hand, @Nullable ItemStack stack);
@@ -584,7 +584,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     }
 
                     this.hurtDir = (float) (Mth.atan2(d0, d1) * 57.2957763671875D - (double) this.shadow$getYRot());
-                    this.shadow$knockback(0.4F, d1, d0);
+                    this.shadow$knockback(0.4D, d1, d0);
                 } else {
                     this.hurtDir = (float) (Math.random() * 2.0D * 180);
                 }
