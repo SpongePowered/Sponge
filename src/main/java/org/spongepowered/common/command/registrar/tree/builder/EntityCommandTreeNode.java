@@ -28,7 +28,7 @@ import com.mojang.brigadier.arguments.ArgumentType;
 import net.minecraft.commands.arguments.EntityArgument;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
 // TODO
@@ -39,7 +39,7 @@ public final class EntityCommandTreeNode
     private boolean playersOnly = false;
     private boolean oneOnly = false;
 
-    public EntityCommandTreeNode(final @Nullable ClientCompletionKey<EntitySelection> parameterType) {
+    public EntityCommandTreeNode(final @Nullable CommandTreeNodeType<EntitySelection> parameterType) {
         super(parameterType);
     }
 

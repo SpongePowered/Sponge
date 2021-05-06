@@ -26,13 +26,13 @@ package org.spongepowered.common.service.game.pagination;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
-import com.google.common.collect.ImmutableList;
 import com.google.common.collect.MapMaker;
 import com.google.inject.Singleton;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandExecutor;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.ArgumentParseException;
@@ -45,7 +45,9 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.pagination.PaginationList;
 import org.spongepowered.api.service.pagination.PaginationService;
 import org.spongepowered.api.util.Nameable;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 
+import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
@@ -55,7 +57,6 @@ import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
-
 
 @Singleton
 public final class SpongePaginationService implements PaginationService {
@@ -200,13 +201,16 @@ public final class SpongePaginationService implements PaginationService {
         }
 
         @Override
-        public List<String> complete(final CommandContext context, final String input) {
+        public List<CommandCompletion> complete(final CommandContext context, final String input) {
             final Audience audience = context.cause().audience();
             final SourcePaginations paginations = SpongePaginationService.this.getPaginationState(audience, false);
             if (paginations != null) {
-                return paginations.keys().stream().map(Object::toString).filter(x -> x.startsWith(input)).collect(Collectors.toList());
+                return paginations.keys().stream().map(Object::toString)
+                        .filter(x -> x.startsWith(input))
+                        .map(SpongeCommandCompletion::new)
+                        .collect(Collectors.toList());
             }
-            return ImmutableList.of();
+            return Collections.emptyList();
         }
     }
 }

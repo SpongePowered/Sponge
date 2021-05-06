@@ -33,6 +33,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.entity.living.player.User;
@@ -40,9 +41,11 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.user.UserManager;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
@@ -56,9 +59,11 @@ public final class SpongeUserValueParameter extends ResourceKeyedArgumentValuePa
     }
 
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+    public List<CommandCompletion> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
         return Sponge.server().userManager().streamOfMatches(currentInput).filter(GameProfile::hasName)
-                .map(x -> x.name().orElse("")).collect(Collectors.toList());
+                .map(x -> x.name().map(SpongeCommandCompletion::new).orElse(null))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
     }
 
     @Override

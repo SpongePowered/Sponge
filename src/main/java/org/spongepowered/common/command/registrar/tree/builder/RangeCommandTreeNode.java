@@ -27,10 +27,9 @@ package org.spongepowered.common.command.registrar.tree.builder;
 import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
-import java.util.Objects;
 import java.util.Optional;
 import java.util.function.BiFunction;
 
@@ -44,7 +43,7 @@ public final class RangeCommandTreeNode<T extends Number>
     private final BiFunction<T, T, ArgumentType<?>> typeCreator;
 
     public RangeCommandTreeNode(
-            final ClientCompletionKey<Range<T>> parameterType,
+            final CommandTreeNodeType<Range<T>> parameterType,
             final BiFunction<T, T, ArgumentType<?>> typeCreator,
             final T defaultMin,
             final T defaultMax) {

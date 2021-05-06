@@ -28,6 +28,7 @@ import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
@@ -45,7 +46,7 @@ public final class SpongeIPAddressValueParameter extends ResourceKeyedArgumentVa
     }
 
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+    public List<CommandCompletion> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
         return Collections.emptyList();
     }
 

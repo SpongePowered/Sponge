@@ -25,7 +25,7 @@
 package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
 public final class AmountCommandTreeNode extends ArgumentCommandTreeNode<CommandTreeNode.Amount> implements CommandTreeNode.Amount {
@@ -34,7 +34,7 @@ public final class AmountCommandTreeNode extends ArgumentCommandTreeNode<Command
     private final ArgumentType<?> ifMultiple;
     private boolean single;
 
-    public AmountCommandTreeNode(final ClientCompletionKey<CommandTreeNode.Amount> parameterType,
+    public AmountCommandTreeNode(final CommandTreeNodeType<Amount> parameterType,
             final ArgumentType<?> ifSingle,
             final ArgumentType<?> ifMultiple) {
         super(parameterType);

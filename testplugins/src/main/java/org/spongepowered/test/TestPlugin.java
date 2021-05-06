@@ -29,6 +29,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.event.Listener;
@@ -53,11 +54,12 @@ public final class TestPlugin {
 
     @Listener
     public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<PluginContainer> pluginKey = Parameter.plugin().key("plugin").suggestions(
+        final Parameter.Value<PluginContainer> pluginKey = Parameter.plugin().key("plugin").completer(
                 (context, currentInput) -> Sponge.pluginManager().plugins().stream()
                         .filter(pc -> pc.instance() instanceof LoadableModule)
                         .filter(x -> x.metadata().id().startsWith(currentInput))
-                        .map(x -> x.metadata().id()).collect(Collectors.toList())).build();
+                        .map(x -> CommandCompletion.of(x.metadata().id(), Component.text(x.metadata().name().orElseGet(() -> x.metadata().id()))))
+                        .collect(Collectors.toList())).build();
         final Command.Parameterized enableCommand = Command.builder().addParameter(pluginKey)
                 .executor(context -> {
                     final PluginContainer pc = context.requireOne(pluginKey);

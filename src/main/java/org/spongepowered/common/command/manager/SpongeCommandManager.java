@@ -53,6 +53,7 @@ import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
@@ -75,6 +76,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.adventure.CallbackCommand;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
@@ -469,7 +471,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    public @NonNull List<String> suggest(final @NonNull String arguments) {
+    public List<CommandCompletion> complete(final @NonNull String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.COMMAND, arguments);
             final String[] splitArg = arguments.split(" ", 2);
@@ -483,12 +485,13 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                     return Collections.emptyList();
                 }
 
-                return mapping.registrar().suggestions(CommandCause.create(), mapping, command, splitArg[1]);
+                return mapping.registrar().complete(CommandCause.create(), mapping, command, splitArg[1]);
             }
 
             return this.commandMappings.keySet()
                     .stream()
                     .filter(x -> x.startsWith(command))
+                    .map(SpongeCommandCompletion::new)
                     .collect(Collectors.toList());
         } catch (final Exception e) {
             return Collections.emptyList();
@@ -496,25 +499,25 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     }
 
     @Override
-    public <T extends Subject & Audience> @NonNull List<String> suggest(
+    public <T extends Subject & Audience> List<CommandCompletion> complete(
             final @NonNull T subjectReceiver,
             final @NonNull String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, subjectReceiver);
             frame.addContext(EventContextKeys.AUDIENCE, subjectReceiver);
-            return this.suggest(arguments);
+            return this.complete(arguments);
         }
     }
 
     @Override
-    public @NonNull List<String> suggest(
+    public List<CommandCompletion> complete(
             final @NonNull Subject subject,
             final @NonNull Audience receiver,
             final @NonNull String arguments) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.addContext(EventContextKeys.SUBJECT, subject);
             frame.addContext(EventContextKeys.AUDIENCE, receiver);
-            return this.suggest(arguments);
+            return this.complete(arguments);
         }
     }
 

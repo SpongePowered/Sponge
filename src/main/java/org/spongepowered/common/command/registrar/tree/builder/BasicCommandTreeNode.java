@@ -25,14 +25,14 @@
 package org.spongepowered.common.command.registrar.tree.builder;
 
 import com.mojang.brigadier.arguments.ArgumentType;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
 public final class BasicCommandTreeNode extends ArgumentCommandTreeNode<CommandTreeNode.Basic> implements CommandTreeNode.Basic {
 
     private final ArgumentType<?> type;
 
-    public BasicCommandTreeNode(final ClientCompletionKey<Basic> parameterType, final ArgumentType<?> type) {
+    public BasicCommandTreeNode(final CommandTreeNodeType<Basic> parameterType, final ArgumentType<?> type) {
         super(parameterType);
         this.type = type;
     }

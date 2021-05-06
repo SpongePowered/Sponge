@@ -30,11 +30,12 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKeys;
-import org.spongepowered.api.command.registrar.tree.ClientSuggestionProviders;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
+import org.spongepowered.api.command.registrar.tree.CommandCompletionProviders;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
 
 import java.util.Collections;
@@ -50,7 +51,7 @@ public class ClientSuggestionsRawCommandTest implements Command.Raw {
     }
 
     @Override
-    public @NonNull List<String> suggestions(@NonNull final CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) throws CommandException {
+    public List<CommandCompletion> complete(@NonNull final CommandCause cause, final ArgumentReader.@NonNull Mutable arguments) throws CommandException {
         // This should not get hit
         return Collections.emptyList();
     }
@@ -78,9 +79,9 @@ public class ClientSuggestionsRawCommandTest implements Command.Raw {
     @Override
     public CommandTreeNode.Root commandTree() {
         return CommandTreeNode.root()
-                .child("s1", ClientCompletionKeys.RESOURCE_LOCATION.get().createNode()
+                .child("s1", CommandTreeNodeTypes.RESOURCE_LOCATION.get().createNode()
                 .executable()
-                .suggestions(ClientSuggestionProviders.ALL_RECIPES));
+                .completions(CommandCompletionProviders.ALL_RECIPES));
     }
 
 }

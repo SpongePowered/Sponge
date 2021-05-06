@@ -24,28 +24,28 @@
  */
 package org.spongepowered.common.command.registrar.tree.key;
 
-import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
-import org.spongepowered.common.AbstractResourceKeyed;
-import org.spongepowered.common.command.registrar.tree.builder.AmountCommandTreeNode;
+import org.spongepowered.common.command.registrar.tree.builder.EntityCommandTreeNode;
 
-public final class SpongeAmountClientCompletionKey extends AbstractResourceKeyed implements ClientCompletionKey<CommandTreeNode.@NonNull Amount> {
+public final class SpongeEntityCommandTreeNodeType implements CommandTreeNodeType<CommandTreeNode.EntitySelection> {
 
-    private final ArgumentType<?> ifSingle;
-    private final ArgumentType<?> ifMultiple;
+    private final ResourceKey key;
 
-    public SpongeAmountClientCompletionKey(final ResourceKey key, final ArgumentType<?> ifSingle, final ArgumentType<?> ifMultiple) {
-        super(key);
-
-        this.ifSingle = ifSingle;
-        this.ifMultiple = ifMultiple;
+    public SpongeEntityCommandTreeNodeType(final ResourceKey key) {
+        this.key = key;
     }
 
     @Override
-    public CommandTreeNode.@NonNull Amount createNode() {
-        return new AmountCommandTreeNode(this, this.ifSingle, this.ifMultiple);
+    public CommandTreeNode.@NonNull EntitySelection createNode() {
+        return new EntityCommandTreeNode(this);
     }
+
+    @Override
+    public @NonNull ResourceKey key() {
+        return this.key;
+    }
+
 }

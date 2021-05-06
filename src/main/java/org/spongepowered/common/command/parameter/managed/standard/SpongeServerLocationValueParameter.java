@@ -40,13 +40,13 @@ import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.command.parameter.CommandContext;
-import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
 import org.spongepowered.common.command.brigadier.argument.ComplexSuggestionNodeProvider;
 import org.spongepowered.common.util.Constants;
@@ -58,6 +58,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class SpongeServerLocationValueParameter extends ResourceKeyedArgumentValueParser<ServerLocation> implements ComplexSuggestionNodeProvider {
 
@@ -69,17 +70,16 @@ public final class SpongeServerLocationValueParameter extends ResourceKeyedArgum
     }
 
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
-        return this.complete(currentInput);
+    public List<CommandCompletion> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+        return this.complete(currentInput).map(SpongeCommandCompletion::new).collect(Collectors.toList());
     }
 
-    private List<String> complete(final String currentInput) {
+    private Stream<String> complete(final String currentInput) {
         return SpongeCommon.getGame().server().worldManager().worlds()
                 .stream()
                 .map(ServerWorld::key)
                 .map(ResourceKey::formatted)
-                .filter(x -> x.startsWith(currentInput))
-                .collect(Collectors.toList());
+                .filter(x -> x.startsWith(currentInput));
     }
 
     @Override

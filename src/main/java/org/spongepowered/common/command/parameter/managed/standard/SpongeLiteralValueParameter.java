@@ -28,11 +28,13 @@ import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueCompleter;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
 
@@ -78,10 +80,10 @@ public final class SpongeLiteralValueParameter<T> extends AbstractArgumentParser
     }
 
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String input) {
+    public List<CommandCompletion> complete(final @NonNull CommandContext context, final @NonNull String input) {
         final String literal = String.join(" ", this.literalSupplier.get());
         if (literal.startsWith(input)) {
-            return Collections.singletonList(literal);
+            return Collections.singletonList(new SpongeCommandCompletion(literal));
         }
         return Collections.emptyList();
     }

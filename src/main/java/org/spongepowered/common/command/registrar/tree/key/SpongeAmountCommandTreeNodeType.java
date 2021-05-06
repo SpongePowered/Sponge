@@ -22,43 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.parameter.managed.standard;
+package org.spongepowered.common.command.registrar.tree.key;
 
-import com.google.common.collect.ImmutableList;
 import com.mojang.brigadier.arguments.ArgumentType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.CommandCause;
-import org.spongepowered.api.command.CommandCompletion;
-import org.spongepowered.api.command.exception.ArgumentParseException;
-import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.data.persistence.DataContainer;
-import org.spongepowered.common.command.brigadier.argument.ResourceKeyedArgumentValueParser;
-import org.spongepowered.common.util.Constants;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
+import org.spongepowered.common.AbstractResourceKeyed;
+import org.spongepowered.common.command.registrar.tree.builder.AmountCommandTreeNode;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
+public final class SpongeAmountCommandTreeNodeType extends AbstractResourceKeyed implements CommandTreeNodeType<CommandTreeNode.@NonNull Amount> {
 
-public final class SpongeDataContainerValueParameter extends ResourceKeyedArgumentValueParser<DataContainer> {
+    private final ArgumentType<?> ifSingle;
+    private final ArgumentType<?> ifMultiple;
 
-    public SpongeDataContainerValueParameter(final ResourceKey key) {
+    public SpongeAmountCommandTreeNodeType(final ResourceKey key, final ArgumentType<?> ifSingle, final ArgumentType<?> ifMultiple) {
         super(key);
+
+        this.ifSingle = ifSingle;
+        this.ifMultiple = ifMultiple;
     }
 
     @Override
-    public List<CommandCompletion> complete(final @NonNull CommandCause context, final @NonNull String currentInput) {
-        return ImmutableList.of();
-    }
-
-    @Override
-    public List<ArgumentType<?>> getClientCompletionArgumentType() {
-        return Collections.singletonList(Constants.Command.NBT_ARGUMENT_TYPE);
-    }
-
-    @Override
-    public @NonNull Optional<? extends DataContainer> parseValue(
-            final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
-        return Optional.of(reader.parseDataContainer());
+    public CommandTreeNode.@NonNull Amount createNode() {
+        return new AmountCommandTreeNode(this, this.ifSingle, this.ifMultiple);
     }
 }

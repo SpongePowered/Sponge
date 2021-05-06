@@ -31,6 +31,7 @@ import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -38,6 +39,7 @@ import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedValueParameter;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 
 import java.util.List;
@@ -66,7 +68,7 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
     }
 
     @Override
-    public @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+    public List<CommandCompletion> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         return this.complete(context.cause(), currentInput);
     }
 
@@ -78,7 +80,7 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
         }
 
         @Override
-        public final @NonNull List<String> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
+        public final List<CommandCompletion> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
             final CommandDispatcher<CommandSourceStack> dispatcher = SpongeCommon.getServer().getCommands().getDispatcher();
             final SpongeCommandContextBuilder builder = new SpongeCommandContextBuilder(
                     dispatcher,
@@ -90,7 +92,7 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
         }
 
         @Override
-        public final @NonNull List<String> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
+        public final List<CommandCompletion> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
             final com.mojang.brigadier.context.CommandContext<?> c;
             if (context instanceof CommandContext.Builder) {
                 c = (com.mojang.brigadier.context.CommandContext<?>) ((CommandContext.Builder) context).build(currentInput);
@@ -99,7 +101,7 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
             }
             final SuggestionsBuilder builder = new SuggestionsBuilder(c.getInput(), c.getRange().getStart());
             this.listSuggestions(c, builder);
-            return builder.build().getList().stream().map(Suggestion::getText).collect(Collectors.toList());
+            return builder.build().getList().stream().map(SpongeCommandCompletion::from).collect(Collectors.toList());
         }
 
         @Override

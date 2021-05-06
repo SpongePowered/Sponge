@@ -22,30 +22,47 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree.key;
+package org.spongepowered.common.command;
 
+import com.mojang.brigadier.suggestion.Suggestion;
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
-import org.spongepowered.common.command.registrar.tree.builder.EntityCommandTreeNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.CommandCompletion;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-public final class SpongeEntityClientCompletionKey implements ClientCompletionKey<CommandTreeNode.EntitySelection> {
+import java.util.Optional;
 
-    private final ResourceKey key;
+public final class SpongeCommandCompletion implements CommandCompletion {
 
-    public SpongeEntityClientCompletionKey(final ResourceKey key) {
-        this.key = key;
+    public static SpongeCommandCompletion from(final @NonNull Suggestion suggestion) {
+        @Nullable Component tooltip = null;
+        if (suggestion.getTooltip() != null) {
+            tooltip = SpongeAdventure.asAdventure(suggestion.getTooltip());
+        }
+        return new SpongeCommandCompletion(suggestion.getText(), tooltip);
+    }
+
+    final String completion;
+    final @Nullable Component tooltip;
+
+    public SpongeCommandCompletion(final String completion) {
+        this(completion, null);
+    }
+
+    public SpongeCommandCompletion(final String completion, final @Nullable Component tooltip) {
+        this.completion = completion;
+        this.tooltip = tooltip;
     }
 
     @Override
-    public CommandTreeNode.@NonNull EntitySelection createNode() {
-        return new EntityCommandTreeNode(this);
+    public String completion() {
+        return this.completion;
     }
 
     @Override
-    public @NonNull ResourceKey key() {
-        return this.key;
+    public Optional<Component> tooltip() {
+        return Optional.ofNullable(this.tooltip);
     }
 
 }

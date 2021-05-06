@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.brigadier.argument;
 
+import com.mojang.brigadier.Message;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -31,6 +32,7 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -38,10 +40,12 @@ import org.spongepowered.api.command.parameter.managed.ValueCompleter;
 import org.spongepowered.api.command.parameter.managed.ValueParameterModifier;
 import org.spongepowered.api.command.parameter.managed.ValueParser;
 import org.spongepowered.api.command.parameter.managed.clientcompletion.ClientCompletionTypes;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
 import org.spongepowered.common.command.parameter.managed.clientcompletion.SpongeClientCompletionType;
+import org.spongepowered.common.util.CommandUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.ArrayList;
@@ -137,18 +141,9 @@ public final class CustomArgumentParser<T> implements ArgumentParser<T>, Suggest
     public CompletableFuture<Suggestions> listSuggestions(
             final com.mojang.brigadier.context.CommandContext<?> context,
             final SuggestionsBuilder builder) {
-        for (final String s : this.completer.complete((SpongeCommandContext) context, builder.getRemaining())) {
-            if (CustomArgumentParser.INTEGER_PATTERN.matcher(s).matches()) {
-                try {
-                    builder.suggest(Integer.parseInt(s));
-                } catch (final NumberFormatException ex) {
-                    builder.suggest(s);
-                }
-            } else {
-                builder.suggest(s);
-            }
-        }
-        return builder.buildFuture();
+
+        final List<CommandCompletion> completions = this.completer.complete((SpongeCommandContext) context, builder.getRemaining());
+        return CommandUtil.buildSuggestionsFromCompletions(completions, builder);
     }
 
     @Override

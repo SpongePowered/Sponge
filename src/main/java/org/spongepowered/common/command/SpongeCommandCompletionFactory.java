@@ -22,23 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.command.registrar.tree.key;
+package org.spongepowered.common.command;
 
+import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.command.registrar.tree.ClientCompletionKey;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
-import org.spongepowered.common.AbstractResourceKeyed;
-import org.spongepowered.common.command.registrar.tree.builder.StringCommandTreeNode;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.CommandCompletion;
 
-public final class SpongeStringClientCompletionKey extends AbstractResourceKeyed implements ClientCompletionKey<CommandTreeNode.@NonNull StringParser> {
-
-    public SpongeStringClientCompletionKey(final ResourceKey key) {
-        super(key);
-    }
+public final class SpongeCommandCompletionFactory implements CommandCompletion.Factory {
 
     @Override
-    public CommandTreeNode.@NonNull StringParser createNode() {
-        return new StringCommandTreeNode(this);
+    @NonNull
+    public CommandCompletion completion(final @NonNull String completion, final @Nullable Component tooltip) {
+        if (completion == null || completion.isEmpty()) {
+            throw new IllegalStateException("The completion may not be null or empty.");
+        }
+        return new SpongeCommandCompletion(completion, tooltip);
     }
 }

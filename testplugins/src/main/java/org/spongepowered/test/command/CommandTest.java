@@ -24,7 +24,6 @@
  */
 package org.spongepowered.test.command;
 
-import com.google.common.collect.ImmutableList;
 import com.google.inject.Inject;
 import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.audience.Audience;
@@ -40,6 +39,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.SystemSubject;
 import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
+import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.exception.CommandException;
@@ -245,7 +245,10 @@ public final class CommandTest {
                 this.plugin,
                 Command.builder()
                         .addParameter(Parameter.enumValue(TestEnum.class).key(enumParameterKey).build())
-                        .addParameter(Parameter.string().key(stringKey).suggestions((context, currentInput) -> ImmutableList.of("bacon", "eggs", "spam")).build())
+                        .addParameter(Parameter.string().key(stringKey)
+                                .completer((context, currentInput) ->
+                                        Arrays.asList("bacon", "eggs", "spam").stream().map(CommandCompletion::of).collect(Collectors.toList()))
+                                .build())
                         .executor(x -> {
                             x.sendMessage(Identity.nil(), Component.text(x.one(enumParameterKey).orElse(TestEnum.ONE).name()));
                             return CommandResult.success();
@@ -342,15 +345,17 @@ public final class CommandTest {
 
         final Command.Builder builder = Command.builder();
 
-        final ValueCompleter stringValueCompleter = (c, s) -> s.isEmpty() ? Collections.singletonList("x") : Arrays.asList(s, s + "bar", "foo_" + s);
+        final ValueCompleter stringValueCompleter = (c, s) -> s.isEmpty() ?
+                Collections.singletonList(CommandCompletion.of("x")) :
+                Arrays.asList(s, s + "bar", "foo_" + s).stream().map(CommandCompletion::of).collect(Collectors.toList());
 //        final ValueCompleter stringValueCompleter = null;
 
         final Parameter.Value<String> r_opt = Parameter.remainingJoinedStrings().key("r_def").optional().build();
-        final Parameter.Value<String> r_req = Parameter.remainingJoinedStrings().key("r_req").suggestions(stringValueCompleter).build();
+        final Parameter.Value<String> r_req = Parameter.remainingJoinedStrings().key("r_req").completer(stringValueCompleter).build();
         final Parameter.Value<String> opt1 = Parameter.string().optional().key("opt1").build();
         final Parameter.Value<String> opt2 = Parameter.string().optional().key("opt2").build();
         final Parameter.Value<String> topt = Parameter.string().optional().key("topt").terminal().build();
-        final Parameter.Value<String> req1 = Parameter.string().key("req1").suggestions(stringValueCompleter).build();
+        final Parameter.Value<String> req1 = Parameter.string().key("req1").completer(stringValueCompleter).build();
         final Parameter.Value<String> req2 = Parameter.string().key("req2").build();
         final Parameter.Value<Boolean> lit1 = Parameter.literal(Boolean.class, true, "lit1").key("lit1").build();
         final Parameter.Value<Boolean> lit2 = Parameter.literal(Boolean.class, true, "lit2").key("lit2").build();
@@ -488,10 +493,10 @@ public final class CommandTest {
                             }
 
                             @Override
-                            public @NotNull List<String> modifyCompletion(@NotNull final CommandContext context,
-                                                                          @NotNull final String currentInput,
-                                                                          @NotNull final List<String> completions) {
-                                return completions.stream().filter(x -> !x.equalsIgnoreCase(TestEnum.THREE.name())).collect(Collectors.toList());
+                            public List<CommandCompletion> modifyCompletion(@NotNull final CommandContext context,
+                                                                            @NotNull final String currentInput,
+                                                                            final List<CommandCompletion> completions) {
+                                return completions.stream().filter(x -> !x.completion().equalsIgnoreCase(TestEnum.THREE.name())).collect(Collectors.toList());
                             }
 
                             @Override
