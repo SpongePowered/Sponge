@@ -44,6 +44,7 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.monster.Enemy;
@@ -136,6 +137,7 @@ public class EntityActivationRange {
                 || entity instanceof AbstractHurtingProjectile
                 || entity instanceof LightningBolt
                 || entity instanceof PrimedTnt
+                || entity instanceof Painting
                 || entity instanceof EndCrystal
                 || entity instanceof FireworkRocketEntity
                 || entity instanceof FallingBlockEntity) // Always tick falling blocks
