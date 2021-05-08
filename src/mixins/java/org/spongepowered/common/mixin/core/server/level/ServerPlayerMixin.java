@@ -862,6 +862,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
     }
 
+    @Override
+    public net.minecraft.world.scores.Scoreboard shadow$getScoreboard() {
+        return (net.minecraft.world.scores.Scoreboard) this.impl$scoreboard;
+    }
 }
 
 
