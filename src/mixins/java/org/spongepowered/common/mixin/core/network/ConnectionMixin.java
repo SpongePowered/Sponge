@@ -28,6 +28,7 @@ import com.google.common.collect.Sets;
 import io.netty.channel.Channel;
 import io.netty.channel.SimpleChannelInboundHandler;
 import io.netty.channel.local.LocalAddress;
+import net.minecraft.network.chat.Component;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.network.EngineConnection;
@@ -62,6 +63,7 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
 
     @Nullable private InetSocketAddress impl$virtualHost;
     @Nullable private MinecraftVersion impl$version;
+    @Nullable private net.minecraft.network.chat.Component impl$kickReason;
 
     private ClientType impl$clientType = ClientType.VANILLA;
 
@@ -114,6 +116,16 @@ public abstract class ConnectionMixin extends SimpleChannelInboundHandler<Packet
         } catch (UnknownHostException e) {
             this.impl$virtualHost = InetSocketAddress.createUnresolved(host, port);
         }
+    }
+
+    @Nullable
+    public Component bridge$getKickReason() {
+        return this.impl$kickReason;
+    }
+
+    @Override
+    public void bridge$setKickReason(Component component) {
+        this.impl$kickReason = component;
     }
 
     @Override

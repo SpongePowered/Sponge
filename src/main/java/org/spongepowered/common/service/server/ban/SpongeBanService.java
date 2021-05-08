@@ -112,22 +112,20 @@ public final class SpongeBanService implements BanService {
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public CompletableFuture<Boolean> isBanned(final GameProfile profile) {
+    public boolean isBanned(final GameProfile profile) {
         final StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry> accessor =
             (StoredUserListAccessor<com.mojang.authlib.GameProfile, UserBanListEntry>) this.getUserBanList();
 
         accessor.invoker$removeExpired();
-        return CompletableFuture.completedFuture(accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile))));
+        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(SpongeGameProfile.toMcProfile(profile)));
     }
 
     @SuppressWarnings("unchecked")
-    @Override
-    public CompletableFuture<Boolean> isBanned(final InetAddress address) {
+    public boolean isBanned(final InetAddress address) {
         final StoredUserListAccessor<String, IpBanListEntry> accessor = ((StoredUserListAccessor<String, IpBanListEntry>) this.getIPBanList());
 
         accessor.invoker$removeExpired();
-        return CompletableFuture.completedFuture(accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(((IpBanListAccessor) accessor).invoker$getIpFromAddress(new InetSocketAddress(address, 0)))));
+        return accessor.accessor$map().containsKey(accessor.invoker$getKeyForUser(((IpBanListAccessor) accessor).invoker$getIpFromAddress(new InetSocketAddress(address, 0))));
     }
 
     @SuppressWarnings("unchecked")
@@ -151,7 +149,7 @@ public final class SpongeBanService implements BanService {
 
     @Override
     public CompletableFuture<Boolean> removeBan(final Ban ban) {
-        if (!this.hasBan(ban).join()) {
+        if (!this.hasBan(ban)) {
             return CompletableFuture.completedFuture(false);
         }
         if (ban.type().equals(BanTypes.PROFILE.get())) {
@@ -191,8 +189,7 @@ public final class SpongeBanService implements BanService {
         return CompletableFuture.completedFuture(Optional.ofNullable(prevBan));
     }
 
-    @Override
-    public CompletableFuture<Boolean> hasBan(final Ban ban) {
+    public boolean hasBan(final Ban ban) {
         if (ban.type().equals(BanTypes.PROFILE.get())) {
             return this.isBanned(((Ban.Profile) ban).profile());
         } else if (ban.type().equals(BanTypes.IP.get())) {
