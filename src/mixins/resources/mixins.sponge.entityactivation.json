@@ -11,7 +11,7 @@
       "entity.item.FireworkRocketEntityMixin_EntityActivation",
       "entity.item.ItemEntityMixin_EntityActivation",
       "entity.projectile.AbstractArrowEntityMixin_EntityActivation",
-      "world.server.ServerWorldMixin_EntityActivation"
+      "world.server.ServerLevelMixin_EntityActivation"
     ],
     "injectors": {
         "defaultRequire": 1

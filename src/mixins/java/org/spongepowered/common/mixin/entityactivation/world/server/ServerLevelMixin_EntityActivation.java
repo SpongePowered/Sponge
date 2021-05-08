@@ -38,19 +38,19 @@ import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRa
 import java.util.function.BooleanSupplier;
 
 @Mixin(value = ServerLevel.class, priority = 1005)
-public abstract class ServerWorldMixin_EntityActivation extends LevelMixin {
+public abstract class ServerLevelMixin_EntityActivation extends LevelMixin {
 
     @Inject(method = "tick",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V"),
         slice = @Slice(
                 from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;runBlockEvents()V"),
                 to = @At(value = "CONSTANT", args = "stringValue=entities", shift = At.Shift.AFTER)))
-    protected void impl$entityActivationCheck(final BooleanSupplier var1, final CallbackInfo ci) {
+    protected void activation$entityActivationCheck(final BooleanSupplier var1, final CallbackInfo ci) {
         EntityActivationRange.activateEntities(((ServerLevel) (Object) this));
     }
 
     @Inject(method = "tickNonPassenger", at = @At("HEAD"), cancellable = true)
-    private void impl$checkIfCanUpdate(final Entity ticking, final CallbackInfo ci) {
+    private void activation$checkIfCanUpdate(final Entity ticking, final CallbackInfo ci) {
         if (EntityActivationRange.checkIfActive(ticking)) {
             return;
         }
@@ -59,4 +59,5 @@ public abstract class ServerWorldMixin_EntityActivation extends LevelMixin {
         ((ActivationCapabilityBridge) ticking).activation$inactiveTick();
         ci.cancel();
     }
+
 }
