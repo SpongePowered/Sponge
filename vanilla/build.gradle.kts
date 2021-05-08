@@ -255,14 +255,10 @@ dependencies {
     }
 
     val libraries = vanillaLibrariesConfig.name
-    libraries("net.minecrell:terminalconsoleappender:1.2.0")
+    libraries("net.minecrell:terminalconsoleappender:1.3.0-SNAPSHOT")
     libraries("org.jline:jline-terminal:$jlineVersion")
     libraries("org.jline:jline-reader:$jlineVersion")
-    libraries("org.jline:jline-terminal-jansi:$jlineVersion") {
-        exclude("org.fusesource.jansi") // Use our own JAnsi
-    }
-    // A newer version is required to make log4j happy
-    libraries("org.fusesource.jansi:jansi:2.3.1")
+    libraries("org.jline:jline-terminal-jansi:$jlineVersion")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // The ModLauncher compatibility launch layer
