@@ -31,6 +31,8 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.apache.logging.log4j.Level;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,6 +45,7 @@ import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
@@ -61,6 +64,35 @@ public abstract class ChunkMapMixin_Tracker {
             PhasePrinter.printMessageWithCaughtException(PhaseTracker.getInstance(), "Exception tracking entity", "An entity that was already tracked was added to the tracker!", exception);
         }
         return exception;
+    }
+
+    @Redirect(method = "lambda$null$36(Lnet/minecraft/world/level/chunk/ChunkAccess;)Lnet/minecraft/world/level/chunk/LevelChunk;",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;unpackTicks()V"))
+    private static void tracker$wrapUnpackTicks(final LevelChunk chunk) {
+        if (!PhaseTracker.SERVER.onSidedThread()) {
+            new PrettyPrinter(60).add("Illegal Async Chunk Unpacking").centre().hr()
+                .addWrapped("Someone is attempting to unpack chunk scheduled updates while off the main thread, this is" +
+                    "generally unsupported and Sponge would appreciate a report about this. Please attach " +
+                    "the generated classes output as a zip file after enabling -Dmixin.debug.export=true " +
+                    "and request triage support on discord. Do NOT report as an issue on GitHub.")
+                .add()
+                .add(" %s : %s", "Chunk Pos", chunk.getPos().toString())
+                .add()
+                .add(new Exception("Async Chunk Scheduling Detected"))
+                .log(SpongeCommon.getLogger(), Level.ERROR);
+            return;
+        }
+        if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_LOADING) {
+            return;
+        }
+        try (final PhaseContext<@NonNull ?> ctx = GenerationPhase.State.CHUNK_LOADING.createPhaseContext(PhaseTracker.getInstance())
+            .source(chunk)
+            .world((ServerLevel) chunk.getLevel())
+            .chunk(chunk)) {
+            ctx.buildAndSwitch();
+            chunk.unpackTicks();
+        }
+
     }
 
     @Redirect(method = "*",
