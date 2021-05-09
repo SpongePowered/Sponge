@@ -38,13 +38,14 @@ import co.aikar.timings.sponge.SpongeTimings;
 
 import javax.annotation.Nullable;
 import net.minecraft.world.level.block.Block;
+import org.spongepowered.common.util.ReflectionUtil;
 
 @Mixin(value = Block.class)
 public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge {
 
     private final boolean impl$isVanilla = this.getClass().getName().startsWith("net.minecraft.");
-    private boolean impl$hasCollideLogic;
-    private boolean impl$hasCollideWithStateLogic;
+    private boolean impl$hasCollideLogic = ReflectionUtil.isStepOnDeclared(this.getClass());
+    private boolean impl$hasCollideWithStateLogic = ReflectionUtil.isEntityInsideDeclared(this.getClass());
     // Used to determine if this block needs to be handled in WorldServer#addBlockEvent
     private boolean impl$shouldFireBlockEvents = true;
     @Nullable private Timing impl$timing;
@@ -180,40 +181,6 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         // @reason Due to early class initialization and object instantiation, a lot of the reflection access
         // logic can be delayed until actual type registration with sponge. This will at the very least allow
         // mod type registrations to go through without getting the overall cost of reflection during object construction.
-
-        this.impl$hasCollideLogic = true;
-        this.impl$hasCollideWithStateLogic = true;
-
-        // onEntityCollidedWithBlock
-        try {
-            final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? "onEntityWalk" : "func_176199_a";
-            final Class<?>[] argTypes = {net.minecraft.world.World.class, BlockPos.class, Entity.class };
-            final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (clazz.equals(Block.class)) {
-                this.impl$hasCollideLogic = false;
-            }
-        } catch (final NoClassDefFoundError err) {
-            //noinspection EqualsBetweenInconvertibleTypes
-            this.impl$hasCollideLogic = !this.getClass().equals(Block.class);
-        } catch (final Throwable ex) {
-            // ignore
-        }
-
-        // onEntityCollision (IBlockState)
-        try {
-            final String mapping = Launcher.getInstance().isDeveloperEnvironment() ? "onEntityCollision" : "func_180634_a";
-            final Class<?>[] argTypes = {net.minecraft.world.World.class, BlockPos.class, net.minecraft.block.BlockState.class, Entity.class };
-            final Class<?> clazz = this.getClass().getMethod(mapping, argTypes).getDeclaringClass();
-            if (clazz.equals(Block.class)) {
-                this.impl$hasCollideWithStateLogic = false;
-            }
-        } catch (final NoClassDefFoundError err) {
-            //noinspection EqualsBetweenInconvertibleTypes
-            this.impl$hasCollideWithStateLogic = !this.getClass().equals(Block.class);
-        } catch (final Throwable ex) {
-            // ignore
-        }
-
 
         if (!blockTrackerModCat.isEnabled()) {
             this.impl$allowsBlockBulkCapture = false;
