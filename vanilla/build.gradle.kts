@@ -202,8 +202,8 @@ dependencies {
 
     val installer = vanillaInstallerConfig.name
     installer("com.google.code.gson:gson:2.8.0")
-    installer("org.spongepowered:configurate-hocon:4.0.0")
-    installer("org.spongepowered:configurate-core:4.0.0")
+    installer("org.spongepowered:configurate-hocon:4.1.1")
+    installer("org.spongepowered:configurate-core:4.1.1")
     installer("net.sf.jopt-simple:jopt-simple:5.0.3")
     installer("org.tinylog:tinylog-api:2.2.1")
     installer("org.tinylog:tinylog-impl:2.2.1")
@@ -241,7 +241,7 @@ dependencies {
     appLaunch("com.lmax:disruptor:3.4.2")
     appLaunch("com.zaxxer:HikariCP:2.6.3")
     appLaunch("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
-    appLaunch(platform("org.spongepowered:configurate-bom:4.0.0"))
+    appLaunch(platform("org.spongepowered:configurate-bom:4.1.1"))
     appLaunch("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }

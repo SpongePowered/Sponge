@@ -169,7 +169,7 @@ dependencies {
     applaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
     applaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
     applaunchConfig("com.google.guava:guava:$guavaVersion")
-    applaunchConfig(platform("org.spongepowered:configurate-bom:4.0.0"))
+    applaunchConfig(platform("org.spongepowered:configurate-bom:4.1.1"))
     applaunchConfig("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
