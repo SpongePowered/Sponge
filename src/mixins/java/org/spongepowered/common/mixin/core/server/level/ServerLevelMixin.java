@@ -80,7 +80,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
-import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
+import co.aikar.timings.sponge.WorldTimingsHandler;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 

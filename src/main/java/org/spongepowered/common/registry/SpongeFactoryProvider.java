@@ -108,7 +108,7 @@ import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlerFac
 import org.spongepowered.common.network.status.SpongeFavicon;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
+import co.aikar.timings.sponge.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
 import org.spongepowered.common.util.SpongeAABB;

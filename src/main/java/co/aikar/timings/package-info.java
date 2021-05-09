@@ -22,30 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.relocate.co.aikar.timings;
-
-import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
-import com.google.gson.JsonArray;
-
-class TimingHistoryEntry {
-
-    final TimingData data;
-    final TimingData[] children;
-
-    TimingHistoryEntry(TimingHandler handler) {
-        this.data = handler.record.clone();
-        this.children = new TimingData[handler.children.size()];
-        int i = 0;
-        for (TimingData child : handler.children.values()) {
-            this.children[i++] = child.clone();
-        }
-    }
-
-    JsonArray export() {
-        JsonArray result = this.data.export();
-        if (this.children.length > 0) {
-            result.add(JSONUtil.mapArray(this.children, TimingData::export));
-        }
-        return result;
-    }
-}
+@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
+package co.aikar.timings;

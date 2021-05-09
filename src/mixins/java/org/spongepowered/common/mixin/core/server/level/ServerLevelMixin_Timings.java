@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin_Timings;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingHistory;
+import co.aikar.timings.sponge.TimingHistory;
 
 import java.util.function.BooleanSupplier;
 

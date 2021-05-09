@@ -33,7 +33,7 @@ import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
+import co.aikar.timings.sponge.TimingsManager;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.Iterator;

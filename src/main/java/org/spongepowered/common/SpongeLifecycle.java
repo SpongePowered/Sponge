@@ -54,7 +54,7 @@ import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.registry.SpongeRegistries;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimingsFactory;
+import co.aikar.timings.sponge.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.plugin.PluginContainer;
 

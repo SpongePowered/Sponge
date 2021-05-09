@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.relocate.co.aikar.timings;
+package co.aikar.timings.sponge;
 
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import com.google.gson.JsonArray;
