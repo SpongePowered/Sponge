@@ -503,6 +503,27 @@
                 "id": "spongeapi",
                 "version": "8.0.0"
             }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "collidetest",
+            "name": "CollideTest",
+            "version": "1.0.0",
+            "main-class": "org.spongepowered.test.collide.CollideTest",
+            "description": "Tests map api",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
         }
     ]
 }
