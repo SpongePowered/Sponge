@@ -23,6 +23,7 @@ val mixinVersion: String by project
 val pluginSpiVersion: String by project
 val guavaVersion: String by project
 val junitVersion: String by project
+val timingsVersion: String by project
 
 val commonManifest = the<JavaPluginConvention>().manifest {
     attributes(
@@ -142,7 +143,7 @@ dependencies {
     implementation("javax.inject:javax.inject:1")
 
     // Timings
-    implementation("org.spongepowered:timings:1.0-SNAPSHOT")
+    implementation("org.spongepowered:timings:$timingsVersion")
 
     // ASM - required for generating event listeners
     implementation("org.ow2.asm:asm-util:$asmVersion")
@@ -187,6 +188,7 @@ dependencies {
     applaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
 
     mixinsConfig(sourceSets.named("main").map { it.output })
+    mixinsConfig("org.spongepowered:timings:$timingsVersion")
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
     // Tests
