@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.players;
 
+import io.netty.channel.local.LocalAddress;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
@@ -169,11 +170,16 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 }
                 return CompletableFuture.completedFuture(Optional.of(var1));
             }
+
+            if (param0 instanceof LocalAddress) { // don't bother looking up IP bans on local address
+                return CompletableFuture.completedFuture(Optional.empty());
+            }
+
             final InetAddress address;
             try {
                 address = InetAddress.getByName(NetworkUtil.getHostString(param0));
-            } catch (UnknownHostException e) {
-                return CompletableFuture.completedFuture(Optional.of(new TextComponent(e.getMessage()))); // no
+            } catch (final UnknownHostException ex) {
+                return CompletableFuture.completedFuture(Optional.of(new TextComponent(ex.getMessage()))); // no
             }
             return Sponge.server().serviceProvider().banService().banFor(address).thenCompose(ipBanOpt -> {
                 if (ipBanOpt.isPresent()) {
