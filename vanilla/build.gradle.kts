@@ -192,6 +192,7 @@ dependencies {
     val mixinVersion: String by project
     val modlauncherVersion: String by project
     val pluginSpiVersion: String by project
+    val timingsVersion: String by project
 
     api(project(":", configuration = "launch"))
     implementation(project(":", configuration = "accessors"))
@@ -259,6 +260,7 @@ dependencies {
     libraries("org.jline:jline-terminal:$jlineVersion")
     libraries("org.jline:jline-reader:$jlineVersion")
     libraries("org.jline:jline-terminal-jansi:$jlineVersion")
+    libraries("org.spongepowered:timings:$timingsVersion")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // The ModLauncher compatibility launch layer
