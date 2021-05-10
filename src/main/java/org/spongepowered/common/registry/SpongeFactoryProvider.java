@@ -56,6 +56,7 @@ import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.TypeNotFoundException;
 import org.spongepowered.api.resourcepack.ResourcePack;
+import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.state.StateMatcher;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.util.MinecraftDayTime;
@@ -110,6 +111,7 @@ import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.profile.SpongeProfilePropertyFactory;
 import co.aikar.timings.sponge.SpongeTimingsFactory;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
+import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
 import org.spongepowered.common.state.SpongeStateMatcherFactory;
 import org.spongepowered.common.util.SpongeAABB;
 import org.spongepowered.common.util.SpongeDamageSourceFactory;
@@ -235,6 +237,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(ItemStackComparators.Factory.class, new SpongeItemStackComparatorFactory())
                 .registerFactory(Favicon.Factory.class, new SpongeFavicon.FactoryImpl())
                 .registerFactory(CommandCompletion.Factory.class, new SpongeCommandCompletionFactory())
+                .registerFactory(DisplaySlot.Factory.class, new SpongeDisplaySlotFactory())
         ;
     }
 }

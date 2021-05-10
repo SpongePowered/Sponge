@@ -85,7 +85,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public void bridge$updateDisplaySlot(@Nullable final Objective objective, final DisplaySlot displaySlot) throws IllegalStateException {
-        this.bridge$updateDisplaySlot(objective, ((SpongeDisplaySlot) displaySlot).getIndex());
+        this.bridge$updateDisplaySlot(objective, ((SpongeDisplaySlot) displaySlot).index());
     }
 
     @Override
@@ -128,7 +128,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Optional<Objective> bridge$getObjective(final DisplaySlot slot) {
-        final net.minecraft.world.scores.Objective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[((SpongeDisplaySlot) slot).getIndex()];
+        final net.minecraft.world.scores.Objective objective = ((ScoreboardAccessor) this).accessor$displayObjectives()[((SpongeDisplaySlot) slot).index()];
         if (objective != null) {
             return Optional.of(((ObjectiveBridge) objective).bridge$getSpongeObjective());
         }
