@@ -304,7 +304,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         )
     )
     private void impl$onInitPlayer_BeforeSetWorld(final Connection p_72355_1_, final net.minecraft.server.level.ServerPlayer p_72355_2_, final CallbackInfo ci) {
-        if (p_72355_2_.level == null) {
+        if (!p_72355_1_.isConnected()) {
             ci.cancel();
         }
     }
