@@ -43,7 +43,7 @@ import java.util.List;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
-@Mixin(SuggestionProviders.Wrapper.class)
+@Mixin(targets = "net/minecraft/commands/synchronization/SuggestionProviders$Wrapper")
 public abstract class SuggestionProviders_WrapperMixin_API implements CommandCompletionProvider {
 
     // @formatter:off

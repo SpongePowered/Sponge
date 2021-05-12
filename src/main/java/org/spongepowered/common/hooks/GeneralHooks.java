@@ -32,7 +32,7 @@ public interface GeneralHooks {
 
     default double getEntityReachDistanceSq(ServerPlayer player, Entity targeted) {
         double d0 = 36.0d; // 6 blocks
-        if (!player.canSee(targeted)) {
+        if (!player.hasLineOfSight(targeted)) {
             d0 = 9.0D; // 3 blocks
         }
 

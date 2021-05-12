@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.tags.Tag;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
@@ -41,6 +42,8 @@ import org.spongepowered.common.util.NBTCollectors;
 
 import java.util.List;
 import java.util.Set;
+import java.util.stream.Collectors;
+
 import net.minecraft.core.Registry;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -90,14 +93,14 @@ public final class ItemStackData {
                         .get(h -> {
                             final Item item = h.getItem();
                             if (item instanceof DiggerItemAccessor && !(item instanceof PickaxeItem)) {
-                                final Set<Block> blocks = ((DiggerItemAccessor) item).accessor$blocks();
-                                return ImmutableSet.copyOf((Set<BlockType>) (Object) blocks);
+                                final Tag<Block> blocks = ((DiggerItemAccessor) item).accessor$blocks();
+                                return Set.copyOf((List<BlockType>) (Object) blocks.getValues());
                             }
 
                             final Set<BlockType> blockTypes = Registry.BLOCK.stream()
                                     .filter(b -> item.isCorrectToolForDrops(b.defaultBlockState()))
                                     .map(BlockType.class::cast)
-                                    .collect(ImmutableSet.toImmutableSet());
+                                    .collect(Collectors.toUnmodifiableSet());
                             return blockTypes.isEmpty() ? null : blockTypes;
                         })
                     .create(Keys.CONTAINER_ITEM)
