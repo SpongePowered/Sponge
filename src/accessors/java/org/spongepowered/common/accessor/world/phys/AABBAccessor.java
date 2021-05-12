@@ -26,20 +26,27 @@ package org.spongepowered.common.accessor.world.phys;
 
 import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(AABB.class)
 public interface AABBAccessor {
 
+    @Mutable
     @Accessor("minX") void accessor$setMinX(double minX);
 
+    @Mutable
     @Accessor("minY") void accessor$setMinY(double minY);
 
+    @Mutable
     @Accessor("minZ") void accessor$setMinZ(double minZ);
 
+    @Mutable
     @Accessor("maxX") void accessor$setMaxX(double maxX);
 
+    @Mutable
     @Accessor("maxY") void accessor$setMaxY(double maxY);
 
+    @Mutable
     @Accessor("maxZ") void accessor$setMaxZ(double maxZ);
 }

@@ -102,7 +102,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         SpongeCommon.getGame().asyncScheduler().close();
     }
 
-    @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryReadOps;"))
+    @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryReadOps;"))
     private static <T> RegistryReadOps<T> impl$setWorldSettingsAdapter(final DynamicOps<T> ops, final ResourceManager resourceManager, final RegistryAccess registryAccess) {
         final RegistryReadOps<T> worldSettingsAdapter = RegistryReadOps.create(ops, resourceManager, registryAccess);
         BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);

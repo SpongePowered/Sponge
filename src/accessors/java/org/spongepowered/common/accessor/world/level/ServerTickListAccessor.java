@@ -40,7 +40,7 @@ public interface ServerTickListAccessor<T> {
 
     @Accessor("alreadyTicked") List<TickNextTickData<T>> accessor$alreadyTicked();
 
-    @Accessor("tickNextTickList") TreeSet<TickNextTickData<T>> accessor$tickNextTickList();
+    @Accessor("tickNextTickList") Set<TickNextTickData<T>> accessor$tickNextTickList();
 
     @Accessor("tickNextTickSet") Set<TickNextTickData<T>> accessor$tickNextTickSet();
 
