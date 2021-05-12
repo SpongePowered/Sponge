@@ -22,22 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server.players;
+package co.aikar.timings.sponge;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
+import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
+import com.google.gson.JsonArray;
 
-import java.net.SocketAddress;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+class TimingHistoryEntry {
 
-public interface PlayerListBridge {
+    final TimingData data;
+    final TimingData[] children;
 
-    void bridge$setNewDestinationDimension(ResourceKey<Level> dimension);
+    TimingHistoryEntry(TimingHandler handler) {
+        this.data = handler.record.clone();
+        this.children = new TimingData[handler.children.size()];
+        int i = 0;
+        for (TimingData child : handler.children.values()) {
+            this.children[i++] = child.clone();
+        }
+    }
 
-    void bridge$setOriginalDestinationDimension(ResourceKey<Level> dimension);
-
-    CompletableFuture<Optional<Component>> bridge$canPlayerLogin(SocketAddress param0, GameProfile param1);
+    JsonArray export() {
+        JsonArray result = this.data.export();
+        if (this.children.length > 0) {
+            result.add(JSONUtil.mapArray(this.children, TimingData::export));
+        }
+        return result;
+    }
 }

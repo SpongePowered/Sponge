@@ -45,4 +45,8 @@ public interface ChunkBiomeContainerAccessor {
 
     @Accessor("biomes") Biome[] accessor$biomes();
 
+    @Accessor("quartMinY") int accessor$quartMinY();
+
+    @Accessor("quartHeight") int accessor$quartHeight();
+
 }

@@ -23,6 +23,7 @@ val mixinVersion: String by project
 val pluginSpiVersion: String by project
 val guavaVersion: String by project
 val junitVersion: String by project
+val timingsVersion: String by project
 
 val commonManifest = the<JavaPluginConvention>().manifest {
     attributes(
@@ -141,6 +142,9 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.20.0")
     implementation("javax.inject:javax.inject:1")
 
+    // Timings
+    implementation("org.spongepowered:timings:$timingsVersion")
+
     // ASM - required for generating event listeners
     implementation("org.ow2.asm:asm-util:$asmVersion")
     implementation("org.ow2.asm:asm-tree:$asmVersion")
@@ -169,7 +173,7 @@ dependencies {
     applaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
     applaunchConfig("org.apache.logging.log4j:log4j-api:2.11.2")
     applaunchConfig("com.google.guava:guava:$guavaVersion")
-    applaunchConfig(platform("org.spongepowered:configurate-bom:4.0.0"))
+    applaunchConfig(platform("org.spongepowered:configurate-bom:4.1.1"))
     applaunchConfig("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
     }
@@ -184,6 +188,7 @@ dependencies {
     applaunchConfig("org.apache.logging.log4j:log4j-core:2.11.2")
 
     mixinsConfig(sourceSets.named("main").map { it.output })
+    mixinsConfig("org.spongepowered:timings:$timingsVersion")
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
     // Tests

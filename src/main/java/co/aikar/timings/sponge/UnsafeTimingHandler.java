@@ -22,22 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server.players;
+package co.aikar.timings.sponge;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
+import org.spongepowered.common.SpongeCommon;
 
-import java.net.SocketAddress;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+class UnsafeTimingHandler extends TimingHandler {
 
-public interface PlayerListBridge {
+    UnsafeTimingHandler(TimingIdentifier id) {
+        super(id);
+    }
 
-    void bridge$setNewDestinationDimension(ResourceKey<Level> dimension);
+    private static void checkThread() {
+        if (!SpongeCommon.getServer().isSameThread()) {
+            throw new IllegalStateException("Calling Timings from Async Operation");
+        }
+    }
 
-    void bridge$setOriginalDestinationDimension(ResourceKey<Level> dimension);
+    @Override
+    public TimingHandler startTiming() {
+        UnsafeTimingHandler.checkThread();
+        super.startTiming();
+        return this;
+    }
 
-    CompletableFuture<Optional<Component>> bridge$canPlayerLogin(SocketAddress param0, GameProfile param1);
+    @Override
+    public void stopTiming() {
+        UnsafeTimingHandler.checkThread();
+        super.stopTiming();
+    }
 }

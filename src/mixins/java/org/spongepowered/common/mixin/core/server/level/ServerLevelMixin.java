@@ -80,7 +80,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
-import org.spongepowered.common.relocate.co.aikar.timings.WorldTimingsHandler;
+import co.aikar.timings.sponge.WorldTimingsHandler;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -123,7 +123,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     }
 
     @Redirect(method = "getSeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/WorldData;worldGenSettings()Lnet/minecraft/world/level/levelgen/WorldGenSettings;"))
-    public WorldGenSettings impl$onGetSeed(WorldData iServerConfiguration) {
+    public WorldGenSettings impl$onGetSeed(final WorldData iServerConfiguration) {
         return ((PrimaryLevelData) this.serverLevelData).worldGenSettings();
     }
 

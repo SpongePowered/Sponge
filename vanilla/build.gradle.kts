@@ -186,6 +186,7 @@ dependencies {
     val mixinVersion: String by project
     val modlauncherVersion: String by project
     val pluginSpiVersion: String by project
+    val timingsVersion: String by project
 
     api(project(":", configuration = "launch"))
     implementation(project(":", configuration = "accessors"))
@@ -196,8 +197,8 @@ dependencies {
 
     val installer = vanillaInstallerConfig.name
     installer("com.google.code.gson:gson:2.8.0")
-    installer("org.spongepowered:configurate-hocon:4.0.0")
-    installer("org.spongepowered:configurate-core:4.0.0")
+    installer("org.spongepowered:configurate-hocon:4.1.1")
+    installer("org.spongepowered:configurate-core:4.1.1")
     installer("net.sf.jopt-simple:jopt-simple:5.0.3")
     installer("org.tinylog:tinylog-api:2.2.1")
     installer("org.tinylog:tinylog-impl:2.2.1")
@@ -235,7 +236,7 @@ dependencies {
     appLaunch("com.lmax:disruptor:3.4.2")
     appLaunch("com.zaxxer:HikariCP:2.6.3")
     appLaunch("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
-    appLaunch(platform("org.spongepowered:configurate-bom:4.0.0"))
+    appLaunch(platform("org.spongepowered:configurate-bom:4.1.1"))
     appLaunch("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
@@ -249,14 +250,11 @@ dependencies {
     }
 
     val libraries = vanillaLibrariesConfig.name
-    libraries("net.minecrell:terminalconsoleappender:1.2.0")
+    libraries("net.minecrell:terminalconsoleappender:1.3.0-SNAPSHOT")
     libraries("org.jline:jline-terminal:$jlineVersion")
     libraries("org.jline:jline-reader:$jlineVersion")
-    libraries("org.jline:jline-terminal-jansi:$jlineVersion") {
-        exclude("org.fusesource.jansi") // Use our own JAnsi
-    }
-    // A newer version is required to make log4j happy
-    libraries("org.fusesource.jansi:jansi:2.3.1")
+    libraries("org.jline:jline-terminal-jansi:$jlineVersion")
+    libraries("org.spongepowered:timings:$timingsVersion")
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // The ModLauncher compatibility launch layer

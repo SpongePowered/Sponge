@@ -151,13 +151,7 @@ public final class SpongeConfigs {
         Files.createDirectories(path.getParent());
 
         return HoconConfigurationLoader.builder()
-            .source(() -> Files.newBufferedReader(path, StandardCharsets.UTF_8))
-            .sink(() -> Files.newBufferedWriter(path,
-                                                StandardCharsets.UTF_8,
-                                                StandardOpenOption.CREATE,
-                                                StandardOpenOption.TRUNCATE_EXISTING,
-                                                StandardOpenOption.WRITE,
-                                                StandardOpenOption.DSYNC))
+            .path(path)
             .defaultOptions(options)
             .build();
     }
@@ -200,21 +194,12 @@ public final class SpongeConfigs {
             NodePath.path("service-registration"),
             NodePath.path("debug"),
             NodePath.path("timings"))
-        .map(SpongeConfigs::applySpongePrefix)
+        .map(SpongeConfigs.PATH_PREFIX::plus)
         .collect(ImmutableSet.toImmutableSet());
 
     // Paths moved to metrics.conf
     private static final Set<NodePath> MIGRATE_METRICS_PATHS = ImmutableSet.of(
             NodePath.path("sponge", "metrics"));
-
-    // TODO(zml): Replace with NodePath.plus when updating to Configurate 4.1.0
-    private static NodePath applySpongePrefix(final NodePath input) {
-        final Object[] src = input.array();
-        final Object[] target = new Object[input.size() + 1];
-        target[0] = "sponge";
-        System.arraycopy(src, 0, target, 1, src.length);
-        return NodePath.of(target);
-    }
 
     private static void splitFiles() {
         final Path commonFile = SpongeConfigs.getDirectory().resolve(CommonConfig.FILE_NAME);

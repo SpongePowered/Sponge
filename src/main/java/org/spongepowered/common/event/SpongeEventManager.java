@@ -57,7 +57,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import org.spongepowered.common.relocate.co.aikar.timings.TimingsManager;
+import co.aikar.timings.sponge.TimingsManager;
 import org.spongepowered.common.util.EngineUtil;
 import org.spongepowered.common.util.TypeTokenUtil;
 import org.spongepowered.configurate.util.Types;

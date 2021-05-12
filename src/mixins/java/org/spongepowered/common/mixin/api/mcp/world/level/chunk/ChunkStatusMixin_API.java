@@ -22,22 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server.players;
+package org.spongepowered.common.mixin.api.mcp.world.level.chunk;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import org.spongepowered.api.world.chunk.ChunkState;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.net.SocketAddress;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+@Mixin(ChunkStatus.class)
+public abstract class ChunkStatusMixin_API implements ChunkState {
 
-public interface PlayerListBridge {
+    @Shadow public abstract boolean isOrAfter(ChunkStatus param0);
 
-    void bridge$setNewDestinationDimension(ResourceKey<Level> dimension);
+    @Override
+    public boolean isAfter(final ChunkState state) {
+        return !this.equals(state) && this.isOrAfter((ChunkStatus) state);
+    }
 
-    void bridge$setOriginalDestinationDimension(ResourceKey<Level> dimension);
-
-    CompletableFuture<Optional<Component>> bridge$canPlayerLogin(SocketAddress param0, GameProfile param1);
 }

@@ -42,6 +42,10 @@ public interface ConnectionBridge {
 
     void bridge$setVirtualHost(String host, int port);
 
+    net.minecraft.network.chat.Component bridge$getKickReason();
+
+    void bridge$setKickReason(net.minecraft.network.chat.Component component);
+
     MinecraftVersion bridge$getVersion();
 
     void bridge$setVersion(int version);

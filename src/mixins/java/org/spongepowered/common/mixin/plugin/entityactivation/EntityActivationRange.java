@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.plugin.entityactivation;
 
 import com.google.common.collect.ImmutableMap;
-import com.google.common.collect.Maps;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
@@ -44,6 +43,7 @@ import net.minecraft.world.entity.boss.EnderDragonPart;
 import net.minecraft.world.entity.boss.enderdragon.EndCrystal;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
+import net.minecraft.world.entity.decoration.Painting;
 import net.minecraft.world.entity.item.FallingBlockEntity;
 import net.minecraft.world.entity.item.PrimedTnt;
 import net.minecraft.world.entity.monster.Enemy;
@@ -75,9 +75,10 @@ import org.spongepowered.common.config.inheritable.GlobalConfig;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
 
+import java.util.HashMap;
 import java.util.Map;
 
-public class EntityActivationRange {
+public final class EntityActivationRange {
 
     private static final ImmutableMap<Byte, String> activationTypeMappings = new ImmutableMap.Builder<Byte, String>()
             .put((byte) 1, "monster")
@@ -94,7 +95,7 @@ public class EntityActivationRange {
     static AABB aquaticBB = new AABB(0, 0, 0, 0, 0, 0);
     static AABB ambientBB = new AABB(0, 0, 0, 0, 0, 0);
     static AABB tileEntityBB = new AABB(0, 0, 0, 0, 0, 0);
-    static Map<Byte, Integer> maxActivationRanges = Maps.newHashMap();
+    static Map<Byte, Integer> maxActivationRanges = new HashMap<>();
 
     /**
      * Initializes an entities type on construction to specify what group this
@@ -137,6 +138,7 @@ public class EntityActivationRange {
                 || entity instanceof AbstractHurtingProjectile
                 || entity instanceof LightningBolt
                 || entity instanceof PrimedTnt
+                || entity instanceof Painting
                 || entity instanceof EndCrystal
                 || entity instanceof FireworkRocketEntity
                 || entity instanceof FallingBlockEntity) // Always tick falling blocks
@@ -195,7 +197,7 @@ public class EntityActivationRange {
      * @param x The x value to expand by
      * @param y The y value to expand by
      * @param z The z value to expand by
-     * @return
+     * @return An AABB
      */
     public static AABB growBb(final AABB target, final AABB source, final int x, final int y, final int z) {
         ((AABBAccessor) target).accessor$setMinX(source.minX - x);
@@ -218,7 +220,7 @@ public class EntityActivationRange {
             return;
         }
 
-        for (ServerPlayer player : world.players()) {
+        for (final ServerPlayer player : world.players()) {
             int maxRange = 0;
             for (final Integer range : EntityActivationRange.maxActivationRanges.values()) {
                 if (range > maxRange) {
@@ -238,7 +240,7 @@ public class EntityActivationRange {
 
             for (int i1 = i; i1 <= j; ++i1) {
                 for (int j1 = k; j1 <= l; ++j1) {
-                    final LevelChunk chunk = world.getChunkSource().getChunk(i1, j1, false);
+                    final LevelChunk chunk = world.getChunkSource().getChunkNow(i1, j1);
                     if (chunk != null) {
                         EntityActivationRange.activateChunkEntities(player, chunk);
                     }
@@ -253,7 +255,6 @@ public class EntityActivationRange {
      * @param chunk Chunk to check for activation
      */
     private static void activateChunkEntities(final ServerPlayer player, final LevelChunk chunk) {
-
         //TODO find a better way
         for (Entity entity : player.getLevel().getAllEntities()) {
             if (!entity.chunkPosition().equals(chunk.getPos())) {

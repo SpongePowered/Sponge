@@ -27,10 +27,15 @@ package org.spongepowered.common.mixin.core.server.network;
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
+import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
+import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
+import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -38,6 +43,7 @@ import org.spongepowered.api.event.network.ServerSideConnectionEvent;
 import org.spongepowered.api.network.ServerSideConnection;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -45,8 +51,11 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
+import org.spongepowered.common.bridge.server.players.PlayerListBridge;
+import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 
 import java.net.SocketAddress;
 
@@ -55,21 +64,65 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
 
     @Shadow @Final public Connection connection;
     @Shadow private com.mojang.authlib.GameProfile gameProfile;
+    @Shadow @Final private MinecraftServer server;
+    @Shadow private ServerLoginPacketListenerImpl.State state;
+    @Shadow private ServerPlayer delayedAcceptPlayer;
 
     @Shadow protected abstract com.mojang.authlib.GameProfile shadow$createFakeProfile(com.mojang.authlib.GameProfile profile);
     @Shadow public abstract void shadow$disconnect(net.minecraft.network.chat.Component reason);
+
+    private boolean impl$accepted = false;
 
     @Override
     public Connection bridge$getConnection() {
         return this.connection;
     }
 
-    @Redirect(method = "handleAcceptedLogin()V",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/server/players/PlayerList;canPlayerLogin(Ljava/net/SocketAddress;Lcom/mojang/authlib/GameProfile;)Lnet/minecraft/network/chat/Component;"))
-    private net.minecraft.network.chat.Component impl$ignoreConnections(final PlayerList confMgr, final SocketAddress address, final com.mojang.authlib.GameProfile profile) {
-        return null; // We handle disconnecting
+    /**
+     * @author morph - April 27th, 2021
+     *
+     * @reason support async ban/whitelist service
+     */
+    @Overwrite
+    public void handleAcceptedLogin() {
+        if (!this.gameProfile.isComplete()) {
+            this.gameProfile = this.shadow$createFakeProfile(this.gameProfile);
+        }
+
+        // Sponge start - avoid #tick calling handleAcceptedLogin more than once.
+        if (this.impl$accepted) {
+            return;
+        }
+        this.impl$accepted = true;
+        // Sponge end
+
+        // Sponge start - completable future
+        ((PlayerListBridge) this.server.getPlayerList()).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.gameProfile).thenAcceptAsync(componentOpt -> {
+        // Sponge end
+            // Sponge start - we handle this later
+            if (componentOpt.isPresent()) {
+                // TODO add should fire logic to disconnect the player and return early
+                ((ConnectionBridge) this.connection).bridge$setKickReason(componentOpt.get());
+            }
+            // Sponge end
+            this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
+            if (this.server.getCompressionThreshold() >= 0 && !this.connection.isMemoryConnection()) {
+                this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), (param0) -> this.connection.setupCompression(this.server.getCompressionThreshold()));
+            }
+
+            this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
+            ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
+            if (var1 != null) {
+                this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
+                this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile);
+            } else {
+                // Sponge start - Also send the channel registrations using the minecraft channel, for compatibility
+                final ServerSideConnection connection = (ServerSideConnection) this;
+                ((SpongeChannelRegistry) Sponge.channelRegistry()).sendChannelRegistrations(connection);
+                // Sponge end
+                this.server.getPlayerList().placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
+            }
+        }, SpongeCommon.getServer());
     }
 
     private void impl$disconnectClient(final Component disconnectMessage) {

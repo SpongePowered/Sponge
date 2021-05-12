@@ -30,7 +30,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scheduler.ScheduledTask;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.common.relocate.co.aikar.timings.SpongeTimings;
+import co.aikar.timings.sponge.SpongeTimings;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.time.Duration;

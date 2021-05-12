@@ -22,32 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.relocate.co.aikar.timings;
+package org.spongepowered.common.mixin.api.mcp.world.level.chunk;
 
-import org.spongepowered.common.SpongeCommon;
+import net.minecraft.world.level.chunk.ChunkBiomeContainer;
+import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.ProtoChunk;
+import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.generation.PrimitiveChunk;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.ChunkUtil;
+import org.spongepowered.common.util.SpongeTicks;
 
-class UnsafeTimingHandler extends TimingHandler {
+@Mixin(ProtoChunk.class)
+public abstract class ProtoChunkMixin_API implements PrimitiveChunk {
 
-    UnsafeTimingHandler(TimingIdentifier id) {
-        super(id);
-    }
+    // @formatter:off
+    @Shadow private ChunkBiomeContainer biomes;
+    @Shadow private long inhabitedTime;
+    @Shadow private volatile ChunkStatus status;
+    // @formatter:on
 
-    private static void checkThread() {
-        if (!SpongeCommon.getServer().isSameThread()) {
-            throw new IllegalStateException("Calling Timings from Async Operation");
-        }
+    @Override
+    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
+        return ChunkUtil.setBiome(this.biomes, x, y, z, biome);
     }
 
     @Override
-    public TimingHandler startTiming() {
-        UnsafeTimingHandler.checkThread();
-        super.startTiming();
-        return this;
+    public Ticks inhabitedTime() {
+        return new SpongeTicks(this.inhabitedTime);
     }
 
     @Override
-    public void stopTiming() {
-        UnsafeTimingHandler.checkThread();
-        super.stopTiming();
+    public void setInhabitedTime(final Ticks newInhabitedTime) {
+        this.inhabitedTime = newInhabitedTime.ticks();
     }
+
+    @Override
+    public boolean isEmpty() {
+        return this.status == ChunkStatus.EMPTY;
+    }
+
 }

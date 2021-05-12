@@ -22,22 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server.players;
+package org.spongepowered.common.mixin.api.mcp.world.level.chunk;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
+import net.minecraft.world.level.chunk.EmptyLevelChunk;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.asm.mixin.Mixin;
 
-import java.net.SocketAddress;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+@Mixin(EmptyLevelChunk.class)
+public abstract class EmptyLevelChunkMixin_API extends LevelChunkMixin_API {
 
-public interface PlayerListBridge {
+    @Override
+    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
+        return false;
+    }
 
-    void bridge$setNewDestinationDimension(ResourceKey<Level> dimension);
-
-    void bridge$setOriginalDestinationDimension(ResourceKey<Level> dimension);
-
-    CompletableFuture<Optional<Component>> bridge$canPlayerLogin(SocketAddress param0, GameProfile param1);
 }

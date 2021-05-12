@@ -22,22 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.server.players;
+package org.spongepowered.common.mixin.api.mcp.world.level.levelgen;
 
-import com.mojang.authlib.GameProfile;
-import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.util.BlockReaderAwareMatcher;
+import org.spongepowered.api.world.HeightType;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-import java.net.SocketAddress;
-import java.util.Optional;
-import java.util.concurrent.CompletableFuture;
+import java.util.function.Predicate;
+import net.minecraft.world.level.levelgen.Heightmap;
 
-public interface PlayerListBridge {
+@Mixin(value = Heightmap.Types.class)
+public abstract class Heightmap_TypeMixin_API implements HeightType {
 
-    void bridge$setNewDestinationDimension(ResourceKey<Level> dimension);
+    // @formatter:off
+    @Shadow @Final private Predicate<net.minecraft.world.level.block.state.BlockState> isOpaque;
+    // @formatter:on
 
-    void bridge$setOriginalDestinationDimension(ResourceKey<Level> dimension);
+    @Override
+    @NonNull
+    public BlockReaderAwareMatcher<BlockState> matcher() {
+        return (state, volume, position) -> this.isOpaque.test((net.minecraft.world.level.block.state.BlockState) state);
+    }
 
-    CompletableFuture<Optional<Component>> bridge$canPlayerLogin(SocketAddress param0, GameProfile param1);
 }
