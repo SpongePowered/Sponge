@@ -24,13 +24,21 @@
  */
 package org.spongepowered.common.mixin.optimization.mcp.world.level.saveddata.maps;
 
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.optimization.OptimizedMapInfoBridge;
 
 @Mixin(MapItemSavedData.HoldingPlayer.class)
 public abstract class MapItemSavedData_HoldingPlayerMixin_Optimization_Map implements OptimizedMapInfoBridge {
 
+    @Shadow private int tick;
+    @Shadow @Final public Player player;
     private boolean mapOptimization$valid;
 
     @Override
@@ -43,4 +51,12 @@ public abstract class MapItemSavedData_HoldingPlayerMixin_Optimization_Map imple
         return this.mapOptimization$valid;
     }
 
+    // Randomise tick offset.
+    // Normally minecraft gets these distributed by when they are loaded in,
+    // but in sponge they are all ticked at once due to the optimisation. Giving
+    // this a random offset stops client lag. Also randomised in OptimizedMapDataBridge#mapOptimizationBridge$tickMap()
+    @Inject(method = "<init>", at = @At("RETURN"))
+    public void randomiseTick(MapItemSavedData outer, Player player, CallbackInfo ci) {
+        this.tick = this.player.level.random.nextInt(5);
+    }
 }

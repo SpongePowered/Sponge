@@ -22,44 +22,46 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.optimization.mcp.server;
+package org.spongepowered.common.mixin.optimization.mcp.server;
 
 import net.minecraft.server.MinecraftServer;
-import net.minecraft.world.storage.MapData;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.world.level.Level;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
+import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
+import org.spongepowered.common.map.SpongeMapStorage;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.Collection;
+import java.util.stream.Collectors;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Optimization_Map {
+public class MinecraftServerMixin_MapOptimisation {
 
     // Sponge re-uses the same MapStorage for all worlds, so we only
     // need to tick it once per server tick
-    @Inject(method = "tick", at = @At(value = "RETURN"))
+    @Inject(method = "tickServer", at = @At(value = "RETURN"))
     private void mapOptimization$onEndTickMapOptimization(CallbackInfo ci) {
 
-        final List<WorldSavedData> data;
+        /*final List<SavedData> data;
 
         // Mods, such as TwilightForest, may add themselves to this list when ticking which will cause a CME.
+        // TODO: Review for the TwilightForest case when SpongeForge begins.
         if (!SpongeImplHooks.isVanilla()) {
             data = new ArrayList<>(
-                ((MapStorageAccessor) (SpongeCommon.getWorldManager().getDefaultWorld().getMapStorage())).accessor$getLoadedDataList());
+                    ((MapStorageAccessor) (Sponge.server().worldManager().defaultWorld())).getLoadedDataList());
         }
         else {
-            data = ((MapStorageAccessor) (SpongeCommon.getWorldManager().getDefaultWorld().getMapStorage())).accessor$getLoadedDataList();
-        }
+            data = ((MapStorageAccessor) (WorldManager.getWorldByDimensionId(0).orElse(null).getMapStorage())).getLoadedDataList();
+        }*/
 
-        data
-            .stream()
-            .filter(wsd -> wsd instanceof MapData)
-            .forEach(wsd -> ((OptimizedMapDataBridge) wsd).mapOptimizationBridge$tickMap());
+        final Collection<MapInfo> data = ((SpongeMapStorage) Sponge.server().mapStorage()).getLoadedMaps();
+
+        data.forEach(wsd -> ((OptimizedMapDataBridge) wsd).mapOptimizationBridge$tickMap());
     }
 }

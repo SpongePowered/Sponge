@@ -142,8 +142,8 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
             SpongeCommon.getLogger().error("Map id could not be got from map name, (" + mapname + ")", e);
         }
         final SpongeMapStorage mapStorage = (SpongeMapStorage) Sponge.server().mapStorage();
-        mapStorage.addMapInfo((MapInfo) this);
         this.impl$uuid = mapStorage.requestUUID(this.impl$mapId);
+        mapStorage.addMapInfo((MapInfo) this);
     }
 
     @Override 

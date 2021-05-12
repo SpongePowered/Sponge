@@ -22,24 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.optimization.mcp.world.storage;
+package org.spongepowered.common.mixin.optimization.mcp.world.level.saveddata.maps;
 
-import net.minecraft.entity.item.ItemFrameEntity;
-import net.minecraft.entity.player.PlayerEntity;
-import net.minecraft.entity.player.ServerPlayerEntity;
-import net.minecraft.item.ItemStack;
-import net.minecraft.item.Items;
-import net.minecraft.nbt.CompoundNBT;
-import net.minecraft.nbt.ListNBT;
-import net.minecraft.network.IPacket;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
-import net.minecraft.world.storage.MapData;
-import net.minecraft.world.storage.MapDecoration;
-import net.minecraft.world.storage.WorldSavedData;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.saveddata.SavedData;
+import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import org.jetbrains.annotations.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -50,12 +54,10 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 import org.spongepowered.common.bridge.optimization.OptimizedMapInfoBridge;
 
 import java.lang.reflect.Constructor;
-import java.lang.reflect.Field;
 import java.util.ArrayList;
 import java.util.HashSet;
 import java.util.Iterator;
@@ -63,62 +65,66 @@ import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Set;
-import java.util.UUID;
 
-@Mixin(MapData.class)
-public abstract class MapDataMixin_Optimization_Map extends WorldSavedData implements OptimizedMapDataBridge {
+@Mixin(MapItemSavedData.class)
+public abstract class MapItemSavedDataOptimisation_Map extends SavedData implements OptimizedMapDataBridge {
 
-
-    public MapDataMixin_Optimization_Map(final String name) {
+    public MapItemSavedDataOptimisation_Map(String name) {
         super(name);
     }
 
-    @Shadow @Final @Mutable private Map<PlayerEntity, MapData.MapInfo> playersHashMap;
-    @Shadow public Map<String, MapDecoration> mapDecorations;
-    @Shadow public List<MapData.MapInfo> playersArrayList;
+    @Shadow
+    @Final
+    @Mutable
+    private Map<Player, MapItemSavedData.HoldingPlayer> carriedByPlayers;
+    @Final
+    @Shadow public Map<String, MapDecoration> decorations;
+    @Final
+    @Shadow public List<MapItemSavedData.HoldingPlayer> carriedBy;
 
     @Shadow public boolean trackingPosition;
 
-
-    @Shadow protected abstract void updateDecorations(MapDecoration.Type type, World worldIn, String decorationName, double worldX, double worldZ,
-            double rotationIn);
-
     @Shadow public byte scale;
-    @Shadow public int xCenter;
-    @Shadow public int zCenter;
+    @Shadow public int x;
+    @Shadow public int z;
     @Shadow public boolean unlimitedTracking;
 
-    private Set<UUID> mapOptimizationImpl$activeWorlds = new HashSet<>();
+    @Shadow public ResourceKey<Level> dimension;
+
+    @Shadow protected abstract void addDecoration(MapDecoration.Type var1, @Nullable LevelAccessor var2, String var3, double var4, double var6, double var8, @Nullable Component var10);
+
+    private Set<org.spongepowered.api.ResourceKey> mapOptimizationImpl$activeWorlds = new HashSet<>();
     // Used
-    private ItemStack mapOptimizationImpl$dummyItemStack = new ItemStack(Items.FILLED_MAP, 1, this.mapOptimizationImpl$getMapId());
+    private ItemStack mapOptimizationImpl$dummyItemStack;
 
-    private static Constructor<MapData.MapInfo> mapOptimizationImpl$mapInfoConstructor;
-    // Forge changes the type of this field from 'byte' to 'integer'
-    // To support both SpongeVanilla and SpongeForge, we use reflection to access it
-    private static Field mapOptimizationImpl$dimensionField;
+    // Randomise tick offset. (Set in <init> inject)
+    // Normally minecraft gets these distributed by when they are loaded in,
+    // but in sponge they are all ticked at once due to the optimisation. Giving
+    // this a random offset stops client lag. Also randomised in MapItemSavedData_HoldingPlayerMixin_Optimization_Map
+    private int randomTickOffset;
 
-
+    private static Constructor<MapItemSavedData.HoldingPlayer> mapOptimizationImpl$mapInfoConstructor;
 
     static {
         try {
-            mapOptimizationImpl$mapInfoConstructor = MapData.MapInfo.class.getDeclaredConstructor(MapData.class, PlayerEntity.class);
-            if (SpongeImplHooks.isDeobfuscatedEnvironment()) {
-                mapOptimizationImpl$dimensionField = MapData.class.getDeclaredField("dimension");
-            } else {
-                mapOptimizationImpl$dimensionField = MapData.class.getDeclaredField("field_76200_c");
-            }
+            mapOptimizationImpl$mapInfoConstructor = MapItemSavedData.HoldingPlayer.class.getDeclaredConstructor(MapItemSavedData.class, Player.class);
         } catch (final Exception e) {
             e.printStackTrace();
         }
     }
 
     private Integer mapOptimizationImpl$getMapId() {
-        return Integer.valueOf(this.name.split("map_")[1]);
+        return Integer.valueOf(this.getId().split("map_")[1]);
     }
 
     @Inject(method = "<init>", at = @At(value = "RETURN"))
     private void mapOptimization$initPlayerHashmap(final CallbackInfo ci) {
-        this.playersHashMap = new LinkedHashMap<>();
+        this.carriedByPlayers = new LinkedHashMap<>();
+        this.randomTickOffset = SpongeCommon.getServer().getLevel(Level.OVERWORLD).random.nextInt(10);
+        this.mapOptimizationImpl$dummyItemStack = new ItemStack(Items.FILLED_MAP, 1);
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("map", this.mapOptimizationImpl$getMapId());
+        this.mapOptimizationImpl$dummyItemStack.setTag(tag);
     }
 
     /**
@@ -128,7 +134,7 @@ public abstract class MapDataMixin_Optimization_Map extends WorldSavedData imple
      * @author Aaron1011 - August 8th, 2018
      */
     @Overwrite
-    public void updateVisiblePlayers(final PlayerEntity player, final ItemStack mapStack) {
+    public void tickCarriedBy(final Player player, final ItemStack mapStack) {
     }
 
     /**
@@ -162,25 +168,25 @@ public abstract class MapDataMixin_Optimization_Map extends WorldSavedData imple
      **/
     @Override
     public void mapOptimizationBridge$tickMap() {
-        final List<OptimizedMapInfoBridge> mapInfosToUpdate = new ArrayList<>(this.playersHashMap.size());
+        final List<OptimizedMapInfoBridge> mapInfosToUpdate = new ArrayList<>(this.carriedByPlayers.size());
         try {
-            final Iterator<Map.Entry<PlayerEntity, MapData.MapInfo>> it = this.playersHashMap.entrySet().iterator();
+            final Iterator<Map.Entry<Player, MapItemSavedData.HoldingPlayer>> it = this.carriedByPlayers.entrySet().iterator();
             while (it.hasNext()) {
-                final Map.Entry<PlayerEntity, MapData.MapInfo> entry = it.next();
-                final PlayerEntity player = entry.getKey();
-                final MapData.MapInfo mapInfo = entry.getValue();
-                final OptimizedMapInfoBridge mixinMapInfo = (OptimizedMapInfoBridge) mapInfo;
-                if (player.removed) {
+                final Map.Entry<Player, MapItemSavedData.HoldingPlayer> entry = it.next();
+                final Player player = entry.getKey();
+                final MapItemSavedData.HoldingPlayer holdingPlayer = entry.getValue();
+                final OptimizedMapInfoBridge mixinMapInfo = (OptimizedMapInfoBridge) holdingPlayer;
+                if (player.isDeadOrDying()) {
                     it.remove();
                     continue;
                 }
 
                 if (!mixinMapInfo.mapOptimizationBridge$isValid()) {
-                    this.mapDecorations.remove(player.getName());
+                    this.decorations.remove(player.getName());
                 } else {
-                    if (this.trackingPosition && mapOptimizationImpl$dimensionField.get(this).equals(player.dimension)) {
-                        this.updateDecorations(MapDecoration.Type.PLAYER, player.world, player.getName(), player.posX, player.posZ,
-                                (double) player.rotationYaw);
+                    if (this.trackingPosition && this.dimension.equals(player.level.dimension())) {
+                        this.addDecoration(MapDecoration.Type.PLAYER, player.level, player.getName().getString(), player.getX(), player.getZ(),
+                                (double) player.yHeadRot, null);
                     }
                     // We invalidate the player's map info every tick.
                     // If the map item is still in the player's hand, the MapInfo
@@ -207,7 +213,7 @@ public abstract class MapDataMixin_Optimization_Map extends WorldSavedData imple
     // In EntityPlayerMP#onUpdateEntity, players have map data packets
     // sent to them for each map in their inventory.
     // In this method, we send map data packets to players in the same world
-    // as an ItemFrame containing a map. In Vanilla, this is done in EntityTrackerEntry,
+    // as an ItemFrame containing a map. In Vanilla, this is done in ServerEntity,
     // for every single ItemFrame in the game. This is completely unecessary - we only
     // need to send update packets once per player per unique MapData.
 
@@ -215,32 +221,32 @@ public abstract class MapDataMixin_Optimization_Map extends WorldSavedData imple
     // to players who already have the same map in their inventory
     private void mapOptimizationImpl$updatePlayersInWorld() {
         // Copied from EntityTrackerEntry#updatePlayerList
-        if (Sponge.getServer().getRunningTimeTicks() % 10 == 0) {
-            for (final org.spongepowered.api.world.World world: Sponge.getServer().getWorlds()) {
-                if (!this.mapOptimizationImpl$activeWorlds.contains(world.getUniqueId())) {
+        if (Sponge.server().runningTimeTicks() % 10 == this.randomTickOffset) {
+            for (final ServerWorld world : Sponge.server().worldManager().worlds()) {
+                if (!this.mapOptimizationImpl$activeWorlds.contains(world.key())) {
                     continue;
                 }
-                for (final Player player: world.getPlayers()) {
+                for (final Object p : world.players()) {
                     // Copied from EntityTrackerEntry#updatePlayerList
 
-                    final ServerPlayerEntity entityplayermp = (ServerPlayerEntity) player;
-                    OptimizedMapInfoBridge mapInfo = (OptimizedMapInfoBridge) this.playersHashMap.get(player);
+                    final ServerPlayer player = (ServerPlayer) p;
+                    OptimizedMapInfoBridge mapInfo = (OptimizedMapInfoBridge) this.carriedByPlayers.get(player);
                     if (mapInfo != null && mapInfo.mapOptimizationBridge$isValid()) {
                         continue; // We've already sent the player a map data packet for this map
                     }
 
                     // Create a MapInfo for use by createMapDataPacket
                     if (mapInfo == null) {
-                        mapInfo = (OptimizedMapInfoBridge) this.constructMapInfo(entityplayermp);
-                        this.playersHashMap.put(entityplayermp, (MapData.MapInfo) mapInfo);
+                        mapInfo = (OptimizedMapInfoBridge) this.constructHoldingPlayer(player);
+                        this.carriedByPlayers.put(player, (MapItemSavedData.HoldingPlayer) mapInfo);
                     }
 
                     //mapdata.updateVisiblePlayers(entityplayermp, itemstack); - Sponge - this is handled above in bridge$tickMap
-                    final IPacket<?> packet = Items.FILLED_MAP.getUpdatePacket(this.mapOptimizationImpl$dummyItemStack, (World) world, entityplayermp);
+                    final Packet<?> packet = ((MapItemSavedData.HoldingPlayer)mapInfo).nextUpdatePacket(this.mapOptimizationImpl$dummyItemStack);
 
                     if (packet != null)
                     {
-                        entityplayermp.connection.sendPacket(packet);
+                        player.connection.send(packet);
                     }
                 }
             }
@@ -248,16 +254,16 @@ public abstract class MapDataMixin_Optimization_Map extends WorldSavedData imple
     }
 
     // Use playersHashMap instead of playersArrayList, since we skip updating playersArrayList
-    @Redirect(method = "updateMapData", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", remap = false))
-    private Iterator<?> mapOptimization$GetIteratorFromPlayerHashMap(final List<?> this$0) {
-        return this.playersHashMap.values().iterator();
+    @Redirect(method = "setDirty", at = @At(value = "INVOKE", target = "Ljava/util/List;iterator()Ljava/util/Iterator;", remap = false))
+    private Iterator<?> mapOptimization$GetIteratorFromCarriedByMap(final List<?> this$0) {
+        return this.carriedByPlayers.values().iterator();
     }
 
 
 
     // MapInfo is a non-static inner class, so we need to use reflection to call
     // the constructor
-    private MapData.MapInfo constructMapInfo(final PlayerEntity player) {
+    private MapItemSavedData.HoldingPlayer constructHoldingPlayer(final net.minecraft.world.entity.player.Player player) {
         try {
             return mapOptimizationImpl$mapInfoConstructor.newInstance(this, player);
         } catch (final Exception e) {
@@ -266,46 +272,45 @@ public abstract class MapDataMixin_Optimization_Map extends WorldSavedData imple
     }
 
     @Override
-    public void mapOptimizationBridge$updatePlayer(final PlayerEntity player, final ItemStack mapStack) {
-        MapData.MapInfo info = this.playersHashMap.get(player);
+    public void mapOptimizationBridge$updatePlayer(final net.minecraft.world.entity.player.Player player, final ItemStack mapStack) {
+        MapItemSavedData.HoldingPlayer info = this.carriedByPlayers.get(player);
         if (info == null) {
-            info = this.constructMapInfo(player);
-            this.playersHashMap.put(player, info);
+            info = this.constructHoldingPlayer(player);
+            this.carriedByPlayers.put(player, info);
         }
         ((OptimizedMapInfoBridge) info).mapOptimizationBridge$setValid(true);
 
         if (mapStack.hasTag() && mapStack.getTag().contains("Decorations", 9))
         {
-            final ListNBT nbttaglist = mapStack.getTag().getList("Decorations", 10);
+            final ListTag nbttaglist = mapStack.getTag().getList("Decorations", 10);
 
-            for (int j = 0; j < nbttaglist.tagCount(); ++j)
+            for (int j = 0; j < nbttaglist.size(); ++j)
             {
-                final CompoundNBT nbttagcompound = nbttaglist.getCompound(j);
+                final CompoundTag nbttagcompound = nbttaglist.getCompound(j);
 
-                if (!this.mapDecorations.containsKey(nbttagcompound.getString("id")))
+                if (!this.decorations.containsKey(nbttagcompound.getString("id")))
                 {
-                    this.updateDecorations(MapDecoration.Type.byIcon(nbttagcompound.getByte("type")), player.world, nbttagcompound.getString("id"), nbttagcompound.getDouble("x"), nbttagcompound.getDouble("z"), nbttagcompound.getDouble("rot"));
+                    this.addDecoration(MapDecoration.Type.byIcon(nbttagcompound.getByte("type")), player.level, nbttagcompound.getString("id"), nbttagcompound.getDouble("x"), nbttagcompound.getDouble("z"), nbttagcompound.getDouble("rot"), null);
                 }
             }
         }
     }
 
     @Override
-    public void mapOptimizationBridge$updateItemFrameDecoration(final ItemFrameEntity frame) {
-        this.mapOptimizationImpl$activeWorlds.add(((Entity) frame).getWorld().getUniqueId());
+    public void mapOptimizationBridge$updateItemFrameDecoration(final ItemFrame frame) {
+        this.mapOptimizationImpl$activeWorlds.add(((Entity) frame).serverLocation().worldKey());
         if (this.trackingPosition) {
-            final BlockPos blockpos = frame.getHangingPosition();
-            if (blockpos == null || frame.facingDirection == null) {
+            final BlockPos blockpos = frame.getPos();
+            if (blockpos == null || frame.getDirection() == null) {
                 return;
             }
-            this.updateDecorations(MapDecoration.Type.FRAME, frame.world, "frame-" + frame.getEntityId(), (double)blockpos.getX(), (double)blockpos.getZ(), (double)(frame.facingDirection.getHorizontalIndex() * 90));
+            this.addDecoration(MapDecoration.Type.FRAME, frame.level, "frame-" + frame.getUUID(), (double)blockpos.getX(), (double)blockpos.getZ(), (double)(frame.getDirection().get2DDataValue() * 90), null);
         }
     }
 
     @Override
-    public void mapOptimizationBridge$removeItemFrame(final ItemFrameEntity frame) {
-        this.mapOptimizationImpl$activeWorlds.remove(((Entity) frame).getWorld().getUniqueId());
-        this.mapDecorations.remove("frame-" + frame.getEntityId());
+    public void mapOptimizationBridge$removeItemFrame(final ItemFrame frame) {
+        this.mapOptimizationImpl$activeWorlds.remove(((Entity) frame).serverLocation().worldKey());
+        this.decorations.remove("frame-" + frame.getUUID());
     }
-
 }

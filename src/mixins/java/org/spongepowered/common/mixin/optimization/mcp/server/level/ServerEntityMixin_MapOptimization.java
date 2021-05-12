@@ -22,14 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.invalid.optimization.entity;
+package org.spongepowered.common.mixin.optimization.mcp.server.level;
 
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.EntityTrackerEntry;
-import net.minecraft.entity.item.ItemFrameEntity;
-import net.minecraft.item.FilledMapItem;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
+import net.minecraft.server.level.ServerEntity;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.item.Item;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MapItem;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,28 +40,28 @@ import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
 
 import javax.annotation.Nullable;
 
-@Mixin(EntityTrackerEntry.class)
-public abstract class EntityTrackerEntryMixin_MapOptimization {
+@Mixin(ServerEntity.class)
+public abstract class ServerEntityMixin_MapOptimization {
 
-    @Shadow @Final private Entity trackedEntity;
+    @Shadow @Final private Entity entity;
 
     /**
-     * When processing an EntitYItemFrame containing an ItemMap, we call
-     * bridge$updateItemFrameDecoration on its correspoding MapDAta
+     * When processing an ItemFrame containing an ItemMap, we call
+     * bridge$updateItemFrameDecoration on its correspoding MapData
      *
      * <p>We always return 'null' here in order to prevent the original 'if' block from executing.</p>
      * @param itemStack
      * @return
      */
     @Nullable
-    @Redirect(method = "updatePlayerList",
+    @Redirect(method = "sendChanges",
         at = @At(
             value = "INVOKE",
-            target = "Lnet/minecraft/item/ItemStack;getItem()Lnet/minecraft/item/Item;",
+            target = "Lnet/minecraft/world/item/ItemStack;getItem()Lnet/minecraft/world/item/Item;",
             ordinal = 0))
     private Item mapOptimization$onGetItem(final ItemStack itemStack) {
-        if (itemStack.getItem() instanceof FilledMapItem) {
-            ((OptimizedMapDataBridge) ((FilledMapItem) itemStack.getItem()).getMapData(itemStack, this.trackedEntity.world)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrameEntity) this.trackedEntity);
+        if (itemStack.getItem() == Items.FILLED_MAP) {
+            ((OptimizedMapDataBridge) MapItem.getOrCreateSavedData(itemStack, this.entity.level)).mapOptimizationBridge$updateItemFrameDecoration((ItemFrame) this.entity);
         }
         return null;
     }

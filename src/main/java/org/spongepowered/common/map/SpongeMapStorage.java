@@ -85,6 +85,7 @@ public final class SpongeMapStorage implements MapStorage {
 		if (mapInfo != null) {
 			return Optional.of(mapInfo);
 		}
+		this.ensureHasMapUUIDIndex();
 		Integer mapId = this.mapIdUUIDIndex.inverse().get(uuid);
 		if (mapId == null) {
 			return Optional.empty();
@@ -124,5 +125,9 @@ public final class SpongeMapStorage implements MapStorage {
 		if (this.mapIdUUIDIndex == null) {
 			this.mapIdUUIDIndex = ((PrimaryLevelDataBridge) Sponge.server().worldManager().defaultWorld().properties()).bridge$getMapUUIDIndex();
 		}
+	}
+
+	public Collection<MapInfo> getLoadedMaps() {
+		return this.loadedMapUUIDs.values();
 	}
 }

@@ -31,7 +31,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.common.applaunch.config.common.OptimizationCategory;
 
 /**
- * Only used for the {@link OptimizationCategory#useMapOptimization()} mixins targeting {@link MapItemSavedData}.
+ * Only used for the {@link OptimizationCategory#optimizeMaps} mixins targeting {@link MapItemSavedData}.
  */
 public interface OptimizedMapDataBridge {
 

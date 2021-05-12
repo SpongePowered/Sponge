@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.plugin;
 
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.asm.util.PrettyPrinter;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.common.applaunch.config.common.OptimizationCategory;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
@@ -61,18 +62,20 @@ public class OptimizationPlugin extends AbstractMixinConfigPlugin {
                     optimizationCategory -> optimizationCategory.cacheTameableOwners)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.item.ItemFrameEntityMixin_Optimization_Map",
                     optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.invalid.optimization.entity.EntityTrackerEntryMixin_MapOptimization",
+            .put("org.spongepowered.common.mixin.optimization.mcp.server.MinecraftServerMixin_MapOptimisation",
                     optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.optimization.mcp.item.ItemMapMixin_MapOptimization",
+            .put("org.spongepowered.common.mixin.optimization.mcp.server.level.ServerEntityMixin_MapOptimization",
                     optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.optimization.mcp.world.storage.MapDataMixin_MapOptimization",
-                    optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.optimization.mcp.world.storage.MapInfoMixin_MapOptimization",
-                    optimizationCategory -> optimizationCategory.optimizeMaps)
-            .put("org.spongepowered.common.mixin.optimization.mcp.server.MinecraftServerMixin_MapOptimization",
+            .put("org.spongepowered.common.mixin.optimization.mcp.world.entity.decoration.ItemFrameMixin_Optimization_Map",
                     optimizationCategory -> optimizationCategory.optimizeMaps)
             .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.TileEntityMixin_Optimization_Hopper",
-                    optimizationCategory -> optimizationCategory.optimizeHoppers)
+                    optimizationCategory -> optimizationCategory.optimizeMaps)
+            .put("org.spongepowered.common.mixin.optimization.mcp.world.item.MapItemMixin_Optimization_Map",
+                    optimizationCategory -> optimizationCategory.optimizeMaps)
+            .put("org.spongepowered.common.mixin.optimization.mcp.world.level.saveddata.maps.MapItemSavedDataOptimisation_Map",
+                    optimizationCategory -> optimizationCategory.optimizeMaps)
+            .put("org.spongepowered.common.mixin.optimization.mcp.world.level.saveddata.maps.MapItemSavedData_HoldingPlayerMixin_Optimization_Map",
+                    optimizationCategory -> optimizationCategory.optimizeMaps)
             .put("org.spongepowered.common.mixin.optimization.mcp.tileentity.HopperTileEntityMixin_Optimization_Hopper",
                     optimizationCategory -> optimizationCategory.optimizeHoppers)
             .put("org.spongepowered.common.mixin.optimization.mcp.entity.EntityMixin_UseActiveChunkForCollisions",
