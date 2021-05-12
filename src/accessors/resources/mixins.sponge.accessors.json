@@ -3,7 +3,7 @@
     "minVersion": "0.8",
     "package": "org.spongepowered.common.accessor",
     "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
+    "compatibilityLevel": "JAVA_11",
     "client": [
         "client.KeyMappingAccessor",
         "client.gui.components.AbstractSelectionListAccessor",

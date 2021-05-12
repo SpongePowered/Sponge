@@ -3,7 +3,7 @@
     "package": "org.spongepowered.common.mixin.entityactivation",
     "plugin": "org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRangePlugin",
     "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
+    "compatibilityLevel": "JAVA_11",
     "mixins": [
       "entity.AgeableEntityMixin_EntityActivation",
       "entity.EntityMixin_EntityActivation",

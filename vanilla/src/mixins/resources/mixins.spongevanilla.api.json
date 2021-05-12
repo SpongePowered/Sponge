@@ -3,7 +3,7 @@
     "minVersion": "0.8",
     "package": "org.spongepowered.vanilla.mixin.api",
     "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
+    "compatibilityLevel": "JAVA_11",
     "priority": 1300,
     "server": [],
     "mixins": [

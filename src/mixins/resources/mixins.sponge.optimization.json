@@ -3,7 +3,7 @@
     "package": "org.spongepowered.common.mixin.optimization",
     "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
     "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
+    "compatibilityLevel": "JAVA_11",
     "mixins": [
         "mcp.entity.EntityMixin_Optimization_Collision",
         "mcp.tileentity.HopperTileEntityMixin_Optimization_Hopper",

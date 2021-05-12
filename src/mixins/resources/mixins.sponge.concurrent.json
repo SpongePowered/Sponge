@@ -3,7 +3,7 @@
     "package": "org.spongepowered.common.mixin.concurrentcheck",
     "plugin": "org.spongepowered.common.mixin.plugin.ConcurrentCheckPlugin",
     "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
+    "compatibilityLevel": "JAVA_11",
     "mixins": [
         "util.ClassInstanceMultiMapMixin_ConcurrentCheck"
     ],

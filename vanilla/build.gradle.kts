@@ -38,16 +38,13 @@ val main = commonProject.sourceSets.named("main")
 // Vanilla source sets
 val vanillaInstaller by sourceSets.register("installer")
 
-val vanillaInstallerJava9 by sourceSets.register("installerJava9") {
-    this.java.setSrcDirs(setOf("src/installer/java9"))
+val vanillaInstallerJava8 by sourceSets.register("installerLegacy8") {
+    this.java.setSrcDirs(setOf("src/installer/java8"))
     compileClasspath += vanillaInstaller.compileClasspath
     compileClasspath += vanillaInstaller.runtimeClasspath
 
     tasks.named(compileJavaTaskName, JavaCompile::class) {
-        options.release.set(9)
-        if (JavaVersion.current() < JavaVersion.VERSION_11) {
-            javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(11)) })
-        }
+        options.release.set(8)
     }
 
     dependencies.add(implementationConfigurationName, objects.fileCollection().from(vanillaInstaller.output.classesDirs))
@@ -98,13 +95,6 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaMain, this, project, this.runtimeOnlyConfigurationName)
 }
 val generator by sourceSets.registering {
-    tasks.named(compileJavaTaskName, JavaCompile::class) {
-        options.release.set(11)
-        if (!JavaVersion.current().isJava11Compatible) {
-            javaCompiler.set(javaToolchains.compilerFor { languageVersion.set(JavaLanguageVersion.of(11)) })
-        }
-    }
-
     configurations.named(implementationConfigurationName) {
         extendsFrom(configurations.minecraft.get())
     }
@@ -124,16 +114,12 @@ val vanillaAppLaunchRuntime by configurations.named(vanillaAppLaunch.runtimeOnly
 minecraft {
     runs {
         // Full development environment
-        sequenceOf(8, 11, 16).forEach {
-            server("runJava${it}Server") {
-                args("--nogui", "--launchTarget", "sponge_server_dev")
-                targetVersion(it)
-            }
-            client("runJava${it}Client") {
-                args("--launchTarget", "sponge_client_dev")
-                jvmArgs("-Dmixin.debug.export=true", "-Dmixin.debug=true")
-                targetVersion(it)
-            }
+        server("runServer") {
+            args("--nogui", "--launchTarget", "sponge_server_dev")
+        }
+        client("runClient") {
+            args("--launchTarget", "sponge_client_dev")
+            // jvmArgs("-Dmixin.debug.export=true", "-Dmixin.debug=true")
         }
 
         // Lightweight integration tests
@@ -145,6 +131,7 @@ minecraft {
         }
 
         configureEach {
+            targetVersion(16)
             workingDirectory(project.file("run/"))
             if (org.spongepowered.gradle.vanilla.util.IdeConfigurer.isIdeaImport()) {
                 // IntelliJ does not properly report its compatibility
@@ -165,15 +152,10 @@ minecraft {
                 }
 
                 // Then add necessary module cracks
-                if (!this.name.contains("integrationTest") && !this.name.contains("Java8") && !this.name.contains("integrationTest")) {
-                    base + listOf(
-                        "--illegal-access=deny", // enable strict mode in prep for Java 16
-                        "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
-                        "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
-                    )
-                } else {
-                    base
-                }
+                base + listOf(
+                    "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
+                    "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
+                )
             }
             mainClass("org.spongepowered.vanilla.applaunch.Main")
             classpath.setFrom(
@@ -329,9 +311,7 @@ tasks {
             )
         }
         from(vanillaInstaller.output)
-        into("META-INF/versions/9/") {
-            from(vanillaInstallerJava9.output)
-        }
+        from(vanillaInstallerJava8.output)
     }
 
     val vanillaAppLaunchJar by registering(Jar::class) {
@@ -426,9 +406,7 @@ tasks {
         from(commonProject.sourceSets.named("applaunch").map {it.output })
         from(sourceSets.main.map {it.output })
         from(vanillaInstaller.output)
-        from(vanillaInstallerJava9.output) {
-            into("META-INF/versions/9/")
-        }
+        from(vanillaInstallerJava8.output)
         from(vanillaAppLaunch.output)
         from(vanillaLaunch.output)
         from(vanillaMixins.output)
@@ -450,9 +428,7 @@ tasks {
     register("generateApiData", JavaExec::class) {
         group = "sponge"
         description = "Generate API Catalog classes"
-        if (!JavaVersion.current().isJava11Compatible) {
-            javaLauncher.set(project.javaToolchains.launcherFor { languageVersion.set(JavaLanguageVersion.of(11)) })
-        }
+        javaLauncher.set(project.javaToolchains.launcherFor(java.toolchain))
 
         classpath(generator.map { it.output }, generator.map { it.runtimeClasspath })
         mainClass.set("org.spongepowered.vanilla.generator.GeneratorMain")

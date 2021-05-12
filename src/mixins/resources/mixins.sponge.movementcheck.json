@@ -3,7 +3,7 @@
     "package": "org.spongepowered.common.mixin.movementcheck",
     "plugin": "org.spongepowered.common.mixin.plugin.MovementCheckPlugin",
     "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
+    "compatibilityLevel": "JAVA_11",
     "mixins": [
         "server.network.ServerGamePacketListenerImplMixin_MovementCheck"
     ],

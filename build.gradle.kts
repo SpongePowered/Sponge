@@ -255,8 +255,13 @@ allprojects {
     }
 
     java {
-        sourceCompatibility = JavaVersion.VERSION_1_8
-        targetCompatibility = JavaVersion.VERSION_1_8
+        sourceCompatibility = JavaVersion.VERSION_16
+        targetCompatibility = JavaVersion.VERSION_16
+        if (JavaVersion.current() < JavaVersion.VERSION_16) {
+            toolchain {
+                languageVersion.set(JavaLanguageVersion.of(16))
+            }
+        }
     }
 
     tasks.withType<AbstractArchiveTask> {
@@ -266,14 +271,25 @@ allprojects {
     val spongeSnapshotRepo: String? by project
     val spongeReleaseRepo: String? by project
     tasks {
+        fun Task.isMixin(): Boolean {
+            return this.name.contains("Mixin") || this.name.contains("Accessor")
+        }
+
         val emptyAnnotationProcessors = objects.fileCollection()
         withType(JavaCompile::class).configureEach {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
-            if (JavaVersion.current().isJava10Compatible) {
-                options.release.set(8)
+            if (!isMixin()) {
+                options.release.set(16)
             }
             options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
+        }
+
+        matching { it.isMixin() && it is JavaCompile }.configureEach {
+            // Mixin does not itself support Java 16, so this lets us target the latest supported java version instead
+            require(this is JavaCompile)
+            sourceCompatibility = "11"
+            targetCompatibility = "11"
         }
 
         withType(PublishToMavenRepository::class).configureEach {
@@ -296,6 +312,16 @@ allprojects {
             val classifier = if ("main".equals(sourceSet.name)) "sources" else "${sourceSet.name}sources"
             archiveClassifier.set(classifier)
             from(sourceSet.allJava)
+        }
+    }
+    sourceSets.matching { it.name == "accessors" || it.name == "mixins" }.configureEach {
+        // We know we have J16 at runtime, so this will let us read J16 dependencies
+        sequenceOf(compileClasspathConfigurationName, runtimeClasspathConfigurationName).forEach { confName ->
+            configurations.named(confName) {
+                attributes {
+                    attribute(TargetJvmVersion.TARGET_JVM_VERSION_ATTRIBUTE, 16)
+                }
+            }
         }
     }
     afterEvaluate {

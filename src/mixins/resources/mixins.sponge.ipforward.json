@@ -3,7 +3,7 @@
     "package": "org.spongepowered.common.mixin.ipforward",
     "plugin": "org.spongepowered.common.mixin.plugin.IpForwardPlugin",
     "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
+    "compatibilityLevel": "JAVA_11",
     "mixins": [
         "network.ConnectionMixin_IpForward",
         "network.protocol.handshake.ClientIntentionPacketMixin_IpForward",

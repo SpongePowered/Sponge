@@ -1,12 +1,19 @@
 plugins {
     id "java-gradle-plugin"
-    id "org.spongepowered.gradle.sponge.dev" version "1.0.3"
+    id "org.spongepowered.gradle.sponge.dev" version "1.1.0"
+    id "net.kyori.indra" version "2.0.3"
 }
 
 repositories {
     maven {
         url = "https://repo.spongepowered.org/repository/maven-public"
         name = "sponge"
+    }
+}
+
+indra {
+    javaVersions {
+        target(16)
     }
 }
 
