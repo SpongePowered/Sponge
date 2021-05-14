@@ -24,60 +24,24 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.item;
 
-import net.kyori.adventure.text.Component;
-import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Rarity;
-import org.spongepowered.api.block.BlockType;
+import net.kyori.adventure.text.format.TextColor;
+import net.minecraft.ChatFormatting;
 import org.spongepowered.api.item.ItemRarity;
-import org.spongepowered.api.item.ItemType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-import java.util.Arrays;
-import java.util.Optional;
-import java.util.function.Supplier;
+@Mixin(net.minecraft.world.item.Rarity.class)
+public abstract class RarityMixin_API implements ItemRarity {
 
-import javax.annotation.Nullable;
+    @Shadow @Final public ChatFormatting color;
 
-@Mixin(Item.class)
-public abstract class ItemMixin_API implements ItemType {
-
-    // @formatter:off
-    @Shadow public abstract int shadow$getMaxStackSize();
-    @Shadow public abstract String shadow$getDescriptionId();
-    @Shadow @Final private Rarity rarity;
-    // @formatter:on
-
-    @Nullable protected BlockType api$blockType = null;
+    private final TextColor api$color = SpongeAdventure.asAdventure(this.color);
 
     @Override
-    public Component asComponent() {
-        return Component.translatable(this.shadow$getDescriptionId());
+    public TextColor color() {
+        return this.api$color;
     }
 
-    @Override
-    public int maxStackQuantity() {
-        return this.shadow$getMaxStackSize();
-    }
-
-    @Override
-    public ItemRarity rarity() {
-        return (ItemRarity) (Object) this.rarity;
-    }
-
-    @Override
-    public Optional<BlockType> block() {
-        return Optional.ofNullable(this.api$blockType);
-    }
-
-    @Override
-    public boolean isAnyOf(Supplier<? extends ItemType>... types) {
-        return Arrays.stream(types).map(Supplier::get).anyMatch(type -> type == this);
-    }
-
-    @Override
-    public boolean isAnyOf(ItemType... types) {
-        return Arrays.stream(types).anyMatch(type -> type == this);
-    }
 }

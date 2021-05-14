@@ -29,6 +29,7 @@ import com.mojang.datafixers.util.Pair;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.NestedTableEntry;
@@ -179,6 +180,8 @@ public final class ItemStackData {
                         .get(stack -> stack.getMaxDamage() - stack.getDamageValue())
                         .set((stack, durability) -> stack.setDamageValue(stack.getMaxDamage() - durability))
                         .supports(h -> h.getItem().canBeDepleted())
+                    .create(Keys.ITEM_RARITY)
+                        .get(stack -> (ItemRarity) (Object) stack.getRarity())
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {
                             if (h.getItem().isEdible()) {
