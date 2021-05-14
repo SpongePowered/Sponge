@@ -99,6 +99,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.FireworkEffect;
 import org.spongepowered.api.item.FireworkShapes;
+import org.spongepowered.api.item.ItemRarities;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.enchantment.EnchantmentTypes;
@@ -920,6 +921,9 @@ public final class DataTest  {
         this.checkGetData(sheep, Keys.IS_WET, false);
 
         this.checkOfferData(jungleAxe, Keys.ITEM_DURABILITY, 5);
+
+        this.checkGetData(jungleAxe, Keys.ITEM_RARITY, ItemRarities.COMMON.get());
+        this.checkGetData(playerHeadStack, Keys.ITEM_RARITY, ItemRarities.UNCOMMON.get());
 
         this.checkOfferData(itemEntity, Keys.ITEM_STACK_SNAPSHOT, jungleAxe.createSnapshot());
 

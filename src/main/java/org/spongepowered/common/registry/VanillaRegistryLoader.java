@@ -47,6 +47,7 @@ import net.minecraft.world.entity.vehicle.Boat;
 import net.minecraft.world.item.ArmorMaterials;
 import net.minecraft.world.item.DyeColor;
 import net.minecraft.world.item.FireworkRocketItem;
+import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.block.Mirror;
@@ -175,6 +176,7 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.HAND_PREFERENCE, HumanoidArm.values());
         this.automaticName(RegistryTypes.HAND_TYPE, InteractionHand.values());
         this.knownName(RegistryTypes.INSTRUMENT_TYPE, NoteBlockInstrument.values(), NoteBlockInstrument::getSerializedName);
+        this.automaticName(RegistryTypes.ITEM_RARITY, Rarity.values());
         this.automaticName(RegistryTypes.ITEM_TIER, Tiers.values());
         this.knownName(RegistryTypes.MOOSHROOM_TYPE, MushroomCow.MushroomType.values(), type -> ((MushroomCow_MushroomTypeAccessor) (Object) type).accessor$type());
         this.knownName(RegistryTypes.OBJECTIVE_DISPLAY_MODE, ObjectiveCriteria.RenderType.values(), ObjectiveCriteria.RenderType::getId);

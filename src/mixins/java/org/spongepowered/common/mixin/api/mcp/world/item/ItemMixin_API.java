@@ -26,8 +26,11 @@ package org.spongepowered.common.mixin.api.mcp.world.item;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.world.item.Item;
+import net.minecraft.world.item.Rarity;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
@@ -43,6 +46,7 @@ public abstract class ItemMixin_API implements ItemType {
     // @formatter:off
     @Shadow public abstract int shadow$getMaxStackSize();
     @Shadow public abstract String shadow$getDescriptionId();
+    @Shadow @Final private Rarity rarity;
     // @formatter:on
 
     @Nullable protected BlockType api$blockType = null;
@@ -55,6 +59,11 @@ public abstract class ItemMixin_API implements ItemType {
     @Override
     public int maxStackQuantity() {
         return this.shadow$getMaxStackSize();
+    }
+
+    @Override
+    public ItemRarity rarity() {
+        return (ItemRarity) (Object) this.rarity;
     }
 
     @Override

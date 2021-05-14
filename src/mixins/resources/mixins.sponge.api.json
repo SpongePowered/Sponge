@@ -248,6 +248,7 @@
         "mcp.world.item.ItemCooldownsMixin_API",
         "mcp.world.item.ItemMixin_API",
         "mcp.world.item.ItemStackMixin_API",
+        "mcp.world.item.RarityMixin_API",
         "mcp.world.item.TiersMixin_API",
         "mcp.world.item.alchemy.PotionMixin_API",
         "mcp.world.item.crafting.AbstractCookingRecipeMixin_API",
