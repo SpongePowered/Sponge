@@ -262,6 +262,7 @@ allprojects {
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        modularity.inferModulePath.set(false) // fixed in 7.0.1 but we can't use that because it breaks event-impl-gen
     }
 
     tasks.withType<AbstractArchiveTask> {
