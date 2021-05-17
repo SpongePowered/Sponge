@@ -134,7 +134,7 @@ minecraft {
 
         configureEach {
             workingDirectory(project.file("run/"))
-            if (org.spongepowered.gradle.vanilla.util.IdeConfigurer.isIdeaImport()) {
+            if (org.spongepowered.gradle.vanilla.internal.util.IdeConfigurer.isIdeaImport()) { // todo(zml): promote to API... eventually
                 // IntelliJ does not properly report its compatibility
                 jvmArgs("-Dterminal.ansi=true", "-Djansi.mode=force")
             }
@@ -146,7 +146,7 @@ minecraft {
                         .firstOrNull()
 
                 // The mixin agent initializes logging too early, which prevents jansi from properly stripping escape codes in Eclipse.
-                val base = if (!org.spongepowered.gradle.vanilla.util.IdeConfigurer.isEclipseImport() && mixinJar != null) {
+                val base = if (!org.spongepowered.gradle.vanilla.internal.util.IdeConfigurer.isEclipseImport() && mixinJar != null) {
                     listOf("-javaagent:$mixinJar")
                 } else {
                     emptyList()
