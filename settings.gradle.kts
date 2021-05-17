@@ -9,7 +9,7 @@ pluginManagement {
 
     plugins {
         // Default plugin versions
-        id("org.spongepowered.gradle.vanilla") version "0.2-SNAPSHOT"
+        id("org.spongepowered.gradle.vanilla") version "0.2"
         id("org.cadixdev.licenser") version "0.6.0"
         id("com.github.johnrengelman.shadow") version "7.0.0"
         id("org.spongepowered.gradle.sponge.dev") version "1.0.3"

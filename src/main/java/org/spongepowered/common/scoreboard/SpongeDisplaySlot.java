@@ -26,44 +26,48 @@ package org.spongepowered.common.scoreboard;
 
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.minecraft.ChatFormatting;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 public final class SpongeDisplaySlot implements DisplaySlot {
 
+    private final int id;
     private final @Nullable ChatFormatting formatting;
-    private final @Nullable Function<ChatFormatting, DisplaySlot> withColorFunction;
 
     private @Nullable NamedTextColor color;
 
-    public SpongeDisplaySlot() {
-        this(null, null);
+    public static int slotIdFromFormatting(final ChatFormatting formatting) {
+        return formatting.getId() + 3;
     }
 
-    public SpongeDisplaySlot(final @Nullable ChatFormatting color, final @Nullable Function<ChatFormatting, DisplaySlot> withColorFunction) {
-        this.withColorFunction = withColorFunction;
+    public SpongeDisplaySlot(final int id) {
+        this(id, null);
+    }
+
+    public SpongeDisplaySlot(final ChatFormatting color) {
+        this(SpongeDisplaySlot.slotIdFromFormatting(color), color);
+    }
+
+    private SpongeDisplaySlot(final int id, final @Nullable ChatFormatting color) {
+        this.id = id;
         this.formatting = color;
     }
 
     @Override
-    public DisplaySlot withTeamColor(final @Nullable NamedTextColor color) {
-        if (this.withColorFunction == null) {
-            return this;
-        }
-        final DisplaySlot slot = this.withColorFunction.apply(
-                color == null ? ChatFormatting.RESET : SpongeAdventure.asVanilla(color));
-        return slot == null ? this : slot;
-    }
-
-    @Override
+    @NonNull
     public Optional<NamedTextColor> teamColor() {
         if (this.color == null) {
             this.color = SpongeAdventure.asAdventureNamed(this.formatting);
         }
         return Optional.ofNullable(this.color);
     }
+
+    public int index() {
+        return this.id;
+    }
+
 }

@@ -32,7 +32,6 @@ import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.kyori.adventure.text.Component;
-import net.minecraft.ChatFormatting;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.CompoundTagArgument;
@@ -72,10 +71,10 @@ import org.spongepowered.api.command.parameter.managed.operator.Operator;
 import org.spongepowered.api.command.parameter.managed.operator.Operators;
 import org.spongepowered.api.command.parameter.managed.standard.ResourceKeyedValueParameters;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
-import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.command.registrar.tree.CommandCompletionProvider;
 import org.spongepowered.api.command.registrar.tree.CommandCompletionProviders;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeType;
+import org.spongepowered.api.command.registrar.tree.CommandTreeNodeTypes;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithm;
 import org.spongepowered.api.command.selector.SelectorSortAlgorithms;
 import org.spongepowered.api.command.selector.SelectorType;
@@ -269,6 +268,8 @@ import org.spongepowered.common.map.decoration.SpongeMapDecorationType;
 import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOrientation;
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
+import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.EndPortalType;
 import org.spongepowered.common.world.portal.NetherPortalType;
@@ -559,25 +560,12 @@ public final class SpongeRegistryLoaders {
 
     public static RegistryLoader<DisplaySlot> displaySlot() {
         return RegistryLoader.of(l -> {
-            l.add(2, DisplaySlots.BELOW_NAME, SpongeDisplaySlot::new);
-            l.add(0, DisplaySlots.LIST, SpongeDisplaySlot::new);
-            l.add(1, DisplaySlots.SIDEBAR_TEAM_NO_COLOR, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.AQUA.getId() + 3, DisplaySlots.SIDEBAR_TEAM_AQUA, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.BLACK.getId() + 3, DisplaySlots.SIDEBAR_TEAM_BLACK, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.BLUE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_BLUE, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_AQUA.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_AQUA, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_BLUE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_BLUE, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_GRAY.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_GRAY, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_GREEN.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_GREEN, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_PURPLE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_PURPLE, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.DARK_RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_DARK_RED, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.GOLD.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GOLD, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.GRAY.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GRAY, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.GREEN.getId() + 3, DisplaySlots.SIDEBAR_TEAM_GREEN, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.LIGHT_PURPLE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_LIGHT_PURPLE, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.RED.getId() + 3, DisplaySlots.SIDEBAR_TEAM_RED, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.WHITE.getId() + 3, DisplaySlots.SIDEBAR_TEAM_WHITE, SpongeDisplaySlot::new);
-            l.add(ChatFormatting.YELLOW.getId() + 3, DisplaySlots.SIDEBAR_TEAM_YELLOW, SpongeDisplaySlot::new);
+            l.add(0, DisplaySlots.LIST, k -> new SpongeDisplaySlot(0));
+            l.add(1, DisplaySlots.SIDEBAR, k -> new SpongeDisplaySlot(1));
+            l.add(2, DisplaySlots.BELOW_NAME, k -> new SpongeDisplaySlot(2));
+
+            SpongeDisplaySlotFactory.ColorMapping.COLOR_TO_DISPLAY_SLOT_MAP.forEach((color, s) ->
+                            l.add(SpongeDisplaySlot.slotIdFromFormatting(color), s, k -> new SpongeDisplaySlot(color)));
         });
     }
 
