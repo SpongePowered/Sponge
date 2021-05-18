@@ -28,6 +28,7 @@ val pluginSpiVersion: String by project
 val guavaVersion: String by project
 val junitVersion: String by project
 val timingsVersion: String by project
+val observerVersion: String by project
 val checkerVersion: String by project
 
 val commonManifest = the<JavaPluginConvention>().manifest {
@@ -153,6 +154,9 @@ dependencies {
 
     // Timings
     implementation("org.spongepowered:timings:$timingsVersion")
+    implementation("org.spongepowered:observer:$observerVersion") {
+        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+    }
 
     // ASM - required for generating event listeners
     implementation("org.ow2.asm:asm-util:$asmVersion")
