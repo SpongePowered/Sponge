@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.block.entity.CommandBlock;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
@@ -60,7 +61,7 @@ public abstract class CommandBlockEntityMixin_API extends BlockEntityMixin_API i
         container.set(Constants.TileEntity.CUSTOM_NAME, this.shadow$getCommandBlock().getName());
         container.set(Constants.TileEntity.CommandBlock.DOES_TRACK_OUTPUT, this.shadow$getCommandBlock().shouldInformAdmins());
         if (this.shadow$getCommandBlock().shouldInformAdmins()) {
-            container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, SpongeAdventure.legacySection(SpongeAdventure.asAdventure(this.shadow$getCommandBlock().getLastOutput())));
+            container.set(Constants.TileEntity.CommandBlock.TRACKED_OUTPUT, LegacyComponentSerializer.legacySection().serialize(SpongeAdventure.asAdventure(this.shadow$getCommandBlock().getLastOutput())));
         }
         return container;
     }

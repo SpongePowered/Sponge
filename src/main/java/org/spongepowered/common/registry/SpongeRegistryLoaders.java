@@ -32,6 +32,8 @@ import com.mojang.brigadier.arguments.LongArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.arguments.ComponentArgument;
 import net.minecraft.commands.arguments.CompoundTagArgument;
@@ -363,10 +365,10 @@ public final class SpongeRegistryLoaders {
             l.add(ResourceKeyedValueParameters.TARGET_BLOCK, SpongeTargetBlockValueParameter::new);
             l.add(ResourceKeyedValueParameters.TARGET_ENTITY, k -> new SpongeTargetEntityValueParameter(k, false));
             l.add(ResourceKeyedValueParameters.TARGET_PLAYER, k -> new SpongeTargetEntityValueParameter(k, true));
-            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)));
-            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.legacyAmpersand(result)));
+            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(), (reader, cause, result) -> LegacyComponentSerializer.legacyAmpersand().deserialize(result)));
+            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> LegacyComponentSerializer.legacyAmpersand().deserialize(result)));
             l.add(ResourceKeyedValueParameters.TEXT_JSON, k -> ClientNativeArgumentParser.createConverter(k, ComponentArgument.textComponent(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)));
-            l.add(ResourceKeyedValueParameters.TEXT_JSON_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> SpongeAdventure.json(result)));
+            l.add(ResourceKeyedValueParameters.TEXT_JSON_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> GsonComponentSerializer.gson().deserialize(result)));
             l.add(ResourceKeyedValueParameters.URL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(),
                     (reader, cause, input) -> {
                         try {

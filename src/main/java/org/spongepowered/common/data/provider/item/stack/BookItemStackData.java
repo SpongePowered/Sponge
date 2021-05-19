@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.item.stack;
 
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.IntTag;
 import net.minecraft.nbt.ListTag;
@@ -33,7 +34,6 @@ import net.minecraft.nbt.Tag;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.NBTCollectors;
@@ -57,9 +57,9 @@ public final class BookItemStackData {
                             if (tag == null) {
                                 return null;
                             }
-                            return SpongeAdventure.legacySection(tag.getString(Constants.Item.Book.ITEM_BOOK_AUTHOR));
+                            return LegacyComponentSerializer.legacySection().deserialize(tag.getString(Constants.Item.Book.ITEM_BOOK_AUTHOR));
                         })
-                        .set((h, v) -> h.addTagElement(Constants.Item.Book.ITEM_BOOK_AUTHOR, StringTag.valueOf(SpongeAdventure.legacySection(v))))
+                        .set((h, v) -> h.addTagElement(Constants.Item.Book.ITEM_BOOK_AUTHOR, StringTag.valueOf(LegacyComponentSerializer.legacySection().serialize(v))))
                         .supports(h -> h.getItem() == Items.WRITTEN_BOOK)
                     .create(Keys.GENERATION)
                         .get(h -> {

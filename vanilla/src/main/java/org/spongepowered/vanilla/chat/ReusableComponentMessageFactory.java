@@ -140,7 +140,7 @@ public class ReusableComponentMessageFactory implements MessageFactory2 {
             final Object param = this.getParameter();
             // TODO: ansi formatting
             if (param instanceof ComponentLike) {
-                return SpongeAdventure.PLAIN.serialize(ComponentMessage.RENDERER.render(((ComponentLike) param).asComponent(), Locale.getDefault()));
+                return SpongeAdventure.plain(ComponentMessage.RENDERER.render(((ComponentLike) param).asComponent(), Locale.getDefault()));
             } else if (param instanceof net.minecraft.network.chat.Component) {
                 return NativeComponentRenderer.apply((Component) param, Locale.getDefault()).getString();
             }
@@ -152,7 +152,7 @@ public class ReusableComponentMessageFactory implements MessageFactory2 {
             final Object param = this.getParameter();
             // TODO: ansi formatting
             if (param instanceof ComponentLike) {
-                SpongeAdventure.FLATTENER.flatten(
+                SpongeAdventure.flattener().flatten(
                     ComponentMessage.RENDERER.render(((ComponentLike) param).asComponent(), Locale.getDefault()),
                     buffer::append
                 );

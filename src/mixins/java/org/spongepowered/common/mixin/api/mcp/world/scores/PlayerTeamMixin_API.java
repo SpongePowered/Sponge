@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.mcp.world.scores;
 
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.scores.PlayerTeam;
 import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.api.scoreboard.Team;
@@ -173,12 +174,13 @@ public abstract class PlayerTeamMixin_API implements Team {
 
     @Override
     public Set<Component> members() {
-        return this.shadow$getPlayers().stream().map(SpongeAdventure::legacySection).collect(Collectors.toSet());
+        final LegacyComponentSerializer lcs = LegacyComponentSerializer.legacySection();
+        return this.shadow$getPlayers().stream().map(lcs::deserialize).collect(Collectors.toSet());
     }
 
     @Override
     public void addMember(final Component member) {
-        final String legacyName = SpongeAdventure.legacySection(member);
+        final String legacyName = LegacyComponentSerializer.legacySection().serialize(member);
         if (legacyName.length() > 40) {
             throw new IllegalArgumentException(String.format("Member is %s characters long! It must be at most 40.", legacyName.length()));
         }
@@ -192,7 +194,7 @@ public abstract class PlayerTeamMixin_API implements Team {
     @SuppressWarnings("RedundantCast")
     @Override
     public boolean removeMember(final Component member) {
-        final String legacyName = SpongeAdventure.legacySection(member);
+        final String legacyName = LegacyComponentSerializer.legacySection().serialize(member);
         if (this.scoreboard != null) {
             final PlayerTeam realTeam = this.scoreboard.getPlayersTeam(legacyName);
 

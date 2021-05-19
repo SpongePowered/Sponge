@@ -25,6 +25,7 @@
 package org.spongepowered.common.ban;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.server.players.IpBanListEntry;
 import net.minecraft.server.players.UserBanListEntry;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -115,8 +116,9 @@ public final class SpongeBanBuilder implements Ban.Builder {
             throw new IllegalStateException("BanType cannot be null!");
         }
 
-        final String sourceName = this.source != null ? SpongeAdventure.legacySection(this.source) : null;
-        final String reason = this.reason != null ? SpongeAdventure.legacySection(this.reason) : null;
+        final LegacyComponentSerializer lcs = LegacyComponentSerializer.legacySection();
+        final String sourceName = this.source != null ? lcs.serialize(this.source) : null;
+        final String reason = this.reason != null ? lcs.serialize(this.reason) : null;
 
         if (this.banType == BanTypes.PROFILE.get()) {
             if (this.profile == null) {

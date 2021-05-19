@@ -36,6 +36,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.commands.Commands;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.server.MinecraftServer;
@@ -287,7 +288,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
 
     @Override
     public Component motd() {
-        return SpongeAdventure.legacySection(this.shadow$getMotd());
+        return LegacyComponentSerializer.legacySection().deserialize(this.shadow$getMotd());
     }
 
     @Override

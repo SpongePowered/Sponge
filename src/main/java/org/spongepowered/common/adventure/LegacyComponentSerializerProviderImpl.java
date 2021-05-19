@@ -22,23 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.network.protocol.status;
+package org.spongepowered.common.adventure;
 
-import com.google.gson.GsonBuilder;
-import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
-import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-import java.lang.reflect.Type;
+import java.util.function.Consumer;
 
-@Mixin(ClientboundStatusResponsePacket.class)
-public abstract class ClientboundStatusResponsePacketMixin {
+@SuppressWarnings("UnstableApiUsage") // permitted provider
+public final class LegacyComponentSerializerProviderImpl implements LegacyComponentSerializer.Provider {
+    @Override
+    public @NonNull LegacyComponentSerializer legacyAmpersand() {
+        return LegacyComponentSerializer.builder()
+          .character(LegacyComponentSerializer.AMPERSAND_CHAR)
+          .flattener(ComponentFlattenerProvider.INSTANCE)
+          .build();
+    }
 
-   @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/google/gson/GsonBuilder;registerTypeAdapter(Ljava/lang/reflect/Type;Ljava/lang/Object;)Lcom/google/gson/GsonBuilder;", ordinal = 0))
-   private static GsonBuilder impl$injectAdventureSerializers(final GsonBuilder instance, final Type type, final Object adapter) {
-      return GsonComponentSerializer.gson().populator().apply(instance.registerTypeAdapter(type, adapter));
-   }
+    @Override
+    public @NonNull LegacyComponentSerializer legacySection() {
+        return LegacyComponentSerializer.builder()
+          .character(LegacyComponentSerializer.SECTION_CHAR)
+          .flattener(ComponentFlattenerProvider.INSTANCE)
+          .build();
+    }
 
+    @Override
+    public @NonNull Consumer<LegacyComponentSerializer.Builder> legacy() {
+        return builder -> {
+            builder.flattener(ComponentFlattenerProvider.INSTANCE);
+        };
+    }
 }

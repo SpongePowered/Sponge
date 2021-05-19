@@ -26,6 +26,7 @@ package org.spongepowered.common.service.server.ban;
 
 import static org.spongepowered.common.util.NetworkUtil.LOCAL_ADDRESS;
 
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.BanService;
@@ -80,11 +81,12 @@ public final class SpongeIPBanList extends IpBanList {
                         if (ban instanceof IpBanListEntry) {
                             return (IpBanListEntry) ban;
                         }
+                        final LegacyComponentSerializer lcs = LegacyComponentSerializer.legacySection();
                         return new IpBanListEntry(BanUtil.addressToBanCompatibleString(ban.address()),
                                 Date.from(ban.creationDate()),
-                                ban.banSource().map(SpongeAdventure::legacySection).orElse(null),
+                                ban.banSource().map(lcs::serialize).orElse(null),
                                 ban.expirationDate().map(Date::from).orElse(null),
-                                ban.reason().map(SpongeAdventure::legacySection).orElse(null));
+                                ban.reason().map(lcs::serialize).orElse(null));
                     })
                     .orElse(null);
         } catch (final UnknownHostException e) {
