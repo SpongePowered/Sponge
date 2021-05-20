@@ -1,0 +1,50 @@
+modLoader = "javafml"
+loaderVersion = "[36,)"
+license = "MIT License"
+
+issueTrackerURL="https://github.com/SpongePowered/Sponge/issues"
+
+[[mods]]
+modId = "spongeforge"
+# The version number of the mod - unlike in the Forge MDK,
+# we'll use the processResources task to replace this for us
+version = "${version}"
+displayName = "SpongeForge"
+# This URL will be queried by the Forge update checker in order to find the latest version of your mod.
+# If an update is found, you'll see a little blinking "emerald" symbol on your Mods button!
+# updateJSONURL="https://changeme.dev/updates.json" #optional
+# This is your mod's "homepage" and will be displayed on the mod's information screen in the Mods panel.
+# displayURL="https://changeme.dev/" #optional
+# This will be displayed as your mod's logo in the Mods panel.
+# logoFile="icon.png" #optional
+# Some more fluff displayed in the Mods panel. Feel free to issue your special thanks here!
+# credits="Thanks to Mojang for making this great game" #optional
+# Some more fluff displayed in the Mods panel. Plug your stuff here!
+# authors="Me!" #optional
+# A multi-line description for your mod. This has no minimum length, but it *is* required!
+description = '''
+${description}
+'''
+
+# An (optional) dependency for your mod. Though technically not required,
+# it's always helpful to add these to stop your mod from loading when something is missing
+# rather than erroring out later
+[[dependencies.spongeforge]]
+modId = "forge"
+mandatory = true # do you **need** this mod to be able to launch?
+# A version range using interval notation.
+# Brackets mean "inclusive" bounds, while parentheses mean "exclusive".
+versionRange = "[36,)" # This essentially means any forge >= 36
+ordering = "NONE" # Use this if you want your mod to be loaded specifically BEFORE or AFTER another mod
+side = "BOTH" # Specify where this mod is required: can be BOTH, CLIENT or SERVER
+
+# And another dependency, use this if you want to require a certain Minecraft version.
+[[dependencies.spongeforge]]
+modId = "minecraft"
+mandatory = true
+# See above for how to read this notation, this essentially means any
+# version of Minecraft from 1.16.5 (inclusive) until 1.17 (exclusive),
+# so versions 1.16.* would be valid.
+versionRange = "[1.16.5,1.17)"
+ordering = "NONE"
+side = "BOTH"
