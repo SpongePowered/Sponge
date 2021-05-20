@@ -1,0 +1,11 @@
+{
+    "required": true,
+    "minVersion": "0.8",
+    "package": "org.spongepowered.forge.mixin.core",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "priority": 1301,
+    "client": [
+        "client.main.MainMixin_Forge"
+    ]
+}
