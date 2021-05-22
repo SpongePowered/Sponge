@@ -31,6 +31,9 @@ import it.unimi.dsi.fastutil.objects.ObjectArrayList;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
+import net.minecraft.client.gui.narration.NarratableEntry;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.network.chat.ClickEvent;
 import net.minecraft.network.chat.Component;
 import net.minecraft.network.chat.MutableComponent;
@@ -51,7 +54,7 @@ import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
 
-public final class MetadataPanel extends ScrollPanel {
+public final class MetadataPanel extends ScrollPanel implements NarratableEntry {
 
     private static final Component NO_RESULTS = new TextComponent("No data...")
             .withStyle(ChatFormatting.GRAY);
@@ -65,6 +68,7 @@ public final class MetadataPanel extends ScrollPanel {
     private final Minecraft minecraft;
     private final PluginScreen screen;
     private final int lineHeight;
+    private String activePluginName;
     private final List<Category> categories = new ObjectArrayList<>();
     private final List<Category> resizedCategories = new ObjectArrayList<>();
     private int maxKeyWidth;
@@ -82,8 +86,11 @@ public final class MetadataPanel extends ScrollPanel {
 
         if (metadata == null) {
             this.resizedCategories.clear();
+            this.activePluginName = null;
             return;
         }
+
+        this.activePluginName = metadata.name().orElse(metadata.id());
 
         // Details
         this.categories.add(new Category("Details")
@@ -214,14 +221,15 @@ public final class MetadataPanel extends ScrollPanel {
 
         if (this.resizedCategories.isEmpty()) {
             final Font font = this.minecraft.font;
-            final int noResultsWidth = font.width(NO_RESULTS);
+            final int noResultsWidth = font.width(MetadataPanel.NO_RESULTS);
 
             font.draw(
-                    stack,
-                    NO_RESULTS,
-                    ((float) this.width / 2) + this.left - ((float) noResultsWidth / 2),
-                    this.top + 10,
-                    0xFFFFFF);
+                stack,
+                MetadataPanel.NO_RESULTS,
+                ((float) this.width / 2) + this.left - ((float) noResultsWidth / 2),
+                this.top + 10,
+                0xFFFFFF
+            );
 
             return;
         }
@@ -364,6 +372,18 @@ public final class MetadataPanel extends ScrollPanel {
             ichat.append(string.substring(lastEnd));
         }
         return ichat;
+    }
+
+    @Override
+    public NarrationPriority narrationPriority() {
+        return NarrationPriority.NONE; // todo
+    }
+
+    @Override
+    public void updateNarration(final NarrationElementOutput elementOutput) {
+        if (this.activePluginName != null) {
+            elementOutput.add(NarratedElementType.TITLE, this.activePluginName);
+        }
     }
 
     private static final class Category {

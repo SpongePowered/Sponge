@@ -48,8 +48,9 @@ public abstract class TitleScreenMixin_Vanilla extends Screen {
 
     @Inject(method = "init", at = @At("TAIL"))
     private void vanilla$addPluginsButton(final CallbackInfo ci) {
-        final Optional<AbstractWidget> realmsButton = this.buttons.stream()
-            .filter(b -> b.getMessage().equals(new TranslatableComponent("menu.online")))
+        final Optional<AbstractWidget> realmsButton = this.children().stream()
+            .filter(b ->  b instanceof AbstractWidget && ((AbstractWidget) b).getMessage().equals(new TranslatableComponent("menu.online")))
+            .map(b -> (AbstractWidget) b)
             .findFirst();
         realmsButton.ifPresent(b -> {
             b.setWidth(98);
@@ -57,7 +58,7 @@ public abstract class TitleScreenMixin_Vanilla extends Screen {
         });
 
         // Plugins Button
-        this.addButton(new Button(this.width / 2 - 100, realmsButton.map(b -> b.y).orElse(0), 98, 20, new TextComponent("Plugins"),
+        this.addRenderableWidget(new Button(this.width / 2 - 100, realmsButton.map(b -> b.y).orElse(0), 98, 20, new TextComponent("Plugins"),
             b -> this.minecraft.setScreen(new PluginScreen(this))));
     }
 }

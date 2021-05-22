@@ -1147,9 +1147,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
 
         @Override
-        public <E> DataResult<Pair<E, OptionalInt>> parseElement(final DynamicOps<JsonElement> ops, final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<E>> registryKey, final net.minecraft.resources.ResourceKey<E> elementKey, final Decoder<E> decoder) {
+        public <E> Optional<DataResult<Pair<E, OptionalInt>>> parseElement(final DynamicOps<JsonElement> ops, final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<E>> registryKey, final net.minecraft.resources.ResourceKey<E> elementKey, final Decoder<E> decoder) {
             final DataResult<E> result = decoder.parse(ops, this.element);
-            return result.map(t -> Pair.of(t, OptionalInt.empty()));
+            return Optional.of(result.map(t -> Pair.of(t, OptionalInt.empty()))); // todo: correct?
         }
     }
 }

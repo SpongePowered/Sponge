@@ -14,7 +14,7 @@
         "ChatFormattingAccessor",
         "advancements.CriteriaTriggersAccessor",
         "advancements.CriterionTrigger_ListenerAccessor",
-        "advancements.critereon.MinMaxBounds_FloatsAccessor",
+        "advancements.critereon.MinMaxBounds_DoublesAccessor",
         "advancements.critereon.MinMaxBounds_IntsAccessor",
         "commands.CommandSourceStackAccessor",
         "commands.arguments.DimensionArgumentAccessor",

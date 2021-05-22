@@ -35,8 +35,14 @@ import net.minecraft.ChatFormatting;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.Font;
 import net.minecraft.client.gui.components.AbstractSelectionList;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
+import net.minecraft.client.gui.narration.NarrationSupplier;
 import net.minecraft.client.gui.screens.Screen;
 import net.minecraft.client.renderer.GameRenderer;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.TranslatableComponent;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.accessor.client.gui.components.AbstractSelectionListAccessor;
 import org.spongepowered.vanilla.util.Bounds;
 
@@ -50,6 +56,8 @@ import javax.annotation.Nullable;
 
 @SuppressWarnings("unchecked")
 public class FilterableList<P extends FilterableList<P, E>, E extends FilterableList.Entry<P, E>> extends AbstractSelectionList<E> {
+
+    private static final Component USAGE_NARRATION = new TranslatableComponent("narration.selection.usage");
 
     private final Screen screen;
     private Supplier<List<E>> filterSupplier;
@@ -289,7 +297,26 @@ public class FilterableList<P extends FilterableList<P, E>, E extends Filterable
         }
     }
 
-    public static abstract class Entry<P extends FilterableList<P, E>, E extends org.spongepowered.vanilla.client.gui.widget.list.FilterableList.Entry<P, E>> extends net.minecraft.client.gui.components.AbstractSelectionList.Entry<E> {
+    @Override
+    public void updateNarration(final @NonNull NarrationElementOutput narrationConsumer) {
+        final @org.checkerframework.checker.nullness.qual.Nullable E hovered = this.getCurrentHoveredEntry();
+        if (hovered != null) {
+            this.narrateListElementPosition(narrationConsumer, hovered);
+            hovered.updateNarration(narrationConsumer);
+        } else {
+            final E selected = this.getSelected();
+            if (selected != null) {
+                this.narrateListElementPosition(narrationConsumer.nest(), selected);
+                selected.updateNarration(narrationConsumer);
+            }
+        }
+
+        if (this.isFocused()) {
+            narrationConsumer.add(NarratedElementType.USAGE, FilterableList.USAGE_NARRATION);
+        }
+    }
+
+    public static abstract class Entry<P extends FilterableList<P, E>, E extends org.spongepowered.vanilla.client.gui.widget.list.FilterableList.Entry<P, E>> extends net.minecraft.client.gui.components.AbstractSelectionList.Entry<E> implements NarrationSupplier {
 
         private final P parentList;
 

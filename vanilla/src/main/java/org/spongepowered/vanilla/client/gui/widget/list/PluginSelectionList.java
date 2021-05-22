@@ -25,6 +25,8 @@
 package org.spongepowered.vanilla.client.gui.widget.list;
 
 import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.gui.narration.NarratedElementType;
+import net.minecraft.client.gui.narration.NarrationElementOutput;
 import net.minecraft.client.gui.screens.Screen;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.vanilla.util.Bounds;
@@ -68,6 +70,11 @@ public final class PluginSelectionList extends FilterableList<PluginSelectionLis
         public boolean mouseClicked(final double p_mouseClicked_1_, final double p_mouseClicked_3_, final int p_mouseClicked_5_) {
             this.getParentList().setSelected(this);
             return true;
+        }
+
+        @Override
+        public void updateNarration(final NarrationElementOutput var1) {
+            var1.add(NarratedElementType.TITLE, this.metadata.name().orElse(this.metadata.id()));
         }
     }
 }

@@ -46,7 +46,7 @@ public abstract class EntitySelectorMixin {
         return !entity.isSpectator();
     };
 
-    @Shadow @Final @Mutable public static Predicate<Entity> ATTACK_ALLOWED = entity ->{
+    /* @Shadow @Final @Mutable public static Predicate<Entity> ATTACK_ALLOWED = entity ->{
         if (entity instanceof VanishableBridge
             && ((VanishableBridge) entity).bridge$isVanished()
             && ((VanishableBridge) entity).bridge$isVanishPreventsTargeting()) {
@@ -54,7 +54,7 @@ public abstract class EntitySelectorMixin {
             return false;
         }
         return !(entity instanceof Player) || (!entity.isSpectator() && !((Player) entity).isCreative());
-    };
+    }; */
 
 
 }

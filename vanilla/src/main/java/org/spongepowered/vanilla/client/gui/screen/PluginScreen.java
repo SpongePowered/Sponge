@@ -96,22 +96,20 @@ public final class PluginScreen extends Screen {
         });
 
         // Add controls
-        this.children.addAll(Arrays.asList(this.selectionList, this.contentPanel, this.searchField));
+        this.addRenderableWidget(this.selectionList);
+        this.addRenderableWidget(this.contentPanel);
+        this.addRenderableWidget(this.searchField);
 
         // Add the 'Done' button
-        this.addButton(new Button(this.width / 2 - 50, this.height - 40, 100, 20, new TranslatableComponent(I18n.get("gui.done")),
+        this.addRenderableWidget(new Button(this.width / 2 - 50, this.height - 40, 100, 20, new TranslatableComponent(I18n.get("gui.done")),
             (p_214323_1_) -> Minecraft.getInstance().setScreen(this.previousScreen)));
     }
 
     @Override
     public void render(final PoseStack stack, final int p_render_1_, final int p_render_2_, final float p_render_3_) {
         this.renderBackground(stack);
-        this.children.stream()
-            .filter(child -> child instanceof Widget)
-            .forEach(child -> ((Widget) child).render(stack, p_render_1_, p_render_2_, p_render_3_));
+        super.render(stack, p_render_1_, p_render_2_, p_render_3_); // render the widgets
         Screen.drawCenteredString(stack, this.font, this.title.getString(), this.width / 2, 8, 16777215);
-
-        super.render(stack, p_render_1_, p_render_2_, p_render_3_);
     }
 
     private void generateEntries(final List<PluginMetadata> metadatas) {

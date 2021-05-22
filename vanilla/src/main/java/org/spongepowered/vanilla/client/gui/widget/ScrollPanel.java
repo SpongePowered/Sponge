@@ -36,7 +36,6 @@ import com.mojang.blaze3d.vertex.Tesselator;
 import com.mojang.blaze3d.vertex.VertexFormat;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.gui.GuiComponent;
-import net.minecraft.client.gui.components.AbstractSelectionList;
 import net.minecraft.client.gui.components.Widget;
 import net.minecraft.client.gui.components.events.AbstractContainerEventHandler;
 import net.minecraft.client.gui.components.events.GuiEventListener;
@@ -95,7 +94,7 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
     }
 
     private void applyScrollLimits() {
-        int max = Math.max(0, this.getMaxScroll());
+        final int max = Math.max(0, this.getMaxScroll());
 
         if (this.scrollDistance < 0.0F) {
             this.scrollDistance = 0.0F;
@@ -219,25 +218,24 @@ public abstract class ScrollPanel extends AbstractContainerEventHandler implemen
             }
 
             RenderSystem.disableTexture();
-            RenderSystem.setShader(GameRenderer::getPositionTexColorShader);
-            RenderSystem._setShaderTexture(0, AbstractSelectionList.WHITE_TEXTURE_LOCATION);
-            worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            worldr.vertex(this.barLeft, this.bottom, 0.0f).uv(0.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
-            worldr.vertex(this.barLeft + this.barWidth, this.bottom, 0.0f).uv(1.0f, 1.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
-            worldr.vertex(this.barLeft + this.barWidth, this.top, 0.0f).uv(1.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
-            worldr.vertex(this.barLeft, this.top, 0.0f).uv(0.0f, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            RenderSystem.setShader(GameRenderer::getPositionColorShader);
+            worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            worldr.vertex(this.barLeft, this.bottom, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth, this.bottom, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth, this.top, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
+            worldr.vertex(this.barLeft, this.top, 0.0f).color(0x00, 0x00, 0x00, 0xFF).endVertex();
             tess.end();
-            worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            worldr.vertex(this.barLeft, barTop + barHeight, 0.0f).uv(0.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            worldr.vertex(this.barLeft + this.barWidth, barTop + barHeight, 0.0f).uv(1.0f, 1.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            worldr.vertex(this.barLeft + this.barWidth, barTop, 0.0f).uv(1.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
-            worldr.vertex(this.barLeft, barTop, 0.0f).uv(0.0f, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            worldr.vertex(this.barLeft, barTop + barHeight, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth, barTop + barHeight, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth, barTop, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
+            worldr.vertex(this.barLeft, barTop, 0.0f).color(0x80, 0x80, 0x80, 0xFF).endVertex();
             tess.end();
-            worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_TEX_COLOR);
-            worldr.vertex(this.barLeft, barTop + barHeight - 1, 0.0f).uv(0.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
-            worldr.vertex(this.barLeft + this.barWidth - 1, barTop + barHeight - 1, 0.0f).uv(1.0f, 1.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
-            worldr.vertex(this.barLeft + this.barWidth - 1, barTop, 0.0f).uv(1.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
-            worldr.vertex(this.barLeft, barTop, 0.0f).uv(0.0f, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.begin(VertexFormat.Mode.QUADS, DefaultVertexFormat.POSITION_COLOR);
+            worldr.vertex(this.barLeft, barTop + barHeight - 1, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth - 1, barTop + barHeight - 1, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.vertex(this.barLeft + this.barWidth - 1, barTop, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
+            worldr.vertex(this.barLeft, barTop, 0.0f).color(0xC0, 0xC0, 0xC0, 0xFF).endVertex();
             tess.end();
         }
 

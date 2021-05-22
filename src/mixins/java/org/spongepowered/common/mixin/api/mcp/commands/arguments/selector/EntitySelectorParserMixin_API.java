@@ -51,7 +51,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_FloatsAccessor;
+import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_DoublesAccessor;
 import org.spongepowered.common.accessor.advancements.critereon.MinMaxBounds_IntsAccessor;
 import org.spongepowered.common.bridge.commands.arguments.selector.EntitySelectorParserBridge;
 import org.spongepowered.common.command.selector.SpongeSelectorSortAlgorithm;
@@ -85,7 +85,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Shadow @Final private StringReader reader;
     @Shadow private int maxResults;
     @Shadow private BiConsumer<Vec3, List<? extends Entity>> order;
-    @Shadow private MinMaxBounds.Floats distance;
+    @Shadow private MinMaxBounds.Doubles distance;
     @Shadow private MinMaxBounds.Ints level;
     @Shadow private boolean includesEntities;
     @Shadow private boolean worldLimited;
@@ -167,9 +167,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     public Selector.@NonNull Builder distance(@NonNull final Range<@NonNull Double> range) {
         Preconditions.checkArgument(range.min() == null || range.min() >= 0, "min must be non-negative");
         Preconditions.checkArgument(range.max() == null || range.max() >= 0, "max must be non-negative");
-        this.distance = MinMaxBounds_FloatsAccessor.invoker$new(
-                this.api$floatFromDouble(range.min(), Function.identity()),
-                this.api$floatFromDouble(range.max(), Function.identity()));
+        this.distance = MinMaxBounds_DoublesAccessor.invoker$new(range.min(), range.max());
         return this;
     }
 
@@ -400,7 +398,7 @@ public abstract class EntitySelectorParserMixin_API implements Selector.Builder 
     @Override
     public Selector.@NonNull Builder reset() {
         this.order = EntitySelectorParser.ORDER_ARBITRARY;
-        this.distance = MinMaxBounds.Floats.ANY;
+        this.distance = MinMaxBounds.Doubles.ANY;
         this.level = MinMaxBounds.Ints.ANY;
         this.includesEntities = false;
         this.worldLimited = false;

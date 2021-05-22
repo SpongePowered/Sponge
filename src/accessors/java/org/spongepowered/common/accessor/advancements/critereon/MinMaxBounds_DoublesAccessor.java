@@ -30,10 +30,10 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
 
-@Mixin(MinMaxBounds.Floats.class)
-public interface MinMaxBounds_FloatsAccessor {
+@Mixin(MinMaxBounds.Doubles.class)
+public interface MinMaxBounds_DoublesAccessor {
 
-    @Invoker("<init>") static MinMaxBounds.Floats invoker$new(final @Nullable Float min, final @Nullable Float max) {
+    @Invoker("<init>") static MinMaxBounds.Doubles invoker$new(final @Nullable Double min, final @Nullable Double max) {
         throw new UntransformedInvokerError();
     }
 
