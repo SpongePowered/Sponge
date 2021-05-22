@@ -37,16 +37,15 @@ import org.spongepowered.api.event.entity.ExpireEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeImpl;
 import org.spongepowered.common.SpongeImplHooks;
 import org.spongepowered.common.bridge.entity.EntityItemBridge;
-import org.spongepowered.common.bridge.inventory.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.WorldInfoBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -186,20 +185,6 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
         compound.setBoolean(Constants.Sponge.Entity.Item.INFINITE_DESPAWN_DELAY, this.infiniteDespawnDelay);
         compound.setShort(Constants.Sponge.Entity.Item.PREVIOUS_DESPAWN_DELAY, (short) this.previousDespawnDelay);
     }
-
-    @Inject(
-        method = "onCollideWithPlayer",
-        at = @At(
-            value = "INVOKE",
-            ordinal = 0,
-            target = "Lnet/minecraft/entity/item/EntityItem;getItem()Lnet/minecraft/item/ItemStack;"),
-        cancellable = true
-    )
-    private void spongeImpl$ThrowPickupEvent(final EntityPlayer entityIn, final CallbackInfo ci) {
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (EntityItem) (Object) this, this.pickupDelay)) {
-            ci.cancel();
-        }
-    }
     
     @Inject(
         method = "onUpdate",
@@ -223,16 +208,8 @@ public abstract class EntityItemMixin extends EntityMixin implements EntityItemB
     }
 
     @Redirect(method = "onCollideWithPlayer", at = @At(value = "INVOKE", target = "Lnet/minecraft/entity/player/InventoryPlayer;addItemStackToInventory(Lnet/minecraft/item/ItemStack;)Z"))
-    private boolean spongeImpl$throwPikcupEventForAddItem(final InventoryPlayer inventory, final ItemStack itemStack, final EntityPlayer player) {
-        final TrackedInventoryBridge inv = (TrackedInventoryBridge) inventory;
-        inv.bridge$setCaptureInventory(true);
-        final boolean added = inventory.addItemStackToInventory(itemStack);
-        inv.bridge$setCaptureInventory(false);
-        inv.bridge$getCapturedSlotTransactions();
-        if (!SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(player, inv)) {
-            return false;
-        }
-        return added;
+    private boolean spongeImpl$throwPickupEventForAddItem(final InventoryPlayer inventory, final ItemStack itemStack, final EntityPlayer player) {
+        return SpongeCommonEventFactory.callPlayerChangeInventoryPickupEvent(player, (EntityItem) (Object) this);
     }
 
 }

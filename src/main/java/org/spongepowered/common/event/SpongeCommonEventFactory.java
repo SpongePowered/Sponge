@@ -186,7 +186,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.EnumSet;
-import java.util.HashMap;
 import java.util.HashSet;
 import java.util.Iterator;
 import java.util.List;
@@ -340,9 +339,7 @@ public class SpongeCommonEventFactory {
         return event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
     }
 
-
-
-    public static boolean callPlayerChangeInventoryPickupPreEvent(final EntityPlayer player, final EntityItem itemToPickup, final int pickupDelay) {
+    public static boolean callPlayerChangeInventoryPickupEvent(final EntityPlayer player, final EntityItem itemToPickup) {
         final ItemStack stack = itemToPickup.getItem();
         Sponge.getCauseStackManager().pushCause(player);
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
@@ -358,8 +355,8 @@ public class SpongeCommonEventFactory {
         if (event.getCustom().isPresent()) {
             final List<ItemStackSnapshot> list = event.getCustom().get();
             if (list.isEmpty()) {
-                itemToPickup.getItem().setCount(0);
-                return false;
+                stack.setCount(0);
+                return true;
             }
 
             boolean fullTransfer = true;
@@ -384,12 +381,21 @@ public class SpongeCommonEventFactory {
             if (!callPlayerChangeInventoryPickupEvent(player, capture)) {
                 return false;
             }
-            itemToPickup.getItem().setCount(0);
+            stack.setCount(0);
+            return true;
+        } else {
+            final TrackedInventoryBridge capture = (TrackedInventoryBridge) player.inventory;
+            capture.bridge$setCaptureInventory(true);
+            final boolean added = player.inventory.addItemStackToInventory(stack);
+            capture.bridge$setCaptureInventory(false);
+            if (!callPlayerChangeInventoryPickupEvent(player, capture)) {
+                return false;
+            }
+            return added;
         }
-        return true;
     }
 
-    public static boolean callPlayerChangeInventoryPickupEvent(final EntityPlayer player, final TrackedInventoryBridge inventory) {
+    private static boolean callPlayerChangeInventoryPickupEvent(final EntityPlayer player, final TrackedInventoryBridge inventory) {
         if (inventory.bridge$getCapturedSlotTransactions().isEmpty()) {
             return true;
         }
@@ -475,7 +481,7 @@ public class SpongeCommonEventFactory {
         return trans;
     }
 
-    public static boolean callInventoryPickupEvent(final IInventory inventory, final ItemStack[] prevInventory) {
+    private static boolean callInventoryPickupEvent(final IInventory inventory, final ItemStack[] prevInventory) {
         final Inventory spongeInventory = InventoryUtil.toInventory(inventory, null);
         final List<SlotTransaction> trans = generateTransactions(spongeInventory, inventory, prevInventory);
         if (trans.isEmpty()) {
