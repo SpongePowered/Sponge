@@ -26,6 +26,7 @@ package org.spongepowered.common.adventure;
 
 import com.github.benmanes.caffeine.cache.Cache;
 import com.github.benmanes.caffeine.cache.Caffeine;
+import io.leangen.geantyref.TypeToken;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.Command;
@@ -37,7 +38,6 @@ import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
-import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 
 import java.time.Duration;
@@ -62,10 +62,10 @@ public final class CallbackCommand {
     public Command.Parameterized createCommand() {
         this.callbacks.invalidateAll();
 
-        final Parameter.Key<Consumer<CommandCause>> key = Parameter.key("key", TypeTokens.COMMAND_CAUSE_CONSUMER);
+        final Parameter.Key<Consumer<CommandCause>> key = Parameter.key("key", new TypeToken<Consumer<CommandCause>>() {});
         return Command.builder()
                 .shortDescription(Component.text("Execute a callback registered as part of a TextComponent. Primarily for internal use"))
-                .addParameter(Parameter.builder(TypeTokens.COMMAND_CAUSE_CONSUMER).key(key).addParser(new CallbackValueParameter()).build())
+                .addParameter(Parameter.builder(key).addParser(new CallbackValueParameter()).build())
                 .executor(context -> {
                     context.requireOne(key).accept(context.cause());
                     return CommandResult.success();

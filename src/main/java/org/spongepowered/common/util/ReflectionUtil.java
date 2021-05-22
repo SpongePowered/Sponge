@@ -72,6 +72,12 @@ public final class ReflectionUtil {
         BlockPos.class,
         Entity.class
     };
+    private static final Class<?>[] STEP_ON_METHOD_ARGS = {
+        Level.class,
+        BlockPos.class,
+        BlockState.class,
+        Entity.class
+    };
 
     public static boolean isNeighborChangedDeclared(final Class<?> targetClass) {
         return ReflectionUtil.doesMethodExist(
@@ -88,6 +94,15 @@ public final class ReflectionUtil {
             BlockBehaviour.class,
             "entityInside",
             ReflectionUtil.ENTITY_INSIDE_METHOD_ARGS
+        );
+    }
+
+    public static boolean isStepOnDeclared(final Class<?> targetClass) {
+        return ReflectionUtil.doesMethodExist(
+            targetClass,
+            Block.class,
+            "stepOn",
+            ReflectionUtil.STEP_ON_METHOD_ARGS
         );
     }
 

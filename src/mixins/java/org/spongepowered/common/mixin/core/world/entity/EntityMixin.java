@@ -47,11 +47,13 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Material;
 import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.AABB;
+import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.event.Cause;
@@ -79,6 +81,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.TimingBridge;
+import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
@@ -94,6 +97,7 @@ import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
@@ -194,8 +198,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract float shadow$getXRot();
     @Shadow public abstract void shadow$setYRot(final float param0);
     @Shadow public abstract void shadow$setXRot(final float param0);
+    @Shadow protected abstract Vec3 shadow$collide(Vec3 param0);
     // @formatter:on
 
+    @Shadow protected String stringUUID;
     private boolean impl$isConstructing = true;
     private boolean impl$vanishPreventsTargeting = false;
     private boolean impl$isVanished = false;
@@ -208,6 +214,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     protected boolean impl$hasCustomFireImmuneTicks = false;
     protected boolean impl$dontCreateExitPortal = false;
     protected short impl$fireImmuneTicks = 0;
+    private BlockPos impl$lastCollidedBlockPos;
 
     // When changing custom data it is serialized on to this.
     // On writeInternal the SpongeData tag is added to the new CompoundNBT accordingly
@@ -864,75 +871,84 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         this.velocityChanged = true;
     }
 
+    */
+
+    @Redirect(method = "move", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;collide(Lnet/minecraft/world/phys/Vec3;)Lnet/minecraft/world/phys/Vec3;"))
+    private Vec3 impl$onMoveCollide(final Entity entity, final Vec3 originalMove) {
+        final Vec3 afterCollide = this.shadow$collide(originalMove);
+        if (ShouldFire.COLLIDE_BLOCK_EVENT_MOVE && !originalMove.equals(afterCollide)) {
+            // We had a collision! Try to find the colliding block
+            // TODO this is not 100% accurate as the collision happens with the bb potentially colliding with multiple blocks
+            // TODO maybe actually check for blocks in bb?
+            BlockPos pos = new BlockPos(this.position.add(originalMove));
+            if (this.blockPosition.equals(pos)) {
+                // retry with bigger move for entities with big bounding box - e.g. minecart
+                pos = new BlockPos(this.position.add(originalMove.normalize()));
+            }
+            final BlockState state = this.level.getBlockState(pos);
+            final org.spongepowered.api.util.Direction dir = org.spongepowered.api.util.Direction.closest(new Vector3d(originalMove.x, originalMove.y, originalMove.z));
+            if (SpongeCommonEventFactory.handleCollideBlockEvent(state.getBlock(), this.level, pos, state,
+                    (Entity) (Object) this, dir, SpongeCommonEventFactory.CollisionType.MOVE)) {
+                return originalMove;
+            }
+        }
+        return afterCollide;
+    }
+
+    @Redirect(method = "checkFallDamage",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/block/Block;fallOn(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;F)V"))
+    private void impl$onFallOnCollide(final Block block, final Level world, final BlockState state, final BlockPos pos, final Entity entity, final float fallDistance) {
+        if (!ShouldFire.COLLIDE_BLOCK_EVENT_FALL || world.isClientSide) {
+            block.fallOn(world, state, pos, entity, fallDistance);
+            return;
+        }
+
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, org.spongepowered.api.util.Direction.UP, SpongeCommonEventFactory.CollisionType.FALL)) {
+            block.fallOn(world, state, pos, entity, fallDistance);
+            this.impl$lastCollidedBlockPos = pos;
+        }
+    }
+
     @Redirect(
-        method = "move",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/block/Block;onEntityWalk(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"
-        )
+            method = "move",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/block/Block;stepOn(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/world/entity/Entity;)V"
+            )
     )
-    private void impl$onEntityCollideWithBlockThrowEventSponge(final Block block, final net.minecraft.world.World world,
-        final BlockPos pos, final Entity entity) {
-        // if block can't collide, return
-        if (!((BlockBridge) block).bridge$hasCollideLogic()) {
+    private void impl$onStepOnCollide(final Block block, final Level world, final BlockPos pos, final BlockState state, final Entity entity) {
+        if (!ShouldFire.COLLIDE_BLOCK_EVENT_STEP_ON || world.isClientSide) {
+            block.stepOn(world, pos, state, entity);
             return;
         }
 
-        if (world.isClientSide) {
-            block.onEntityWalk(world, pos, entity);
-            return;
-        }
-
-        final BlockState state = world.getBlockState(pos);
-        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.NONE)) {
-            block.onEntityWalk(world, pos, entity);
+        final org.spongepowered.api.util.Direction dir = org.spongepowered.api.util.Direction.NONE;
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, dir, SpongeCommonEventFactory.CollisionType.STEP_ON)) {
+            block.stepOn(world, pos, state, entity);
             this.impl$lastCollidedBlockPos = pos;
         }
 
     }
 
-    @Redirect(method = "doBlockCollisions",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/block/BlockState;onEntityCollision(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;)V"
-        )
+    @Redirect(method = "checkInsideBlocks",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/world/level/block/state/BlockState;entityInside(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/Entity;)V"
+            )
     ) // doBlockCollisions
-    private void impl$onEntityCollideWithBlockState(final BlockState blockState,
-        final net.minecraft.world.World worldIn, final BlockPos pos, final Entity entityIn) {
-        // if block can't collide, return
-        if (!((BlockBridge) blockState.getBlock()).bridge$hasCollideWithStateLogic()) {
+    private void impl$onCheckInsideBlocksCollide(final BlockState blockState, final Level worldIn, final BlockPos pos, final Entity entityIn) {
+        if (!ShouldFire.COLLIDE_BLOCK_EVENT_INSIDE || worldIn.isClientSide) {
+            blockState.entityInside(worldIn, pos, entityIn);
             return;
         }
 
-        if (world.isClientSide) {
-            blockState.onEntityCollision(world, pos, entityIn);
-            return;
-        }
-
-        if (!SpongeCommonEventFactory.handleCollideBlockEvent(blockState.getBlock(), world, pos, blockState, entityIn, Direction.NONE)) {
-            blockState.onEntityCollision(world, pos, entityIn);
+        final org.spongepowered.api.util.Direction dir = org.spongepowered.api.util.Direction.NONE;
+        if (!SpongeCommonEventFactory.handleCollideBlockEvent(blockState.getBlock(), worldIn, pos, blockState, entityIn, dir, SpongeCommonEventFactory.CollisionType.INSIDE)) {
+            blockState.entityInside(worldIn, pos, entityIn);
             this.impl$lastCollidedBlockPos = pos;
         }
 
     }
-
-    @Redirect(method = "updateFallState",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/block/Block;onFallenUpon(Lnet/minecraft/world/World;Lnet/minecraft/util/math/BlockPos;Lnet/minecraft/entity/Entity;F)V"))
-    private void impl$onBlockFallenUpon(final Block block, final net.minecraft.world.World world, final BlockPos pos,
-        final Entity entity, final float fallDistance) {
-        if (world.isClientSide) {
-            block.onFallenUpon(world, pos, entity, fallDistance);
-            return;
-        }
-
-        final BlockState state = world.getBlockState(pos);
-        if (!SpongeCommonEventFactory.handleCollideBlockEvent(block, world, pos, state, entity, Direction.UP)) {
-            block.onFallenUpon(world, pos, entity, fallDistance);
-            this.impl$lastCollidedBlockPos = pos;
-        }
-
-    }
-*/
 
     /**
          * @author gabizou - January 4th, 2016
@@ -1012,13 +1028,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         // Sponge - Redirect server sided code to handle through the PhaseTracker
         return EntityUtil.entityOnDropItem((Entity) (Object) this, stack, offsetY, ((Entity) (Object) this).posX, ((Entity) (Object) this).posZ);
     }
-
+*/
     @Nullable
     @Override
     public BlockPos bridge$getLastCollidedBlockPos() {
         return this.impl$lastCollidedBlockPos;
     }
-*/
+
 
 /*
     @Redirect(method = "setFire",

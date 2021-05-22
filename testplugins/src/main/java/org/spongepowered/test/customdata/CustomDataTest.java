@@ -57,7 +57,6 @@ import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.scheduler.Scheduler;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.api.util.TypeTokens;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
@@ -176,17 +175,17 @@ public final class CustomDataTest {
 
         // Or if it is super simple data
 
-        this.mySimpleDataKey = Key.of(this.plugin, "mysimpledata", TypeTokens.STRING_VALUE_TOKEN);
+        this.mySimpleDataKey = Key.from(this.plugin, "mysimpledata", String.class);
         event.register(DataRegistration.of(this.mySimpleDataKey, ItemStack.class));
 
-        this.myItemTypeKey = Key.of(this.plugin, "myitemtypedata", TypeTokens.ITEM_TYPE_VALUE_TOKEN);
+        this.myItemTypeKey = Key.from(this.plugin, "myitemtypedata", ItemType.class);
         event.register(DataRegistration.of(this.myItemTypeKey, ItemStack.class));
     }
 
     // replace with mongoDB - for web-scale
     private Map<ResourceKey, Map<Vector3i, Integer>> myCustomData = new HashMap<>();
 
-    private DataTransactionResult removeData(ServerLocation serverLocation) {
+    private DataTransactionResult removeData(final ServerLocation serverLocation) {
         final Integer removed = this.myCustomData.getOrDefault(serverLocation.worldKey(), Collections.emptyMap()).remove(serverLocation.blockPosition());
         if (removed == null) {
             return DataTransactionResult.failNoData();
@@ -194,13 +193,13 @@ public final class CustomDataTest {
         return DataTransactionResult.successRemove(Value.immutableOf(this.myDataKey, removed));
     }
 
-    private DataTransactionResult setData(ServerLocation serverLocation, Integer value) {
+    private DataTransactionResult setData(final ServerLocation serverLocation, final Integer value) {
         final Map<Vector3i, Integer> worldData = this.myCustomData.computeIfAbsent(serverLocation.worldKey(), k -> new HashMap<>());
         worldData.put(serverLocation.blockPosition(), value);
         return DataTransactionResult.successResult(Value.immutableOf(this.myDataKey, value));
     }
 
-    private Integer getData(ServerLocation serverLocation) {
+    private Integer getData(final ServerLocation serverLocation) {
         return this.myCustomData.getOrDefault(serverLocation.worldKey(), Collections.emptyMap()).get(serverLocation.blockPosition());
     }
 

@@ -101,6 +101,11 @@ public final class ShouldFire {
     public static boolean EXPLOSION_EVENT_DETONATE = false;
     public static boolean COLLIDE_ENTITY_EVENT = false;
 
+    public static boolean COLLIDE_BLOCK_EVENT_MOVE = false;
+    public static boolean COLLIDE_BLOCK_EVENT_FALL = false;
+    public static boolean COLLIDE_BLOCK_EVENT_STEP_ON = false;
+    public static boolean COLLIDE_BLOCK_EVENT_INSIDE = false;
+
     public static boolean BREEDING_EVENT_READY_TO_MATE = false;
     public static boolean BREEDING_EVENT_FIND_MATE = false;
     public static boolean BREEDING_EVENT_BREED = false;

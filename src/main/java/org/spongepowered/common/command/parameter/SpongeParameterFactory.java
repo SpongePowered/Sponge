@@ -31,6 +31,11 @@ import org.spongepowered.api.command.parameter.Parameter;
 public final class SpongeParameterFactory implements Parameter.Factory {
 
     @Override
+    public <T> Parameter.Value.Builder<T> createParameterBuilder(final Parameter.Key<T> key) {
+        return new SpongeParameterValueBuilder<T>(key.type()).key(key);
+    }
+
+    @Override
     public <T> Parameter.Value.@NonNull Builder<T> createParameterBuilder(final @NonNull TypeToken<T> parameterClass) {
         return new SpongeParameterValueBuilder<>(parameterClass.getType());
     }

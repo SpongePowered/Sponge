@@ -45,7 +45,10 @@ import java.util.ArrayList;
 import java.util.Comparator;
 import java.util.HashMap;
 import java.util.HashSet;
+import java.util.List;
+import java.util.Map;
 import java.util.Objects;
+import java.util.Set;
 import java.util.function.BiPredicate;
 import java.util.function.Supplier;
 
@@ -70,11 +73,86 @@ public final class SpongeKeyBuilder<E, V extends Value<E>> extends AbstractResou
         return (SpongeKeyBuilder<T, B>) this;
     }
 
-    @Override public <T> Key.Builder<T, Value<T>> elementType(final Class<T> type) {
+    @Override
+    public <T> Key.Builder<T, Value<T>> elementType(final Class<T> type) {
         Objects.requireNonNull(type, "type");
         this.valueType = TypeFactory.parameterizedClass(Value.class, type);
         this.elementType = type;
         return (SpongeKeyBuilder<T, Value<T>>) this;
+    }
+
+    @Override
+    public <T> Key.Builder<T, Value<T>> elementType(final TypeToken<T> type) {
+        Objects.requireNonNull(type, "type");
+        this.valueType = TypeFactory.parameterizedClass(Value.class, type.getType());
+        this.elementType = type.getType();
+        return (SpongeKeyBuilder<T, Value<T>>) this;
+    }
+
+    @Override
+    public <T> Key.Builder<List<T>, ListValue<T>> listElementType(final Class<T> type) {
+        Objects.requireNonNull(type, "type");
+        this.valueType = TypeFactory.parameterizedClass(ListValue.class, type);
+        this.elementType = TypeFactory.parameterizedClass(List.class, type);
+        return (SpongeKeyBuilder<List<T>, ListValue<T>>) this;
+    }
+
+    @Override
+    public <T> Key.Builder<List<T>, ListValue<T>> listElementType(final TypeToken<T> type) {
+        Objects.requireNonNull(type, "type");
+        this.valueType = TypeFactory.parameterizedClass(ListValue.class, type.getType());
+        this.elementType = TypeFactory.parameterizedClass(List.class, type.getType());
+        return (SpongeKeyBuilder<List<T>, ListValue<T>>) this;
+    }
+
+    @Override
+    public <T> Key.Builder<Set<T>, SetValue<T>> setElementType(final Class<T> type) {
+        Objects.requireNonNull(type, "type");
+        this.valueType = TypeFactory.parameterizedClass(SetValue.class, type);
+        this.elementType = TypeFactory.parameterizedClass(Set.class, type);
+        return (SpongeKeyBuilder<Set<T>, SetValue<T>>) this;
+    }
+
+    @Override
+    public <T> Key.Builder<Set<T>, SetValue<T>> setElementType(final TypeToken<T> type) {
+        Objects.requireNonNull(type, "type");
+        this.valueType = TypeFactory.parameterizedClass(SetValue.class, type.getType());
+        this.elementType = TypeFactory.parameterizedClass(Set.class, type.getType());
+        return (SpongeKeyBuilder<Set<T>, SetValue<T>>) this;
+    }
+
+    @Override
+    public <K, V1> Key.Builder<Map<K, V1>, MapValue<K, V1>> mapElementType(final Class<K> keyType, final Class<V1> valueType) {
+        Objects.requireNonNull(keyType, "keyType");
+        Objects.requireNonNull(valueType, "valueType");
+        this.valueType = TypeFactory.parameterizedClass(MapValue.class, keyType, valueType);
+        this.elementType = TypeFactory.parameterizedClass(Map.class, keyType, valueType);
+        return (SpongeKeyBuilder<Map<K, V1>, MapValue<K, V1>>) this;
+    }
+
+    @Override
+    public <K, V1> Key.Builder<Map<K, V1>, MapValue<K, V1>> mapElementType(final TypeToken<K> keyType, final TypeToken<V1> valueType) {
+        Objects.requireNonNull(keyType, "keyType");
+        Objects.requireNonNull(valueType, "valueType");
+        this.valueType = TypeFactory.parameterizedClass(MapValue.class, keyType.getType(), valueType.getType());
+        this.elementType = TypeFactory.parameterizedClass(Map.class, keyType.getType(), valueType.getType());
+        return (SpongeKeyBuilder<Map<K, V1>, MapValue<K, V1>>) this;
+    }
+
+    @Override
+    public <T> Key.Builder<WeightedTable<T>, WeightedCollectionValue<T>> weightedCollectionElementType(final Class<T> type) {
+        Objects.requireNonNull(type, "type");
+        this.valueType = TypeFactory.parameterizedClass(WeightedCollectionValue.class, type);
+        this.elementType = TypeFactory.parameterizedClass(WeightedTable.class, type);
+        return (SpongeKeyBuilder<WeightedTable<T>, WeightedCollectionValue<T>>) this;
+    }
+
+    @Override
+    public <T> Key.Builder<WeightedTable<T>, WeightedCollectionValue<T>> weightedCollectionElementType(final TypeToken<T> type) {
+        Objects.requireNonNull(type, "type");
+        this.valueType = TypeFactory.parameterizedClass(WeightedCollectionValue.class, type.getType());
+        this.elementType = TypeFactory.parameterizedClass(WeightedTable.class, type.getType());
+        return (SpongeKeyBuilder<WeightedTable<T>, WeightedCollectionValue<T>>) this;
     }
 
     @Override
