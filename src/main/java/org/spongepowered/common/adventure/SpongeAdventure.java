@@ -55,6 +55,7 @@ import net.kyori.adventure.translation.GlobalTranslator;
 import net.kyori.adventure.translation.TranslationRegistry;
 import net.kyori.adventure.translation.Translator;
 import net.kyori.adventure.util.Codec;
+import net.kyori.adventure.util.TriState;
 import net.minecraft.ChatFormatting;
 import net.minecraft.client.KeyMapping;
 import net.minecraft.core.Registry;
@@ -77,6 +78,7 @@ import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
+import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.client.KeyMappingAccessor;
 import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAccessor;
@@ -221,6 +223,21 @@ public final class SpongeAdventure {
             return mapping.getTranslatedKeyMessage().getString();
         }
         return component.keybind();
+    }
+
+    // --------------
+    // ---- Core ----
+    // --------------
+
+    public static TriState asAdventure(final Tristate state) {
+        if (state == Tristate.UNDEFINED) {
+            return TriState.NOT_SET;
+        } else if (state == Tristate.FALSE) {
+            return TriState.FALSE;
+        } else if (state == Tristate.TRUE) {
+            return TriState.TRUE;
+        }
+        throw new IllegalArgumentException(state.name());
     }
 
     // -------------
