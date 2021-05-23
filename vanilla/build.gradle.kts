@@ -50,6 +50,20 @@ val vanillaInstallerJava8 by sourceSets.register("installerLegacy8") {
     dependencies.add(implementationConfigurationName, objects.fileCollection().from(vanillaInstaller.output.classesDirs))
 }
 
+val vanillaInstallerJava9 by sourceSets.register("installerJava9") {
+    this.java.setSrcDirs(setOf("src/installer/java9"))
+
+    tasks.named(compileJavaTaskName, JavaCompile::class) {
+        options.release.set(9)
+    }
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(vanillaInstallerConfig.get())
+    }
+}
+
+dependencies.add(vanillaInstaller.implementationConfigurationName, vanillaInstallerJava9.output)
+
 val vanillaMain by sourceSets.named("main") {
     // implementation (compile) dependencies
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.implementationConfigurationName)
@@ -105,6 +119,7 @@ val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementa
 configurations.named(vanillaInstaller.implementationConfigurationName) {
     extendsFrom(vanillaInstallerConfig.get())
 }
+
 configurations.named(vanillaAppLaunch.implementationConfigurationName) {
     extendsFrom(vanillaAppLaunchConfig.get())
     extendsFrom(launchConfig.get())
@@ -310,6 +325,7 @@ tasks {
         }
         from(vanillaInstaller.output)
         from(vanillaInstallerJava8.output)
+        from(vanillaInstallerJava9.output)
     }
 
     val vanillaAppLaunchJar by registering(Jar::class) {
@@ -388,7 +404,7 @@ tasks {
         manifest {
             attributes(mapOf(
                     "Access-Widener" to "common.accesswidener",
-                    "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
+                    "Main-Class" to "org.spongepowered.vanilla.installer.VersionCheckingMain",
                     "Launch-Target" to "sponge_server_prod",
                     "Multi-Release" to true,
                     "Premain-Class" to "org.spongepowered.vanilla.installer.Agent",
@@ -405,6 +421,7 @@ tasks {
         from(sourceSets.main.map {it.output })
         from(vanillaInstaller.output)
         from(vanillaInstallerJava8.output)
+        from(vanillaInstallerJava9.output)
         from(vanillaAppLaunch.output)
         from(vanillaLaunch.output)
         from(vanillaMixins.output)

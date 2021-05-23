@@ -22,23 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level;
+package org.spongepowered.vanilla.installer;
 
-import net.minecraft.world.Difficulty;
-import net.minecraft.world.level.GameType;
-import net.minecraft.world.level.LevelSettings;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Mutable;
-import org.spongepowered.asm.mixin.gen.Accessor;
+public class VersionCheckingMain {
 
-@Mixin(LevelSettings.class)
-public interface LevelSettingsAccessor {
+    public static void main(final String[] args) throws Exception {
+        JavaVersionCheckUtils.ensureJava16();
+        VersionCheckingMain.runInstaller(args);
+    }
 
-    @Accessor("hardcore") @Mutable void accessor$hardcode(boolean hardcode);
+    private static void runInstaller(final String[] args) throws Exception {
+        InstallerMain.main(args);
+    }
 
-    @Accessor("allowCommands") @Mutable void accessor$allowCommands(boolean allowCommands);
-
-    @Accessor("difficulty") @Mutable void accessor$difficulty(Difficulty difficulty);
-
-    @Accessor("gameType") @Mutable void accessor$gameType(GameType gameType);
 }

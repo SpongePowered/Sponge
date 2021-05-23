@@ -13,7 +13,7 @@ repositories {
 
 indra {
     javaVersions {
-        target(16)
+        strictVersions(false) // it's just buildscript, no need for anything fancy
     }
 }
 

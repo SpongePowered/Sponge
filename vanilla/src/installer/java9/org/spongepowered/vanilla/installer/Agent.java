@@ -45,6 +45,9 @@ import java.util.jar.Manifest;
 /**
  * Agent, used to add downloaded jars to the system classpath and open modules
  * for deep reflection.
+ *
+ * <p>This needs to be compiled for exactly java 9, since it runs before we have
+ * an opportunity to provide a friendly warning message.</p>
  */
 public class Agent {
 
