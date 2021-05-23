@@ -26,7 +26,7 @@ package org.spongepowered.common.bridge.world.entity.player;
 
 import net.minecraft.world.InteractionHand;
 
-public interface InventoryBridge {
+public interface PlayerInventoryBridge {
 
     int bridge$getHeldItemIndex(InteractionHand hand);
 

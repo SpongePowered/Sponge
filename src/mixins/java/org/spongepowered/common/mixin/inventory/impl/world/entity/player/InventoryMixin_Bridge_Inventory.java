@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.entity.player.InventoryBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 
 import java.util.List;
@@ -43,7 +43,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 
 @Mixin(Inventory.class)
-public abstract class InventoryMixin_Bridge_Inventory implements InventoryBridge, InventoryAdapter {
+public abstract class InventoryMixin_Bridge_Inventory implements PlayerInventoryBridge, InventoryAdapter {
 
     @Shadow public int selected;
     @Shadow @Final public Player player;

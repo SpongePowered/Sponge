@@ -26,7 +26,7 @@ package org.spongepowered.common.scheduler;
 
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.common.bridge.world.entity.player.InventoryBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.BasicPluginContext;
@@ -46,7 +46,7 @@ public final class ServerScheduler extends SyncScheduler {
         for (final Player player : Sponge.server().onlinePlayers()) {
             if (player instanceof net.minecraft.world.entity.player.Player) {
                 // Detect Changes on PlayerInventories marked as dirty.
-                ((InventoryBridge) ((net.minecraft.world.entity.player.Player) player).inventory).bridge$cleanupDirty();
+                ((PlayerInventoryBridge) ((net.minecraft.world.entity.player.Player) player).inventory).bridge$cleanupDirty();
             }
         }
     }

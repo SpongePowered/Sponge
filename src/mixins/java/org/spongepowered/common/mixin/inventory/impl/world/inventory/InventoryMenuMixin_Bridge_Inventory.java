@@ -29,7 +29,7 @@ import net.minecraft.world.inventory.InventoryMenu;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.entity.player.InventoryBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
 
 @Mixin(InventoryMenu.class)
@@ -39,6 +39,6 @@ public abstract class InventoryMenuMixin_Bridge_Inventory implements InventoryMe
 
     @Override
     public void bridge$markClean() {
-        ((InventoryBridge) this.owner.inventory).bridge$markClean();
+        ((PlayerInventoryBridge) this.owner.inventory).bridge$markClean();
     }
 }
