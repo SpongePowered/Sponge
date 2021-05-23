@@ -720,12 +720,12 @@ public final class SpongeCommonEventFactory {
     public static boolean handleCollideBlockEvent(final Block block, final Level world, final BlockPos pos,
             final net.minecraft.world.level.block.state.BlockState state,
             final net.minecraft.world.entity.Entity entity, final Direction direction, final CollisionType type) {
-        if (pos.getY() <= 0) {
+        if (world.isClientSide() || pos.getY() <= 0) {
             return false;
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause( entity);
+            frame.pushCause(entity);
 
             if (entity instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge spongeEntity = (CreatorTrackedBridge) entity;

@@ -52,7 +52,6 @@ public class CollideTest implements LoadableModule {
     @Inject
     public CollideTest(final PluginContainer pluginContainer) {
         this.pluginContainer = pluginContainer;
-        Sponge.eventManager().registerListeners(this.pluginContainer, new CollideListener());
     }
 
     @Override
@@ -60,10 +59,15 @@ public class CollideTest implements LoadableModule {
         Sponge.eventManager().registerListeners(this.pluginContainer, new CollideListener());
     }
 
+    @Override
+    public void disable(final CommandContext ctx) {
+        Sponge.eventManager().unregisterListeners(this.pluginContainer);
+    }
+
     public static final class CollideListener {
 
         @Listener
-        public void onMoveCollide(CollideBlockEvent.Move event) {
+        public void onMoveCollide(final CollideBlockEvent.Move event) {
             // TODO cancel is not working for players & projectiles yet - and maybe more?
             if (event.targetBlock().type().isAnyOf(BlockTypes.EMERALD_BLOCK)) {
                  event.setCancelled(true);
@@ -71,7 +75,7 @@ public class CollideTest implements LoadableModule {
         }
 
         @Listener
-        public void onFallOnBlock(CollideBlockEvent.Fall event, @First ServerPlayer player) {
+        public void onFallOnBlock(final CollideBlockEvent.Fall event, @First final ServerPlayer player) {
             if (event.targetBlock().type().isAnyOf(BlockTypes.DIAMOND_BLOCK)) {
                 player.transform(Keys.POTION_EFFECTS, e -> {
                     e.add(PotionEffect.of(PotionEffectTypes.JUMP_BOOST, 4, 20));
@@ -85,7 +89,7 @@ public class CollideTest implements LoadableModule {
         }
 
         @Listener
-        public void onStepOnBlock(CollideBlockEvent.StepOn event, @First ServerPlayer player) {
+        public void onStepOnBlock(final CollideBlockEvent.StepOn event, @First final ServerPlayer player) {
             if (event.targetBlock().type().isAnyOf(BlockTypes.REDSTONE_BLOCK)) {
                 player.transform(Keys.POTION_EFFECTS, e -> {
                     e.add(PotionEffect.of(PotionEffectTypes.SPEED, 4, 20));
@@ -100,7 +104,7 @@ public class CollideTest implements LoadableModule {
         }
 
         @Listener
-        public void onInsideBlock(CollideBlockEvent.Inside event, @First ServerPlayer player) {
+        public void onInsideBlock(final CollideBlockEvent.Inside event, @First final ServerPlayer player) {
             if (event.targetBlock().type().isAnyOf(BlockTypes.TALL_GRASS)) {
                 player.transform(Keys.POTION_EFFECTS, e -> {
                     player.sendActionBar(Component.text("Invisibility!"));
@@ -115,7 +119,7 @@ public class CollideTest implements LoadableModule {
 
 
         @Listener
-        public void onImpact(CollideBlockEvent.Impact event) {
+        public void onImpact(final CollideBlockEvent.Impact event) {
             if (event.targetBlock().type().isAnyOf(BlockTypes.EMERALD_BLOCK)) {
                 event.setCancelled(true);
             }
