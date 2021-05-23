@@ -115,9 +115,8 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
 
     @Override
     public boolean isOpen() {
-        org.spongepowered.api.item.inventory.Container thisContainer = this;
-        throw new MissingImplementationException("Viewer", "openInventory");
-//        return this.viewer().openInventory().map(c -> c == thisContainer).orElse(false);
+        final org.spongepowered.api.item.inventory.Container thisContainer = this;
+        return this.viewer().openInventory().map(c -> c == thisContainer).orElse(false);
     }
 
     @Override
