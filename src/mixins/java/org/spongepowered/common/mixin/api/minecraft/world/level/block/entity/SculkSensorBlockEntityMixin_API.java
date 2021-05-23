@@ -24,50 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level.block.entity;
 
-import com.google.common.collect.Lists;
-import org.spongepowered.api.block.entity.Sign;
+import net.minecraft.world.level.block.entity.SculkSensorBlockEntity;
+import org.spongepowered.api.block.entity.SculkSensor;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.Constants;
 
-import java.util.List;
 import java.util.Set;
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.level.block.entity.SignBlockEntity;
 
-@Mixin(SignBlockEntity.class)
-public abstract class SignBlockEntityMixin_API extends BlockEntityMixin_API implements Sign {
-
-    // @formatter:off
-    @Shadow @Final private Component[] messages;
-    // @formatter:on
-
-    @Shadow private boolean hasGlowingText;
-
-    @Override
-    public DataContainer toContainer() {
-        final DataContainer container = super.toContainer();
-        final List<String> lines = Lists.newArrayList();
-        for (final Component line : this.messages) {
-            lines.add(Component.Serializer.toJson(line));
-        }
-
-        container.set(Constants.TileEntity.Sign.LINES, lines);
-        container.set(Constants.TileEntity.Sign.GLOWING_TEXT, this.hasGlowingText);
-        return container;
-    }
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.lines().asImmutable());
-        values.add(this.glowingText().asImmutable());
-
-        return values;
-    }
+@Mixin(SculkSensorBlockEntity.class)
+public abstract class SculkSensorBlockEntityMixin_API extends BlockEntityMixin_API implements SculkSensor {
 
 }
