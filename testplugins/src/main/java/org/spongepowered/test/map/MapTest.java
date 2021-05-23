@@ -237,7 +237,7 @@ public class MapTest implements LoadableModule {
             mapInfo.offer(Keys.MAP_CANVAS, mapCanvas);
             final ItemStack itemStack = ItemStack.of(ItemTypes.FILLED_MAP);
             itemStack.offer(Keys.MAP_INFO, mapInfo);
-            itemStack.offer(Keys.DISPLAY_NAME, Component.text(entry.key().formatted()));
+            itemStack.offer(Keys.CUSTOM_NAME, Component.text(entry.key().formatted()));
 
             player.inventory().primary().offer(itemStack);
         }

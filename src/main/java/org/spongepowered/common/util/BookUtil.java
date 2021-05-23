@@ -59,7 +59,7 @@ public final class BookUtil {
         for (final Player player : players) {
             if (!Objects.equals(player.locale(), lastLocale)) {
                 lastLocale = player.locale();
-                item.offer(Keys.DISPLAY_NAME, GlobalTranslator.render(book.title(), lastLocale));
+                item.offer(Keys.CUSTOM_NAME, GlobalTranslator.render(book.title(), lastLocale));
                 item.offer(Keys.AUTHOR, GlobalTranslator.render(book.author(), lastLocale));
                 final Locale finalLastLocale = lastLocale;
                 item.offer(Keys.PAGES, Lists.transform(book.pages(), page -> GlobalTranslator.render(page, finalLastLocale)));

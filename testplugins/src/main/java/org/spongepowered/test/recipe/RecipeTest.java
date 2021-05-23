@@ -281,7 +281,7 @@ public final class RecipeTest implements LoadableModule {
         event.register(villagerSpawnEggRecipe);
 
         final ItemStack writtenBook = ItemStack.of(ItemTypes.WRITTEN_BOOK);
-        writtenBook.offer(Keys.DISPLAY_NAME, Component.text("Biome Data"));
+        writtenBook.offer(Keys.CUSTOM_NAME, Component.text("Biome Data"));
         writtenBook.offer(Keys.AUTHOR, Component.text("Herobrine"));
         final RecipeRegistration biomeDetectorRecipe = ShapedCraftingRecipe.builder()
                 .aisle("d", "b")
@@ -295,7 +295,7 @@ public final class RecipeTest implements LoadableModule {
                     final Integer biomeHumidity = biome.map(Biome::humidity).map(d -> (int) (d*10)).orElse(0);
                     final TextComponent temperature = Component.text("Temperature: ").append(Component.text(biomeTemperature));
                     final TextComponent humidity = Component.text("Humidity: ").append(Component.text(biomeHumidity));
-                    writtenBook.offer(Keys.DISPLAY_NAME, Component.text("Biome Data: " + name));
+                    writtenBook.offer(Keys.CUSTOM_NAME, Component.text("Biome Data: " + name));
                     writtenBook.offer(Keys.PAGES, Arrays.asList(temperature, humidity));
                     writtenBook.offer(Keys.AUTHOR, Component.text(player.map(ServerPlayer::name).orElse("Herobrine")));
                     return writtenBook.copy();
