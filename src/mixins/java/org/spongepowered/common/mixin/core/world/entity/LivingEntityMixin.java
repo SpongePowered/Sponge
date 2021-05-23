@@ -71,6 +71,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformLivingEntityBridge;
@@ -913,4 +914,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     }
 
     // End implementation of UseItemStackEvent
+
+    @Inject(method = "canBeSeenAsEnemy", at = @At("HEAD"), cancellable = true)
+    private void impl$makeVanishable(final CallbackInfoReturnable<Boolean> cir) {
+        if (this instanceof VanishableBridge
+            && ((VanishableBridge) this).bridge$isVanished()
+            && ((VanishableBridge) this).bridge$isVanishPreventsTargeting()) {
+            // Sponge: Take into account untargetability from vanishing
+            cir.setReturnValue(false);
+        }
+    }
 }
