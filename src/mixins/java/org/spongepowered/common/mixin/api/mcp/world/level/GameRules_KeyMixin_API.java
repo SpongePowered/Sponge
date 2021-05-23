@@ -45,7 +45,15 @@ public class GameRules_KeyMixin_API<T> implements GameRule<T> {
 
     @Override
     public Type valueType() {
-        throw new UnsupportedOperationException("Not implemented yet");
+        final GameRules.Type<?> type = GameRulesAccessor.accessor$GAME_RULE_TYPES().get(this);
+        final GameRules.Value<?> value = type.createRule();
+        if (value instanceof GameRules.BooleanValue) {
+            return Boolean.class;
+        }
+        if (value instanceof GameRules.IntegerValue) {
+            return Integer.class;
+        }
+        throw new IllegalStateException("Unexpected GameRule.Value implementation " + value.getClass().getName());
     }
 
     @Override
