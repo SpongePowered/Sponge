@@ -109,6 +109,7 @@ configurations.named(vanillaAppLaunch.implementationConfigurationName) {
 }
 val vanillaAppLaunchRuntime by configurations.named(vanillaAppLaunch.runtimeOnlyConfigurationName)
 
+val mixinConfigs = spongeImpl.mixinConfigurations
 minecraft {
     runs {
         // Full development environment
@@ -116,11 +117,21 @@ minecraft {
             server("runJava${it}Server") {
                 args("--nogui", "--launchTarget", "sponge_server_dev")
                 targetVersion(it)
+                allArgumentProviders += CommandLineArgumentProvider {
+                    mixinConfigs.asSequence()
+                            .flatMap { sequenceOf("--mixin.config", it) }
+                            .toList()
+                }
             }
             client("runJava${it}Client") {
                 args("--launchTarget", "sponge_client_dev")
                 jvmArgs("-Dmixin.debug.export=true", "-Dmixin.debug=true")
                 targetVersion(it)
+                allArgumentProviders += CommandLineArgumentProvider {
+                    mixinConfigs.asSequence()
+                            .flatMap { sequenceOf("--mixin.config", it) }
+                            .toList()
+                }
             }
         }
 
@@ -391,6 +402,7 @@ tasks {
         manifest {
             attributes(mapOf(
                     "Access-Widener" to "common.accesswidener",
+                    "MixinConfigs" to mixinConfigs.joinToString(","),
                     "Main-Class" to "org.spongepowered.vanilla.installer.InstallerMain",
                     "Launch-Target" to "sponge_server_prod",
                     "Multi-Release" to true,

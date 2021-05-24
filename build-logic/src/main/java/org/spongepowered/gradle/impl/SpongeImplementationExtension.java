@@ -4,18 +4,27 @@ import org.gradle.api.Project;
 import org.gradle.api.logging.Logger;
 import org.gradle.api.tasks.SourceSet;
 
+import java.util.Collection;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.Objects;
+import java.util.Set;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
+import javax.annotation.Nullable;
 import javax.inject.Inject;
 
 public abstract class SpongeImplementationExtension {
 
+    public static final String MIXIN_CONFIGS_PROPERTY = "mixinConfigs";
+
+    private final Project project;
     private final Logger logger;
 
     @Inject
-    public SpongeImplementationExtension(final Logger logger) {
+    public SpongeImplementationExtension(final Project project, final Logger logger) {
+        this.project = project;
         this.logger = logger;
     }
 
@@ -68,6 +77,34 @@ public abstract class SpongeImplementationExtension {
         return Stream.of(minecraftVersion, addedVersionInfo, implVersionAsReleaseCandidateOrRecommended)
             .filter(Objects::nonNull)
             .collect(Collectors.joining("-"));
+    }
+
+    /**
+     * Get all mixin configurations that should be applied to this project
+     * @return the mixin configuration files that should be applied to this project
+     */
+    public Set<String> getMixinConfigurations() {
+        final Set<String> configs = new HashSet<>();
+
+        // if we have a parent
+        final Project parentProject = this.project.getParent();
+        if (parentProject != null) {
+            SpongeImplementationExtension
+                .splitAndAddIfNonNull(configs, (String) parentProject.findProperty(SpongeImplementationExtension.MIXIN_CONFIGS_PROPERTY));
+        }
+
+        // own project
+        SpongeImplementationExtension.splitAndAddIfNonNull(configs, (String) this.project.findProperty("mixinConfigs"));
+        return configs;
+    }
+
+    private static void splitAndAddIfNonNull(final Collection<String> collector, final @Nullable String property) {
+        if (property == null) {
+            return;
+        }
+
+        final String[] split = property.split(",");
+        Collections.addAll(collector, split);
     }
 
 }
