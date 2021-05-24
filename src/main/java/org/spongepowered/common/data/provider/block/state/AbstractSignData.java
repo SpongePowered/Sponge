@@ -42,10 +42,6 @@ public final class AbstractSignData {
                     .create(Keys.IS_ATTACHED)
                         .get(h -> h.getBlock() instanceof WallSignBlock)
                         .set((h, v) -> null)
-                        .supports(h -> h.getBlock() instanceof SignBlock)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(SignBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(SignBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof SignBlock);
     }
     // @formatter:on

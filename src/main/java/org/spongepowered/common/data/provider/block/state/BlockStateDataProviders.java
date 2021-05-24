@@ -32,7 +32,6 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
     public void registerProviders() {
         AbstractBannerData.register(this.registrator);
         AbstractButtonData.register(this.registrator);
-        AbstractCoralPlantData.register(this.registrator);
         AbstractFurnaceData.register(this.registrator);
         AbstractRailData.register(this.registrator);
         AbstractSignData.register(this.registrator);
@@ -48,7 +47,6 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         ChestData.register(this.registrator);
         CocoaData.register(this.registrator);
         ComparatorData.register(this.registrator);
-        ConduitData.register(this.registrator);
         CropsData.register(this.registrator);
         DaylightDetectorData.register(this.registrator);
         DetectorRailData.register(this.registrator);
@@ -62,7 +60,6 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         FenceData.register(this.registrator);
         FenceGateData.register(this.registrator);
         FlowingFluidData.register(this.registrator);
-        FourWayData.register(this.registrator);
         HopperData.register(this.registrator);
         HorizontalData.register(this.registrator);
         HorizontalFaceData.register(this.registrator);
@@ -84,8 +81,8 @@ public final class BlockStateDataProviders extends DataProviderRegistratorBuilde
         RepeaterData.register(this.registrator);
         RotatedPillarData.register(this.registrator);
         SaplingData.register(this.registrator);
-        ScaffoldingData.register(this.registrator);
         SeaPickleData.register(this.registrator);
+        SimpleWaterloggedBlockData.register(this.registrator);
         SkullData.register(this.registrator);
         SlabData.register(this.registrator);
         SnowData.register(this.registrator);

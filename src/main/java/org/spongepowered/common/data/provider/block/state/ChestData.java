@@ -92,10 +92,6 @@ public final class ChestData {
                             }
                             return Constants.DirectionFunctions.getFor(ChestBlock.getConnectedDirection(h)) == Direction.WEST;
                         })
-                        .supports(h -> h.getBlock() instanceof ChestBlock)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(ChestBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(ChestBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof ChestBlock);
     }
     // @formatter:on

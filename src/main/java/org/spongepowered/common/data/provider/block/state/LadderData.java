@@ -42,10 +42,6 @@ public final class LadderData {
                     .create(Keys.DIRECTION)
                         .get(h -> DirectionUtil.getFor(h.getValue(LadderBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, LadderBlock.FACING))
-                        .supports(h -> h.getBlock() instanceof LadderBlock)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(LadderBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(LadderBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof LadderBlock);
     }
     // @formatter:on
