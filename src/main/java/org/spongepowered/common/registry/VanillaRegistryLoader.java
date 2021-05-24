@@ -57,14 +57,17 @@ import net.minecraft.world.level.block.state.properties.AttachFace;
 import net.minecraft.world.level.block.state.properties.ChestType;
 import net.minecraft.world.level.block.state.properties.ComparatorMode;
 import net.minecraft.world.level.block.state.properties.DoorHingeSide;
+import net.minecraft.world.level.block.state.properties.DripstoneThickness;
 import net.minecraft.world.level.block.state.properties.Half;
 import net.minecraft.world.level.block.state.properties.NoteBlockInstrument;
 import net.minecraft.world.level.block.state.properties.PistonType;
 import net.minecraft.world.level.block.state.properties.RailShape;
 import net.minecraft.world.level.block.state.properties.RedstoneSide;
+import net.minecraft.world.level.block.state.properties.SculkSensorPhase;
 import net.minecraft.world.level.block.state.properties.SlabType;
 import net.minecraft.world.level.block.state.properties.StairsShape;
 import net.minecraft.world.level.block.state.properties.StructureMode;
+import net.minecraft.world.level.block.state.properties.Tilt;
 import net.minecraft.world.level.levelgen.Heightmap;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.scores.Team;
@@ -153,6 +156,7 @@ final class VanillaRegistryLoader {
         this.knownName(RegistryTypes.DIFFICULTY, Difficulty.values(), Difficulty::getKey);
         this.knownName(RegistryTypes.DYE_COLOR, DyeColor.values(), DyeColor::getSerializedName);
         this.knownName(RegistryTypes.DOOR_HINGE, DoorHingeSide.values(), DoorHingeSide::getSerializedName);
+        this.knownName(RegistryTypes.DRIPSTONE_SEGMENT, DripstoneThickness.values(), DripstoneThickness::getSerializedName);
         this.manualName(RegistryTypes.EQUIPMENT_GROUP, EquipmentSlot.Type.values(), map -> {
             map.put(EquipmentSlot.Type.ARMOR, "worn");
             map.put(EquipmentSlot.Type.HAND, "held");
@@ -190,10 +194,12 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.ROTATION, Rotation.values());
         this.knownName(RegistryTypes.RAIL_DIRECTION, RailShape.values(), RailShape::getSerializedName);
         this.knownName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values(), RedstoneSide::getSerializedName);
+        this.knownName(RegistryTypes.SCULK_SENSOR_STATE, SculkSensorPhase.values(), SculkSensorPhase::getSerializedName);
         this.knownName(RegistryTypes.SLAB_PORTION, SlabType.values(), SlabType::getSerializedName);
         this.automaticName(RegistryTypes.SPELL_TYPE, SpellcasterIllager.IllagerSpell.values());
         this.knownName(RegistryTypes.STAIR_SHAPE, StairsShape.values(), StairsShape::getSerializedName);
         this.knownName(RegistryTypes.STRUCTURE_MODE, StructureMode.values(), StructureMode::getSerializedName);
+        this.knownName(RegistryTypes.TILT, Tilt.values(), Tilt::getSerializedName);
         this.manualName(RegistryTypes.VISIBILITY, Team.Visibility.values(), map -> {
             map.put(Team.Visibility.ALWAYS, "always");
             map.put(Team.Visibility.NEVER, "never");
