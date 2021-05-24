@@ -1,9 +1,11 @@
 import org.jetbrains.gradle.ext.TaskTriggersConfig
+import org.spongepowered.gradle.impl.GenerateResourceTemplates
 
 plugins {
     id("org.spongepowered.gradle.vanilla")
     id("com.github.johnrengelman.shadow")
     id("implementation-structure")
+    id("templated-resources")
     eclipse
 }
 
@@ -309,6 +311,19 @@ tasks {
     jar {
         manifest.from(vanillaManifest)
     }
+
+    named("templateLaunchResources", GenerateResourceTemplates::class) {
+        inputs.property("version.api", apiVersion)
+        inputs.property("version.minecraft", minecraftVersion)
+        inputs.property("version.vanilla", project.version)
+
+        expand(
+            "apiVersion" to apiVersion,
+            "minecraftVersion" to minecraftVersion,
+            "version" to project.version
+        )
+    }
+
     val vanillaInstallerJar by registering(Jar::class) {
         archiveClassifier.set("installer")
         manifest{

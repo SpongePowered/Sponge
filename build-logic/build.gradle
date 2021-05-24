@@ -12,6 +12,7 @@ repositories {
 
 dependencies {
     implementation("com.google.code.gson:gson:2.8.6")
+    implementation("gradle.plugin.org.jetbrains.gradle.plugin.idea-ext:gradle-idea-ext:1.0")
 }
 
 gradlePlugin {
@@ -19,6 +20,10 @@ gradlePlugin {
         impl {
             id = "implementation-structure"
             implementationClass = "org.spongepowered.gradle.impl.SpongeImplementationPlugin"
+        }
+        templateResources {
+            id = "templated-resources"
+            implementationClass = "org.spongepowered.gradle.impl.TemplatedResourcesPlugin"
         }
     }
 }

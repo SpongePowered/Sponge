@@ -4,7 +4,7 @@
             "loader": "java_plain",
             "id": "minecraft",
             "name": "Minecraft",
-            "version": "1.16.5",
+            "version": "${minecraftVersion}",
             "main-class": "org.spongepowered.common.launcher.Launcher",
             "links": {
                 "homepage": "https://www.minecraft.net"
@@ -22,7 +22,7 @@
             "loader": "java_plain",
             "id": "spongeapi",
             "name": "SpongeAPI",
-            "version": "8.0.0",
+            "version": "${apiVersion}",
             "main-class": "org.spongepowered.api.Sponge",
             "description": "The Minecraft API specification",
             "links": {
@@ -43,7 +43,7 @@
             "loader": "java_plain",
             "id": "sponge",
             "name": "Sponge",
-            "version": "1.16.5-8.0.0",
+            "version": "${minecraftVersion}-${apiVersion}",
             "main-class": "org.spongepowered.common.SpongeCommon",
             "description": "The common Sponge implementation",
             "links": {
@@ -60,11 +60,11 @@
             "dependencies": [
                 {
                     "id": "minecraft",
-                    "version": "1.16.5"
+                    "version": "${minecraftVersion}"
                 },
                 {
                     "id": "spongeapi",
-                    "version": "8.0.0"
+                    "version": "${apiVersion}"
                 }
             ],
             "extra": {}
@@ -73,7 +73,7 @@
             "loader": "java_plain",
             "id": "spongevanilla",
             "name": "SpongeVanilla",
-            "version": "1.16.5-8.0.0",
+            "version": "${version}",
             "main-class": "org.spongepowered.vanilla.SpongeVanilla",
             "description": "Vanilla Minecraft with Sponge",
             "links": {
@@ -90,7 +90,7 @@
             "dependencies": [
                 {
                     "id": "sponge",
-                    "version": "1.16.5-8.0.0"
+                    "version": "${minecraftVersion}-${apiVersion}"
                 }
             ],
             "extra": {}
