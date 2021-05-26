@@ -57,6 +57,10 @@ import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.WorldServer;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
+import org.spongepowered.api.data.key.Keys;
+import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -64,6 +68,7 @@ import org.spongepowered.api.event.cause.Cause;
 import org.spongepowered.api.event.cause.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.dismount.DismountType;
 import org.spongepowered.api.event.cause.entity.dismount.DismountTypes;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.message.MessageEvent;
 import org.spongepowered.api.text.Text;
@@ -98,6 +103,7 @@ import org.spongepowered.common.bridge.world.WorldServerBridge;
 import org.spongepowered.common.bridge.world.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.chunk.ChunkBridge;
 import org.spongepowered.common.data.util.DataUtil;
+import org.spongepowered.common.data.value.immutable.ImmutableSpongeValue;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.SpongeEntityType;
 import org.spongepowered.common.event.ShouldFire;
@@ -854,6 +860,83 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             && !((Entity) (Object) this instanceof EntityLiving)) {
 
             this.impl$destructCause = Sponge.getCauseStackManager().getCurrentCause();
+        }
+    }
+
+    @Redirect(
+        method = "setFire",
+        at = @At(
+            value = "FIELD",
+            opcode = Opcodes.PUTFIELD,
+            target = "Lnet/minecraft/entity/Entity;fire:I"
+        )
+    )
+    private void impl$callFireValueChange(final Entity thisEntity, final int value) {
+        if (!((WorldBridge) this.world).bridge$isFake() && SpongeImplHooks.isMainThread()) {
+            if (this.fire == 0) {
+                final DataTransactionResult transaction = DataTransactionResult.builder()
+                    .replace(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, 0, this.fire))
+                    .success(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, 0, value))
+                    .result(DataTransactionResult.Type.SUCCESS)
+                    .build();
+
+                final ChangeDataHolderEvent.ValueChange event = SpongeEventFactory.createChangeDataHolderEventValueChange(
+                        Sponge.getCauseStackManager().getCurrentCause(),
+                        transaction,
+                        (DataHolder) this);
+
+                Sponge.getEventManager().post(event);
+                if (event.isCancelled()) {
+                    //If the event is cancelled, well, don't change the underlying value.
+                    return;
+                }
+                this.fire = event.getEndResult().getSuccessfulData()
+                    .stream()
+                    .filter(d -> d.getKey() == Keys.FIRE_TICKS)
+                    .findFirst()
+                    .map(BaseValue::get)
+                    .map(o -> (int) o)
+                    .orElse(0);
+            }
+        }
+    }
+
+
+    @Redirect(
+        method = "extinguish",
+        at = @At(
+            value = "FIELD",
+            opcode = Opcodes.PUTFIELD,
+            target = "Lnet/minecraft/entity/Entity;fire:I"
+        )
+    )
+    private void impl$callExtinguishValueChange(final Entity thisEntity, final int value) {
+        if (!((WorldBridge) this.world).bridge$isFake() && SpongeImplHooks.isMainThread()) {
+            if (this.fire == 0) {
+                final DataTransactionResult transaction = DataTransactionResult.builder()
+                    .replace(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, 0, this.fire))
+                    .success(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, 0, value))
+                    .result(DataTransactionResult.Type.SUCCESS)
+                    .build();
+
+                final ChangeDataHolderEvent.ValueChange event = SpongeEventFactory.createChangeDataHolderEventValueChange(
+                    Sponge.getCauseStackManager().getCurrentCause(),
+                    transaction,
+                    (DataHolder) this);
+
+                Sponge.getEventManager().post(event);
+                if (event.isCancelled()) {
+                    //If the event is cancelled, well, don't change the underlying value.
+                    return;
+                }
+                this.fire = event.getEndResult().getSuccessfulData()
+                    .stream()
+                    .filter(d -> d.getKey() == Keys.FIRE_TICKS)
+                    .findFirst()
+                    .map(BaseValue::get)
+                    .map(o -> (int) o)
+                    .orElse(this.fire); // Otherwise, if it's failed, just "set it back"
+            }
         }
     }
 
