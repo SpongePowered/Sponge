@@ -108,11 +108,6 @@ val vanillaAppLaunch by sourceSets.register("applaunch") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, accessors.get(), this, project, this.runtimeOnlyConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, vanillaMain, this, project, this.runtimeOnlyConfigurationName)
 }
-val generator by sourceSets.registering {
-    configurations.named(implementationConfigurationName) {
-        extendsFrom(configurations.minecraft.get())
-    }
-}
 val vanillaMixinsImplementation by configurations.named(vanillaMixins.implementationConfigurationName) {
     extendsFrom(vanillaAppLaunchConfig.get())
 }
@@ -290,11 +285,6 @@ dependencies {
             exclude(group = "org.spongepowered")
         }
     }
-
-    "generatorImplementation"("com.squareup:javapoet:1.13.0")
-    "generatorImplementation"("com.github.javaparser:javaparser-core:3.19.0")
-    "generatorImplementation"("org.tinylog:tinylog-api:2.2.1")
-    "generatorRuntimeOnly"("org.tinylog:tinylog-impl:2.2.1")
 }
 
 val vanillaManifest = the<JavaPluginConvention>().manifest {
@@ -438,32 +428,6 @@ tasks {
         dependsOn(shadowJar)
     }
 
-    val apiBase = rootProject.file("SpongeAPI/src/main/java/")
-    val temporaryLicenseHeader = project.buildDir.resolve("api-gen-license-header.txt")
-    register("generateApiData", JavaExec::class) {
-        group = "sponge"
-        description = "Generate API Catalog classes"
-        javaLauncher.set(project.javaToolchains.launcherFor(java.toolchain))
-
-        classpath(generator.map { it.output }, generator.map { it.runtimeClasspath })
-        mainClass.set("org.spongepowered.vanilla.generator.GeneratorMain")
-        args(apiBase.canonicalPath, temporaryLicenseHeader.canonicalPath)
-
-        doFirst {
-            // Write a template-expanded license header to the temporary file
-            license.header.get().asReader().buffered().use { reader ->
-                val template = groovy.text.GStringTemplateEngine().createTemplate(reader)
-
-                val propertyMap = (license as ExtensionAware).extra.properties.toMutableMap()
-                propertyMap["name"] = "SpongeAPI"
-                val out = template.make(propertyMap)
-
-                temporaryLicenseHeader.bufferedWriter(Charsets.UTF_8).use { writer ->
-                    out.writeTo(writer)
-                }
-            }
-        }
-    }
 }
 
 license {

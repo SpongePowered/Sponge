@@ -42,6 +42,7 @@ import java.nio.file.Path;
 
 final class Context {
 
+    static final String INDENT = "    ";
     static final String BASE_PACKAGE = "org.spongepowered.api";
     private final Path outputDirectory;
     private final RegistryAccess registries;
@@ -100,7 +101,7 @@ final class Context {
         final String pkg = relativePackage.isBlank() ? Context.BASE_PACKAGE : String.join(".", Context.BASE_PACKAGE, relativePackage);
         final var file = JavaFile.builder(pkg, spec)
             .skipJavaLangImports(true)
-            .indent("    ")
+            .indent(Context.INDENT)
             .build();
 
         file.writeTo(this.outputDirectory, StandardCharsets.UTF_8);

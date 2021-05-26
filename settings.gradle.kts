@@ -48,6 +48,8 @@ includeBuild("SpongeAPI") {
 include(":SpongeVanilla")
 project(":SpongeVanilla").projectDir = file("vanilla")
 
+include("generator")
+
 val testPlugins = file("testplugins.settings.gradle.kts")
 if (testPlugins.exists()) {
     apply(from = testPlugins)
