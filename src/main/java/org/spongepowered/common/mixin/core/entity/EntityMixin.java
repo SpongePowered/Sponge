@@ -60,7 +60,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataHolder;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.key.Keys;
-import org.spongepowered.api.data.value.BaseValue;
 import org.spongepowered.api.entity.Transform;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -841,8 +840,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
                     .stream()
                     .filter(d -> d.getKey() == Keys.FIRE_TICKS)
                     .findFirst()
-                    .map(BaseValue::get)
-                    .map(o -> (int) o)
+                    .map(immutableValue -> (Integer) immutableValue.get())
                     .orElse(0);
             }
         }
@@ -915,8 +913,7 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
                     .stream()
                     .filter(d -> d.getKey() == Keys.FIRE_TICKS)
                     .findFirst()
-                    .map(BaseValue::get)
-                    .map(o -> (int) o)
+                    .map(immutableValue -> (Integer) immutableValue.get())
                     .orElse(this.fire); // Otherwise, if it's failed, just "set it back"
             }
         }
