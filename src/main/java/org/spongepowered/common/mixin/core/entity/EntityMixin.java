@@ -814,15 +814,36 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
         if (this.fire < 1 && !this.spongeImpl$isImmuneToFireForIgniteEvent()) {
             try (final CauseStackManager.StackFrame frame = Sponge.getCauseStackManager().pushCauseFrame()) {
 
-                frame.pushCause(((org.spongepowered.api.entity.Entity) this).getLocation().getExtent());
                 final IgniteEntityEvent event = SpongeEventFactory.
                         createIgniteEntityEvent(frame.getCurrentCause(), ticks, ticks, (org.spongepowered.api.entity.Entity) this);
 
                 if (SpongeImpl.postEvent(event)) {
-                    this.fire = 0;
-                    return; // set fire ticks to 0
+                    // Don't do anything
+                    return;
                 }
-                this.fire = event.getFireTicks();
+                final DataTransactionResult transaction = DataTransactionResult.builder()
+                    .replace(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, 0, this.fire))
+                    .success(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, 0, event.getFireTicks()))
+                    .result(DataTransactionResult.Type.SUCCESS)
+                    .build();
+
+                final ChangeDataHolderEvent.ValueChange valueChange = SpongeEventFactory.createChangeDataHolderEventValueChange(
+                    Sponge.getCauseStackManager().getCurrentCause(),
+                    transaction,
+                    (DataHolder) this);
+
+                Sponge.getEventManager().post(valueChange);
+                if (valueChange.isCancelled()) {
+                    //If the event is cancelled, well, don't change the underlying value.
+                    return;
+                }
+                this.fire = valueChange.getEndResult().getSuccessfulData()
+                    .stream()
+                    .filter(d -> d.getKey() == Keys.FIRE_TICKS)
+                    .findFirst()
+                    .map(BaseValue::get)
+                    .map(o -> (int) o)
+                    .orElse(0);
             }
         }
     }
@@ -862,45 +883,6 @@ public abstract class EntityMixin implements EntityBridge, TrackableBridge, Vani
             this.impl$destructCause = Sponge.getCauseStackManager().getCurrentCause();
         }
     }
-
-    @Redirect(
-        method = "setFire",
-        at = @At(
-            value = "FIELD",
-            opcode = Opcodes.PUTFIELD,
-            target = "Lnet/minecraft/entity/Entity;fire:I"
-        )
-    )
-    private void impl$callFireValueChange(final Entity thisEntity, final int value) {
-        if (!((WorldBridge) this.world).bridge$isFake() && SpongeImplHooks.isMainThread()) {
-            if (this.fire == 0) {
-                final DataTransactionResult transaction = DataTransactionResult.builder()
-                    .replace(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, 0, this.fire))
-                    .success(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, 0, value))
-                    .result(DataTransactionResult.Type.SUCCESS)
-                    .build();
-
-                final ChangeDataHolderEvent.ValueChange event = SpongeEventFactory.createChangeDataHolderEventValueChange(
-                        Sponge.getCauseStackManager().getCurrentCause(),
-                        transaction,
-                        (DataHolder) this);
-
-                Sponge.getEventManager().post(event);
-                if (event.isCancelled()) {
-                    //If the event is cancelled, well, don't change the underlying value.
-                    return;
-                }
-                this.fire = event.getEndResult().getSuccessfulData()
-                    .stream()
-                    .filter(d -> d.getKey() == Keys.FIRE_TICKS)
-                    .findFirst()
-                    .map(BaseValue::get)
-                    .map(o -> (int) o)
-                    .orElse(0);
-            }
-        }
-    }
-
 
     @Redirect(
         method = "extinguish",
