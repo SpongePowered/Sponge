@@ -246,8 +246,9 @@ public final class GeneratorMain {
                 context.relativeClass("world", "WorldType"),
                 Registry.DIMENSION_TYPE_REGISTRY,
                 $ -> true,
-                RegistryEntriesGenerator.RegistryScope.SERVER
-            )
+                RegistryScope.SERVER
+            ),
+            new BlockStatePropertiesGenerator()
         );
     }
 }

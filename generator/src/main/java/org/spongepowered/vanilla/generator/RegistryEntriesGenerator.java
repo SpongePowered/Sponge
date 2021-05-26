@@ -25,12 +25,8 @@
 package org.spongepowered.vanilla.generator;
 
 import com.github.javaparser.ast.body.TypeDeclaration;
-import com.squareup.javapoet.AnnotationSpec;
-import com.squareup.javapoet.ClassName;
-import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
-import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.minecraft.core.Registry;
@@ -39,8 +35,6 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
 import java.util.Comparator;
-import java.util.Locale;
-import java.util.Objects;
 import java.util.function.Predicate;
 
 import javax.lang.model.element.Modifier;
@@ -155,86 +149,6 @@ class RegistryEntriesGenerator<V> implements Generator {
         return FieldSpec.builder(fieldType, Types.keyToFieldName(element.getPath()), Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
             .initializer("$L.$N($L)", ownType, factoryMethod, Types.resourceKey(element))
             .build();
-    }
-
-    enum RegistryScope {
-        GAME {
-            @Override
-            protected CodeBlock registryKeyToReference() {
-                return CodeBlock.of("asDefaultedReference(() -> $T.game().registries())", Types.SPONGE);
-            }
-
-            @Override
-            ClassName registryReferenceType() {
-                return Types.DEFAULTED_REGISTRY_REFERENCE;
-            }
-
-            @Override
-            AnnotationSpec registryScopeAnnotation() {
-                return RegistryScope.registryScopeAnnotation("GAME");
-            }
-        },
-        SERVER {
-            @Override
-            protected CodeBlock registryKeyToReference() {
-                return CodeBlock.of("asDefaultedReference(() -> $T.server().registries())", Types.SPONGE);
-            }
-
-            @Override
-            ClassName registryReferenceType() {
-                return Types.DEFAULTED_REGISTRY_REFERENCE;
-            }
-
-            @Override
-            AnnotationSpec registryScopeAnnotation() {
-                return RegistryScope.registryScopeAnnotation("ENGINE");
-            }
-        },
-        WORLD {
-            @Override
-            protected CodeBlock registryKeyToReference() {
-                return CodeBlock.of("asReference()");
-            }
-
-            @Override
-            ClassName registryReferenceType() {
-                return Types.REGISTRY_REFERENCE;
-            }
-
-            @Override
-            AnnotationSpec registryScopeAnnotation() {
-                return RegistryScope.registryScopeAnnotation("WORLD");
-            }
-        };
-
-        protected static AnnotationSpec registryScopeAnnotation(final String registryScope) {
-            Objects.requireNonNull(registryScope, "registryScope");
-            return AnnotationSpec.builder(Types.REGISTRY_SCOPES)
-                .addMember("scopes", "$T.$L", Types.REGISTRY_SCOPE, registryScope.toUpperCase(Locale.ROOT))
-                .build();
-        }
-
-        protected abstract CodeBlock registryKeyToReference();
-
-        abstract ClassName registryReferenceType();
-
-        abstract AnnotationSpec registryScopeAnnotation();
-
-        final MethodSpec registryReferenceFactory(final String registryTypeName, final TypeName valueType) {
-            final var locationParam = ParameterSpec.builder(Types.RESOURCE_KEY, "location", Modifier.FINAL).build();
-            return MethodSpec.methodBuilder("key")
-                .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
-                .returns(ParameterizedTypeName.get(this.registryReferenceType(), valueType))
-                .addParameter(locationParam)
-                .addCode(
-                    "return $T.of($T.$L, $N).$L;",
-                    Types.REGISTRY_KEY,
-                    Types.REGISTRY_TYPES,
-                    registryTypeName.toUpperCase(Locale.ROOT),
-                    locationParam,
-                    this.registryKeyToReference()
-                ).build();
-        }
     }
 
 }
