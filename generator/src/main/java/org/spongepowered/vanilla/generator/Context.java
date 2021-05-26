@@ -24,6 +24,7 @@
  */
 package org.spongepowered.vanilla.generator;
 
+import com.github.javaparser.ParserConfiguration;
 import com.github.javaparser.ast.CompilationUnit;
 import com.github.javaparser.printer.DefaultPrettyPrinter;
 import com.github.javaparser.printer.configuration.DefaultConfigurationOption;
@@ -54,6 +55,7 @@ final class Context {
         this.registries = registries;
         this.licenseHeader = licenseHeader;
         this.sourceRoot = new SourceRoot(outputDirectory);
+        this.sourceRoot.getParserConfiguration().setLanguageLevel(ParserConfiguration.LanguageLevel.JAVA_16);
         final var config = new DefaultPrinterConfiguration();
         config.addOption(new DefaultConfigurationOption(DefaultPrinterConfiguration.ConfigOption.PRINT_COMMENTS, true));
         final var printer = new DefaultPrettyPrinter(config);
