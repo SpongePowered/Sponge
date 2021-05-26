@@ -88,16 +88,12 @@ final class Types {
 
     public static CodeBlock resourceKey(final ResourceLocation location) {
         Objects.requireNonNull(location, "location");
-        switch (location.getNamespace()) {
-            case "minecraft":
-                return CodeBlock.of("$T.minecraft($S)", Types.RESOURCE_KEY, location.getPath());
-            case "brigadier":
-                return CodeBlock.of("$T.brigadier($S)", Types.RESOURCE_KEY, location.getPath());
-            case "sponge":
-                return CodeBlock.of("$T.sponge($S)", Types.RESOURCE_KEY, location.getPath());
-            default:
-                return CodeBlock.of("$T.of($S, $S)", Types.RESOURCE_KEY, location.getNamespace(), location.getPath());
-        }
+        return switch (location.getNamespace()) {
+            case "minecraft" -> CodeBlock.of("$T.minecraft($S)", Types.RESOURCE_KEY, location.getPath());
+            case "brigadier" -> CodeBlock.of("$T.brigadier($S)", Types.RESOURCE_KEY, location.getPath());
+            case "sponge" -> CodeBlock.of("$T.sponge($S)", Types.RESOURCE_KEY, location.getPath());
+            default -> CodeBlock.of("$T.of($S, $S)", Types.RESOURCE_KEY, location.getNamespace(), location.getPath());
+        };
     }
 
     public static AnnotationSpec suppressWarnings(final String... values) {

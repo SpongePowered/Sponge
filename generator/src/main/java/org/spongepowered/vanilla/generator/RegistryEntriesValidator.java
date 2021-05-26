@@ -162,11 +162,11 @@ class RegistryEntriesValidator<V> implements Generator {
         }
 
         final Expression argument = ((MethodCallExpr) initializer).getArgument(0);
-        if (!(argument instanceof MethodCallExpr) || ((MethodCallExpr) argument).getArguments().size() < 1) {
+        if (!(argument instanceof final MethodCallExpr keyInitializer)
+                || keyInitializer.getArguments().size() < 1) {
             return new ResourceLocation(var.getNameAsString().toLowerCase(Locale.ROOT)); // a best guess
         }
 
-        final MethodCallExpr keyInitializer = (MethodCallExpr) argument;
         if (keyInitializer.getArguments().size() == 1) { // method name as namespace
             return new ResourceLocation(keyInitializer.getNameAsString(), keyInitializer.getArgument(0).asStringLiteralExpr().asString());
         } else if (keyInitializer.getArguments().size() == 2) { // (namespace, path)
@@ -192,15 +192,12 @@ class RegistryEntriesValidator<V> implements Generator {
     public static MethodCallExpr resourceKey(final ResourceLocation location) {
         Objects.requireNonNull(location, "location");
         final var resourceKey = new NameExpr("ResourceKey");
-        switch (location.getNamespace()) {
-            case "minecraft":
-                return new MethodCallExpr(resourceKey, "minecraft", new NodeList<>(new StringLiteralExpr(location.getPath())));
-            case "brigadier":
-                return new MethodCallExpr(resourceKey, "brigadier", new NodeList<>(new StringLiteralExpr(location.getPath())));
-            case "sponge":
-                return new MethodCallExpr(resourceKey, "sponge", new NodeList<>(new StringLiteralExpr(location.getPath())));
-            default:
-                return new MethodCallExpr(resourceKey, "of", new NodeList<>(new StringLiteralExpr(location.getNamespace()), new StringLiteralExpr(location.getPath())));
-        }
+        return switch (location.getNamespace()) {
+            case "minecraft" -> new MethodCallExpr(resourceKey, "minecraft", new NodeList<>(new StringLiteralExpr(location.getPath())));
+            case "brigadier" -> new MethodCallExpr(resourceKey, "brigadier", new NodeList<>(new StringLiteralExpr(location.getPath())));
+            case "sponge" -> new MethodCallExpr(resourceKey, "sponge", new NodeList<>(new StringLiteralExpr(location.getPath())));
+            default -> new MethodCallExpr(
+                resourceKey, "of", new NodeList<>(new StringLiteralExpr(location.getNamespace()), new StringLiteralExpr(location.getPath())));
+        };
     }
 }

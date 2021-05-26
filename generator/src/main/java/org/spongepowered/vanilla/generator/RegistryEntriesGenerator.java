@@ -220,7 +220,7 @@ class RegistryEntriesGenerator<V> implements Generator {
 
         abstract AnnotationSpec registryScopeAnnotation();
 
-        final MethodSpec registryReferenceFactory(String registryTypeName, TypeName valueType) {
+        final MethodSpec registryReferenceFactory(final String registryTypeName, final TypeName valueType) {
             final var locationParam = ParameterSpec.builder(Types.RESOURCE_KEY, "location", Modifier.FINAL).build();
             return MethodSpec.methodBuilder("key")
                 .addModifiers(Modifier.PRIVATE, Modifier.STATIC)

@@ -25,7 +25,6 @@
 package org.spongepowered.vanilla.generator;
 
 import com.github.javaparser.utils.Log;
-import net.minecraft.SharedConstants;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
