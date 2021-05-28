@@ -36,6 +36,7 @@ import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.Listener;
+import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
@@ -58,6 +59,7 @@ import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.GridInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.math.vector.Vector2i;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
@@ -140,6 +142,17 @@ public final class InventoryTest implements LoadableModule {
                 this.plugin.logger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.original().type(), slotTrans.original().quantity(),
                         slotTrans.finalReplacement().type(), slotTrans.finalReplacement().quantity(), integer.get());
             }
+        }
+
+        @Listener
+        public void onChangeEquipment(final ChangeEntityEquipmentEvent event) {
+            final Slot slot = event.slot();
+            final Transaction<ItemStackSnapshot> transaction = event.transaction();
+            this.plugin.logger().info("{}: {} {}->{}",
+                    event.entity().type().key(RegistryTypes.ENTITY_TYPE),
+                    slot.get(Keys.EQUIPMENT_TYPE).get().key(RegistryTypes.EQUIPMENT_TYPE),
+                    transaction.original().type().key(RegistryTypes.ITEM_TYPE),
+                    transaction.finalReplacement().type().key(RegistryTypes.ITEM_TYPE));
         }
 
         @Listener

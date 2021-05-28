@@ -728,7 +728,7 @@ public final class SpongeCommonEventFactory {
             return false;
         }
 
-        if (pos.getY() < world.getMinBuildHeight()) {
+        if (world.isClientSide() || pos.getY() < world.getMinBuildHeight()) {
             return false;
         }
 

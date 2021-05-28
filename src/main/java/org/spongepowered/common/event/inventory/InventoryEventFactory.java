@@ -535,7 +535,7 @@ public class InventoryEventFactory {
 
 
     public static ChangeEntityEquipmentEvent callChangeEntityEquipmentEvent(
-            final LivingEntity entity, final ItemStackSnapshot before, final ItemStackSnapshot after, final SlotAdapter slot) {
+            final LivingEntity entity, final ItemStackSnapshot before, final ItemStackSnapshot after, final Slot slot) {
         final ChangeEntityEquipmentEvent event;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(entity);

@@ -22,32 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.mixin;
+package org.spongepowered.common.bridge.world.entity.player;
 
-import org.spongepowered.asm.launch.platform.container.ContainerHandleModLauncher;
-import org.spongepowered.asm.service.modlauncher.MixinServiceModLauncher;
-import org.spongepowered.asm.util.Constants;
+import net.minecraft.world.InteractionHand;
 
-public final class MixinServiceVanillaModLauncher extends MixinServiceModLauncher {
+public interface PlayerInventoryBridge {
 
-    private final ContainerHandleModLauncher rootContainer = new ContainerHandleVanillaModLauncher(this.getName());
+    int bridge$getHeldItemIndex(InteractionHand hand);
 
-    @Override
-    public boolean isValid() {
-        return true;
-    }
+    /**
+     * Set the current hotbar item and optionally notify the client
+     *
+     * @param itemIndex Hotbar index to set
+     * @param notify True to send an update packet to the client if this is a
+     *      server
+     */
+    void bridge$setSelectedItem(int itemIndex, boolean notify);
 
-    @Override
-    public ContainerHandleModLauncher getPrimaryContainer() {
-        return this.rootContainer;
-    }
+    /**
+     * Cleanup dirty Inventory State. E.g. after changes made through a scheduled task.
+     */
+    void bridge$cleanupDirty();
 
-    private static final class ContainerHandleVanillaModLauncher extends ContainerHandleModLauncher {
-
-        public ContainerHandleVanillaModLauncher(final String name) {
-            super(name);
-
-            this.setAttribute(Constants.ManifestAttributes.MIXINCONNECTOR, "org.spongepowered.vanilla.applaunch.mixin.VanillaLaunchMixinConnector");
-        }
-    }
+    /**
+     * Removes dirty Inventory State. Used after detectAndSendChanges.
+     */
+    void bridge$markClean();
 }

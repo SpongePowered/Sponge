@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.inventory.lens.impl.comp;
 
+import net.minecraft.world.entity.EquipmentSlot;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.item.inventory.Equipable;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -41,15 +42,28 @@ import java.util.Optional;
 
 public class EquipmentInventoryLens extends RealLens {
 
+    private final Map<EquipmentType, SlotLens> lenses;
+
     public EquipmentInventoryLens(Map<EquipmentType, SlotLens> lenses) {
         super(0, lenses.size(), EquipmentInventoryAdapter.class);
-        this.init(lenses);
+        this.lenses = lenses;
+        this.init(this.lenses);
     }
 
     private void init(Map<EquipmentType, SlotLens> lenses) {
-        for (Map.Entry<EquipmentType, SlotLens> entry : lenses.entrySet()) {
-            this.addSpanningChild(new EquipmentSlotLens(this, entry.getValue(), entry.getKey()), KeyValuePair.of(Keys.EQUIPMENT_TYPE, entry.getKey()));
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
+            final EquipmentType type = (EquipmentType) (Object) slot;
+            final SlotLens lensAtSlot = lenses.get(slot);
+            if (lensAtSlot != null) {
+                final EquipmentSlotLens equipmentSlotLens = new EquipmentSlotLens(this, lensAtSlot, type);
+                this.addSpanningChild(equipmentSlotLens, KeyValuePair.of(Keys.EQUIPMENT_TYPE, type));
+                this.lenses.put(type, equipmentSlotLens);
+            }
         }
+    }
+
+    public SlotLens getSlotLens(EquipmentType equipmentType) {
+        return this.lenses.get(equipmentType);
     }
 
     @SuppressWarnings("rawtypes")

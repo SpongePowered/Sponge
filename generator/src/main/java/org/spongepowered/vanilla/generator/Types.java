@@ -28,7 +28,9 @@ import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
 import com.squareup.javapoet.MethodSpec;
+import com.squareup.javapoet.TypeName;
 import com.squareup.javapoet.TypeSpec;
+import com.squareup.javapoet.WildcardTypeName;
 import net.minecraft.resources.ResourceLocation;
 
 import java.util.Locale;
@@ -40,6 +42,10 @@ import javax.lang.model.element.Modifier;
 final class Types {
 
     private static final Pattern ILLEGAL_FIELD_CHARACTERS = Pattern.compile("[./-]");
+
+    public static final String NAMESPACE_SPONGE = "sponge";
+
+    public static final WildcardTypeName WILDCARD = WildcardTypeName.subtypeOf(TypeName.OBJECT);
 
     public static final ClassName RESOURCE_KEY = ClassName.get(Context.BASE_PACKAGE, "ResourceKey");
 
@@ -88,16 +94,16 @@ final class Types {
 
     public static CodeBlock resourceKey(final ResourceLocation location) {
         Objects.requireNonNull(location, "location");
-        switch (location.getNamespace()) {
-            case "minecraft":
-                return CodeBlock.of("$T.minecraft($S)", Types.RESOURCE_KEY, location.getPath());
-            case "brigadier":
-                return CodeBlock.of("$T.brigadier($S)", Types.RESOURCE_KEY, location.getPath());
-            case "sponge":
-                return CodeBlock.of("$T.sponge($S)", Types.RESOURCE_KEY, location.getPath());
-            default:
-                return CodeBlock.of("$T.of($S, $S)", Types.RESOURCE_KEY, location.getNamespace(), location.getPath());
-        }
+        return Types.resourceKey(location.getNamespace(), location.getPath());
+    }
+
+    public static CodeBlock resourceKey(final String namespace, final String path) {
+        return switch (namespace) {
+            case "minecraft" -> CodeBlock.of("$T.minecraft($S)", Types.RESOURCE_KEY, path);
+            case "brigadier" -> CodeBlock.of("$T.brigadier($S)", Types.RESOURCE_KEY, path);
+            case Types.NAMESPACE_SPONGE -> CodeBlock.of("$T.sponge($S)", Types.RESOURCE_KEY, path);
+            default -> CodeBlock.of("$T.of($S, $S)", Types.RESOURCE_KEY, namespace, path);
+        };
     }
 
     public static AnnotationSpec suppressWarnings(final String... values) {

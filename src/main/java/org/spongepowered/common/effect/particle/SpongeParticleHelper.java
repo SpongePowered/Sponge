@@ -133,11 +133,12 @@ public final class SpongeParticleHelper {
         } else if (internalType.getDeserializer() == DustParticleOptions.DESERIALIZER) {
             // This particle type supports a color option.
             final Color color = effect.optionOrDefault(ParticleOptions.COLOR).get();
+            final double scale = effect.optionOrDefault(ParticleOptions.SCALE).get();
             final DustParticleOptions particleData = new DustParticleOptions(new com.mojang.math.Vector3f(
-                    (float) color.red() / 255,
-                    (float) color.green() / 255,
-                    (float) color.blue() / 255),
-                    1.0f);
+                (float) color.red() / 255,
+                (float) color.green() / 255,
+                (float) color.blue() / 255),
+                (float) scale);
             return new NamedCachedPacket(particleData, offset, quantity, velocity);
         }
 

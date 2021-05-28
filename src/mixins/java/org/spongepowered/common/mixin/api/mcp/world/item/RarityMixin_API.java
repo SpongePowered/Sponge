@@ -22,30 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.entity.player;
+package org.spongepowered.common.mixin.api.mcp.world.item;
 
-import net.minecraft.world.InteractionHand;
+import net.kyori.adventure.text.format.TextColor;
+import net.minecraft.ChatFormatting;
+import org.spongepowered.api.item.ItemRarity;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.adventure.SpongeAdventure;
 
-public interface InventoryBridge {
+@Mixin(net.minecraft.world.item.Rarity.class)
+public abstract class RarityMixin_API implements ItemRarity {
 
-    int bridge$getHeldItemIndex(InteractionHand hand);
+    private TextColor api$color;
 
-    /**
-     * Set the current hotbar item and optionally notify the client
-     *
-     * @param itemIndex Hotbar index to set
-     * @param notify True to send an update packet to the client if this is a
-     *      server
-     */
-    void bridge$setSelectedItem(int itemIndex, boolean notify);
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    private void api$setColor(final String enumName, final int ordinal, final ChatFormatting param0, final CallbackInfo ci) {
+        this.api$color = SpongeAdventure.asAdventure(param0);
+    }
 
-    /**
-     * Cleanup dirty Inventory State. E.g. after changes made through a scheduled task.
-     */
-    void bridge$cleanupDirty();
+    @Override
+    public TextColor color() {
+        return this.api$color;
+    }
 
-    /**
-     * Removes dirty Inventory State. Used after detectAndSendChanges.
-     */
-    void bridge$markClean();
 }

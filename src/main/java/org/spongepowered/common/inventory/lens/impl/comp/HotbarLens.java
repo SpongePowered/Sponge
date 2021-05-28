@@ -26,7 +26,7 @@ package org.spongepowered.common.inventory.lens.impl.comp;
 
 import net.minecraft.world.InteractionHand;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.common.bridge.world.entity.player.InventoryBridge;
+import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.inventory.adapter.impl.comp.HotbarAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.impl.slot.SlotLensProvider;
@@ -48,8 +48,8 @@ public class HotbarLens extends InventoryRowLens {
 
     public int getSelectedSlotIndex(Fabric fabric) {
         for (Object inner : fabric.fabric$allInventories()) {
-            if (inner instanceof InventoryBridge) {
-                return ((InventoryBridge) inner).bridge$getHeldItemIndex(InteractionHand.MAIN_HAND);
+            if (inner instanceof PlayerInventoryBridge) {
+                return ((PlayerInventoryBridge) inner).bridge$getHeldItemIndex(InteractionHand.MAIN_HAND);
             }
         }
         return 0;
@@ -57,8 +57,8 @@ public class HotbarLens extends InventoryRowLens {
 
     public void setSelectedSlotIndex(Fabric fabric, int index) {
         fabric.fabric$allInventories().stream()
-                .filter(InventoryBridge.class::isInstance)
-                .map(InventoryBridge.class::cast)
+                .filter(PlayerInventoryBridge.class::isInstance)
+                .map(PlayerInventoryBridge.class::cast)
                 .forEach(inner -> inner.bridge$setSelectedItem(index, true));
     }
 

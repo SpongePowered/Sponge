@@ -30,6 +30,7 @@ import net.minecraft.tags.Tag;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.effect.potion.PotionEffect;
+import org.spongepowered.api.item.ItemRarity;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.util.weighted.ChanceTable;
 import org.spongepowered.api.util.weighted.NestedTableEntry;
@@ -106,24 +107,7 @@ public final class ItemStackData {
                     .create(Keys.CONTAINER_ITEM)
                         .get(h -> (ItemType) h.getItem().getCraftingRemainingItem())
                     .create(Keys.DISPLAY_NAME)
-                        .get(h -> {
-                            if (h.getItem() == Items.WRITTEN_BOOK) {
-                                final CompoundTag tag = h.getTag();
-                                if (tag != null) {
-                                    final String title = tag.getString(Constants.Item.Book.ITEM_BOOK_TITLE);
-                                    return SpongeAdventure.legacySection(title);
-                                }
-                            }
-                            return SpongeAdventure.asAdventure(h.getDisplayName());
-                        })
-                        .setAnd((h, v) -> {
-                            if (h.getItem() == Items.WRITTEN_BOOK) {
-                                final String legacy = SpongeAdventure.legacySection(v);
-                                h.addTagElement(Constants.Item.Book.ITEM_BOOK_TITLE, StringTag.valueOf(legacy));
-                                return true;
-                            }
-                            return false;
-                        })
+                        .get(h -> SpongeAdventure.asAdventure(h.getDisplayName()))
                     .create(Keys.CUSTOM_MODEL_DATA)
                         .get(h -> {
                             final CompoundTag tag = h.getTag();
@@ -143,7 +127,21 @@ public final class ItemStackData {
                             }
                         })
                     .create(Keys.CUSTOM_NAME)
-                        .get(h -> h.hasCustomHoverName() ? SpongeAdventure.asAdventure(h.getHoverName()) : null)
+                        .get(h -> {
+                            if (h.hasCustomHoverName()) {
+                                return SpongeAdventure.asAdventure(h.getHoverName());
+                            }
+                            if (h.getItem() == Items.WRITTEN_BOOK) {
+                                // When no custom name is set on a written book fallback to its title
+                                // The custom name has a higher priority than the title so no setter is needed.
+                                final CompoundTag tag = h.getTag();
+                                if (tag != null) {
+                                    final String title = tag.getString(Constants.Item.Book.ITEM_BOOK_TITLE);
+                                    return SpongeAdventure.legacySection(title);
+                                }
+                            }
+                            return null;
+                        })
                         .set((h, v) -> h.setHoverName(SpongeAdventure.asVanilla(v)))
                         .delete(ItemStack::resetHoverName)
                     .create(Keys.IS_UNBREAKABLE)
@@ -182,6 +180,8 @@ public final class ItemStackData {
                         .get(stack -> stack.getMaxDamage() - stack.getDamageValue())
                         .set((stack, durability) -> stack.setDamageValue(stack.getMaxDamage() - durability))
                         .supports(h -> h.getItem().canBeDepleted())
+                    .create(Keys.ITEM_RARITY)
+                        .get(stack -> (ItemRarity) (Object) stack.getRarity())
                     .create(Keys.REPLENISHED_FOOD)
                         .get(h -> {
                             if (h.getItem().isEdible()) {

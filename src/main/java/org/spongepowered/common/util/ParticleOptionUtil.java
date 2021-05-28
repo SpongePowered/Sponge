@@ -56,6 +56,7 @@ public final class ParticleOptionUtil {
             options.put(ParticleOptions.ITEM_STACK_SNAPSHOT.get(), ItemStackSnapshot.empty());
         } else if (type.getDeserializer() == DustParticleOptions.DESERIALIZER) {
             options.put(ParticleOptions.COLOR.get(), Color.RED);
+            options.put(ParticleOptions.SCALE.get(), 1.0d);
         }
 
         return ImmutableMap.copyOf(options);

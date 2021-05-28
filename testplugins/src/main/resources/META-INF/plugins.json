@@ -510,7 +510,7 @@
             "name": "CollideTest",
             "version": "1.0.0",
             "main-class": "org.spongepowered.test.collide.CollideTest",
-            "description": "Tests map api",
+            "description": "Tests collide events",
             "links": {
                 "homepage": "https://www.spongepowered.org",
                 "source": "https://www.spongepowered.org/source",

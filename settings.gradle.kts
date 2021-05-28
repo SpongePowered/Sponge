@@ -15,6 +15,7 @@ pluginManagement {
         id("org.spongepowered.gradle.sponge.dev") version "1.0.3"
         id("implementation-structure")
         id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
+        id("com.github.ben-manes.versions") version "0.39.0"
     }
 }
 
@@ -47,6 +48,7 @@ includeBuild("SpongeAPI") {
 }
 include(":SpongeVanilla")
 project(":SpongeVanilla").projectDir = file("vanilla")
+include("generator")
 
 include("generator")
 

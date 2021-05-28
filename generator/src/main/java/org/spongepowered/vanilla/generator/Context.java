@@ -39,6 +39,7 @@ import net.minecraft.core.RegistryAccess;
 
 import java.io.IOException;
 import java.nio.charset.StandardCharsets;
+import java.nio.file.Files;
 import java.nio.file.Path;
 
 final class Context {
@@ -106,13 +107,20 @@ final class Context {
             .indent(Context.INDENT)
             .build();
 
-        file.writeTo(this.outputDirectory, StandardCharsets.UTF_8);
+        Path destinationDir = this.outputDirectory;
+        for (final String el : pkg.split("\\.")) {
+            destinationDir = destinationDir.resolve(el);
+        }
+        Files.createDirectories(destinationDir);
 
-        // Then re-read it in order to add a license header
-        final var compilationUnit = this.compilationUnit(relativePackage, spec.name);
-        compilationUnit.getPackageDeclaration().ifPresent(decl -> {
-            decl.setBlockComment(this.licenseHeader);
-        });
+        try (final var writer = Files.newBufferedWriter(destinationDir.resolve(file.typeSpec.name + ".java"), StandardCharsets.UTF_8)) {
+            // write license header
+            writer.write("/*");
+            writer.write(this.licenseHeader);
+            writer.write("*/");
+            // then file
+            file.writeTo(writer);
+        }
     }
 
     /**

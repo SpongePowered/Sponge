@@ -40,6 +40,7 @@ import org.spongepowered.vanilla.applaunch.Main;
 import org.spongepowered.vanilla.applaunch.service.AccessWidenerLaunchService;
 import org.spongepowered.vanilla.installer.Constants;
 
+import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
@@ -89,25 +90,27 @@ public final class VanillaPlatformService implements ITransformationService {
                     }
 
                     // Offer jar to the AW service
-                        ((JVMPluginResource) resource).manifest().ifPresent(manifest -> {
-                            if (accessWidener != null) {
-                                final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.ACCESS_WIDENER);
-                                if (atFiles != null) {
-                                    for (final String atFile : atFiles.split(",")) {
-                                        if (!atFile.endsWith(".accesswidener")) {
-                                            continue;
-                                        }
-                                        accessWidener.offerResource(resource.fileSystem().getPath(atFile), atFile);
+                    ((JVMPluginResource) resource).manifest().ifPresent(manifest -> {
+                        if (accessWidener != null) {
+                            final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.ACCESS_WIDENER);
+                            if (atFiles != null) {
+                                for (final String atFile : atFiles.split(",")) {
+                                    if (!atFile.endsWith(".accesswidener")) {
+                                        continue;
                                     }
+                                    accessWidener.offerResource(resource.fileSystem().getPath(atFile), atFile);
                                 }
                             }
-                            if (mixin != null && manifest.getMainAttributes().getValue(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS) != null) {
+                        }
+                        if (mixin != null && manifest.getMainAttributes().getValue(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS) != null) {
+                            if (!VanillaPlatformService.isSponge(resource)) {
                                 VanillaPlatformService.pluginEngine.getPluginEnvironment().logger().warn(
                                     "Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the "
-                                    + "problem to Sponge!", resource.path()
+                                        + "problem to Sponge!", resource.path()
                                 );
                             }
-                        });
+                        }
+                    });
                 }
 
                 final Map.Entry<String, Path> entry = Maps.immutableEntry(resource.path().getFileName().toString(), resource.path());
@@ -118,8 +121,16 @@ public final class VanillaPlatformService implements ITransformationService {
         return launchResources;
     }
 
-    @Override
-    public void onLoad(final IEnvironment env, final Set<String> otherServices) {
+    private static boolean isSponge(final PluginResource resource) {
+        try {
+            return resource.path().toUri().equals(VanillaPlatformService.class.getProtectionDomain().getCodeSource().getLocation().toURI());
+        } catch (final URISyntaxException ex) {
+            return false;
+        }
+    }
+
+        @Override
+        public void onLoad(final IEnvironment env, final Set<String> otherServices) {
         final VanillaPluginEngine pluginEngine = VanillaPlatformService.pluginEngine;
 
         pluginEngine.getPluginEnvironment().logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",

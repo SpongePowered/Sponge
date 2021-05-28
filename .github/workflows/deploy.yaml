@@ -5,7 +5,7 @@ name: Build and Deploy
 
 on:
   push:
-    branches: [ api-8 ]
+    branches: [ 'api-*' ]
 
 
 jobs:

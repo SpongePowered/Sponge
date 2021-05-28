@@ -465,7 +465,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 } else {
                     if (!previewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
                         SlotTransaction previewTransaction = previewTransactions.get(0);
-                        if (previewTransaction.equals(newTransaction)) {
+                        if (previewTransaction.slot().equals(newTransaction.slot())) {
                             newTransaction = null;
                         }
                     }

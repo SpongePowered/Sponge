@@ -33,6 +33,7 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.impl.comp.EquipmentInventoryLens;
 import org.spongepowered.common.inventory.lens.impl.minecraft.PlayerInventoryLens;
@@ -42,7 +43,6 @@ import java.util.Optional;
 
 import javax.annotation.Nullable;
 import net.minecraft.world.InteractionHand;
-import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.decoration.ArmorStand;
@@ -70,14 +70,16 @@ public abstract class TraitMixin_ArmorEquipable_Inventory_API implements ArmorEq
     public Optional<ItemStack> equipped(final EquipmentType type) {
         final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
         final EquipmentInventoryLens lens = this.impl$equipmentInventory(inv);
-        return Optional.of(ItemStackUtil.fromNative(lens.getStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlot) (Object) type).getIndex())));
+        final Fabric fabric = inv.inventoryAdapter$getFabric();
+        return Optional.of(ItemStackUtil.fromNative(lens.getSlotLens(type).getStack(fabric)));
     }
 
     @Override
     public boolean equip(final EquipmentType type, @Nullable final ItemStack equipment) {
         final InventoryAdapter inv = ((InventoryBridge) this).bridge$getAdapter();
         final EquipmentInventoryLens lens = this.impl$equipmentInventory(inv);
-        return lens.setStack(inv.inventoryAdapter$getFabric(), ((EquipmentSlot) (Object) type).getIndex(), ItemStackUtil.toNative(equipment));
+        final Fabric fabric = inv.inventoryAdapter$getFabric();
+        return lens.getSlotLens(type).setStack(fabric, ItemStackUtil.toNative(equipment));
     }
 
     @Override

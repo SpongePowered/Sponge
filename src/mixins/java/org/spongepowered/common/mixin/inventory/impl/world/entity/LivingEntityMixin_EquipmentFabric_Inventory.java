@@ -50,16 +50,7 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
     @Shadow public abstract ItemStack shadow$getItemBySlot(EquipmentSlot slotIn);
     @Shadow public abstract void shadow$setItemSlot(EquipmentSlot slotIn, ItemStack stack);
 
-    private static final EquipmentSlot[] SLOTS;
     private static final int MAX_STACK_SIZE = 64;
-
-    static {
-        EquipmentSlot[] values = EquipmentSlot.values();
-        SLOTS = new EquipmentSlot[values.length];
-        for (EquipmentSlot slot : values) {
-            LivingEntityMixin_EquipmentFabric_Inventory.SLOTS[slot.getIndex()] = slot;
-        }
-    }
 
     @Override
     public Collection<InventoryBridge> fabric$allInventories() {
@@ -73,12 +64,12 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
 
     @Override
     public ItemStack fabric$getStack(int index) {
-        return this.shadow$getItemBySlot(LivingEntityMixin_EquipmentFabric_Inventory.SLOTS[index]);
+        return this.shadow$getItemBySlot(EquipmentSlot.values()[index]);
     }
 
     @Override
     public void fabric$setStack(int index, ItemStack stack) {
-        this.shadow$setItemSlot(LivingEntityMixin_EquipmentFabric_Inventory.SLOTS[index], stack);
+        this.shadow$setItemSlot(EquipmentSlot.values()[index], stack);
     }
 
     @Override
@@ -88,12 +79,12 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
 
     @Override
     public int fabric$getSize() {
-        return LivingEntityMixin_EquipmentFabric_Inventory.SLOTS.length;
+        return EquipmentSlot.values().length;
     }
 
     @Override
     public void fabric$clear() {
-        for (EquipmentSlot slot : LivingEntityMixin_EquipmentFabric_Inventory.SLOTS) {
+        for (EquipmentSlot slot : EquipmentSlot.values()) {
             this.shadow$setItemSlot(slot, ItemStack.EMPTY);
         }
     }
@@ -110,8 +101,8 @@ public abstract class LivingEntityMixin_EquipmentFabric_Inventory implements Fab
     @Override
     public Lens lensGeneratorBridge$generateLens(SlotLensProvider slotLensProvider) {
         Map<EquipmentType, SlotLens> equipmentLenses = new LinkedHashMap<>();
-        for (int i = 0, slotsLength = LivingEntityMixin_EquipmentFabric_Inventory.SLOTS.length; i < slotsLength; i++) {
-            EquipmentSlot slot = LivingEntityMixin_EquipmentFabric_Inventory.SLOTS[i];
+        for (int i = 0, slotsLength = EquipmentSlot.values().length; i < slotsLength; i++) {
+            EquipmentSlot slot = EquipmentSlot.values()[i];
             equipmentLenses.put((EquipmentType) (Object) slot, slotLensProvider.getSlotLens(i));
         }
         return new EquipmentInventoryLens(equipmentLenses);

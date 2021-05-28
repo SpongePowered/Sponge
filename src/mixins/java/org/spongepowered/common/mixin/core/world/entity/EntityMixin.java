@@ -55,7 +55,12 @@ import net.minecraft.world.level.portal.PortalInfo;
 import net.minecraft.world.phys.AABB;
 import net.minecraft.world.phys.Vec3;
 import net.minecraft.world.scores.Team;
+import org.objectweb.asm.Opcodes;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -63,9 +68,11 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.DismountType;
 import org.spongepowered.api.event.cause.entity.DismountTypes;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
+import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -96,6 +103,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
+import org.spongepowered.common.data.value.ImmutableSpongeValue;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
@@ -202,6 +210,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     // @formatter:on
 
     @Shadow protected String stringUUID;
+    @Shadow private int remainingFireTicks;
     private boolean impl$isConstructing = true;
     private boolean impl$vanishPreventsTargeting = false;
     private boolean impl$isVanished = false;
@@ -1036,34 +1045,55 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
 
-/*
-    @Redirect(method = "setFire",
+    @Redirect(method = "setRemainingFireTicks",
         at = @At(value = "FIELD",
-            target = "Lnet/minecraft/entity/Entity;fire:I",
+            target = "Lnet/minecraft/world/entity/Entity;remainingFireTicks:I",
             opcode = Opcodes.PUTFIELD)
     )
     private void impl$ThrowIgniteEventForFire(final Entity entity, final int ticks) {
-        if (((WorldBridge) this.world).bridge$isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
-            this.fire = ticks; // Vanilla functionality
+        if (((WorldBridge) this.level).bridge$isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
+            this.remainingFireTicks = ticks; // Vanilla functionality
             return;
         }
-        if (this.fire < 1 && !this.impl$isImmuneToFireForIgniteEvent()) {
+        if (this.remainingFireTicks < 1 && !this.impl$canCallIgniteEntityEvent()) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
 
                 frame.pushCause(((org.spongepowered.api.entity.Entity) this).location().world());
                 final IgniteEntityEvent event = SpongeEventFactory.
-                    createIgniteEntityEvent(frame.getCurrentCause(), ticks, ticks, (org.spongepowered.api.entity.Entity) this);
+                    createIgniteEntityEvent(frame.currentCause(), ticks, ticks, (org.spongepowered.api.entity.Entity) this);
 
                 if (SpongeCommon.postEvent(event)) {
-                    this.fire = 0;
-                    return; // set fire ticks to 0
+                    // Don't do anything
+                    return;
                 }
-                this.fire = event.fireTicks();
+                final DataTransactionResult transaction = DataTransactionResult.builder()
+                    .replace(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, Ticks.of(this.remainingFireTicks)))
+                    .success(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, Ticks.of(event.fireTicks())))
+                    .result(DataTransactionResult.Type.SUCCESS)
+                    .build();
+
+                final ChangeDataHolderEvent.ValueChange valueChange = SpongeEventFactory.createChangeDataHolderEventValueChange(
+                    PhaseTracker.SERVER.currentCause(),
+                    transaction,
+                    (DataHolder.Mutable) this);
+
+                Sponge.eventManager().post(valueChange);
+                if (valueChange.isCancelled()) {
+                    //If the event is cancelled, well, don't change the underlying value.
+                    return;
+                }
+                this.remainingFireTicks = valueChange.endResult().successfulData()
+                    .stream()
+                    .filter(d -> d.key() == Keys.FIRE_TICKS)
+                    .findFirst()
+                    .map(Value::get)
+                    .map(o -> (int) o)
+                    .orElse(0);
+
             }
         }
     }
 
-    */
 
     @Redirect(method = "getEncodeId", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/EntityType;canSerialize()Z"))
     private boolean impl$respectTransientFlag(final EntityType entityType) {
@@ -1137,4 +1167,17 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     protected boolean impl$canCallIgniteEntityEvent() {
         return false;
     }
+
+    /*@Redirect(
+        method = "setRemainingFireTicks",
+        at = @At(
+            value = "FIELD",
+            target = "Lnet/minecraft/world/entity/Entity;remainingFireTicks:I",
+            opcode = Opcodes.PUTFIELD
+        )
+    )
+    private void impl$callIgnite(Entity entity, int value) {
+
+    }*/
+
 }

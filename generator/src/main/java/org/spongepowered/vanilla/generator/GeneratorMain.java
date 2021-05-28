@@ -115,7 +115,7 @@ public final class GeneratorMain {
                 "entity.attribute.type",
                 "AttributeTypes",
                 "ATTRIBUTE_TYPE",
-                context.relativeClass("entity.attribute.type", "AttributeType"),
+                context.relativeClass("entity.attribute.type", "RangedAttributeType"),
                 Registry.ATTRIBUTE_REGISTRY
             ),
             new RegistryEntriesGenerator<>(
@@ -248,8 +248,9 @@ public final class GeneratorMain {
                 context.relativeClass("world", "WorldType"),
                 Registry.DIMENSION_TYPE_REGISTRY,
                 $ -> true,
-                RegistryEntriesGenerator.RegistryScope.SERVER
-            )
+                RegistryScope.SERVER
+            ),
+            new BlockStatePropertiesGenerator()
         );
     }
 }
