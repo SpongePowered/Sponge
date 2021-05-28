@@ -1161,16 +1161,4 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return false;
     }
 
-    @Redirect(
-        method = "setRemainingFireTicks",
-        at = @At(
-            value = "FIELD",
-            target = "Lnet/minecraft/world/entity/Entity;remainingFireTicks:I",
-            opcode = Opcodes.PUTFIELD
-        )
-    )
-    private void impl$callIgnite(Entity entity, int value) {
-
-    }
-
 }
