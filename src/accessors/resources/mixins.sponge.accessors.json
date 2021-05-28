@@ -196,7 +196,6 @@
         "world.scores.PlayerTeamAccessor",
         "world.scores.ScoreAccessor",
         "world.scores.ScoreboardAccessor",
-        "CrashReportCategoryAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

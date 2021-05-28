@@ -237,12 +237,12 @@ public abstract class ExplosionMixin implements ExplosionBridge {
         for (int k2 = 0; k2 < list.size(); ++k2) {
             final Entity entity = list.get(k2);
             if (!entity.ignoreExplosion()) {
-                final double d12 = (double)(Mth.sqrt(entity.distanceToSqr(vec3d)) / f3);
+                final double d12 = (Math.sqrt(entity.distanceToSqr(vec3d)) / f3);
                 if (d12 <= 1.0D) {
                     double d5 = entity.getX() - this.x;
                     double d7 = entity.getEyeY() - this.y;
                     double d9 = entity.getZ() - this.z;
-                    final double d13 = (double)Mth.sqrt(d5 * d5 + d7 * d7 + d9 * d9);
+                    final double d13 = Math.sqrt(d5 * d5 + d7 * d7 + d9 * d9);
                     if (d13 != 0.0D) {
                         d5 = d5 / d13;
                         d7 = d7 / d13;

@@ -519,7 +519,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         final double d0 = target.getX() - this.getX();
         final double d1 = target.getBoundingBox().minY + target.getBbHeight() / 3.0F - entitytippedarrow.getY();
         final double d2 = target.getZ() - this.getZ();
-        final double d3 = Mth.sqrt(d0 * d0 + d2 * d2);
+        final double d3 = Math.sqrt(d0 * d0 + d2 * d2);
         entitytippedarrow.shoot(d0, d1 + d3 * 0.20000000298023224D, d2, 1.6F, 14 - this.level.getDifficulty().getId() * 4);
         // These names are wrong
         final int i = EnchantmentHelper.getEnchantmentLevel(Enchantments.PUNCH_ARROWS, this);

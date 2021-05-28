@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.server;
 
-import net.minecraft.CrashReport;
-import net.minecraft.CrashReportCategory;
+import net.minecraft.SystemReport;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.TickTask;
 import net.minecraft.server.level.ServerLevel;
@@ -38,7 +37,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.accessor.CrashReportCategoryAccessor;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.event.tracking.CauseTrackerCrashHandler;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -52,14 +50,14 @@ import java.util.function.BooleanSupplier;
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMixin_Tracker {
 
+    // @formatter:off
     @Shadow public abstract boolean shadow$isStopped();
+    @Shadow public abstract void shadow$tickChildren(BooleanSupplier hasTimeLeft);
+    // @formatter:on
 
-    @Shadow protected abstract void shadow$tickChildren(BooleanSupplier hasTimeLeft);
-
-    @Inject(method = "fillReport", at = @At("RETURN"), cancellable = true)
-    private void tracker$addPhaseTrackerToCrashReport(final CrashReportCategory category, final CallbackInfo ci) {
-        final CrashReport report = ((CrashReportCategoryAccessor) category).accessor$report();
-        report.addCategory("Sponge PhaseTracker").setDetail("Phase Stack", CauseTrackerCrashHandler.INSTANCE);
+    @Inject(method = "fillSystemReport", at = @At("RETURN"), cancellable = true)
+    private void tracker$addPhaseTrackerToCrashReport(final SystemReport category, final CallbackInfoReturnable<SystemReport> cir) {
+        category.setDetail("Sponge PhaseTracker", CauseTrackerCrashHandler.INSTANCE::call);
     }
 
     @Inject(method = "tickServer", at = @At("RETURN"))

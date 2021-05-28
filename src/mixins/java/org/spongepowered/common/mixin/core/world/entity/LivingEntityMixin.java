@@ -769,7 +769,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
     }
 
-    @Redirect(method = "updatingUsingItem",
+    @Redirect(method = "updateUsingItem",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/LivingEntity;getUseItemRemainingTicks()I",
             ordinal = 0))

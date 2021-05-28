@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.mixin.core;
 
 import net.minecraft.CrashReport;
 import net.minecraft.CrashReportCategory;
+import net.minecraft.SystemReport;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -39,11 +40,11 @@ import org.spongepowered.plugin.metadata.PluginMetadata;
 @Mixin(CrashReport.class)
 public abstract class CrashReportMixin_Vanilla {
 
-    @Shadow @Final private CrashReportCategory systemDetails;
+    @Shadow @Final private SystemReport systemReport;
 
-    @Inject(method = "initDetails", at = @At("RETURN"))
+    @Inject(method = "<init>", at = @At("RETURN"))
     private void vanilla$addPluginsToEnvironment(final CallbackInfo ci) {
-        this.systemDetails.setDetail("Plugins", () -> {
+        this.systemReport.setDetail("Plugins", () -> {
             final StringBuilder result = new StringBuilder(64);
             for (final PluginContainer container : Sponge.pluginManager().plugins()) {
                 final PluginMetadata metadata = container.metadata();

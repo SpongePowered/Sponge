@@ -158,9 +158,9 @@ public abstract class FishingHookMixin extends EntityMixin {
                     double d0 = playerEntity.getX() - this.shadow$getX();
                     double d1 = playerEntity.getY() - this.shadow$getY();
                     double d2 = playerEntity.getZ() - this.shadow$getZ();
-                    double d3 = Mth.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
+                    double d3 = Math.sqrt(d0 * d0 + d1 * d1 + d2 * d2);
                     //double d4 = 0.1D;
-                    entityitem.setDeltaMovement(d0 * 0.1D, d1 * 0.1D + Mth.sqrt(d3) * 0.08D, d2 * 0.1D);
+                    entityitem.setDeltaMovement(d0 * 0.1D, d1 * 0.1D + Math.sqrt(d3) * 0.08D, d2 * 0.1D);
                     this.level.addFreshEntity(entityitem);
                     playerEntity.level.addFreshEntity(new ExperienceOrb(playerEntity.level, playerEntity.getX(), playerEntity.getY() + 0.5D,
                             playerEntity.getZ() + 0.5D,

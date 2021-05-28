@@ -71,9 +71,7 @@ public abstract class ServerTickListMixin<T> {
         ),
         locals = LocalCapture.CAPTURE_FAILHARD
     )
-    private void impl$markDataAsCompleted(CallbackInfo ci, int var0,
-        ServerChunkCache var1, Iterator var2,
-        TickNextTickData var4) {
+    private void impl$markDataAsCompleted(final CallbackInfo ci, final int var0, final Iterator var2, final TickNextTickData var4) {
         ((TickNextTickDataBridge<T>) var4).bridge$setState(ScheduledUpdate.State.FINISHED);
     }
 

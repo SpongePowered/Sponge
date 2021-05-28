@@ -31,7 +31,7 @@ public class CauseTrackerCrashHandler implements CrashReportDetail<String> {
     public static final CauseTrackerCrashHandler INSTANCE = new CauseTrackerCrashHandler();
 
     @Override
-    public String call() throws Exception {
+    public String call() {
         // TODO - this should really print the stack per thread since the crash report is happening and stopping the game
         return PhaseTracker.getInstance().dumpStack();
     }

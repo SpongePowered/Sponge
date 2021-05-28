@@ -26,85 +26,31 @@ package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import com.mojang.authlib.GameProfile;
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.StringUtil;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.entity.SkullBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.level.block.entity.SkullBlockEntityBridge;
-import org.spongepowered.common.profile.SpongeGameProfile;
-
-import java.util.concurrent.CompletableFuture;
 
 @Mixin(SkullBlockEntity.class)
 public abstract class SkullBlockEntityMixin extends BlockEntity implements SkullBlockEntityBridge {
 
     @Shadow private GameProfile owner;
 
-    private @Nullable CompletableFuture<?> impl$currentProfileFuture;
-
     private SkullBlockEntityMixin(
-        BlockEntityType<?> var1, BlockPos var2, BlockState var3
+        final BlockEntityType<?> var1, final BlockPos var2, final BlockState var3
     ) {
         super(var1, var2, var3);
     }
 
-    private void cancelResolveFuture() {
-        if (this.impl$currentProfileFuture != null) {
-            this.impl$currentProfileFuture.cancel(true);
-            this.impl$currentProfileFuture = null;
-        }
-    }
-
     @Override
     public void bridge$setUnresolvedPlayerProfile(final @Nullable GameProfile owner) {
-        this.cancelResolveFuture();
+        // TODO: cancel existing resolve future from authlib callback
         this.owner = owner;
         this.setChanged();
     }
 
-    /**
-     * @reason Don't block the main thread while attempting to lookup a game profile.
-     */
-    @Redirect(method = "updateOwnerProfile()V", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/level/block/entity/SkullBlockEntity;updateGameprofile(Lcom/mojang/authlib/GameProfile;)Lcom/mojang/authlib/GameProfile;"))
-    private GameProfile onUpdateProfile(final GameProfile input) {
-        this.cancelResolveFuture();
-        if (input == null) {
-            return null;
-        }
-        if (input.isComplete() && input.getProperties().containsKey("textures")) {
-            return input;
-        }
-        final GameProfileManager manager = Sponge.server().gameProfileManager();
-        CompletableFuture<org.spongepowered.api.profile.GameProfile> future = null;
-        if (input.getId() != null) {
-            future = manager.profile(input.getId());
-        } else if (!StringUtil.isNullOrEmpty(input.getName())) {
-            future = manager.profile(input.getName());
-        }
-        if (future == null) {
-            return input;
-        }
-        future.thenAcceptAsync(profile -> {
-            this.owner = SpongeGameProfile.toMcProfile(profile);
-            this.setChanged();
-        }, SpongeCommon.getServer());
-        this.impl$currentProfileFuture = future;
-        return input;
-    }
-
-    @Override
-    public void setRemoved() {
-        super.setRemoved();
-        this.cancelResolveFuture();
-    }
 }
