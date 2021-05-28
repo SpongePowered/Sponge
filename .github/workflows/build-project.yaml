@@ -5,7 +5,7 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches-ignore: [ api-8 ]
+    branches-ignore: [ 'api-*' ]
     tags-ignore: ["*"]
   pull_request:
     branches-ignore: [ stable-7 ]

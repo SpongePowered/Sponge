@@ -199,9 +199,12 @@ minecraft {
 }
 
 dependencies {
+    val apiAdventureVersion: String by project
+    val apiConfigurateVersion: String by project
     val asmVersion: String by project
     val guavaVersion: String by project
     val jlineVersion: String by project
+    val log4jVersion: String by project
     val mixinVersion: String by project
     val modlauncherVersion: String by project
     val pluginSpiVersion: String by project
@@ -216,8 +219,8 @@ dependencies {
 
     val installer = vanillaInstallerConfig.name
     installer("com.google.code.gson:gson:2.8.0")
-    installer("org.spongepowered:configurate-hocon:4.1.1")
-    installer("org.spongepowered:configurate-core:4.1.1")
+    installer("org.spongepowered:configurate-hocon:$apiConfigurateVersion")
+    installer("org.spongepowered:configurate-core:$apiConfigurateVersion")
     installer("net.sf.jopt-simple:jopt-simple:5.0.3")
     installer("org.tinylog:tinylog-api:2.2.1")
     installer("org.tinylog:tinylog-impl:2.2.1")
@@ -242,7 +245,7 @@ dependencies {
 
     val appLaunch = vanillaAppLaunchConfig.name
     appLaunch("org.spongepowered:spongeapi:$apiVersion")
-    appLaunch(platform("net.kyori:adventure-bom:4.7.0"))
+    appLaunch(platform("net.kyori:adventure-bom:$apiAdventureVersion"))
     appLaunch("net.kyori:adventure-serializer-configurate4")
     appLaunch("org.spongepowered:mixin:$mixinVersion")
     appLaunch("org.ow2.asm:asm-util:$asmVersion")
@@ -250,12 +253,12 @@ dependencies {
     appLaunch("com.google.guava:guava:$guavaVersion")
     appLaunch("org.spongepowered:plugin-spi:$pluginSpiVersion")
     appLaunch("javax.inject:javax.inject:1")
-    appLaunch("org.apache.logging.log4j:log4j-api:2.11.2")
-    appLaunch("org.apache.logging.log4j:log4j-core:2.11.2")
+    appLaunch("org.apache.logging.log4j:log4j-api:$log4jVersion")
+    appLaunch("org.apache.logging.log4j:log4j-core:$log4jVersion")
     appLaunch("com.lmax:disruptor:3.4.2")
     appLaunch("com.zaxxer:HikariCP:2.6.3")
-    appLaunch("org.apache.logging.log4j:log4j-slf4j-impl:2.11.2")
-    appLaunch(platform("org.spongepowered:configurate-bom:4.1.1"))
+    appLaunch("org.apache.logging.log4j:log4j-slf4j-impl:$log4jVersion")
+    appLaunch(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
     appLaunch("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
