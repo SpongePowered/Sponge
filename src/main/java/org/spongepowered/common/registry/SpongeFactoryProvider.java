@@ -87,6 +87,7 @@ import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
 import org.spongepowered.api.world.volume.block.BlockVolumeFactory;
+import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.common.advancement.SpongeAdvancementCriterionFactory;
 import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
@@ -142,6 +143,7 @@ import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 import org.spongepowered.common.world.server.SpongeServerLocationCreatorFactory;
 import org.spongepowered.common.world.volume.block.SpongeBlockVolumeFactory;
+import org.spongepowered.common.world.weather.SpongeWeather;
 
 import java.util.Map;
 import java.util.Objects;
@@ -238,6 +240,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(Favicon.Factory.class, new SpongeFavicon.FactoryImpl())
                 .registerFactory(CommandCompletion.Factory.class, new SpongeCommandCompletionFactory())
                 .registerFactory(DisplaySlot.Factory.class, new SpongeDisplaySlotFactory())
+                .registerFactory(Weather.Factory.class, new SpongeWeather.FactoryImpl())
         ;
     }
 }

@@ -71,4 +71,12 @@ public final class SpongeWeather implements Weather {
                 .set(Constants.Universe.Weather.REMAINING_DURATION, this.remainingDuration.ticks())
                 .set(Constants.Universe.Weather.RUNNING_DURATION, this.runningDuration.ticks());
     }
+
+    public static class FactoryImpl implements Weather.Factory {
+
+        @Override
+        public Weather of(WeatherType type, Ticks remainingDuration, Ticks runningDuration) {
+            return new SpongeWeather((SpongeWeatherType) type, remainingDuration, runningDuration);
+        }
+    }
 }
