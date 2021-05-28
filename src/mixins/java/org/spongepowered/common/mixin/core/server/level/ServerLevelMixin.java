@@ -47,7 +47,9 @@ import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -56,6 +58,7 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -288,6 +291,13 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
      */
     @Overwrite
     public void save(@Nullable final ProgressListener progress, final boolean flush, final boolean skipSave) {
+
+        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+
+        if (Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPre(currentCause, ((ServerWorld) this)))) {
+            return; // cancelled save
+        }
+
         final PrimaryLevelData levelData = (PrimaryLevelData) this.shadow$getLevelData();
 
         final ServerChunkCache chunkProvider = ((ServerLevel) (Object) this).getChunkSource();
@@ -327,6 +337,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             if (canAutomaticallySave || canManuallySave) {
                 chunkProvider.save(flush);
             }
+
+            Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, ((ServerWorld) this)));
         }
 
         this.impl$isManualSave = false;
