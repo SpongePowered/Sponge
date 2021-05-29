@@ -26,8 +26,10 @@ package org.spongepowered.common.mixin.core.world.entity.item;
 
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.item.ItemStack;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Item;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ExpireEntityEvent;
@@ -184,6 +186,15 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
     @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000))
     private int impl$tickUseDespawnRateFromConfig(final int originalValue) {
         return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate;
+    }
+
+    @Inject(method = "tryToMerge", cancellable = true,
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;merge(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/world/item/ItemStack;)V"))
+    private void impl$merge(final ItemEntity param0, final CallbackInfo ci) {
+        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+        if (Sponge.eventManager().post(SpongeEventFactory.createItemMergeWithItemEvent(currentCause, (Item) this, (Item) param0))) {
+            ci.cancel();
+        }
     }
 
 }
