@@ -25,10 +25,12 @@
 package org.spongepowered.common.mixin.core.server.level;
 
 import com.google.common.collect.ImmutableSet;
+import com.mojang.datafixers.util.Either;
 import io.netty.channel.Channel;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.ChatFormatting;
+import net.minecraft.advancements.CriteriaTriggers;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.ChatType;
@@ -53,6 +55,7 @@ import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.Stats;
+import net.minecraft.util.Unit;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.effect.MobEffectInstance;
@@ -74,10 +77,13 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.SkinPart;
+import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -94,6 +100,7 @@ import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.locale.Locales;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -103,6 +110,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.ConnectionAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundClientInformationPacketAccessor;
@@ -865,6 +873,34 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public net.minecraft.world.scores.Scoreboard shadow$getScoreboard() {
         return (net.minecraft.world.scores.Scoreboard) this.impl$scoreboard;
+    }
+
+    @Inject(method = "startSleepInBed", at = @At(value = "RETURN"), cancellable = true)
+    private void impl$onReturnSleep(final BlockPos param0, final CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
+        final Either<Player.BedSleepingProblem, Unit> returnValue = cir.getReturnValue();
+        if (returnValue.left().isPresent()) {
+            switch (returnValue.left().get()) {
+
+                case NOT_POSSIBLE_HERE:
+                case TOO_FAR_AWAY:
+                case NOT_POSSIBLE_NOW:
+                case OBSTRUCTED:
+                case NOT_SAFE:
+                    final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+                    final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
+                    if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Humanoid) this))) {
+                        Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
+                            this.shadow$awardStat(Stats.SLEEP_IN_BED);
+                            CriteriaTriggers.SLEPT_IN_BED.trigger((net.minecraft.server.level.ServerPlayer) (Object) this);
+                        });
+                        ((ServerLevel)this.level).updateSleepingPlayerList();
+                        cir.setReturnValue(var5);
+                    }
+                    break;
+                case OTHER_PROBLEM: // ignore
+                    break;
+            }
+        }
     }
 }
 
