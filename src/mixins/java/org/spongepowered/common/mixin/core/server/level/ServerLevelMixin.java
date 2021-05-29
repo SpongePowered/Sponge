@@ -54,6 +54,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.action.LightningEvent;
 import org.spongepowered.api.event.world.ChangeWeatherEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -392,6 +393,19 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             }
         }
 
+    }
+
+    @Redirect(method = "tickChunk",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;isRainingAt(Lnet/minecraft/core/BlockPos;)Z"))
+    private boolean impl$onBeforeThunder(final ServerLevel serverLevel, final BlockPos param0) {
+        final boolean rainingAt = serverLevel.isRainingAt(param0);
+        if (rainingAt) {
+            final LightningEvent.Pre strike = SpongeEventFactory.createLightningEventPre(Sponge.server().causeStackManager().currentCause());
+            if (Sponge.eventManager().post(strike)) {
+                return false;
+            }
+        }
+        return rainingAt;
     }
 
     @Override
