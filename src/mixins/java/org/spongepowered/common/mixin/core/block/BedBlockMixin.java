@@ -34,6 +34,7 @@ import net.minecraft.world.phys.BlockHitResult;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -52,7 +53,7 @@ public class BedBlockMixin {
             final Cause currentCause = Sponge.server().causeStackManager().currentCause();
             final BlockPos bedLocation = param5.getBlockPos();
             final BlockSnapshot snapshot = ((ServerWorld) param1).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
-            if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventPre(currentCause, snapshot, (Humanoid) param3))) {
+            if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventPre(currentCause, snapshot, (Living) param3))) {
                 cir.setReturnValue(InteractionResult.CONSUME);
             }
         }
@@ -64,7 +65,7 @@ public class BedBlockMixin {
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
         final BlockPos bedLocation = param5.getBlockPos();
         final BlockSnapshot snapshot = ((ServerWorld) param1).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
-        if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Humanoid) param3))) {
+        if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) param3))) {
             param3.startSleepInBed(param2).ifLeft((param1x) -> {
                 if (param1x != null) {
                     param3.displayClientMessage(param1x.getMessage(), true);

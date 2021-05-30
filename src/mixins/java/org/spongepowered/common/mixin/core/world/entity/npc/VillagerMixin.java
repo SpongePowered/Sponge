@@ -31,6 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -57,7 +58,7 @@ public abstract class VillagerMixin extends AbstractVillagerMixin {
     private void impl$callPreSleepingEvent(BlockPos param0, CallbackInfo ci) {
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
         final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
-        if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventPre(currentCause, snapshot, (Humanoid) this))) {
+        if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventPre(currentCause, snapshot, (Living) this))) {
             ci.cancel();
         }
     }

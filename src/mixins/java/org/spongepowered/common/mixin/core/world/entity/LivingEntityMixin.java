@@ -52,6 +52,7 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -931,7 +932,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         if (sleepingPos.isPresent()) {
             snapshot = ((ServerWorld) this.level).createSnapshot(sleepingPos.get().getX(), sleepingPos.get().getY(), sleepingPos.get().getZ());
         }
-        final SleepingEvent.Finish event = SpongeEventFactory.createSleepingEventFinish(currentCause, loc, loc, rot, rot, snapshot, (Humanoid) this);
+        final SleepingEvent.Finish event = SpongeEventFactory.createSleepingEventFinish(currentCause, loc, loc, rot, rot, snapshot, (Living) this);
         Sponge.eventManager().post(event);
         ((Humanoid) this).setLocation(event.toLocation());
         ((Humanoid) this).setRotation(event.toRotation());

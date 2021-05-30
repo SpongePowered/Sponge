@@ -80,6 +80,7 @@ import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -888,7 +889,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 case NOT_SAFE:
                     final Cause currentCause = Sponge.server().causeStackManager().currentCause();
                     final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
-                    if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Humanoid) this))) {
+                    if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) this))) {
                         Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
                             this.shadow$awardStat(Stats.SLEEP_IN_BED);
                             CriteriaTriggers.SLEPT_IN_BED.trigger((net.minecraft.server.level.ServerPlayer) (Object) this);

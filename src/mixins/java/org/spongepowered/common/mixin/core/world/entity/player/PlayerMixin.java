@@ -65,6 +65,7 @@ import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -211,7 +212,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.shadow$getSleepingPos().get();
                 final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
-                SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventTick(csm.currentCause(), snapshot, (Humanoid) this));
+                SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventTick(csm.currentCause(), snapshot, (Living) this));
                 csm.popCause();
             }
             return true;
