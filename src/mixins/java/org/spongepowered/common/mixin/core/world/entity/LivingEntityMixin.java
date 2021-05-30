@@ -935,7 +935,10 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         final SleepingEvent.Finish event = SpongeEventFactory.createSleepingEventFinish(currentCause, loc, loc, rot, rot, snapshot, (Living) this);
         Sponge.eventManager().post(event);
         this.shadow$clearSleepingPos();
-        ((Living) this).setLocation(event.toLocation());
+        if (event.toLocation().world() != this.level) {
+            throw new UnsupportedOperationException("World change is not supported here.");
+        }
+        this.shadow$setPos(event.toLocation().x(), event.toLocation().y(), event.toLocation().z());
         ((Living) this).setRotation(event.toRotation());
     }
 }
