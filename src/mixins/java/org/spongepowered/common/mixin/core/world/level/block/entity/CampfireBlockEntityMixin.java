@@ -70,7 +70,8 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
         final boolean isEmpty = itemStack.isEmpty();
         if (!isEmpty) {
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-            final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (Campfire) this, Optional.empty(),
+            final ItemStackSnapshot stack = ItemStackUtil.snapshotOf(this.items.get(i));
+            final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (Campfire) this, stack, Optional.empty(),
                     Optional.ofNullable((CookingRecipe) impl$cookingRecipe[i]));
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
