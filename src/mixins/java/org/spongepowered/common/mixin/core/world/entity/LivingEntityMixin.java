@@ -167,6 +167,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Shadow  public abstract Collection<MobEffectInstance> shadow$getActiveEffects();
     @Shadow public abstract float shadow$getMaxHealth();
     @Shadow public abstract AttributeMap shadow$getAttributes();
+    @Shadow public abstract void shadow$clearSleepingPos();
     // @formatter:on
 
     @Nullable private ItemStack impl$activeItemStackCopy;
@@ -933,6 +934,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
         final SleepingEvent.Finish event = SpongeEventFactory.createSleepingEventFinish(currentCause, loc, loc, rot, rot, snapshot, (Living) this);
         Sponge.eventManager().post(event);
+        this.shadow$clearSleepingPos();
         ((Living) this).setLocation(event.toLocation());
         ((Living) this).setRotation(event.toRotation());
     }
