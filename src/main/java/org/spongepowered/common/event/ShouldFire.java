@@ -109,7 +109,6 @@ public final class ShouldFire {
     public static boolean BREEDING_EVENT_READY_TO_MATE = false;
     public static boolean BREEDING_EVENT_FIND_MATE = false;
     public static boolean BREEDING_EVENT_BREED = false;
-    public static boolean CHANGE_GAME_MODE_EVENT = false;
 
     public static boolean PLAY_SOUND_EVENT_AT_ENTITY = false;
     public static boolean PLAY_SOUND_EVENT_RECORD = false;
