@@ -91,8 +91,8 @@ import org.spongepowered.common.accessor.world.gen.DimensionGeneratorSettingsAcc
 import org.spongepowered.common.accessor.world.level.storage.LevelStorageSource_LevelStorageAccessAccessor;
 import org.spongepowered.common.accessor.world.level.storage.PrimaryLevelDataAccessor;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
@@ -931,6 +931,9 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             final ServerLevel world = new ServerLevel(this.server, ((MinecraftServerAccessor) this.server).accessor$executor(), storageSource, levelData,
                     registryKey, (DimensionType) worldType, chunkStatusListener, template.generator(), isDebugGeneration, seed, spawners, true);
+            // Ensure that the world border is registered.
+            world.getWorldBorder().applySettings(levelData.getWorldBorder());
+
             this.worlds.put(registryKey, world);
 
             this.prepareWorld(world, isDebugGeneration);

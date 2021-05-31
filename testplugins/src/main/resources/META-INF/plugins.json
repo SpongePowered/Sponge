@@ -524,6 +524,27 @@
                 "id": "spongeapi",
                 "version": "8.0.0"
             }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "worldbordertest",
+            "name": "World Border Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.worldborder.WorldBorderTest",
+            "description": "World Border testing",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
         }
     ]
 }

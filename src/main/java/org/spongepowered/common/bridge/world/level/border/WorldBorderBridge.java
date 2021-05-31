@@ -22,33 +22,17 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.entity.player;
+package org.spongepowered.common.bridge.world.level.border;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemCooldowns;
-import net.minecraft.world.phys.Vec3;
-import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.mixin.api.mcp.world.entity.LivingEntityMixin_API;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 
-@Mixin(net.minecraft.world.entity.player.Player.class)
-public abstract class PlayerMixin_API extends LivingEntityMixin_API implements Player {
+public interface WorldBorderBridge {
 
-    // @formatter:off
-    @Shadow public AbstractContainerMenu containerMenu;
-    @Shadow public abstract ItemCooldowns shadow$getCooldowns();
-    @Shadow public abstract Component shadow$getName();
-    // @formatter:on
+    void bridge$setAssociatedWorld(ResourceKey resourceKey);
 
-    public final boolean impl$isFake = ((PlatformEntityBridge) this).bridge$isFakePlayer();
+    org.spongepowered.api.world.border.@Nullable WorldBorder bridge$applyFrom(final org.spongepowered.api.world.border.WorldBorder worldBorder);
 
-    @Override
-    public String name() {
-        return this.shadow$getName().getString();
-    }
+    org.spongepowered.api.world.border.WorldBorder bridge$asImmutable();
 
 }

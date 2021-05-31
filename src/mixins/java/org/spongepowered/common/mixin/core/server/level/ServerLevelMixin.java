@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import co.aikar.timings.sponge.WorldTimingsHandler;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
@@ -35,6 +36,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.TicketType;
 import net.minecraft.server.level.progress.ChunkProgressListener;
 import net.minecraft.util.ProgressListener;
+import net.minecraft.util.profiling.ProfilerFiller;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.CustomSpawner;
@@ -47,8 +49,13 @@ import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.ServerLevelData;
 import net.minecraft.world.level.storage.WorldData;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.action.LightningEvent;
+import org.spongepowered.api.event.world.ChangeWeatherEvent;
 import org.spongepowered.api.event.world.ExplosionEvent;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -56,7 +63,10 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
+import org.spongepowered.api.world.weather.Weather;
+import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
@@ -65,12 +75,15 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
+import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -84,13 +97,13 @@ import co.aikar.timings.sponge.WorldTimingsHandler;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
+import java.util.function.BooleanSupplier;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge, PlatformServerLevelBridge, ResourceKeyBridge {
@@ -161,6 +174,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
         // TODO Minecraft 1.16.2 - Rebuild level stems, get generator from type, set generator
         // TODO ...or cache generator on type?
+
+        this.impl$setWorldOnBorder();
     }
 
     @Override
@@ -330,6 +345,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         }
 
         this.impl$isManualSave = false;
+    }
+
+    private void impl$setWorldOnBorder() {
+        ((WorldBorderBridge) this.shadow$getWorldBorder()).bridge$setAssociatedWorld(this.bridge$getKey());
     }
 
     @Override

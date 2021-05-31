@@ -22,33 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.entity.player;
+package org.spongepowered.common.accessor.world.level.border;
 
-import net.minecraft.network.chat.Component;
-import net.minecraft.world.entity.MoverType;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.item.ItemCooldowns;
-import net.minecraft.world.phys.Vec3;
-import org.spongepowered.api.entity.living.player.Player;
+import net.minecraft.world.level.border.WorldBorder;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.mixin.api.mcp.world.entity.LivingEntityMixin_API;
+import org.spongepowered.asm.mixin.gen.Invoker;
+import org.spongepowered.common.UntransformedInvokerError;
 
-@Mixin(net.minecraft.world.entity.player.Player.class)
-public abstract class PlayerMixin_API extends LivingEntityMixin_API implements Player {
+@Mixin(WorldBorder.Settings.class)
+public interface WorldBorder_SettingsAccessor {
 
-    // @formatter:off
-    @Shadow public AbstractContainerMenu containerMenu;
-    @Shadow public abstract ItemCooldowns shadow$getCooldowns();
-    @Shadow public abstract Component shadow$getName();
-    // @formatter:on
-
-    public final boolean impl$isFake = ((PlatformEntityBridge) this).bridge$isFakePlayer();
-
-    @Override
-    public String name() {
-        return this.shadow$getName().getString();
+    @Invoker("<init>")
+    static WorldBorder.Settings invoker$new(
+        final double centerX,
+        final double centerZ,
+        final double damagePerBlock,
+        final double safeZone,
+        final int warningBlocks,
+        final int warningTime,
+        final double size,
+        final long sizeLerpTime,
+        final double sizeLerpTarget
+    ) {
+        throw new UntransformedInvokerError();
     }
-
 }

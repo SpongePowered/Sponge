@@ -42,18 +42,16 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightType;
-import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
@@ -91,7 +89,17 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @Override
     default WorldBorder border() {
-        return (WorldBorder) ((CollisionGetter) this).getWorldBorder();
+        return ((WorldBorderBridge) ((CollisionGetter) this).getWorldBorder()).bridge$asImmutable();
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    @Override
+    default WorldBorder setBorder(final WorldBorder border) {
+        final WorldBorder worldBorder = ((WorldBorderBridge) ((CollisionGetter) this).getWorldBorder()).bridge$applyFrom(border);
+        if (worldBorder == null) {
+            return (WorldBorder) net.minecraft.world.level.border.WorldBorder.DEFAULT_SETTINGS;
+        }
+        return worldBorder;
     }
 
     @Override
