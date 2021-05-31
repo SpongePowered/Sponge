@@ -339,7 +339,7 @@
         "mcp.world.level.block.state.properties.SlabTypeMixin_API",
         "mcp.world.level.block.state.properties.StairsShapeMixin_API",
         "mcp.world.level.block.state.properties.StructureModeMixin_API",
-        "mcp.world.level.border.WorldBorderMixin_API",
+        "mcp.world.level.border.WorldBorderMixin_Settings_API",
         "mcp.world.level.chunk.ChunkAccessMixin_API",
         "mcp.world.level.chunk.ChunkGeneratorMixin_API",
         "mcp.world.level.chunk.ChunkStatusMixin_API",

@@ -24,87 +24,151 @@
  */
 package org.spongepowered.common.world.border;
 
-import org.spongepowered.api.world.WorldBorder;
-import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.api.world.border.WorldBorder;
+import org.spongepowered.common.accessor.world.level.border.WorldBorder_SettingsAccessor;
+import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
+import org.spongepowered.math.vector.Vector2d;
 
 import java.time.Duration;
 
-public class SpongeWorldBorderBuilder implements WorldBorder.Builder {
+public final class SpongeWorldBorderBuilder implements WorldBorder.Builder {
 
-    private double diameter;
-    private Vector3d center = Vector3d.ZERO; //use a default value otherwise null is used
-    private Duration warningTime;
+    private double diameter = -1;
+    private double initialDiameter = -1;
+    private Duration time = Duration.ZERO;
+    private Vector2d center = Vector2d.ZERO; //use a default value otherwise null is used
+    private Duration warningTime = Duration.ZERO;
     private double warningDistance;
-    private double damageThreshold;
-    private double damageAmount;
+    private double safeZone;
+    private double damagePerBlock;
+
+    public WorldBorder.Builder from(final WorldBorderBridge border) {
+        return this.from(border.bridge$asImmutable());
+    }
 
     @Override
     public WorldBorder.Builder from(final WorldBorder border) {
-        this.diameter = border.diameter();
+        this.diameter = border.targetDiameter();
+        this.initialDiameter = border.diameter();
+        this.time = border.timeUntilTargetDiameter();
         this.center = border.center();
         this.warningTime = border.warningTime();
         this.warningDistance = border.warningDistance();
-        this.damageThreshold = border.damageThreshold();
-        this.damageAmount = border.damageAmount();
+        this.safeZone = border.safeZone();
+        this.damagePerBlock = border.damagePerBlock();
         return this;
     }
 
     @Override
-    public WorldBorder.Builder diameter(final double diameter) {
+    public WorldBorder.Builder overworldDefaults() {
+        return this.from((WorldBorder) net.minecraft.world.level.border.WorldBorder.DEFAULT_SETTINGS);
+    }
+
+    @Override
+    public WorldBorder.Builder targetDiameter(final double diameter) {
+        if (diameter <= 0) {
+            throw new IllegalArgumentException("diameter cannot be non-positive");
+        }
         this.diameter = diameter;
+        if (this.initialDiameter == -1) {
+            this.initialDiameter = diameter;
+        }
+        return this;
+    }
+
+    @Override
+    public WorldBorder.Builder timeToTargetDiameter(final Duration time) {
+        if (time.isNegative()) {
+            throw new IllegalArgumentException("time cannot be negative");
+        }
+        this.time = time;
         return this;
     }
 
     @Override
     public WorldBorder.Builder center(final double x, final double z) {
-        this.center = new Vector3d(x, 0, z);
+        this.center = new Vector2d(x, z);
         return this;
     }
 
     @Override
-    public WorldBorder.Builder warningTime(final Duration time) {
-        this.warningTime = time;
+    public WorldBorder.Builder initialDiameter(final double initialDiameter) {
+        if (initialDiameter <= 0) {
+            throw new IllegalArgumentException("diameter cannot be non-positive");
+        }
+        this.initialDiameter = initialDiameter;
+        if (this.diameter == -1) {
+            this.diameter = initialDiameter;
+        }
+        return this;
+    }
+
+    @Override
+    public WorldBorder.Builder safeZone(final double safeZone) {
+        if (safeZone < 0) {
+            throw new IllegalArgumentException("damagePerBlock cannot be negative");
+        }
+        this.safeZone = safeZone;
+        return this;
+    }
+
+    @Override
+    public WorldBorder.Builder damagePerBlock(final double damagePerBlock) {
+        if (damagePerBlock <= 0) {
+            throw new IllegalArgumentException("damagePerBlock cannot be non-positive");
+        }
+        this.damagePerBlock = damagePerBlock;
+        return this;
+    }
+
+    @Override
+    public WorldBorder.Builder warningTime(final Duration warningTime) {
+        if (warningTime.isNegative()) {
+            throw new IllegalArgumentException("warning time cannot be negative");
+        }
+        this.warningTime = warningTime;
         return this;
     }
 
     @Override
     public WorldBorder.Builder warningDistance(final double distance) {
+        if (distance < 0) {
+            throw new IllegalArgumentException("warning distance cannot be negative");
+        }
         this.warningDistance = distance;
         return this;
     }
 
-    @Override
-    public WorldBorder.Builder damageThreshold(final double distance) {
-        this.damageThreshold = distance;
-        return this;
-    }
-
-    @Override
-    public WorldBorder.Builder damageAmount(final double damage) {
-        this.damageAmount = damage;
-        return this;
-    }
 
     @Override
     public WorldBorder build() throws IllegalStateException {
-        final net.minecraft.world.level.border.WorldBorder border = new net.minecraft.world.level.border.WorldBorder();
-        border.setCenter(this.center.x(), this.center.z());
-        border.setDamagePerBlock(this.damageAmount);
-        border.setDamageSafeZone(this.damageThreshold);
-        border.setSize(this.diameter);
-        border.setWarningBlocks((int) this.warningDistance);
-        border.setWarningTime((int) this.warningTime.getSeconds());
-        return (WorldBorder) border;
+        if (this.diameter == -1) {
+            throw new IllegalStateException("The diameter or initial diameter has not been set!");
+        }
+        return (WorldBorder) WorldBorder_SettingsAccessor.invoker$new(
+                this.center.x(),
+                this.center.y(),
+                this.damagePerBlock,
+                this.safeZone,
+                (int) this.warningDistance,
+                (int) this.warningTime.getSeconds(),
+                this.initialDiameter == -1 ? this.diameter : this.initialDiameter,
+                this.time.toMillis(),
+                this.diameter
+        );
     }
 
     @Override
     public WorldBorder.Builder reset() {
-        this.center = Vector3d.ZERO;
-        this.damageAmount = 0;
-        this.damageThreshold = 0;
-        this.diameter = 0;
+        this.center = Vector2d.ZERO;
+        this.damagePerBlock = 0;
+        this.safeZone = 0;
+        this.diameter = -1;
+        this.initialDiameter = -1;
+        this.time = Duration.ZERO;
         this.warningDistance = 0;
         this.warningTime = Duration.ZERO;
         return this;
     }
+
 }

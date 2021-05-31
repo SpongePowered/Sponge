@@ -73,7 +73,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.Map;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;

@@ -37,12 +37,14 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
+import net.minecraft.world.level.CollisionGetter;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.Fluid;
 import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.ServerLevelData;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -55,6 +57,7 @@ import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
+import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.WorldTemplate;
@@ -64,13 +67,11 @@ import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.data.holder.SpongeLocationBaseDataHolder;
 import org.spongepowered.common.mixin.api.mcp.world.level.LevelMixin_API;
 import org.spongepowered.common.util.MissingImplementationException;
@@ -80,6 +81,8 @@ import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.io.IOException;
 import java.nio.file.Path;
 import java.util.Collection;
@@ -89,9 +92,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-
 @SuppressWarnings({"unchecked", "rawtypes"})
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowered.api.world.server.ServerWorld, ServerLocation> implements org.spongepowered.api.world.server.ServerWorld, SpongeLocationBaseDataHolder {
@@ -100,6 +100,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     @Shadow @Final private ServerTickList<Block> blockTicks;
     @Shadow @Final private ServerTickList<Fluid> liquidTicks;
     @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
+    @Shadow @Final private ServerLevelData serverLevelData;
 
     @Shadow public abstract void shadow$save(@Nullable ProgressListener p_217445_1_, boolean p_217445_2_, boolean p_217445_3_);
     @Shadow public abstract void shadow$unload(LevelChunk p_217466_1_);
@@ -303,4 +304,15 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     public ChunkLayout chunkLayout() {
         return SpongeChunkLayout.INSTANCE;
     }
+
+    @Override
+    public WorldBorder setBorder(final WorldBorder border) {
+        final WorldBorder worldBorder = ((WorldBorderBridge) ((CollisionGetter) this).getWorldBorder()).bridge$applyFrom(border);
+        if (worldBorder == null) {
+            return (WorldBorder) net.minecraft.world.level.border.WorldBorder.DEFAULT_SETTINGS;
+        }
+        this.serverLevelData.setWorldBorder((net.minecraft.world.level.border.WorldBorder.Settings) border);
+        return worldBorder;
+    }
+
 }

@@ -65,12 +65,13 @@ import org.spongepowered.api.entity.living.player.tab.TabList;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.message.PlayerChatEvent;
+import org.spongepowered.api.event.world.ChangeWorldBorderEvent;
 import org.spongepowered.api.network.ServerPlayerConnection;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
-import org.spongepowered.api.world.WorldBorder;
 import org.spongepowered.api.world.WorldType;
+import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -83,6 +84,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.PlayerAdvancementsBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
@@ -119,7 +121,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
     @Nullable private PlayerChatFormatter api$chatRouter;
-    @Nullable private WorldBorder api$worldBorder;
+    @Nullable private WorldBorderBridge api$worldBorder;
 
     @Override
     public ServerWorld world() {
@@ -318,8 +320,12 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     }
 
     @Override
+    @NonNull
     public Optional<WorldBorder> worldBorder() {
-        return Optional.ofNullable(this.api$worldBorder);
+        if (this.api$worldBorder == null) {
+            return Optional.empty();
+        }
+        return Optional.of(this.api$worldBorder.bridge$asImmutable());
     }
 
     @Override
@@ -340,32 +346,45 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         return Collections.unmodifiableCollection(((PlayerAdvancementsBridge) this.advancements).bridge$getAdvancementTrees());
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public void setWorldBorder(final @Nullable WorldBorder border) {
+    @NonNull
+    public Optional<WorldBorder> setWorldBorder(final @Nullable WorldBorder border) {
         if (this.impl$isFake) {
-            return;
+            return Optional.empty();
         }
-        if (this.api$worldBorder == border) {
-            return; //do not fire an event since nothing would have changed
+        final Optional<WorldBorder> currentBorder = this.worldBorder();
+        if (Objects.equals(currentBorder.orElse(null), border)) {
+            return currentBorder; // do not fire an event since nothing would have changed
         }
-        if (!SpongeCommon.postEvent(SpongeEventFactory.createChangeWorldBorderEventTargetPlayer(PhaseTracker.getCauseStackManager().currentCause(),
-                Optional.ofNullable(this.api$worldBorder), this, Optional.ofNullable(border)))) {
-            if (this.api$worldBorder != null) { //is the world border about to be unset?
-                ((WorldBorderAccessor) this.api$worldBorder).accessor$listeners().remove(
-                        ((ServerPlayerBridge) this).bridge$getWorldBorderListener()); //remove the listener, if so
-            }
-            this.api$worldBorder = border;
-            if (this.api$worldBorder != null) {
-                ((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder).addListener(
-                        ((ServerPlayerBridge) this).bridge$getWorldBorderListener());
-                this.connection.send(
-                        new ClientboundSetBorderPacket((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder,
-                                ClientboundSetBorderPacket.Type.INITIALIZE));
-            } else { //unset the border if null
-                this.connection.send(
-                        new ClientboundSetBorderPacket(this.shadow$getCommandSenderWorld().getWorldBorder(), ClientboundSetBorderPacket.Type.INITIALIZE));
-            }
+        final ChangeWorldBorderEvent.Player event =
+                SpongeEventFactory.createChangeWorldBorderEventPlayer(PhaseTracker.getCauseStackManager().currentCause(),
+                        Optional.ofNullable(border), Optional.ofNullable(border), this, Optional.ofNullable(border));
+        if (SpongeCommon.postEvent(event)) {
+            return currentBorder;
         }
+
+        if (this.api$worldBorder != null) { // is the world border about to be unset?
+            ((WorldBorderAccessor) this.api$worldBorder).accessor$listeners().remove(
+                    ((ServerPlayerBridge) this).bridge$getWorldBorderListener()); // remove the listener, if so
+        }
+        final Optional<WorldBorder> toSet = event.newBorder();
+        if (toSet.isPresent()) {
+            final net.minecraft.world.level.border.WorldBorder mutableWorldBorder =
+                    new net.minecraft.world.level.border.WorldBorder();
+            this.api$worldBorder = ((WorldBorderBridge) mutableWorldBorder);
+            this.api$worldBorder.bridge$applyFrom(toSet.get());
+            mutableWorldBorder.addListener(((ServerPlayerBridge) this).bridge$getWorldBorderListener());
+            this.connection.send(
+                    new ClientboundSetBorderPacket((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder,
+                            ClientboundSetBorderPacket.Type.INITIALIZE));
+        } else { // unset the border if null
+            this.api$worldBorder = null;
+            this.connection.send(
+                    new ClientboundSetBorderPacket(this.shadow$getCommandSenderWorld().getWorldBorder(), ClientboundSetBorderPacket.Type.INITIALIZE));
+        }
+        return toSet;
+
     }
 
     @Override

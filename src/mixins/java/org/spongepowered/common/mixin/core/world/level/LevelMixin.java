@@ -39,6 +39,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.border.WorldBorder;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.storage.LevelData;
@@ -72,6 +73,7 @@ public abstract class LevelMixin implements WorldBridge, LevelAccessor {
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos p_175726_1_);
     @Shadow public abstract DifficultyInstance shadow$getCurrentDifficultyAt(BlockPos p_175649_1_);
     @Shadow public abstract boolean shadow$isRaining();
+    @Shadow public abstract WorldBorder shadow$getWorldBorder();
     // @formatter on
 
     @Override

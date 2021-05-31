@@ -82,6 +82,7 @@ import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
+import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.event.ShouldFire;
@@ -94,14 +95,13 @@ import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
-
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge, PlatformServerLevelBridge, ResourceKeyBridge {
@@ -125,9 +125,9 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$cacheLevelSave(final MinecraftServer p_i241885_1_, final Executor p_i241885_2_, final LevelStorageSource.LevelStorageAccess p_i241885_3_,
-            final ServerLevelData p_i241885_4_, final net.minecraft.resources.ResourceKey<Level> p_i241885_5_, final DimensionType p_i241885_6_, final ChunkProgressListener p_i241885_7_,
-            final ChunkGenerator p_i241885_8_, final boolean p_i241885_9_, final long p_i241885_10_, final List<CustomSpawner> p_i241885_12_, final boolean p_i241885_13_,
-            final CallbackInfo ci) {
+                                     final ServerLevelData p_i241885_4_, final net.minecraft.resources.ResourceKey<Level> p_i241885_5_, final DimensionType p_i241885_6_, final ChunkProgressListener p_i241885_7_,
+                                     final ChunkGenerator p_i241885_8_, final boolean p_i241885_9_, final long p_i241885_10_, final List<CustomSpawner> p_i241885_12_, final boolean p_i241885_13_,
+                                     final CallbackInfo ci) {
         this.impl$levelSave = p_i241885_3_;
         this.impl$chunkStatusListener = p_i241885_7_;
         this.impl$rotationUpdates = new Object2ObjectOpenHashMap<>();
@@ -174,6 +174,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
         // TODO Minecraft 1.16.2 - Rebuild level stems, get generator from type, set generator
         // TODO ...or cache generator on type?
+
+        this.impl$setWorldOnBorder();
     }
 
     @Override
@@ -406,6 +408,10 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             }
         }
         return rainingAt;
+    }
+
+    private void impl$setWorldOnBorder() {
+        ((WorldBorderBridge) this.shadow$getWorldBorder()).bridge$setAssociatedWorld(this.bridge$getKey());
     }
 
     @Override

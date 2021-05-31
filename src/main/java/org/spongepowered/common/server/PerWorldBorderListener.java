@@ -33,7 +33,7 @@ public final class PerWorldBorderListener implements BorderChangeListener {
 
     private final ServerLevel world;
 
-    public PerWorldBorderListener(ServerLevel world) {
+    public PerWorldBorderListener(final ServerLevel world) {
         this.world = world;
     }
 

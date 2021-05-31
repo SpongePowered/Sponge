@@ -58,6 +58,7 @@
         "util.datafix.schemas.V100Accessor",
         "world.CompoundContainerAccessor",
         "world.LockCodeAccessor",
+        "world.level.border.WorldBorder_SettingsAccessor",
         "world.damagesource.CombatEntryAccessor",
         "world.damagesource.CombatTrackerAccessor",
         "world.damagesource.DamageSourceAccessor",

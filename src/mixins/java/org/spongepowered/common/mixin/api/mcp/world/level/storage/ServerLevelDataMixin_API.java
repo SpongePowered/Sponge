@@ -31,7 +31,7 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.trader.WanderingTrader;
 import org.spongepowered.api.util.MinecraftDayTime;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.api.world.WorldBorder;
+import org.spongepowered.api.world.border.WorldBorder;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
@@ -168,11 +168,7 @@ public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     @Override
     default WorldBorder worldBorder() {
-        final net.minecraft.world.level.border.WorldBorder.Settings settings = this.shadow$getWorldBorder();
-
-        final net.minecraft.world.level.border.WorldBorder mcBorder = new net.minecraft.world.level.border.WorldBorder();
-        mcBorder.applySettings(settings);
-        return (WorldBorder) mcBorder;
+        return (WorldBorder) this.shadow$getWorldBorder();
     }
 
 }

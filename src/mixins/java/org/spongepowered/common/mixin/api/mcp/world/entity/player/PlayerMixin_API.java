@@ -31,9 +31,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemCooldowns;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
@@ -44,7 +41,6 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
 
     // @formatter:off
     @Shadow public AbstractContainerMenu containerMenu;
-    @Shadow public float experienceProgress;
     @Shadow @Final public Abilities abilities;
     @Shadow @Final public Inventory inventory;
     @Shadow public abstract ItemCooldowns shadow$getCooldowns();
@@ -52,7 +48,7 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
     @Shadow public abstract Component shadow$getName();
     // @formatter:on
 
-    public final boolean impl$isFake = ((PlatformEntityBridge) (net.minecraft.world.entity.player.Player) (Object) this).bridge$isFakePlayer();
+    public final boolean impl$isFake = ((PlatformEntityBridge) this).bridge$isFakePlayer();
 
     @Override
     public String name() {
