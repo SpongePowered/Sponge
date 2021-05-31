@@ -44,6 +44,7 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
+import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.Level;
@@ -924,6 +925,9 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Inject(method = "stopSleeping", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;clearSleepingPos()V"))
     private void impl$callFinishSleepingEvent(CallbackInfo ci) {
+        if ((Object) this instanceof Fox) {
+            return;
+        }
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
         ServerLocation loc = ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3d(this.shadow$position()));
         Vector3d rot = ((Living) this).rotation();
