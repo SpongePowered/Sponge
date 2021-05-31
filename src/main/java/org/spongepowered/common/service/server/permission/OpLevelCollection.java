@@ -27,7 +27,6 @@ package org.spongepowered.common.service.server.permission;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.MemorySubjectData;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -98,7 +97,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
             SpongePermissions.populateNonCommandPermissions(this.data, (permLevel, name) -> level == permLevel);
         }
 
-        public int getOpLevel() {
+        public int opLevel() {
             return this.level;
         }
 
@@ -113,7 +112,7 @@ public class OpLevelCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public PermissionService getService() {
+        public PermissionService service() {
             return this.service;
         }
 

@@ -30,9 +30,9 @@ import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import net.minecraft.server.players.ServerOpList;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
-import org.spongepowered.api.service.context.ContextCalculator;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionDescription.Builder;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -42,7 +42,6 @@ import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.plugin.PluginContainer;
 
-import net.minecraft.server.players.ServerOpList;
 import java.util.Collection;
 import java.util.LinkedHashMap;
 import java.util.Map;
@@ -83,8 +82,7 @@ public final class SpongePermissionService implements PermissionService {
         this.subjects.put(PermissionService.SUBJECTS_SYSTEM, new DataFactoryCollection(
             PermissionService.SUBJECTS_SYSTEM, this,
                 s -> new FixedParentMemorySubjectData(s, this.getGroupForOpLevel(4).asSubjectReference())
-//                ,
-//                s -> {
+//                , s -> {
 //                    if (s.equals("Server")) {
 //                        return SpongeImpl.game().getServer().getConsole();
 //                    } /*else if (s.equals("RCON")) {
@@ -174,11 +172,6 @@ public final class SpongePermissionService implements PermissionService {
     @Override
     public CompletableFuture<Set<String>> allIdentifiers() {
         return CompletableFuture.completedFuture(this.loadedCollections().keySet());
-    }
-
-    @Override
-    public void registerContextCalculator(final ContextCalculator<Subject> calculator) {
-
     }
 
     @Override

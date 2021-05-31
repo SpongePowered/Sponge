@@ -24,13 +24,10 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-import static com.google.common.base.Preconditions.checkState;
-
-import com.google.common.base.MoreObjects;
-import com.google.common.base.Preconditions;
+import java.util.regex.Pattern;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.service.permission.PermissionDescription;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
@@ -43,6 +40,7 @@ import org.spongepowered.plugin.PluginContainer;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import java.util.Map.Entry;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
@@ -52,17 +50,22 @@ import java.util.concurrent.CompletableFuture;
  */
 class SpongePermissionDescription implements PermissionDescription {
 
+    private static final Pattern PLACEHOLDER = Pattern.compile("\\.<[a-zA-Z0-9_-]+>");
+    private static final Pattern PERMISSION_FORMAT = Pattern.compile("^[a-zA-Z0-9_-]+(\\.[a-zA-Z0-9_-]+)*(\\.<[a-zA-Z0-9_-]+>)?$");
+
     private final SpongePermissionService permissionService;
     private final String id;
+    /* The ID but without any trailing placeholders */
+    private final String strippedId;
     private final @Nullable Component description;
     private final PluginContainer owner;
 
-    SpongePermissionDescription(SpongePermissionService permissionService, String id, @Nullable Component description, PluginContainer owner) {
-        super();
-        this.permissionService = checkNotNull(permissionService, "permissionService");
-        this.id = checkNotNull(id, "id");
+    SpongePermissionDescription(final SpongePermissionService permissionService, final String id, final String strippedId, final @Nullable Component description, final PluginContainer owner) {
+        this.permissionService = permissionService;
+        this.id = id;
+        this.strippedId = strippedId;
         this.description = description;
-        this.owner = checkNotNull(owner, "owner");
+        this.owner = owner;
     }
 
     @Override
@@ -76,15 +79,45 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
-    public Map<Subject, Boolean> assignedSubjects(String identifier) {
-        SubjectCollection subjects = this.permissionService.get(identifier);
-        return subjects.loadedWithPermission(this.id);
+    public Map<? extends Subject, Boolean> assignedSubjects(final String identifier) {
+        final SubjectCollection subjects = this.permissionService.get(identifier);
+        return subjects.loadedWithPermission(this.strippedId);
     }
 
     @Override
-    public CompletableFuture<Map<SubjectReference, Boolean>> findAssignedSubjects(String type) {
-        SubjectCollection subjects = this.permissionService.get(type);
-        return subjects.allWithPermission(this.id);
+    public boolean query(final Subject subj) {
+        return subj.hasPermission(this.strippedId);
+    }
+
+    @Override
+    public boolean query(final Subject subj, final ResourceKey key) {
+        return subj.hasPermission(this.strippedId + '.' + key.namespace() + '.' + key.value());
+    }
+
+    @Override
+    public boolean query(final Subject subj, final String... parameters) {
+        if (parameters.length == 0) {
+            return this.query(subj);
+        } else if (parameters.length == 1) {
+            return this.query(subj, parameters[0]);
+        }
+        final StringBuilder build = new StringBuilder(this.strippedId);
+        for (final String parameter : parameters) {
+            build.append('.').append(parameter);
+        }
+        return subj.hasPermission(build.toString());
+    }
+
+    @Override
+    public boolean query(final Subject subj, final String parameter) {
+        final String extendedPermission = this.strippedId + '.' + Objects.requireNonNull(parameter, "parameter");
+        return subj.hasPermission(extendedPermission);
+    }
+
+    @Override
+    public CompletableFuture<? extends Map<? extends SubjectReference, Boolean>> findAssignedSubjects(final String type) {
+        final SubjectCollection subjects = this.permissionService.get(type);
+        return subjects.allWithPermission(this.strippedId);
     }
 
     @Override
@@ -93,31 +126,39 @@ class SpongePermissionDescription implements PermissionDescription {
     }
 
     @Override
+    public Tristate defaultValue() {
+        return this.permissionService.defaults().permissionValue(this.strippedId);
+    }
+
+    @Override
     public int hashCode() {
         return this.id.hashCode();
     }
 
     @Override
-    public boolean equals(Object obj) {
-        if (this == obj) {
+    public boolean equals(final Object other) {
+        if (this == other) {
             return true;
         }
-        if (obj == null) {
+        if (other == null) {
             return false;
         }
-        if (this.getClass() != obj.getClass()) {
+        if (this.getClass() != other.getClass()) {
             return false;
         }
-        SpongePermissionDescription other = (SpongePermissionDescription) obj;
-        return this.id.equals(other.id) && this.owner.equals(other.owner) && this.description.equals(other.description);
+        final SpongePermissionDescription that = (SpongePermissionDescription) other;
+        return this.id.equals(that.id)
+                && this.owner.equals(that.owner)
+                && this.description.equals(that.description);
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this)
-                .add("owner", this.owner)
-                .add("id", this.id)
-                .toString();
+        return "SpongePermissionDescription{"
+          + "owner=" + this.owner
+          + ", id=" + this.id
+          + ", description=" + this.description
+          + '}';
     }
 
     static class Builder implements PermissionDescription.Builder {
@@ -127,44 +168,67 @@ class SpongePermissionDescription implements PermissionDescription {
         private String id;
         private @Nullable Component description;
         private final Map<String, Tristate> roleAssignments = new LinkedHashMap<>();
+        private Tristate defaultValue = Tristate.UNDEFINED;
 
-        Builder(SpongePermissionService permissionService, PluginContainer owner) {
-            super();
-            this.permissionService = checkNotNull(permissionService, "permissionService");
-            this.owner = checkNotNull(owner, "owner");
+        Builder(final SpongePermissionService permissionService, final PluginContainer owner) {
+            this.permissionService = Objects.requireNonNull(permissionService, "permissionService");
+            this.owner = Objects.requireNonNull(owner, "owner");
         }
 
         @Override
-        public org.spongepowered.common.service.server.permission.SpongePermissionDescription.Builder id(String id) {
-            this.id = checkNotNull(id, "permissionId");
+        public SpongePermissionDescription.Builder id(final String id) {
+            if (!SpongePermissionDescription.PERMISSION_FORMAT.matcher(Objects.requireNonNull(id, "permissionId")).matches()) {
+                throw new IllegalArgumentException("Input permission '" + this.id + "' is not in the allowed format '"
+                    + SpongePermissionDescription.PERMISSION_FORMAT.pattern() + "'");
+            }
+            this.id = id;
             return this;
         }
 
         @Override
-        public org.spongepowered.common.service.server.permission.SpongePermissionDescription.Builder description(@Nullable Component description) {
+        public SpongePermissionDescription.Builder description(final @Nullable Component description) {
             this.description = description;
             return this;
         }
 
         @Override
-        public org.spongepowered.common.service.server.permission.SpongePermissionDescription.Builder assign(String role, boolean value) {
-            Preconditions.checkNotNull(role, "role");
+        public SpongePermissionDescription.Builder assign(final String role, final boolean value) {
+            Objects.requireNonNull(role, "role");
             this.roleAssignments.put(role, Tristate.fromBoolean(value));
             return this;
         }
 
         @Override
+        public SpongePermissionDescription.Builder defaultValue(final Tristate defaultValue) {
+            this.defaultValue = Objects.requireNonNull(defaultValue, "defaultValue");
+            return this;
+        }
+
+        @Override
         public SpongePermissionDescription register() throws IllegalStateException {
-            checkState(this.id != null, "No id set");
-            SpongePermissionDescription description =
-                    new SpongePermissionDescription(this.permissionService, this.id, this.description, this.owner);
+            if (this.id == null) {
+                throw new IllegalStateException("No id set");
+            }
+            final String strippedId = SpongePermissionDescription.PLACEHOLDER.matcher(this.id).replaceAll("");
+
+            final SpongePermissionDescription description = new SpongePermissionDescription(
+                    this.permissionService,
+                    this.id,
+                    strippedId,
+                    this.description,
+                    this.owner);
             this.permissionService.addDescription(description);
 
+            // Set default value
+            if (this.defaultValue != Tristate.UNDEFINED) {
+                this.permissionService.defaults().transientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, strippedId, this.defaultValue);
+            }
+
             // Set role-templates
-            SpongeSubjectCollection subjects = this.permissionService.get(PermissionService.SUBJECTS_ROLE_TEMPLATE);
-            for (Entry<String, Tristate> assignment : this.roleAssignments.entrySet()) {
-                Subject subject = subjects.get(assignment.getKey());
-                subject.transientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, this.id, assignment.getValue());
+            final SpongeSubjectCollection subjects = this.permissionService.get(PermissionService.SUBJECTS_ROLE_TEMPLATE);
+            for (final Entry<String, Tristate> assignment : this.roleAssignments.entrySet()) {
+                final Subject subject = subjects.get(assignment.getKey());
+                subject.transientSubjectData().setPermission(SubjectData.GLOBAL_CONTEXT, strippedId, assignment.getValue());
             }
             return description;
         }

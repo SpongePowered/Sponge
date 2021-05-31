@@ -22,32 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.util;
+package org.spongepowered.common.applaunch.config.core;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Predicate;
-import org.spongepowered.configurate.ConfigurationNode;
+import org.spongepowered.configurate.serialize.ScalarSerializer;
 import org.spongepowered.configurate.serialize.SerializationException;
-import org.spongepowered.configurate.serialize.TypeSerializer;
 
 import java.lang.reflect.Type;
 import java.net.Inet4Address;
 import java.net.Inet6Address;
 import java.net.InetAddress;
 import java.net.UnknownHostException;
+import java.util.Objects;
+import java.util.function.Predicate;
 
 public final class IpSet implements Predicate<InetAddress> {
     private final InetAddress addr;
     private final int prefixLen;
 
-    private IpSet(final InetAddress addr, final int prefixLen) {
+    IpSet(final InetAddress addr, final int prefixLen) {
         this.addr = addr;
         this.prefixLen = prefixLen;
     }
 
     @Override
-    public boolean apply(final InetAddress input) {
+    public boolean test(final InetAddress input) {
         final byte[] address = input.getAddress();
         final byte[] checkAddr = this.addr.getAddress();
         if (address.length != checkAddr.length) {
@@ -71,19 +69,14 @@ public final class IpSet implements Predicate<InetAddress> {
     }
 
     public static IpSet fromAddrPrefix(final InetAddress address, final int prefixLen) {
-        IpSet.validatePrefixLength(checkNotNull(address, "address"), checkNotNull(prefixLen, "prefixLen"));
+        IpSet.validatePrefixLength(Objects.requireNonNull(address, "address"), prefixLen);
         return new IpSet(address, prefixLen);
     }
 
-    /**
-     *
-     * @param spec
-     * @return
-     */
     public static IpSet fromCidr(final String spec) {
         final String addrString;
         final int prefixLen;
-        final int slashIndex = checkNotNull(spec, "spec").lastIndexOf("/");
+        final int slashIndex = Objects.requireNonNull(spec, "spec").lastIndexOf("/");
         if (slashIndex == -1) {
             prefixLen = 32;
             addrString = spec;
@@ -126,20 +119,25 @@ public final class IpSet implements Predicate<InetAddress> {
         return this.addr.getHostAddress() + "/" + this.prefixLen;
     }
 
-    public static final class IpSetSerializer implements TypeSerializer<IpSet> {
+    public static final class Serializer extends ScalarSerializer<IpSet> {
+        public static final Serializer INSTANCE = new Serializer();
+
+        private Serializer() {
+            super(IpSet.class);
+        }
 
         @Override
-        public IpSet deserialize(final Type type, final ConfigurationNode value) throws SerializationException {
+        public IpSet deserialize(final Type type, final Object value) throws SerializationException {
             try {
-                return IpSet.fromCidr(value.getString());
+                return IpSet.fromCidr(value.toString());
             } catch (final IllegalArgumentException e) {
                 throw new SerializationException(e);
             }
         }
 
         @Override
-        public void serialize(final Type type, final IpSet obj, final ConfigurationNode value) throws SerializationException {
-            value.set(obj == null ? null : obj.toString());
+        public Object serialize(final IpSet item, final Predicate<Class<?>> typeSupported) {
+            return item.toString();
         }
     }
 }

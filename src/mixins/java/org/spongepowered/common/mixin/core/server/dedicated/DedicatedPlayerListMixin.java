@@ -33,7 +33,6 @@ import net.minecraft.world.level.storage.PlayerDataStorage;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectData;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
@@ -57,17 +56,23 @@ public abstract class DedicatedPlayerListMixin extends PlayerList {
             return;
         }
         final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
-        final Subject subject = permissionService.userSubjects()
-                .subject(profile.getId().toString()).orElse(permissionService.defaults());
+        Subject subject = permissionService.userSubjects().subject(profile.getId().toString()).orElse(null);
+        if (subject == null) {
+            subject = permissionService.userSubjects().defaults();
+        }
+
         ci.setReturnValue(subject.hasPermission(LoginPermissions.BYPASS_WHITELIST_PERMISSION));
     }
 
     @Inject(method = "canBypassPlayerLimit", at = @At("HEAD"), cancellable = true)
     private void impl$checkForPlayerLimitBypassPermission(final GameProfile profile, final CallbackInfoReturnable<Boolean> ci) {
         final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
-        final Subject subject = permissionService.userSubjects()
-                .subject(profile.getId().toString()).orElse(permissionService.defaults());
-        final Tristate tristate = subject.permissionValue(SubjectData.GLOBAL_CONTEXT, LoginPermissions.BYPASS_PLAYER_LIMIT_PERMISSION);
+        Subject subject = permissionService.userSubjects().subject(profile.getId().toString()).orElse(null);
+        if (subject == null) {
+            subject = permissionService.userSubjects().defaults();
+        }
+
+        final Tristate tristate = subject.permissionValue(LoginPermissions.BYPASS_PLAYER_LIMIT_PERMISSION);
         // Use the op list if the permission isn't overridden for the subject and
         // if we are still using the default permission service
         if (tristate == Tristate.UNDEFINED && permissionService instanceof SpongePermissionService) {

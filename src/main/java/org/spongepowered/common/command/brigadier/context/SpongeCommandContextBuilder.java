@@ -44,6 +44,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
 import org.spongepowered.common.command.parameter.SpongeParameterKey;
@@ -502,6 +503,11 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     @Override
     public Subject subject() {
         return this.cause().subject();
+    }
+
+    @Override
+    public Cause contextCause() {
+        return this.cause().cause();
     }
 
 }

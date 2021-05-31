@@ -82,7 +82,9 @@ public final class SpongeConfigs {
                     .register(type -> {
                         final Class<?> erasure = GenericTypeReflector.erase(type);
                         return erasure.isAnnotationPresent(ConfigSerializable.class) || Config.class.isAssignableFrom(erasure);
-                    }, SpongeConfigs.OBJECT_MAPPERS.asTypeSerializer()));
+                    }, SpongeConfigs.OBJECT_MAPPERS.asTypeSerializer())
+                .register(IpSet.Serializer.INSTANCE)
+            );
 
     static final Logger LOGGER = LogManager.getLogger();
 
@@ -122,6 +124,7 @@ public final class SpongeConfigs {
      *
      * @return global config
      */
+    @SuppressWarnings("deprecation") // getGlobalInheritable
     public static ConfigHandle<CommonConfig> getCommon() {
         if (SpongeConfigs.sponge == null) {
             SpongeConfigs.initLock.lock();

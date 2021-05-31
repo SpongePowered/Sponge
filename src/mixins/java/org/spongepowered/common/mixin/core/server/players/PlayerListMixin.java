@@ -196,7 +196,10 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                         return true;
                     }
                     final PermissionService permissionService = Sponge.server().serviceProvider().permissionService();
-                    final Subject subject = permissionService.userSubjects().subject(param1.getId().toString()).orElse(permissionService.defaults());
+                    Subject subject = permissionService.userSubjects().subject(param1.getId().toString()).orElse(null);
+                    if (subject == null) {
+                        subject = permissionService.defaults();
+                    }
                     return subject.hasPermission(LoginPermissions.BYPASS_WHITELIST_PERMISSION);
                 }, SpongeCommon.getServer()).thenCompose(w -> {
                     if (w) {

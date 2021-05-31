@@ -26,9 +26,9 @@ package org.spongepowered.common.service.server.permission;
 
 import com.google.common.base.Preconditions;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.server.players.ServerOpListEntry;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.MemorySubjectData;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.SubjectCollection;
 import org.spongepowered.api.service.permission.SubjectReference;
@@ -36,8 +36,6 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeCommon;
 
 import java.util.Optional;
-import java.util.Set;
-import net.minecraft.server.players.ServerOpListEntry;
 
 /**
  * An implementation of vanilla minecraft's 4 op groups.
@@ -51,7 +49,7 @@ public class UserSubject extends SpongeSubject {
         this.player = Preconditions.checkNotNull(player);
         this.data = new SingleParentMemorySubjectData(this) {
             @Override
-            public SubjectReference getParent() {
+            public SubjectReference parent() {
                 return users.getService().getGroupForOpLevel(UserSubject.this.getOpLevel()).asSubjectReference();
             }
 
@@ -64,7 +62,7 @@ public class UserSubject extends SpongeSubject {
                     if (!(parent.resolve().join() instanceof OpLevelCollection.OpLevelSubject)) {
                         return;
                     }
-                    opLevel = ((OpLevelCollection.OpLevelSubject) parent).getOpLevel();
+                    opLevel = ((OpLevelCollection.OpLevelSubject) parent).opLevel();
                 }
                 if (opLevel > 0) {
                     // TODO: Should bypassesPlayerLimit be true or false?
@@ -85,6 +83,15 @@ public class UserSubject extends SpongeSubject {
     @Override
     public Optional<String> friendlyIdentifier() {
         return Optional.of(this.player.getName());
+    }
+
+    @Override
+    public Optional<?> associatedObject() {
+        if (!Sponge.isServerAvailable()) {
+            return Optional.empty();
+        }
+
+        return Sponge.server().player(this.player.getId());
     }
 
     int getOpLevel() {
@@ -111,18 +118,18 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public PermissionService getService() {
+    public PermissionService service() {
         return this.collection.getService();
     }
 
     @Override
-    public Tristate permissionValue(final Set<Context> contexts, final String permission) {
-        Tristate ret = super.permissionValue(contexts, permission);
+    public Tristate permissionValue(final String permission, final Cause cause) {
+        Tristate ret = super.permissionValue(permission, cause);
         if (ret == Tristate.UNDEFINED) {
-            ret = this.getDataPermissionValue(this.collection.defaults().subjectData(), permission);
+            ret = this.dataPermissionValue(this.collection.defaults().subjectData(), permission);
         }
         if (ret == Tristate.UNDEFINED) {
-            ret = this.getDataPermissionValue(this.collection.getService().defaults().subjectData(), permission);
+            ret = this.dataPermissionValue(this.collection.getService().defaults().subjectData(), permission);
         }
         if (ret == Tristate.UNDEFINED && this.getOpLevel() >= SpongePermissionService.getServerOpLevel()) {
             ret = Tristate.TRUE;
@@ -131,13 +138,13 @@ public class UserSubject extends SpongeSubject {
     }
 
     @Override
-    public Optional<String> option(final Set<Context> contexts, final String option) {
-        Optional<String> ret = super.option(contexts, option);
+    public Optional<String> option(final String option, final Cause cause) {
+        Optional<String> ret = super.option(option, cause);
         if (!ret.isPresent()) {
-            ret = this.getDataOptionValue(this.collection.defaults().subjectData(), option);
+            ret = this.dataOptionValue(this.collection.defaults().subjectData(), option);
         }
         if (!ret.isPresent()) {
-            ret = this.getDataOptionValue(this.collection.getService().defaults().subjectData(), option);
+            ret = this.dataOptionValue(this.collection.getService().defaults().subjectData(), option);
         }
         return ret;
     }

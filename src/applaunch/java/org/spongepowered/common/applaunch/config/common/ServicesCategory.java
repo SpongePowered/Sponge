@@ -53,6 +53,10 @@ public final class ServicesCategory {
         @Comment("Specifies the plugin that will provide the ban service")
         public String banService = ServicesCategory.UNSPECIFIED;
 
+        @Setting("context-service")
+        @Comment("Specifies the plugin that will provide the context service")
+        public String contextService = UNSPECIFIED;
+
         @Setting("economy-service")
         @Comment("Specifies the plugin that will provide the economy service")
         public String economyService = ServicesCategory.UNSPECIFIED;
