@@ -38,6 +38,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.advancement.criteria.AdvancementCriterion;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.advancement.AdvancementEvent;
 import org.spongepowered.asm.mixin.Final;
@@ -48,6 +49,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.advancements.AdvancementProgressBridge;
@@ -204,4 +206,15 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
         this.impl$message = null;
         this.impl$wasSuccess = false;
     }
+
+    @Inject(method = "revoke", locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            at = @At(value = "INVOKE",
+                     target = "Lnet/minecraft/server/PlayerAdvancements;ensureVisibility(Lnet/minecraft/advancements/Advancement;)V"))
+    private void impl$callRevokeEventIfSuccessful(final Advancement advancement, final String string, final CallbackInfoReturnable<Boolean> ci, boolean var0) {
+        if (var0) {
+            final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+            SpongeCommon.postEvent(SpongeEventFactory.createAdvancementEventRevoke(currentCause, (org.spongepowered.api.advancement.Advancement) advancement, (ServerPlayer) this.player));
+        }
+    }
+
 }
