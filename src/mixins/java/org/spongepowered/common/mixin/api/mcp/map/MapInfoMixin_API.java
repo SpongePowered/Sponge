@@ -51,7 +51,7 @@ import java.util.UUID;
 public abstract class MapInfoMixin_API extends SavedData implements MapInfo, SpongeMutableDataHolder {
 
     // @formatter:off
-    @Shadow public abstract void toggleBanner(LevelAccessor p_204269_1_, BlockPos p_204269_2_);
+    @Shadow public abstract boolean toggleBanner(LevelAccessor p_204269_1_, BlockPos p_204269_2_);
     // @formatter:on
 
     @Override
@@ -65,9 +65,9 @@ public abstract class MapInfoMixin_API extends SavedData implements MapInfo, Spo
         final BlockType bannerType = bannerLocation.block().type();
 
         Preconditions.checkArgument(bannerType instanceof BannerBlock, "Location must have a banner!");
-        this.toggleBanner((LevelAccessor) bannerLocation.world(), new BlockPos(bannerLocation.blockX(), bannerLocation.blockY(), bannerLocation.blockZ()));
-
-        this.setDirty();
+        if (this.toggleBanner((LevelAccessor) bannerLocation.world(), new BlockPos(bannerLocation.blockX(), bannerLocation.blockY(), bannerLocation.blockZ()))) {
+            this.setDirty();
+        }
     }
 
     @Override

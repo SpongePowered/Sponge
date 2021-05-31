@@ -50,6 +50,7 @@ import org.spongepowered.api.entity.projectile.explosive.fireball.SmallFireball;
 import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Map;
@@ -258,7 +259,7 @@ public final class ProjectileUtil {
             protected Optional<ExplosiveFireball> createProjectile(final LivingEntity source, final ServerLocation loc) {
                 final net.minecraft.world.phys.Vec3 lookVec = source.getViewVector(1);
                 final LargeFireball fireball = new LargeFireball(source.level, source,
-                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4);
+                        lookVec.x * 4, lookVec.y * 4, lookVec.z * 4, Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
                 fireball.setPos(fireball.getX(), fireball.getY() + source.getEyeHeight(), fireball.getZ());
                 return ProjectileUtil.doLaunch(loc.world(), (ExplosiveFireball) fireball);
             }
@@ -273,7 +274,7 @@ public final class ProjectileUtil {
                 final Direction enumfacing = DispenserSourceLogic.getFacing(dispenser);
                 final LivingEntity thrower = new ArmorStand(dispenser.getLevel(), loc.x() + enumfacing.getStepX(),
                         loc.y() + enumfacing.getStepY(), loc.z() + enumfacing.getStepZ());
-                final LargeFireball fireball = new LargeFireball(dispenser.getLevel(), thrower, 0, 0, 0);
+                final LargeFireball fireball = new LargeFireball(dispenser.getLevel(), thrower, 0, 0, 0, Constants.Entity.Fireball.DEFAULT_EXPLOSION_RADIUS);
                 // Acceleration is set separately because the constructor applies a random value to it
                 // As for 0.1;  it is a reasonable default value
                 fireball.xPower = enumfacing.getStepX() * 0.1;
