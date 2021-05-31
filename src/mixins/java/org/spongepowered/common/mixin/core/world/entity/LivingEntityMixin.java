@@ -925,17 +925,14 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
     @Inject(method = "stopSleeping", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;clearSleepingPos()V"))
     private void impl$callFinishSleepingEvent(CallbackInfo ci) {
-        if ((Object) this instanceof Fox) {
+        final Optional<BlockPos> sleepingPos = this.shadow$getSleepingPos();
+        if (!sleepingPos.isPresent()) {
             return;
         }
+        BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(sleepingPos.get().getX(), sleepingPos.get().getY(), sleepingPos.get().getZ());
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
         ServerLocation loc = ServerLocation.of((ServerWorld) this.level, VecHelper.toVector3d(this.shadow$position()));
         Vector3d rot = ((Living) this).rotation();
-        BlockSnapshot snapshot = null;
-        final Optional<BlockPos> sleepingPos = this.shadow$getSleepingPos();
-        if (sleepingPos.isPresent()) {
-            snapshot = ((ServerWorld) this.level).createSnapshot(sleepingPos.get().getX(), sleepingPos.get().getY(), sleepingPos.get().getZ());
-        }
         final SleepingEvent.Finish event = SpongeEventFactory.createSleepingEventFinish(currentCause, loc, loc, rot, rot, snapshot, (Living) this);
         Sponge.eventManager().post(event);
         this.shadow$clearSleepingPos();
@@ -944,5 +941,6 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
         }
         this.shadow$setPos(event.toLocation().x(), event.toLocation().y(), event.toLocation().z());
         ((Living) this).setRotation(event.toRotation());
+
     }
 }
