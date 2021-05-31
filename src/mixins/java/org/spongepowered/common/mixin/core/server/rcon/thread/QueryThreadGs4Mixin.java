@@ -72,7 +72,6 @@ public abstract class QueryThreadGs4Mixin {
                 this.worldName,
                 this.serverName,
                 this.maxPlayers,
-                1460,
                 this.serverInterface.getPlayerCount());
 
         Sponge.eventManager().post(event);
@@ -106,7 +105,6 @@ public abstract class QueryThreadGs4Mixin {
                 this.serverInterface.getPluginNames(),
                 this.serverInterface.getServerVersion(),
                 this.maxPlayers,
-                1460,
                 this.serverInterface.getPlayerCount());
         Sponge.eventManager().post(event);
 
