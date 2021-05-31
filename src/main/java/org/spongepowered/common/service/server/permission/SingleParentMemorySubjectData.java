@@ -35,25 +35,24 @@ import java.util.List;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 
-
 public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
     private SubjectReference parent;
 
     /**
      * Creates a new subject data instance, using the provided service to request instances of permission subjects.
      */
-    public SingleParentMemorySubjectData(Subject subject) {
+    public SingleParentMemorySubjectData(final Subject subject) {
         super(subject);
     }
 
     @Override
-    public List<SubjectReference> parents(Set<Context> contexts) {
-        final SubjectReference parent = this.getParent();
+    public List<SubjectReference> parents(final Set<Context> contexts) {
+        final SubjectReference parent = this.parent();
         return contexts.isEmpty() && parent != null ? Collections.singletonList(parent) : Collections.emptyList();
     }
 
     @Override
-    public CompletableFuture<Boolean> addParent(Set<Context> contexts, SubjectReference parent) {
+    public CompletableFuture<Boolean> addParent(final Set<Context> contexts, final SubjectReference parent) {
         if (!(parent instanceof OpLevelCollection.OpLevelSubject)) {
             return CompletableFuture.completedFuture(false);
         }
@@ -66,7 +65,7 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> removeParent(Set<Context> contexts, SubjectReference parent) {
+    public CompletableFuture<Boolean> removeParent(final Set<Context> contexts, final SubjectReference parent) {
         if (parent == this.parent) {
             this.setParent(null);
             return CompletableFuture.completedFuture(true);
@@ -81,7 +80,7 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
     }
 
     @Override
-    public CompletableFuture<Boolean> clearParents(Set<Context> contexts) {
+    public CompletableFuture<Boolean> clearParents(final Set<Context> contexts) {
         if (!contexts.isEmpty()) {
             return CompletableFuture.completedFuture(false);
         }
@@ -93,7 +92,7 @@ public class SingleParentMemorySubjectData extends GlobalMemorySubjectData {
         this.parent = parent;
     }
 
-    public @Nullable SubjectReference getParent() {
+    public @Nullable SubjectReference parent() {
         return this.parent;
     }
 }

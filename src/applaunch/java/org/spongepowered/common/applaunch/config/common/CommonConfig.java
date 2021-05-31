@@ -28,12 +28,16 @@ import org.spongepowered.configurate.NodePath;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.common.applaunch.config.core.Config;
+import org.spongepowered.common.applaunch.config.core.IpSet;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
 import org.spongepowered.configurate.transformation.TransformAction;
 
+import java.net.InetAddress;
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.function.Predicate;
 
 /**
  * Sponge's core configuration.
@@ -65,7 +69,7 @@ public final class CommonConfig implements Config {
     public final ModuleCategory modules = new ModuleCategory();
 
     @Setting("ip-sets")
-    public final Map<String, List<String>> ipSets = new HashMap<>();
+    private final Map<String, List<IpSet>> ipSets = new HashMap<>();
 
     @Setting
     public final IpForwardingCategory ipForwarding = new IpForwardingCategory();
@@ -113,13 +117,28 @@ public final class CommonConfig implements Config {
             .build();
     }
 
-    /* TODO(zml): Reimplement this when bringing in SpongeContextCalculator from invalid
     public Map<String, Predicate<InetAddress>> getIpSets() {
-        return ImmutableMap.copyOf(Maps.transformValues(this.ipSets, Predicates::and));
+        final Map<String, Predicate<InetAddress>> result = new HashMap<>(this.ipSets.size());
+        for (final Map.Entry<String, List<IpSet>> entry : this.ipSets.entrySet()) {
+            result.put(entry.getKey(), CommonConfig.allOf(entry.getValue()));
+        }
+        return Collections.unmodifiableMap(result);
     }
 
-    public Predicate<InetAddress> getIpSet(String name) {
-        return this.ipSets.containsKey(name) ? Predicates.and(this.ipSets.get(name)) : null;
+    public Predicate<InetAddress> getIpSet(final String name) {
+        return this.ipSets.containsKey(name) ? CommonConfig.allOf(this.ipSets.get(name)) : null;
     }
-     */
+
+    private static <T> Predicate<T> allOf(final List<? extends Predicate<T>> elements) {
+        @SuppressWarnings("unchecked")
+        final Predicate<T>[] sets = elements.toArray(new Predicate[0]);
+        return addr -> {
+            for (final Predicate<T> set : sets) {
+                if (!set.test(addr)) {
+                    return false;
+                }
+            }
+            return true;
+        };
+    }
 }

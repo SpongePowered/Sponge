@@ -22,16 +22,5 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
+@org.checkerframework.framework.qual.DefaultQualifier(org.checkerframework.checker.nullness.qual.NonNull.class)
 package org.spongepowered.common.service.server.permission;
-
-public abstract class SpongeSubject extends SpongeBaseSubject {
-
-    @Override
-    public MemorySubjectData transientSubjectData() {
-        return this.subjectData();
-    }
-
-    @Override
-    public abstract MemorySubjectData subjectData();
-
-}

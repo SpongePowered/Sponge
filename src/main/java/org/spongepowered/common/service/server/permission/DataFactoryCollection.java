@@ -26,8 +26,7 @@ package org.spongepowered.common.service.server.permission;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import org.spongepowered.api.service.context.Context;
-import org.spongepowered.api.service.permission.MemorySubjectData;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectCollection;
@@ -35,7 +34,6 @@ import org.spongepowered.api.util.Tristate;
 
 import java.util.Collection;
 import java.util.Optional;
-import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
 import java.util.function.Function;
@@ -45,14 +43,17 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
     private final ConcurrentMap<String, SpongeSubject> subjects = new ConcurrentHashMap<>();
     private final Function<Subject, MemorySubjectData> dataFactory;
 
-    protected DataFactoryCollection(String identifier, SpongePermissionService service, Function<Subject, MemorySubjectData> dataFactory) {
+    protected DataFactoryCollection(
+            final String identifier,
+            final SpongePermissionService service,
+            final Function<Subject, MemorySubjectData> dataFactory) {
         super(identifier, service);
         this.service = service;
         this.dataFactory = dataFactory;
     }
 
     @Override
-    public SpongeSubject get(String identifier) {
+    public SpongeSubject get(final String identifier) {
         checkNotNull(identifier, "identifier");
         if (!this.subjects.containsKey(identifier)) {
             this.subjects.putIfAbsent(identifier, new DataFactorySubject(identifier, this.dataFactory));
@@ -61,7 +62,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
     }
 
     @Override
-    public boolean isRegistered(String identifier) {
+    public boolean isRegistered(final String identifier) {
         return this.subjects.containsKey(identifier);
     }
 
@@ -75,7 +76,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         private final String identifier;
         private final MemorySubjectData data;
 
-        protected DataFactorySubject(String identifier, Function<Subject, MemorySubjectData> dataFactory) {
+        protected DataFactorySubject(final String identifier, final Function<Subject, MemorySubjectData> dataFactory) {
             this.identifier = identifier;
             this.data = dataFactory.apply(this);
         }
@@ -97,7 +98,7 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public PermissionService getService() {
+        public PermissionService service() {
             return DataFactoryCollection.this.service;
         }
 
@@ -107,27 +108,27 @@ public class DataFactoryCollection extends SpongeSubjectCollection {
         }
 
         @Override
-        public Tristate permissionValue(Set<Context> contexts, String permission) {
-            Tristate ret = super.permissionValue(contexts, permission);
+        public Tristate permissionValue(final String permission, final Cause cause) {
+            Tristate ret = super.permissionValue(permission, cause);
 
             if (ret == Tristate.UNDEFINED) {
-                ret = this.getDataPermissionValue(DataFactoryCollection.this.defaults().transientSubjectData(), permission);
+                ret = this.dataPermissionValue(DataFactoryCollection.this.defaults().transientSubjectData(), permission);
             }
 
             if (ret == Tristate.UNDEFINED) {
-                ret = this.getDataPermissionValue(DataFactoryCollection.this.service.defaults().transientSubjectData(), permission);
+                ret = this.dataPermissionValue(DataFactoryCollection.this.service.defaults().transientSubjectData(), permission);
             }
             return ret;
         }
 
         @Override
-        public Optional<String> option(Set<Context> contexts, String option) {
-            Optional<String> ret = super.option(contexts, option);
+        public Optional<String> option(final String option, final Cause cause) {
+            Optional<String> ret = super.option(option, cause);
             if (!ret.isPresent()) {
-                ret = this.getDataOptionValue(DataFactoryCollection.this.defaults().subjectData(), option);
+                ret = this.dataOptionValue(DataFactoryCollection.this.defaults().subjectData(), option);
             }
             if (!ret.isPresent()) {
-                ret = this.getDataOptionValue(DataFactoryCollection.this.service.defaults().subjectData(), option);
+                ret = this.dataOptionValue(DataFactoryCollection.this.service.defaults().subjectData(), option);
             }
             return ret;
         }

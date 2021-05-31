@@ -35,12 +35,14 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.service.ban.BanService;
+import org.spongepowered.api.service.context.ContextService;
 import org.spongepowered.api.service.economy.EconomyService;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.whitelist.WhitelistService;
 import org.spongepowered.common.event.lifecycle.AbstractProvideServiceEventImpl;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.server.ban.SpongeBanService;
+import org.spongepowered.common.service.server.context.SpongeContextService;
 import org.spongepowered.common.service.server.permission.SpongePermissionService;
 import org.spongepowered.common.service.server.whitelist.SpongeWhitelistService;
 import org.spongepowered.plugin.PluginContainer;
@@ -66,6 +68,10 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
                         servicePluginSubCategory -> servicePluginSubCategory.banService,
                         SpongeBanService.class))
                 .add(new Service<>(
+                        ContextService.class,
+                        servicePluginSubCategory -> servicePluginSubCategory.contextService,
+                        SpongeContextService.class))
+                .add(new Service<>(
                         EconomyService.class,
                         servicePluginSubCategory -> servicePluginSubCategory.economyService,
                         null))
@@ -81,7 +87,7 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
     }
 
     @Override
-    protected <T> AbstractProvideServiceEventImpl<T> createEvent(PluginContainer container, Service<T> service) {
+    protected <T> AbstractProvideServiceEventImpl<T> createEvent(final PluginContainer container, final Service<T> service) {
         return new AbstractProvideServiceEventImpl.EngineScopedImpl<>(Cause.of(EventContext.empty(), this.getGame()),
                 this.getGame(), TypeToken.get(service.getServiceClass()), this.server);
     }
@@ -94,6 +100,11 @@ public final class SpongeServerScopedServiceProvider extends SpongeServiceProvid
     @Override
     public final @NonNull Optional<EconomyService> economyService() {
         return this.provide(EconomyService.class);
+    }
+
+    @Override
+    public final @NonNull ContextService contextService() {
+        return this.provideUnchecked(ContextService.class);
     }
 
     @Override
