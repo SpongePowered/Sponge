@@ -27,7 +27,6 @@ package org.spongepowered.common.map.decoration;
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -136,7 +135,7 @@ public class SpongeMapDecorationBuilder implements MapDecoration.Builder {
         }
 
         if (container.contains(Constants.Map.NAME)) {
-            final Component component = SpongeComponents.gsonSerializer().deserialize(
+            final Component component = SpongeAdventure.GSON.deserialize(
                     container.getString(Constants.Map.NAME)
                             .orElseThrow(() -> new InvalidDataException("Invalid data type for " + Constants.Map.NAME + ". Should be String"))
             );
