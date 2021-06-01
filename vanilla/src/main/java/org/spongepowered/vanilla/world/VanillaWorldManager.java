@@ -193,6 +193,26 @@ public final class VanillaWorldManager implements SpongeWorldManager {
     }
 
     @Override
+    public Optional<Path> worldDirectory(final ResourceKey key) {
+        Objects.requireNonNull(key, "key");
+        
+        Path directory;
+        if (Level.OVERWORLD.location().equals(key)) {
+            directory = this.defaultWorldDirectory;
+        } else if (Level.NETHER.location().equals(key)) {
+            directory = this.defaultWorldDirectory.resolve("DIM-1");
+        } else if (Level.END.location().equals(key)) {
+            directory = this.defaultWorldDirectory.resolve("DIM1");
+        } else {
+            directory = this.customWorldsDirectory.resolve(key.namespace()).resolve(key.value());
+        }
+        if (Files.notExists(directory)) {
+            return Optional.empty();
+        }
+        return Optional.of(directory);
+    }
+
+    @Override
     public Collection<org.spongepowered.api.world.server.ServerWorld> worlds() {
         return Collections.unmodifiableCollection((Collection<org.spongepowered.api.world.server.ServerWorld>) (Object) this.worlds.values());
     }
