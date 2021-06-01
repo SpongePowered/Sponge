@@ -73,6 +73,7 @@ import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import net.minecraft.world.level.storage.WorldData;
+import org.apache.commons.io.FilenameUtils;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
@@ -82,6 +83,7 @@ import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scheduler.Task;
 import org.spongepowered.api.world.WorldType;
+import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
@@ -133,6 +135,7 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 public final class VanillaWorldManager implements SpongeWorldManager {
 
@@ -226,6 +229,35 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
 
         return Collections.unmodifiableList(worldKeys);
+    }
+
+    @Override
+    public List<ResourceKey> templateKeys() {
+        final List<ResourceKey> templateKeys = new ArrayList<>();
+        // Treat Vanilla ones as template keys
+        templateKeys.add(WorldTypes.OVERWORLD.location());
+        templateKeys.add(WorldTypes.THE_NETHER.location());
+        templateKeys.add(WorldTypes.THE_END.location());
+
+        try (final Stream<Path> pluginDirectories = Files.walk(this.getDimensionDataPackDirectory(), 1)) {
+            pluginDirectories
+                    .filter(Files::isDirectory)
+                    .forEach(pluginDirectory -> {
+                                try (final Stream<Path> pluginTemplates = Files.walk(pluginDirectory.resolve("dimension"), 1)) {
+                                    pluginTemplates
+                                            .filter(template -> template.endsWith(".json"))
+                                            .forEach(template -> templateKeys.add((ResourceKey) (Object) new ResourceLocation(pluginDirectory.toString(),
+                                                    FilenameUtils.removeExtension(template.getFileName().toString()))));
+                                } catch (final IOException e) {
+                                    throw new RuntimeException(e);
+                                }
+                            }
+                    );
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        return templateKeys;
     }
 
     @Override
