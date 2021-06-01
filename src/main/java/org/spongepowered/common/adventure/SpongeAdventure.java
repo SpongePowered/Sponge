@@ -752,31 +752,6 @@ public final class SpongeAdventure {
         }
 
         @Override
-        public @NonNull LegacyComponentSerializer legacySectionSerializer() {
-            return SpongeAdventure.LEGACY_SECTION;
-        }
-
-        @Override
-        public @NonNull LegacyComponentSerializer legacyAmpersandSerializer() {
-            return SpongeAdventure.LEGACY_AMPERSAND;
-        }
-
-        @Override
-        public @NonNull LegacyComponentSerializer legacySerializer(final char character) {
-            return SpongeAdventure.legacy(character);
-        }
-
-        @Override
-        public @NonNull GsonComponentSerializer gsonSerializer() {
-            return SpongeAdventure.GSON;
-        }
-
-        @Override
-        public @NonNull PlainComponentSerializer plainSerializer() {
-            return SpongeAdventure.PLAIN;
-        }
-
-        @Override
         @SafeVarargs
         public final @NonNull Component render(
             final @NonNull Component component,
