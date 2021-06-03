@@ -29,24 +29,25 @@ import org.spongepowered.common.util.Constants;
 
 public final class SpongeMapShade implements MapShade {
 
-	private final int shadeNum;
-	private final int multiplier;
+    private final int shadeNum;
+    private final int multiplier;
 
-	/**
-	 * Create a SpongeMapShade with given parameters
-	 * @param shadeNum Number to add to color byte after multiplying by 4
-	 * @param multiplier Number to multiply R,G and B before dividing by {@value Constants.Map#SHADE_DIVIDER}
-	 */
-	public SpongeMapShade(int shadeNum, int multiplier) {
-		this.shadeNum = shadeNum;
-		this.multiplier = multiplier;
-	}
+    /**
+     * Create a SpongeMapShade with given parameters
+     *
+     * @param shadeNum   Number to add to color byte after multiplying by 4
+     * @param multiplier Number to multiply R,G and B before dividing by {@value Constants.Map#SHADE_DIVIDER}
+     */
+    public SpongeMapShade(final int shadeNum, final int multiplier) {
+        this.shadeNum = shadeNum;
+        this.multiplier = multiplier;
+    }
 
-	public int getShadeNum() {
-		return this.shadeNum;
-	}
+    public int getShadeNum() {
+        return this.shadeNum;
+    }
 
-	public int getMultiplier() {
-		return multiplier;
-	}
+    public int getMultiplier() {
+        return this.multiplier;
+    }
 }

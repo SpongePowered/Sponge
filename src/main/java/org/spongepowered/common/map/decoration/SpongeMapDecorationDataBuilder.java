@@ -32,19 +32,19 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Optional;
 
-public class SpongeMapDecorationDataBuilder extends AbstractDataBuilder<MapDecoration> {
-	public SpongeMapDecorationDataBuilder() {
-		super(MapDecoration.class, 1);
-	}
+public final class SpongeMapDecorationDataBuilder extends AbstractDataBuilder<MapDecoration> {
+    public SpongeMapDecorationDataBuilder() {
+        super(MapDecoration.class, 1);
+    }
 
-	@Override
-	protected Optional<MapDecoration> buildContent(DataView container) throws InvalidDataException {
-		if (!container.contains(
-				Constants.Map.DECORATION_TYPE,
-				Constants.Map.DECORATION_ROTATION
-		)) {
-			return Optional.empty();
-		}
-		return Optional.of(MapDecoration.builder().fromContainer(container).build());
-	}
+    @Override
+    protected Optional<MapDecoration> buildContent(final DataView container) throws InvalidDataException {
+        if (!container.contains(
+                Constants.Map.DECORATION_TYPE,
+                Constants.Map.DECORATION_ROTATION
+        )) {
+            return Optional.empty();
+        }
+        return Optional.of(MapDecoration.builder().fromContainer(container).build());
+    }
 }

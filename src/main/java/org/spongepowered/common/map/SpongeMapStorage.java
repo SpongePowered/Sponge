@@ -55,74 +55,73 @@ import java.util.UUID;
  */
 public final class SpongeMapStorage implements MapStorage {
 
-	private final Map<UUID, MapInfo> loadedMapUUIDs = new HashMap<>();
- private @Nullable BiMap<Integer, UUID> mapIdUUIDIndex = null;
+    private final Map<UUID, MapInfo> loadedMapUUIDs = new HashMap<>();
+    private @Nullable BiMap<Integer, UUID> mapIdUUIDIndex = null;
 
-	@Override
-	public Collection<MapInfo> allMapInfos() {
-		final Set<MapInfo> mapInfos = new HashSet<>();
+    @Override
+    public Collection<MapInfo> allMapInfos() {
+        final Set<MapInfo> mapInfos = new HashSet<>();
+        final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().defaultWorld();
 
-		final ServerWorld spongeWorld = Sponge.server().worldManager().defaultWorld();
-		final ServerLevel defaultWorld = (ServerLevel) spongeWorld;
+        final int highestId = ((MapIdTrackerBridge) defaultWorld.getDataStorage()
+                .computeIfAbsent(MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME)).bridge$getHighestMapId().orElse(-1);
+        for (int i = 0; i <= highestId; i++) {
+            final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + i);
+            if (mapInfo == null) {
+                SpongeCommon.getLogger().warn("Missing map with id: " + i);
+                continue;
+            }
+            this.addMapInfo(mapInfo);
+            mapInfos.add(mapInfo);
+        }
+        return mapInfos;
+    }
 
-		final int highestId = ((MapIdTrackerBridge)defaultWorld.getDataStorage()
-				.computeIfAbsent(MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME)).bridge$getHighestMapId().orElse(-1);
-		for (int i = 0; i <= highestId; i++) {
-			final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + i);
-			if (mapInfo == null) {
-				SpongeCommon.getLogger().warn("Missing map with id: " + i);
-				continue;
-			}
-			this.addMapInfo(mapInfo);
-			mapInfos.add(mapInfo);
-		}
-		return mapInfos;
-	}
+    @Override
+    public Optional<MapInfo> mapInfo(final UUID uuid) {
+        this.ensureHasMapUUIDIndex();
+        final MapInfo mapInfo = this.loadedMapUUIDs.get(uuid);
+        if (mapInfo != null) {
+            return Optional.of(mapInfo);
+        }
+        final Integer mapId = this.mapIdUUIDIndex.inverse().get(uuid);
+        if (mapId == null) {
+            return Optional.empty();
+        }
+        final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().defaultWorld();
+        final MapInfo loadedMapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + mapId);
+        return Optional.ofNullable(loadedMapInfo);
+    }
 
-	@Override
-	public Optional<MapInfo> mapInfo(final UUID uuid) {
-		MapInfo mapInfo = this.loadedMapUUIDs.get(uuid);
-		if (mapInfo != null) {
-			return Optional.of(mapInfo);
-		}
-		Integer mapId = this.mapIdUUIDIndex.inverse().get(uuid);
-		if (mapId == null) {
-			return Optional.empty();
-		}
-		final ServerWorld spongeWorld = Sponge.server().worldManager().defaultWorld();
-		final ServerLevel defaultWorld = (ServerLevel) spongeWorld;
-		final MapInfo loadedMapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + mapId);
-		return Optional.ofNullable(loadedMapInfo);
-	}
+    @Override
+    public Optional<MapInfo> createNewMapInfo() {
+        return SpongeCommonEventFactory.fireCreateMapEvent(PhaseTracker.getCauseStackManager().currentCause());
+    }
 
-	@Override
-	public Optional<MapInfo> createNewMapInfo() {
-		return SpongeCommonEventFactory.fireCreateMapEvent(PhaseTracker.getCauseStackManager().currentCause());
-	}
+    /**
+     * Request the UUID for the given map id.
+     * If there is no known UUID, one is created and saved.
+     *
+     * @param id Map id
+     * @return UUID of the map.
+     */
+    public UUID requestUUID(final int id) {
+        this.ensureHasMapUUIDIndex();
+        UUID uuid = this.mapIdUUIDIndex.get(id);
+        if (uuid == null) {
+            uuid = UUID.randomUUID();
+            this.mapIdUUIDIndex.put(id, uuid);
+        }
+        return uuid;
+    }
 
-	/**
-	 * Request the UUID for the given map id.
-	 * If there is no known UUID, one is created and saved.
-	 * @param id Map id
-	 * @return UUID of the map.
-	 */
-	public UUID requestUUID(final int id) {
-		this.ensureHasMapUUIDIndex();
-		UUID uuid = this.mapIdUUIDIndex.get(id);
-		if (uuid == null) {
-			uuid = UUID.randomUUID();
-			this.mapIdUUIDIndex.put(id, uuid);
-		}
-		return uuid;
-	}
+    public void addMapInfo(final MapInfo mapInfo) {
+        this.loadedMapUUIDs.put(mapInfo.uniqueId(), mapInfo);
+    }
 
-	public void addMapInfo(final MapInfo mapInfo) {
-		this.loadedMapUUIDs.put(mapInfo.uniqueId(), mapInfo);
-	}
-
-	private void ensureHasMapUUIDIndex() {
-		if (this.mapIdUUIDIndex == null) {
-			this.mapIdUUIDIndex = ((PrimaryLevelDataBridge) Sponge.server().worldManager().defaultWorld().properties()).bridge$getMapUUIDIndex();
-		}
-	}
+    private void ensureHasMapUUIDIndex() {
+        if (this.mapIdUUIDIndex == null) {
+            this.mapIdUUIDIndex = ((PrimaryLevelDataBridge) Sponge.server().worldManager().defaultWorld().properties()).bridge$getMapUUIDIndex();
+        }
+    }
 }

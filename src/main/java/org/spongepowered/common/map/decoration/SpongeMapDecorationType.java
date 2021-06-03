@@ -35,13 +35,13 @@ public class SpongeMapDecorationType implements MapDecorationType {
 
     private static final Map<MapDecoration.Type, MapDecorationType> VANILLA_TYPE_MAP = new HashMap<>();
 
-    public static Optional<MapDecorationType> toSpongeType(MapDecoration.Type vanillaType) {
+    public static Optional<MapDecorationType> toSpongeType(final MapDecoration.Type vanillaType) {
         return Optional.ofNullable(SpongeMapDecorationType.VANILLA_TYPE_MAP.get(vanillaType));
     }
 
     private final MapDecoration.Type type;
 
-    public SpongeMapDecorationType(MapDecoration.Type mapDecorationType) {
+    public SpongeMapDecorationType(final MapDecoration.Type mapDecorationType) {
         this.type = mapDecorationType;
         SpongeMapDecorationType.VANILLA_TYPE_MAP.put(mapDecorationType, this);
     }

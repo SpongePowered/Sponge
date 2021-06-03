@@ -46,7 +46,7 @@ import java.util.Objects;
 public final class SpongeMapCanvasBuilder implements MapCanvas.Builder {
     // If its being used to build from a DataView, or is blank
     // We don't want to create a big array.
-    private byte@Nullable[] canvas = null;
+    private byte @Nullable [] canvas = null;
 
     private byte[] getCanvas() {
         if (this.canvas == null) {
@@ -57,7 +57,7 @@ public final class SpongeMapCanvasBuilder implements MapCanvas.Builder {
 
     @Override
     public MapCanvas.Builder paintAll(final MapColor color) {
-        Arrays.fill(getCanvas(), ((SpongeMapColor)color).getMCColor());
+        Arrays.fill(this.getCanvas(), ((SpongeMapColor) color).getMCColor());
         return this;
     }
 
@@ -77,7 +77,7 @@ public final class SpongeMapCanvasBuilder implements MapCanvas.Builder {
         }
 
         final byte[] canvas = this.getCanvas();
-        final byte color = ((SpongeMapColor)mapColor).getMCColor();
+        final byte color = ((SpongeMapColor) mapColor).getMCColor();
         for (int x = startX; x <= endX; x++) {
             for (int y = startY; y <= endY; y++) {
                 canvas[x + (y * Constants.Map.MAP_PIXELS)] = color;
@@ -91,7 +91,7 @@ public final class SpongeMapCanvasBuilder implements MapCanvas.Builder {
         if (canvas instanceof SpongeEmptyCanvas) {
             return MapCanvas.builder();
         }
-        this.canvas = ((SpongeMapByteCanvas)canvas).canvas.clone();
+        this.canvas = ((SpongeMapByteCanvas) canvas).canvas.clone();
         return this;
     }
 
@@ -107,31 +107,19 @@ public final class SpongeMapCanvasBuilder implements MapCanvas.Builder {
         if (image.getWidth(null) != Constants.Map.MAP_PIXELS || image.getHeight(null) != Constants.Map.MAP_PIXELS) {
             throw new IllegalArgumentException("image size was invalid!");
         }
-        BufferedImage bufferedImage = null;
-        boolean shouldConvert = true;
-        if (image instanceof BufferedImage) {
-            bufferedImage = (BufferedImage)image;
-            // If its not TYPE_INT_RGB, convert it.
-            shouldConvert = bufferedImage.getType() != BufferedImage.TYPE_INT_RGB;
-        }
-        if (shouldConvert) {
-            bufferedImage = new BufferedImage(image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
-            Graphics2D bGr = bufferedImage.createGraphics();
-            bGr.drawImage(image, 0, 0, null);
-            bGr.dispose();
-        }
+        final BufferedImage bufferedImage = this.createBufferedImage(image);
         final int[] pixels = ((DataBufferInt) bufferedImage.getRaster().getDataBuffer()).getData();
         // Get the color palette we are working with
         final Map<Integer, SpongeMapColor> palette = new HashMap<>();
         Sponge.game().registries().registry(RegistryTypes.MAP_COLOR_TYPE).stream().forEach(color -> {
             Sponge.game().registries().registry(RegistryTypes.MAP_SHADE).stream().forEach(shade -> {
-                SpongeMapColor spongeMapColor = new SpongeMapColor(color, shade);
+                final SpongeMapColor spongeMapColor = new SpongeMapColor(color, shade);
                 palette.put(spongeMapColor.color().rgb(), spongeMapColor);
             });
         });
-        final byte[] canvas = getCanvas();
+        final byte[] canvas = this.getCanvas();
         for (int i = 0; i < pixels.length; i++) {
-            SpongeMapColor color = palette.get(pixels[i]);
+            final SpongeMapColor color = palette.get(pixels[i]);
             if (color == null) {
                 throw new IllegalArgumentException("Can not find a matching color for rgb value: " + Integer.toHexString(pixels[i]) + ". The MapCanvas will have painted all pixels up to this point.");
             }
@@ -156,6 +144,24 @@ public final class SpongeMapCanvasBuilder implements MapCanvas.Builder {
         if (this.canvas == null) {
             return SpongeEmptyCanvas.INSTANCE;
         }
-        return new SpongeMapByteCanvas(canvas.clone());
+        return new SpongeMapByteCanvas(this.canvas.clone());
     }
+
+    private BufferedImage createBufferedImage(final Image image) {
+        if (image instanceof BufferedImage) {
+            final BufferedImage bufferedImage = (BufferedImage) image;
+            // If its not TYPE_INT_RGB, we need to convert anyway.
+            if (bufferedImage.getType() == BufferedImage.TYPE_INT_RGB) {
+                return bufferedImage;
+            }
+        }
+
+        final BufferedImage bufferedImage = new BufferedImage(
+                image.getWidth(null), image.getHeight(null), BufferedImage.TYPE_INT_RGB);
+        final Graphics2D bGr = bufferedImage.createGraphics();
+        bGr.drawImage(image, 0, 0, null);
+        bGr.dispose();
+        return bufferedImage;
+    }
+
 }

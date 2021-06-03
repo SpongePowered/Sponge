@@ -1020,55 +1020,55 @@ public final class SpongeCommonEventFactory {
         return event;
     }
 
-	/**
-	 * Returns MapInfo of newly created map, if the event was not cancelled.
-	 * @param cause Cause of the event
-	 * @return MapInfo if event was not cancelled
-	 */
-	public static Optional<MapInfo> fireCreateMapEvent(final Cause cause) {
-		return fireCreateMapEvent(cause, Collections.emptySet());
-	}
+    /**
+     * Returns MapInfo of newly created map, if the event was not cancelled.
+     *
+     * @param cause Cause of the event
+     * @return MapInfo if event was not cancelled
+     */
+    public static Optional<MapInfo> fireCreateMapEvent(final Cause cause) {
+        return fireCreateMapEvent(cause, Collections.emptySet());
+    }
 
-	public static Optional<MapInfo> fireCreateMapEvent(final Cause cause, final Set<Value<?>> values) {
+    public static Optional<MapInfo> fireCreateMapEvent(final Cause cause, final Set<Value<?>> values) {
 
-		final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().defaultWorld();
-		final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getDataStorage().computeIfAbsent(MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME);
+        final ServerLevel defaultWorld = (ServerLevel) Sponge.server().worldManager().defaultWorld();
+        final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getDataStorage()
+                .computeIfAbsent(MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME);
 
-		final int id = mapIdTrackerBridge.bridge$getHighestMapId()
-				.map(i -> ++i)
-				.orElse(0);
+        final int id = mapIdTrackerBridge.bridge$getHighestMapId().orElse(-1) + 1;
+        final String s = Constants.Map.MAP_PREFIX + id;
+        final MapItemSavedData mapData = new MapItemSavedData(s);
 
-		final String s = Constants.Map.MAP_PREFIX + id;
-		final MapItemSavedData mapData = new MapItemSavedData(s);
+        mapData.dimension = Level.OVERWORLD; // Set default to prevent NPEs
 
-		mapData.dimension = Level.OVERWORLD; // Set default to prevent NPEs
+        final MapInfo mapInfo = (MapInfo) mapData;
 
-		final MapInfo mapInfo = (MapInfo) mapData;
+        for (final Value<?> value : values) {
+            mapInfo.offer(value);
+        }
 
-		for (final Value<?> value : values) {
-			mapInfo.offer(value);
-		}
+        final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapInfo);
+        SpongeCommon.postEvent(event);
+        if (event.isCancelled()) {
+            return Optional.empty();
+        }
 
-		final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapInfo);
-		SpongeCommon.postEvent(event);
-		if (event.isCancelled()) {
-			return Optional.empty();
-		}
+        // Advance map id.
+        final int mcId = defaultWorld.getFreeMapId();
+        if (id != mcId) {
+            // TODO: REMOVE OR replace for Integer.MAX_VALUE
+            SpongeCommon.getLogger().warn("Map size corruption, vanilla only allows " + Integer.MAX_VALUE + "! " +
+                    "Expected next number was not equal to the true next number.");
+            SpongeCommon.getLogger().warn("Expected: " + id + ". Got: " + mcId);
+            SpongeCommon.getLogger().warn("Automatically cancelling map creation");
+            mapIdTrackerBridge.bridge$setHighestMapId(id - 1);
+            return Optional.empty();
+        }
+        defaultWorld.setMapData(mapData);
 
-		// Advance map id.
-		final int mcId = defaultWorld.getFreeMapId();
-		if (id != mcId) {
-			// TODO: REMOVE OR replace for Integer.MAX_VALUE
-			SpongeCommon.getLogger().warn("Map size corruption, vanilla only allows " + Integer.MAX_VALUE + "! Expected next number was not equal to the true next number.");
-			SpongeCommon.getLogger().warn("Expected: " + id + ". Got: " + mcId);
-			SpongeCommon.getLogger().warn("Automatically cancelling map creation");
-			mapIdTrackerBridge.bridge$setHighestMapId(id - 1);
-			return Optional.empty();
-		}
-		defaultWorld.setMapData(mapData);
+        ((SpongeMapStorage) Sponge.server().mapStorage()).addMapInfo(mapInfo);
 
-		((SpongeMapStorage) Sponge.server().mapStorage()).addMapInfo(mapInfo);
-
-		return Optional.of(mapInfo);
-	}
+        return Optional.of(mapInfo);
+    }
 }

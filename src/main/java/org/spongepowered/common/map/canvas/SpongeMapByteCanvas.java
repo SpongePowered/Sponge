@@ -42,12 +42,12 @@ public final class SpongeMapByteCanvas implements SpongeMapCanvas {
     // Main Canvas storage
     public final byte[] canvas;
 
-    public SpongeMapByteCanvas(byte[] canvas) {
+    public SpongeMapByteCanvas(final byte[] canvas) {
         this.canvas = canvas;
     }
 
     public void applyToMapData(final MapItemSavedData mapData) {
-        mapData.colors = canvas.clone();
+        mapData.colors = this.canvas.clone();
         mapData.setDirty();
     }
 
@@ -58,7 +58,7 @@ public final class SpongeMapByteCanvas implements SpongeMapCanvas {
 
     @Override
     public DataContainer toContainer() {
-        return DataContainer.createNew().set(Constants.Map.MAP_CANVAS, Bytes.asList(canvas));
+        return DataContainer.createNew().set(Constants.Map.MAP_CANVAS, Bytes.asList(this.canvas));
     }
 
     @Override

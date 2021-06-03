@@ -61,8 +61,11 @@ public abstract class EmptyMapItemMixin {
     @Redirect(method = "use",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/item/MapItem;create(Lnet/minecraft/world/level/Level;IIBZZ)Lnet/minecraft/world/item/ItemStack;"))
-    private ItemStack impl$createMapWithSpongeData(Level level, int x, int y, byte scale, boolean trackingPosition, boolean unlimitedTracking, Level level2,
-                                                   net.minecraft.world.entity.player.Player playerIn, InteractionHand usedHand) {
+    private ItemStack impl$createMapWithSpongeData(final Level level, final int x, final int y, final byte scale,
+                                                   final boolean trackingPosition, final boolean unlimitedTracking,
+                                                   final Level level2,
+                                                   final net.minecraft.world.entity.player.Player playerIn,
+                                                   final InteractionHand usedHand) {
         final Player player = (Player) playerIn;
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -100,8 +103,11 @@ public abstract class EmptyMapItemMixin {
     @Inject(method = "use", at = @At(value = "INVOKE", shift = At.Shift.AFTER,
             target = "net/minecraft/world/entity/player/Player.getItemInHand (Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/item/ItemStack;"),
             locals = LocalCapture.CAPTURE_FAILHARD, cancellable = true)
-    private void impl$returnFailResultIfMapWasNotCreated(Level level, net.minecraft.world.entity.player.Player playerIn, InteractionHand handIn,
-                                                         CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, ItemStack itemstack) {
+    private void impl$returnFailResultIfMapWasNotCreated(final Level level,
+                                                         final net.minecraft.world.entity.player.Player playerIn,
+                                                         final InteractionHand handIn,
+                                                         final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir,
+                                                         final ItemStack itemstack) {
         if (itemstack.isEmpty()) {
             cir.cancel();
             cir.setReturnValue(InteractionResultHolder.fail(playerIn.getItemInHand(handIn)));

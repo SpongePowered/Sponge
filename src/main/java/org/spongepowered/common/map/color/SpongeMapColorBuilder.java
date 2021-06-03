@@ -35,14 +35,13 @@ import org.spongepowered.api.map.color.MapShades;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MapUtil;
 
-
-public class SpongeMapColorBuilder implements MapColor.Builder {
+public final class SpongeMapColorBuilder implements MapColor.Builder {
 
     private @Nullable MapColorType color = null;
     private MapShade shade = MapShades.BASE.get();
 
     @Override
-    public MapColor.Builder shade(MapShade shade) {
+    public MapColor.Builder shade(final MapShade shade) {
         this.shade = shade;
         return this;
     }
@@ -68,18 +67,18 @@ public class SpongeMapColorBuilder implements MapColor.Builder {
     }
 
     @Override
-    public MapColor.Builder baseColor(MapColorType mapColorType) {
+    public MapColor.Builder baseColor(final MapColorType mapColorType) {
         this.color = mapColorType;
         return this;
     }
 
     @Override
-    public MapColor.Builder fromContainer(DataView container) {
+    public MapColor.Builder fromContainer(final DataView container) {
         if (!container.contains(Constants.Map.COLOR_INDEX)) {
             return this;
         }
-        reset();
-        int colorInt = container.getInt(Constants.Map.COLOR_INDEX).get();
+        this.reset();
+        final int colorInt = container.getInt(Constants.Map.COLOR_INDEX).get();
         this.color = MapUtil.getMapColorTypeByColorIndex(colorInt).orElseThrow(() -> new InvalidDataException("Invalid map color " + colorInt));
 
         container.getInt(Constants.Map.SHADE_NUM).ifPresent(mapShadeInt -> this.shade = MapUtil.getMapShadeById(mapShadeInt));
@@ -94,8 +93,8 @@ public class SpongeMapColorBuilder implements MapColor.Builder {
     }
 
     @Override
-    public MapColor.Builder from(MapColor value) {
-        SpongeMapColor mapColorBridge = (SpongeMapColor)value;
+    public MapColor.Builder from(final MapColor value) {
+        final SpongeMapColor mapColorBridge = (SpongeMapColor)value;
         this.color = mapColorBridge.type();
         this.shade = mapColorBridge.shade();
         return this;

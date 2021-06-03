@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.storage;
+package org.spongepowered.common.mixin.api.mcp.world.level.saveddata;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.level.saveddata.SavedData;
@@ -92,10 +92,10 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     @Override
     public void bridge$setDecorations(final Set<org.spongepowered.api.map.decoration.MapDecoration> newDecorations) {
         this.decorations.clear();
-        for (org.spongepowered.api.map.decoration.MapDecoration decoration : newDecorations) {
+        for (final org.spongepowered.api.map.decoration.MapDecoration decoration : newDecorations) {
             this.impl$addDecorationToDecorationsMapIfNotExists((MapDecoration) decoration);
         }
-        for (MapDecoration existingDecoration : this.decorations.values()) {
+        for (final MapDecoration existingDecoration : this.decorations.values()) {
             if (!newDecorations.contains(existingDecoration)) {
                 // Removed.
                 ((MapDecorationBridge)existingDecoration).notifyRemovedFromMap((MapInfo) this);
@@ -152,12 +152,12 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     }
 
     @Override 
-    public void data$setCompound(CompoundTag nbt) {
+    public void data$setCompound(final CompoundTag nbt) {
         this.impl$nbt = nbt;
     }
 
     public void impl$addDecorationToDecorationsMapIfNotExists(final MapDecoration mapDecoration) {
-        MapDecorationBridge bridge = (MapDecorationBridge)mapDecoration;
+        final MapDecorationBridge bridge = (MapDecorationBridge)mapDecoration;
         bridge.bridge$setPersistent(true); // Anything saved should be persistent so it can save next time too.
         if (this.decorations.containsKey(bridge.bridge$getKey())) {
             return;

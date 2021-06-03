@@ -41,6 +41,7 @@ import java.util.Collections;
 // This class basically means that we don't have to create tons of huge byte arrays
 // While doing stuff like create SpongeValues for keys.
 public final class SpongeEmptyCanvas implements SpongeMapCanvas {
+
     // Only allow construction from within this class
     private SpongeEmptyCanvas() {}
     public static final SpongeEmptyCanvas INSTANCE = new SpongeEmptyCanvas();
@@ -57,8 +58,8 @@ public final class SpongeEmptyCanvas implements SpongeMapCanvas {
 
     @Override
     public Image toImage(final Color color) {
-        BufferedImage image = new BufferedImage(Constants.Map.MAP_PIXELS, Constants.Map.MAP_PIXELS, BufferedImage.TYPE_INT_RGB);
-        Graphics graphics = image.getGraphics();
+        final BufferedImage image = new BufferedImage(Constants.Map.MAP_PIXELS, Constants.Map.MAP_PIXELS, BufferedImage.TYPE_INT_RGB);
+        final Graphics graphics = image.getGraphics();
         graphics.setColor(color);
         graphics.drawRect(0,0, image.getWidth(), image.getHeight());
         return image;

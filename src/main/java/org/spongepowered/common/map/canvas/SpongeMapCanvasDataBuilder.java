@@ -35,17 +35,19 @@ import java.util.Objects;
 import java.util.Optional;
 
 public final class SpongeMapCanvasDataBuilder extends AbstractDataBuilder<MapCanvas> {
-	public SpongeMapCanvasDataBuilder() {
-		super(MapCanvas.class, 1);
-	}
 
-	@Override
-	protected Optional<MapCanvas> buildContent(DataView container) throws InvalidDataException {
-		Objects.requireNonNull(container, "container cannot be null");
-		if (!container.contains(Constants.Map.MAP_CANVAS)) {
-			return Optional.empty();
-		}
-		final byte[] canvas =  MapUtil.getMapCanvasFromContainer(container);
-		return Optional.of(new SpongeMapByteCanvas(canvas));
-	}
+    public SpongeMapCanvasDataBuilder() {
+        super(MapCanvas.class, 1);
+    }
+
+    @Override
+    protected Optional<MapCanvas> buildContent(final DataView container) throws InvalidDataException {
+        Objects.requireNonNull(container, "container cannot be null");
+        if (!container.contains(Constants.Map.MAP_CANVAS)) {
+            return Optional.empty();
+        }
+        final byte[] canvas = MapUtil.getMapCanvasFromContainer(container);
+        return Optional.of(new SpongeMapByteCanvas(canvas));
+    }
+
 }

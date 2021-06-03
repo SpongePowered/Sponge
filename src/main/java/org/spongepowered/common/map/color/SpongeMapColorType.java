@@ -31,10 +31,9 @@ import org.spongepowered.api.util.Color;
 
 public final class SpongeMapColorType implements MapColorType {
 
-
     private final MaterialColor materialColor;
 
-    public SpongeMapColorType(MaterialColor materialColor) {
+    public SpongeMapColorType(final MaterialColor materialColor) {
         this.materialColor = materialColor;
     }
 
