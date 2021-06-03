@@ -81,6 +81,7 @@ public final class SpongeMapStorage implements MapStorage {
 
 	@Override
 	public Optional<MapInfo> mapInfo(final UUID uuid) {
+		ensureHasMapUUIDIndex();
 		MapInfo mapInfo = this.loadedMapUUIDs.get(uuid);
 		if (mapInfo != null) {
 			return Optional.of(mapInfo);
