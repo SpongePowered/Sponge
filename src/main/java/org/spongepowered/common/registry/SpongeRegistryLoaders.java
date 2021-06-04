@@ -42,6 +42,7 @@ import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.commands.arguments.ScoreHolderArgument;
 import net.minecraft.commands.arguments.UuidArgument;
 import net.minecraft.commands.arguments.blocks.BlockStateArgument;
+import net.minecraft.commands.arguments.coordinates.RotationArgument;
 import net.minecraft.commands.arguments.coordinates.Vec2Argument;
 import net.minecraft.commands.arguments.coordinates.Vec3Argument;
 import net.minecraft.commands.arguments.item.ItemArgument;
@@ -56,6 +57,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.material.MaterialColor;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
+import net.minecraft.world.phys.Vec2;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -269,7 +271,6 @@ import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOr
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.EndPortalType;
 import org.spongepowered.common.world.portal.NetherPortalType;
@@ -359,6 +360,10 @@ public final class SpongeRegistryLoaders {
             l.add(ResourceKeyedValueParameters.PLUGIN, SpongePluginContainerValueParameter::new);
             l.add(ResourceKeyedValueParameters.REMAINING_JOINED_STRINGS, k -> ClientNativeArgumentParser.createIdentity(k, StringArgumentType.greedyString()));
             l.add(ResourceKeyedValueParameters.RESOURCE_KEY, k -> ClientNativeArgumentParser.createConverter(k, ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation));
+            l.add(ResourceKeyedValueParameters.ROTATION, k -> ClientNativeArgumentParser.createConverter(k, RotationArgument.rotation(), (reader, cause, coords) -> {
+                final Vec2 rotation = coords.getRotation((CommandSourceStack) cause);
+                return new Vector3d(rotation.x, rotation.y, 0);
+            }));
             l.add(ResourceKeyedValueParameters.STRING, k -> ClientNativeArgumentParser.createIdentity(k, StringArgumentType.string()));
             l.add(ResourceKeyedValueParameters.TARGET_BLOCK, SpongeTargetBlockValueParameter::new);
             l.add(ResourceKeyedValueParameters.TARGET_ENTITY, k -> new SpongeTargetEntityValueParameter(k, false));
