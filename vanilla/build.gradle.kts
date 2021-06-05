@@ -55,9 +55,9 @@ val vanillaInstallerJava8 by sourceSets.register("installerLegacy8") {
 val vanillaInstallerJava9 by sourceSets.register("installerJava9") {
     this.java.setSrcDirs(setOf("src/installer/java9"))
 
-    tasks.named(compileJavaTaskName, JavaCompile::class) {
-        options.release.set(9)
-    }
+//    tasks.named(compileJavaTaskName, JavaCompile::class) {
+//        options.release.set(9)
+//    }
 
     configurations.named(implementationConfigurationName) {
         extendsFrom(vanillaInstallerConfig.get())
