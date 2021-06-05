@@ -50,10 +50,11 @@ import java.nio.file.Path;
 public abstract class MainMixin {
 
     @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/server/dedicated/DedicatedServerSettings"))
-    private static DedicatedServerSettings impl$cacheBootstrapProperties(final RegistryAccess p_i242100_1_, final Path p_i242100_2_) {
-        final DedicatedServerSettings provider = new DedicatedServerSettings(p_i242100_1_, p_i242100_2_);
+    private static DedicatedServerSettings impl$cacheBootstrapProperties(final Path p_i242100_2_) {
+        final DedicatedServerSettings provider = new DedicatedServerSettings(p_i242100_2_);
         final DedicatedServerProperties properties = provider.getProperties();
-        BootstrapProperties.init(properties.worldGenSettings, properties.gamemode, properties.difficulty, properties.pvp, properties.hardcore,
+        RegistryAccess.RegistryHolder p_i242100_1_ = RegistryAccess.builtin();
+        BootstrapProperties.init(properties.getWorldGenSettings(p_i242100_1_), properties.gamemode, properties.difficulty, properties.pvp, properties.hardcore,
                 true, properties.viewDistance, p_i242100_1_);
         return provider;
     }

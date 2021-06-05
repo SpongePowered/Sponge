@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.tracker.server.level;
 
+import com.mojang.datafixers.util.Either;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
@@ -50,6 +51,8 @@ import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 
+import java.util.concurrent.CompletableFuture;
+
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin_Tracker {
 
@@ -66,7 +69,7 @@ public abstract class ChunkMapMixin_Tracker {
         return exception;
     }
 
-    @Redirect(method = "lambda$prepareAccessibleChunk$37(Ljava/util/List;)Lnet/minecraft/world/level/chunk/LevelChunk;",
+    @Redirect(method = "*",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;unpackTicks()V"))
     private static void tracker$wrapUnpackTicks(final LevelChunk chunk) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
@@ -132,7 +135,7 @@ public abstract class ChunkMapMixin_Tracker {
     }
 
     @SuppressWarnings("UnresolvedMixinReference")
-    @Inject(method = "lambda$protoChunkToFullChunk$26(Lnet/minecraft/server/level/ChunkHolder;Lnet/minecraft/world/level/chunk/ChunkAccess;)Lnet/minecraft/world/level/chunk/ChunkAccess;",
+    @Inject(method = "*",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V", shift = At.Shift.BY, by = 2),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V")

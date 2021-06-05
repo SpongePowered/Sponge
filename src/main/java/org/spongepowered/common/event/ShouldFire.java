@@ -48,7 +48,6 @@ public final class ShouldFire {
     public static boolean INTERACT_ITEM_EVENT_PRIMARY = false;
 
     public static boolean SPAWN_ENTITY_EVENT = false;
-    public static boolean SPAWN_ENTITY_EVENT_CHUNK_LOAD = false;
     public static boolean SPAWN_ENTITY_EVENT_CUSTOM = false;
 
     public static boolean CHANGE_BLOCK_EVENT = false;
@@ -109,7 +108,6 @@ public final class ShouldFire {
     public static boolean BREEDING_EVENT_READY_TO_MATE = false;
     public static boolean BREEDING_EVENT_FIND_MATE = false;
     public static boolean BREEDING_EVENT_BREED = false;
-    public static boolean CHANGE_GAME_MODE_EVENT = false;
 
     public static boolean PLAY_SOUND_EVENT_AT_ENTITY = false;
     public static boolean PLAY_SOUND_EVENT_RECORD = false;

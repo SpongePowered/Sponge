@@ -35,11 +35,13 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.title.Title;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Registry;
+import net.minecraft.network.chat.ChatType;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundBlockUpdatePacket;
 import net.minecraft.network.protocol.game.ClientboundChatPacket;
 import net.minecraft.network.protocol.game.ClientboundClearTitlesPacket;
 import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
+import net.minecraft.network.protocol.game.ClientboundInitializeBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundSetActionBarTextPacket;
 import net.minecraft.network.protocol.game.ClientboundSetSubtitleTextPacket;
@@ -110,6 +112,7 @@ import java.util.Locale;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
 public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements ServerPlayer {
@@ -120,6 +123,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Shadow public ServerGamePacketListenerImpl connection;
 
     @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
+    @Shadow public abstract void shadow$sendMessage(net.minecraft.network.chat.Component param0, ChatType param1, UUID param2);
     // @formatter:on
 
     private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
@@ -378,13 +382,10 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
             this.api$worldBorder = ((WorldBorderBridge) mutableWorldBorder);
             this.api$worldBorder.bridge$applyFrom(toSet.get());
             mutableWorldBorder.addListener(((ServerPlayerBridge) this).bridge$getWorldBorderListener());
-            this.connection.send(
-                    new ClientboundSetBorderPacket((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder,
-                            ClientboundSetBorderPacket.Type.INITIALIZE));
+            this.connection.send(new ClientboundInitializeBorderPacket((net.minecraft.world.level.border.WorldBorder) this.api$worldBorder));
         } else { // unset the border if null
             this.api$worldBorder = null;
-            this.connection.send(
-                    new ClientboundSetBorderPacket(this.shadow$getCommandSenderWorld().getWorldBorder(), ClientboundSetBorderPacket.Type.INITIALIZE));
+            this.connection.send(new ClientboundInitializeBorderPacket(this.shadow$getCommandSenderWorld().getWorldBorder()));
         }
         return toSet;
 
