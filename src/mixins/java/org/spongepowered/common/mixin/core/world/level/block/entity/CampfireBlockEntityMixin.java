@@ -76,8 +76,8 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
             final CampfireBlockEntityMixin mixinSelf = MixinTargetHelper.cast(self);
             final ItemStackSnapshot stack = ItemStackUtil.snapshotOf(mixinSelf.items.get(i));
-            final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (Campfire) self, Optional.empty(),
-                    Optional.ofNullable((CookingRecipe) mixinSelf.impl$cookingRecipe[i]), Collections.singletonList(new Transaction<>(stack, stack)));
+            final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (Campfire) self, stack, Optional.empty(),
+                    Optional.ofNullable((CookingRecipe) mixinSelf.impl$cookingRecipe[i]));
             SpongeCommon.postEvent(event);
             if (event.isCancelled()) {
                 ((CampfireBlockEntityMixin) (Object) self).cookingProgress[i]--;
