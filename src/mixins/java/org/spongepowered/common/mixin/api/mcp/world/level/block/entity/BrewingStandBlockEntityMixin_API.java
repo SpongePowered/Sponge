@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.mcp.world.level.block.entity;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.NonNullList;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.Level;
 import org.spongepowered.api.block.entity.carrier.BrewingStand;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.asm.mixin.Mixin;
@@ -35,15 +39,19 @@ import org.spongepowered.asm.mixin.Shadow;
 @Mixin(BrewingStandBlockEntity.class)
 public abstract class BrewingStandBlockEntityMixin_API extends BaseContainerBlockEntityMixin_API implements BrewingStand {
 
-    // @Formatter:off
-    @Shadow protected abstract void shadow$doBrew();
-    @Shadow protected abstract boolean shadow$isBrewable();
-    // @Formatter:on
+    // @formatter:off
+    @Shadow private NonNullList<ItemStack> items;
+
+    @Shadow private static void shadow$doBrew(Level param0, BlockPos param1, NonNullList<ItemStack> param2) {};
+    @Shadow private static boolean shadow$isBrewable(NonNullList<ItemStack> param0) {
+        return false;
+    }
+    // @formatter:on
 
     @Override
     public boolean brew() {
-        if (this.shadow$isBrewable()) {
-            this.shadow$doBrew();
+        if (BrewingStandBlockEntityMixin_API.shadow$isBrewable(this.items)) {
+            BrewingStandBlockEntityMixin_API.shadow$doBrew(this.level, this.shadow$getBlockPos(), this.items);
             return true;
         }
         return false;

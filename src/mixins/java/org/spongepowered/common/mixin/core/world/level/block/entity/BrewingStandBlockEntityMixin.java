@@ -24,11 +24,14 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
+import net.minecraft.core.BlockPos;
 import net.minecraft.core.NonNullList;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.entity.carrier.BrewingStand;
 import org.spongepowered.api.data.Transaction;
@@ -52,71 +55,78 @@ import java.util.List;
 @Mixin(BrewingStandBlockEntity.class)
 public class BrewingStandBlockEntityMixin {
 
-    // @Formatter:off
-    @Shadow private int brewTime;
-    @Shadow private int fuel;
+    // @formatter:off
+    @Shadow int brewTime;
+    @Shadow int fuel;
     @Shadow private NonNullList<ItemStack> items;
     @Shadow private Item ingredient;
-    // @Formatter:on
+    // @formatter:on
 
-    @Inject(method = "tick",
+    @Inject(method = "serverTick",
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable()Z")),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;setChanged()V"))
-    private void impl$onConsumeFuel(CallbackInfo ci, ItemStack fuelStack) {
+            slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/core/NonNullList;)Z")),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;" +
+                    "setChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
+    private static void impl$onConsumeFuel(final Level param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3,
+                                           final CallbackInfo ci, final ItemStack fuelStack) {
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
         fuelStack.grow(1);
         final ItemStackSnapshot originalStack = ItemStackUtil.snapshotOf(fuelStack);
         fuelStack.shrink(1);
         final Transaction<ItemStackSnapshot> fuelTransaction = new Transaction<>(originalStack, ItemStackUtil.snapshotOf(fuelStack));
-        final ItemStackSnapshot ingredientStack = ItemStackUtil.snapshotOf(this.items.get(3));
+        final ItemStackSnapshot ingredientStack = ItemStackUtil.snapshotOf(((BrewingStandBlockEntityMixin) (Object) param3).items.get(3));
         final BrewingEvent.ConsumeFuel
-                event = SpongeEventFactory.createBrewingEventConsumeFuel(currentCause, (BrewingStand) this, fuelTransaction, ingredientStack);
+                event = SpongeEventFactory.createBrewingEventConsumeFuel(currentCause, (BrewingStand) param3, fuelTransaction, ingredientStack);
         if (Sponge.eventManager().post(event)) {
             fuelStack.grow(1);
-            this.fuel = 0;
+            ((BrewingStandBlockEntityMixin) (Object) param3).fuel = 0;
         } else if (event.fuel().custom().isPresent()) {
             final ItemStackSnapshot finalFuel = event.fuel().finalReplacement();
-            this.items.set(4, ItemStackUtil.fromSnapshotToNative(finalFuel));
+            ((BrewingStandBlockEntityMixin) (Object) param3).items.set(4, ItemStackUtil.fromSnapshotToNative(finalFuel));
         }
     }
 
-    @Inject(method = "tick",
+    @Inject(method = "serverTick",
             locals = LocalCapture.CAPTURE_FAILEXCEPTION,
-            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable()Z")),
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;setChanged()V"))
-    private void impl$callBrewEvents(CallbackInfo ci, ItemStack fuelStack, boolean isBrewable, boolean isBrewing, ItemStack ingredientStack) {
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;isBrewable(Lnet/minecraft/core/NonNullList;)Z")),
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;" +
+                    "setChanged(Lnet/minecraft/world/level/Level;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/level/block/state/BlockState;)V"))
+    private static void impl$callBrewEvents(final Level param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3,
+                                            final CallbackInfo ci, final ItemStack fuelStack, final boolean isBrewable, final boolean isBrewing, final ItemStack ingredientStack) {
         final Cause currentCause = Sponge.server().causeStackManager().currentCause();
         if (isBrewing) {
-            if (this.brewTime == 0 && isBrewable) {
-                List<ItemStackSnapshot> stacks = new ArrayList<>();
+            if (((BrewingStandBlockEntityMixin) (Object) param3).brewTime == 0 && isBrewable) {
+                final List<ItemStackSnapshot> stacks = new ArrayList<>();
                 for(int i = 0; i < 3; ++i) {
-                    stacks.add(ItemStackUtil.snapshotOf(this.items.get(i)));
+                    stacks.add(ItemStackUtil.snapshotOf(((BrewingStandBlockEntityMixin) (Object) param3).items.get(i)));
                 }
-                final BrewingEvent.Finish event = SpongeEventFactory.createBrewingEventFinish(currentCause, Collections.unmodifiableList(stacks), (BrewingStand) this, ItemStackUtil.snapshotOf(ingredientStack));
+                final BrewingEvent.Finish event = SpongeEventFactory.createBrewingEventFinish(currentCause, Collections.unmodifiableList(stacks), (BrewingStand) param3, ItemStackUtil.snapshotOf(ingredientStack));
                 Sponge.eventManager().post(event);
-            } else if (!isBrewable || this.ingredient != ingredientStack.getItem()) {
-                final BrewingEvent.Interrupt event = SpongeEventFactory.createBrewingEventInterrupt(currentCause, (BrewingStand) this, ItemStackUtil.snapshotOf(ingredientStack));
+            } else if (!isBrewable || ((BrewingStandBlockEntityMixin) (Object) param3).ingredient != ingredientStack.getItem()) {
+                final BrewingEvent.Interrupt event = SpongeEventFactory.createBrewingEventInterrupt(currentCause, (BrewingStand) param3, ItemStackUtil.snapshotOf(ingredientStack));
                 Sponge.eventManager().post(event);
             }
-        } else if (isBrewable && this.fuel > 0) {
-            final BrewingEvent.Start event = SpongeEventFactory.createBrewingEventStart(currentCause, (BrewingStand) this, ItemStackUtil.snapshotOf(ingredientStack));
+        } else if (isBrewable && ((BrewingStandBlockEntityMixin) (Object) param3).fuel > 0) {
+            final BrewingEvent.Start event = SpongeEventFactory.createBrewingEventStart(currentCause, (BrewingStand) param3, ItemStackUtil.snapshotOf(ingredientStack));
             if (Sponge.eventManager().post(event)) {
-                this.brewTime = 0;
-                this.ingredient = Items.AIR;
-                this.fuel++;
+                ((BrewingStandBlockEntityMixin) (Object) param3).brewTime = 0;
+                ((BrewingStandBlockEntityMixin) (Object) param3).ingredient = Items.AIR;
+                ((BrewingStandBlockEntityMixin) (Object) param3).fuel++;
             }
         }
     }
 
-    @Inject(method = "tick", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+    @Inject(method = "serverTick", cancellable = true, locals = LocalCapture.CAPTURE_FAILEXCEPTION,
             at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/entity/BrewingStandBlockEntity;brewTime:I", ordinal = 1))
-    private void impl$onTick(CallbackInfo ci, ItemStack fuelStack, boolean isBrewable, boolean isBrewing, ItemStack ingredientStack) {
-        if (this.brewTime != 0 && isBrewable && this.ingredient == ingredientStack.getItem()) {
+    private static void impl$onTick(
+            final Level param0, final BlockPos param1, final BlockState param2, final BrewingStandBlockEntity param3, final CallbackInfo ci,
+            final ItemStack fuelStack, final boolean isBrewable, final boolean isBrewing, final ItemStack ingredientStack) {
+        if (((BrewingStandBlockEntityMixin) (Object) param3).brewTime != 0 && isBrewable &&
+                ((BrewingStandBlockEntityMixin) (Object) param3).ingredient == ingredientStack.getItem()) {
             final Cause currentCause = Sponge.server().causeStackManager().currentCause();
-            final BrewingEvent.Tick event = SpongeEventFactory.createBrewingEventTick(currentCause, (BrewingStand) this, ItemStackUtil.snapshotOf(ingredientStack));
+            final BrewingEvent.Tick event = SpongeEventFactory.createBrewingEventTick(currentCause, (BrewingStand) param3, ItemStackUtil.snapshotOf(ingredientStack));
             if (Sponge.eventManager().post(event)) {
-                this.brewTime++;
+                ((BrewingStandBlockEntityMixin) (Object) param3).brewTime++;
             }
         }
     }
