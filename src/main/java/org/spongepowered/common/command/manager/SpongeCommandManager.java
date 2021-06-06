@@ -145,7 +145,12 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
 
     @Override
     public @NonNull Set<String> knownAliases() {
-        return ImmutableSet.copyOf(this.commandMappings.keySet());
+        return Collections.unmodifiableSet(new HashSet<>(this.commandMappings.keySet()));
+    }
+
+    @Override
+    public Set<CommandMapping> knownMappings() {
+        return Collections.unmodifiableSet(new HashSet<>(this.inverseCommandMappings.keySet()));
     }
 
     public @NonNull CommandMapping registerNamespacedAlias(

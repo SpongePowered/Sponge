@@ -146,6 +146,16 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
     }
 
     @Override
+    public @NonNull Optional<Component> shortDescription(final @NonNull CommandCause cause, final @NonNull CommandMapping command) {
+        final Command.Parameterized commandEntry = this.commandMap.get(command);
+        if (commandEntry == null) {
+            throw new IllegalArgumentException(command + " is not a valid a valid command!");
+        }
+
+        return commandEntry.shortDescription(cause);
+    }
+
+    @Override
     public @NonNull Optional<Component> help(final @NonNull CommandCause cause, final @NonNull CommandMapping command) {
         final Command.Parameterized commandEntry = this.commandMap.get(command);
         if (commandEntry == null) {
