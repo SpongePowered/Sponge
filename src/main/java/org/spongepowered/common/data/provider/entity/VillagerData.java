@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.minecraft.world.entity.npc.WanderingTrader;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.ProfessionType;
 import org.spongepowered.api.data.type.VillagerType;
 import org.spongepowered.api.item.merchant.TradeOffer;
+import org.spongepowered.common.accessor.world.entity.npc.AbstractVillagerAccessor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.stream.Collectors;
@@ -69,7 +71,11 @@ public final class VillagerData {
                         .set((h, v) -> h.setOffers(v.stream().map(MerchantOffer.class::cast).collect(Collectors.toCollection(MerchantOffers::new))))
                     .create(Keys.VILLAGER_TYPE)
                         .get(h -> (VillagerType) (Object) h.getVillagerData().getType())
-                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setType((net.minecraft.world.entity.npc.VillagerType) (Object) v)));
+                        .set((h, v) -> h.setVillagerData(h.getVillagerData().setType((net.minecraft.world.entity.npc.VillagerType) (Object) v)))
+                .asMutable(WanderingTrader.class)
+                    .create(Keys.TRADE_OFFERS)
+                    .get(h -> h.getOffers().stream().map(TradeOffer.class::cast).collect(Collectors.toList()))
+                    .set((h, v) -> ((AbstractVillagerAccessor)h).accessor$offers(v.stream().map(MerchantOffer.class::cast).collect(Collectors.toCollection(MerchantOffers::new))));
     }
     // @formatter:on
 }

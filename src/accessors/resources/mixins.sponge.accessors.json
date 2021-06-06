@@ -109,6 +109,7 @@
         "world.entity.monster.VexAccessor",
         "world.entity.monster.VindicatorAccessor",
         "world.entity.monster.ZombifiedPiglinAccessor",
+        "world.entity.npc.AbstractVillagerAccessor",
         "world.entity.player.AbilitiesAccessor",
         "world.entity.player.PlayerAccessor",
         "world.entity.projectile.AbstractArrowAccessor",
