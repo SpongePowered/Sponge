@@ -104,7 +104,8 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             "org.fusesource.",
             "net.minecrell.terminalconsole.",
             // Guice (for easier opening to reflection)
-            "com.google.inject."
+            "com.google.inject.",
+            "org.slf4j."
     };
 
     @Override

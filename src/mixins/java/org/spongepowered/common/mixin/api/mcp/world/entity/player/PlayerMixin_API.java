@@ -26,10 +26,13 @@ package org.spongepowered.common.mixin.api.mcp.world.entity.player;
 
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.MoverType;
+import net.minecraft.world.entity.player.Abilities;
+import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemCooldowns;
 import net.minecraft.world.phys.Vec3;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;

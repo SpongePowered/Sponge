@@ -28,13 +28,13 @@ import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation
 
 public class SpongeMapDecorationOrientation implements MapDecorationOrientation {
 
-	private final int orientationNumber;
+    private final int orientationNumber;
 
-	public SpongeMapDecorationOrientation(int orientationNumber) {
-		this.orientationNumber = orientationNumber;
-	}
+    public SpongeMapDecorationOrientation(final int orientationNumber) {
+        this.orientationNumber = orientationNumber;
+    }
 
-	public int getOrientationNumber() {
-		return orientationNumber;
-	}
+    public int getOrientationNumber() {
+        return this.orientationNumber;
+    }
 }

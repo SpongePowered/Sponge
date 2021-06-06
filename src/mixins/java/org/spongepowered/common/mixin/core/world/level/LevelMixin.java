@@ -61,6 +61,10 @@ public abstract class LevelMixin implements WorldBridge, LevelAccessor {
 
     // @formatter: off
     @Mutable @Shadow @Final private DimensionType dimensionType;
+    @Shadow protected float oRainLevel;
+    @Shadow protected float rainLevel;
+    @Shadow protected float oThunderLevel;
+    @Shadow protected float thunderLevel;
 
     @Shadow public abstract LevelData shadow$getLevelData();
     @Shadow public abstract void shadow$updateSkyBrightness();
@@ -68,6 +72,7 @@ public abstract class LevelMixin implements WorldBridge, LevelAccessor {
     @Shadow public abstract DimensionType shadow$dimensionType();
     @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos p_175726_1_);
     @Shadow public abstract DifficultyInstance shadow$getCurrentDifficultyAt(BlockPos p_175649_1_);
+    @Shadow public abstract boolean shadow$isRaining();
     @Shadow public abstract WorldBorder shadow$getWorldBorder();
     // @formatter on
 

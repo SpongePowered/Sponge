@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.api.mcp.server.level;
 
 import com.google.common.collect.ImmutableList;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerChunkCache;
@@ -38,7 +37,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.raid.Raid;
 import net.minecraft.world.entity.raid.Raids;
 import net.minecraft.world.level.CollisionGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -68,9 +66,6 @@ import org.spongepowered.api.world.storage.WorldStorage;
 import org.spongepowered.api.world.weather.Weather;
 import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.entity.raid.RaidsAccessor;

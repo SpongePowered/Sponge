@@ -530,14 +530,22 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return FutureUtil.completedWithException(e);
         }
 
-        final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
-        final LevelSettings defaultLevelSettings = ((PrimaryLevelDataAccessor) defaultLevelData).accessor$settings();
-
         final WorldData levelData;
         try {
-            levelData = storageSource.getDataTag((DynamicOps<Tag>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig());
-        } catch (final Exception ex) {
-            return FutureUtil.completedWithException(ex);
+            final PrimaryLevelData defaultLevelData = (PrimaryLevelData) this.server.getWorldData();
+            final LevelSettings defaultLevelSettings = ((PrimaryLevelDataAccessor) defaultLevelData).accessor$settings();
+
+            try {
+                levelData = storageSource.getDataTag((DynamicOps<Tag>) BootstrapProperties.worldSettingsAdapter, defaultLevelSettings.getDataPackConfig());
+            } catch (final Exception ex) {
+                return FutureUtil.completedWithException(ex);
+            }
+        } finally {
+            try {
+                storageSource.close();
+            } catch (final IOException ex) {
+                return FutureUtil.completedWithException(ex);
+            }
         }
 
         return this.loadTemplate(key).thenCompose(r -> {
@@ -576,9 +584,17 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
 
         try {
-            storageSource.saveDataTag(BootstrapProperties.registries, (WorldData) properties, null);
-        } catch (final Exception ex) {
-            return FutureUtil.completedWithException(ex);
+            try {
+                storageSource.saveDataTag(BootstrapProperties.registries, (WorldData) properties, null);
+            } catch (final Exception ex) {
+                return FutureUtil.completedWithException(ex);
+            }
+        } finally {
+            try {
+                storageSource.close();
+            } catch (final IOException ex) {
+                return FutureUtil.completedWithException(ex);
+            }
         }
 
         // Properties doesn't have everything we need...namely the generator, load the template and set values we actually got

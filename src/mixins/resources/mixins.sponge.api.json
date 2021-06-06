@@ -364,6 +364,8 @@
         "mcp.world.level.levelgen.flat.FlatLevelGeneratorSettingsMixin_API",
         "mcp.world.level.material.FluidMixin_API",
         "mcp.world.level.material.FluidStateMixin_API",
+        "mcp.world.level.saveddata.MapDecorationMixin",
+        "mcp.world.level.saveddata.MapItemSavedDataMixin",
         "mcp.world.level.storage.LevelDataMixin_API",
         "mcp.world.level.storage.PrimaryLevelDataMixin_API",
         "mcp.world.level.storage.ServerLevelDataMixin_API",
@@ -373,8 +375,6 @@
         "mcp.world.scores.Team_VisibilityMixin_API",
         "mcp.world.scores.criteria.ObjectiveCriteria_RenderTypeMixin_API",
         "mcp.world.scores.criteria.ObjectiveCriteriaMixin_API",
-        "mcp.world.storage.MapDecorationMixin",
-        "mcp.world.storage.MapItemSavedDataMixin",
         "mojang.authlib.properties.PropertyMixin_API",
         "service.permission.SubjectMixin_API",
         "world.LocatableBlockMixin_API"

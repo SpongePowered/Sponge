@@ -1087,7 +1087,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     .filter(d -> d.key() == Keys.FIRE_TICKS)
                     .findFirst()
                     .map(Value::get)
-                    .map(o -> (int) o)
+                    .map(o -> (int) (Object) o)
                     .orElse(0);
 
             }

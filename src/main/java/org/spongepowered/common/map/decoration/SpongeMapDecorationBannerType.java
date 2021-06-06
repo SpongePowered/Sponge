@@ -31,15 +31,15 @@ import org.spongepowered.api.map.decoration.MapDecorationBannerType;
 import java.util.function.Supplier;
 
 public class SpongeMapDecorationBannerType extends SpongeMapDecorationType implements MapDecorationBannerType {
-	private final Supplier<DyeColor> bannerColor;
+    private final Supplier<DyeColor> bannerColor;
 
-	public SpongeMapDecorationBannerType(final MapDecoration.Type mapDecorationType, final Supplier<DyeColor> bannerColor) {
-		super(mapDecorationType);
-		this.bannerColor = bannerColor;
-	}
+    public SpongeMapDecorationBannerType(final MapDecoration.Type mapDecorationType, final Supplier<DyeColor> bannerColor) {
+        super(mapDecorationType);
+        this.bannerColor = bannerColor;
+    }
 
-	@Override
-	public DyeColor bannerColor() {
-		return bannerColor.get();
-	}
+    @Override
+    public DyeColor bannerColor() {
+        return this.bannerColor.get();
+    }
 }

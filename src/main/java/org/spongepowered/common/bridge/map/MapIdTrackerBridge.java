@@ -24,26 +24,27 @@
  */
 package org.spongepowered.common.bridge.map;
 
-import java.util.Optional;
+import java.util.OptionalInt;
 
 public interface MapIdTrackerBridge {
-	/**
-	 * Only call if you know what you are doing, if used
-	 * incorrectly, will cause maps to be overwritten.
-	 * Next map created will use this id + 1
-	 * @param id int To set highest map number to.
-	 */
-	void bridge$setHighestMapId(int id);
+    /**
+     * Only call if you know what you are doing, if used
+     * incorrectly, will cause maps to be overwritten.
+     * Next map created will use this id + 1
+     *
+     * @param id int To set highest map number to.
+     */
+    void bridge$setHighestMapId(int id);
 
-	/**
-	 * Gets the highest known map id.
-	 *
-	 * This will not be available if no maps exist.
-	 * Any map id returned by this exists, though it does not
-	 * necessarily mean there are that amount of maps+1 as we *only*
-	 * know about the highest id.
-	 *
-	 * @return Highest map id, if present
-	 */
-	Optional<Integer> bridge$getHighestMapId();
+    /**
+     * Gets the highest known map id.
+     * <p>
+     * This will not be available if no maps exist.
+     * Any map id returned by this exists, though it does not
+     * necessarily mean there are that amount of maps+1 as we *only*
+     * know about the highest id.
+     *
+     * @return Highest map id, if present
+     */
+    OptionalInt bridge$getHighestMapId();
 }

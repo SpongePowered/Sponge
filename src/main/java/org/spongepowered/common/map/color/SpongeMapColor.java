@@ -33,12 +33,12 @@ import org.spongepowered.common.util.Constants;
 
 import java.util.Objects;
 
-public class SpongeMapColor implements MapColor {
+public final class SpongeMapColor implements MapColor {
     private final MapColorType type;
     private final MapShade shade;
     private final byte mcColor;
 
-    public SpongeMapColor(MapColorType type, MapShade shade) {
+    public SpongeMapColor(final MapColorType type, final MapShade shade) {
         this.type = type;
         this.shade = shade;
         this.mcColor = (byte) ((((SpongeMapColorType) this.type).getColorIndex() * Constants.Map.MAP_SHADES) + ((SpongeMapShade)shade).getShadeNum());
@@ -58,14 +58,14 @@ public class SpongeMapColor implements MapColor {
 
     @Override
     public Color color() {
-        Color color = type().color();
-        int r = addShade(color.red());
-        int g = addShade(color.green());
-        int b = addShade(color.blue());
+        final Color color = this.type().color();
+        final int r = this.addShade(color.red());
+        final int g = this.addShade(color.green());
+        final int b = this.addShade(color.blue());
         return Color.ofRgb(r,g,b);
     }
 
-    private int addShade(int color) {
+    private int addShade(final int color) {
         return Math.floorDiv(color * ((SpongeMapShade)this.shade).getMultiplier(), Constants.Map.SHADE_DIVIDER);
     }
 
@@ -82,16 +82,16 @@ public class SpongeMapColor implements MapColor {
     }
 
     @Override
-    public boolean equals(Object o) {
+    public boolean equals(final Object o) {
         if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-        SpongeMapColor that = (SpongeMapColor) o;
-        return type.equals(that.type) &&
-                shade.equals(that.shade);
+        if (o == null || this.getClass() != o.getClass()) return false;
+        final SpongeMapColor that = (SpongeMapColor) o;
+        return this.type.equals(that.type) &&
+                this.shade.equals(that.shade);
     }
 
     @Override
     public int hashCode() {
-        return Objects.hash(type, shade);
+        return Objects.hash(this.type, this.shade);
     }
 }

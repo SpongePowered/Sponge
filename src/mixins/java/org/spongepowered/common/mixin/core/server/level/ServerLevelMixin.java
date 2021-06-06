@@ -79,7 +79,6 @@ import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
-import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
@@ -93,7 +92,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
-import co.aikar.timings.sponge.WorldTimingsHandler;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -120,19 +118,21 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     private SpongeRegistryHolder impl$registerHolder;
     private ChunkProgressListener impl$chunkStatusListener;
     private Map<Entity, Vector3d> impl$rotationUpdates;
+    private Weather impl$prevWeather;
 
     private boolean impl$isManualSave = false;
     protected WorldTimingsHandler impl$timings = new WorldTimingsHandler((ServerLevel) (Object) this);
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$cacheLevelSave(final MinecraftServer p_i241885_1_, final Executor p_i241885_2_, final LevelStorageSource.LevelStorageAccess p_i241885_3_,
-            final ServerLevelData p_i241885_4_, final net.minecraft.resources.ResourceKey<Level> p_i241885_5_, final DimensionType p_i241885_6_, final ChunkProgressListener p_i241885_7_,
-            final ChunkGenerator p_i241885_8_, final boolean p_i241885_9_, final long p_i241885_10_, final List<CustomSpawner> p_i241885_12_, final boolean p_i241885_13_,
-            final CallbackInfo ci) {
+                                     final ServerLevelData p_i241885_4_, final net.minecraft.resources.ResourceKey<Level> p_i241885_5_, final DimensionType p_i241885_6_, final ChunkProgressListener p_i241885_7_,
+                                     final ChunkGenerator p_i241885_8_, final boolean p_i241885_9_, final long p_i241885_10_, final List<CustomSpawner> p_i241885_12_, final boolean p_i241885_13_,
+                                     final CallbackInfo ci) {
         this.impl$levelSave = p_i241885_3_;
         this.impl$chunkStatusListener = p_i241885_7_;
         this.impl$rotationUpdates = new Object2ObjectOpenHashMap<>();
         this.impl$registerHolder = new SpongeRegistryHolder(((RegistryAccess.RegistryHolder) p_i241885_1_.registryAccess()));
+        this.impl$prevWeather = ((ServerWorld) this).weather();
     }
 
     @Redirect(method = "getSeed", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/WorldData;worldGenSettings()Lnet/minecraft/world/level/levelgen/WorldGenSettings;"))
@@ -303,6 +303,13 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
      */
     @Overwrite
     public void save(@Nullable final ProgressListener progress, final boolean flush, final boolean skipSave) {
+
+        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+
+        if (Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPre(currentCause, ((ServerWorld) this)))) {
+            return; // cancelled save
+        }
+
         final PrimaryLevelData levelData = (PrimaryLevelData) this.shadow$getLevelData();
 
         final ServerChunkCache chunkProvider = ((ServerLevel) (Object) this).getChunkSource();
@@ -342,9 +349,65 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
             if (canAutomaticallySave || canManuallySave) {
                 chunkProvider.save(flush);
             }
+
+            Sponge.eventManager().post(SpongeEventFactory.createSaveWorldEventPost(currentCause, ((ServerWorld) this)));
         }
 
         this.impl$isManualSave = false;
+    }
+
+    @Inject(method = "tick",
+            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+            at = @At(value = "FIELD", target = "Lnet/minecraft/server/level/ServerLevel;oRainLevel:F", shift = At.Shift.BEFORE, ordinal = 1))
+    public void impl$onSetWeatherParameters(final BooleanSupplier param0, final CallbackInfo ci, final ProfilerFiller var0, final boolean wasRaining) {
+        final boolean isRaining = this.shadow$isRaining();
+        if (this.oRainLevel != this.rainLevel || this.oThunderLevel != this.thunderLevel || wasRaining != isRaining) {
+            Weather newWeather = ((ServerWorld) this).properties().weather();
+            final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+            final Transaction<Weather> weatherTransaction = new Transaction<>(this.impl$prevWeather, newWeather);
+            final ChangeWeatherEvent event = SpongeEventFactory.createChangeWeatherEvent(currentCause, ((ServerWorld) this), weatherTransaction);
+            if (Sponge.eventManager().post(event)) {
+                newWeather = event.weather().original();
+            } else {
+                newWeather = event.weather().finalReplacement();
+            }
+
+            // Set event results
+            this.impl$prevWeather = newWeather;
+            if (newWeather.type() == WeatherTypes.CLEAR.get()) {
+                this.serverLevelData.setThunderTime(0);
+                this.serverLevelData.setRainTime(0);
+                this.serverLevelData.setClearWeatherTime((int) newWeather.remainingDuration().ticks());
+                this.serverLevelData.setThundering(false);
+                this.serverLevelData.setRaining(false);
+            } else {
+                final int newTime = (int) newWeather.remainingDuration().ticks();
+                this.serverLevelData.setRaining(true);
+                this.serverLevelData.setClearWeatherTime(0);
+                this.serverLevelData.setRainTime(newTime);
+                if (newWeather.type() == WeatherTypes.THUNDER.get()) {
+                    this.serverLevelData.setThunderTime(newTime);
+                    this.serverLevelData.setThundering(true);
+                } else {
+                    this.serverLevelData.setThunderTime(0);
+                    this.serverLevelData.setThundering(false);
+                }
+            }
+        }
+
+    }
+
+    @Redirect(method = "tickChunk",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;isRainingAt(Lnet/minecraft/core/BlockPos;)Z"))
+    private boolean impl$onBeforeThunder(final ServerLevel serverLevel, final BlockPos param0) {
+        final boolean rainingAt = serverLevel.isRainingAt(param0);
+        if (rainingAt) {
+            final LightningEvent.Pre strike = SpongeEventFactory.createLightningEventPre(Sponge.server().causeStackManager().currentCause());
+            if (Sponge.eventManager().post(strike)) {
+                return false;
+            }
+        }
+        return rainingAt;
     }
 
     private void impl$setWorldOnBorder() {

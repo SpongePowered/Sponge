@@ -127,7 +127,6 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
                     Optional.of((CookingRecipe) recipe));
             SpongeCommon.postEvent(event);
             return !event.isCancelled();
-
         } else { // Tick up
             final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(((AbstractFurnaceBlockEntityMixin) (Object) entity).items.get(0));
             final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, cooking, Optional.of(fuel),

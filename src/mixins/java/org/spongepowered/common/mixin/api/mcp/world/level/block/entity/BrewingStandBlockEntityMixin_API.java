@@ -30,13 +30,22 @@ import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
 import net.minecraft.world.level.block.entity.BrewingStandBlockEntity;
+import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(BrewingStandBlockEntity.class)
 public abstract class BrewingStandBlockEntityMixin_API extends BaseContainerBlockEntityMixin_API implements BrewingStand {
 
+    // @Formatter:off
+    @Shadow protected abstract void shadow$doBrew();
+    @Shadow protected abstract boolean shadow$isBrewable();
+    // @Formatter:on
+
     @Override
     public boolean brew() {
-
+        if (this.shadow$isBrewable()) {
+            this.shadow$doBrew();
+            return true;
+        }
         return false;
     }
 

@@ -102,6 +102,15 @@ public final class SpongeRawCommandRegistrar implements CommandRegistrar<Command
     }
 
     @Override
+    public Optional<Component> shortDescription(final CommandCause cause, final CommandMapping mapping) {
+        final Command.Raw commandToExecute = this.commands.get(mapping);
+        if (commandToExecute.canExecute(cause)) {
+            return commandToExecute.shortDescription(cause);
+        }
+        return Optional.empty();
+    }
+
+    @Override
     public Optional<Component> help(final CommandCause cause, final CommandMapping mapping) {
         final Command.Raw commandToExecute = this.commands.get(mapping);
         if (commandToExecute.canExecute(cause)) {

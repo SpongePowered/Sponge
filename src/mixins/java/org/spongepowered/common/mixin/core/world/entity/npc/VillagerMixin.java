@@ -24,11 +24,22 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.npc;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.npc.Villager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.entity.living.Humanoid;
+import org.spongepowered.api.entity.living.Living;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 
 @Mixin(Villager.class)
 public abstract class VillagerMixin extends AbstractVillagerMixin {
@@ -41,5 +52,14 @@ public abstract class VillagerMixin extends AbstractVillagerMixin {
     )
     private void impl$silenceMojangSpam(final Logger logger, final String message, final Object p0, final Object p1) {
         //noop
+    }
+
+    @Inject(method = "startSleeping", at = @At("HEAD"), cancellable = true)
+    private void impl$callPreSleepingEvent(BlockPos param0, CallbackInfo ci) {
+        final Cause currentCause = Sponge.server().causeStackManager().currentCause();
+        final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
+        if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventPre(currentCause, snapshot, (Living) this))) {
+            ci.cancel();
+        }
     }
 }

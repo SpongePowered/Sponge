@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
 import org.spongepowered.common.inventory.lens.Lens;
 import org.spongepowered.common.inventory.lens.LensCreator;
+import org.spongepowered.common.inventory.lens.impl.DefaultEmptyLens;
 import org.spongepowered.common.inventory.lens.impl.DefaultIndexedLens;
 import org.spongepowered.common.inventory.lens.impl.LensRegistrar;
 import org.spongepowered.common.inventory.lens.impl.comp.GridInventoryLens;
@@ -228,8 +229,10 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
     @Override
     public EndStep completeStructure() {
         if (this.slotDefinitions.isEmpty()) {
-            Inventory inventory = Inventory.builder().slots(this.info.size).completeStructure().build();
-            this.finalInventories = Arrays.asList(inventory);
+            if (this.info.size != 0) {
+                Inventory inventory = Inventory.builder().slots(this.info.size).completeStructure().build();
+                this.finalInventories = Arrays.asList(inventory);
+            }
         } else {
             this.fillDummy();
             this.finalInventories = this.slotDefinitions.values().stream().map(Inventory::parent).distinct().collect(Collectors.toList());
@@ -345,28 +348,28 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
         // Containers with internal Inventory
         // TODO how to handle internal Container inventories?
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.ANVIL.get(), // 3 internal slots
-                ContainerTypeInfo.of(0, 0,
+                ContainerTypeInfo.of(0,
                         (id, i, p, vi) -> new AnvilMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.BEACON.get(), // 1 internal slot
-                ContainerTypeInfo.of(0, 3,
+                ContainerTypeInfo.of( 3,
                         (id, i, p, vi) -> new BeaconMenu(id, i, vi.getData(), SpongeViewableInventoryBuilder.toPos(p))));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.CARTOGRAPHY_TABLE.get(),  // 2 internal slots
-                ContainerTypeInfo.of(0, 0,
+                ContainerTypeInfo.of( 0,
                         (id, i, p, vi) -> new CartographyTableMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.CRAFTING.get(), // 3x3+1 10 internal slots
-                ContainerTypeInfo.of(0, 0,
+                ContainerTypeInfo.of( 0,
                         (id, i, p, vi) -> new CraftingMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.ENCHANTMENT.get(), // 3 internal slot
-                ContainerTypeInfo.of(0, 0,
+                ContainerTypeInfo.of( 0,
                         (id, i, p, vi) -> new EnchantmentMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.GRINDSTONE.get(), // 2 internal slot
-                ContainerTypeInfo.of(0, 0,
+                ContainerTypeInfo.of( 0,
                         (id, i, p, vi) -> new GrindstoneMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.LOOM.get(), // 3 internal slot
-                ContainerTypeInfo.of(0, 0,
+                ContainerTypeInfo.of( 0,
                         (id, i, p, vi) -> new LoomMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
         SpongeViewableInventoryBuilder.containerTypeInfo.put(ContainerTypes.STONECUTTER.get(), // 1 internal slot
-                ContainerTypeInfo.of(0, 0,
+                ContainerTypeInfo.of( 0,
                         (id, i, p, vi) -> new StonecutterMenu(id, i, SpongeViewableInventoryBuilder.toPos(p))));
 
         // Containers that need additional Info to construct
@@ -423,6 +426,10 @@ public class SpongeViewableInventoryBuilder implements ViewableInventory.Builder
 
         public static ContainerTypeInfo of(LensCreator lensCreator, int size, int dataSize, CustomInventoryContainerProvider provider) {
             return new ContainerTypeInfo(lensCreator, () -> new SimpleContainerData(dataSize), provider, 0, 0, size);
+        }
+
+        public static ContainerTypeInfo of(int dataSize, CustomInventoryContainerProvider provider) {
+            return new ContainerTypeInfo(sp -> new DefaultEmptyLens(), () -> new SimpleContainerData(dataSize), provider, 0, 0, 0);
         }
 
         public static ContainerTypeInfo of(int size, int dataSize, CustomInventoryContainerProvider provider) {
