@@ -24,13 +24,22 @@
  */
 package org.spongepowered.common.accessor.world.level.saveddata.maps;
 
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(MapItemSavedData.class)
 public interface MapItemSavedDataAccessor {
 
     @Accessor("unlimitedTracking") boolean accessor$unlimitedTracking();
+    @Accessor("unlimitedTracking") @Mutable void accessor$unlimitedTracking(final boolean unlimitedTracking);
+    @Accessor("trackingPosition") boolean accessor$trackingPosition();
+    @Accessor("trackingPosition") @Mutable void accessor$trackingPosition(final boolean trackingPosition);
+    @Accessor("dimension") @Mutable void accessor$dimension(final ResourceKey<Level> dim);
+    @Accessor("locked") @Mutable void accessor$locked(final boolean locked);
+    @Accessor("scale") @Mutable void accessor$scale(byte scale);
 
 }

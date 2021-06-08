@@ -47,6 +47,8 @@ public interface MapItemSavedDataBridge {
 
     Set<MapDecoration> bridge$getDecorations();
 
+    void bridge$setOrigin(final double x, final double z, final int scale);
+
     UUID bridge$getUniqueId();
 
 }

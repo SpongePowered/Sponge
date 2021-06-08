@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.world.level.saveddata;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.util.Mth;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.level.saveddata.maps.MapDecoration;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
@@ -33,6 +34,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -69,11 +71,15 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
      * (but also leave them there)
      */
     // @formatter:off
+    @Shadow @Final private static int HALF_MAP_SIZE;
     @Shadow @Final private Map<String, MapDecoration> decorations;
+    @Shadow @Final @Mutable public int x;
+    @Shadow @Final @Mutable public int z;
 
     @Shadow protected abstract void shadow$setColorsDirty(int x, int y);
     // @formatter:on
 
+    @Shadow @Final private static int MAP_SIZE;
     private int impl$mapId; // Set in <init>
     private UUID impl$uuid;
     private CompoundTag impl$nbt;
@@ -146,6 +152,15 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     @Override 
     public void data$setCompound(final CompoundTag nbt) {
         this.impl$nbt = nbt;
+    }
+
+    @Override
+    public void bridge$setOrigin(final double x, final double z, final int scale) {
+        final int scaledSize = MapItemSavedDataMixin.MAP_SIZE * (1 << scale);
+        final int centerX = Mth.floor((x + MapItemSavedDataMixin.HALF_MAP_SIZE) / (double)scaledSize);
+        final int centerZ = Mth.floor((z + MapItemSavedDataMixin.HALF_MAP_SIZE) / (double)scaledSize);
+        this.x = centerX * scaledSize + scaledSize / 2 - 64;
+        this.z = centerZ * scaledSize + scaledSize / 2 - 64;
     }
 
     public void impl$addDecorationToDecorationsMapIfNotExists(final MapDecoration mapDecoration) {

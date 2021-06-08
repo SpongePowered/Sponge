@@ -24,31 +24,19 @@
  */
 package org.spongepowered.common.data.provider.map;
 
-import net.minecraft.world.level.Level;
+import net.minecraft.core.Registry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.apache.logging.log4j.LogManager;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.persistence.DataQuery;
-import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.map.MapInfo;
-import org.spongepowered.api.map.decoration.MapDecoration;
-import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.accessor.world.level.saveddata.maps.MapItemSavedDataAccessor;
 import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.entity.SpongeEntityArchetype;
-import org.spongepowered.common.entity.SpongeEntitySnapshot;
 import org.spongepowered.common.map.canvas.SpongeMapByteCanvas;
 import org.spongepowered.common.map.canvas.SpongeMapCanvas;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector2i;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class MapInfoData {
 
@@ -57,8 +45,7 @@ public final class MapInfoData {
 
 	// @formatter:off
 	public static void register(final DataProviderRegistrator registrator) {
-		// TODO(Faithcaio): look at the changes here more
-		// does this want to become immutable?
+		// todo: does this want to become immutable?
 		registrator.asMutable(MapItemSavedData.class)
 				.create(Keys.MAP_CANVAS)
 					.get(mapData -> new SpongeMapByteCanvas(mapData.colors))
@@ -68,35 +55,35 @@ public final class MapInfoData {
 					})
 				.create(Keys.MAP_LOCATION)
 					.get(mapData -> Vector2i.from(mapData.x, mapData.z))
-					/*.set((mapData, vector2i) -> {
-						mapData.setOrigin(vector2i.x(), vector2i.y(), mapData.scale);
+					.set((mapData, vector2i) -> {
+						((MapItemSavedDataBridge) mapData).bridge$setOrigin(vector2i.x(), vector2i.y(), mapData.scale);
 						mapData.setDirty();
-					})*/
+					})
 				.create(Keys.MAP_LOCKED)
 					.get(mapData -> mapData.locked)
-					/*.set((mapData, locked) -> {
-						mapData.locked = locked;
+					.set((mapData, locked) -> {
+						((MapItemSavedDataAccessor) mapData).accessor$locked(locked);
 						mapData.setDirty();
-					})*/
+					})
 				.create(Keys.MAP_SCALE)
 					.get(mapData -> (int) mapData.scale)
-					/*.set((mapData, scale) -> {
-						mapData.scale = scale.byteValue();
-						mapData.setOrigin(mapData.x, mapData.z, mapData.scale);
+					.set((mapData, scale) -> {
+						((MapItemSavedDataAccessor) mapData).accessor$scale(scale.byteValue());
+						((MapItemSavedDataBridge) mapData).bridge$setOrigin(mapData.x, mapData.z, mapData.scale);
 						mapData.setDirty();
-					})*/
-				/*.create(Keys.MAP_TRACKS_PLAYERS)
-					.get(mapData -> mapData.trackingPosition)
+					})
+				.create(Keys.MAP_TRACKS_PLAYERS)
+					.get(mapData -> ((MapItemSavedDataAccessor) mapData).accessor$trackingPosition())
 					.set((mapData, tracksPlayers) -> {
-						mapData.trackingPosition = tracksPlayers;
+						((MapItemSavedDataAccessor) mapData).accessor$trackingPosition(tracksPlayers);
 						mapData.setDirty();
-					})*/
-				/*.create(Keys.MAP_UNLIMITED_TRACKING)
-					.get(mapData -> mapData.unlimitedTracking)
+					})
+				.create(Keys.MAP_UNLIMITED_TRACKING)
+					.get(mapData -> ((MapItemSavedDataAccessor) mapData).accessor$unlimitedTracking())
 					.set((mapData, unlimitedTracking) -> {
-						mapData.unlimitedTracking = unlimitedTracking;
+						((MapItemSavedDataAccessor) mapData).accessor$unlimitedTracking(unlimitedTracking);
 						mapData.setDirty();
-					})*/
+					})
 				.create(Keys.MAP_WORLD)
 					.get(mapData -> {
 						final int id = ((MapItemSavedDataBridge)mapData).bridge$getMapId();
@@ -107,17 +94,16 @@ public final class MapInfoData {
 
 						return (ResourceKey) (Object) mapData.dimension.location();
 					})
-					/*.set((mapData, key) -> {
-						mapData.dimension = ((Level) Sponge.getServer().getWorldManager().world(key).get()).dimension();
+					.set((mapData, key) -> {
+						((MapItemSavedDataAccessor) mapData).accessor$dimension(net.minecraft.resources.ResourceKey.create(Registry.DIMENSION_REGISTRY, (ResourceLocation) (Object) key));
 						mapData.setDirty();
-					})*/
+					})
 			.asMutable(MapItemSavedDataBridge.class)
 					.create(Keys.MAP_DECORATIONS)
 					.get(MapItemSavedDataBridge::bridge$getDecorations)
 					.set(MapItemSavedDataBridge::bridge$setDecorations);
 
 		registrator.spongeDataStore(ResourceKey.sponge("map-data"), MapInfo.class, Keys.MAP_DECORATIONS);
-
 	}
 	// @formatter:on
 }
