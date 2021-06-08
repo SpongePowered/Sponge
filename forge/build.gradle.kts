@@ -33,10 +33,12 @@ loom {
 
     runs {
         configureEach {
-            vmArgs(
-                    "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
-                    "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
-            )
+            if (JavaVersion.current().isJava11Compatible) {
+                vmArgs(
+                        "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
+                        "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
+                )
+            }
             runDir(project.projectDir.resolve("run").toRelativeString(project.rootDir))
         }
     }
