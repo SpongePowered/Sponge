@@ -40,6 +40,7 @@ import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.scheduler.TaskPriority;
 import org.spongepowered.api.util.Direction;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -203,22 +204,32 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
 
     @Override
     public ScheduledUpdate<BlockType> scheduleBlockUpdate(final int delay, final TemporalUnit temporalUnit) {
-        throw new MissingImplementationException("ServerLocation", "scheduleBlockUpdate");
+        return this.world().scheduledBlockUpdates().schedule(this.blockPosition(), this.blockType(), delay, temporalUnit);
+    }
+
+    @Override
+    public ScheduledUpdate<BlockType> scheduleBlockUpdate(final Ticks delay, final TaskPriority priority) {
+        return this.world().scheduledBlockUpdates().schedule(this.blockPosition(), this.blockType(), delay, priority);
     }
 
     @Override
     public ScheduledUpdate<BlockType> scheduleBlockUpdate(final int delay, final TemporalUnit temporalUnit, final TaskPriority priority) {
-        throw new MissingImplementationException("ServerLocation", "scheduleBlockUpdate");
+        return this.world().scheduledBlockUpdates().schedule(this.blockPosition(), this.blockType(), delay, temporalUnit, priority);
+    }
+
+    @Override
+    public ScheduledUpdate<BlockType> scheduleBlockUpdate(final Ticks delay) {
+        return this.world().scheduledBlockUpdates().schedule(this.blockPosition(), this.blockType(), delay);
     }
 
     @Override
     public ScheduledUpdate<BlockType> scheduleBlockUpdate(final Duration delay) {
-        throw new MissingImplementationException("ServerLocation", "scheduleBlockUpdate");
+        return this.world().scheduledBlockUpdates().schedule(this.blockPosition(), this.blockType(), delay);
     }
 
     @Override
     public ScheduledUpdate<BlockType> scheduleBlockUpdate(final Duration delay, final TaskPriority priority) {
-        throw new MissingImplementationException("ServerLocation", "scheduleBlockUpdate");
+        return this.world().scheduledBlockUpdates().schedule(this.blockPosition(), this.blockType(), delay, priority);
     }
 
     @Override
@@ -228,23 +239,33 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
 
     @Override
     public ScheduledUpdate<FluidType> scheduleFluidUpdate(final int delay, final TemporalUnit temporalUnit) {
-        throw new MissingImplementationException("ServerLocation", "scheduleFluidUpdate");
+        return this.world().scheduledFluidUpdates().schedule(this.blockPosition(), this.fluid().type(), delay, temporalUnit);
     }
 
     @Override
     public ScheduledUpdate<FluidType> scheduleFluidUpdate(final int delay, final TemporalUnit temporalUnit,
         final TaskPriority priority) {
-        throw new MissingImplementationException("ServerLocation", "scheduleFluidUpdate");
+        return this.world().scheduledFluidUpdates().schedule(this.blockPosition(), this.fluid().type(), delay, temporalUnit, priority);
+    }
+
+    @Override
+    public ScheduledUpdate<FluidType> scheduleFluidUpdate(final Ticks ticks) {
+        return this.world().scheduledFluidUpdates().schedule(this.blockPosition(), this.fluid().type(), ticks);
+    }
+
+    @Override
+    public ScheduledUpdate<FluidType> scheduleFluidUpdate(final Ticks ticks, final TaskPriority priority) {
+        return this.world().scheduledFluidUpdates().schedule(this.blockPosition(), this.fluid().type(), ticks, priority);
     }
 
     @Override
     public ScheduledUpdate<FluidType> scheduleFluidUpdate(final Duration delay) {
-        throw new MissingImplementationException("ServerLocation", "scheduleFluidUpdate");
+        return this.world().scheduledFluidUpdates().schedule(this.blockPosition(), this.fluid().type(), delay);
     }
 
     @Override
     public ScheduledUpdate<FluidType> scheduleFluidUpdate(final Duration delay, final TaskPriority priority) {
-        throw new MissingImplementationException("ServerLocation", "scheduleFluidUpdate");
+        return this.world().scheduledFluidUpdates().schedule(this.blockPosition(), this.fluid().type(), delay, priority);
     }
 
     @Override

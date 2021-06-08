@@ -30,6 +30,7 @@ import net.minecraft.world.level.ServerTickList;
 import net.minecraft.world.level.TickNextTickData;
 import net.minecraft.world.level.TickPriority;
 import org.spongepowered.api.Engine;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.scheduler.ScheduledUpdate;
 import org.spongepowered.api.scheduler.ScheduledUpdateList;
 import org.spongepowered.api.scheduler.TaskPriority;
@@ -38,8 +39,11 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
+import org.spongepowered.common.util.SpongeTicks;
 
 import java.time.Duration;
+import java.time.temporal.ChronoUnit;
+import java.time.temporal.TemporalUnit;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.Queue;
@@ -58,13 +62,19 @@ public abstract class ServerTickListMixin_API<T> implements ScheduledUpdateList<
     @Shadow public abstract boolean shadow$hasScheduledTick(BlockPos param0, T param1);
     @Shadow protected abstract void shadow$addTickData(TickNextTickData<T> data);
 
+    @Override
+    public ScheduledUpdate<T> schedule(
+            final int x, final int y, final int z, final T target, final Duration delay, final TaskPriority priority
+    ) {
+        return this.schedule(x, y, z, target, Ticks.ofWallClockTime(Sponge.server(), delay.toMillis(), ChronoUnit.MILLIS));
+    }
+
     @SuppressWarnings({"unchecked", "ConstantConditions"})
     @Override
     public ScheduledUpdate<T> schedule(
-        int x, int y, int z, T target, Duration delay, TaskPriority priority
+            final int x, final int y, final int z, final T target, final Ticks tickDelay, final TaskPriority priority
     ) {
-        final long tickDelay = Ticks.ofWallClockSeconds((Engine) this.level.getServer(), (int) delay.getSeconds()).ticks();
-        final TickNextTickData<T> scheduledUpdate = new TickNextTickData<>(new BlockPos(x, y, z), target, tickDelay + this.level.getGameTime(), (TickPriority) (Object) priority);
+        final TickNextTickData<T> scheduledUpdate = new TickNextTickData<>(new BlockPos(x, y, z), target, tickDelay.ticks() + this.level.getGameTime(), (TickPriority) (Object) priority);
         if (!this.ignore.test(target)) {
             ((TickNextTickDataBridge<T>) scheduledUpdate).bridge$createdByList((ServerTickList<T>) (Object) this);
             this.shadow$addTickData(scheduledUpdate);
@@ -73,13 +83,13 @@ public abstract class ServerTickListMixin_API<T> implements ScheduledUpdateList<
     }
 
     @Override
-    public boolean isScheduled(int x, int y, int z, T target) {
+    public boolean isScheduled(final int x, final int y, final int z, final T target) {
         return this.shadow$hasScheduledTick(new BlockPos(x, y, z), target);
     }
 
     @SuppressWarnings("unchecked")
     @Override
-    public Collection<? extends ScheduledUpdate<T>> scheduledAt(int x, int y, int z) {
+    public Collection<? extends ScheduledUpdate<T>> scheduledAt(final int x, final int y, final int z) {
         if (!this.currentlyTicking.isEmpty()) {
             return Collections.emptySet();
         }
