@@ -24,8 +24,8 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.StainedGlassPaneBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
@@ -38,10 +38,10 @@ public final class StainedGlassPaneBlockData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asImmutable(BlockState.class)
+                .asImmutable(Block.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((StainedGlassPaneBlock) h.getBlock()).getColor())
-                        .supports(h -> h.getBlock() instanceof StainedGlassPaneBlock);
+                        .get(h -> (DyeColor) (Object) ((StainedGlassPaneBlock) h).getColor())
+                        .supports(h -> h instanceof StainedGlassPaneBlock);
     }
     // @formatter:on
 }

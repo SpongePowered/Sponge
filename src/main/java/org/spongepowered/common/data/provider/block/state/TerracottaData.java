@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
@@ -43,11 +43,11 @@ public final class TerracottaData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asImmutable(BlockState.class)
+                .asImmutable(Block.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_TERRACOTTA.get(h.getBlock()))
+                        .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_TERRACOTTA.get(h))
                         .supports(h -> {
-                            final ResourceKey key = Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey(((BlockType)h.getBlock()));
+                            final ResourceKey key = Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE).valueKey(((BlockType)h));
                             if (!key.namespace().equals(PluginManager.MINECRAFT_PLUGIN_ID)) {
                                 return false;
                             }

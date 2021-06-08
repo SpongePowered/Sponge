@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
 import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
@@ -39,10 +39,10 @@ public final class WoolData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asImmutable(BlockState.class)
+                .asImmutable(Block.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_WOOL.get(h.getBlock()))
-                        .supports(h -> SheepAccessor.accessor$ITEM_BY_DYE().containsValue(h.getBlock()));
+                        .get(h -> (DyeColor) (Object) DyeColorUtil.COLOR_BY_WOOL.get(h))
+                        .supports(h -> SheepAccessor.accessor$ITEM_BY_DYE().containsValue(h));
     }
     // @formatter:on
 }

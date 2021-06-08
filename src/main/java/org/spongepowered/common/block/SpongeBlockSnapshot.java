@@ -322,7 +322,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public List<DataHolder> impl$delegateDataHolder() {
-        return Arrays.asList(this, this.state());
+        return Arrays.asList(this, this.state(), this.state().type());
     }
 
     @Override
