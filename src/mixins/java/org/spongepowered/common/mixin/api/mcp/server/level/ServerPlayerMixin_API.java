@@ -29,6 +29,8 @@ import net.kyori.adventure.audience.MessageType;
 import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
+import net.kyori.adventure.permission.PermissionChecker;
+import net.kyori.adventure.pointer.Pointers;
 import net.kyori.adventure.sound.Sound;
 import net.kyori.adventure.sound.SoundStop;
 import net.kyori.adventure.text.Component;
@@ -42,6 +44,7 @@ import net.minecraft.network.protocol.game.ClientboundCustomSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundResourcePackPacket;
 import net.minecraft.network.protocol.game.ClientboundSetBorderPacket;
 import net.minecraft.network.protocol.game.ClientboundSetTitlesPacket;
+import net.minecraft.network.protocol.game.ClientboundSoundEntityPacket;
 import net.minecraft.network.protocol.game.ClientboundSoundPacket;
 import net.minecraft.network.protocol.game.ClientboundStopSoundPacket;
 import net.minecraft.server.MinecraftServer;
@@ -49,7 +52,9 @@ import net.minecraft.server.PlayerAdvancements;
 import net.minecraft.server.level.ServerBossEvent;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
 import net.minecraft.sounds.SoundEvent;
+import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
@@ -118,6 +123,8 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Shadow public abstract net.minecraft.server.level.ServerLevel shadow$getLevel();
     // @formatter:on
+
+    private volatile Pointers api$pointers;
 
     private final TabList api$tabList = new SpongeTabList((net.minecraft.server.level.ServerPlayer) (Object) this);
     @Nullable private PlayerChatFormatter api$chatRouter;
@@ -412,6 +419,26 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     // Audience
 
     @Override
+    public @NotNull Pointers pointers() {
+        Pointers pointers = this.api$pointers;
+        if (pointers == null) {
+            synchronized (this) {
+                if (this.api$pointers == null) {
+                    this.api$pointers = pointers = Pointers.builder()
+                        .withDynamic(Identity.NAME, () -> ((net.minecraft.server.level.ServerPlayer) (Object) this).getGameProfile().getName())
+                        .withDynamic(Identity.DISPLAY_NAME, () -> this.displayName().get())
+                        .withDynamic(Identity.UUID, ((Entity) (Object) this)::getUUID)
+                        .withStatic(PermissionChecker.POINTER, permission -> SpongeAdventure.asAdventure(this.permissionValue(permission)))
+                        .build();
+                } else {
+                    return this.api$pointers;
+                }
+            }
+        }
+        return pointers;
+    }
+
+    @Override
     public void sendMessage(final Identity identity, final Component message, final MessageType type) {
         if (this.impl$isFake) {
             return;
@@ -493,6 +520,27 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     @Override
     public void playSound(final Sound sound) {
         this.playSound(Objects.requireNonNull(sound, "sound"), this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
+    }
+
+    @Override
+    public void playSound(final @NonNull Sound sound, final Sound.@NotNull Emitter emitter) {
+        Objects.requireNonNull(sound, "sound");
+        Objects.requireNonNull(emitter, "emitter");
+        if (this.impl$isFake) {
+            return;
+        }
+        final Optional<SoundEvent> event = Registry.SOUND_EVENT.getOptional(SpongeAdventure.asVanilla(Objects.requireNonNull(sound, "sound").name()));
+        if (event.isPresent()) { // The SoundEntityPacket does not support custom sounds
+            final Entity tracked;
+            if (emitter == Sound.Emitter.self()) {
+                tracked = (Entity) (Object) this;
+            } else if (emitter instanceof org.spongepowered.api.entity.Entity) {
+                tracked = (Entity) emitter;
+            } else {
+                throw new IllegalArgumentException("Specified emitter '" + emitter + "' is not a Sponge Entity or Emitter.self(), was of type '" + emitter.getClass() + "'");
+            }
+            this.connection.send(new ClientboundSoundEntityPacket(event.get(), SpongeAdventure.asVanilla(sound.source()), tracked, sound.volume(), sound.pitch()));
+        }
     }
 
     @Override

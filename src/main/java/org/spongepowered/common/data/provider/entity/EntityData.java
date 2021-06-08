@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
@@ -188,8 +189,8 @@ public final class EntityData {
 
         registrator.newDataStore(SpongeEntitySnapshot.class, SpongeEntityArchetype.class)
                 .dataStore(Keys.CUSTOM_NAME,
-                    (dv, v) -> dv.set(Constants.Entity.CUSTOM_NAME, SpongeAdventure.json(v)),
-                    dv -> dv.getString(Constants.Entity.CUSTOM_NAME).map(SpongeAdventure::json));
+                    (dv, v) -> dv.set(Constants.Entity.CUSTOM_NAME, GsonComponentSerializer.gson().serialize(v)),
+                    dv -> dv.getString(Constants.Entity.CUSTOM_NAME).map(GsonComponentSerializer.gson()::deserialize));
 
         // @formatter:on
     }

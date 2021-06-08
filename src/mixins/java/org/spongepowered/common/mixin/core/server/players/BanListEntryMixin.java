@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server.players;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.server.players.BanListEntry;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -32,7 +33,6 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.server.players.BanListEntryBridge;
 
 import java.util.Optional;
@@ -52,8 +52,9 @@ public abstract class BanListEntryMixin<T> extends StoredUserEntryMixin<T> imple
 
     @Inject(method = "<init>*", at = @At("RETURN"))
     private void bridge$initializeFields(final CallbackInfo ci) { // Prevent this from being overriden in UserListIPBansEntryMixin
-        this.impl$reason = this.reason == null ? null : SpongeAdventure.legacySection(this.reason);
-        this.impl$source = SpongeAdventure.legacySection(this.source);
+        final LegacyComponentSerializer lcs = LegacyComponentSerializer.legacySection();
+        this.impl$reason = this.reason == null ? null : lcs.deserialize(this.reason);
+        this.impl$source = lcs.deserialize(this.source);
 
 //        final Optional<Player> user;
 //        if ("Server".equals(this.source)) { // There could be a user called Server, but of course Mojang doesn't care...

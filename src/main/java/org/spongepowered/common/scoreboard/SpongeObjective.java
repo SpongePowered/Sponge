@@ -26,6 +26,7 @@ package org.spongepowered.common.scoreboard;
 
 import com.google.common.collect.Maps;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.world.scores.criteria.ObjectiveCriteria;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.scoreboard.Score;
@@ -62,7 +63,7 @@ public final class SpongeObjective implements Objective {
 
     public SpongeObjective(final String name, final Criterion criterion) {
         this.name = name;
-        this.displayName = SpongeAdventure.legacySection(name);
+        this.displayName = LegacyComponentSerializer.legacySection().deserialize(name);
         this.displayMode = ObjectiveDisplayModes.INTEGER.get();
         this.criterion = criterion;
 
@@ -116,7 +117,7 @@ public final class SpongeObjective implements Objective {
     public void addScore(final Score score) throws IllegalArgumentException {
         if (this.scores.containsKey(score.name())) {
             throw new IllegalArgumentException(String.format("A score with the name %s already exists!",
-                    SpongeAdventure.legacySection(score.name())));
+                    LegacyComponentSerializer.legacySection().serialize(score.name())));
         }
         this.scores.put(score.name(), score);
 

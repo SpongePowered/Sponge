@@ -29,6 +29,7 @@ import com.google.gson.GsonBuilder;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonSerializationContext;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,7 +39,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.adventure.AdventureTextComponent;
-import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.lang.reflect.Type;
 
@@ -65,7 +65,7 @@ public abstract class Component_SerializerMixin {
     @Inject(method = "*()Lcom/google/gson/Gson;", at = @At(value = "INVOKE_ASSIGN", target = "com/google/gson/GsonBuilder.disableHtmlEscaping()Lcom/google/gson/GsonBuilder;", remap = false),
             locals = LocalCapture.CAPTURE_FAILEXCEPTION, remap = false)
     private static void impl$injectAdventureGson(final CallbackInfoReturnable<Gson> cir, final GsonBuilder gson) {
-        SpongeAdventure.GSON.populator().apply(gson);
+        GsonComponentSerializer.gson().populator().apply(gson);
     }
 
     @Inject(method = "toJson", at = @At("HEAD"), cancellable = true)

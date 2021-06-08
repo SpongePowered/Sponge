@@ -33,38 +33,35 @@ import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
+
 import java.util.List;
 import java.util.Optional;
 
-public final class EntityCustomNameConverter extends DataParameterConverter<String> {
-
+public final class EntityCustomNameConverter extends DataParameterConverter<net.minecraft.network.chat.Component> {
     public EntityCustomNameConverter() {
         super(EntityAccessor.accessor$DATA_CUSTOM_NAME());
     }
 
     @Override
-    public Optional<DataTransactionResult> createTransaction(final Entity entity, final String currentValue, final String value) {
-        final Component currentText = SpongeAdventure.legacySection(currentValue);
-        final Component newValue = SpongeAdventure.legacySection(value);
-
+    public Optional<DataTransactionResult> createTransaction(final Entity entity, final net.minecraft.network.chat.Component oldValue, final net.minecraft.network.chat.Component newValue) {
         return Optional.of(DataTransactionResult.builder()
-                .replace(Value.immutableOf(Keys.DISPLAY_NAME, currentText))
-                .success(Value.immutableOf(Keys.DISPLAY_NAME, newValue))
+                .replace(Value.immutableOf(Keys.DISPLAY_NAME, SpongeAdventure.asAdventure(oldValue)))
+                .success(Value.immutableOf(Keys.DISPLAY_NAME, SpongeAdventure.asAdventure(newValue)))
                 .result(DataTransactionResult.Type.SUCCESS)
                 .build());
     }
 
     @Override
-    public String getValueFromEvent(final String originalValue, final List<Immutable<?>> immutableValues) {
-        for (final Immutable<?> value : immutableValues) {
+    public net.minecraft.network.chat.Component getValueFromEvent(final net.minecraft.network.chat.Component oldValue, final List<Immutable<?>> values) {
+        for (final Immutable<?> value : values) {
             if (value.key() == Keys.DISPLAY_NAME) {
                 try {
-                    return SpongeAdventure.legacySection((Component) value.get());
-                } catch (Exception e) {
-                    return originalValue;
+                    return SpongeAdventure.asVanilla((Component) value.get());
+                } catch (final Exception e) {
+                    return oldValue;
                 }
             }
         }
-        return originalValue;
+        return oldValue;
     }
 }

@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.Lists;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.item.ItemStack;
 import org.spongepowered.api.data.Keys;
@@ -54,13 +55,15 @@ public final class SignItemStackData {
                             if (!id.equalsIgnoreCase(Constants.TileEntity.SIGN)) {
                                 return null;
                             }
+                          final GsonComponentSerializer gcs = GsonComponentSerializer.gson();
                             final List<Component> texts = Lists.newArrayListWithCapacity(4);
                             for (int i = 0; i < 4; i++) {
-                                texts.add(SpongeAdventure.json(tag.getString("Text" + (i + 1))));
+                                texts.add(gcs.deserialize(tag.getString("Text" + (i + 1))));
                             }
                             return texts;
                         })
                         .set((h, v) -> {
+                            final GsonComponentSerializer gcs = GsonComponentSerializer.gson();
                             final CompoundTag tag = h.getOrCreateTagElement(Constants.Item.BLOCK_ENTITY_TAG);
                             tag.putString(Constants.Item.BLOCK_ENTITY_ID, Constants.TileEntity.SIGN);
                             for (int i = 0; i < 4; i++) {
@@ -68,7 +71,7 @@ public final class SignItemStackData {
                                 if (line == null) {
                                     throw new IllegalArgumentException("A null line was given at index " + i);
                                 }
-                                tag.putString("Text" + (i + 1), SpongeAdventure.json(line));
+                                tag.putString("Text" + (i + 1), gcs.serialize(line));
                             }
                         })
                         .delete(h -> h.removeTagKey(Constants.Item.BLOCK_ENTITY_TAG));

@@ -26,6 +26,7 @@ package org.spongepowered.common.map.decoration;
 
 import com.google.common.base.Preconditions;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
@@ -140,7 +141,7 @@ public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
         }
 
         if (container.contains(Constants.Map.NAME)) {
-            final Component component = SpongeAdventure.GSON.deserialize(
+            final Component component = GsonComponentSerializer.gson().deserialize(
                     container.getString(Constants.Map.NAME)
                             .orElseThrow(() -> new InvalidDataException("Invalid data type for " + Constants.Map.NAME + ". Should be String"))
             );
@@ -159,7 +160,7 @@ public final class SpongeMapDecorationBuilder implements MapDecoration.Builder {
     public MapDecoration build() throws IllegalStateException {
         Objects.requireNonNull(this.type, "Type has not been set");
         final MapDecoration decoration = (MapDecoration) new net.minecraft.world.level.saveddata.maps.MapDecoration(
-                ((SpongeMapDecorationType) type).getType(),
+                ((SpongeMapDecorationType) this.type).getType(),
                 (byte)this.x, (byte)this.y, (byte) ((SpongeMapDecorationOrientation)this.rot).getOrientationNumber(),
                 this.customName == null ? null : SpongeAdventure.asVanilla(this.customName));
         ((MapDecorationBridge) decoration).bridge$setPersistent(true); // Anything that comes out of this builder should be persistent

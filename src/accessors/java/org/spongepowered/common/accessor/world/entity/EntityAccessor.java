@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.accessor.world.entity;
 
+import net.minecraft.network.chat.Component;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
@@ -54,7 +55,7 @@ public interface EntityAccessor {
     }
 
     @Accessor("DATA_CUSTOM_NAME")
-    static EntityDataAccessor<String> accessor$DATA_CUSTOM_NAME() {
+    static EntityDataAccessor<Component> accessor$DATA_CUSTOM_NAME() {
         throw new UntransformedAccessorError();
     }
 
