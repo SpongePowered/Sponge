@@ -198,6 +198,9 @@ dependencies {
     // Tests
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+
+    // Decompiler
+    forgeFlower("net.minecraftforge:forgeflower:1.5.498.12")
 }
 
 val organization: String by project

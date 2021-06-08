@@ -296,6 +296,9 @@ dependencies {
             exclude(group = "org.spongepowered")
         }
     }
+
+    // Decompiler
+    forgeFlower("net.minecraftforge:forgeflower:1.5.498.12")
 }
 
 val vanillaManifest = the<JavaPluginConvention>().manifest {
