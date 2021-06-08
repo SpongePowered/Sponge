@@ -38,6 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
@@ -100,8 +101,17 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
         this.bridge$setMenu(null);
     }
 
-    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPlace(Lnet/minecraft/world/item/ItemStack;)Z"))
-    public boolean impl$onMayPlace(final Slot slot, final ItemStack stack) {
+    @Redirect(method = "doClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPlace(Lnet/minecraft/world/item/ItemStack;)Z"))
+    public boolean impl$onClickMayPlace(final Slot slot, final ItemStack stack) {
+        return this.impl$onMayPlace(slot, stack);
+    }
+
+    @Redirect(method = "moveItemStackTo", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPlace(Lnet/minecraft/world/item/ItemStack;)Z"))
+    public boolean impl$onMoveMayPlace(final Slot slot, final ItemStack stack) {
+        return this.impl$onMayPlace(slot, stack);
+    }
+
+    private boolean impl$onMayPlace(final Slot slot, final ItemStack stack) {
         if (this.bridge$isReadonlyMenu(slot)) {
             this.bridge$refreshListeners();
             return false;
@@ -110,10 +120,23 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
     }
 
     /**
-     * We already have another mixin for the ordinal=4 in {@link org.spongepowered.common.mixin.inventory.event.world.inventory.AbstractContainerMenuMixin_Inventory#onCanTakeStack}
+     * ordinal=4 is handled in {@link org.spongepowered.common.mixin.inventory.event.world.inventory.AbstractContainerMenuMixin_Inventory#onCanTakeStack}
      */
-    @Redirect(method = "*", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z"))
-    public boolean impl$onMayPickup(final Slot slot, final Player player) {
+    @Redirect(method = "doClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z"),
+            slice = @Slice(to = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z", ordinal = 3))
+    )
+    public boolean impl$onMayPickupBefore4(final Slot slot, final Player player) {
+        return this.impl$onMayPickup(slot, player);
+    }
+
+    @Redirect(method = "doClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z"),
+        slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z", ordinal = 5))
+    )
+    public boolean impl$onMayPickupAfter4(final Slot slot, final Player player) {
+        return this.impl$onMayPickup(slot, player);
+    }
+
+    private boolean impl$onMayPickup(final Slot slot, final Player player) {
         if (this.bridge$isReadonlyMenu(slot)) {
             this.bridge$refreshListeners();
             return false;
