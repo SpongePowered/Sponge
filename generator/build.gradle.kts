@@ -8,6 +8,15 @@ val projectUrl: String by project
 
 description = "Code generator for automatically producing API catalog classes based off of Vanilla MC data"
 
+minecraft {
+    rootProject.sourceSets["main"].resources
+            .filter { it.name.endsWith(".accesswidener") }
+            .files
+            .forEach {
+                accessWideners(it)
+            }
+}
+
 java {
     // generator is non-API, we can use Java 16 just fine
     if (JavaVersion.current() < JavaVersion.VERSION_16) {
