@@ -31,8 +31,6 @@ import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.world.level.biome.BiomeZoomer;
-import net.minecraft.world.level.biome.FuzzyOffsetConstantColumnBiomeZoomer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -49,7 +47,8 @@ import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
-import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
+import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
+import org.spongepowered.common.data.fixer.SpongeDataCodec;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.MissingImplementationException;
@@ -69,7 +68,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     public final boolean ultraWarm, natural, skylight, ceiling, piglinSafe, bedWorks, respawnAnchorWorks, hasRaids, createDragonFight;
     public final float ambientLight;
-    public final int logicalHeight;
+    public final int minY, logicalHeight, maximumHeight;
     public final double coordinateScale;
 
     private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
@@ -78,45 +77,11 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
                             ResourceLocation.CODEC.optionalFieldOf("biome_sampler", new ResourceLocation("sponge", "column_fuzzed")).forGetter(v -> v.biomeSampler),
                             Codec.BOOL.optionalFieldOf("create_dragon_fight", Boolean.FALSE).forGetter(v -> v.createDragonFight)
                     )
-                    .apply(r, SpongeDataSection::new)
+                    .apply(r, r.stable(SpongeDataSection::new))
             );
 
-    public static final Codec<DimensionType> DIRECT_CODEC = RecordCodecBuilder
-            .create(r -> r
-                    .group(
-                            Codec.LONG.optionalFieldOf("fixed_time")
-                                    .xmap(
-                                            v -> v.map(OptionalLong::of).orElseGet(OptionalLong::empty),
-                                            v -> v.isPresent() ? Optional.of(v.getAsLong()) : Optional.empty()
-                                    )
-                                    .forGetter(v -> ((DimensionTypeAccessor) v).accessor$fixedTime())
-                            ,
-                            Codec.BOOL.fieldOf("has_skylight").forGetter(DimensionType::hasSkyLight),
-                            Codec.BOOL.fieldOf("has_ceiling").forGetter(DimensionType::hasCeiling),
-                            Codec.BOOL.fieldOf("ultrawarm").forGetter(DimensionType::ultraWarm),
-                            Codec.BOOL.fieldOf("natural").forGetter(DimensionType::natural),
-                            Codec.doubleRange(1.0E-5F, 3.0E7D).fieldOf("coordinate_scale").forGetter(DimensionType::coordinateScale),
-                            Codec.BOOL.fieldOf("piglin_safe").forGetter(DimensionType::piglinSafe),
-                            Codec.BOOL.fieldOf("bed_works").forGetter(DimensionType::bedWorks),
-                            Codec.BOOL.fieldOf("respawn_anchor_works").forGetter(DimensionType::respawnAnchorWorks),
-                            Codec.BOOL.fieldOf("has_raids").forGetter(DimensionType::hasRaids),
-                            Codec.intRange(0, 256).fieldOf("logical_height").forGetter(DimensionType::logicalHeight),
-                            ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(v -> ((Tag.Named<Block>)v.infiniburn()).getName()),
-                            ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) WorldTypeEffects.OVERWORLD.key()).forGetter(v -> ((DimensionTypeAccessor) v).accessor$effectsLocation()),
-                            Codec.FLOAT.fieldOf("ambient_light").forGetter(v -> ((DimensionTypeAccessor) v).accessor$ambientLight()),
-                            SpongeWorldTypeTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeSamplerProvider.INSTANCE.get((BiomeSampler) v.getBiomeZoomer()), v.createDragonFight())))
-                    )
-                    // *Chuckles* I'm in danger
-                    .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15) -> {
-                        final BiomeZoomer biomeMagnifier = f15.isPresent() ? (BiomeZoomer) BiomeSamplerProvider.INSTANCE.get((ResourceKey) (Object) f15.get().biomeSampler) : FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE;
-                        final boolean createDragonFight = f15.isPresent() && f15.get().createDragonFight;
-                        // TODO - Zidane!
-                        throw new UnsupportedOperationException("Needs some updating");
-//
-//                        return DimensionType.invoker$new(f1, f2, f3, f4, f5, f6, createDragonFight, f7, f8, f9, f10, f11,
-//                                biomeMagnifier, f12, f13, f14);
-                    })
-            );
+    public static final Codec<DimensionType> DIRECT_CODEC = new SpongeDataCodec<>(DimensionType.DIRECT_CODEC, SpongeWorldTypeTemplate.SPONGE_CODEC
+        , (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge) type).bridge$createData());
 
     public static final Codec<Supplier<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, SpongeWorldTypeTemplate.DIRECT_CODEC);
 
@@ -135,7 +100,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.respawnAnchorWorks = builder.respawnAnchorsUsable;
         this.hasRaids = builder.hasRaids;
         this.ambientLight = builder.ambientLighting;
+        this.minY = builder.minY;
         this.logicalHeight = builder.logicalHeight;
+        this.maximumHeight = builder.maximumHeight;
         this.coordinateScale = builder.coordinateMultiplier;
 
         // Sponge
@@ -157,7 +124,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.bedWorks = dimensionType.bedWorks();
         this.respawnAnchorWorks = dimensionType.respawnAnchorWorks();
         this.hasRaids = dimensionType.hasRaids();
+        this.minY = dimensionType.minY();
         this.logicalHeight = dimensionType.logicalHeight();
+        this.maximumHeight = dimensionType.height();
         this.biomeSampler = (BiomeSampler) dimensionType.getBiomeZoomer();
         this.infiniburn = (ResourceKey) (Object) ((Tag.Named<Block>) dimensionType.infiniburn()).getName();
         this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) dimensionType).accessor$effectsLocation());
@@ -246,8 +215,18 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     }
 
     @Override
+    public int minY() {
+        return this.minY;
+    }
+
+    @Override
     public int logicalHeight() {
         return this.logicalHeight;
+    }
+
+    @Override
+    public int maximumHeight() {
+        return this.maximumHeight;
     }
 
     @Override
@@ -255,9 +234,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         return this.createDragonFight;
     }
 
-    private static final class SpongeDataSection {
-        private final ResourceLocation biomeSampler;
-        private final boolean createDragonFight;
+    public static final class SpongeDataSection {
+        public final ResourceLocation biomeSampler;
+        public final boolean createDragonFight;
 
         public SpongeDataSection(final ResourceLocation biomeSampler, final boolean createDragonFight) {
             this.biomeSampler = biomeSampler;
@@ -274,7 +253,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
         protected boolean scorching, natural, skylight, ceiling, piglinSafe, bedsUsable, respawnAnchorsUsable, hasRaids, createDragonFight;
         protected float ambientLighting;
-        protected int logicalHeight;
+        protected int minY, logicalHeight, maximumHeight;
         protected double coordinateMultiplier;
 
         @Override
@@ -356,8 +335,20 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         }
 
         @Override
+        public Builder minY(final int y) {
+            this.minY = y;
+            return this;
+        }
+
+        @Override
         public WorldTypeTemplate.Builder logicalHeight(final int logicalHeight) {
             this.logicalHeight = logicalHeight;
+            return this;
+        }
+
+        @Override
+        public Builder maximumHeight(final int maximumHeight) {
+            this.maximumHeight = maximumHeight;
             return this;
         }
 
@@ -383,7 +374,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             this.respawnAnchorsUsable = false;
             this.hasRaids = true;
             this.ambientLighting = 0.5f;
+            this.minY = 0;
             this.logicalHeight = 256;
+            this.maximumHeight = 256;
             this.coordinateMultiplier = 1;
             this.createDragonFight = false;
             return this;
@@ -406,7 +399,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             this.respawnAnchorsUsable = value.respawnAnchorsUsable();
             this.hasRaids = value.hasRaids();
             this.ambientLighting = value.ambientLighting();
+            this.minY = value.minY();
             this.logicalHeight = value.logicalHeight();
+            this.maximumHeight = value.maximumHeight();
             this.coordinateMultiplier = value.coordinateMultiplier();
             this.createDragonFight = value.createDragonFight();
             return this;
