@@ -209,6 +209,7 @@ dependencies {
     val modlauncherVersion: String by project
     val pluginSpiVersion: String by project
     val timingsVersion: String by project
+    val tinyLogVersion: String by project
 
     api(project(":", configuration = "launch"))
     implementation(project(":", configuration = "accessors"))
@@ -222,8 +223,8 @@ dependencies {
     installer("org.spongepowered:configurate-hocon:$apiConfigurateVersion")
     installer("org.spongepowered:configurate-core:$apiConfigurateVersion")
     installer("net.sf.jopt-simple:jopt-simple:5.0.3")
-    installer("org.tinylog:tinylog-api:2.2.1")
-    installer("org.tinylog:tinylog-impl:2.2.1")
+    installer("org.tinylog:tinylog-api:$tinyLogVersion")
+    installer("org.tinylog:tinylog-impl:$tinyLogVersion")
     // Override ASM versions, and explicitly declare dependencies so ASM is excluded from the manifest.
     val asmExclusions = sequenceOf("-commons", "-tree", "-analysis", "")
             .map { "asm$it" }
