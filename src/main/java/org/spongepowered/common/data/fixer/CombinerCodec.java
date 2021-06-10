@@ -49,9 +49,12 @@ public abstract class CombinerCodec<A, B> implements Codec<A> {
     @Override
     public <T> DataResult<Pair<A, T>> decode(final DynamicOps<T> ops, final T input) {
         final DataResult<Pair<A, T>> firstResult = this.first.decode(ops, input);
-        final DataResult<Pair<B, T>> secondResult = this.second.decode(ops, input);
         // TODO Error verification
         if (firstResult.result().isEmpty()) {
+            return firstResult;
+        }
+        final DataResult<Pair<B, T>> secondResult = this.second.decode(ops, input);
+        if (secondResult.result().isEmpty()) {
             return firstResult;
         }
         return firstResult.map(res -> res.mapFirst(val -> this.decodeAction.apply(val, secondResult.result().get().getFirst())));

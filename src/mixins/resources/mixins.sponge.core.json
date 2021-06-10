@@ -181,6 +181,7 @@
         "world.level.ServerTickListMixin",
         "world.level.TickNextTickDataMixin",
         "world.level.biome.BiomeMixin",
+        "world.level.biome.BiomeSourceMixin",
         "world.level.biome.OverworldBiomeSourceMixin",
         "world.level.block.BaseFireBlockMixin",
         "world.level.block.CactusBlockMixin",
@@ -229,7 +230,8 @@
         "world.scores.PlayerTeamMixin",
         "world.scores.ScoreboardMixin",
         "world.scores.ScoreMixin",
-        "core.RegistryMixin"
+        "core.RegistryMixin",
+        "world.level.biome.BiomeSourceMixin"
     ],
     "client": [
         "client.MinecraftMixin",
