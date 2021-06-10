@@ -46,18 +46,16 @@ import java.util.Map;
 
 public final class SpongeDataPackManager {
 
-    public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.game());
+    public static final SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.game());
 
     private final Game game;
     private final Map<SpongeDataPackType, List<DataPackSerializable>> serializables;
 
     private SpongeDataPackManager(final Game game) {
-        SpongeDataPackManager.INSTANCE = this;
         this.game = game;
         this.serializables = new Object2ObjectOpenHashMap<>();
     }
 
-    @SuppressWarnings("unchecked")
     public void callRegisterDataPackValueEvents() {
         SpongeIngredient.clearCache();
         ResultUtil.clearCache();
@@ -71,7 +69,7 @@ public final class SpongeDataPackManager {
     }
 
     @SuppressWarnings("unchecked")
-    public void serialize(final Path dataPacksDirectory, Collection<String> dataPacksToLoad) throws IOException {
+    public void serialize(final Path dataPacksDirectory, final Collection<String> dataPacksToLoad) throws IOException {
         for (final Map.Entry<SpongeDataPackType, List<DataPackSerializable>> entry : this.serializables.entrySet()) {
             final SpongeDataPackType key = entry.getKey();
             final List<DataPackSerializable> value = entry.getValue();

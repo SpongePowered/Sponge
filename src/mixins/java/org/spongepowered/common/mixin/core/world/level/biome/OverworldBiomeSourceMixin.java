@@ -25,33 +25,60 @@
 package org.spongepowered.common.mixin.core.world.level.biome;
 
 import com.mojang.serialization.Codec;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.biome.provider.SpongeLayeredBiomeProviderHelper;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.world.level.biome.BiomeSourceAccessor;
+import org.spongepowered.common.bridge.world.level.biome.OverworldBiomeSourceBridge;
+import org.spongepowered.common.world.biome.provider.OverworldBiomeSourceHelper;
 
 import java.util.List;
-import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 @Mixin(OverworldBiomeSource.class)
-public abstract class OverworldBiomeSourceMixin extends BiomeSource {
+public abstract class OverworldBiomeSourceMixin extends BiomeSource implements OverworldBiomeSourceBridge {
 
-    @SuppressWarnings("UnresolvedMixinReference")
-    @Redirect(
-        method = "*",
-        at = @At(
-            value = "INVOKE",
-            target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"
-        )
-    )
-    private static Codec impl$useEnhancedCodec(final Function function) {
-        return SpongeLayeredBiomeProviderHelper.DIRECT_CODEC;
-    }
+    // @formatter: off
+
+    @Shadow @Final private static List<ResourceKey<Biome>> POSSIBLE_BIOMES;
+
+    // @formatter: on
 
     protected OverworldBiomeSourceMixin(final List<Biome> p_i231634_1_) {
         super(p_i231634_1_);
+    }
+
+    @Override
+    public OverworldBiomeSource bridge$decorateData(final OverworldBiomeSourceHelper.SpongeDataSection data) {
+        if (data.biomes == null || data.biomes.isEmpty()) {
+            return (OverworldBiomeSource) (Object) this;
+        }
+
+        final List<Biome> biomes = ((BiomeSourceAccessor) this).accessor$possibleBiomes();
+        biomes.clear();
+        data.biomes.forEach(biome -> biomes.add(biome.get()));
+
+        return (OverworldBiomeSource) (Object) this;
+    }
+
+    @Override
+    public OverworldBiomeSourceHelper.SpongeDataSection bridge$createData() {
+        final List<Biome> biomes = ((BiomeSourceAccessor) this).accessor$possibleBiomes();
+        final List<Supplier<Biome>> suppliedBiomes = biomes.stream()
+            // We only want to include what Vanilla doesn't ship by default, it is safe to allow reference equality in this scenario
+            .filter(biome -> !OverworldBiomeSourceMixin.POSSIBLE_BIOMES.contains(biome))
+            .map(biome -> (Supplier<Biome>) () -> biome)
+            .collect(Collectors.toList());
+        return new OverworldBiomeSourceHelper.SpongeDataSection(suppliedBiomes.isEmpty() ? null : suppliedBiomes);
+    }
+
+    @Override
+    protected Codec<? extends BiomeSource> codec() {
+        return OverworldBiomeSourceHelper.DIRECT_CODEC;
     }
 }

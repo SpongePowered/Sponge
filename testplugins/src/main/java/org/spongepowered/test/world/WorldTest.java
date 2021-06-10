@@ -50,6 +50,7 @@ import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.WorldTypes;
 import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.CheckerboardBiomeConfig;
+import org.spongepowered.api.world.biome.provider.LayeredBiomeConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
 import org.spongepowered.api.world.generation.structure.Structure;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
@@ -371,7 +372,8 @@ public final class WorldTest {
                 .loadOnStartup(false)
                 .performsSpawnLogic(true)
                 .displayName(Component.text("Custom world by " + owner))
-                .generator(ChunkGenerator.noise(BiomeProvider.checkerboard(CheckerboardBiomeConfig.builder().addBiomes(biomes).scale(random.nextInt(16 - 2) + 2).build()),
+                .generator(ChunkGenerator.noise(BiomeProvider.layered(
+                    LayeredBiomeConfig.builder().addBiomes(biomes).largeBiomes(true).build()),
                     noiseGenConfig))
                 .build();
 

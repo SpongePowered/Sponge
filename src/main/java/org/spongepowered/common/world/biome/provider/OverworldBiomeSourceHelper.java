@@ -22,30 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.world.biome.provider;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.common.UntransformedAccessorError;
-
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import java.util.List;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
+import java.util.Optional;
+import java.util.function.Supplier;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
+import org.spongepowered.common.bridge.world.level.biome.OverworldBiomeSourceBridge;
+import org.spongepowered.common.data.fixer.SpongeDataCodec;
 
-@Mixin(OverworldBiomeSource.class)
-public interface OverworldBiomeSourceAccessor {
+public final class OverworldBiomeSourceHelper {
 
-    @Accessor("POSSIBLE_BIOMES") static List<ResourceKey<Biome>> accessor$POSSIBLE_BIOMES() {
-        throw new UntransformedAccessorError();
+    private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
+            .create(r -> r
+                    .group(
+                            Biome.LIST_CODEC.optionalFieldOf("biomes").forGetter(v -> Optional.of(v.biomes))
+                    )
+                    .apply(r, f1 -> new SpongeDataSection(f1.orElse(null)))
+            );
+
+    public static final Codec<OverworldBiomeSource> DIRECT_CODEC = new SpongeDataCodec<>(OverworldBiomeSource.CODEC,
+        OverworldBiomeSourceHelper.SPONGE_CODEC, (type, data) -> ((OverworldBiomeSourceBridge) type).bridge$decorateData(data),
+        type -> ((OverworldBiomeSourceBridge) type).bridge$createData());
+
+    public static final class SpongeDataSection {
+        public final List<Supplier<Biome>> biomes;
+
+        public SpongeDataSection(final @Nullable List<Supplier<Biome>> biomes) {
+            this.biomes = biomes;
+        }
     }
 
-    @Accessor("seed") long accessor$seed();
-
-    @Accessor("legacyBiomeInitLayer") boolean accessor$legacyBiomeInitLayer();
-
-    @Accessor("largeBiomes") boolean accessor$largeBiomes();
-
-    @Accessor("biomes") Registry<Biome> accessor$biomes();
 }

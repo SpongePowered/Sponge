@@ -39,7 +39,7 @@ public abstract class CombinerCodec<A, B> implements Codec<A> {
     private final BiFunction<A, B, A> decodeAction;
     private final Function<A, B> encodeAction;
 
-    public <T> CombinerCodec(final Codec<A> first, final Codec<B> second, final BiFunction<A, B, A> decodeAction, Function<A, B> encodeAction) {
+    public CombinerCodec(final Codec<A> first, final Codec<B> second, final BiFunction<A, B, A> decodeAction, Function<A, B> encodeAction) {
         this.first = first;
         this.second = second;
         this.decodeAction = decodeAction;
@@ -69,6 +69,14 @@ public abstract class CombinerCodec<A, B> implements Codec<A> {
             return secondResult;
         }
         return this.merge(ops, firstResult, secondResult);
+    }
+
+    public Codec<A> first() {
+        return this.first;
+    }
+
+    public Codec<B> second() {
+        return this.second;
     }
 
     protected abstract <T> DataResult<T> merge(DynamicOps<T> adapter, DataResult<T> first, DataResult<T> second);
