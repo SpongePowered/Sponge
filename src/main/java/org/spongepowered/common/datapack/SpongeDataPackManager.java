@@ -32,6 +32,7 @@ import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
+import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.lifecycle.RegisterDataPackValueEventImpl;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
@@ -50,6 +51,7 @@ public final class SpongeDataPackManager {
     public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.game());
 
     private final Game game;
+    private RegistryHolder registryHolder;
 
     private Map<DataPackType, Runnable> delayed = new HashMap<>();
 
@@ -61,6 +63,7 @@ public final class SpongeDataPackManager {
         this.callRegisterDataPackValueEvents(dataPacksDirectory, new ArrayList<>());
     }
 
+    @SuppressWarnings("unchecked")
     public void callRegisterDataPackValueEvents(final Path dataPacksDirectory, final Collection<String> dataPacksToLoad) {
         SpongeIngredient.clearCache();
         IngredientResultUtil.clearCache();
@@ -69,6 +72,7 @@ public final class SpongeDataPackManager {
         this.serialize(DataPackTypes.RECIPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.RECIPE), false);
         this.serialize(DataPackTypes.WORLD_TYPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD_TYPE), false);
         this.serialize(DataPackTypes.WORLD, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD), true);
+        this.serialize(DataPackTypes.TAG, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.TAG), false);
     }
 
     private <T extends DataPackSerializable> List<T> callRegisterDataPackValueEvent(final DataPackType<T> type) {

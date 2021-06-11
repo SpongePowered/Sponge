@@ -117,8 +117,8 @@ public final class SpongeLifecycle {
         ((SpongeDataManager) this.game.dataManager()).registerKeyListeners();
     }
 
-    public void callRegisterDataPackValueEvent(final Path dataPacksDirectory) {
-        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(dataPacksDirectory);
+    public void callRegisterDataPackValueEvent(final Path datapackDir) {
+        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(datapackDir);
     }
 
     public void callRegisterChannelEvent() {

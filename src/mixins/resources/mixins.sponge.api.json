@@ -63,6 +63,7 @@
         "minecraft.state.PropertyMixin_API",
         "minecraft.stats.StatMixin_API",
         "minecraft.stats.StatTypeMixin_API",
+        "minecraft.tag.TagWrapperMixin_API",
         "minecraft.util.DamageSourceMixin_API",
         "minecraft.util.EntityDamageSourceMixin_API",
         "minecraft.util.IndirectEntityDamageSourceMixin_API",

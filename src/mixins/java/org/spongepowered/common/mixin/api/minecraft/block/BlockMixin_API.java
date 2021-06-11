@@ -32,10 +32,15 @@ import net.minecraft.world.level.block.state.StateDefinition;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.state.StateProperty;
+import org.spongepowered.api.tag.Tag;
+import org.spongepowered.api.tag.TagType;
+import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.util.TagUtil;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 
 import java.util.Arrays;
@@ -91,5 +96,15 @@ public abstract class BlockMixin_API extends AbstractBlockMixin_API implements S
     @Override
     public boolean isAnyOf(final BlockType... types) {
         return Arrays.stream(types).anyMatch(type -> type == this);
+    }
+
+    @Override
+    public TagType<BlockType> tagType() {
+        return TagTypes.BLOCK_TYPE.get();
+    }
+
+    @Override
+    public Collection<Tag<BlockType>> tags() {
+        return TagUtil.getAssociatedTags(this, RegistryTypes.BLOCK_TYPE_TAGS);
     }
 }

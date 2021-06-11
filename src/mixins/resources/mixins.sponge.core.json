@@ -84,6 +84,7 @@
         "server.rcon.thread.QueryThreadGs4Mixin",
         "server.rcon.thread.RconClientMixin",
         "service.permission.SubjectMixin",
+        "tag.TagWrapperMixin",
         "util.ClassInstanceMultiMapMixin",
         "util.datafix.schemas.V1125Mixin",
         "world.BossEventMixin",

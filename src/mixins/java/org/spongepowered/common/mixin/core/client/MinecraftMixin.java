@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.client;
 
+import com.mojang.datafixers.util.Function4;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
@@ -56,6 +57,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
+import java.util.function.Function;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
