@@ -25,6 +25,7 @@
 package org.spongepowered.common.datapack;
 
 import com.google.gson.JsonObject;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.datapack.DataPackSerializable;
@@ -69,6 +70,7 @@ public final class SpongeDataPackManager {
         this.serialize(DataPackTypes.RECIPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.RECIPE), false);
         this.serialize(DataPackTypes.WORLD_TYPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD_TYPE), false);
         this.serialize(DataPackTypes.WORLD, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD), true);
+        this.serialize(DataPackTypes.TAG, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.TAG), false);
     }
 
     private <T extends DataPackSerializable> List<T> callRegisterDataPackValueEvent(final DataPackType<T> type) {
