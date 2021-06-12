@@ -35,18 +35,19 @@ import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.server.level.ServerPlayer_ContainerListenerAccessor;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.MissingImplementationException;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
 import java.util.stream.Collectors;
+
+import javax.annotation.Nullable;
 
 @Mixin(value = AbstractContainerMenu.class, priority = 998)
 public abstract class ContainerMixin_Inventory_API implements org.spongepowered.api.item.inventory.Container,
@@ -125,8 +126,8 @@ public abstract class ContainerMixin_Inventory_API implements org.spongepowered.
 
     private List<net.minecraft.server.level.ServerPlayer> listeners() {
         return this.containerListeners.stream()
-                .filter(net.minecraft.server.level.ServerPlayer.class::isInstance)
-                .map(net.minecraft.server.level.ServerPlayer.class::cast)
+                .filter(listener -> this.containerListeners.get(0).getClass().getEnclosingClass() == net.minecraft.server.level.ServerPlayer.class)
+                .map(listener -> ((ServerPlayer_ContainerListenerAccessor) listener).accessor$this$0())
                 .collect(Collectors.toList());
     }
 

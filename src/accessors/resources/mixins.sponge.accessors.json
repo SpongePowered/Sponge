@@ -42,6 +42,7 @@
         "server.level.ChunkMapAccessor",
         "server.level.ServerLevelAccessor",
         "server.level.ServerPlayerAccessor",
+        "server.level.ServerPlayer_ContainerListenerAccessor",
         "server.level.ServerPlayerGameModeAccessor",
         "server.network.ServerLoginPacketListenerImplAccessor",
         "server.players.GameProfileCache_GameProfileInfoAccessor",
