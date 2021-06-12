@@ -24,16 +24,29 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.tag;
 
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
+import org.spongepowered.api.ResourceKey;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Collection;
 
 @Mixin(targets = "net.minecraft.tags.StaticTagHelper$Wrapper")
 public abstract class TagWrapperMixin_API<T> implements Tag.Named<T>, org.spongepowered.api.tag.Tag<T> {
 
+    @Shadow @Final protected ResourceLocation name;
+
     @Override
     public Collection<T> all() {
         return this.getValues();
     }
+
+    @Override
+    public ResourceKey key() {
+        return (ResourceKey) (Object) this.name;
+    }
+
+    // contains(T value) already defined.
 }

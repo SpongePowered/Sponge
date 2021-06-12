@@ -212,4 +212,33 @@ public final class SpongeRegistryHolder implements RegistryHolder {
         }
         return (Registry<T>) registry;
     }
+
+    public <T> RefreshableRegistry<T> createRegistry(
+            final RegistryType<T> type,
+            final RegistryDynamicPopulator<T> dynamicPopulator
+    ) {
+        Objects.requireNonNull(type);
+        Objects.requireNonNull(dynamicPopulator);
+        final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(type.root());
+        if (root == null) {
+            throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
+        }
+        net.minecraft.core.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
+        if (registry != null) {
+            throw new DuplicateRegistrationException(String.format("Registry '%s' in root '%s' has already been defined", type.location(), type.root()));
+        }
+        final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<T>> key;
+        if (net.minecraft.core.Registry.ROOT_REGISTRY_NAME.equals(type.root())) {
+            key = net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) type.location());
+        } else {
+            key = ResourceKeyAccessor.invoker$create(
+                    (ResourceLocation) (Object) RegistryRoots.SPONGE,
+                    (ResourceLocation) (Object) type.location()
+            );
+        }
+        registry = new RefreshableRegistry<>(key, Lifecycle.stable(), dynamicPopulator);
+        ((RefreshableRegistry<T>) registry).refresh(); // Loads initial values.
+        ((WritableRegistry) root).register(key, registry, Lifecycle.stable());
+        return (RefreshableRegistry<T>) registry;
+    }
 }

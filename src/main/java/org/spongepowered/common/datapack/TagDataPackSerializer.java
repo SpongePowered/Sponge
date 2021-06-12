@@ -33,7 +33,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.datapack.tag.TagSerializedObject;
 
 import java.io.BufferedReader;
-import java.io.BufferedWriter;
 import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -60,7 +59,7 @@ public class TagDataPackSerializer extends DataPackSerializer<TagSerializedObjec
         for (final TagSerializedObject object : objects) {
             final Path namespacedDataDirectory = datapackDir.resolve("data").resolve(object.getKey().namespace());
             final String filename = object.getKey().value() + ".json";
-            final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(object.getTagType().datapackDirectory()).resolve(filename);
+            final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(object.getTagType().id()).resolve(filename);
             Files.createDirectories(objectFile.getParent());
 
 

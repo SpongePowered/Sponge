@@ -22,37 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.tag;
+package org.spongepowered.common.registry;
 
-import org.spongepowered.api.registry.DefaultedRegistryType;
-import org.spongepowered.api.tag.Tag;
-import org.spongepowered.api.tag.TagType;
-import org.spongepowered.api.tag.Taggable;
+import java.util.function.Consumer;
 
-public class SpongeTagType<T extends Taggable> implements TagType<T> {
+public class RegistryDynamicPopulator<T> {
 
-    private final String id;
-    private final DefaultedRegistryType<T> taggableRegistry;
-    private final DefaultedRegistryType<Tag<T>> tagRegistry;
+    private final Consumer<RegistryLoader<T>> populator;
 
-    public SpongeTagType(String id, DefaultedRegistryType<T> taggableRegistry, DefaultedRegistryType<Tag<T>> tagRegistry) {
-        this.id = id;
-        this.taggableRegistry = taggableRegistry;
-        this.tagRegistry = tagRegistry;
+    public RegistryDynamicPopulator(Consumer<RegistryLoader<T>> populator) {
+        this.populator = populator;
     }
 
-    @Override
-    public String id() {
-        return this.id;
+
+    public static <T> RegistryDynamicPopulator<T> of(Consumer<RegistryLoader<T>> populator) {
+        return new RegistryDynamicPopulator<>(populator);
     }
 
-    @Override
-    public DefaultedRegistryType<T> taggableRegistry() {
-        return this.taggableRegistry;
-    }
-
-    @Override
-    public DefaultedRegistryType<Tag<T>> tagRegistry() {
-        return this.tagRegistry;
+    public RegistryLoader<T> createLoader() {
+        return RegistryLoader.of(populator);
     }
 }

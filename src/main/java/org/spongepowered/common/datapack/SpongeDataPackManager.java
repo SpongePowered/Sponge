@@ -34,9 +34,13 @@ import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.lifecycle.RegisterDataPackValueEventImpl;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
+import org.spongepowered.common.registry.RefreshableRegistry;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -84,6 +88,20 @@ public final class SpongeDataPackManager {
         if (runnable != null) {
             runnable.run();
         }
+    }
+
+    public void refreshRegistries() {
+        Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE_TAGS);
+        Sponge.game().registries().registry(RegistryTypes.TAG_TYPES).streamEntries().forEach(tagType -> {
+            Registry<?> registry = Sponge.game().registries().registry(tagType.value().tagRegistry());
+            if (registry instanceof RefreshableRegistry) {
+                ((RefreshableRegistry)registry).refresh();
+                SpongeCommon.getLogger().debug("Refreshing tag registry: " + tagType.key());
+            }
+            else {
+                SpongeCommon.getLogger().warn("Could not refresh tag type: " + tagType.key() + " it was not a refreshable registry.");
+            }
+        });
     }
 
     @SuppressWarnings("unchecked")

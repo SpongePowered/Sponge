@@ -55,6 +55,10 @@ import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.material.MaterialColor;
@@ -158,6 +162,7 @@ import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.placeholder.PlaceholderParsers;
 import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
@@ -166,6 +171,7 @@ import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
+import org.spongepowered.api.tag.FluidTypeTags;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.tag.TagType;
 import org.spongepowered.api.tag.TagTypes;
@@ -1046,22 +1052,45 @@ public final class SpongeRegistryLoaders {
         });
     }
 
-    public static RegistryLoader<Tag<BlockType>> blockTypeTag() {
-        return RegistryLoader.of(l -> {
-            //System.out.println("DYE COLOUR OF BLACK WOOL IS: " + BlockTypes.BLACK_WOOL.get().get(Keys.DYE_COLOR).get());
-            //throw new UnsupportedOperationException();
-            //l.add(BlockTypeTags.WOOL, k -> TagUtil.fromMinecraftBlock(BlockTags.WOOL, Keys.DYE_COLOR));
-            //l.add(BlockTypeTags.PLANKS, k -> TagUtil.fromMinecraftBlock(BlockTags.PLANKS, Keys.WOOD_TYPE));
+    public static RegistryDynamicPopulator<Tag<BlockType>> blockTypeTag() {
+        return RegistryDynamicPopulator.of(l -> {
+            BlockTags.getWrappers().forEach(namedTag -> {
+                l.add(RegistryKey.of(RegistryTypes.BLOCK_TYPE_TAGS, (ResourceKey) (Object) namedTag.getName()), x -> (Tag<BlockType>) namedTag);
+            });
+        });
+    }
+
+    public static RegistryDynamicPopulator<Tag<EntityType<?>>> entityTypeTag() {
+        return RegistryDynamicPopulator.of(l -> {
+            EntityTypeTags.getWrappers().forEach(namedTag -> {
+                l.add(RegistryKey.of(RegistryTypes.ENTITY_TYPE_TAGS, (ResourceKey) (Object) namedTag.getName()), x -> (Tag<EntityType<?>>) namedTag);
+            });
+        });
+    }
+
+
+    public static RegistryDynamicPopulator<Tag<ItemType>> itemTypeTag() {
+        return RegistryDynamicPopulator.of(l -> {
+            ItemTags.getWrappers().forEach(namedTag -> {
+                l.add(RegistryKey.of(RegistryTypes.ITEM_TYPE_TAGS, (ResourceKey) (Object) namedTag.getName()), x -> (Tag<ItemType>) namedTag);
+            });
+        });
+    }
+
+    public static RegistryDynamicPopulator<Tag<FluidType>> fluidTypeTag() {
+        return RegistryDynamicPopulator.of(l -> {
+            FluidTags.getWrappers().forEach(namedTag -> {
+                l.add(RegistryKey.of(RegistryTypes.FLUID_TYPE_TAGS, (ResourceKey) (Object) namedTag.getName()), x -> (Tag<FluidType>) namedTag);
+            });
         });
     }
 
     public static RegistryLoader<TagType<@NonNull ?>> tagTypes() {
         return RegistryLoader.of(l -> {
-            l.add(TagTypes.BLOCK_TYPE, k -> new SpongeTagType<@NonNull BlockType>("blocks", RegistryTypes.BLOCK_TYPE));
-            l.add(TagTypes.ENTITY_TYPE, k -> new SpongeTagType<@NonNull EntityType<?>>("entity_types", RegistryTypes.ENTITY_TYPE));
-            l.add(TagTypes.FLUID_TYPE, k -> new SpongeTagType<@NonNull FluidType>("fluids", RegistryTypes.FLUID_TYPE));
-            l.add(TagTypes.FUNCTIONS, k -> new SpongeTagType<>("functions", null)); // urm
-            l.add(TagTypes.ITEM_TYPE, k -> new SpongeTagType<@NonNull ItemType>("items", RegistryTypes.ITEM_TYPE));
+            l.add(TagTypes.BLOCK_TYPE, k -> new SpongeTagType<@NonNull BlockType>("blocks", RegistryTypes.BLOCK_TYPE, RegistryTypes.BLOCK_TYPE_TAGS));
+            l.add(TagTypes.ENTITY_TYPE, k -> new SpongeTagType<@NonNull EntityType<?>>("entity_types", RegistryTypes.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE_TAGS));
+            l.add(TagTypes.FLUID_TYPE, k -> new SpongeTagType<@NonNull FluidType>("fluids", RegistryTypes.FLUID_TYPE, RegistryTypes.FLUID_TYPE_TAGS));
+            l.add(TagTypes.ITEM_TYPE, k -> new SpongeTagType<@NonNull ItemType>("items", RegistryTypes.ITEM_TYPE, RegistryTypes.ITEM_TYPE_TAGS));
         });
     }
 
