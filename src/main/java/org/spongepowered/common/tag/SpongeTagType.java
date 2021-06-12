@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.tag;
 
-import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.tag.TagType;
 import org.spongepowered.api.tag.Taggable;
@@ -32,10 +32,10 @@ import org.spongepowered.api.tag.Taggable;
 public class SpongeTagType<T extends Taggable> implements TagType<T> {
 
     private final String id;
-    private final DefaultedRegistryType<T> taggableRegistry;
-    private final DefaultedRegistryType<Tag<T>> tagRegistry;
+    private final RegistryType<T> taggableRegistry;
+    private final RegistryType<Tag<T>> tagRegistry;
 
-    public SpongeTagType(String id, DefaultedRegistryType<T> taggableRegistry, DefaultedRegistryType<Tag<T>> tagRegistry) {
+    public SpongeTagType(String id, RegistryType<T> taggableRegistry, RegistryType<Tag<T>> tagRegistry) {
         this.id = id;
         this.taggableRegistry = taggableRegistry;
         this.tagRegistry = tagRegistry;
@@ -47,12 +47,12 @@ public class SpongeTagType<T extends Taggable> implements TagType<T> {
     }
 
     @Override
-    public DefaultedRegistryType<T> taggableRegistry() {
+    public RegistryType<T> taggableRegistry() {
         return this.taggableRegistry;
     }
 
     @Override
-    public DefaultedRegistryType<Tag<T>> tagRegistry() {
+    public RegistryType<Tag<T>> tagRegistry() {
         return this.tagRegistry;
     }
 }

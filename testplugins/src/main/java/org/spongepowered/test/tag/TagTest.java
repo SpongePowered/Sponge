@@ -49,11 +49,10 @@ import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.DefaultedRegistryType;
-import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.BlockTypeTags;
 import org.spongepowered.api.tag.Tag;
-import org.spongepowered.api.tag.TagRegistration;
+import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.api.util.blockray.RayTrace;
@@ -77,10 +76,10 @@ public class TagTest {
     private static final TypeToken<Tag<FluidType>> FLUID_TYPE_TAG_TOKEN = new TypeToken<Tag<FluidType>>() {};
 
     @Listener
-    public void registerTags(final RegisterDataPackValueEvent<@NonNull TagRegistration> event) {
+    public void registerTags(final RegisterDataPackValueEvent<@NonNull TagTemplate> event) {
         logger.info("Adding tags.");
 
-        final TagRegistration tagRegistration = Tag.builder()
+        final TagTemplate tagRegistration = TagTemplate.builder()
                 .key(ResourceKey.of(pluginContainer, "wool"))
                 .type(TagTypes.BLOCK_TYPE.get())
                 .addValue(BlockTypes.GRASS.get())
@@ -88,7 +87,7 @@ public class TagTest {
 
         event.register(tagRegistration);
 
-        final TagRegistration woolLog = Tag.builder()
+        final TagTemplate woolLog = TagTemplate.builder()
                 .key(BlockTypeTags.WOOL.location())
                 .type(TagTypes.BLOCK_TYPE.get())
                 .addValue(BlockTypes.OAK_LOG.get())
@@ -96,7 +95,7 @@ public class TagTest {
 
         event.register(woolLog);
 
-        final TagRegistration woolGrass = Tag.builder()
+        final TagTemplate woolGrass = TagTemplate.builder()
                 .key(ResourceKey.minecraft("wool"))
                 .type(TagTypes.BLOCK_TYPE.get())
                 .addValue(BlockTypes.GRASS_BLOCK.get())
@@ -104,7 +103,7 @@ public class TagTest {
 
         event.register(woolGrass);
 
-        final TagRegistration underwaterDiamond = Tag.builder()
+        final TagTemplate underwaterDiamond = TagTemplate.builder()
                 .key(BlockTypeTags.UNDERWATER_BONEMEALS.location())
                 .type(TagTypes.BLOCK_TYPE.get())
                 .addValue(BlockTypes.DIAMOND_BLOCK.get())

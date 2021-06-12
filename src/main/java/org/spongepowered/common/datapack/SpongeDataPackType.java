@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.datapack;
 
-import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import io.leangen.geantyref.TypeToken;
@@ -41,7 +40,6 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
-import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
@@ -50,7 +48,7 @@ import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
 import org.spongepowered.common.datapack.tag.TagSerializedObject;
 import org.spongepowered.common.server.BootstrapProperties;
-import org.spongepowered.common.tag.SpongeTagRegistration;
+import org.spongepowered.common.tag.SpongeTagTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
@@ -140,7 +138,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 true
         );
 
-        private final SpongeDataPackType<@NonNull SpongeTagRegistration, TagSerializedObject> tag = new SpongeDataPackType<@NonNull SpongeTagRegistration, TagSerializedObject>(TypeToken.get(SpongeTagRegistration.class),
+        private final SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject> tag = new SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject>(TypeToken.get(SpongeTagTemplate.class),
                 new TagDataPackSerializer("Tag", "tags"),
                 s -> {
                     final net.minecraft.tags.Tag.Builder builder = new net.minecraft.tags.Tag.Builder();

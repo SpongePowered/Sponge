@@ -34,14 +34,14 @@ import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
-import org.spongepowered.api.tag.TagRegistration;
+import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.tag.TagType;
 import org.spongepowered.common.SpongeCommon;
 
 import java.io.IOException;
 import java.util.List;
 
-public class SpongeTagRegistration implements TagRegistration {
+public class SpongeTagTemplate implements TagTemplate {
 
     private final ResourceKey key;
     private final TagType<@NonNull ?> tagType;
@@ -49,7 +49,7 @@ public class SpongeTagRegistration implements TagRegistration {
     private final List<ResourceKey> elements;
     private final List<ResourceKey> subTags;
 
-    public SpongeTagRegistration(final ResourceKey key, final TagType<@NonNull ?> tagType, final boolean replace, final List<ResourceKey> elements, final List<ResourceKey> subTags) {
+    public SpongeTagTemplate(final ResourceKey key, final TagType<@NonNull ?> tagType, final boolean replace, final List<ResourceKey> elements, final List<ResourceKey> subTags) {
         this.key = key;
         this.tagType = tagType;
         this.replace = replace;
