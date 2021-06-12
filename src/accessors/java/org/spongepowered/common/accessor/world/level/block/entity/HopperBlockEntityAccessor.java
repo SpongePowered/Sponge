@@ -58,4 +58,8 @@ public interface HopperBlockEntityAccessor {
         throw new UntransformedInvokerError();
     }
 
+    @Invoker("isFullContainer")
+    static boolean invoker$isFullContainer(Container param0, Direction param1) {
+        throw new UntransformedInvokerError();
+    }
 }

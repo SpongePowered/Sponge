@@ -54,10 +54,7 @@ import javax.annotation.Nullable;
 @Mixin(HopperBlockEntity.class)
 public abstract class HopperBlockEntityMixin_Inventory {
 
-    @Shadow
-    private static boolean shadow$isFullContainer(final Container inventoryIn, final Direction side) {
-        return false;
-    }
+
 
     // Call PreEvents
 
@@ -78,7 +75,7 @@ public abstract class HopperBlockEntityMixin_Inventory {
     private static boolean impl$throwTransferPreIfNotFull(
         final Container var0, final Direction direction, final Level level, final BlockPos pos, final BlockState state, final Container container
     ) {
-        final boolean result = HopperBlockEntityMixin_Inventory.shadow$isFullContainer(container, direction);
+        final boolean result = HopperBlockEntityAccessor.invoker$isFullContainer(container, direction);
         if (result || !ShouldFire.TRANSFER_INVENTORY_EVENT_PRE) {
             return result;
         }

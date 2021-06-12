@@ -81,16 +81,4 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         }
     }
 
-    @Inject(method = "handleContainerClick",
-        at = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/ints/Int2ShortMap;put(IS)S", remap = false))
-    private void impl$updateOpenContainer(final ServerboundContainerClickPacket packet, final CallbackInfo ci) {
-        // We want to treat an 'invalid' click just like a regular click - we still fire events, do restores, etc.
-
-        // Vanilla doesn't call detectAndSendChanges for 'invalid' clicks, since it restores the entire inventory
-        // Allows capturing to happen for event firing, but doesn't send any pointless packets
-        this.player.containerMenu.suppressRemoteUpdates();
-        this.player.containerMenu.broadcastChanges();
-        this.player.containerMenu.resumeRemoteUpdates();
-    }
-
 }

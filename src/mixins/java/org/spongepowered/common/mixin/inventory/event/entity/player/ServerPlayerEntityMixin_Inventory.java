@@ -49,7 +49,7 @@ public abstract class ServerPlayerEntityMixin_Inventory extends PlayerEntityMixi
         ((TrackedContainerBridge) var2).bridge$trackViewable(containerProvider);
     }
 
-    @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;addSlotListener(Lnet/minecraft/world/inventory/ContainerListener;)V"))
+    @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu(Lnet/minecraft/world/inventory/AbstractContainerMenu;)V"))
     private void impl$onOpenHorseInventory(final AbstractHorse horse, final Container inventoryIn, final CallbackInfo ci) {
         ((TrackedContainerBridge) this.containerMenu).bridge$trackViewable(inventoryIn);
     }

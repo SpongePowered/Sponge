@@ -33,7 +33,6 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerListener;
 import net.minecraft.world.inventory.CraftingMenu;
-import net.minecraft.world.inventory.DataSlot;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
@@ -331,7 +330,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // Called when adding items to the cursor (pickup with item on cursor)
     // Captures the previous cursor for later use
     @Inject(method = "doClick",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;grow(I)V", ordinal = 1))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;grow(I)V", ordinal = 0))
     private void beforeOnTakeClickWithItem(
             final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfo ci) {
         this.bridge$setPreviousCursor(player.containerMenu.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
@@ -340,7 +339,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // Called when setting the cursor item (pickup with empty cursor)
     // Captures the previous cursor for later use
     @Inject(method = "doClick",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ContainerMenu;setCarried(Lnet/minecraft/world/item/ItemStack;)V", ordinal = 3))
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;setCarried(Lnet/minecraft/world/item/ItemStack;)V", ordinal = 3))
     private void beforeOnTakeClick(
             final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfo ci) {
         this.bridge$setPreviousCursor(player.containerMenu.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
@@ -351,11 +350,11 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // When it is crafting check if it was cancelled and prevent item drop
     @Redirect(method = "doClick",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/world/inventory/Slot;onTake(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)V",
-                    ordinal = 5))
-    private void redirectOnTakeThrow(final Slot slot, final Player player, final ItemStack stackToDrop) {
+                    target = "Lnet/minecraft/world/inventory/Slot;safeTake(IILnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/item/ItemStack;",
+                    ordinal = 0))
+    private ItemStack redirectOnTakeThrow(final Slot slot, final int cnt, final int intMaxValue, final Player player) {
         this.bridge$setLastCraft(null);
-        slot.onTake(player, stackToDrop);
+        final ItemStack stackToDrop = slot.safeTake(cnt, intMaxValue, player);
         CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
         if (lastCraft != null) {
             if (slot instanceof ResultSlot) {
@@ -364,6 +363,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 }
             }
         }
+        return stackToDrop;
     }
 
     // ClickType.QUICK_MOVE (for Crafting) -------------------------
