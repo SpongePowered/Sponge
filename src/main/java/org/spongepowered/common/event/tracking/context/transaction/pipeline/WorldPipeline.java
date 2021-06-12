@@ -88,13 +88,17 @@ public final class WorldPipeline implements BlockPipeline {
             return false;
         }
         final ServerLevel serverWorld = Objects.requireNonNull(this.serverWorld).get();
+        // Keep track of the existing block entity prior to processing the chunk pipeline
+        // and the reasoning is that in several cases where the block entity that is being removed
+        // will no longer be available. This could be avoided by having the "previous cursor" returned
+        // from ChunkPipeline, but alas.... that's a refactor for another time.
+        final @Nullable BlockEntity existing = this.chunkSupplier.get().getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
         // We have to get the "old state" from
         final @Nullable BlockState oldState = this.chunkPipeline.processChange(context, currentState, newProposedState, pos, limit);
         if (oldState == null) {
             return false;
         }
         final int oldOpacity = oldState.getLightBlock(serverWorld, pos);
-        final @Nullable BlockEntity existing = this.chunkSupplier.get().getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
         PipelineCursor formerState = new PipelineCursor(oldState, oldOpacity, pos, existing, destroyer, limit);
 
         for (final ResultingTransactionBySideEffect effect : this.worldEffects) {
