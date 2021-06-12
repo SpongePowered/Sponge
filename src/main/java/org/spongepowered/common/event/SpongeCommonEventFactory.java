@@ -53,7 +53,6 @@ import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.DirectionalBlock;
 import net.minecraft.world.level.block.entity.JukeboxBlockEntity;
 import net.minecraft.world.level.block.piston.PistonStructureResolver;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.saveddata.maps.MapIndex;
 import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.BlockHitResult;
@@ -91,7 +90,6 @@ import org.spongepowered.api.event.action.CreateMapEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
@@ -113,9 +111,9 @@ import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.World;
 import org.spongepowered.api.world.explosion.Explosion;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
@@ -124,18 +122,18 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.block.BlockBridge;
+import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
+import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
@@ -156,11 +154,8 @@ import org.spongepowered.math.vector.Vector3i;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -1041,44 +1036,39 @@ public final class SpongeCommonEventFactory {
         final MapIdTrackerBridge mapIdTrackerBridge = (MapIdTrackerBridge) defaultWorld.getDataStorage()
                 .computeIfAbsent(MapIndex::load, MapIndex::new, Constants.Map.MAP_INDEX_DATA_NAME);
 
-        final int id = mapIdTrackerBridge.bridge$getHighestMapId().orElse(-1) + 1;
-        final String mapId = MapItem.makeKey(id);
+        final MapItemSavedData mapData = MapItemSavedData.createFresh(0, 0, (byte) 0, false, false, Level.END);
 
-        // TODO: Restore for 1.17
-//        final String s = Constants.Map.MAP_PREFIX + id;
-//        final MapItemSavedData mapData = new MapItemSavedData(s);
-//
-//        mapData.dimension = Level.OVERWORLD; // Set default to prevent NPEs
-//
-//        final MapInfo mapInfo = (MapInfo) mapData;
-//
-//        for (final Value<?> value : values) {
-//            mapInfo.offer(value);
-//        }
-//
-//        final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapInfo);
-//        SpongeCommon.postEvent(event);
-//        if (event.isCancelled()) {
-//            return Optional.empty();
-//        }
-//
-//        // Advance map id.
-//        final int mcId = defaultWorld.getFreeMapId();
-//        if (id != mcId) {
-//            // TODO: REMOVE OR replace for Integer.MAX_VALUE
-//            SpongeCommon.getLogger().warn("Map size corruption, vanilla only allows " + Integer.MAX_VALUE + "! " +
-//                    "Expected next number was not equal to the true next number.");
-//            SpongeCommon.getLogger().warn("Expected: " + id + ". Got: " + mcId);
-//            SpongeCommon.getLogger().warn("Automatically cancelling map creation");
-//            mapIdTrackerBridge.bridge$setHighestMapId(id - 1);
-//            return Optional.empty();
-//        }
-//        defaultWorld.setMapData(mapData);
-//
-//        ((SpongeMapStorage) Sponge.server().mapStorage()).addMapInfo(mapInfo);
-//
-//        return Optional.of(mapInfo);
-        return Optional.empty();
+        final MapInfo mapInfo = (MapInfo) mapData;
+        for (final Value<?> value : values) {
+            mapInfo.offer(value);
+        }
+
+        final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapInfo);
+        SpongeCommon.postEvent(event);
+        if (event.isCancelled()) {
+            return Optional.empty();
+        }
+
+        final int id = mapIdTrackerBridge.bridge$getHighestMapId().orElse(-1) + 1;
+        // Advance map id.
+        final int mcId = defaultWorld.getFreeMapId();
+        if (id != mcId) {
+            // TODO: REMOVE OR replace for Integer.MAX_VALUE
+            SpongeCommon.getLogger().warn("Map size corruption, vanilla only allows " + Integer.MAX_VALUE + "! " +
+                    "Expected next number was not equal to the true next number.");
+            SpongeCommon.getLogger().warn("Expected: " + id + ". Got: " + mcId);
+            SpongeCommon.getLogger().warn("Automatically cancelling map creation");
+            mapIdTrackerBridge.bridge$setHighestMapId(id - 1);
+            return Optional.empty();
+        }
+
+        final String mapId = MapItem.makeKey(id);
+        defaultWorld.setMapData(mapId, mapData);
+        ((MapItemSavedDataBridge) mapData).bridge$initMapId(id);
+
+        ((SpongeMapStorage) Sponge.server().mapStorage()).addMapInfo(mapInfo);
+
+        return Optional.of(mapInfo);
     }
 
 }
