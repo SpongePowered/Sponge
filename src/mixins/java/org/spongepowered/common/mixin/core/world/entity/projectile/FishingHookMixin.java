@@ -29,12 +29,10 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stats;
 import net.minecraft.tags.ItemTags;
-import net.minecraft.util.Mth;
 import net.minecraft.world.entity.ExperienceOrb;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.entity.projectile.FishingHook;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.storage.loot.BuiltInLootTables;
 import net.minecraft.world.level.storage.loot.LootContext;
@@ -64,6 +62,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
+
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
@@ -85,10 +84,10 @@ public abstract class FishingHookMixin extends EntityMixin {
 
     @Nullable private ProjectileSource impl$projectileSource;
 
-    @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
-    private void onSetHookedEntity(CallbackInfo ci) {
-        if (SpongeCommon
-            .postEvent(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) this.hookedIn, (FishingBobber) this))) {
+    @Inject(method = "setHookedEntity", at = @At(value = "HEAD"), cancellable = true)
+    private void onSetHookedEntity(@Nullable net.minecraft.world.entity.Entity hookedIn, CallbackInfo ci) {
+        if (hookedIn != null && SpongeCommon
+            .postEvent(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) hookedIn, (FishingBobber) this))) {
             this.hookedIn = null;
             ci.cancel();
         }
