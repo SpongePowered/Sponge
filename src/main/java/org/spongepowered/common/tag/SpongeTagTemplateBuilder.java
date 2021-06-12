@@ -30,6 +30,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.ResourceKeyed;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.tag.Tag;
+import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.tag.TagType;
 import org.spongepowered.api.tag.Taggable;
 
@@ -38,7 +39,7 @@ import java.util.HashSet;
 import java.util.Set;
 import java.util.stream.Collectors;
 
-public class SpongeTagTemplateBuilder<T extends Taggable> implements Tag.Builder<T> {
+public class SpongeTagTemplateBuilder<T extends Taggable> implements TagTemplate.Builder<T> {
 
     @Nullable
     private TagType<T> tagType;
@@ -49,7 +50,7 @@ public class SpongeTagTemplateBuilder<T extends Taggable> implements Tag.Builder
     private final Set<Tag<T>> children = new HashSet<>();
 
     @Override
-    public <NT extends Taggable> Tag.Builder<NT> type(final TagType<NT> tagType) {
+    public <NT extends Taggable> TagTemplate.Builder<NT> type(final TagType<NT> tagType) {
         if (!this.values.isEmpty() || !children.isEmpty()) {
             throw new IllegalStateException("Cannot change tag type once values are added!");
         }
@@ -60,20 +61,20 @@ public class SpongeTagTemplateBuilder<T extends Taggable> implements Tag.Builder
     }
 
     @Override
-    public Tag.Builder<T> key(ResourceKey key) {
+    public TagTemplate.Builder<T> key(ResourceKey key) {
         this.key = key;
         return this;
     }
 
     @Override
-    public Tag.Builder<T> replace(final boolean replace) {
+    public TagTemplate.Builder<T> replace(final boolean replace) {
         this.ensureTagTypeAdded();
         this.replace = replace;
         return this;
     }
 
     @Override
-    public Tag.Builder<T> addChild(final Tag<T> childTag) {
+    public TagTemplate.Builder<T> addChild(final Tag<T> childTag) {
         ensureTagTypeAdded();
         if (this.tagType == null) {
             throw new IllegalStateException("Tag type must be set first!");
@@ -83,21 +84,21 @@ public class SpongeTagTemplateBuilder<T extends Taggable> implements Tag.Builder
     }
 
     @Override
-    public Tag.Builder<T> addChildren(final Collection<Tag<T>> children) {
+    public TagTemplate.Builder<T> addChildren(final Collection<Tag<T>> children) {
         ensureTagTypeAdded();
         this.children.addAll(children);
         return this;
     }
 
     @Override
-    public Tag.Builder<T> addValue(final T value) throws IllegalArgumentException {
+    public TagTemplate.Builder<T> addValue(final T value) throws IllegalArgumentException {
         ensureTagTypeAdded();
         this.values.add(value);
         return this;
     }
 
     @Override
-    public Tag.Builder<T> addValues(final Collection<T> values) throws IllegalArgumentException {
+    public TagTemplate.Builder<T> addValues(final Collection<T> values) throws IllegalArgumentException {
         ensureTagTypeAdded();
         this.values.addAll(values);
         return this;
@@ -125,7 +126,7 @@ public class SpongeTagTemplateBuilder<T extends Taggable> implements Tag.Builder
     }
 
     @Override
-    public Tag.Builder<T> reset() {
+    public TagTemplate.Builder<T> reset() {
         this.tagType = null;
         this.replace = false;
         this.values.clear();
