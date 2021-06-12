@@ -56,6 +56,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.server.network.TextFilter;
 import net.minecraft.server.players.PlayerList;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.item.ItemStack;
@@ -523,16 +524,17 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
     }
 
     @Redirect(method = "updateSignText", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
-    private int impl$callChangeSignEvent(final List<String> list, final ServerboundSignUpdatePacket p_244542_1_, final List<String> p_244542_2_) {
+    private int impl$callChangeSignEvent(final List<TextFilter.FilteredText> list, final ServerboundSignUpdatePacket p_244542_1_, final List<String> p_244542_2_) {
         final SignBlockEntity blockEntity = (SignBlockEntity) this.player.level.getBlockEntity(p_244542_1_.getPos());
         final ListValue<Component> originalLinesValue = ((Sign) blockEntity).getValue(Keys.SIGN_LINES)
                 .orElseGet(() -> new ImmutableSpongeListValue<>(Keys.SIGN_LINES, ImmutableList.of()));
 
         final List<Component> newLines = new ArrayList<>();
-        for (final String line : list) {
+        for (final TextFilter.FilteredText line : list) {
+            // TODO is this still needed?
             // Sponge Start - While Vanilla does some strip formatting, it doesn't catch everything. This patches an exploit that allows color
             // signs to be created.
-            newLines.add(Component.text(SharedConstants.filterText(line)));
+            newLines.add(Component.text(SharedConstants.filterText(line.getFiltered())));
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
