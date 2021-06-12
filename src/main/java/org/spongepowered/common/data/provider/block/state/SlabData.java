@@ -40,10 +40,6 @@ public final class SlabData {
     public static void register(final DataProviderRegistrator registrator) {
         registrator
                 .asImmutable(BlockState.class)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(SlabBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(SlabBlock.WATERLOGGED, v))
-                        .supports(h -> h.getBlock() instanceof SlabBlock)
                     .create(Keys.SLAB_PORTION)
                         .get(h -> (SlabPortion) (Object) h.getValue(SlabBlock.TYPE))
                         .set((h, v) -> h.setValue(SlabBlock.TYPE, (SlabType) (Object) v))

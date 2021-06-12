@@ -24,24 +24,26 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
-import net.minecraft.world.level.block.BaseCoralPlantTypeBlock;
+import net.minecraft.world.level.block.SimpleWaterloggedBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
-public final class AbstractCoralPlantData {
+public final class SimpleWaterloggedBlockData {
 
-    private AbstractCoralPlantData() {
+    private SimpleWaterloggedBlockData() {
     }
 
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asImmutable(BlockState.class)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(BaseCoralPlantTypeBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(BaseCoralPlantTypeBlock.WATERLOGGED, v))
-                        .supports(h -> h.getBlock() instanceof BaseCoralPlantTypeBlock);
+            .asImmutable(BlockState.class)
+            .create(Keys.IS_WATERLOGGED)
+            .get(h -> h.getValue(BlockStateProperties.WATERLOGGED))
+            .set((h, v) -> h.setValue(BlockStateProperties.WATERLOGGED, v))
+            .supports(h -> h.getBlock() instanceof SimpleWaterloggedBlock);
     }
     // @formatter:on
+
 }

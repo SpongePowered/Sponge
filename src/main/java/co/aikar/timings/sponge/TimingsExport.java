@@ -36,6 +36,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.core.Registry;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.ResourceKey;
@@ -45,7 +46,6 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.network.RconConnection;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
 import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
@@ -124,7 +124,7 @@ class TimingsExport extends Thread {
                 .add("sampletime", (System.currentTimeMillis() - TimingsManager.timingStart) / 1000);
         if (!TimingsManager.privacy) {
             builder.add("server", TimingsExport.getServerName())
-                    .add("motd", SpongeAdventure.plain(Sponge.server().motd()))
+                    .add("motd", PlainTextComponentSerializer.plainText().serialize(Sponge.server().motd()))
                     .add("online-mode", Sponge.server().isOnlineModeEnabled())
                     .add("icon", SpongeCommon.getServer().getStatus().getFavicon());
         }

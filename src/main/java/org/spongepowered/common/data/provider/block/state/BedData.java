@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.block.state;
 
 import net.minecraft.world.level.block.BedBlock;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.DyeColor;
@@ -40,10 +41,11 @@ public final class BedData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asImmutable(BlockState.class)
+                .asImmutable(Block.class)
                     .create(Keys.DYE_COLOR)
-                        .get(h -> (DyeColor) (Object) ((BedBlockAccessor) h.getBlock()).accessor$color())
-                        .supports(h -> h.getBlock() instanceof BedBlock)
+                        .get(h -> (DyeColor) (Object) ((BedBlockAccessor) h).accessor$color())
+                        .supports(h -> h instanceof BedBlock)
+                .asImmutable(BlockState.class)
                     .create(Keys.IS_OCCUPIED)
                         .get(h -> h.getValue(BedBlock.OCCUPIED))
                         .set((h, v) -> h.setValue(BedBlock.OCCUPIED, v))

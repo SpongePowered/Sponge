@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.core.world.scores;
 import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.ChatFormatting;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.scores.PlayerTeam;
@@ -75,7 +76,7 @@ public abstract class PlayerTeamMixin implements PlayerTeamBridge {
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void impl$setUpDisplayNames(final Scoreboard scoreboard, final String name, final CallbackInfo ci) {
-        this.bridge$displayName = SpongeAdventure.legacySection(name);
+        this.bridge$displayName = LegacyComponentSerializer.legacySection().deserialize(name);
         this.bridge$prefix = SpongeAdventure.asAdventure(this.playerPrefix);
         this.bridge$suffix = SpongeAdventure.asAdventure(this.playerSuffix);
         this.bridge$color = SpongeAdventure.asAdventureNamed(this.color);

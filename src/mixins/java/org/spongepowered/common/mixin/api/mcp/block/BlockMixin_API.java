@@ -36,6 +36,7 @@ import org.spongepowered.api.state.StateProperty;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 
 import java.util.Arrays;
 import java.util.Collection;
@@ -43,7 +44,7 @@ import java.util.Optional;
 import java.util.function.Supplier;
 
 @Mixin(value = Block.class, priority = 999)
-public abstract class BlockMixin_API extends AbstractBlockMixin_API {
+public abstract class BlockMixin_API extends AbstractBlockMixin_API implements SpongeImmutableDataHolder<BlockType> {
 
     // @formatter:off
     @Shadow @Final protected StateDefinition<Block, net.minecraft.world.level.block.state.BlockState> stateDefinition;

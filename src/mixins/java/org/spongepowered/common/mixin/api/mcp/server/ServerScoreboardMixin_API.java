@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.api.mcp.server;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.server.ServerScoreboard;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -40,7 +41,6 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.accessor.world.scores.ScoreboardAccessor;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.scores.ObjectiveBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.scoreboard.SpongeObjective;
@@ -163,6 +163,6 @@ public abstract class ServerScoreboardMixin_API implements Scoreboard {
     public Optional<Team> memberTeam(final Component member) {
         Objects.requireNonNull(member);
 
-        return Optional.ofNullable((Team) ((ScoreboardAccessor) this).accessor$teamsByPlayer().get(SpongeAdventure.legacySection(member)));
+        return Optional.ofNullable((Team) ((ScoreboardAccessor) this).accessor$teamsByPlayer().get(LegacyComponentSerializer.legacySection().serialize(member)));
     }
 }

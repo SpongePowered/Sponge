@@ -26,7 +26,7 @@ package org.spongepowered.test.inventory;
 
 import com.google.inject.Inject;
 import net.kyori.adventure.text.Component;
-import net.kyori.adventure.text.serializer.plain.PlainComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.data.KeyValueMatcher;
@@ -109,7 +109,7 @@ public final class InventoryTest implements LoadableModule {
             this.plugin.logger().info("{} count: {}", "grids ", grids.children().size()); // contains duplicate slots
             final Optional<Component> component = container.get(Keys.DISPLAY_NAME);
 
-            final String title = component.map(c -> PlainComponentSerializer.plain().serialize(c)).orElse("No Title");
+            final String title = component.map(c -> PlainTextComponentSerializer.plainText().serialize(c)).orElse("No Title");
             this.plugin.logger().info("{} [{}]", event.getClass().getSimpleName(), title);
         }
 
@@ -120,7 +120,7 @@ public final class InventoryTest implements LoadableModule {
                         ((EnchantItemEvent) event).seed());
             }
             final Optional<Component> component = event.container().get(Keys.DISPLAY_NAME);
-            final String title = component.map(c -> PlainComponentSerializer.plain().serialize(c)).orElse("No Title");
+            final String title = component.map(c -> PlainTextComponentSerializer.plainText().serialize(c)).orElse("No Title");
             if (title.equals("Foobar")) {
                 InventoryTest.doFancyStuff(event.cause().first(Player.class).get());
             }
@@ -168,7 +168,7 @@ public final class InventoryTest implements LoadableModule {
         }
 
         @Listener
-        public void onCraft(CraftItemEvent event) {
+        public void onCraft(final CraftItemEvent event) {
 //            this.plugin.logger().info("{} size: {} recipe: {} ",
 //                    event.getClass().getSimpleName(),
 //                    event.craftingInventory().capacity(),

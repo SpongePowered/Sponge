@@ -8,11 +8,22 @@ val projectUrl: String by project
 
 description = "Code generator for automatically producing API catalog classes based off of Vanilla MC data"
 
+minecraft {
+    rootProject.sourceSets["main"].resources
+            .filter { it.name.endsWith(".accesswidener") }
+            .files
+            .forEach {
+                accessWideners(it)
+            }
+}
+
+
 dependencies {
+    val tinyLogVersion: String by project
     implementation("com.squareup:javapoet:1.13.0")
     implementation("com.github.javaparser:javaparser-core:3.22.1")
-    implementation("org.tinylog:tinylog-api:2.2.1")
-    runtimeOnly("org.tinylog:tinylog-impl:2.2.1")
+    implementation("org.tinylog:tinylog-api:$tinyLogVersion")
+    runtimeOnly("org.tinylog:tinylog-impl:$tinyLogVersion")
 }
 
 license {

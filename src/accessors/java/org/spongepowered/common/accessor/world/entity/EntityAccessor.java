@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.BlockUtil;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
+import net.minecraft.network.chat.Component;
 import net.minecraft.network.syncher.EntityDataAccessor;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -54,7 +55,7 @@ public interface EntityAccessor {
     }
 
     @Accessor("DATA_CUSTOM_NAME")
-    static EntityDataAccessor<String> accessor$DATA_CUSTOM_NAME() {
+    static EntityDataAccessor<Component> accessor$DATA_CUSTOM_NAME() {
         throw new UntransformedAccessorError();
     }
 

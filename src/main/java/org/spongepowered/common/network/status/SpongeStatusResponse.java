@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.network.status;
 
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.network.protocol.status.ServerStatus;
 import net.minecraft.server.MinecraftServer;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -100,11 +102,11 @@ public final class SpongeStatusResponse {
     }
 
     public static String getMotd(final ServerStatus response) {
-        return SpongeStatusResponse.getFirstLine(SpongeAdventure.legacySection(SpongeAdventure.asAdventure(response.getDescription())));
+        return SpongeStatusResponse.getFirstLine(LegacyComponentSerializer.legacySection().serialize(SpongeAdventure.asAdventure(response.getDescription())));
     }
 
     public static String getUnformattedMotd(final ServerStatus response) {
-        return SpongeStatusResponse.getFirstLine(SpongeAdventure.plain(SpongeAdventure.asAdventure(response.getDescription())));
+        return SpongeStatusResponse.getFirstLine(PlainTextComponentSerializer.plainText().serialize(SpongeAdventure.asAdventure(response.getDescription())));
     }
 
     private static String getFirstLine(final String s) {

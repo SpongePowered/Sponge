@@ -22,26 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.state;
+package org.spongepowered.common.adventure;
 
-import net.minecraft.world.level.block.ScaffoldingBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public final class ScaffoldingData {
+import java.util.function.Consumer;
 
-    private ScaffoldingData() {
+@SuppressWarnings("UnstableApiUsage") // permitted provider
+public final class LegacyComponentSerializerProviderImpl implements LegacyComponentSerializer.Provider {
+    @Override
+    public @NonNull LegacyComponentSerializer legacyAmpersand() {
+        return LegacyComponentSerializer.builder()
+          .character(LegacyComponentSerializer.AMPERSAND_CHAR)
+          .flattener(ComponentFlattenerProvider.INSTANCE)
+          .build();
     }
 
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asImmutable(BlockState.class)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(ScaffoldingBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(ScaffoldingBlock.WATERLOGGED, v))
-                        .supports(h -> h.getBlock() instanceof ScaffoldingBlock);
+    @Override
+    public @NonNull LegacyComponentSerializer legacySection() {
+        return LegacyComponentSerializer.builder()
+          .character(LegacyComponentSerializer.SECTION_CHAR)
+          .flattener(ComponentFlattenerProvider.INSTANCE)
+          .build();
     }
-    // @formatter:on
+
+    @Override
+    public @NonNull Consumer<LegacyComponentSerializer.Builder> legacy() {
+        return builder -> {
+            builder.flattener(ComponentFlattenerProvider.INSTANCE);
+        };
+    }
 }

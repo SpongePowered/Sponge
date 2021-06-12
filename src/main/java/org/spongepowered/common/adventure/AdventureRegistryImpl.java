@@ -31,11 +31,15 @@ import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.kyori.adventure.util.Index;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.adventure.AdventureRegistry;
-import org.spongepowered.common.adventure.AdventureRegistryImpl.ForIndex;
+
 import java.util.Optional;
 import java.util.Set;
 
+@DefaultQualifier(NonNull.class)
 public final class AdventureRegistryImpl implements AdventureRegistry {
     public static final AdventureRegistry INSTANCE = new AdventureRegistryImpl();
 
@@ -97,7 +101,11 @@ public final class AdventureRegistryImpl implements AdventureRegistry {
 
         @Override
         public String key(final T value) {
-            return this.registry.key(value);
+            final @Nullable String key = this.registry.key(value);
+            if (key == null) {
+                throw new NullPointerException("no key for " + value);
+            }
+            return key;
         }
 
         @Override

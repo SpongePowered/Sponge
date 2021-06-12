@@ -50,10 +50,6 @@ public final class TrapDoorData {
                     .create(Keys.IS_POWERED)
                         .get(h -> h.getValue(TrapDoorBlock.POWERED))
                         .set((h, v) -> h.setValue(TrapDoorBlock.POWERED, v))
-                        .supports(h -> h.getBlock() instanceof TrapDoorBlock)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(TrapDoorBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(TrapDoorBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof TrapDoorBlock);
     }
     // @formatter:on

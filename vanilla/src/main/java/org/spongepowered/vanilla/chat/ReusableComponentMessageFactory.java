@@ -26,6 +26,7 @@ package org.spongepowered.vanilla.chat;
 
 import net.kyori.adventure.text.ComponentLike;
 import net.kyori.adventure.text.renderer.ComponentRenderer;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.kyori.adventure.translation.GlobalTranslator;
 import net.minecraft.network.chat.Component;
 import org.apache.logging.log4j.message.Message;
@@ -140,7 +141,9 @@ public class ReusableComponentMessageFactory implements MessageFactory2 {
             final Object param = this.getParameter();
             // TODO: ansi formatting
             if (param instanceof ComponentLike) {
-                return SpongeAdventure.PLAIN.serialize(ComponentMessage.RENDERER.render(((ComponentLike) param).asComponent(), Locale.getDefault()));
+                return PlainTextComponentSerializer.plainText().serialize(
+                    ComponentMessage.RENDERER.render(((ComponentLike) param).asComponent(), Locale.getDefault())
+                );
             } else if (param instanceof net.minecraft.network.chat.Component) {
                 return NativeComponentRenderer.apply((Component) param, Locale.getDefault()).getString();
             }
@@ -148,11 +151,11 @@ public class ReusableComponentMessageFactory implements MessageFactory2 {
         }
 
         @Override
-        public void formatTo(StringBuilder buffer) {
+        public void formatTo(final StringBuilder buffer) {
             final Object param = this.getParameter();
             // TODO: ansi formatting
             if (param instanceof ComponentLike) {
-                SpongeAdventure.FLATTENER.flatten(
+                SpongeAdventure.flattener().flatten(
                     ComponentMessage.RENDERER.render(((ComponentLike) param).asComponent(), Locale.getDefault()),
                     buffer::append
                 );

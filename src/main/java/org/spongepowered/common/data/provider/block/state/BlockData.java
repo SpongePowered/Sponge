@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
+import net.minecraft.world.level.block.Block;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.InstrumentType;
 import org.spongepowered.api.data.type.MatterTypes;
@@ -56,9 +57,30 @@ public final class BlockData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asImmutable(BlockState.class)
+                .asImmutable(Block.class)
                     .create(Keys.BLAST_RESISTANCE)
-                        .get(h -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) h.getBlock()).accessor$properties()).accessor$explosionResistance())
+                        .get(h -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) h).accessor$properties()).accessor$explosionResistance())
+                    .create(Keys.DYE_COLOR)
+                        .get(h -> ((DyeColorBlockBridge) h).bridge$getDyeColor().orElse(null))
+                        .supports(h -> h instanceof DyeColorBlockBridge)
+                    .create(Keys.DESTROY_SPEED)
+                        .get(block -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) block).accessor$properties()).accessor$destroyTime())
+                    .create(Keys.HELD_ITEM)
+                        .get(h -> {
+                            final Item item = h.asItem();
+                            if (item instanceof BlockItem) {
+                                return (ItemType) item;
+                            }
+                            return null;
+                        })
+                        .supports(h -> h.asItem() instanceof BlockItem)
+                    .create(Keys.IS_GRAVITY_AFFECTED)
+                        .get(h -> h instanceof FallingBlock)
+                    .create(Keys.IS_UNBREAKABLE)
+                        .get(h -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) h).accessor$properties()).accessor$destroyTime() < 0)
+                    .create(Keys.IS_SURROGATE_BLOCK)
+                        .get(h -> ((BlockBridge) h).bridge$isDummy())
+                .asImmutable(BlockState.class)
                     .create(Keys.CONNECTED_DIRECTIONS)
                         .get(h -> {
                             if (h.getValue(ChestBlock.TYPE) == ChestType.SINGLE) {
@@ -67,34 +89,14 @@ public final class BlockData {
                             return Collections.singleton(Constants.DirectionFunctions.getFor(ChestBlock.getConnectedDirection(h)));
                         })
                         .supports(h -> h.hasProperty(ChestBlock.TYPE))
-                    .create(Keys.DYE_COLOR)
-                        .get(h -> ((DyeColorBlockBridge) h.getBlock()).bridge$getDyeColor().orElse(null))
-                        .supports(h -> h.getBlock() instanceof DyeColorBlockBridge)
-                    .create(Keys.DESTROY_SPEED)
-                        .get(state -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) state.getBlock()).accessor$properties()).accessor$destroyTime())
-                    .create(Keys.HELD_ITEM)
-                        .get(h -> {
-                            final Item item = h.getBlock().asItem();
-                            if (item instanceof BlockItem) {
-                                return (ItemType) item;
-                            }
-                            return null;
-                        })
-                        .supports(h -> h.getBlock().asItem() instanceof BlockItem)
-                    .create(Keys.IS_GRAVITY_AFFECTED)
-                        .get(h -> h.getBlock() instanceof FallingBlock)
                     .create(Keys.IS_PASSABLE)
                         .get(h -> !h.getMaterial().blocksMotion())
-                    .create(Keys.IS_UNBREAKABLE)
-                        .get(h -> (double) ((BlockBehaviour_PropertiesAccessor) ((BlockBehaviourAccessor) h.getBlock()).accessor$properties()).accessor$destroyTime() < 0)
                     .create(Keys.IS_FLAMMABLE)
                         .get(((BaseFireBlockAccessor) Blocks.FIRE)::invoker$canBurn)
                     .create(Keys.IS_SOLID)
                         .get(h -> h.getMaterial().isSolid())
                     .create(Keys.IS_REPLACEABLE)
                         .get(h -> h.getMaterial().isReplaceable())
-                    .create(Keys.IS_SURROGATE_BLOCK)
-                        .get(h -> ((BlockBridge) h.getBlock()).bridge$isDummy())
                     .create(Keys.LIGHT_EMISSION)
                         .get(BlockState::getLightEmission)
                     .create(Keys.MATTER_TYPE)

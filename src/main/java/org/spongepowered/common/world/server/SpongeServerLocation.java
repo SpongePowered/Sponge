@@ -278,9 +278,9 @@ public final class SpongeServerLocation extends SpongeLocation<ServerWorld, Serv
     public List<DataHolder> impl$delegateDataHolder() {
         final Optional<? extends BlockEntity> be = this.blockEntity();
         if (be.isPresent()) {
-            return Arrays.asList(this, be.get(), this.block());
+            return Arrays.asList(this, be.get(), this.block(), this.block().type());
         }
-        return Arrays.asList(this, this.block());
+        return Arrays.asList(this, this.block(), this.block().type());
     }
 
     @Override

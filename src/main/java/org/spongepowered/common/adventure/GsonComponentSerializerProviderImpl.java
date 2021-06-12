@@ -22,26 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.state;
+package org.spongepowered.common.adventure;
 
-import net.minecraft.world.level.block.ConduitBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import java.util.function.Consumer;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public final class ConduitData {
-
-    private ConduitData() {
+@SuppressWarnings("UnstableApiUsage") // permitted provider
+public final class GsonComponentSerializerProviderImpl implements GsonComponentSerializer.Provider {
+    @Override
+    public @NonNull GsonComponentSerializer gson() {
+        return GsonComponentSerializer.builder()
+          .legacyHoverEventSerializer(NbtLegacyHoverEventSerializer.INSTANCE)
+          .build();
     }
 
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asImmutable(BlockState.class)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(ConduitBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(ConduitBlock.WATERLOGGED, v))
-                        .supports(h -> h.getBlock() instanceof ConduitBlock);
+    @Override
+    public @NonNull GsonComponentSerializer gsonLegacy() {
+        return GsonComponentSerializer.builder()
+            .legacyHoverEventSerializer(NbtLegacyHoverEventSerializer.INSTANCE)
+            .downsampleColors()
+            .build();
     }
-    // @formatter:on
+
+    @Override
+    public @NonNull Consumer<GsonComponentSerializer.Builder> builder() {
+        return builder -> {
+            builder.legacyHoverEventSerializer(NbtLegacyHoverEventSerializer.INSTANCE);
+        };
+    }
 }

@@ -22,26 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.provider.block.state;
+package org.spongepowered.common.adventure;
 
-import net.minecraft.world.level.block.CrossCollisionBlock;
-import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
+import org.checkerframework.checker.nullness.qual.NonNull;
 
-public final class FourWayData {
+import java.util.function.Consumer;
 
-    private FourWayData() {
+@SuppressWarnings("UnstableApiUsage") // permitted provider
+public final class PlainTextComponentSerializerProviderImpl implements PlainTextComponentSerializer.Provider {
+    @Override
+    public @NonNull PlainTextComponentSerializer plainTextSimple() {
+        return PlainTextComponentSerializer.builder().flattener(ComponentFlattenerProvider.INSTANCE).build();
     }
 
-    // @formatter:off
-    public static void register(final DataProviderRegistrator registrator) {
-        registrator
-                .asImmutable(BlockState.class)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(CrossCollisionBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(CrossCollisionBlock.WATERLOGGED, v))
-                        .supports(h -> h.getBlock() instanceof CrossCollisionBlock);
+    @Override
+    public @NonNull Consumer<PlainTextComponentSerializer.Builder> plainText() {
+        return builder -> {
+            builder.flattener(ComponentFlattenerProvider.INSTANCE);
+        };
     }
-    // @formatter:on
 }

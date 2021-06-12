@@ -26,6 +26,7 @@ package org.spongepowered.common.data.provider.item.stack;
 
 import com.google.common.collect.ImmutableSet;
 import com.mojang.datafixers.util.Pair;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.tags.Tag;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.data.Keys;
@@ -137,7 +138,7 @@ public final class ItemStackData {
                                 final CompoundTag tag = h.getTag();
                                 if (tag != null) {
                                     final String title = tag.getString(Constants.Item.Book.ITEM_BOOK_TITLE);
-                                    return SpongeAdventure.legacySection(title);
+                                    return LegacyComponentSerializer.legacySection().deserialize(title);
                                 }
                             }
                             return null;

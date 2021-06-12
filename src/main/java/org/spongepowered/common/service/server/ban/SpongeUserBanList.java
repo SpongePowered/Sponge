@@ -24,10 +24,10 @@
  */
 package org.spongepowered.common.service.server.ban;
 
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.service.ban.BanService;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.profile.SpongeGameProfile;
 
 import java.io.File;
@@ -60,11 +60,12 @@ public class SpongeUserBanList extends UserBanList {
             if (x instanceof UserBanListEntry) {
                 return (UserBanListEntry) x;
             } else {
+                final LegacyComponentSerializer lcs = LegacyComponentSerializer.legacySection();
                 return new UserBanListEntry(SpongeGameProfile.toMcProfile(x.profile()),
                         Date.from(x.creationDate()),
-                        x.banSource().map(SpongeAdventure::legacySection).orElse(null),
+                        x.banSource().map(lcs::serialize).orElse(null),
                         x.expirationDate().map(Date::from).orElse(null),
-                        x.reason().map(SpongeAdventure::legacySection).orElse(null));
+                        x.reason().map(lcs::serialize).orElse(null));
             }
         }).orElse(null);
     }

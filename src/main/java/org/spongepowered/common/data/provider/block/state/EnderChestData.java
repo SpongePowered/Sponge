@@ -42,10 +42,6 @@ public final class EnderChestData {
                     .create(Keys.DIRECTION)
                         .get(h -> DirectionUtil.getFor(h.getValue(EnderChestBlock.FACING)))
                         .set((h, v) -> DirectionUtil.set(h, v, EnderChestBlock.FACING))
-                        .supports(h -> h.getBlock() instanceof EnderChestBlock)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(EnderChestBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(EnderChestBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof EnderChestBlock);
     }
     // @formatter:on

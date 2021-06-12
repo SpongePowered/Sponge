@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundSetDisplayObjectivePacket;
 import net.minecraft.network.protocol.game.ClientboundSetObjectivePacket;
@@ -263,22 +264,23 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
 
     @Override
     public Score getOrCreatePlayerScore(final String name, final net.minecraft.world.scores.Objective objective) {
-        return ((SpongeScore) ((ObjectiveBridge) objective).bridge$getSpongeObjective().findOrCreateScore(SpongeAdventure.legacySection(name)))
+        return ((SpongeScore) ((ObjectiveBridge) objective).bridge$getSpongeObjective().findOrCreateScore(LegacyComponentSerializer.legacySection().deserialize(name)))
                 .getScoreFor(objective);
     }
 
     @Override
     public void resetPlayerScore(final String name, final net.minecraft.world.scores.Objective objective) {
+        final LegacyComponentSerializer lcs = LegacyComponentSerializer.legacySection();
         if (objective != null) {
             final SpongeObjective spongeObjective = ((ObjectiveBridge) objective).bridge$getSpongeObjective();
-            final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.findScore(SpongeAdventure.legacySection(name));
+            final Optional<org.spongepowered.api.scoreboard.Score> score = spongeObjective.findScore(lcs.deserialize(name));
             if (score.isPresent()) {
                 spongeObjective.removeScore(score.get());
             } else {
                 SpongeCommon.getLogger().warn("Objective {} did have have the score", name);
             }
         } else {
-            final Component textName = SpongeAdventure.legacySection(name);
+            final Component textName = lcs.deserialize(name);
             for (final net.minecraft.world.scores.Objective scoreObjective : this.getObjectives()) {
                 ((ObjectiveBridge) scoreObjective).bridge$getSpongeObjective().removeScore(textName);
             }

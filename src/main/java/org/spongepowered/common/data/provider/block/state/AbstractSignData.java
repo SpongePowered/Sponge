@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.data.provider.block.state;
 
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.SignBlock;
 import net.minecraft.world.level.block.WallSignBlock;
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
@@ -38,15 +38,11 @@ public final class AbstractSignData {
     // @formatter:off
     public static void register(final DataProviderRegistrator registrator) {
         registrator
-                .asImmutable(BlockState.class)
+                .asImmutable(Block.class)
                     .create(Keys.IS_ATTACHED)
-                        .get(h -> h.getBlock() instanceof WallSignBlock)
+                        .get(h -> h instanceof WallSignBlock)
                         .set((h, v) -> null)
-                        .supports(h -> h.getBlock() instanceof SignBlock)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(SignBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(SignBlock.WATERLOGGED, v))
-                        .supports(h -> h.getBlock() instanceof SignBlock);
+                        .supports(h -> h instanceof SignBlock);
     }
     // @formatter:on
 }

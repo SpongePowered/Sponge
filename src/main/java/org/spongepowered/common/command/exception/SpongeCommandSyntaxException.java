@@ -28,6 +28,7 @@ import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
@@ -73,7 +74,7 @@ public final class SpongeCommandSyntaxException extends CommandSyntaxException {
 
     @Override
     public String getMessage() {
-        return SpongeAdventure.plain(this.getComponentMessage());
+        return PlainTextComponentSerializer.plainText().serialize(this.getComponentMessage());
     }
 
 }

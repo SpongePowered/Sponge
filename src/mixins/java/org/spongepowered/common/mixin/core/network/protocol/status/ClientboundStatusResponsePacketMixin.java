@@ -25,11 +25,11 @@
 package org.spongepowered.common.mixin.core.network.protocol.status;
 
 import com.google.gson.GsonBuilder;
+import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
 import net.minecraft.network.protocol.status.ClientboundStatusResponsePacket;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.adventure.SpongeAdventure;
 
 import java.lang.reflect.Type;
 
@@ -39,7 +39,7 @@ public abstract class ClientboundStatusResponsePacketMixin {
    @SuppressWarnings("UnresolvedMixinReference")
    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/google/gson/GsonBuilder;registerTypeAdapter(Ljava/lang/reflect/Type;Ljava/lang/Object;)Lcom/google/gson/GsonBuilder;", ordinal = 0))
    private static GsonBuilder impl$injectAdventureSerializers(final GsonBuilder instance, final Type type, final Object adapter) {
-      return SpongeAdventure.GSON.populator().apply(instance.registerTypeAdapter(type, adapter));
+      return GsonComponentSerializer.gson().populator().apply(instance.registerTypeAdapter(type, adapter));
    }
 
 }

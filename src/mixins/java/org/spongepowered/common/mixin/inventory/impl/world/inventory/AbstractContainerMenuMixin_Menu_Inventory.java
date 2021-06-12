@@ -98,7 +98,6 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
         this.bridge$setMenu(null);
     }
 
-
     @Redirect(method = "doClick", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;mayPlace(Lnet/minecraft/world/item/ItemStack;)Z"))
     public boolean impl$onClickMayPlace(final Slot slot, final ItemStack stack) {
         return this.impl$onMayPlace(slot, stack);
@@ -141,7 +140,6 @@ public abstract class AbstractContainerMenuMixin_Menu_Inventory implements MenuB
         }
         return slot.mayPickup(player);
     }
-
 
     @Redirect(method = "moveItemStackTo",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/Slot;getItem()Lnet/minecraft/world/item/ItemStack;", ordinal = 0))

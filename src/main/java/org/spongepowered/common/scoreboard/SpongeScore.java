@@ -25,6 +25,7 @@
 package org.spongepowered.common.scoreboard;
 
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.serializer.legacy.LegacyComponentSerializer;
 import org.spongepowered.api.scoreboard.Score;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.common.accessor.world.scores.ObjectiveAccessor;
@@ -50,7 +51,7 @@ public final class SpongeScore implements Score {
 
     public SpongeScore(final Component name) {
         this.name = name;
-        this.legacyName = SpongeAdventure.legacySection(name);
+        this.legacyName = LegacyComponentSerializer.legacySection().serialize(name);
         if (this.legacyName.length() > Constants.Scoreboards.SCORE_NAME_LENGTH) {
             throw new IllegalArgumentException(String.format("The score name %s is too long! It must be at most %s characters.", this.legacyName, Constants.Scoreboards.SCORE_NAME_LENGTH));
         }

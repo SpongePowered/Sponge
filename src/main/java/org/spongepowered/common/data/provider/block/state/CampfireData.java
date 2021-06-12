@@ -41,10 +41,6 @@ public final class CampfireData {
                     .create(Keys.IS_LIT)
                         .get(h -> h.getValue(CampfireBlock.LIT))
                         .set((h, v) -> h.setValue(CampfireBlock.LIT, v))
-                        .supports(h -> h.getBlock() instanceof CampfireBlock)
-                    .create(Keys.IS_WATERLOGGED)
-                        .get(h -> h.getValue(CampfireBlock.WATERLOGGED))
-                        .set((h, v) -> h.setValue(CampfireBlock.WATERLOGGED, v))
                         .supports(h -> h.getBlock() instanceof CampfireBlock);
     }
     // @formatter:on
