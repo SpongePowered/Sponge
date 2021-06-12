@@ -88,6 +88,7 @@ public abstract class FishingHookMixin extends EntityMixin {
     private void onSetHookedEntity(@Nullable net.minecraft.world.entity.Entity hookedIn, CallbackInfo ci) {
         if (hookedIn != null && SpongeCommon
             .postEvent(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) hookedIn, (FishingBobber) this))) {
+            this.hookedIn = null;
             ci.cancel();
         }
     }
