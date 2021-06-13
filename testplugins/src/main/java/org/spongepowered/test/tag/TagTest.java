@@ -32,14 +32,17 @@ import net.kyori.adventure.text.format.NamedTextColor;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.command.parameter.managed.ValueParameter;
+import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.data.type.HandTypes;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
@@ -49,6 +52,7 @@ import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.DefaultedRegistryType;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.BlockTypeTags;
 import org.spongepowered.api.tag.Tag;
@@ -56,10 +60,12 @@ import org.spongepowered.api.tag.TagTemplate;
 import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.api.util.blockray.RayTrace;
-import org.spongepowered.api.util.blockray.RayTraceResult;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
+
+import java.util.Collection;
 
 @Plugin("tagtest")
 public class TagTest {
@@ -115,87 +121,50 @@ public class TagTest {
     @Listener
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
 
-        final Parameter.Value<Tag<BlockType>> BLOCK_TYPE_TAG = Parameter.registryElement(TagTest.BLOCK_TYPE_TAG_TOKEN, RegistryTypes.BLOCK_TYPE_TAGS).key("blocktag").build();
+        final Parameter.Value<Tag<BlockType>> BLOCK_TYPE_TAG = TagTest.makeTagRegistryParameter(TagTest.BLOCK_TYPE_TAG_TOKEN, RegistryTypes.BLOCK_TYPE_TAGS, "blocktag");
         final Command.Parameterized blockHasTag = Command.builder()
                 .addParameter(BLOCK_TYPE_TAG)
                 .executor(ctx -> {
                     final Tag<BlockType> tag = ctx.requireOne(BLOCK_TYPE_TAG);
 
-                    final ServerPlayer serverPlayer = ctx.cause().first(ServerPlayer.class)
-                            .orElseThrow(() -> new CommandException(Component.text("You must be a player to use this command! (Ray trace)")));
-                    final RayTraceResult<@NonNull LocatableBlock> result = RayTrace.block()
-                            .select(RayTrace.nonAir())
-                            .world(serverPlayer.world())
-                            .sourceEyePosition(serverPlayer)
-                            .direction(serverPlayer)
-                            .execute()
-                            .orElseThrow(() -> new CommandException(Component.text("You must look at a block to use this command!")));
-
-                    final BlockType blockType = result.selectedObject().blockState().type();
+                    final BlockType blockType = TagTest.raytraceBlock(ctx).blockState().type();
                     TagTest.sendTagMessage(blockType, RegistryTypes.BLOCK_TYPE, tag, tag.key(RegistryTypes.BLOCK_TYPE_TAGS), ctx.cause().audience());
                     return CommandResult.success();
                 })
                 .build();
 
-        final Parameter.Value<Tag<ItemType>> ITEM_TYPE_TAG = Parameter.registryElement(TagTest.ITEM_TYPE_TAG_TOKEN, RegistryTypes.ITEM_TYPE_TAGS).key("itemtag").build();
+        final Parameter.Value<Tag<ItemType>> ITEM_TYPE_TAG = TagTest.makeTagRegistryParameter(TagTest.ITEM_TYPE_TAG_TOKEN, RegistryTypes.ITEM_TYPE_TAGS, "itemtag");
         final Command.Parameterized itemHasTag = Command.builder()
                 .addParameter(ITEM_TYPE_TAG)
                 .executor(ctx -> {
-                    final ServerPlayer serverPlayer = ctx.cause().first(ServerPlayer.class)
-                            .orElseThrow(() -> new CommandException(Component.text("You must be a player to use this command! (Held item)")));
-                    final ItemStack heldItem = serverPlayer.itemInHand(HandTypes.MAIN_HAND);
-                    if (heldItem.isEmpty()) {
-                        throw new CommandException(Component.text("You must hold an item in your main hand!"));
-                    }
                     final Tag<ItemType> tag = ctx.requireOne(ITEM_TYPE_TAG);
 
-                    final ItemType itemType = heldItem.type();
+                    final ItemType itemType = TagTest.requireItemInHand(ctx);
                     TagTest.sendTagMessage(itemType, RegistryTypes.ITEM_TYPE, tag, tag.key(RegistryTypes.ITEM_TYPE_TAGS), ctx.cause().audience());
                     return CommandResult.success();
                 })
                 .build();
 
-        final Parameter.Value<Tag<EntityType<?>>> ENTITY_TYPE_TAG = Parameter.registryElement(TagTest.ENTITY_TYPE_TAG_TOKEN, RegistryTypes.ENTITY_TYPE_TAGS).key("entitytag").build();
+        final Parameter.Value<Tag<EntityType<?>>> ENTITY_TYPE_TAG = TagTest.makeTagRegistryParameter(TagTest.ENTITY_TYPE_TAG_TOKEN, RegistryTypes.ENTITY_TYPE_TAGS, "entitytag");
         final Command.Parameterized entityHasTag = Command.builder()
                 .addParameter(ENTITY_TYPE_TAG)
                 .executor(ctx -> {
-                    final ServerPlayer serverPlayer = ctx.cause().first(ServerPlayer.class)
-                            .orElseThrow(() -> new CommandException(Component.text("You must be a player to use this command! (Ray trace)")));
-
                     final Tag<EntityType<?>> tag = ctx.requireOne(ENTITY_TYPE_TAG);
 
-
-                    final RayTraceResult<@NonNull Entity> result = RayTrace.entity()
-                            .world(serverPlayer.world())
-                            .sourceEyePosition(serverPlayer)
-                            .direction(serverPlayer)
-                            .execute()
-                            .orElseThrow(() -> new CommandException(Component.text("You must look at an entity to use this command!")));
-
-                    final EntityType<?> type = result.selectedObject().type();
+                    final EntityType<?> type = TagTest.raytraceEntity(ctx);
 
                     TagTest.sendTagMessage(type, RegistryTypes.ENTITY_TYPE, tag, tag.key(RegistryTypes.ENTITY_TYPE_TAGS), ctx.cause().audience());
                     return CommandResult.success();
                 })
                 .build();
 
-        final Parameter.Value<Tag<FluidType>> FLUID_TYPE_TAG = Parameter.registryElement(TagTest.FLUID_TYPE_TAG_TOKEN, RegistryTypes.FLUID_TYPE_TAGS).key("fluidtag").build();
+        final Parameter.Value<Tag<FluidType>> FLUID_TYPE_TAG = TagTest.makeTagRegistryParameter(TagTest.FLUID_TYPE_TAG_TOKEN, RegistryTypes.FLUID_TYPE_TAGS, "fluidtag");
         final Command.Parameterized fluidHasTag = Command.builder()
                 .addParameter(FLUID_TYPE_TAG)
                 .executor(ctx -> {
                     final Tag<FluidType> tag = ctx.requireOne(FLUID_TYPE_TAG);
 
-                    final ServerPlayer serverPlayer = ctx.cause().first(ServerPlayer.class)
-                            .orElseThrow(() -> new CommandException(Component.text("You must be a player to use this command! (Ray trace)")));
-                    final RayTraceResult<@NonNull LocatableBlock> result = RayTrace.block()
-                            .select(RayTrace.nonAir())
-                            .world(serverPlayer.world())
-                            .sourceEyePosition(serverPlayer)
-                            .direction(serverPlayer)
-                            .execute()
-                            .orElseThrow(() -> new CommandException(Component.text("You must look at a block to use this command!")));
-
-                    final FluidType fluidType = result.selectedObject().serverLocation().fluid().type();
+                    final FluidType fluidType = TagTest.raytraceBlock(ctx).serverLocation().fluid().type();
 
                     TagTest.sendTagMessage(fluidType, RegistryTypes.FLUID_TYPE, tag, tag.key(RegistryTypes.FLUID_TYPE_TAGS), ctx.cause().audience());
 
@@ -210,13 +179,116 @@ public class TagTest {
                 .addChild(fluidHasTag, "fluid")
                 .build();
 
-        event.register(pluginContainer, hasTag, "hastag");
+        event.register(this.pluginContainer, hasTag, "hastag");
+
+        final Command.Parameterized blockTags = Command.builder()
+                .executor(ctx -> {
+                    final BlockType blockType = TagTest.raytraceBlock(ctx).blockState().type();
+                    final Audience audience = ctx.cause().audience();
+                    TagTest.sendTags(audience, blockType);
+                    return CommandResult.success();
+                })
+                .build();
+
+        final Command.Parameterized itemTags = Command.builder()
+                .executor(ctx -> {
+                    final ItemType itemType = TagTest.requireItemInHand(ctx);
+                    final Audience audience = ctx.cause().audience();
+                    TagTest.sendTags(audience, itemType);
+                    return CommandResult.success();
+                })
+                .build();
+
+        final Command.Parameterized entityTags = Command.builder()
+                .executor(ctx -> {
+                    final EntityType<?> entityType = TagTest.raytraceEntity(ctx);
+                    final Audience audience = ctx.cause().audience();
+                    TagTest.sendTags(audience, entityType);
+                    return CommandResult.success();
+                })
+                .build();
+
+        final Command.Parameterized fluidTags = Command.builder()
+                .executor(ctx -> {
+                    final FluidType fluidType = TagTest.raytraceBlock(ctx).blockState().fluidState().type();
+                    final Audience audience = ctx.cause().audience();
+                    TagTest.sendTags(audience, fluidType);
+                    return CommandResult.success();
+                })
+                .build();
+
+        final Command.Parameterized getTags = Command.builder()
+                .addChild(blockTags, "block")
+                .addChild(itemTags, "item")
+                .addChild(entityTags, "entity")
+                .addChild(fluidTags, "fluid")
+                .build();
+
+        event.register(this.pluginContainer, getTags, "gettags");
     }
 
-    private static <T extends Taggable> void sendTagMessage(T taggable, DefaultedRegistryType<T> registry, Tag<T> tag, ResourceKey tagKey, Audience audience) {
+    private static <T> Parameter.Value<Tag<T>> makeTagRegistryParameter(final TypeToken<Tag<T>> token, final RegistryType<Tag<T>> registryType, final String key) {
+        final ValueParameter<Tag<T>> valueParameter = VariableValueParameters.registryEntryBuilder(x -> Sponge.game().dataPackManager().registries().registry(registryType))
+                .defaultNamespace(ResourceKey.MINECRAFT_NAMESPACE)
+                .build();
+        return Parameter.builder(token, valueParameter).key(key).build();
+    }
+
+    private static ServerPlayer requirePlayerRayTrace(final CommandContext ctx) throws CommandException {
+        return ctx.cause().first(ServerPlayer.class)
+                .orElseThrow(() -> new CommandException(Component.text("You must be a player to use this command! (Ray trace)")));
+    }
+
+    private static LocatableBlock raytraceBlock(final CommandContext ctx) throws CommandException {
+        final ServerPlayer player = TagTest.requirePlayerRayTrace(ctx);
+        return RayTrace.block()
+                .select(RayTrace.nonAir())
+                .world(player.world())
+                .sourceEyePosition(player)
+                .direction(player)
+                .execute()
+                .orElseThrow(() -> new CommandException(Component.text("You must look at a block to use this command!")))
+                .selectedObject();
+    }
+
+    private static EntityType<?> raytraceEntity(final CommandContext ctx) throws CommandException {
+        final ServerPlayer player = TagTest.requirePlayerRayTrace(ctx);
+        return RayTrace.entity()
+                .world(player.world())
+                .sourceEyePosition(player)
+                .direction(player)
+                .execute()
+                .orElseThrow(() -> new CommandException(Component.text("You must look at an entity to use this command!")))
+                .selectedObject().type();
+    }
+
+    private static ItemType requireItemInHand(final CommandContext ctx) throws CommandException {
+        final ServerPlayer serverPlayer = ctx.cause().first(ServerPlayer.class)
+                .orElseThrow(() -> new CommandException(Component.text("You must be a player to use this command! (Held item)")));
+
+        final ItemStack heldItem = serverPlayer.itemInHand(HandTypes.MAIN_HAND);
+        if (heldItem.isEmpty()) {
+            throw new CommandException(Component.text("You must hold an item in your main hand!"));
+        }
+        return heldItem.type();
+    }
+
+    private static <T extends Taggable<@NonNull T>> void sendTagMessage(final T taggable, final DefaultedRegistryType<T> registry, final Tag<T> tag, final ResourceKey tagKey, final Audience audience) {
         boolean contained = tag.contains(taggable);
         final Component message = contained ? Component.text(taggable.key(registry) + " has tag " + tagKey, NamedTextColor.GREEN)
                 : Component.text(taggable.key(registry) + " does not have tag " + tagKey, NamedTextColor.RED);
         audience.sendMessage(message);
+    }
+
+    private static <T extends Taggable<@NonNull T>> void sendTags(final Audience audience, final T taggable) {
+        final Collection<Tag<T>> tags = taggable.tags();
+        final String taggableKey = Sponge.game().registries().registry(taggable.tagType().taggableRegistry()).valueKey(taggable).toString();
+        if (tags.isEmpty()) {
+            audience.sendMessage(Component.text(taggableKey + " has no tags", NamedTextColor.RED));
+            return;
+        }
+        audience.sendMessage(Component.text(taggableKey + " has tags:", NamedTextColor.GREEN));
+        tags.forEach(tag -> audience.sendMessage(Component.text(" - " +
+                Sponge.game().dataPackManager().registries().registry(taggable.tagType().tagRegistry()).valueKey(tag).toString(), NamedTextColor.BLUE)));
     }
 }

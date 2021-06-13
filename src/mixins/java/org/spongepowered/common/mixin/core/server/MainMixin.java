@@ -40,7 +40,9 @@ import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
@@ -78,6 +80,11 @@ public abstract class MainMixin {
         lifecycle.callRegisterDataEvent();
         lifecycle.callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
+    }
+
+    @Inject(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerResources;updateGlobals()V"))
+    private static void impl$loadDataPackRegistry(String[] param0, CallbackInfo ci) {
+        SpongeBootstrap.getLifecycle().establishDataPackRegistries();
     }
 
     @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/world/level/storage/PrimaryLevelData"))

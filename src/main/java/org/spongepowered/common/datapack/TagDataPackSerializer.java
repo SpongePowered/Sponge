@@ -31,6 +31,7 @@ import net.minecraft.tags.Tag;
 import org.apache.commons.io.FileUtils;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.datapack.tag.TagSerializedObject;
+import org.spongepowered.common.tag.SpongeTagType;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -59,7 +60,7 @@ public class TagDataPackSerializer extends DataPackSerializer<TagSerializedObjec
         for (final TagSerializedObject object : objects) {
             final Path namespacedDataDirectory = datapackDir.resolve("data").resolve(object.getKey().namespace());
             final String filename = object.getKey().value() + ".json";
-            final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(object.getTagType().id()).resolve(filename);
+            final Path objectFile = namespacedDataDirectory.resolve(this.typeDirectoryName).resolve(((SpongeTagType<?>) object.getTagType()).internalId()).resolve(filename);
             Files.createDirectories(objectFile.getParent());
 
 

@@ -85,6 +85,22 @@ enum RegistryScope {
         AnnotationSpec registryScopeAnnotation() {
             return RegistryScope.registryScopeAnnotation("WORLD");
         }
+    },
+    DATA_PACK {
+        @Override
+        protected CodeBlock registryKeyToReference() {
+            return CodeBlock.of("asDefaultedReference(() -> $T.game().dataPackManager().registries())", Types.SPONGE);
+        }
+
+        @Override
+        ClassName registryReferenceType() {
+            return Types.DEFAULTED_REGISTRY_REFERENCE;
+        }
+
+        @Override
+        AnnotationSpec registryScopeAnnotation() {
+            return RegistryScope.registryScopeAnnotation("DATA_PACK");
+        }
     };
 
     protected static AnnotationSpec registryScopeAnnotation(final String registryScope) {

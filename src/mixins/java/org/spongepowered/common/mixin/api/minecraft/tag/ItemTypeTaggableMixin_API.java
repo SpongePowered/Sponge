@@ -22,42 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.tag;
+package org.spongepowered.common.mixin.api.minecraft.tag;
 
-import org.spongepowered.api.registry.RegistryType;
+import net.minecraft.world.item.Item;
+import org.spongepowered.api.item.ItemType;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.tag.TagType;
+import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.api.tag.Taggable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.tag.TagUtil;
 
-public class SpongeTagType<T extends Taggable> implements TagType<T> {
+import java.util.Collection;
 
-    private final String id;
-    private final RegistryType<T> taggableRegistry;
-    private final RegistryType<Tag<T>> tagRegistry;
+@Mixin(Item.class)
+public abstract class ItemTypeTaggableMixin_API implements Taggable<ItemType> {
 
-    public SpongeTagType(String id, RegistryType<T> taggableRegistry, RegistryType<Tag<T>> tagRegistry) {
-        this.id = id;
-        this.taggableRegistry = taggableRegistry;
-        this.tagRegistry = tagRegistry;
-    }
-
-    /**
-     * The internal id for this tag type.
-     * Used for the directory.
-     *
-     * @return This TagType's id
-     */
-    public String internalId() {
-        return this.id;
+    @Override
+    public TagType<ItemType> tagType() {
+        return TagTypes.ITEM_TYPE.get();
     }
 
     @Override
-    public RegistryType<T> taggableRegistry() {
-        return this.taggableRegistry;
-    }
-
-    @Override
-    public RegistryType<Tag<T>> tagRegistry() {
-        return this.tagRegistry;
+    public Collection<Tag<ItemType>> tags() {
+        return TagUtil.getAssociatedTags((ItemType) this, RegistryTypes.ITEM_TYPE_TAGS);
     }
 }

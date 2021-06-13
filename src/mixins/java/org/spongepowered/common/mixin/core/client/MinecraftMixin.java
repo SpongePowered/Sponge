@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.client;
 
+import com.mojang.datafixers.util.Function4;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
@@ -56,6 +57,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
+import java.util.function.Function;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
@@ -147,5 +149,10 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         final Path datapackDir = levelSave.getLevelPath(folderName);
         SpongeBootstrap.lifecycle().callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
+    }
+
+    @Inject(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;managedBlock(Ljava/util/function/BooleanSupplier;)V"))
+    private void impl$establishDataPackRegistries(RegistryAccess.RegistryHolder param0, Function<LevelStorageSource.LevelStorageAccess, DataPackConfig> param1, Function4<LevelStorageSource.LevelStorageAccess, RegistryAccess.RegistryHolder, ResourceManager, DataPackConfig, WorldData> param2, boolean param3, LevelStorageSource.LevelStorageAccess param4, CallbackInfoReturnable<Minecraft.ServerStem> cir) {
+        SpongeBootstrap.getLifecycle().establishDataPackRegistries();
     }
 }

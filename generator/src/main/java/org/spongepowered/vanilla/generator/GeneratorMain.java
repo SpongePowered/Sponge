@@ -275,8 +275,7 @@ public final class GeneratorMain {
                     "EntityType Tags",
                     "ENTITY_TYPE_TAGS",
                     EntityTypeTags::getWrappers,
-                    ParameterizedTypeName.get(context.relativeClass("entity", "EntityType"),
-                            WildcardTypeName.subtypeOf(context.relativeClass("entity", "Entity"))),
+                    ParameterizedTypeName.get(context.relativeClass("entity", "EntityType"), WildcardTypeName.subtypeOf(Object.class)),
                     "tag",
                     "EntityTypeTags"
             ),

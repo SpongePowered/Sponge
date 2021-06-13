@@ -1052,16 +1052,16 @@ public final class SpongeRegistryLoaders {
         });
     }
 
-    public static RegistryDynamicPopulator<Tag<BlockType>> blockTypeTag() {
-        return RegistryDynamicPopulator.of(l -> {
+    public static RegistryLoader<Tag<BlockType>> blockTypeTag() {
+        return RegistryLoader.of(l -> {
             BlockTags.getWrappers().forEach(namedTag -> {
                 l.add(RegistryKey.of(RegistryTypes.BLOCK_TYPE_TAGS, (ResourceKey) (Object) namedTag.getName()), x -> (Tag<BlockType>) namedTag);
             });
         });
     }
 
-    public static RegistryDynamicPopulator<Tag<EntityType<?>>> entityTypeTag() {
-        return RegistryDynamicPopulator.of(l -> {
+    public static RegistryLoader<Tag<EntityType<?>>> entityTypeTag() {
+        return RegistryLoader.of(l -> {
             EntityTypeTags.getWrappers().forEach(namedTag -> {
                 l.add(RegistryKey.of(RegistryTypes.ENTITY_TYPE_TAGS, (ResourceKey) (Object) namedTag.getName()), x -> (Tag<EntityType<?>>) namedTag);
             });
@@ -1069,16 +1069,16 @@ public final class SpongeRegistryLoaders {
     }
 
 
-    public static RegistryDynamicPopulator<Tag<ItemType>> itemTypeTag() {
-        return RegistryDynamicPopulator.of(l -> {
+    public static RegistryLoader<Tag<ItemType>> itemTypeTag() {
+        return RegistryLoader.of(l -> {
             ItemTags.getWrappers().forEach(namedTag -> {
                 l.add(RegistryKey.of(RegistryTypes.ITEM_TYPE_TAGS, (ResourceKey) (Object) namedTag.getName()), x -> (Tag<ItemType>) namedTag);
             });
         });
     }
 
-    public static RegistryDynamicPopulator<Tag<FluidType>> fluidTypeTag() {
-        return RegistryDynamicPopulator.of(l -> {
+    public static RegistryLoader<Tag<FluidType>> fluidTypeTag() {
+        return RegistryLoader.of(l -> {
             FluidTags.getWrappers().forEach(namedTag -> {
                 l.add(RegistryKey.of(RegistryTypes.FLUID_TYPE_TAGS, (ResourceKey) (Object) namedTag.getName()), x -> (Tag<FluidType>) namedTag);
             });

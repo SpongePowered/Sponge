@@ -22,24 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry;
+package org.spongepowered.common.tag;
 
-import java.util.function.Consumer;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.registry.RegistryType;
+import org.spongepowered.api.tag.Tag;
+import org.spongepowered.api.tag.Taggable;
 
-public class RegistryDynamicPopulator<T> {
+import java.util.Collection;
+import java.util.stream.Collectors;
 
-    private final Consumer<RegistryLoader<T>> populator;
+public class TagUtil {
 
-    public RegistryDynamicPopulator(Consumer<RegistryLoader<T>> populator) {
-        this.populator = populator;
-    }
-
-
-    public static <T> RegistryDynamicPopulator<T> of(Consumer<RegistryLoader<T>> populator) {
-        return new RegistryDynamicPopulator<>(populator);
-    }
-
-    public RegistryLoader<T> createLoader() {
-        return RegistryLoader.of(populator);
+    public static <T extends Taggable<T>> Collection<Tag<T>> getAssociatedTags(T taggable, RegistryType<Tag<T>> taggableRegistry) {
+        return Sponge.game().dataPackManager().registries().registry(taggableRegistry).stream()
+                .filter(tag -> tag.contains(taggable))
+                .collect(Collectors.toList());
     }
 }

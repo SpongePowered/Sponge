@@ -80,12 +80,15 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoaders.mapDecorationType());
         holder.createRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoaders.mapShade());
         holder.createRegistry(RegistryTypes.TAG_TYPES, SpongeRegistryLoaders.tagTypes());
+    }
+
+    public static void registerServerRegistries(final SpongeRegistryHolder holder) {
+    }
+
+    public static void registerDataPackRegistries(final SpongeRegistryHolder holder) {
         holder.createRegistry(RegistryTypes.BLOCK_TYPE_TAGS, SpongeRegistryLoaders.blockTypeTag());
         holder.createRegistry(RegistryTypes.ITEM_TYPE_TAGS, SpongeRegistryLoaders.itemTypeTag());
         holder.createRegistry(RegistryTypes.ENTITY_TYPE_TAGS, SpongeRegistryLoaders.entityTypeTag());
         holder.createRegistry(RegistryTypes.FLUID_TYPE_TAGS, SpongeRegistryLoaders.fluidTypeTag());
-    }
-
-    public static void registerServerRegistries(final SpongeRegistryHolder holder) {
     }
 }

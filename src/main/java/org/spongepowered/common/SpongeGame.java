@@ -34,6 +34,7 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.data.DataManager;
+import org.spongepowered.api.datapack.DataPackManager;
 import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.network.channel.ChannelManager;
 import org.spongepowered.api.plugin.PluginManager;
@@ -68,6 +69,7 @@ public final class SpongeGame implements Game {
     private final MetricsConfigManager metricsConfigManager;
     private final SqlManager sqlManager;
     private final ServiceProvider.GameScoped serviceProvider;
+    private final DataPackManager dataPackManager;
 
     private final AsyncScheduler asyncScheduler;
     private RegistryHolder registryHolder;
@@ -98,6 +100,8 @@ public final class SpongeGame implements Game {
         this.serviceProvider = serviceProvider;
 
         this.asyncScheduler = new AsyncScheduler();
+        //this.registryHolder = new SpongeRegistryHolder();
+        this.dataPackManager = dataPackManager;
     }
 
     @Override
@@ -233,6 +237,11 @@ public final class SpongeGame implements Game {
         }
 
         return this.registryHolder;
+    }
+
+    @Override
+    public DataPackManager dataPackManager() {
+        return this.dataPackManager;
     }
 
     @Override
