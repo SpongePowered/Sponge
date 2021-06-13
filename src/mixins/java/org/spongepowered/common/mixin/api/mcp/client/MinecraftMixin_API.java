@@ -25,6 +25,8 @@
 package org.spongepowered.common.mixin.api.mcp.client;
 
 import net.minecraft.client.Minecraft;
+import net.minecraft.client.Options;
+import net.minecraft.client.resources.language.LanguageManager;
 import net.minecraft.client.server.IntegratedServer;
 import net.minecraft.network.Connection;
 import net.minecraft.util.thread.ReentrantBlockableEventLoop;
@@ -37,6 +39,7 @@ import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.world.client.ClientWorld;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
@@ -44,7 +47,9 @@ import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.common.scheduler.ClientScheduler;
+import org.spongepowered.common.util.LocaleCache;
 
+import java.util.Locale;
 import java.util.Optional;
 
 import javax.annotation.Nullable;
@@ -56,6 +61,7 @@ public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Run
     @Shadow public net.minecraft.client.multiplayer.ClientLevel level;
     @Shadow public net.minecraft.client.player.LocalPlayer player;
     @Shadow @Nullable private Connection pendingConnection;
+    @Shadow @Final public Options options;
     @Shadow @Nullable public abstract IntegratedServer shadow$getSingleplayerServer();
     // @formatter:on
 
@@ -125,4 +131,10 @@ public abstract class MinecraftMixin_API extends ReentrantBlockableEventLoop<Run
     public RegistryHolder registries() {
         return this.api$registryHolder;
     }
+
+    @Override
+    public Locale locale() {
+        return LocaleCache.getLocale(this.options.languageCode);
+    }
+
 }
