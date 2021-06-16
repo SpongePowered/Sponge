@@ -33,6 +33,7 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
+import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
@@ -54,7 +55,7 @@ import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 
-public final class SpongeDataPackType<T extends DataPackSerializable, U extends DataPackSerializedObject> implements DataPackType {
+public final class SpongeDataPackType<T extends DataPackSerializable, U extends DataPackSerializedObject> implements DataPackType<T> {
 
     private final TypeToken<T> token;
     private final DataPackSerializer<U> packSerializer;
@@ -72,7 +73,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
     }
 
     @Override
-    public TypeToken type() {
+    public TypeToken<T> type() {
         return this.token;
     }
 
@@ -140,22 +141,22 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         );
 
         @Override
-        public DataPackType recipe() {
+        public DataPackType<RecipeRegistration> recipe() {
             return this.recipe;
         }
 
         @Override
-        public DataPackType advancement() {
+        public DataPackType<Advancement> advancement() {
             return this.advancement;
         }
 
         @Override
-        public DataPackType worldType() {
+        public DataPackType<WorldTypeTemplate> worldType() {
             return this.worldType;
         }
 
         @Override
-        public DataPackType world() {
+        public DataPackType<WorldTemplate> world() {
             return world;
         }
     }
