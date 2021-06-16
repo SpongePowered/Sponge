@@ -22,30 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.bridge.world.level.biome;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.common.UntransformedAccessorError;
-
-import java.util.List;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
+import org.spongepowered.common.world.biome.provider.OverworldBiomeSourceHelper;
 
-@Mixin(OverworldBiomeSource.class)
-public interface OverworldBiomeSourceAccessor {
+public interface OverworldBiomeSourceBridge {
 
-    @Accessor("POSSIBLE_BIOMES") static List<ResourceKey<Biome>> accessor$POSSIBLE_BIOMES() {
-        throw new UntransformedAccessorError();
-    }
+    OverworldBiomeSource bridge$decorateData(OverworldBiomeSourceHelper.SpongeDataSection data);
 
-    @Accessor("seed") long accessor$seed();
-
-    @Accessor("legacyBiomeInitLayer") boolean accessor$legacyBiomeInitLayer();
-
-    @Accessor("largeBiomes") boolean accessor$largeBiomes();
-
-    @Accessor("biomes") Registry<Biome> accessor$biomes();
+    OverworldBiomeSourceHelper.SpongeDataSection bridge$createData();
 }

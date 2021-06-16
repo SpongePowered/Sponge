@@ -35,9 +35,13 @@ import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.difficulty.Difficulty;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -45,10 +49,15 @@ import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
-import java.util.function.Function;
 
 @Mixin(LevelStem.class)
 public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBridge {
+
+    // @formatter:off
+
+    @Shadow @Final @Mutable public static Codec<LevelStem> CODEC;
+
+    // @formatter:on
 
     private ResourceKey impl$key;
     private ResourceLocation impl$gameMode;
@@ -60,6 +69,11 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
     @Nullable private Boolean impl$hardcore, impl$pvp, impl$commands;
 
     private boolean impl$loadOnStartup = true, impl$performsSpawnLogic = false, impl$fromSettings = true;
+
+    @Inject(method = "<clinit>", at = @At("RETURN"))
+    private static void impl$useTemplateCodec(final CallbackInfo ci) {
+        LevelStemMixin.CODEC = SpongeWorldTemplate.DIRECT_CODEC;
+    }
 
     @Override
     public ResourceKey bridge$getKey() {
@@ -137,18 +151,31 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
     }
 
     @Override
-    public void bridge$populateFromData(final SpongeWorldTemplate.SpongeDataSection spongeData) {
-        this.impl$gameMode = spongeData.gameMode;
-        this.impl$difficulty = spongeData.difficulty;
-        this.impl$serializationBehavior = spongeData.serializationBehavior;
-        this.impl$displayName = spongeData.displayName;
-        this.impl$viewDistance = spongeData.viewDistance;
-        this.impl$spawnPosition = spongeData.spawnPosition;
-        this.impl$loadOnStartup = spongeData.loadOnStartup == null || spongeData.loadOnStartup;
-        this.impl$performsSpawnLogic = spongeData.performsSpawnLogic != null && spongeData.performsSpawnLogic;
-        this.impl$hardcore = spongeData.hardcore;
-        this.impl$commands = spongeData.commands;
-        this.impl$pvp = spongeData.pvp;
+    public LevelStem bridge$decorateData(final SpongeWorldTemplate.SpongeDataSection data) {
+        this.impl$gameMode = data.gameMode;
+        this.impl$difficulty = data.difficulty;
+        this.impl$serializationBehavior = data.serializationBehavior;
+        this.impl$displayName = data.displayName;
+        this.impl$viewDistance = data.viewDistance;
+        this.impl$spawnPosition = data.spawnPosition;
+        this.impl$loadOnStartup = data.loadOnStartup == null || data.loadOnStartup;
+        this.impl$performsSpawnLogic = data.performsSpawnLogic != null && data.performsSpawnLogic;
+        this.impl$hardcore = data.hardcore;
+        this.impl$commands = data.commands;
+        this.impl$pvp = data.pvp;
+
+        return (LevelStem) (Object) this;
+    }
+
+    @Override
+    public SpongeWorldTemplate.SpongeDataSection bridge$createData() {
+        return new SpongeWorldTemplate.SpongeDataSection(this.bridge$displayName().orElse(null),
+            this.bridge$gameMode().orElse(null), this.bridge$difficulty().orElse(null),
+            this.bridge$serializationBehavior().orElse(null),
+            this.bridge$viewDistance().orElse(null), this.bridge$spawnPosition().orElse(null),
+            this.bridge$loadOnStartup(), this.bridge$performsSpawnLogic(),
+            this.bridge$hardcore().orElse(null), this.bridge$commands().orElse(null),
+            this.bridge$pvp().orElse(null));
     }
 
     @Override
@@ -186,16 +213,5 @@ public abstract class LevelStemMixin implements LevelStemBridge, ResourceKeyBrid
     @Override
     public SpongeWorldTemplate bridge$asTemplate() {
         return new SpongeWorldTemplate((LevelStem) (Object) this);
-    }
-
-    @Redirect(
-        method = "*",
-        at = @At(
-            value = "INVOKE",
-            target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"
-        )
-    )
-    private static Codec impl$useTemplateCodec(final Function function) {
-        return SpongeWorldTemplate.DIRECT_CODEC;
     }
 }

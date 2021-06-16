@@ -160,7 +160,6 @@
         "world.level.ServerTickListAccessor",
         "world.level.biome.BiomeSourceAccessor",
         "world.level.biome.MultiNoiseBiomeSourceAccessor",
-        "world.level.biome.OverworldBiomeSourceAccessor",
         "world.level.biome.TheEndBiomeSourceAccessor",
         "world.level.block.AbstractSkullBlockAccessor",
         "world.level.block.BaseFireBlockAccessor",

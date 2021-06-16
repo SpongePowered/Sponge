@@ -25,32 +25,62 @@
 package org.spongepowered.common.mixin.core.world.level.biome;
 
 import com.mojang.serialization.Codec;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.world.biome.provider.SpongeLayeredBiomeProviderHelper;
-
-import java.util.List;
-import java.util.function.Function;
 import net.minecraft.world.level.biome.Biome;
 import net.minecraft.world.level.biome.BiomeSource;
 import net.minecraft.world.level.biome.OverworldBiomeSource;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.world.level.biome.BiomeSourceAccessor;
+import org.spongepowered.common.bridge.world.level.biome.OverworldBiomeSourceBridge;
+import org.spongepowered.common.world.biome.provider.OverworldBiomeSourceHelper;
+
+import java.util.ArrayList;
+import java.util.List;
+import java.util.function.Supplier;
 
 @Mixin(OverworldBiomeSource.class)
-public abstract class OverworldBiomeSourceMixin extends BiomeSource {
+public abstract class OverworldBiomeSourceMixin extends BiomeSource implements OverworldBiomeSourceBridge {
 
-    @Redirect(
-        method = "*",
-        at = @At(
-            value = "INVOKE",
-            target = "Lcom/mojang/serialization/codecs/RecordCodecBuilder;create(Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"
-        )
-    )
-    private static Codec impl$useEnhancedCodec(final Function function) {
-        return SpongeLayeredBiomeProviderHelper.DIRECT_CODEC;
-    }
+    // @formatter:off
+
+    @Shadow @Final @Mutable public static Codec<OverworldBiomeSource> CODEC;
+
+    // @formatter:on
 
     protected OverworldBiomeSourceMixin(final List<Biome> p_i231634_1_) {
         super(p_i231634_1_);
+    }
+
+    @Inject(method = "<clinit>", at = @At("RETURN"))
+    private static void impl$useEnhancedCodec(final CallbackInfo ci) {
+        OverworldBiomeSourceMixin.CODEC = OverworldBiomeSourceHelper.DIRECT_CODEC;
+    }
+
+    @Override
+    public OverworldBiomeSource bridge$decorateData(final OverworldBiomeSourceHelper.SpongeDataSection data) {
+        if (data.biomes.isEmpty()) {
+            return (OverworldBiomeSource) (Object) this;
+        }
+
+        final List<Biome> biomes = new ArrayList<>();
+        data.biomes.forEach(biome -> biomes.add(biome.get()));
+
+        ((BiomeSourceAccessor) this).accessor$possibleBiomes(biomes);
+
+        return (OverworldBiomeSource) (Object) this;
+    }
+
+    @Override
+    public OverworldBiomeSourceHelper.SpongeDataSection bridge$createData() {
+        final List<Biome> biomes = ((BiomeSourceAccessor) this).accessor$possibleBiomes();
+        final List<Supplier<Biome>> supplied = new ArrayList<>();
+        biomes.forEach(biome -> supplied.add(() -> biome));
+
+        return new OverworldBiomeSourceHelper.SpongeDataSection(supplied);
     }
 }
