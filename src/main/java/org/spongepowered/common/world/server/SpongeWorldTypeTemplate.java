@@ -69,7 +69,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
     public final boolean ultraWarm, natural, skylight, ceiling, piglinSafe, bedWorks, respawnAnchorWorks, hasRaids, createDragonFight;
     public final float ambientLight;
-    public final int logicalHeight;
+    public final int minY, logicalHeight, maximumHeight;
     public final double coordinateScale;
 
     private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
@@ -81,9 +81,13 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             .apply(r, r.stable(SpongeDataSection::new))
         );
 
-    public static final Codec<DimensionType> DIRECT_CODEC = new MapCodec.MapCodecCodec<>(new SpongeDataCodec<>(DimensionType.DIRECT_CODEC,
-        SpongeWorldTypeTemplate.SPONGE_CODEC, (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge)
-        type).bridge$createData()));
+    public static Codec<DimensionType> DIRECT_CODEC;
+
+    public static void internalCodec(final Codec<DimensionType> internalCodec) {
+        SpongeWorldTypeTemplate.DIRECT_CODEC = new MapCodec.MapCodecCodec<>(new SpongeDataCodec<>(internalCodec,
+            SpongeWorldTypeTemplate.SPONGE_CODEC, (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge)
+            type).bridge$createData()));
+    }
 
     public static final Codec<Supplier<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, SpongeWorldTypeTemplate.DIRECT_CODEC);
 
@@ -102,7 +106,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.respawnAnchorWorks = builder.respawnAnchorsUsable;
         this.hasRaids = builder.hasRaids;
         this.ambientLight = builder.ambientLighting;
+        this.minY = builder.minY;
         this.logicalHeight = builder.logicalHeight;
+        this.maximumHeight = builder.maximumHeight;
         this.coordinateScale = builder.coordinateMultiplier;
 
         // Sponge
@@ -124,7 +130,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.bedWorks = dimensionType.bedWorks();
         this.respawnAnchorWorks = dimensionType.respawnAnchorWorks();
         this.hasRaids = dimensionType.hasRaids();
+        this.minY = dimensionType.minY();
         this.logicalHeight = dimensionType.logicalHeight();
+        this.maximumHeight = dimensionType.height();
         this.biomeSampler = (BiomeSampler) dimensionType.getBiomeZoomer();
         this.infiniburn = (ResourceKey) (Object) ((Tag.Named<Block>) dimensionType.infiniburn()).getName();
         this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) dimensionType).accessor$effectsLocation());
@@ -213,8 +221,18 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     }
 
     @Override
+    public int minY() {
+        return this.minY;
+    }
+
+    @Override
     public int logicalHeight() {
         return this.logicalHeight;
+    }
+
+    @Override
+    public int maximumHeight() {
+        return this.maximumHeight;
     }
 
     @Override
@@ -241,7 +259,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
         protected boolean scorching, natural, skylight, ceiling, piglinSafe, bedsUsable, respawnAnchorsUsable, hasRaids, createDragonFight;
         protected float ambientLighting;
-        protected int logicalHeight;
+        protected int minY, logicalHeight, maximumHeight;
         protected double coordinateMultiplier;
 
         @Override
@@ -323,8 +341,20 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         }
 
         @Override
+        public Builder minY(final int y) {
+            this.minY = y;
+            return this;
+        }
+
+        @Override
         public WorldTypeTemplate.Builder logicalHeight(final int logicalHeight) {
             this.logicalHeight = logicalHeight;
+            return this;
+        }
+
+        @Override
+        public Builder maximumHeight(final int maximumHeight) {
+            this.maximumHeight = maximumHeight;
             return this;
         }
 
@@ -350,7 +380,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             this.respawnAnchorsUsable = false;
             this.hasRaids = true;
             this.ambientLighting = 0.5f;
+            this.minY = 10;
             this.logicalHeight = 256;
+            this.maximumHeight = 256;
             this.coordinateMultiplier = 1;
             this.createDragonFight = false;
             return this;

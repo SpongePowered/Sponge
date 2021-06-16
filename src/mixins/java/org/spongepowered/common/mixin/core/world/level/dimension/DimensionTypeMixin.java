@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.level.dimension;
 
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.level.Level;
@@ -35,11 +37,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
 import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
 import java.io.File;
+import java.util.function.Function;
 
 @Mixin(DimensionType.class)
 public abstract class DimensionTypeMixin implements DimensionTypeBridge {
@@ -74,5 +79,12 @@ public abstract class DimensionTypeMixin implements DimensionTypeBridge {
         return new SpongeWorldTypeTemplate.SpongeDataSection(
             (ResourceLocation) (Object) BiomeSamplerProvider.INSTANCE.get((BiomeSampler) this.biomeZoomer),
             this.createDragonFight);
+    }
+
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;comapFlatMap(Ljava/util/function/Function;Ljava/util/function/Function;)Lcom/mojang/serialization/Codec;"))
+    private static Codec<Object> impl$captureActualCodecBeforeWrap(final Codec<Object> codec, final Function<? super Object, ? extends DataResult<?
+        extends Object>> to, final Function<? super Object, ? extends Object> from) {
+        SpongeWorldTypeTemplate.internalCodec((Codec<DimensionType>) (Object) codec);
+        return codec.comapFlatMap(to, from);
     }
 }
