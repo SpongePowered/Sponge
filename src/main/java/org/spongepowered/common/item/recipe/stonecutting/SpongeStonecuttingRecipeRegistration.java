@@ -26,7 +26,7 @@ package org.spongepowered.common.item.recipe.stonecutting;
 
 import com.google.gson.JsonObject;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.function.Function;
@@ -70,10 +70,10 @@ public class SpongeStonecuttingRecipeRegistration extends SpongeRecipeRegistrati
         json.addProperty(Constants.Recipe.COUNT, this.count);
 
         if (this.spongeResult != null) {
-            json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(this.spongeResult));
+            json.add(Constants.Recipe.SPONGE_RESULT, IngredientResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
+            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, IngredientResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
         }
     }
 }

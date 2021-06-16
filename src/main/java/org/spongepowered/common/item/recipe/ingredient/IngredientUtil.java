@@ -119,7 +119,7 @@ public class IngredientUtil {
                 throw new JsonSyntaxException("Item array cannot be empty, at least one item must be defined");
             }
             return IngredientAccessor.invoker$fromValues(StreamSupport.stream(jsonarray.spliterator(), false).map((p_209355_0_) ->
-                    IngredientAccessor.invoker$valueFromJson(GsonHelper.convertToJsonObject(p_209355_0_, "item"))));
+                IngredientAccessor.invoker$valueFromJson(GsonHelper.convertToJsonObject(p_209355_0_, "item"))));
         }
         throw new JsonSyntaxException("Expected item to be object or array of objects");
     }
@@ -141,9 +141,9 @@ public class IngredientUtil {
         }
         final JsonArray jsonArray = json.getAsJsonArray(SpongeItemList.INGREDIENT_ITEM);
         return StreamSupport.stream(jsonArray.spliterator(), false)
-                .map(JsonElement::getAsJsonObject)
-                .map(ResultUtil::deserializeItemStack)
-                .map(stacks -> new SpongePredicateItemList(id, predicate, stacks));
+            .map(JsonElement::getAsJsonObject)
+            .map(IngredientResultUtil::deserializeItemStack)
+            .map(stacks -> new SpongePredicateItemList(id, predicate, stacks));
     }
 
     public static Stream<Ingredient.Value> spongeDeserializeItemList(JsonObject json) {
@@ -155,9 +155,9 @@ public class IngredientUtil {
         }
         final JsonArray jsonArray = json.getAsJsonArray(SpongeItemList.INGREDIENT_ITEM);
         return StreamSupport.stream(jsonArray.spliterator(), false)
-                .map(JsonElement::getAsJsonObject)
-                .map(ResultUtil::deserializeItemStack)
-                .map(SpongeStackItemList::new);
+            .map(JsonElement::getAsJsonObject)
+            .map(IngredientResultUtil::deserializeItemStack)
+            .map(SpongeStackItemList::new);
     }
 
 

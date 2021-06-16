@@ -52,7 +52,7 @@ public abstract class SpongeItemList implements Ingredient.Value {
         final JsonObject jsonobject = new JsonObject();
         final JsonArray stackArray = new JsonArray();
         for (ItemStack stack : this.stacks) {
-            stackArray.add(ResultUtil.serializeItemStack(stack));
+            stackArray.add(IngredientResultUtil.serializeItemStack(stack));
         }
         jsonobject.add(SpongeItemList.INGREDIENT_ITEM, stackArray);
         return jsonobject;

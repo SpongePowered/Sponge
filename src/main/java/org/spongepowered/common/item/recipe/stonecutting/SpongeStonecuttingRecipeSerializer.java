@@ -27,7 +27,7 @@ package org.spongepowered.common.item.recipe.stonecutting;
 import com.google.gson.JsonObject;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
-import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.function.Function;
@@ -51,8 +51,8 @@ public class SpongeStonecuttingRecipeSerializer<R extends SingleItemRecipe> impl
         final String group = GsonHelper.getAsString(json, Constants.Recipe.GROUP, "");
         final Ingredient ingredient = IngredientUtil.spongeDeserialize(json.get(Constants.Recipe.STONECUTTING_INGREDIENT));
 
-        final Function<Container, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
-        final ItemStack spongeStack = ResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
+        final Function<Container, ItemStack> resultFunction = IngredientResultUtil.deserializeResultFunction(json);
+        final ItemStack spongeStack = IngredientResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
         if (spongeStack != null) {
             return (R) new SpongeStonecuttingRecipe(recipeId, group, ingredient, spongeStack, resultFunction);
         }

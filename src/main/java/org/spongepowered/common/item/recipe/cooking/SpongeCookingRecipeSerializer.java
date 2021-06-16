@@ -28,7 +28,7 @@ import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
-import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.function.Function;
@@ -65,8 +65,8 @@ public abstract class SpongeCookingRecipeSerializer<R extends AbstractCookingRec
         final String result = GsonHelper.getAsString(json, Constants.Recipe.RESULT);
         final ResourceLocation resourcelocation = new ResourceLocation(result);
         final ItemStack itemstack = new ItemStack(Registry.ITEM.getOptional(resourcelocation).orElseThrow(() -> new IllegalStateException("Item: " + result + " does not exist")));
-        final ItemStack spongeStack = ResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
-        final Function<Container, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
+        final ItemStack spongeStack = IngredientResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
+        final Function<Container, ItemStack> resultFunction = IngredientResultUtil.deserializeResultFunction(json);
         final float exp = GsonHelper.getAsFloat(json, Constants.Recipe.COOKING_EXP, 0.0F);
         final int cookTime = GsonHelper.getAsInt(json, Constants.Recipe.COOKING_TIME, this.defaultCookingTime);
         return this.create(recipeId, group, ingredient, spongeStack == null ? itemstack : spongeStack, exp, cookTime, resultFunction);

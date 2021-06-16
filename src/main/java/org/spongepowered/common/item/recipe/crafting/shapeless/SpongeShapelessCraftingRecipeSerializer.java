@@ -30,7 +30,7 @@ import com.google.gson.JsonObject;
 import com.google.gson.JsonParseException;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
 import org.spongepowered.common.item.recipe.ingredient.IngredientUtil;
-import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.function.Function;
@@ -67,9 +67,9 @@ public class SpongeShapelessCraftingRecipeSerializer extends ShapelessRecipe.Ser
             throw new JsonParseException("Too many ingredients for shapeless recipe");
         }
         final ItemStack itemstack = ShapedRecipe.itemFromJson(GsonHelper.getAsJsonObject(json, Constants.Recipe.RESULT));
-        final ItemStack spongeStack = ResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
-        final Function<CraftingContainer, ItemStack> resultFunction = ResultUtil.deserializeResultFunction(json);
-        final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction = ResultUtil.deserializeRemainingItemsFunction(json);
+        final ItemStack spongeStack = IngredientResultUtil.deserializeItemStack(json.getAsJsonObject(Constants.Recipe.SPONGE_RESULT));
+        final Function<CraftingContainer, ItemStack> resultFunction = IngredientResultUtil.deserializeResultFunction(json);
+        final Function<CraftingContainer, NonNullList<ItemStack>> remainingItemsFunction = IngredientResultUtil.deserializeRemainingItemsFunction(json);
         return new SpongeShapelessRecipe(recipeId, s, spongeStack == null ? itemstack : spongeStack, nonnulllist, resultFunction, remainingItemsFunction);
     }
 

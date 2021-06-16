@@ -26,7 +26,7 @@ package org.spongepowered.common.item.recipe.smithing;
 
 import com.google.gson.JsonObject;
 import org.spongepowered.common.item.recipe.SpongeRecipeRegistration;
-import org.spongepowered.common.item.recipe.ingredient.ResultUtil;
+import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.util.Constants;
 
 import java.util.function.Function;
@@ -72,10 +72,10 @@ public class SpongeSmithingRecipeRegistration extends SpongeRecipeRegistration {
         json.add(Constants.Recipe.RESULT, item);
 
         if (this.spongeResult != null) {
-            json.add(Constants.Recipe.SPONGE_RESULT, ResultUtil.serializeItemStack(this.spongeResult));
+            json.add(Constants.Recipe.SPONGE_RESULT, IngredientResultUtil.serializeItemStack(this.spongeResult));
         }
         if (this.resultFunction != null) {
-            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, ResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
+            json.addProperty(Constants.Recipe.SPONGE_RESULTFUNCTION, IngredientResultUtil.cacheResultFunction(this.getId(), this.resultFunction));
         }
     }
 }

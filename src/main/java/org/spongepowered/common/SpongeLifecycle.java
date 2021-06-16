@@ -119,14 +119,8 @@ public final class SpongeLifecycle {
         ((SpongeDataManager) this.game.dataManager()).registerKeyListeners();
     }
 
-    public void callRegisterDataPackValueEvent(final Path datapackDir) {
-
-        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents();
-        try {
-            SpongeDataPackManager.INSTANCE.serialize(datapackDir, new ArrayList<>());
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+    public void callRegisterDataPackValueEvent(final Path dataPacksDirectory) {
+        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(dataPacksDirectory);
     }
 
     public void callRegisterChannelEvent() {
