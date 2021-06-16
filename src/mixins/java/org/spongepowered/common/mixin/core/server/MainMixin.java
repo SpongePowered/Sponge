@@ -37,11 +37,13 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeLifecycle;
+import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
@@ -63,6 +65,7 @@ public abstract class MainMixin {
             RegistryAccess.RegistryHolder p_244335_2_) {
         final RegistryReadOps<T> worldSettingsAdapter = RegistryReadOps.create(p_244335_0_, p_244335_1_, p_244335_2_);
         BootstrapProperties.worldSettingsAdapter(worldSettingsAdapter);
+        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
         return worldSettingsAdapter;
     }
 

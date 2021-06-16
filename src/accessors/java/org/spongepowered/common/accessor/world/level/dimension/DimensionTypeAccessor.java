@@ -72,6 +72,8 @@ public interface DimensionTypeAccessor {
 
     @Accessor("ambientLight") float accessor$ambientLight();
 
+    @Accessor("infiniburn") ResourceLocation accessor$infiniburn();
+
     @Invoker("defaultEndGenerator") static ChunkGenerator invoker$defaultEndGenerator(final Registry<Biome> p_242717_0_,
         final Registry<NoiseGeneratorSettings> p_242717_1_, final long p_242717_2_) {
         throw new UntransformedInvokerError();
