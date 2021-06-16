@@ -27,6 +27,8 @@ package org.spongepowered.common.event.lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.datapack.DataPackSerializable;
+import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.lifecycle.RegisterDataPackValueEvent;
 import org.spongepowered.common.datapack.DataPackSerializedObject;
@@ -37,12 +39,12 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 
-public final class RegisterDataPackValueEventImpl<T extends DataPackSerializable, U extends DataPackSerializedObject> extends AbstractLifecycleEvent.GenericImpl<T> implements RegisterDataPackValueEvent<T> {
+public final class RegisterDataPackValueEventImpl<T extends DataPackSerializable> extends AbstractLifecycleEvent.GenericImpl<T> implements RegisterDataPackValueEvent<T> {
 
-    private final SpongeDataPackType<T, U> type;
-    private final Map<SpongeDataPackType<T, U>, List<T>> serializables;
+    private final DataPackType<T> type;
+    private final Map<DataPackType<T>, List<T>> serializables;
 
-    public RegisterDataPackValueEventImpl(final Cause cause, final Game game, final SpongeDataPackType<T, U> type) {
+    public RegisterDataPackValueEventImpl(final Cause cause, final Game game, final DataPackType<T> type) {
         super(cause, game, type.type());
         this.type = type;
         this.serializables = new Object2ObjectOpenHashMap<>();
@@ -50,12 +52,11 @@ public final class RegisterDataPackValueEventImpl<T extends DataPackSerializable
 
     @Override
     public RegisterDataPackValueEvent<T> register(final T serializable) {
-        Objects.requireNonNull(serializable, "serializable");
-        this.serializables.computeIfAbsent(this.type, k -> new ArrayList<>()).add(serializable);
+        this.serializables.computeIfAbsent(this.type, k -> new ArrayList<>()).add(Objects.requireNonNull(serializable, "serializable"));
         return this;
     }
 
-    public Map<SpongeDataPackType<T, U>, List<T>> serializables() {
+    public Map<DataPackType<T>, List<T>> serializables() {
         return serializables;
     }
 }
