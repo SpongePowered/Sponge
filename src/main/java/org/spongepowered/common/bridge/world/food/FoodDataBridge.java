@@ -27,5 +27,5 @@ package org.spongepowered.common.bridge.world.food;
 import net.minecraft.world.entity.player.Player;
 
 public interface FoodDataBridge {
-    void bridge$setPlayer(Player player);
+    void bridge$setPlayer(final Player player);
 }

@@ -40,7 +40,10 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.food.FoodDataBridge;
+import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import java.util.Objects;
 
 @Mixin(FoodData.class)
 public abstract class FoodDataMixin implements FoodDataBridge {
@@ -54,46 +57,50 @@ public abstract class FoodDataMixin implements FoodDataBridge {
     private Player impl$player;
 
     @Override
-    public void bridge$setPlayer(Player player) {
+    public void bridge$setPlayer(final Player player) {
         this.impl$player = player;
     }
 
     @Redirect(method = "setFoodLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;foodLevel:I", opcode = Opcodes.PUTFIELD))
-    private void impl$setFoodLevel(FoodData self, int value) {
+    private void impl$setFoodLevel(final FoodData self, final int value) {
         this.foodLevel = this.fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
     }
 
     @Redirect(method = "eat(IF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;foodLevel:I", opcode = Opcodes.PUTFIELD))
-    private void impl$eatSetFoodLevel(FoodData self, int value) {
+    private void impl$eatSetFoodLevel(final FoodData self, final int value) {
         this.foodLevel = this.fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
     }
 
     @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;foodLevel:I", opcode = Opcodes.PUTFIELD))
-    private void impl$tickDrainFoodLevel(FoodData self, int value) {
+    private void impl$tickDrainFoodLevel(final FoodData self, final int value) {
         this.foodLevel = this.fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
     }
 
     @Redirect(method = "eat(IF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;saturationLevel:F", opcode = Opcodes.PUTFIELD))
-    private void impl$eatSetSaturationLevel(FoodData self, float value) {
+    private void impl$eatSetSaturationLevel(final FoodData self, final float value) {
         this.saturationLevel = this.fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
     }
 
     @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;saturationLevel:F", opcode = Opcodes.PUTFIELD))
-    private void impl$tickDrainSaturationLevel(FoodData self, float value) {
+    private void impl$tickDrainSaturationLevel(final FoodData self, final float value) {
         this.saturationLevel = this.fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
     }
 
     @Redirect(method = "addExhaustion", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;exhaustionLevel:F", opcode = Opcodes.PUTFIELD))
-    private void impl$addExhaustion(FoodData self, float value) {
+    private void impl$addExhaustion(final FoodData self, final float value) {
         this.exhaustionLevel = this.fireEventAndGetValue(Keys.EXHAUSTION, (double) this.exhaustionLevel, (double) value).floatValue();
     }
 
     @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;exhaustionLevel:F", opcode = Opcodes.PUTFIELD))
-    private void impl$tickDrainExhaustion(FoodData self, float value) {
+    private void impl$tickDrainExhaustion(final FoodData self, final float value) {
         this.exhaustionLevel = this.fireEventAndGetValue(Keys.EXHAUSTION, (double) this.exhaustionLevel, (double) value).floatValue();
     }
 
-    private <E> E fireEventAndGetValue(Key<? extends Value<E>> key, E currentValue, E value) {
+    private <E> E fireEventAndGetValue(final Key<? extends Value<E>> key, final E currentValue, final E value) {
+        if (!ShouldFire.CHANGE_DATA_HOLDER_EVENT_VALUE_CHANGE || Objects.equals(currentValue, value)) {
+            return currentValue;
+        }
+
         final DataTransactionResult transaction = DataTransactionResult.builder()
                 .replace(Value.immutableOf(key, currentValue))
                 .success(Value.immutableOf(key, value))
