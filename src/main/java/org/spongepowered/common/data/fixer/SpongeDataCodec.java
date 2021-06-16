@@ -25,20 +25,20 @@
 package org.spongepowered.common.data.fixer;
 
 import com.mojang.serialization.Codec;
-import com.mojang.serialization.DataResult;
-import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
 
-public final class SpongeDataCodec<A, B> extends CombinerCodec<A, B> {
+public final class SpongeDataCodec<A, B> extends CombineMapsCodec<A, B> {
 
-    public <T> SpongeDataCodec(final Codec<A> first, final Codec<B> second, final BiFunction<A, B, A> decodeAction, final Function<A, B> encodeAction) {
+    public <T> SpongeDataCodec(final Codec<A> first, final Codec<B> second, final BiFunction<A, B, A> decodeAction,
+        final Function<A, B> encodeAction) {
         super(first, second, decodeAction, encodeAction);
     }
 
     @Override
-    protected <T> DataResult<T> merge(DynamicOps<T> adapter, DataResult<T> first, DataResult<T> second) {
-        return adapter.mergeToMap(first.result().get(), adapter.createString("#sponge"), second.result().get());
+    protected String mergeKey() {
+        return "#sponge";
     }
 }

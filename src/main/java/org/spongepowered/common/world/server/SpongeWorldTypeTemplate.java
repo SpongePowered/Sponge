@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.server;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
@@ -80,8 +81,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             .apply(r, r.stable(SpongeDataSection::new))
         );
 
-    public static final Codec<DimensionType> DIRECT_CODEC = new SpongeDataCodec<>(DimensionType.DIRECT_CODEC, SpongeWorldTypeTemplate.SPONGE_CODEC
-        , (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge) type).bridge$createData());
+    public static final Codec<DimensionType> DIRECT_CODEC = new MapCodec.MapCodecCodec<>(new SpongeDataCodec<>(DimensionType.DIRECT_CODEC,
+        SpongeWorldTypeTemplate.SPONGE_CODEC, (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge)
+        type).bridge$createData()));
 
     public static final Codec<Supplier<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, SpongeWorldTypeTemplate.DIRECT_CODEC);
 

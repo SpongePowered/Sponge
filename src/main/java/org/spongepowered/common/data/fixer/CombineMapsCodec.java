@@ -28,48 +28,61 @@ import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
 import com.mojang.serialization.DynamicOps;
+import com.mojang.serialization.MapCodec;
+import com.mojang.serialization.MapLike;
+import com.mojang.serialization.RecordBuilder;
 
 import java.util.function.BiFunction;
 import java.util.function.Function;
+import java.util.stream.Stream;
 
-public abstract class CombinerCodec<A, B> implements Codec<A> {
+public abstract class CombineMapsCodec<A, B> extends MapCodec<A> {
 
-    private final Codec<A> first;
+    private final MapCodec<A> first;
     private final Codec<B> second;
     private final BiFunction<A, B, A> decodeAction;
     private final Function<A, B> encodeAction;
 
-    public <T> CombinerCodec(final Codec<A> first, final Codec<B> second, final BiFunction<A, B, A> decodeAction, Function<A, B> encodeAction) {
-        this.first = first;
+    public <T> CombineMapsCodec(final Codec<A> first, final Codec<B> second, final BiFunction<A, B, A> decodeAction, Function<A, B> encodeAction) {
+        this.first = ((MapCodecCodec<A>) first).codec();
         this.second = second;
         this.decodeAction = decodeAction;
         this.encodeAction = encodeAction;
     }
 
     @Override
-    public <T> DataResult<Pair<A, T>> decode(final DynamicOps<T> ops, final T input) {
-        final DataResult<Pair<A, T>> firstResult = this.first.decode(ops, input);
-        final DataResult<Pair<B, T>> secondResult = this.second.decode(ops, input);
-        // TODO Error verification
-        if (!firstResult.result().isPresent()) {
-            return firstResult;
-        }
-        return firstResult.map(res -> res.mapFirst(val -> this.decodeAction.apply(val, secondResult.result().get().getFirst())));
+    public <T> Stream<T> keys(final DynamicOps<T> ops) {
+        final Stream<T> keys = this.first.keys(ops);
+        return Stream.concat(keys, Stream.of(ops.createString(this.mergeKey())));
     }
 
     @Override
-    public <T> DataResult<T> encode(final A input, final DynamicOps<T> ops, final T prefix) {
-        final DataResult<T> firstResult = this.first.encode(input, ops, prefix);
-        // TODO Error verification
+    public <T> DataResult<A> decode(final DynamicOps<T> ops, final MapLike<T> input) {
+        final DataResult<A> firstResult = this.first.decode(ops, input);
         if (!firstResult.result().isPresent()) {
             return firstResult;
         }
-        final DataResult<T> secondResult = this.second.encode(this.encodeAction.apply(input), ops, prefix);
+        final T rawSecondData = input.get(this.mergeKey());
+        if (rawSecondData == null) {
+            return firstResult;
+        }
+        final DataResult<Pair<B, T>> secondResult = this.second.decode(ops, rawSecondData);
         if (!secondResult.result().isPresent()) {
             return firstResult;
         }
-        return this.merge(ops, firstResult, secondResult);
+        return firstResult.map(val -> this.decodeAction.apply(val, secondResult.result().get().getFirst()));
     }
 
-    protected abstract <T> DataResult<T> merge(DynamicOps<T> adapter, DataResult<T> first, DataResult<T> second);
+    @Override
+    public <T> RecordBuilder<T> encode(final A input, final DynamicOps<T> ops, final RecordBuilder<T> prefix) {
+        final RecordBuilder<T> firstResult = this.first.encode(input, ops, prefix);
+        final DataResult<T> secondResult = this.second.encode(this.encodeAction.apply(input), ops, null);
+
+        // Need an actual result and not a builder:
+        firstResult.add(this.mergeKey(), secondResult);
+
+        return firstResult;
+    }
+
+    protected abstract String mergeKey();
 }
