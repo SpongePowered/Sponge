@@ -26,6 +26,7 @@ package org.spongepowered.common.world.server;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.Lifecycle;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.MappedRegistry;
@@ -107,8 +108,9 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                     )
             );
 
-    public static final Codec<LevelStem> DIRECT_CODEC = new SpongeDataCodec<>(LevelStem.CODEC, SpongeWorldTemplate.SPONGE_CODEC,
-        (type, data) -> ((LevelStemBridge) (Object) type).bridge$decorateData(data), type -> ((LevelStemBridge) (Object) type).bridge$createData());
+    public static final Codec<LevelStem> DIRECT_CODEC = new MapCodec.MapCodecCodec<>(new SpongeDataCodec<>(LevelStem.CODEC,
+        SpongeWorldTemplate.SPONGE_CODEC, (type, data) -> ((LevelStemBridge) (Object) type).bridge$decorateData(data),
+        type -> ((LevelStemBridge) (Object) type).bridge$createData()));
 
     protected SpongeWorldTemplate(final BuilderImpl builder) {
         super(builder.key);

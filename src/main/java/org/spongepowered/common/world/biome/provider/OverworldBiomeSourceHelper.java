@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.biome.provider;
 
 import com.mojang.serialization.Codec;
+import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
 
 import java.util.ArrayList;
@@ -46,9 +47,9 @@ public final class OverworldBiomeSourceHelper {
                     .apply(r, f1 -> new SpongeDataSection(f1.orElse(new ArrayList<>())))
             );
 
-    public static final Codec<OverworldBiomeSource> DIRECT_CODEC = new SpongeDataCodec<>(OverworldBiomeSource.CODEC,
+    public static final Codec<OverworldBiomeSource> DIRECT_CODEC = new MapCodec.MapCodecCodec<>(new SpongeDataCodec<>(OverworldBiomeSource.CODEC,
         OverworldBiomeSourceHelper.SPONGE_CODEC, (type, data) -> ((OverworldBiomeSourceBridge) type).bridge$decorateData(data),
-        type -> ((OverworldBiomeSourceBridge) type).bridge$createData());
+        type -> ((OverworldBiomeSourceBridge) type).bridge$createData()));
 
     public static final class SpongeDataSection {
         public final List<Supplier<Biome>> biomes;
