@@ -22,30 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.accessor.world.level.biome;
+package org.spongepowered.common.world.portal;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.gen.Accessor;
-import org.spongepowered.common.UntransformedAccessorError;
+import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.phys.Vec3;
+import org.spongepowered.api.world.portal.Portal;
 
-import java.util.List;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.biome.Biome;
-import net.minecraft.world.level.biome.OverworldBiomeSource;
+public final class SpongePortalInfo extends PortalInfo {
 
-@Mixin(OverworldBiomeSource.class)
-public interface OverworldBiomeSourceAccessor {
+    private final Portal portal;
 
-    @Accessor("POSSIBLE_BIOMES") static List<ResourceKey<Biome>> accessor$POSSIBLE_BIOMES() {
-        throw new UntransformedAccessorError();
+    public SpongePortalInfo(final Vec3 var1, final Vec3 var2, final float var3, final float var4, final Portal portal) {
+        super(var1, var2, var3, var4);
+        this.portal = portal;
     }
 
-    @Accessor("seed") long accessor$seed();
+    public Portal portal() {
+        return this.portal;
+    }
 
-    @Accessor("legacyBiomeInitLayer") boolean accessor$legacyBiomeInitLayer();
-
-    @Accessor("largeBiomes") boolean accessor$largeBiomes();
-
-    @Accessor("biomes") Registry<Biome> accessor$biomes();
 }

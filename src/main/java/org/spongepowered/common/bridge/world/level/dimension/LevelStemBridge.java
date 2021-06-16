@@ -26,6 +26,7 @@ package org.spongepowered.common.bridge.world.level.dimension;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.world.SerializationBehavior;
@@ -65,11 +66,13 @@ public interface LevelStemBridge {
 
     void bridge$setFromSettings(boolean fromSettings);
 
-    void bridge$populateFromData(SpongeWorldTemplate.SpongeDataSection spongeData);
-
     void bridge$populateFromTemplate(SpongeWorldTemplate s);
 
     void bridge$populateFromLevelData(PrimaryLevelData levelData);
 
     SpongeWorldTemplate bridge$asTemplate();
+
+    LevelStem bridge$decorateData(SpongeWorldTemplate.SpongeDataSection data);
+
+    SpongeWorldTemplate.SpongeDataSection bridge$createData();
 }

@@ -31,8 +31,6 @@ import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.Tag;
-import net.minecraft.world.level.biome.BiomeZoomer;
-import net.minecraft.world.level.biome.FuzzyOffsetConstantColumnBiomeZoomer;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -49,7 +47,8 @@ import org.spongepowered.api.world.WorldTypeEffects;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.common.AbstractResourceKeyed;
 import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
-import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
+import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
+import org.spongepowered.common.data.fixer.SpongeDataCodec;
 import org.spongepowered.common.registry.provider.DimensionEffectProvider;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
 import org.spongepowered.common.util.MissingImplementationException;
@@ -73,50 +72,16 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     public final double coordinateScale;
 
     private static final Codec<SpongeDataSection> SPONGE_CODEC = RecordCodecBuilder
-            .create(r -> r
-                    .group(
-                            ResourceLocation.CODEC.optionalFieldOf("biome_sampler", new ResourceLocation("sponge", "column_fuzzed")).forGetter(v -> v.biomeSampler),
-                            Codec.BOOL.optionalFieldOf("create_dragon_fight", Boolean.FALSE).forGetter(v -> v.createDragonFight)
-                    )
-                    .apply(r, SpongeDataSection::new)
-            );
+        .create(r -> r
+            .group(
+                ResourceLocation.CODEC.optionalFieldOf("biome_sampler", new ResourceLocation("sponge", "column_fuzzed")).forGetter(v -> v.biomeSampler),
+                Codec.BOOL.optionalFieldOf("create_dragon_fight", Boolean.FALSE).forGetter(v -> v.createDragonFight)
+            )
+            .apply(r, r.stable(SpongeDataSection::new))
+        );
 
-    public static final Codec<DimensionType> DIRECT_CODEC = RecordCodecBuilder
-            .create(r -> r
-                    .group(
-                            Codec.LONG.optionalFieldOf("fixed_time")
-                                    .xmap(
-                                            v -> v.map(OptionalLong::of).orElseGet(OptionalLong::empty),
-                                            v -> v.isPresent() ? Optional.of(v.getAsLong()) : Optional.empty()
-                                    )
-                                    .forGetter(v -> ((DimensionTypeAccessor) v).accessor$fixedTime())
-                            ,
-                            Codec.BOOL.fieldOf("has_skylight").forGetter(DimensionType::hasSkyLight),
-                            Codec.BOOL.fieldOf("has_ceiling").forGetter(DimensionType::hasCeiling),
-                            Codec.BOOL.fieldOf("ultrawarm").forGetter(DimensionType::ultraWarm),
-                            Codec.BOOL.fieldOf("natural").forGetter(DimensionType::natural),
-                            Codec.doubleRange(1.0E-5F, 3.0E7D).fieldOf("coordinate_scale").forGetter(DimensionType::coordinateScale),
-                            Codec.BOOL.fieldOf("piglin_safe").forGetter(DimensionType::piglinSafe),
-                            Codec.BOOL.fieldOf("bed_works").forGetter(DimensionType::bedWorks),
-                            Codec.BOOL.fieldOf("respawn_anchor_works").forGetter(DimensionType::respawnAnchorWorks),
-                            Codec.BOOL.fieldOf("has_raids").forGetter(DimensionType::hasRaids),
-                            Codec.intRange(0, 256).fieldOf("logical_height").forGetter(DimensionType::logicalHeight),
-                            ResourceLocation.CODEC.fieldOf("infiniburn").forGetter(v -> ((Tag.Named<Block>)v.infiniburn()).getName()),
-                            ResourceLocation.CODEC.fieldOf("effects").orElse((ResourceLocation) (Object) WorldTypeEffects.OVERWORLD.key()).forGetter(v -> ((DimensionTypeAccessor) v).accessor$effectsLocation()),
-                            Codec.FLOAT.fieldOf("ambient_light").forGetter(v -> ((DimensionTypeAccessor) v).accessor$ambientLight()),
-                            SpongeWorldTypeTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> Optional.of(new SpongeDataSection((ResourceLocation) (Object) BiomeSamplerProvider.INSTANCE.get((BiomeSampler) v.getBiomeZoomer()), v.createDragonFight())))
-                    )
-                    // *Chuckles* I'm in danger
-                    .apply(r, (f1, f2, f3, f4, f5, f6, f7, f8, f9, f10, f11, f12, f13, f14, f15) -> {
-                        final BiomeZoomer biomeMagnifier = f15.isPresent() ? (BiomeZoomer) BiomeSamplerProvider.INSTANCE.get((ResourceKey) (Object) f15.get().biomeSampler) : FuzzyOffsetConstantColumnBiomeZoomer.INSTANCE;
-                        final boolean createDragonFight = f15.isPresent() && f15.get().createDragonFight;
-                        // TODO - Zidane!
-                        throw new UnsupportedOperationException("Needs some updating");
-//
-//                        return DimensionType.invoker$new(f1, f2, f3, f4, f5, f6, createDragonFight, f7, f8, f9, f10, f11,
-//                                biomeMagnifier, f12, f13, f14);
-                    })
-            );
+    public static final Codec<DimensionType> DIRECT_CODEC = new SpongeDataCodec<>(DimensionType.DIRECT_CODEC, SpongeWorldTypeTemplate.SPONGE_CODEC
+        , (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge) type).bridge$createData());
 
     public static final Codec<Supplier<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, SpongeWorldTypeTemplate.DIRECT_CODEC);
 
@@ -166,7 +131,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
     }
 
     @Override
-    public DataPackType type() {
+    public DataPackType<WorldTypeTemplate> type() {
         return DataPackTypes.WORLD_TYPE;
     }
 
@@ -255,9 +220,9 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         return this.createDragonFight;
     }
 
-    private static final class SpongeDataSection {
-        private final ResourceLocation biomeSampler;
-        private final boolean createDragonFight;
+    public static final class SpongeDataSection {
+        public final ResourceLocation biomeSampler;
+        public final boolean createDragonFight;
 
         public SpongeDataSection(final ResourceLocation biomeSampler, final boolean createDragonFight) {
             this.biomeSampler = biomeSampler;

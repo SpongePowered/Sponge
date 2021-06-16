@@ -25,14 +25,17 @@
 package org.spongepowered.common.world.portal;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.util.AxisUtil;
@@ -61,6 +64,23 @@ public final class NetherPortalType extends VanillaPortalType {
                 .findPortalAround(position, serverWorld.dimension() == Level.NETHER);
     }
 
+    public static Portal portalObjectFromRectangle(final ServerWorld world, final BlockUtil.FoundRectangle x) {
+        final Vector3d minCornerVec = VecHelper.toVector3d(x.minCorner);
+        final ServerLocation minCorner = world.location(minCornerVec);
+        final @Nullable Axis axis =  minCorner.block().getOrNull(Keys.AXIS);
+        if (axis == null) {
+            return new VanillaPortal(PortalTypes.NETHER.get(), minCorner, null);
+        }
+        final ServerLocation maxCorner;
+        if (axis == Axis.X) {
+            maxCorner = minCorner.withPosition(minCornerVec.add(x.axis1Size, x.axis2Size, 0));
+        } else {
+            // it's z
+            maxCorner = minCorner.withPosition(minCornerVec.add(0, x.axis2Size, x.axis1Size));
+        }
+        return new VanillaTwoDimensionalPortal(PortalTypes.NETHER.get(), minCorner, maxCorner, null);
+    }
+
     @Override
     public void generatePortal(final ServerLocation location, final Axis axis) {
         Objects.requireNonNull(location);
@@ -74,7 +94,7 @@ public final class NetherPortalType extends VanillaPortalType {
     @Override
     public Optional<Portal> findPortal(final ServerLocation location) {
         Objects.requireNonNull(location);
-        return NetherPortalType.findPortalInternal(location).map(x -> new VanillaPortal(this, location.withPosition(VecHelper.toVector3d(x.minCorner)), null));
+        return NetherPortalType.findPortalInternal(location).map(x -> NetherPortalType.portalObjectFromRectangle(location.world(), x));
     }
 
     @Override

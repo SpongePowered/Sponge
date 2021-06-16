@@ -22,40 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.portal;
+package org.spongepowered.common.data.fixer;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.portal.Portal;
-import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.api.world.server.ServerLocation;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.DataResult;
+import com.mojang.serialization.DynamicOps;
 
-import java.util.Optional;
+import java.util.function.BiFunction;
+import java.util.function.Function;
 
-public class VanillaPortal implements Portal {
+public final class SpongeDataCodec<A, B> extends CombinerCodec<A, B> {
 
-    private final PortalType type;
-    private final ServerLocation minCorner;
-    private final @Nullable ServerLocation destination;
-
-    public VanillaPortal(final PortalType type, final ServerLocation minCorner, final @Nullable ServerLocation destination) {
-        this.type = type;
-        this.minCorner = minCorner;
-        this.destination = destination;
+    public <T> SpongeDataCodec(final Codec<A> first, final Codec<B> second, final BiFunction<A, B, A> decodeAction, final Function<A, B> encodeAction) {
+        super(first, second, decodeAction, encodeAction);
     }
 
     @Override
-    public PortalType type() {
-        return this.type;
-    }
-
-    @Override
-    public ServerLocation origin() {
-        return this.minCorner;
-    }
-
-    // Vanilla has no knowledge of where portals go to until you try, best we can do...
-    @Override
-    public Optional<ServerLocation> destination() {
-        return Optional.ofNullable(this.destination);
+    protected <T> DataResult<T> merge(DynamicOps<T> adapter, DataResult<T> first, DataResult<T> second) {
+        return adapter.mergeToMap(first.result().get(), adapter.createString("#sponge"), second.result().get());
     }
 }

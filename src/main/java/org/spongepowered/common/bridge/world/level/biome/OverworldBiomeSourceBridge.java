@@ -22,40 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.portal;
+package org.spongepowered.common.bridge.world.level.biome;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.portal.Portal;
-import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.api.world.server.ServerLocation;
+import net.minecraft.world.level.biome.OverworldBiomeSource;
+import org.spongepowered.common.world.biome.provider.OverworldBiomeSourceHelper;
 
-import java.util.Optional;
+public interface OverworldBiomeSourceBridge {
 
-public class VanillaPortal implements Portal {
+    OverworldBiomeSource bridge$decorateData(OverworldBiomeSourceHelper.SpongeDataSection data);
 
-    private final PortalType type;
-    private final ServerLocation minCorner;
-    private final @Nullable ServerLocation destination;
-
-    public VanillaPortal(final PortalType type, final ServerLocation minCorner, final @Nullable ServerLocation destination) {
-        this.type = type;
-        this.minCorner = minCorner;
-        this.destination = destination;
-    }
-
-    @Override
-    public PortalType type() {
-        return this.type;
-    }
-
-    @Override
-    public ServerLocation origin() {
-        return this.minCorner;
-    }
-
-    // Vanilla has no knowledge of where portals go to until you try, best we can do...
-    @Override
-    public Optional<ServerLocation> destination() {
-        return Optional.ofNullable(this.destination);
-    }
+    OverworldBiomeSourceHelper.SpongeDataSection bridge$createData();
 }

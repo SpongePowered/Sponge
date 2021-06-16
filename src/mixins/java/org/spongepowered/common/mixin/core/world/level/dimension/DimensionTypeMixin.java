@@ -24,16 +24,32 @@
  */
 package org.spongepowered.common.mixin.core.world.level.dimension;
 
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.biome.BiomeZoomer;
+import net.minecraft.world.level.dimension.DimensionType;
+import org.spongepowered.api.world.biome.BiomeSampler;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
+import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
+import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
 import java.io.File;
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.dimension.DimensionType;
 
 @Mixin(DimensionType.class)
-public abstract class DimensionTypeMixin {
+public abstract class DimensionTypeMixin implements DimensionTypeBridge {
+
+    // @formatter:off
+
+    @Shadow @Final @Mutable private boolean createDragonFight;
+    @Shadow @Final @Mutable private BiomeZoomer biomeZoomer;
+
+    // @formatter:on
 
     /**
      * @author zidane - - January 1st, 2021 - Minecraft 1.16.4
@@ -43,5 +59,20 @@ public abstract class DimensionTypeMixin {
     public static File getStorageFolder(ResourceKey<Level> worldKey, File defaultLevelDirectory) {
         // Sponge Start - The directory is already set to be at this location
         return defaultLevelDirectory;
+    }
+
+    @Override
+    public DimensionType bridge$decorateData(final SpongeWorldTypeTemplate.SpongeDataSection data) {
+        this.createDragonFight = data.createDragonFight;
+        this.biomeZoomer = (BiomeZoomer) BiomeSamplerProvider.INSTANCE.get((org.spongepowered.api.ResourceKey) (Object) data.biomeSampler);
+
+        return (DimensionType) (Object) this;
+    }
+
+    @Override
+    public SpongeWorldTypeTemplate.SpongeDataSection bridge$createData() {
+        return new SpongeWorldTypeTemplate.SpongeDataSection(
+            (ResourceLocation) (Object) BiomeSamplerProvider.INSTANCE.get((BiomeSampler) this.biomeZoomer),
+            this.createDragonFight);
     }
 }

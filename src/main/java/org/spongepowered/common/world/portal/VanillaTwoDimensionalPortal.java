@@ -25,37 +25,22 @@
 package org.spongepowered.common.world.portal;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.world.portal.TwoDimensionalPortal;
 import org.spongepowered.api.world.server.ServerLocation;
 
-import java.util.Optional;
+public final class VanillaTwoDimensionalPortal extends VanillaPortal implements TwoDimensionalPortal {
 
-public class VanillaPortal implements Portal {
+    private final ServerLocation maxCorner;
 
-    private final PortalType type;
-    private final ServerLocation minCorner;
-    private final @Nullable ServerLocation destination;
-
-    public VanillaPortal(final PortalType type, final ServerLocation minCorner, final @Nullable ServerLocation destination) {
-        this.type = type;
-        this.minCorner = minCorner;
-        this.destination = destination;
+    public VanillaTwoDimensionalPortal(
+            final PortalType type, final ServerLocation minCorner, final ServerLocation maxCorner, @Nullable final ServerLocation destination) {
+        super(type, minCorner, destination);
+        this.maxCorner = maxCorner;
     }
 
     @Override
-    public PortalType type() {
-        return this.type;
-    }
-
-    @Override
-    public ServerLocation origin() {
-        return this.minCorner;
-    }
-
-    // Vanilla has no knowledge of where portals go to until you try, best we can do...
-    @Override
-    public Optional<ServerLocation> destination() {
-        return Optional.ofNullable(this.destination);
+    public ServerLocation maxCorner() {
+        return this.maxCorner;
     }
 }

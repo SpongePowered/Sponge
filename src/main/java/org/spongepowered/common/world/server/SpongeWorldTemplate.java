@@ -58,6 +58,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.data.fixer.SpongeDataCodec;
 import org.spongepowered.common.serialization.EnumCodec;
 import org.spongepowered.common.serialization.MathCodecs;
 import org.spongepowered.common.util.AbstractResourceKeyedBuilder;
@@ -106,32 +107,8 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
                     )
             );
 
-    public static final Codec<LevelStem> DIRECT_CODEC = RecordCodecBuilder
-            .create(r ->  r
-                    .group(
-                            SpongeWorldTypeTemplate.CODEC.fieldOf("type").forGetter(LevelStem::typeSupplier),
-                            net.minecraft.world.level.chunk.ChunkGenerator.CODEC.fieldOf("generator").forGetter(LevelStem::generator),
-                            SpongeWorldTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> {
-                                final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) v;
-                                return Optional.of(new SpongeDataSection(levelStemBridge.bridge$displayName().orElse(null),
-                                    levelStemBridge.bridge$gameMode().orElse(null), levelStemBridge.bridge$difficulty().orElse(null),
-                                    levelStemBridge.bridge$serializationBehavior().orElse(null),
-                                    levelStemBridge.bridge$viewDistance().orElse(null), levelStemBridge.bridge$spawnPosition().orElse(null),
-                                    levelStemBridge.bridge$loadOnStartup(), levelStemBridge.bridge$performsSpawnLogic(),
-                                    levelStemBridge.bridge$hardcore().orElse(null), levelStemBridge.bridge$commands().orElse(null),
-                                    levelStemBridge.bridge$pvp().orElse(null)));
-                            })
-                    )
-                    .apply(r, r
-                        .stable((f1, f2, f3) ->
-                            {
-                                final LevelStem template = new LevelStem(f1, f2);
-                                f3.ifPresent(((LevelStemBridge) (Object) template)::bridge$populateFromData);
-                                return template;
-                            }
-                        )
-                    )
-            );
+    public static final Codec<LevelStem> DIRECT_CODEC = new SpongeDataCodec<>(LevelStem.CODEC, SpongeWorldTemplate.SPONGE_CODEC,
+        (type, data) -> ((LevelStemBridge) (Object) type).bridge$decorateData(data), type -> ((LevelStemBridge) (Object) type).bridge$createData());
 
     protected SpongeWorldTemplate(final BuilderImpl builder) {
         super(builder.key);
@@ -192,7 +169,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     }
 
     @Override
-    public DataPackType type() {
+    public DataPackType<WorldTemplate> type() {
         return DataPackTypes.WORLD;
     }
 
