@@ -32,8 +32,6 @@ import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.ExtraCodecs;
-import net.minecraft.world.level.dimension.DimensionType;
 import net.minecraft.world.level.dimension.LevelStem;
 import net.minecraft.world.level.levelgen.WorldGenSettings;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -111,7 +109,7 @@ public final class SpongeWorldTemplate extends AbstractResourceKeyed implements 
     public static final Codec<LevelStem> DIRECT_CODEC = RecordCodecBuilder
             .create(r ->  r
                     .group(
-                            SpongeWorldTypeTemplate.CODEC.fieldOf("type").flatXmap(ExtraCodecs.nonNullSupplierCheck(), ExtraCodecs.nonNullSupplierCheck()).forGetter(LevelStem::typeSupplier),
+                            SpongeWorldTypeTemplate.CODEC.fieldOf("type").forGetter(LevelStem::typeSupplier),
                             net.minecraft.world.level.chunk.ChunkGenerator.CODEC.fieldOf("generator").forGetter(LevelStem::generator),
                             SpongeWorldTemplate.SPONGE_CODEC.optionalFieldOf("#sponge").forGetter(v -> {
                                 final LevelStemBridge levelStemBridge = (LevelStemBridge) (Object) v;

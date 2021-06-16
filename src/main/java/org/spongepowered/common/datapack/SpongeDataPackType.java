@@ -35,11 +35,10 @@ import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.item.recipe.RecipeRegistration;
 import org.spongepowered.api.world.WorldTypeTemplate;
 import org.spongepowered.api.world.server.WorldTemplate;
-import org.spongepowered.common.bridge.world.level.dimension.DimensionTypeBridge;
+import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAccessor;
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
-import org.spongepowered.common.registry.provider.BiomeSamplerProvider;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
@@ -112,15 +111,16 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         private final SpongeDataPackType<@NonNull WorldTypeTemplate, DataPackSerializedObject> worldType = new SpongeDataPackType<>(TypeToken.get(WorldTypeTemplate.class),
                 new DataPackSerializer<>("Dimension Types", "dimension_type"),
                 s -> {
-                    final OptionalLong fixedTime = s.fixedTime().isEmpty() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().ticks());
-                    final DimensionType type =
-                        DimensionType.create(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(), s.coordinateMultiplier(),
-                            s.createDragonFight(), s.piglinSafe(), s.bedsUsable(), s.respawnAnchorsUsable(), s.hasRaids(), s.minY(),
-                            s.maximumHeight(), s.logicalHeight(), (BiomeZoomer) s.biomeSampler(), (ResourceLocation) (Object)
-                                ((SpongeWorldTypeTemplate) s).infiniburn, (ResourceLocation) (Object) s.effect().key(), s.ambientLighting());
-                    ((DimensionTypeBridge) type).bridge$decorateData(new SpongeWorldTypeTemplate.SpongeDataSection((ResourceLocation) (Object) BiomeSamplerProvider.INSTANCE.get(s.biomeSampler()), s.createDragonFight()));
-                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE,
-                        BootstrapProperties.registries), type).getOrThrow(false, e -> {});
+                    final OptionalLong fixedTime = !s.fixedTime().isPresent() ? OptionalLong.empty() : OptionalLong.of(s.fixedTime().get().asTicks().ticks());
+                    // TODO - Zidane!!!
+                    throw new UnsupportedOperationException("Zidane, fix this");
+//                    final DimensionType type =
+//                            DimensionTypeAccessor.invoker$new(fixedTime, s.hasSkylight(), s.hasCeiling(), s.scorching(), s.natural(),
+//                                    s.coordinateMultiplier(),
+//                                    s.createDragonFight(), s.piglinSafe(), s.bedsUsable(), s.respawnAnchorsUsable(), s.hasRaids(), s.logicalHeight(),
+//                                    (BiomeZoomer) s.biomeSampler(), (ResourceLocation) (Object) ((SpongeWorldTypeTemplate) s).infiniburn,
+//                                    (ResourceLocation) (Object) s.effect().key(), s.ambientLighting());
+//                    return SpongeWorldTypeTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), type).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 true
@@ -132,8 +132,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                     final LevelStem template = new LevelStem(() -> BootstrapProperties.registries.registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get((ResourceLocation) (Object) s.worldType().location()), (ChunkGenerator) s.generator());
                     ((LevelStemBridge) (Object) template).bridge$setFromSettings(false);
                     ((LevelStemBridge) (Object) template).bridge$populateFromTemplate((SpongeWorldTemplate) s);
-                    return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries),
-                        template).getOrThrow(false, e -> {});
+                    return SpongeWorldTemplate.DIRECT_CODEC.encodeStart(RegistryWriteOps.create(JsonOps.INSTANCE, BootstrapProperties.registries), template).getOrThrow(false, e -> {});
                 },
                 (i1, i2) -> new DataPackSerializedObject(i1.key(), i2),
                 true
