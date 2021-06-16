@@ -27,6 +27,10 @@ package org.spongepowered.common.item.recipe.ingredient;
 import com.google.gson.JsonElement;
 import com.google.gson.JsonObject;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.core.NonNullList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.util.GsonHelper;
+import net.minecraft.world.Container;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataFormats;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -38,15 +42,12 @@ import java.io.IOException;
 import java.text.MessageFormat;
 import java.util.Map;
 import java.util.function.Function;
-import net.minecraft.core.NonNullList;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.GsonHelper;
-import net.minecraft.world.Container;
 
-public final class ResultUtil {
+public final class IngredientResultUtil {
 
     private static final Map<String, Function<?, net.minecraft.world.item.ItemStack>> cachedResultFunctions = new Object2ObjectOpenHashMap<>();
-    private static final Map<String, Function<?, NonNullList<net.minecraft.world.item.ItemStack>>> cachedRemainingItemsFunctions = new Object2ObjectOpenHashMap<>();
+    private static final Map<String, Function<?, NonNullList<net.minecraft.world.item.ItemStack>>> cachedRemainingItemsFunctions =
+        new Object2ObjectOpenHashMap<>();
 
     public static net.minecraft.world.item.ItemStack deserializeItemStack(final JsonObject result) {
         if (result == null) {
@@ -73,42 +74,45 @@ public final class ResultUtil {
     public static <C extends Container> Function<C, net.minecraft.world.item.ItemStack> deserializeResultFunction(JsonObject json) {
         if (json.has(Constants.Recipe.SPONGE_RESULTFUNCTION)) {
             final String id = GsonHelper.getAsString(json, Constants.Recipe.SPONGE_RESULTFUNCTION);
-            return ((Function<C, net.minecraft.world.item.ItemStack>) ResultUtil.cachedResultFunctions.get(id));
+            return ((Function<C, net.minecraft.world.item.ItemStack>) IngredientResultUtil.cachedResultFunctions.get(id));
         }
         return null;
     }
 
-    public static <C extends Container> String cacheResultFunction(ResourceLocation id, Function<C, net.minecraft.world.item.ItemStack> resultFunction) {
-        if (ResultUtil.cachedResultFunctions.put(id.toString(), resultFunction) != null) {
+    public static <C extends Container> String cacheResultFunction(ResourceLocation id,
+        Function<C, net.minecraft.world.item.ItemStack> resultFunction) {
+        if (IngredientResultUtil.cachedResultFunctions.put(id.toString(), resultFunction) != null) {
             SpongeCommon.getLogger().warn(MessageFormat.format(
-                "Duplicate cache result registration! " + id.toString() + " was replaced.",
-                new Object[]{ }
+                "Duplicate cache result registration! " + id + " was replaced.",
+                new Object[]{}
             ));
         }
         return id.toString();
     }
 
     @SuppressWarnings("unchecked")
-    public static <C extends Container> Function<C, NonNullList<net.minecraft.world.item.ItemStack>> deserializeRemainingItemsFunction(JsonObject json) {
+    public static <C extends Container> Function<C, NonNullList<net.minecraft.world.item.ItemStack>> deserializeRemainingItemsFunction(
+        JsonObject json) {
         if (json.has(Constants.Recipe.SPONGE_REMAINING_ITEMS)) {
             final String id = GsonHelper.getAsString(json, Constants.Recipe.SPONGE_REMAINING_ITEMS);
-            return ((Function<C, NonNullList<net.minecraft.world.item.ItemStack>>) ResultUtil.cachedRemainingItemsFunctions.get(id));
+            return ((Function<C, NonNullList<net.minecraft.world.item.ItemStack>>) IngredientResultUtil.cachedRemainingItemsFunctions.get(id));
         }
         return null;
     }
 
-    public static <C extends Container> String cacheRemainingItemsFunction(ResourceLocation id, Function<C, NonNullList<net.minecraft.world.item.ItemStack>> resultFunction) {
-        if (ResultUtil.cachedRemainingItemsFunctions.put(id.toString(), resultFunction) != null) {
+    public static <C extends Container> String cacheRemainingItemsFunction(ResourceLocation id,
+        Function<C, NonNullList<net.minecraft.world.item.ItemStack>> resultFunction) {
+        if (IngredientResultUtil.cachedRemainingItemsFunctions.put(id.toString(), resultFunction) != null) {
             SpongeCommon.getLogger().warn(MessageFormat.format(
-                "Duplicate cache result registration! " + id.toString() + " was replaced.",
-                new Object[]{ }
+                "Duplicate cache result registration! " + id + " was replaced.",
+                new Object[]{}
             ));
         }
         return id.toString();
     }
 
     public static void clearCache() {
-        ResultUtil.cachedResultFunctions.clear();
-        ResultUtil.cachedRemainingItemsFunctions.clear();
+        IngredientResultUtil.cachedResultFunctions.clear();
+        IngredientResultUtil.cachedRemainingItemsFunctions.clear();
     }
 }

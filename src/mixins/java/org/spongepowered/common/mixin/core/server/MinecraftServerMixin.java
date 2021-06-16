@@ -345,12 +345,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "reloadResources", at = @At(value = "HEAD"))
     public void impl$reloadResources(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents();
-        try {
-            SpongeDataPackManager.INSTANCE.serialize(this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR), datapacksToLoad);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
+        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR), datapacksToLoad);
         this.shadow$getPackRepository().reload();
     }
 
