@@ -120,6 +120,7 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
+import org.spongepowered.common.util.CommandUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -135,8 +136,6 @@ import java.util.function.Consumer;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class ServerGamePacketListenerImplMixin implements ConnectionHolderBridge {
-
-    private static final String[] IMPL$EMPTY_COMMAND_ARRAY = new String[] { "" };
 
     // @formatter:off
     @Shadow @Final public Connection connection;
@@ -177,7 +176,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             cancellable = true)
     private void impl$getSuggestionsFromNonBrigCommand(final ServerboundCommandSuggestionPacket packet, final CallbackInfo ci) {
         final String rawCommand = packet.getCommand();
-        final String[] command = this.impl$extractCommandString(rawCommand);
+        final String[] command = CommandUtil.extractCommandString(rawCommand);
         final CommandCause cause = CommandCause.create();
         final SpongeCommandManager manager = SpongeCommandManager.get(this.server);
         if (!rawCommand.contains(" ")) {
@@ -196,16 +195,8 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
             if (mappingOptional.isPresent()) {
                 final CommandMapping mapping = mappingOptional.get();
                 if (mapping.registrar().canExecute(cause, mapping)) {
-                    try {
-                        final SuggestionsBuilder builder = new SuggestionsBuilder(rawCommand, rawCommand.lastIndexOf(" ") + 1);
-                        mapping.registrar().complete(cause, mapping, command[0], command[1])
-                                .forEach(completion -> builder.suggest(completion.completion(),
-                                            completion.tooltip().map(SpongeAdventure::asVanilla).orElse(null)));
-                        this.connection.send(new ClientboundCommandSuggestionsPacket(packet.getId(), builder.build()));
-                    } catch (final CommandException e) {
-                        cause.sendMessage(Identity.nil(), Component.text("Unable to create suggestions for your tab completion"));
-                        this.connection.send(new ClientboundCommandSuggestionsPacket(packet.getId(), Suggestions.empty().join()));
-                    }
+                    final SuggestionsBuilder builder = CommandUtil.createSuggestionsForRawCommand(rawCommand, command, cause, mapping);
+                    this.connection.send(new ClientboundCommandSuggestionsPacket(packet.getId(), builder.build()));
                 } else {
                     this.connection.send(new ClientboundCommandSuggestionsPacket(packet.getId(), Suggestions.empty().join()));
                 }
@@ -579,13 +570,4 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         return 0;
     }
 
-    private String[] impl$extractCommandString(final String commandString) {
-        if (commandString.isEmpty()) {
-            return ServerGamePacketListenerImplMixin.IMPL$EMPTY_COMMAND_ARRAY;
-        }
-        if (commandString.startsWith("/")) {
-            return commandString.substring(1).split(" ", 2);
-        }
-        return commandString.split(" ", 2);
-    }
 }
