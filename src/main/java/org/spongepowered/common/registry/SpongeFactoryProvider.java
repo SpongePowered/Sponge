@@ -65,6 +65,7 @@ import org.spongepowered.api.util.Range;
 import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.util.blockray.RayTrace;
+import org.spongepowered.api.util.orientation.Orientation;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.biome.AttributedBiome;
 import org.spongepowered.api.world.biome.BiomeAttributes;
@@ -119,6 +120,7 @@ import org.spongepowered.common.state.SpongeStateMatcherFactory;
 import org.spongepowered.common.util.SpongeAABB;
 import org.spongepowered.common.util.SpongeDamageSourceFactory;
 import org.spongepowered.common.util.SpongeMinecraftDayTime;
+import org.spongepowered.common.util.SpongeOrientation;
 import org.spongepowered.common.util.SpongeRange;
 import org.spongepowered.common.util.SpongeTicks;
 import org.spongepowered.common.util.SpongeTransform;
@@ -244,6 +246,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(DisplaySlot.Factory.class, new SpongeDisplaySlotFactory())
                 .registerFactory(Weather.Factory.class, new SpongeWeather.FactoryImpl())
                 .registerFactory(NodeTree.Factory.class, new SpongeNodeTree.FactoryImpl())
+                .registerFactory(Orientation.Factory.class, new SpongeOrientation.Factory())
         ;
     }
 }
