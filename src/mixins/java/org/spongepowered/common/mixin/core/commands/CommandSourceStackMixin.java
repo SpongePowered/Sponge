@@ -35,6 +35,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.phys.Vec2;
 import net.minecraft.world.phys.Vec3;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -193,7 +194,7 @@ public abstract class CommandSourceStackMixin implements CommandSourceStackBridg
 
     @Inject(method = "hasPermission", at = @At(value = "HEAD"), cancellable = true)
     private void impl$checkPermission(final int opLevel, final CallbackInfoReturnable<Boolean> cir) {
-        if (this.impl$potentialPermissionNode != null) {
+        if (Sponge.isServerAvailable() && this.impl$potentialPermissionNode != null) {
             final String perm = this.impl$potentialPermissionNode.get();
             // This will register the permission with the first op level we retrieve.
             SpongePermissions.registerPermission(perm, opLevel);
