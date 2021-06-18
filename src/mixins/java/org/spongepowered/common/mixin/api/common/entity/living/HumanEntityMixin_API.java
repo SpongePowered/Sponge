@@ -29,7 +29,7 @@ import org.spongepowered.api.entity.living.Human;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.entity.living.human.HumanEntity;
-import org.spongepowered.common.mixin.api.mcp.world.entity.PathfinderMobMixin_API;
+import org.spongepowered.common.mixin.api.minecraft.world.entity.PathfinderMobMixin_API;
 import java.util.Objects;
 import java.util.UUID;
 

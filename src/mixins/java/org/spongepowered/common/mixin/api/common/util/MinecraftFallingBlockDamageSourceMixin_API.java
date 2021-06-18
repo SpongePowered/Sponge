@@ -31,7 +31,7 @@ import org.spongepowered.api.entity.FallingBlock;
 import org.spongepowered.api.event.cause.entity.damage.source.FallingBlockDamageSource;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.mcp.util.EntityDamageSourceMixin_API;
+import org.spongepowered.common.mixin.api.minecraft.util.EntityDamageSourceMixin_API;
 import org.spongepowered.common.util.MinecraftFallingBlockDamageSource;
 
 @Mixin(value = MinecraftFallingBlockDamageSource.class, priority = 992)
