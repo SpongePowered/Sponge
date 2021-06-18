@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mcp.world.entity;
+package org.spongepowered.common.mixin.optimization.world.entity;
 
 import com.google.common.base.Optional;
 import org.spongepowered.asm.mixin.Final;

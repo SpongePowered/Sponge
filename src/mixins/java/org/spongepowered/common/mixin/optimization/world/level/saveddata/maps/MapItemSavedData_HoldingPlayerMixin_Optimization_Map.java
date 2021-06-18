@@ -22,29 +22,25 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mcp.tileentity;
+package org.spongepowered.common.mixin.optimization.world.level.saveddata.maps;
 
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.optimization.HopperOptimizationBridge;
+import org.spongepowered.common.bridge.optimization.OptimizedMapInfoBridge;
 
-@Mixin(value = BlockEntity.class, priority = 1300)
-public abstract class TileEntityMixin_Optimization_Hopper implements HopperOptimizationBridge {
+@Mixin(MapItemSavedData.HoldingPlayer.class)
+public abstract class MapItemSavedData_HoldingPlayerMixin_Optimization_Map implements OptimizedMapInfoBridge {
 
-    private boolean hopper$shouldCancelDirtyUpdate = false;
+    private boolean mapOptimization$valid;
 
     @Override
-    public void hopperBridge$setCancelDirtyUpdate(final boolean canMarkDirty) {
-        this.hopper$shouldCancelDirtyUpdate = canMarkDirty;
+    public void mapOptimizationBridge$setValid(final boolean valid) {
+        this.mapOptimization$valid = valid;
     }
 
-    @Inject(method = "setChanged", at = @At("HEAD"), cancellable = true)
-    private void hopper$DoNotUpdateIfMarked(final CallbackInfo ci) {
-        if (this.hopper$shouldCancelDirtyUpdate) {
-            ci.cancel();
-        }
+    @Override
+    public boolean mapOptimizationBridge$isValid() {
+        return this.mapOptimization$valid;
     }
+
 }

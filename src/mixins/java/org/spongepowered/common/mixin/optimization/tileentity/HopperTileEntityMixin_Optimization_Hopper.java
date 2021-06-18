@@ -22,25 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mcp.world.level.saveddata.maps;
+package org.spongepowered.common.mixin.optimization.tileentity;
 
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
+import net.minecraft.world.Container;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.block.entity.HopperBlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.optimization.OptimizedMapInfoBridge;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.optimization.HopperOptimizationBridge;
 
-@Mixin(MapItemSavedData.HoldingPlayer.class)
-public abstract class MapItemSavedData_HoldingPlayerMixin_Optimization_Map implements OptimizedMapInfoBridge {
+@Mixin(value = HopperBlockEntity.class, priority = 1300)
+public abstract class HopperTileEntityMixin_Optimization_Hopper extends TileEntityMixin_Optimization_Hopper {
 
-    private boolean mapOptimization$valid;
-
-    @Override
-    public void mapOptimizationBridge$setValid(final boolean valid) {
-        this.mapOptimization$valid = valid;
-    }
-
-    @Override
-    public boolean mapOptimizationBridge$isValid() {
-        return this.mapOptimization$valid;
+    @Redirect(method = "tryMoveInItem",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/Container;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
+    private static void hopper$FlipMarkUpdateWhenInserting(final Container destination, final int index, final ItemStack stack) {
+        if (destination instanceof HopperOptimizationBridge) {
+            ((HopperOptimizationBridge) destination).hopperBridge$setCancelDirtyUpdate(true);
+        }
+        destination.setItem(index, stack);
+        if (destination instanceof HopperOptimizationBridge) {
+            ((HopperOptimizationBridge) destination).hopperBridge$setCancelDirtyUpdate(false);
+        }
     }
 
 }

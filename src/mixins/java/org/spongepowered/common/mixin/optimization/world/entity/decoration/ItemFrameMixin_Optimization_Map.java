@@ -22,25 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mcp.world.item;
+package org.spongepowered.common.mixin.optimization.world.entity.decoration;
 
-import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.MapItem;
-import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.optimization.OptimizedMapDataBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.mixin.core.world.entity.decoration.HangingEntityMixin;
 
-@Mixin(MapItem.class)
-public abstract class MapItemMixin_Optimization_Map {
+@Mixin(ItemFrame.class)
+public abstract class ItemFrameMixin_Optimization_Map extends HangingEntityMixin {
 
-    @Redirect(method = "inventoryTick",
-        at = @At(
-            value = "INVOKE",
-            target = "Lnet/minecraft/world/level/saveddata/maps/MapItemSavedData;tickCarriedBy(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)V"))
-    private void mapOptimization$onUpdateVisiblePlayers(final MapItemSavedData mapData, final Player player, final ItemStack itemStack) {
-        ((OptimizedMapDataBridge) mapData).mapOptimizationBridge$updatePlayer(player, itemStack);
+    @Shadow public abstract ItemStack shadow$getItem();
+
+    @Inject(method = "setItem(Lnet/minecraft/world/item/ItemStack;Z)V", at = @At(value = "HEAD"))
+    private void mapOptimization$SetItemUpdateMapData(final ItemStack stack, final boolean p_174864_2_, final CallbackInfo ci) {
+        if (((WorldBridge) this.level).bridge$isFake()) {
+            return;
+        }
+
+        final OptimizedMapDataBridge mapData = (OptimizedMapDataBridge) MapItem.getOrCreateSavedData(stack, this.level);
+        if (stack.getItem() instanceof MapItem) {
+            mapData.mapOptimizationBridge$updateItemFrameDecoration((ItemFrame) (Object) this);
+        } else if (this.shadow$getItem().getItem() instanceof MapItem && stack.isEmpty()) {
+            mapData.mapOptimizationBridge$removeItemFrame((ItemFrame) (Object) this);
+        }
     }
+
+
+
 }

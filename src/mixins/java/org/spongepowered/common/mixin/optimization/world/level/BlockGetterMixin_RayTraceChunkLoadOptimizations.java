@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mcp.world.level;
+package org.spongepowered.common.mixin.optimization.world.level;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;

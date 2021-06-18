@@ -22,14 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.optimization.mcp.world.server;
+package org.spongepowered.common.mixin.optimization.world.server;
 
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.mixin.optimization.mcp.world.level.LevelReaderMixin_Optimization_Collision;
+import org.spongepowered.common.mixin.optimization.world.level.LevelReaderMixin_Optimization_Collision;
 
 import java.util.Optional;
 import java.util.stream.Stream;
