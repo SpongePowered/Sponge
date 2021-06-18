@@ -321,7 +321,6 @@ public final class PhaseTracker implements CauseStackManager {
 
     // ----------------- STATE ACCESS ----------------------------------
 
-    @SuppressWarnings("rawtypes")
     void switchToPhase(final IPhaseState<?> state, final PhaseContext<?> phaseContext) {
         if (phaseContext.createdTracker != this && Thread.currentThread() != this.getSidedThread()) {
             // lol no, report the block change properly
@@ -386,7 +385,7 @@ public final class PhaseTracker implements CauseStackManager {
             if (this.stack.checkForRunaways(GeneralPhase.Post.UNWINDING, null)) {
                 // This printing is to detect possibilities of a phase not being cleared properly
                 // and resulting in a "runaway" phase state accumulation.
-                PhasePrinter.printRunnawayPhaseCompletion(this.stack, state);
+                PhasePrinter.printRunAwayPhaseCompletion(this.stack, state);
             }
         }
 

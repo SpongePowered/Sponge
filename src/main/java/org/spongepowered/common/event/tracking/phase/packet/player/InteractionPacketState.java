@@ -92,7 +92,6 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
         return true;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void unwind(final InteractionPacketContext phaseContext) {
 
@@ -113,8 +112,6 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             frame.addContext(EventContextKeys.USED_HAND, usedHand);
             frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
             final boolean hasBlocks = !phaseContext.getTransactor().isEmpty();
-            final List<SpongeBlockSnapshot> capturedBlcoks = phaseContext.getCapturedOriginalBlocksChanged();
-            final @Nullable BlockSnapshot firstBlockChange = hasBlocks ? capturedBlcoks.isEmpty() ? null : capturedBlcoks.get(0) : null;
             if (hasBlocks) {
                 if (!TrackingUtil.processBlockCaptures(phaseContext)) {
                     return;
