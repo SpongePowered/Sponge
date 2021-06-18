@@ -32,9 +32,9 @@ import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
-import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
-import org.spongepowered.common.relocate.co.aikar.util.MRUMapCache;
+import co.aikar.timings.util.JSONUtil;
+import co.aikar.timings.util.LoadingMap;
+import co.aikar.timings.util.MRUMapCache;
 
 import java.lang.management.ManagementFactory;
 import java.util.Collection;

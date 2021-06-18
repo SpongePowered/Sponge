@@ -29,7 +29,7 @@ import co.aikar.timings.Timings;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.relocate.co.aikar.util.LoadingIntMap;
+import co.aikar.timings.util.LoadingIntMap;
 
 class TimingHandler implements Timing {
 
