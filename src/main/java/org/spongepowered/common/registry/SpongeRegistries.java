@@ -24,8 +24,17 @@
  */
 package org.spongepowered.common.registry;
 
+import net.minecraft.tags.StaticTagHelper;
+import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.economy.Currency;
+import org.spongepowered.common.accessor.tags.BlockTagsAccessor;
+import org.spongepowered.common.accessor.tags.EntityTypeTagsAccessor;
+import org.spongepowered.common.accessor.tags.FluidTagsAccessor;
+import org.spongepowered.common.accessor.tags.ItemTagsAccessor;
 
 public final class SpongeRegistries {
 
@@ -80,15 +89,12 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.MAP_DECORATION_TYPE, SpongeRegistryLoaders.mapDecorationType());
         holder.createRegistry(RegistryTypes.MAP_SHADE, SpongeRegistryLoaders.mapShade());
         holder.createRegistry(RegistryTypes.TAG_TYPES, SpongeRegistryLoaders.tagTypes());
+        //holder.createRegistry(RegistryTypes.BLOCK_TYPE_TAGS, (StaticTagHelper<BlockType>) (Object) BlockTagsAccessor.accessor$helper());
+        //holder.createRegistry(RegistryTypes.ITEM_TYPE_TAGS, (StaticTagHelper<ItemType>) (Object) ItemTagsAccessor.accessor$helper());
+        //holder.createRegistry(RegistryTypes.ENTITY_TYPE_TAGS, (StaticTagHelper<EntityType<?>>) (Object) EntityTypeTagsAccessor.accessor$helper());
+        //holder.createRegistry(RegistryTypes.FLUID_TYPE_TAGS, (StaticTagHelper<FluidType>) (Object) FluidTagsAccessor.accessor$helper());
     }
 
     public static void registerServerRegistries(final SpongeRegistryHolder holder) {
-    }
-
-    public static void registerDataPackRegistries(final SpongeRegistryHolder holder) {
-        holder.createRegistry(RegistryTypes.BLOCK_TYPE_TAGS, SpongeRegistryLoaders.blockTypeTag());
-        holder.createRegistry(RegistryTypes.ITEM_TYPE_TAGS, SpongeRegistryLoaders.itemTypeTag());
-        holder.createRegistry(RegistryTypes.ENTITY_TYPE_TAGS, SpongeRegistryLoaders.entityTypeTag());
-        holder.createRegistry(RegistryTypes.FLUID_TYPE_TAGS, SpongeRegistryLoaders.fluidTypeTag());
     }
 }

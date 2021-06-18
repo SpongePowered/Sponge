@@ -82,11 +82,6 @@ public abstract class MainMixin {
         return datapackDir;
     }
 
-    @Inject(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/ServerResources;updateGlobals()V"))
-    private static void impl$loadDataPackRegistry(String[] param0, CallbackInfo ci) {
-        SpongeBootstrap.getLifecycle().establishDataPackRegistries();
-    }
-
     @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/world/level/storage/PrimaryLevelData"))
     private static PrimaryLevelData impl$setIsNewLevel(final LevelSettings settings, final WorldGenSettings generationSettings, final
             Lifecycle lifecycle) {

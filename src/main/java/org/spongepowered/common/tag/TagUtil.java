@@ -35,7 +35,7 @@ import java.util.stream.Collectors;
 public class TagUtil {
 
     public static <T extends Taggable<T>> Collection<Tag<T>> getAssociatedTags(T taggable, RegistryType<Tag<T>> taggableRegistry) {
-        return Sponge.game().dataPackManager().registries().registry(taggableRegistry).stream()
+        return Sponge.game().registries().registry(taggableRegistry).stream()
                 .filter(tag -> tag.contains(taggable))
                 .collect(Collectors.toList());
     }

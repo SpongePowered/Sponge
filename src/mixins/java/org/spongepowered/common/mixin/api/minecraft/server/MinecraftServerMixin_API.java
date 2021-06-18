@@ -53,7 +53,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.datapack.DataPackManager;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
@@ -142,7 +141,6 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     private SpongeUserManager api$userManager;
     private MapStorage api$mapStorage;
     private RegistryHolder api$registryHolder;
-    private DataPackManager api$dataPackManager;
 
     public MinecraftServerMixin_API(final String name) {
         super(name);
@@ -161,7 +159,6 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
         this.api$userManager = new SpongeUserManager(this);
         this.api$mapStorage = new SpongeMapStorage();
         this.api$registryHolder = new SpongeRegistryHolder(p_i232576_2_);
-        this.api$dataPackManager = new SpongeDataPackManager();
     }
 
     @Override
@@ -448,10 +445,5 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     @Override
     public MapStorage mapStorage() {
         return this.api$mapStorage;
-    }
-
-    @Override
-    public DataPackManager dataPackManager() {
-        return this.api$dataPackManager;
     }
 }

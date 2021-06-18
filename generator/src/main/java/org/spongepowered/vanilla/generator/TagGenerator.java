@@ -40,7 +40,7 @@ import java.util.function.Supplier;
 
 public class TagGenerator implements Generator {
 
-    private static final RegistryScope SCOPE = RegistryScope.DATA_PACK;
+    private static final RegistryScope SCOPE = RegistryScope.GAME;
 
     private final String registryName;
     private final String registryTypeName;

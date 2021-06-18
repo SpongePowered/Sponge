@@ -150,9 +150,4 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
         SpongeBootstrap.lifecycle().callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
     }
-
-    @Inject(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/client/Minecraft;managedBlock(Ljava/util/function/BooleanSupplier;)V"))
-    private void impl$establishDataPackRegistries(RegistryAccess.RegistryHolder param0, Function<LevelStorageSource.LevelStorageAccess, DataPackConfig> param1, Function4<LevelStorageSource.LevelStorageAccess, RegistryAccess.RegistryHolder, ResourceManager, DataPackConfig, WorldData> param2, boolean param3, LevelStorageSource.LevelStorageAccess param4, CallbackInfoReturnable<Minecraft.ServerStem> cir) {
-        SpongeBootstrap.getLifecycle().establishDataPackRegistries();
-    }
 }

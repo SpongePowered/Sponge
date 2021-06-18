@@ -228,7 +228,7 @@ public class TagTest {
     }
 
     private static <T> Parameter.Value<Tag<T>> makeTagRegistryParameter(final TypeToken<Tag<T>> token, final RegistryType<Tag<T>> registryType, final String key) {
-        final ValueParameter<Tag<T>> valueParameter = VariableValueParameters.registryEntryBuilder(x -> Sponge.game().dataPackManager().registries().registry(registryType))
+        final ValueParameter<Tag<T>> valueParameter = VariableValueParameters.registryEntryBuilder(x -> Sponge.game().registries().registry(registryType))
                 .defaultNamespace(ResourceKey.MINECRAFT_NAMESPACE)
                 .build();
         return Parameter.builder(token, valueParameter).key(key).build();
@@ -289,6 +289,6 @@ public class TagTest {
         }
         audience.sendMessage(Component.text(taggableKey + " has tags:", NamedTextColor.GREEN));
         tags.forEach(tag -> audience.sendMessage(Component.text(" - " +
-                Sponge.game().dataPackManager().registries().registry(taggable.tagType().tagRegistry()).valueKey(tag).toString(), NamedTextColor.BLUE)));
+                Sponge.game().registries().registry(taggable.tagType().tagRegistry()).valueKey(tag).toString(), NamedTextColor.BLUE)));
     }
 }
