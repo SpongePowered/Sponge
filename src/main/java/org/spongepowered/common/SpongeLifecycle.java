@@ -118,13 +118,7 @@ public final class SpongeLifecycle {
     }
 
     public void callRegisterDataPackValueEvent(final Path datapackDir) {
-        final SpongeDataPackManager dataPackManager = (SpongeDataPackManager) Sponge.game().dataPackManager();
-        dataPackManager.callRegisterDataPackValueEvents(datapackDir);
-    }
-
-    public void establishDataPackRegistries() {
-        final SpongeDataPackManager dataPackManager = (SpongeDataPackManager) Sponge.game().dataPackManager();
-        dataPackManager.loadRegistries();
+        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(datapackDir);
     }
 
     public void callRegisterChannelEvent() {

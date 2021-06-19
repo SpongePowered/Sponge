@@ -141,14 +141,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         private final SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject> tag = new SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject>(TypeToken.get(SpongeTagTemplate.class),
                 new TagDataPackSerializer("Tag", "tags"),
                 s -> {
-                    final net.minecraft.tags.Tag.Builder builder = new net.minecraft.tags.Tag.Builder();
-                    for (final ResourceKey element : s.elements()) {
-                        builder.addElement((ResourceLocation) (Object) element, s.key().namespace());
-                    }
-                    for (final ResourceKey subTag : s.subTags()) {
-                        builder.addElement((ResourceLocation) (Object) subTag, s.key().namespace());
-                    }
-                    final JsonObject jsonObject = builder.serializeToJson();
+                    final JsonObject jsonObject = s.toJson();
                     jsonObject.addProperty("replace", s.replace());
                     return jsonObject;
                 },
@@ -178,7 +171,7 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
 
         @Override
         public DataPackType tag() {
-            return tag;
+            return this.tag;
         }
     }
 }

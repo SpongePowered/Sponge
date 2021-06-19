@@ -38,7 +38,7 @@ import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
 
-public class TagGenerator implements Generator {
+public final class TagGenerator implements Generator {
 
     private static final RegistryScope SCOPE = RegistryScope.GAME;
 

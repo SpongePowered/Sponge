@@ -29,7 +29,7 @@ import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.tag.TagType;
 import org.spongepowered.api.tag.Taggable;
 
-public class SpongeTagType<T extends Taggable> implements TagType<T> {
+public final class SpongeTagType<T extends Taggable<T>> implements TagType<T> {
 
     private final String id;
     private final RegistryType<T> taggableRegistry;

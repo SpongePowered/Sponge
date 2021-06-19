@@ -24,31 +24,19 @@
  */
 package org.spongepowered.common.datapack;
 
-import com.google.common.collect.ImmutableList;
 import com.google.gson.JsonObject;
-import com.google.inject.Singleton;
-import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.server.MinecraftServer;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.datapack.DataPackManager;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
 import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryScope;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.api.registry.Registry;
-import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.lifecycle.RegisterDataPackValueEventImpl;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
 import org.spongepowered.common.item.recipe.ingredient.SpongeIngredient;
-import org.spongepowered.common.registry.SpongeRegistries;
-import org.spongepowered.common.registry.SpongeRegistryHolder;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -58,33 +46,17 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
-@Singleton
-public final class SpongeDataPackManager implements DataPackManager {
+public final class SpongeDataPackManager {
 
-    private final Map<SpongeDataPackType, List<DataPackSerializable>> serializables;
-    private RegistryHolder registryHolder;
+    public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.game());
+
     private final Game game;
+    private RegistryHolder registryHolder;
 
     private Map<DataPackType, Runnable> delayed = new HashMap<>();
 
     private SpongeDataPackManager(final Game game) {
         this.game = game;
-        this.serializables = new Object2ObjectOpenHashMap<>();
-    }
-
-    @Override
-    public Collection<String> loadedPacks() {
-        return ImmutableList.copyOf(((MinecraftServer) Sponge.server()).getPackRepository().getSelectedIds());
-    }
-
-    @Override
-    public RegistryScope registryScope() {
-        return RegistryScope.DATA_PACK;
-    }
-
-    @Override
-    public RegistryHolder registries() {
-        return this.registryHolder;
     }
 
     public void callRegisterDataPackValueEvents(final Path dataPacksDirectory) {
@@ -114,11 +86,6 @@ public final class SpongeDataPackManager implements DataPackManager {
         if (runnable != null) {
             runnable.run();
         }
-    }
-
-    public void loadRegistries() {
-        this.registryHolder = new SpongeRegistryHolder();
-        SpongeRegistries.registerDataPackRegistries((SpongeRegistryHolder) this.registryHolder);
     }
 
     @SuppressWarnings("unchecked")
@@ -157,25 +124,5 @@ public final class SpongeDataPackManager implements DataPackManager {
             dataPacksToLoad.remove("file/" + implType.getPackSerializer().getPackName());
             SpongeCommon.logger().error(e);
         }
-
-        this.reset();
-    }
-
-    private <T extends DataPackSerializable, U extends DataPackSerializedObject> Map<SpongeDataPackType<T, U>, List<T>> callRegisterDataPackValueEvent(final SpongeDataPackType<T, U> type) {
-        final RegisterDataPackValueEventImpl<T, U> event = new RegisterDataPackValueEventImpl<>(Cause.of(EventContext.empty(), Sponge.game()),
-                Sponge.game(), type);
-        Sponge.game().eventManager().post(event);
-        return event.serializables();
-    }
-
-    @SuppressWarnings("rawtypes")
-    private void reset() {
-        this.serializables.clear();
-
-        this.serializables.put((SpongeDataPackType) DataPackTypes.ADVANCEMENT, new ArrayList<>());
-        this.serializables.put((SpongeDataPackType) DataPackTypes.RECIPE, new ArrayList<>());
-        this.serializables.put((SpongeDataPackType) DataPackTypes.WORLD_TYPE, new ArrayList<>());
-        this.serializables.put((SpongeDataPackType) DataPackTypes.WORLD, new ArrayList<>());
-        this.serializables.put((SpongeDataPackType) DataPackTypes.TAG, new ArrayList<>());
     }
 }

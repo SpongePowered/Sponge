@@ -345,22 +345,8 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Inject(method = "reloadResources", at = @At(value = "HEAD"))
     public void impl$reloadResources(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
-        final SpongeDataPackManager dataPackManager = (SpongeDataPackManager) Sponge.server().dataPackManager();
-        dataPackManager.callRegisterDataPackValueEvents();
-        try {
-            dataPackManager.serialize(this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR), datapacksToLoad);
-        } catch (final IOException e) {
-            throw new RuntimeException(e);
-        }
-        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR), datapacksToLoad);
+        SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents();
         this.shadow$getPackRepository().reload();
-    }
-
-    @Inject(method = "lambda$reloadResources$8", at = @At(value = "RETURN"))
-    public void impl$finishedReloading(CallbackInfoReturnable<Void> cir) {
-        SpongeCommon.getLogger().debug("Reloading data pack registries");
-        final SpongeDataPackManager dataPackManager = (SpongeDataPackManager) Sponge.server().dataPackManager();
-        dataPackManager.loadRegistries();
     }
 
     @Inject(method = "reloadResources", at = @At(value = "RETURN"))

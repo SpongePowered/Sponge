@@ -39,7 +39,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
 
-public class TagDataPackSerializer extends DataPackSerializer<TagSerializedObject> {
+public final class TagDataPackSerializer extends DataPackSerializer<TagSerializedObject> {
     public TagDataPackSerializer(String token, String typeDirectoryName) {
         super(token, typeDirectoryName);
     }

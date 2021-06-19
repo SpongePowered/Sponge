@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Collection;
 import java.util.Optional;
 import net.minecraft.world.level.material.Fluid;
-import org.spongepowered.common.tag.TagUtil;
+import org.spongepowered.common.util.TagUtil;
 
 @Mixin(Fluid.class)
 public abstract class FluidMixin_API implements FluidType {

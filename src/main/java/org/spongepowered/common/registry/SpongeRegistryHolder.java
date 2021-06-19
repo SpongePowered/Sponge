@@ -215,7 +215,7 @@ public final class SpongeRegistryHolder implements RegistryHolder {
         return (Registry<T>) registry;
     }
 
-    public <T> Registry<T> createRegistry(final RegistryType<Tag<T>> type, final StaticTagHelper<T> staticTagHelper) {
+    public <T> Registry<T> wrapTagHelperAsRegistry(final RegistryType<Tag<T>> type, final StaticTagHelper<T> staticTagHelper) {
         Objects.requireNonNull(type, "type");
 
         final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(type.root());

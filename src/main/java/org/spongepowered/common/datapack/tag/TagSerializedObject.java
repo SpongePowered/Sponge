@@ -30,7 +30,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.tag.TagType;
 import org.spongepowered.common.datapack.DataPackSerializedObject;
 
-public class TagSerializedObject extends DataPackSerializedObject {
+public final class TagSerializedObject extends DataPackSerializedObject {
     private final TagType<@NonNull ?> tagType;
 
     public TagSerializedObject(ResourceKey key, JsonObject object, TagType<@NonNull ?> tagType) {

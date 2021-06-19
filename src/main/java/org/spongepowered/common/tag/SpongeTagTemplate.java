@@ -24,7 +24,8 @@
  */
 package org.spongepowered.common.tag;
 
-import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMap;
+import com.google.gson.JsonObject;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.Tag;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -39,17 +40,21 @@ import org.spongepowered.api.tag.TagType;
 import org.spongepowered.common.SpongeCommon;
 
 import java.io.IOException;
-import java.util.List;
+import java.util.Map;
 
-public class SpongeTagTemplate implements TagTemplate {
+public final class SpongeTagTemplate implements TagTemplate {
 
     private final ResourceKey key;
     private final TagType<@NonNull ?> tagType;
     private final boolean replace;
-    private final List<ResourceKey> elements;
-    private final List<ResourceKey> subTags;
+    private final Map<ResourceKey, Boolean> elements;
+    private final Map<ResourceKey, Boolean> subTags;
 
-    public SpongeTagTemplate(final ResourceKey key, final TagType<@NonNull ?> tagType, final boolean replace, final List<ResourceKey> elements, final List<ResourceKey> subTags) {
+    public SpongeTagTemplate(final ResourceKey key,
+                             final TagType<@NonNull ?> tagType,
+                             final boolean replace,
+                             final Map<ResourceKey, Boolean> elements,
+                             final Map<ResourceKey, Boolean> subTags) {
         this.key = key;
         this.tagType = tagType;
         this.replace = replace;
@@ -63,19 +68,19 @@ public class SpongeTagTemplate implements TagTemplate {
     }
 
     public TagType<@NonNull ?> tagType() {
-        return tagType;
+        return this.tagType;
     }
 
     public boolean replace() {
         return this.replace;
     }
 
-    public List<ResourceKey> elements() {
-        return ImmutableList.copyOf(this.elements);
+    public Map<ResourceKey, Boolean> elements() {
+        return ImmutableMap.copyOf(this.elements);
     }
 
-    public List<ResourceKey> subTags() {
-        return ImmutableList.copyOf(this.subTags);
+    public Map<ResourceKey, Boolean> subTags() {
+        return ImmutableMap.copyOf(this.subTags);
     }
 
     @Override
@@ -85,21 +90,29 @@ public class SpongeTagTemplate implements TagTemplate {
 
     @Override
     public DataContainer toContainer() {
-        final Tag.Builder builder = new Tag.Builder();
-        for (final ResourceKey element : this.elements) {
-            builder.addElement((ResourceLocation) (Object) element, this.key.namespace());
-        }
-        for (final ResourceKey tag : this.subTags) {
-            builder.addTag((ResourceLocation) (Object) tag, this.key.namespace());
-        }
+        final JsonObject jsonObject = this.toJson();
         try {
-            final DataContainer container = DataFormats.JSON.get().read(builder.serializeToJson().getAsString());
+            final DataContainer container = DataFormats.JSON.get().read(jsonObject.getAsString());
             container.set(DataQuery.of("replace"), this.replace);
             return container;
         } catch (IOException e) {
             SpongeCommon.getLogger().error("Error reading json serialized by minecraft", e);
             return DataContainer.createNew();
         }
+    }
+
+    public JsonObject toJson() {
+        final Tag.Builder builder = new Tag.Builder();
+        this.elements.forEach((k, v) -> {
+            final ResourceLocation location = (ResourceLocation) (Object) k;
+            // "N/A" is supposed to be the source, but we don't know it, and we're serializing it so it isn't used anyway. (Gone when we serializeToJson)
+            builder.add(v ? new Tag.ElementEntry(location) : new Tag.OptionalElementEntry(location), "N/A");
+        });
+        this.subTags.forEach((k, v) -> {
+            final ResourceLocation location = (ResourceLocation) (Object) k;
+            builder.add(v ? new Tag.TagEntry(location) : new Tag.OptionalTagEntry(location), "N/A");
+        });
+        return builder.serializeToJson();
     }
 
     @Override
