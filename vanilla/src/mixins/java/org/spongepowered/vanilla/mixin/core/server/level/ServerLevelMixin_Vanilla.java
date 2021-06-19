@@ -55,12 +55,12 @@ public abstract class ServerLevelMixin_Vanilla extends LevelMixin {
 
     @Inject(method = "tick", at = @At("HEAD"))
     private void vanilla$capturePreTickTime(final BooleanSupplier param0, final CallbackInfo ci) {
-        this.vanilla$preTickTime = Util.getMillis();
+        this.vanilla$preTickTime = Util.getNanos();
     }
 
     @Inject(method = "tick", at = @At("RETURN"))
     private void vanilla$capturePostTickTime(final BooleanSupplier param0, final CallbackInfo ci) {
-        final long postTickTime = Util.getMillis();
+        final long postTickTime = Util.getNanos();
 
         this.vanilla$recentTickTimes[this.shadow$getServer().getTickCount() % 100] = postTickTime - this.vanilla$preTickTime;
     }

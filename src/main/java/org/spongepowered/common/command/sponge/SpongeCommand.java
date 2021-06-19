@@ -444,7 +444,7 @@ public class SpongeCommand {
                         Component.text()
                                 .content("World [")
                                 .append(Component.text(world.key().asString(), NamedTextColor.DARK_GREEN))
-                                .append(Component.text("]"));
+                                .append(Component.text("] - TPS: "));
                 tps.add(this.appendTickTime(((PlatformLevelBridge) world).bridge$recentTickTimes(), builder).build());
             }
 
