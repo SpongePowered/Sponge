@@ -621,6 +621,6 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
 
     @Override
     public boolean impl$canCallIgniteEntityEvent() {
-        return !this.shadow$isSpectator() && !this.shadow$isCreative();
+        return super.impl$canCallIgniteEntityEvent() && !this.shadow$isSpectator() && !this.shadow$isCreative();
     }
 }
