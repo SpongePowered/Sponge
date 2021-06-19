@@ -27,15 +27,21 @@ package org.spongepowered.common.command.sponge;
 import co.aikar.timings.Timings;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.ServerLevelAccessor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.manager.CommandMapping;
@@ -46,8 +52,12 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.level.LevelAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.PlatformLevelBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -247,8 +257,9 @@ public class SpongeCommand {
         final Command.Parameterized globalCommand = Command.builder()
                 .executor(context -> {
                     for (final ServerWorld world : SpongeCommon.getGame().server().worldManager().worlds()) {
-                        context.sendMessage(Identity.nil(), Component.text().content("World ")
-                                        .append(Component.text(world.key().toString(), Style.style(TextDecoration.BOLD)))
+                        context.sendMessage(Identity.nil(), Component.text().content("World: ")
+                                        .append(Component.text(world.key().toString(), NamedTextColor.GREEN))
+                                        .append(Component.newline())
                                         .append(this.getChunksInfo(world))
                                         .build());
                     }
@@ -259,8 +270,9 @@ public class SpongeCommand {
                 .addParameter(CommonParameters.WORLD)
                 .executor(context -> {
                     final ServerWorld world = context.requireOne(CommonParameters.WORLD);
-                    context.sendMessage(Identity.nil(), Component.text().content("World ")
-                            .append(Component.text(world.key().toString(), Style.style(TextDecoration.BOLD)))
+                    context.sendMessage(Identity.nil(), Component.text().content("World: ")
+                            .append(Component.text(world.key().toString(), NamedTextColor.GREEN))
+                            .append(Component.newline())
                             .append(this.getChunksInfo(world))
                             .build());
                     return CommandResult.success();
@@ -296,7 +308,7 @@ public class SpongeCommand {
                 file.getParentFile().mkdirs();
             }
 
-            final Class clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
+            final Class<?> clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
             final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
             final Object hotspotMBean = ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", clazz);
             final Method m = clazz.getMethod("dumpHeap", String.class, boolean.class);
@@ -316,8 +328,8 @@ public class SpongeCommand {
             final PluginMetadata metadata = specificContainer.metadata();
             final TextComponent.Builder builder = Component.text();
             this.createShortContainerMeta(builder.append(SpongeCommand.INDENT_COMPONENT), metadata);
-            // builder.clickEvent(SpongeComponents.executeCallback(cause ->
-            //         cause.sendMessage(this.createContainerMeta(metadata))));
+            builder.clickEvent(SpongeComponents.executeCallback(cause ->
+                    cause.sendMessage(Identity.nil(), this.createContainerMeta(metadata))));
             context.sendMessage(Identity.nil(), builder.build());
         }
 
@@ -338,7 +350,7 @@ public class SpongeCommand {
         );
         if (pluginContainer.isPresent()) {
             // just send the reload event to that
-            context.sendMessage(Identity.nil(), Component.text("Sending refresh event to" + pluginContainer.get().metadata().id() + ", please wait..."));
+            context.sendMessage(Identity.nil(), Component.text("Sending refresh event to " + pluginContainer.get().metadata().id() + ", please wait..."));
             ((SpongeEventManager) SpongeCommon.getGame().eventManager()).post(event, pluginContainer.get());
         } else {
             context.sendMessage(Identity.nil(), Component.text("Sending refresh event to all plugins, please wait..."));
@@ -423,27 +435,30 @@ public class SpongeCommand {
                 .build();
     }
 
-    private CommandResult tpsExecutor(final CommandContext context) {
-         final List<Component> tps = new ArrayList<>();
-          // Uncomment when per-world TPS is in and working.
-//        for (final ServerWorld world : Sponge.getServer().worldManager().getWorlds()) {
-//            // Add code to get the average here.
-//            final TextComponent.Builder builder =
-//                    TextComponent.builder("World [")
-//                            .append(Component.text(world.getKey().asString(), NamedTextColor.DARK_GREEN))
-//                            .append(Component.text("]"));
-//            tps.add(this.appendTickTime(((MinecraftServerBridge) SpongeCommon.getServer()).bridge$getWorldTickTimes()));
-//        }
+    private @NonNull CommandResult tpsExecutor(final CommandContext context) {
+        if (SpongeCommon.getGame().isServerAvailable()) {
 
-        tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimes, Component.text().content("Overall TPS: ")).build());
+            final List<Component> tps = new ArrayList<>();
+            for (final ServerWorld world : Sponge.server().worldManager().worlds()) {
+                final TextComponent.Builder builder =
+                        Component.text()
+                                .content("World [")
+                                .append(Component.text(world.key().asString(), NamedTextColor.DARK_GREEN))
+                                .append(Component.text("]"));
+                tps.add(this.appendTickTime(((PlatformLevelBridge) world).bridge$recentTickTimes(), builder).build());
+            }
 
-        SpongeCommon.getGame().serviceProvider()
-                .paginationService()
-                .builder()
-                .contents(tps)
-                .title(Component.text("Server TPS", NamedTextColor.WHITE))
-                .padding(Component.text("-", NamedTextColor.WHITE))
-                .sendTo(context.cause().audience());
+            tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimes, Component.text().content("Overall TPS: ")).build());
+            SpongeCommon.getGame().serviceProvider()
+                    .paginationService()
+                    .builder()
+                    .contents(tps)
+                    .title(Component.text("Server TPS", NamedTextColor.WHITE))
+                    .padding(Component.text("-", NamedTextColor.WHITE))
+                    .sendTo(context.cause().audience());
+        } else {
+            context.sendMessage(Identity.nil(), Component.text("Server is not running."));
+        }
 
         return CommandResult.success();
     }
@@ -554,26 +569,30 @@ public class SpongeCommand {
 
     // --
 
-    protected Component getChunksInfo(final ServerWorld worldserver) {
-        if (((WorldBridge) worldserver).bridge$isFake() || worldserver.worldStorage().worldProperties() == null) {
-            return Component.text().append(Component.newline(), Component.text("Fake world")).build();
+    protected Component getChunksInfo(final ServerWorld serverWorld) {
+        if (((WorldBridge) serverWorld).bridge$isFake()) {
+            return Component.text().append(Component.newline(), Component.text(serverWorld.key().asString() + " is a fake world")).build();
         }
-        return Component.text().append(Component.newline(), Component.text("chunk stuff here")).build();
-        /*
-                key("DimensionId: "), value(((WorldServerBridge) worldserver).bridge$getDimensionId()), TextComponent.newline(),
-                key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), TextComponent.newline(),
-                key("Active chunks: "), value(worldserver.getChunkProvider().loadedChunks().size()), TextComponent.newline(),
-                key("Entities: "), value(worldserver.loadedEntityList.size()), TextComponent.newline(),
-                key("Tile Entities: "), value(worldserver.loadedTileEntityList.size()), TextComponent.newline(),
-                key("Removed Entities:"), value(((WorldAccessor) worldserver).accessor$getUnloadedEntityList().size()), TextComponent.newline(),
-                key("Removed Tile Entities: "), value(((WorldAccessor) worldserver).accessor$getTileEntitiesToBeRemoved()), TextComponent.newline()*/
+        final ServerLevel serverLevel = (ServerLevel) serverWorld;
+        final int entitiesToRemove = (int) serverWorld.entities().stream().filter(x -> ((Entity) x).removed).count();
+        return LinearComponents.linear(
+                this.key("Loaded chunks: "), this.value(serverLevel.getChunkSource().chunkMap.size()),
+                Component.newline(),
+                this.key("Entities: "), this.value(serverWorld.entities().size()),
+                Component.newline(),
+                this.key("Block Entities: "), this.value(serverWorld.blockEntities().size()),
+                Component.newline(),
+                this.key("Removed Entities:"), this.value(entitiesToRemove),
+                Component.newline(),
+                this.key("Removed Block Entities: "), this.value(((LevelAccessor) serverWorld).accessor$blockEntitiesToUnload().size())
+        );
     }
 
     protected Component key(final String text) {
         return Component.text(text, NamedTextColor.GOLD);
     }
 
-    protected Component value(final String text) {
+    protected Component value(final int text) {
         return Component.text(text, NamedTextColor.GRAY);
     }
 
