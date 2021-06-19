@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Creeper;
 import org.spongepowered.asm.mixin.Mixin;
@@ -47,14 +48,11 @@ public abstract class CreeperMixin_API extends MonsterMixin_API implements Creep
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // FusedExplosive
-        values.add(this.primed().asImmutable());
-        values.add(this.fuseDuration().asImmutable());
+        values.add(this.requireValue(Keys.FUSE_DURATION).asImmutable());
+        values.add(this.requireValue(Keys.IS_CHARGED).asImmutable());
+        values.add(this.requireValue(Keys.TICKS_REMAINING).asImmutable());
 
-        // Explosive
-        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
-
-        values.add(this.charged().asImmutable());
+        this.getValue(Keys.EXPLOSION_RADIUS).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

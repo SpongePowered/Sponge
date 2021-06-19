@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.AreaEffectCloud;
 import org.spongepowered.asm.mixin.Mixin;
@@ -38,17 +39,16 @@ public abstract class AreaEffectCloudMixin_API extends EntityMixin_API implement
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.color().asImmutable());
-        values.add(this.radius().asImmutable());
-        values.add(this.particleEffect().asImmutable());
-        values.add(this.duration().asImmutable());
-        values.add(this.waitTime().asImmutable());
-        values.add(this.radiusOnUse().asImmutable());
-        values.add(this.radiusPerTick().asImmutable());
-        values.add(this.durationOnUse().asImmutable());
-        values.add(this.applicationDelay().asImmutable());
-        values.add(this.effects().asImmutable());
-        values.add(this.age().asImmutable());
+        values.add(this.requireValue(Keys.COLOR).asImmutable());
+        values.add(this.requireValue(Keys.DURATION).asImmutable());
+        values.add(this.requireValue(Keys.DURATION_ON_USE).asImmutable());
+        values.add(this.requireValue(Keys.PARTICLE_EFFECT).asImmutable());
+        values.add(this.requireValue(Keys.POTION_EFFECTS).asImmutable());
+        values.add(this.requireValue(Keys.RADIUS).asImmutable());
+        values.add(this.requireValue(Keys.RADIUS_ON_USE).asImmutable());
+        values.add(this.requireValue(Keys.RADIUS_PER_TICK).asImmutable());
+        values.add(this.requireValue(Keys.REAPPLICATION_DELAY).asImmutable());
+        values.add(this.requireValue(Keys.WAIT_TIME).asImmutable());
 
         return values;
     }

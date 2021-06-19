@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.vehicle;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.vehicle.Boat;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.vehicle.Boat.class)
@@ -40,12 +42,12 @@ public abstract class BoatMixin_API extends EntityMixin_API implements Boat {
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.boatType().asImmutable());
-        values.add(this.inWater().asImmutable());
-        values.add(this.moveOnLand().asImmutable());
-        values.add(this.maxSpeed().asImmutable());
-        values.add(this.unoccupiedDeceleration().asImmutable());
-        values.add(this.occupiedDeceleration().asImmutable());
+        values.add(this.requireValue(Keys.BOAT_TYPE).asImmutable());
+        values.add(this.requireValue(Keys.CAN_MOVE_ON_LAND).asImmutable());
+        values.add(this.requireValue(Keys.IS_IN_WATER).asImmutable());
+        values.add(this.requireValue(Keys.MAX_SPEED).asImmutable());
+        values.add(this.requireValue(Keys.OCCUPIED_DECELERATION).asImmutable());
+        values.add(this.requireValue(Keys.UNOCCUPIED_DECELERATION).asImmutable());
 
         return values;
     }

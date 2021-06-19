@@ -24,23 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.EvokerFangs;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
-import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.projectile.EvokerFangs.class)
 public abstract class EvokerFangsMixin_API extends EntityMixin_API implements EvokerFangs {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        // Projectile
-        this.shooter().map(Value::asImmutable).ifPresent(values::add);
-
-        return values;
-    }
 
 }

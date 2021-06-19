@@ -24,14 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.GameRules;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.explosive.WitherSkull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.entity.projectile.WitherSkullBridge;
 
 import java.util.Set;
-import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.GameRules;
 
 @Mixin(net.minecraft.world.entity.projectile.WitherSkull.class)
 public abstract class WitherSkullMixin_API extends AbstractHurtingProjectileMixin_API implements WitherSkull {
@@ -48,11 +49,9 @@ public abstract class WitherSkullMixin_API extends AbstractHurtingProjectileMixi
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // FireballEntity
-        values.add(this.acceleration().asImmutable());
+        values.add(this.requireValue(Keys.CAN_GRIEF).asImmutable());
 
-        // Explosive
-        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.EXPLOSION_RADIUS).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

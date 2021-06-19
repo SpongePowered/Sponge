@@ -24,21 +24,23 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
+import net.minecraft.world.entity.projectile.ThrownPotion;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.Potion;
 import org.spongepowered.asm.mixin.Mixin;
 
 import java.util.Set;
-import net.minecraft.world.entity.projectile.ThrownPotion;
 
 @Mixin(ThrownPotion.class)
-public abstract class ThrownPotionMixin_API extends ThrowableProjectileMixin_API implements Potion {
+public abstract class ThrownPotionMixin_API extends ThrowableItemProjectileMixin_API implements Potion {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.item().asImmutable());
+        values.add(this.requireValue(Keys.ITEM_STACK_SNAPSHOT).asImmutable());
+        values.add(this.requireValue(Keys.POTION_EFFECTS).asImmutable());
 
         return values;
     }

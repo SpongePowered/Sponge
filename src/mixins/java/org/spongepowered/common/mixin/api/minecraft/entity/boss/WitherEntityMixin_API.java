@@ -24,13 +24,15 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.entity.boss;
 
+import net.minecraft.world.entity.boss.wither.WitherBoss;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.boss.Wither;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.monster.MonsterMixin_API;
+
 import java.util.Set;
-import net.minecraft.world.entity.boss.wither.WitherBoss;
 
 @Mixin(value = WitherBoss.class)
 public abstract class WitherEntityMixin_API extends MonsterMixin_API implements Wither {
@@ -46,17 +48,8 @@ public abstract class WitherEntityMixin_API extends MonsterMixin_API implements 
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Boss
-        values.add(this.bossBar().asImmutable());
-
-        // FusedExplosive
-        values.add(this.primed().asImmutable());
-        values.add(this.fuseDuration().asImmutable());
-
-        // Explosive
-        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
-
-        values.add(this.targetEntities().asImmutable());
+        values.add(this.requireValue(Keys.BOSS_BAR).asImmutable());
+        values.add(this.requireValue(Keys.WITHER_TARGETS).asImmutable());
 
         return values;
     }

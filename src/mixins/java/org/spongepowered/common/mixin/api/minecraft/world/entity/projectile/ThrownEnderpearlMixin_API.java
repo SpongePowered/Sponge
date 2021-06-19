@@ -24,24 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
-import org.spongepowered.api.data.value.Value;
+import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 import org.spongepowered.api.entity.projectile.EnderPearl;
 import org.spongepowered.asm.mixin.Mixin;
-import java.util.Set;
-import net.minecraft.world.entity.projectile.ThrownEnderpearl;
 
 @Mixin(ThrownEnderpearl.class)
-public abstract class ThrownEnderpearlMixin_API extends ThrowableProjectileMixin_API implements EnderPearl {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        // Values from DamagingProjectile in EnderPearl
-        values.add(this.attackDamage().asImmutable());
-        values.add(this.customAttackDamage().asImmutable());
-
-        return values;
-    }
+public abstract class ThrownEnderpearlMixin_API extends ThrowableItemProjectileMixin_API implements EnderPearl {
 
 }

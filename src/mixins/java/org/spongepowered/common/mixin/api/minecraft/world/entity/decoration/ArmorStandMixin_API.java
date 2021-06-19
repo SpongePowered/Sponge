@@ -24,12 +24,14 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.decoration;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.ArmorStand;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.LivingEntityMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.decoration.ArmorStand.class)
@@ -40,12 +42,18 @@ public abstract class ArmorStandMixin_API extends LivingEntityMixin_API implemen
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.marker().asImmutable());
-        values.add(this.small().asImmutable());
-        values.add(this.basePlate().asImmutable());
-        values.add(this.arms().asImmutable());
-        values.add(this.placingDisabled().asImmutable());
-        values.add(this.takingDisabled().asImmutable());
+        values.add(this.requireValue(Keys.BODY_ROTATIONS).asImmutable());
+        values.add(this.requireValue(Keys.CHEST_ROTATION).asImmutable());
+        values.add(this.requireValue(Keys.HAS_ARMS).asImmutable());
+        values.add(this.requireValue(Keys.HAS_BASE_PLATE).asImmutable());
+        values.add(this.requireValue(Keys.HAS_MARKER).asImmutable());
+        values.add(this.requireValue(Keys.HEAD_ROTATION).asImmutable());
+        values.add(this.requireValue(Keys.IS_PLACING_DISABLED).asImmutable());
+        values.add(this.requireValue(Keys.IS_TAKING_DISABLED).asImmutable());
+        values.add(this.requireValue(Keys.LEFT_ARM_ROTATION).asImmutable());
+        values.add(this.requireValue(Keys.LEFT_LEG_ROTATION).asImmutable());
+        values.add(this.requireValue(Keys.RIGHT_ARM_ROTATION).asImmutable());
+        values.add(this.requireValue(Keys.RIGHT_LEG_ROTATION).asImmutable());
 
         return values;
     }

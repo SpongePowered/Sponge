@@ -350,19 +350,42 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = new HashSet<>();
 
-        values.add(this.displayName().asImmutable());
-        values.add(this.fallDistance().asImmutable());
-        values.add(this.passengers().asImmutable());
-        values.add(this.onGround().asImmutable());
-        values.add(this.velocity().asImmutable());
-        values.add(this.gravityAffected().asImmutable());
-        values.add(this.silent().asImmutable());
+        values.add(this.requireValue(Keys.AGE).asImmutable());
+        values.add(this.requireValue(Keys.BASE_SIZE).asImmutable());
+        values.add(this.requireValue(Keys.BASE_VEHICLE).asImmutable());
+        values.add(this.requireValue(Keys.DISPLAY_NAME).asImmutable());
+        values.add(this.requireValue(Keys.EYE_HEIGHT).asImmutable());
+        values.add(this.requireValue(Keys.EYE_POSITION).asImmutable());
+        values.add(this.requireValue(Keys.FALL_DISTANCE).asImmutable());
+        values.add(this.requireValue(Keys.FIRE_DAMAGE_DELAY).asImmutable());
+        values.add(this.requireValue(Keys.HEIGHT).asImmutable());
+        values.add(this.requireValue(Keys.INVULNERABILITY_TICKS).asImmutable());
+        values.add(this.requireValue(Keys.INVULNERABLE).asImmutable());
+        values.add(this.requireValue(Keys.IS_CUSTOM_NAME_VISIBLE).asImmutable());
+        values.add(this.requireValue(Keys.IS_FLYING).asImmutable());
+        values.add(this.requireValue(Keys.IS_GLOWING).asImmutable());
+        values.add(this.requireValue(Keys.IS_GRAVITY_AFFECTED).asImmutable());
+        values.add(this.requireValue(Keys.IS_INVISIBLE).asImmutable());
+        values.add(this.requireValue(Keys.IS_SILENT).asImmutable());
+        values.add(this.requireValue(Keys.IS_SNEAKING).asImmutable());
+        values.add(this.requireValue(Keys.IS_SPRINTING).asImmutable());
+        values.add(this.requireValue(Keys.IS_WET).asImmutable());
+        values.add(this.requireValue(Keys.ON_GROUND).asImmutable());
+        values.add(this.requireValue(Keys.PASSENGERS).asImmutable());
+        values.add(this.requireValue(Keys.SCALE).asImmutable());
+        values.add(this.requireValue(Keys.SCOREBOARD_TAGS).asImmutable());
+        values.add(this.requireValue(Keys.TRANSIENT).asImmutable());
+        values.add(this.requireValue(Keys.VANISH).asImmutable());
+        values.add(this.requireValue(Keys.VANISH_IGNORES_COLLISION).asImmutable());
+        values.add(this.requireValue(Keys.VANISH_PREVENTS_TARGETING).asImmutable());
+        values.add(this.requireValue(Keys.VELOCITY).asImmutable());
 
-        this.baseVehicle().map(Value::asImmutable).ifPresent(values::add);
-        this.creator().map(Value::asImmutable).ifPresent(values::add);
-        this.notifier().map(Value::asImmutable).ifPresent(values::add);
-        this.fireTicks().map(Value::asImmutable).ifPresent(values::add);
-        this.fireImmuneTicks().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.CREATOR).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.CUSTOM_NAME).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.FIRE_TICKS).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.NOTIFIER).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.SWIFTNESS).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.VEHICLE).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

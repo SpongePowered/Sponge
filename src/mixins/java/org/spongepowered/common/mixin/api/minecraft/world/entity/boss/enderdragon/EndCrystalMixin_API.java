@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.boss.enderdragon;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.explosive.EndCrystal;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.entity.boss.enderdragon.EndCrystalBridge;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.boss.enderdragon.EndCrystal.class)
@@ -45,12 +47,11 @@ public abstract class EndCrystalMixin_API extends EntityMixin_API implements End
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Explosive
-        this.explosionRadius().map(Value::asImmutable).ifPresent(values::add);
+        values.add(this.requireValue(Keys.HEIGHT).asImmutable());
+        values.add(this.requireValue(Keys.SHOW_BOTTOM).asImmutable());
 
-        values.add(this.showBottom().asImmutable());
-
-        this.beamTarget().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.EXPLOSION_RADIUS).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.TARGET_POSITION).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }
