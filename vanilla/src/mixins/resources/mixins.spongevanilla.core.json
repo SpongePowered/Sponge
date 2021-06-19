@@ -30,7 +30,8 @@
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
-        "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla"
+        "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla",
+        "server.level.ServerLevelMixin_Vanilla"
     ],
     "injectors": {
         "defaultRequire": 1

@@ -89,8 +89,8 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge,
-        CommandSourceProviderBridge, SubjectProxy, CommandSourceBridge {
+public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge, CommandSourceProviderBridge, SubjectProxy,
+    CommandSourceBridge {
 
     // @formatter:off
     @Shadow @Final private Map<ResourceKey<Level>, ServerLevel> levels;

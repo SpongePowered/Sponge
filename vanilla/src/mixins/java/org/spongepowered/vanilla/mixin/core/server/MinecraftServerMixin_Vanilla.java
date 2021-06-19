@@ -29,11 +29,13 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.Logger;
@@ -42,12 +44,9 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.hooks.PlatformHooks;
-import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
-import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.vanilla.VanillaServer;
 import org.spongepowered.vanilla.hooks.VanillaPacketHooks;
 
@@ -61,10 +60,9 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
     @Shadow @Final private static Logger LOGGER;
 
     @Shadow protected abstract void shadow$detectBundledResources();
-    @Shadow protected abstract void loadLevel();
     @Shadow public abstract boolean shadow$isRunning();
+    @Shadow protected abstract void loadLevel();
     // @formatter:on
-
 
     /**
      * Render localized/formatted chat components
@@ -79,15 +77,15 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
 
 
     @Inject(method = "<init>", at = @At("TAIL"))
-    private void vanilla$setPacketHooks(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_, LevelStorageSource.LevelStorageAccess p_i232576_3_,
-            WorldData p_i232576_4_, PackRepository p_i232576_5_, Proxy p_i232576_6_, DataFixer p_i232576_7_,
-            ServerResources p_i232576_8_, MinecraftSessionService p_i232576_9_, GameProfileRepository p_i232576_10_,
-            GameProfileCache p_i232576_11_, ChunkProgressListenerFactory p_i232576_12_, CallbackInfo ci) {
+    private void vanilla$setPacketHooks(final Thread p_i232576_1_, final RegistryAccess.RegistryHolder p_i232576_2_, final LevelStorageSource.LevelStorageAccess p_i232576_3_,
+        final WorldData p_i232576_4_, final PackRepository p_i232576_5_, final Proxy p_i232576_6_, final DataFixer p_i232576_7_,
+        final ServerResources p_i232576_8_, final MinecraftSessionService p_i232576_9_, final GameProfileRepository p_i232576_10_,
+        final GameProfileCache p_i232576_11_, final ChunkProgressListenerFactory p_i232576_12_, final CallbackInfo ci) {
         PlatformHooks.INSTANCE.setPacketHooks(new VanillaPacketHooks());
     }
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
-    private void vanilla$callStoppingEngineEvent(CallbackInfo ci) {
+    private void vanilla$callStoppingEngineEvent(final CallbackInfo ci) {
         SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
     }
 }
