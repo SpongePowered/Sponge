@@ -95,16 +95,14 @@ import java.util.stream.Collectors;
 @Plugin("maptest")
 public class MapTest implements LoadableModule {
 
-
-    @Inject
-    private PluginContainer container;
-
+    private final PluginContainer container;
     private final Logger logger;
     private final Listeners listeners;
     private boolean isEnabled = false;
 
     @Inject
-    public MapTest(final Logger logger) {
+    public MapTest(final Logger logger, final PluginContainer pluginContainer) {
+        this.container = pluginContainer;
         this.logger = logger;
         this.listeners = new Listeners(logger);
     }
@@ -227,7 +225,11 @@ public class MapTest implements LoadableModule {
 
     private CommandResult testMapShades(final CommandContext ctx) throws CommandException {
         final Player player = this.requirePlayer(ctx);
-        for (final RegistryEntry<MapShade> entry : Sponge.game().registries().registry(RegistryTypes.MAP_SHADE)) {
+        final Collection<RegistryEntry<MapShade>> mapShades = Sponge.game().registries()
+                .registry(RegistryTypes.MAP_SHADE)
+                .streamEntries()
+                .collect(Collectors.toList());
+        for (final RegistryEntry<MapShade> entry : mapShades) {
             final MapColor mapColor = MapColor.of(MapColorTypes.COLOR_GREEN.get(), entry.value());
             final MapCanvas mapCanvas = MapCanvas.builder().paintAll(mapColor).build();
             final MapInfo mapInfo = Sponge.server().mapStorage()

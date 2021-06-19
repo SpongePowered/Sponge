@@ -7,10 +7,10 @@
     "priority": 1300,
     "server": [],
     "mixins": [
-        "mcp.server.MinecraftServerMixin_Vanilla_API"
+        "minecraft.server.MinecraftServerMixin_Vanilla_API"
     ],
     "client": [
-        "mcp.client.MinecraftMixin_Vanilla_API"
+        "minecraft.client.MinecraftMixin_Vanilla_API"
     ],
     "injectors": {
         "defaultRequire": 1

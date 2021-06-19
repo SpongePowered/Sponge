@@ -318,7 +318,7 @@ public final class PhasePrinter {
         }
     }
 
-    static void printRunnawayPhaseCompletion(final PhaseStack stack, final IPhaseState<@NonNull ?> state) {
+    static void printRunAwayPhaseCompletion(final PhaseStack stack, final IPhaseState<@NonNull ?> state) {
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && !PhasePrinter.hasPrintedAboutRunnawayPhases) {
             // Avoiding spam logs.
             return;

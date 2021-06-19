@@ -28,6 +28,8 @@ import com.google.common.base.Preconditions;
 import com.google.inject.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Platform;
+import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.applaunch.plugin.PluginEngine;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
@@ -89,7 +91,7 @@ public abstract class Launch {
 
     public final PluginContainer getMinecraftPlugin() {
         if (this.minecraftPlugin == null) {
-            this.minecraftPlugin = this.pluginManager.plugin("minecraft").orElse(null);
+            this.minecraftPlugin = this.pluginManager.plugin(PluginManager.MINECRAFT_PLUGIN_ID).orElse(null);
 
             if (this.minecraftPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing Minecraft, this is a serious issue!");
@@ -101,7 +103,7 @@ public abstract class Launch {
 
     public final PluginContainer getApiPlugin() {
         if (this.apiPlugin == null) {
-            this.apiPlugin = this.pluginManager.plugin("spongeapi").orElse(null);
+            this.apiPlugin = this.pluginManager.plugin(Platform.API_ID).orElse(null);
 
             if (this.apiPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing SpongeAPI, this is a serious issue!");
@@ -113,7 +115,7 @@ public abstract class Launch {
 
     public final PluginContainer getCommonPlugin() {
         if (this.commonPlugin == null) {
-            this.commonPlugin = this.pluginManager.plugin("sponge").orElse(null);
+            this.commonPlugin = this.pluginManager.plugin(PluginManager.SPONGE_PLUGIN_ID).orElse(null);
 
             if (this.commonPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing Sponge, this is a serious issue!");

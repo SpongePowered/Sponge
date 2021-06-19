@@ -31,8 +31,6 @@ import net.minecraft.core.Registry;
 import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
-import net.minecraft.tags.Tag;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -134,7 +132,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
         this.logicalHeight = dimensionType.logicalHeight();
         this.maximumHeight = dimensionType.height();
         this.biomeSampler = (BiomeSampler) dimensionType.getBiomeZoomer();
-        this.infiniburn = (ResourceKey) (Object) ((Tag.Named<Block>) dimensionType.infiniburn()).getName();
+        this.infiniburn = (ResourceKey) (Object) ((DimensionTypeAccessor)dimensionType).accessor$infiniburn();
         this.effect = DimensionEffectProvider.INSTANCE.get((ResourceKey) (Object) ((DimensionTypeAccessor) dimensionType).accessor$effectsLocation());
         this.ambientLight = ((DimensionTypeAccessor) dimensionType).accessor$ambientLight();
         this.createDragonFight = dimensionType.createDragonFight();

@@ -24,12 +24,17 @@
  */
 package org.spongepowered.common.util;
 
+import com.mojang.brigadier.CommandDispatcher;
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.suggestion.Suggestions;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
+import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.manager.CommandMapping;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.command.brigadier.argument.CustomArgumentParser;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
@@ -40,6 +45,7 @@ import java.util.regex.Pattern;
 
 public final class CommandUtil {
 
+    private static final String[] EMPTY_COMMAND_ARRAY = new String[] { "" };
     private static final Pattern INTEGER_PATTERN = Pattern.compile("\\d+");
 
     public static boolean checkForCustomSuggestions(final CommandNode<?> rootSuggestion) {
@@ -66,6 +72,34 @@ public final class CommandUtil {
             }
         }
         return builder.buildFuture();
+    }
+
+    public static SuggestionsBuilder createSuggestionsForRawCommand(
+            final String rawCommand,
+            final String[] commandArray,
+            final CommandCause cause,
+            final CommandMapping mapping
+    ) {
+        final SuggestionsBuilder builder = new SuggestionsBuilder(rawCommand, rawCommand.lastIndexOf(CommandDispatcher.ARGUMENT_SEPARATOR) + 1);
+        try {
+            mapping.registrar().complete(cause, mapping, commandArray[0], commandArray[1])
+                    .forEach(completion -> builder.suggest(completion.completion(),
+                            completion.tooltip().map(SpongeAdventure::asVanilla).orElse(null)));
+        } catch (final CommandException ex) {
+            SpongeCommon.getLogger().error("Could not determine completions for {}", rawCommand);
+            SpongeCommon.getLogger().error(ex);
+        }
+        return builder;
+    }
+
+    public static String[] extractCommandString(final String commandString) {
+        if (commandString.isEmpty()) {
+            return CommandUtil.EMPTY_COMMAND_ARRAY;
+        }
+        if (commandString.startsWith("/")) {
+            return commandString.substring(1).split(" ", 2);
+        }
+        return commandString.split(" ", 2);
     }
 
     private CommandUtil() {

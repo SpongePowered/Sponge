@@ -41,6 +41,7 @@ import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.command.parameter.managed.Flag;
@@ -71,6 +72,7 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
     private boolean forks;
     private Deque<SpongeCommandContextBuilderTransaction> transaction = null;
     private org.spongepowered.api.command.Command.Parameterized currentTargetCommand = null;
+    @Nullable private String[] nonBrigCommand = null;
 
     public SpongeCommandContextBuilder(
             final CommandDispatcher<CommandSourceStack> dispatcher,
@@ -510,4 +512,15 @@ public final class SpongeCommandContextBuilder extends CommandContextBuilder<Com
         return this.cause().cause();
     }
 
+    public void setNonBrigCommand(final String[] nonBrigCommand) {
+        this.nonBrigCommand = nonBrigCommand;
+    }
+
+    public String[] nonBrigCommand() {
+        return this.nonBrigCommand;
+    }
+
+    public boolean representsNonBrigCommand() {
+        return this.nonBrigCommand != null;
+    }
 }

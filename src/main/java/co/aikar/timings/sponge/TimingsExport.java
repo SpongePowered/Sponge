@@ -47,8 +47,8 @@ import org.spongepowered.api.network.RconConnection;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
-import org.spongepowered.common.relocate.co.aikar.util.JSONUtil.JsonObjectBuilder;
+import co.aikar.timings.util.JSONUtil;
+import co.aikar.timings.util.JSONUtil.JsonObjectBuilder;
 import org.spongepowered.configurate.ConfigurationNode;
 
 import java.io.ByteArrayOutputStream;

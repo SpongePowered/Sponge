@@ -33,6 +33,7 @@ import com.mojang.brigadier.ResultConsumer;
 import com.mojang.brigadier.StringReader;
 import com.mojang.brigadier.context.CommandContext;
 import com.mojang.brigadier.context.CommandContextBuilder;
+import com.mojang.brigadier.context.StringRange;
 import com.mojang.brigadier.context.SuggestionContext;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestions;
@@ -40,17 +41,23 @@ import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.LiteralCommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandManager;
+import org.spongepowered.api.command.manager.CommandMapping;
+import org.spongepowered.api.command.parameter.ArgumentReader;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.command.brigadier.SpongeStringReader;
+import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 import org.spongepowered.common.command.brigadier.context.SpongeCommandContextBuilder;
+import org.spongepowered.common.command.brigadier.tree.DummyCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongeArgumentCommandNode;
 import org.spongepowered.common.command.brigadier.tree.SpongeNode;
 import org.spongepowered.common.command.brigadier.tree.SpongeRootCommandNode;
+import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
@@ -60,9 +67,11 @@ import java.util.Collections;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 import net.minecraft.commands.CommandSourceStack;
+import org.spongepowered.common.util.CommandUtil;
 
 // For use on the Brigadier dispatcher
 public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSourceStack> {
@@ -300,15 +309,65 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
                 // Sponge Start: redirect is now in a local variable as we use it a fair bit
                 final CommandNode<CommandSourceStack> redirect = child.getRedirect();
                 if (redirect != null) {
+                    // If we've redirected to the root node, we may need to head back to our command
+                    // manager - so we should check to see if that's going to actually be the case.
+                    final boolean redirectingToRoot = redirect == this.getRoot();
                     final SpongeCommandContextBuilder childContext =
                             new SpongeCommandContextBuilder(this, source, child.getRedirect(), reader.getCursor());
                     // For a redirect, we want to ensure all of our currently parsed information is available.
                     context.applySpongeElementsTo(childContext, false);
-                    final ParseResults<CommandSourceStack> parse = this.parseNodes(redirect instanceof RootCommandNode,
-                            isSuggestion,
-                            child.getRedirect(),
-                            reader,
-                            childContext);
+                    ParseResults<CommandSourceStack> parse = null;
+                    if (redirectingToRoot) {
+                        // check to see if we can get an element
+                        final ArgumentReader.Immutable snapshot = reader.immutable();
+                        try {
+                            final String commandToAttempt = reader.peekString();
+                            final int offset = reader.cursor();
+                            if (redirect.getChild(commandToAttempt) == null) {
+                                // The redirect fails, so we intercept here, and reroute to our command
+                                // manager with the rest of the string and the new context.
+                                reader.parseString();
+                                final boolean hasMore = reader.canRead();
+                                reader.skipWhitespace();
+                                final Optional<CommandMapping> optionalMapping = this.commandManager.commandMapping(commandToAttempt);
+                                if (optionalMapping.isPresent()) {
+                                    final CommandMapping mapping = optionalMapping.get();
+                                    final String remaining = reader.remaining();
+                                    childContext.withCommand(commandContext -> {
+                                        final SpongeCommandContext spongeContext = (SpongeCommandContext) commandContext;
+                                        try {
+                                            return mapping.registrar().process(
+                                                    spongeContext.cause(),
+                                                    mapping,
+                                                    commandToAttempt,
+                                                    remaining
+                                            ).result();
+                                        } catch (final CommandException e) {
+                                            throw new SpongeCommandSyntaxException(e, spongeContext);
+                                        }
+                                    });
+                                    childContext.withNode(new DummyCommandNode(childContext.getCommand()), StringRange.between(offset, reader.totalLength()));
+                                    childContext.setNonBrigCommand(hasMore ? new String[] { commandToAttempt, remaining } : new String[] { commandToAttempt });
+                                    reader.setCursor(reader.totalLength());
+                                    parse = new ParseResults<>(childContext, reader, Collections.emptyMap());
+                                } else {
+                                    // We'll just let this parser fail as normal.
+                                    reader.setState(snapshot);
+                                }
+                            }
+                        } catch (final ArgumentParseException ignored) {
+                            // ignore it, it'll handle it later.
+                            reader.setState(snapshot);
+                        }
+                    }
+
+                    if (parse == null) {
+                        parse = this.parseNodes(redirect instanceof RootCommandNode,
+                                isSuggestion,
+                                child.getRedirect(),
+                                reader,
+                                childContext);
+                    }
                     // It worked out, so let's apply it back. We clear and reapply, it's simpler than comparing and conditional adding.
                     childContext.applySpongeElementsTo(context, true);
                     // Sponge End
@@ -381,6 +440,23 @@ public final class SpongeCommandDispatcher extends CommandDispatcher<CommandSour
     @Override
     public CompletableFuture<Suggestions> getCompletionSuggestions(final ParseResults<CommandSourceStack> parse, final int cursor) {
         final CommandContextBuilder<CommandSourceStack> context = parse.getContext();
+        // Sponge Start - redirect if this actually represents a non-Brig command
+        final CommandContextBuilder<CommandSourceStack> child = context.getLastChild();
+        if (child instanceof SpongeCommandContextBuilder) {
+            final SpongeCommandContextBuilder spongeChild = (SpongeCommandContextBuilder) child;
+            if (((SpongeCommandContextBuilder) child).representsNonBrigCommand()) {
+                // special handling!
+                final String rawCommand = parse.getReader().getString();
+                final String[] command = spongeChild.nonBrigCommand();
+                final CommandMapping mapping = this.commandManager.commandMapping(command[0]).get(); // we know this will exist.
+                return CommandUtil.createSuggestionsForRawCommand(rawCommand,
+                        spongeChild.nonBrigCommand(),
+                        spongeChild.cause(),
+                        mapping)
+                    .buildFuture();
+            }
+        }
+        // Sponge End
 
         final SuggestionContext<CommandSourceStack> nodeBeforeCursor = context.findSuggestionContext(cursor);
         final CommandNode<CommandSourceStack> parent = nodeBeforeCursor.parent;

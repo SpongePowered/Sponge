@@ -26,8 +26,8 @@ package co.aikar.timings.sponge;
 
 import co.aikar.timings.Timing;
 
-import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
-import org.spongepowered.common.relocate.co.aikar.util.MRUMapCache;
+import co.aikar.timings.util.LoadingMap;
+import co.aikar.timings.util.MRUMapCache;
 
 import java.util.ArrayDeque;
 import java.util.Map;

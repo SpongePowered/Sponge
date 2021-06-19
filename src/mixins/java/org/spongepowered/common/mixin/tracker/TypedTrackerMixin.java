@@ -30,7 +30,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.TrackableBridge;
 
 @Mixin({EntityType.class, BlockEntityType.class})
-public class TypedTrackerMixin implements TrackableBridge {
+public abstract class TypedTrackerMixin implements TrackableBridge {
 
     private boolean tracker$allowsBlockBulkCaptures = true;
     private boolean tracker$allowsBlockEventCreation = true;
