@@ -29,6 +29,6 @@ import org.spongepowered.api.entity.projectile.ExperienceBottle;
 import org.spongepowered.asm.mixin.Mixin;
 
 @Mixin(ThrownExperienceBottle.class)
-public abstract class ThrownExperienceBottleMixin_API extends ThrowableProjectileMixin_API implements ExperienceBottle {
+public abstract class ThrownExperienceBottleMixin_API extends ThrowableItemProjectileMixin_API implements ExperienceBottle {
 
 }

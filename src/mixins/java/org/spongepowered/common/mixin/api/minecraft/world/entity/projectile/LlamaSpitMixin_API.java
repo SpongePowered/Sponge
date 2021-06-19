@@ -24,22 +24,10 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.LlamaSpit;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
-import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.projectile.LlamaSpit.class)
-public abstract class LlamaSpitMixin_API extends EntityMixin_API implements LlamaSpit {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        this.shooter().map(Value::asImmutable).ifPresent(values::add);
-
-        return values;
-    }
+public abstract class LlamaSpitMixin_API extends ProjectileMixin_API implements LlamaSpit {
 
 }

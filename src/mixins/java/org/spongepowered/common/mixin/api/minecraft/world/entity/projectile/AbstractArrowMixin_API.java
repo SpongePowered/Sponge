@@ -24,29 +24,25 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
+import net.minecraft.world.entity.projectile.AbstractArrow;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.arrow.ArrowEntity;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
+
 import java.util.Set;
-import net.minecraft.world.entity.projectile.AbstractArrow;
 
 @Mixin(AbstractArrow.class)
-public abstract class AbstractArrowMixin_API extends EntityMixin_API implements ArrowEntity {
+public abstract class AbstractArrowMixin_API extends ProjectileMixin_API implements ArrowEntity {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Projectile
-        this.shooter().map(Value::asImmutable).ifPresent(values::add);
-
-        // DamagingProjectile
-        values.add(this.attackDamage().asImmutable());
-        values.add(this.customAttackDamage().asImmutable());
-
-        values.add(this.pickupRule().asImmutable());
-        values.add(this.knockbackStrength().asImmutable());
+        values.add(this.requireValue(Keys.ATTACK_DAMAGE).asImmutable());
+        values.add(this.requireValue(Keys.IS_CRITICAL_HIT).asImmutable());
+        values.add(this.requireValue(Keys.KNOCKBACK_STRENGTH).asImmutable());
+        values.add(this.requireValue(Keys.PICKUP_RULE).asImmutable());
 
         return values;
     }

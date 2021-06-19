@@ -60,6 +60,7 @@ import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.advancement.AdvancementProgress;
 import org.spongepowered.api.advancement.AdvancementTree;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.effect.particle.ParticleEffect;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
@@ -402,20 +403,19 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Humanoid
-        values.add(this.foodLevel().asImmutable());
-        values.add(this.exhaustion().asImmutable());
-        values.add(this.saturation().asImmutable());
-        values.add(this.gameMode().asImmutable());
+        values.add(this.requireValue(Keys.CHAT_COLORS_ENABLED).asImmutable());
+        values.add(this.requireValue(Keys.CHAT_VISIBILITY).asImmutable());
+        values.add(this.requireValue(Keys.GAME_MODE).asImmutable());
+        values.add(this.requireValue(Keys.HAS_VIEWED_CREDITS).asImmutable());
+        values.add(this.requireValue(Keys.LOCALE).asImmutable());
+        values.add(this.requireValue(Keys.SKIN_PARTS).asImmutable());
+        values.add(this.requireValue(Keys.SPECTATOR_TARGET).asImmutable());
+        // TODO ClassCastException: ServerStatsCounter -> StatsCounterBridge
+        // values.add(this.requireValue(Keys.STATISTICS).asImmutable());
+        values.add(this.requireValue(Keys.VIEW_DISTANCE).asImmutable());
 
-        // Player
-        values.add(this.firstJoined().asImmutable());
-        values.add(this.lastPlayed().asImmutable());
-        values.add(this.sleepingIgnored().asImmutable());
-        values.add(this.hasViewedCredits().asImmutable());
-
-        // If getSpectatingEntity returns this player, then we are not spectating any other entity, so spectatorTarget would be an Optional.empty()
-        this.spectatorTarget().map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.HEALTH_SCALE).map(Value::asImmutable).ifPresent(values::add);
+        this.getValue(Keys.SKIN_PROFILE_PROPERTY).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

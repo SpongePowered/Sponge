@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
+import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.DamagingProjectile;
 import org.spongepowered.asm.mixin.Mixin;
+
 import java.util.Set;
-import net.minecraft.world.entity.projectile.AbstractHurtingProjectile;
 
 @Mixin(AbstractHurtingProjectile.class)
 public abstract class AbstractHurtingProjectileMixin_API extends ProjectileMixin_API implements DamagingProjectile {
@@ -37,12 +39,7 @@ public abstract class AbstractHurtingProjectileMixin_API extends ProjectileMixin
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Projectile
-        this.shooter().map(Value::asImmutable).ifPresent(values::add);
-
-        // Projectile Data values
-        values.add(this.attackDamage().asImmutable());
-        values.add(this.customAttackDamage().asImmutable());
+        values.add(this.requireValue(Keys.ACCELERATION).asImmutable());
 
         return values;
     }

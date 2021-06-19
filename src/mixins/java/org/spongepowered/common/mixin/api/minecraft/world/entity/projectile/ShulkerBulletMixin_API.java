@@ -24,26 +24,23 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.projectile.ShulkerBullet;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.mixin.api.minecraft.world.entity.EntityMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.projectile.ShulkerBullet.class)
-public abstract class ShulkerBulletMixin_API extends EntityMixin_API implements ShulkerBullet {
+public abstract class ShulkerBulletMixin_API extends ProjectileMixin_API implements ShulkerBullet {
 
     @Override
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        // Projectile
-        this.shooter().map(Value::asImmutable).ifPresent(values::add);
+        values.add(this.requireValue(Keys.DIRECTION).asImmutable());
 
-        // EntityTargettingProjectile
-        this.targetEntity().map(Value::asImmutable).ifPresent(values::add);
-
-        values.add(this.hangingDirection().asImmutable());
+        this.getValue(Keys.TARGET_ENTITY).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }

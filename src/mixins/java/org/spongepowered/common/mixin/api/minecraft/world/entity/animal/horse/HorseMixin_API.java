@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.animal.horse;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.animal.horse.Horse;
 import org.spongepowered.asm.mixin.Mixin;
@@ -37,10 +38,8 @@ public abstract class HorseMixin_API extends AbstractHorseMixin_API implements H
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.color().asImmutable());
-        values.add(this.style().asImmutable());
-
-        this.tamer().map(Value::asImmutable).ifPresent(values::add);
+        values.add(this.requireValue(Keys.HORSE_COLOR).asImmutable());
+        values.add(this.requireValue(Keys.HORSE_STYLE).asImmutable());
 
         return values;
     }

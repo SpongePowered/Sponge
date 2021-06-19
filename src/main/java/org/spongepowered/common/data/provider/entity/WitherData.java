@@ -24,11 +24,11 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.kyori.adventure.bossbar.BossBar;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.boss.wither.WitherBoss;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.boss.wither.WitherBossAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 
 import java.util.stream.Collectors;
@@ -61,7 +61,7 @@ public final class WitherData {
                         })
                 .asMutable(WitherBossAccessor.class)
                     .create(Keys.BOSS_BAR)
-                        .get(h -> (BossBar) h.accessor$bossEvent());
+                        .get(h -> SpongeAdventure.asAdventure(h.accessor$bossEvent()));
     }
     // @formatter:on
 }

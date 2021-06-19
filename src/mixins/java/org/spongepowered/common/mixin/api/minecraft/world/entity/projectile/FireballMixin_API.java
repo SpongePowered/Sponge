@@ -24,23 +24,11 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.projectile;
 
-import org.spongepowered.api.data.value.Value;
+import net.minecraft.world.entity.projectile.Fireball;
 import org.spongepowered.api.entity.projectile.explosive.fireball.FireballEntity;
 import org.spongepowered.asm.mixin.Mixin;
 
-import java.util.Set;
-import net.minecraft.world.entity.projectile.Fireball;
-
 @Mixin(Fireball.class)
 public abstract class FireballMixin_API extends AbstractHurtingProjectileMixin_API implements FireballEntity {
-
-    @Override
-    protected Set<Value.Immutable<?>> api$getVanillaValues() {
-        final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
-
-        values.add(this.acceleration().asImmutable());
-
-        return values;
-    }
 
 }

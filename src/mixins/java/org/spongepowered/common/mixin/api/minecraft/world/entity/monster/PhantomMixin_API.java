@@ -24,10 +24,12 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.monster;
 
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Phantom;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.FlyingMobMixin_API;
+
 import java.util.Set;
 
 @Mixin(net.minecraft.world.entity.monster.Phantom.class)
@@ -37,8 +39,9 @@ public abstract class PhantomMixin_API extends FlyingMobMixin_API implements Pha
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.size().asImmutable());
-        values.add(this.phase().asImmutable());
+        values.add(this.requireValue(Keys.PHANTOM_PHASE).asImmutable());
+        values.add(this.requireValue(Keys.SCALE).asImmutable());
+        values.add(this.requireValue(Keys.SIZE).asImmutable());
 
         return values;
     }
