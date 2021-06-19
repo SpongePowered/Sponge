@@ -206,6 +206,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$absMoveTo(double p_242281_1_, double p_242281_3_, double p_242281_5_);
     @Shadow protected abstract int shadow$getPermissionLevel();
     @Shadow protected abstract Vec3 shadow$collide(Vec3 param0);
+    @Shadow protected abstract boolean shadow$fireImmune();
     // @formatter:on
 
     @Shadow private int remainingFireTicks;
@@ -1174,7 +1175,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      * @return True if this entity is not immune to fire.
      */
     protected boolean impl$canCallIgniteEntityEvent() {
-        return true;
+        return !this.shadow$fireImmune();
     }
 
 }
