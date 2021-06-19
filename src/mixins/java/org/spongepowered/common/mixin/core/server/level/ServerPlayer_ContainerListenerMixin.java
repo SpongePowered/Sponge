@@ -57,7 +57,7 @@ public abstract class ServerPlayer_ContainerListenerMixin  implements ContainerL
     private void sendSlotContents(
             final net.minecraft.world.inventory.AbstractContainerMenu containerToSend, final int slotIn, final ItemStack stack, final CallbackInfo ci) {
         if (containerToSend.getSlot(slotIn) instanceof ResultSlot) {
-            this.this$0.connection.send(new ClientboundContainerSetSlotPacket(containerToSend.containerId, slotIn, stack));
+            this.this$0.connection.send(new ClientboundContainerSetSlotPacket(containerToSend.containerId, containerToSend.getStateId(), slotIn, stack));
         }
     }
 }

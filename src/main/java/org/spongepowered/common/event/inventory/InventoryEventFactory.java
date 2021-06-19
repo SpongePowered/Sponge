@@ -485,7 +485,7 @@ public class InventoryEventFactory {
                     stack = event.preview().original();
                 }
                 // Resend modified output
-                ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(0, 0, ItemStackUtil.fromSnapshotToNative(stack)));
+                ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(0, 0, 0, ItemStackUtil.fromSnapshotToNative(stack)));
             }
 
         }
@@ -515,7 +515,8 @@ public class InventoryEventFactory {
             final ItemStackSnapshot newCursor = event.isCancelled() || event.cursorTransaction().isValid() ? event.cursorTransaction().original() : event.cursorTransaction().finalReplacement();
             player.containerMenu.setCarried(ItemStackUtil.fromSnapshotToNative(newCursor));
             if (player instanceof ServerPlayer) {
-                ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, player.containerMenu.getCarried()));
+                // TODO I'm not sure what's going on here, if the containerid is -1 the packet will be ignored
+                ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, -1, player.containerMenu.getCarried()));
             }
         }
 

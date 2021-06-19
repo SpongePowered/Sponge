@@ -60,9 +60,9 @@ public class ServerGamePacketListenerImplMixin_Inventory {
                 // Reset slot on client
                 if (packetIn.getSlotNum() >= 0 && packetIn.getSlotNum() < this.player.containerMenu.slots.size()) {
                     this.player.connection.send(
-                            new ClientboundContainerSetSlotPacket(this.player.containerMenu.containerId, packetIn.getSlotNum(),
+                            new ClientboundContainerSetSlotPacket(this.player.containerMenu.containerId, this.player.containerMenu.getStateId(), packetIn.getSlotNum(),
                                     this.player.containerMenu.getSlot(packetIn.getSlotNum()).getItem()));
-                    this.player.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, ItemStack.EMPTY));
+                    this.player.connection.send(new ClientboundContainerSetSlotPacket(-1, -1, -1, ItemStack.EMPTY));
                 }
                 ci.cancel();
             } else {

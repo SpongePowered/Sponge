@@ -190,7 +190,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // Called when changing a Slot while in creative mode
     // Captures the SlotTransaction for later event
     @Inject(method = "setItem", at = @At(value = "HEAD") )
-    private void impl$addTransaction(final int slotId, final ItemStack itemstack, final CallbackInfo ci) {
+    private void impl$addTransaction(final int slotId, final int stateId, final ItemStack itemstack, final CallbackInfo ci) {
         if (this.bridge$capturingInventory()) {
             final Slot slot = this.shadow$getSlot(slotId);
             if (slot != null) {
@@ -271,7 +271,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 original = player.containerMenu.getCarried();
             }
             player.containerMenu.setCarried(original);
-            ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, original));
+            ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, -1, original));
         }
         ((PlayerBridge) player).bridge$shouldRestoreInventory(false);
         return entityItem;
@@ -317,7 +317,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             this.impl$lastSlotUsed.set(original);
             player.containerMenu.broadcastChanges(); // TODO check if this is needed?
             player.containerMenu.resumeRemoteUpdates();
-            ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(player.containerMenu.containerId, this.impl$lastSlotUsed.index, original));
+            ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(player.containerMenu.containerId, player.containerMenu.getStateId(), this.impl$lastSlotUsed.index, original));
         }
         this.impl$itemStackSnapshot = ItemStackSnapshot.empty();
         this.impl$lastSlotUsed = null;

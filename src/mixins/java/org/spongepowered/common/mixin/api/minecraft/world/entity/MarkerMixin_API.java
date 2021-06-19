@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mcp.world.entity;
+package org.spongepowered.common.mixin.api.minecraft.world.entity;
 
 import org.spongepowered.api.entity.Marker;
 import org.spongepowered.asm.mixin.Mixin;

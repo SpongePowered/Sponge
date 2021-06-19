@@ -70,14 +70,14 @@ public final class BookUtil {
 
             final Inventory inventory = mcPlayer.getInventory();
             final int bookSlot = inventory.items.size() + inventory.selected;
-            receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, bookSlot, ItemStackUtil.toNative(item)));
+            receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, mcPlayer.containerMenu.getStateId(), bookSlot, ItemStackUtil.toNative(item)));
 
             // Next we tell the client to open the Book GUI
             receiver.send(new ClientboundOpenBookPacket(InteractionHand.MAIN_HAND));
 
             // Now we can remove the fake Book since it's contents will have already
             // been transferred to the GUI
-            receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, bookSlot, inventory.getSelected()));
+            receiver.send(new ClientboundContainerSetSlotPacket(BookUtil.WINDOW_PLAYER_INVENTORY, mcPlayer.containerMenu.getStateId(), bookSlot, inventory.getSelected()));
         }
     }
 

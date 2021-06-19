@@ -28,6 +28,8 @@ import net.minecraft.world.level.LevelHeightAccessor;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.volume.game.PrimitiveGameVolume;
+import org.spongepowered.asm.mixin.Implements;
+import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.math.vector.Vector3i;

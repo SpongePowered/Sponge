@@ -119,7 +119,7 @@ public final class PacketPhaseUtil {
         final ItemStack cursor = ItemStackUtil.fromSnapshotToNative(customCursor);
         player.containerMenu.setCarried(cursor);
         if (player instanceof net.minecraft.server.level.ServerPlayer) {
-            ((net.minecraft.server.level.ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, cursor));
+            ((net.minecraft.server.level.ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, -1, cursor));
         }
     }
 
@@ -158,7 +158,7 @@ public final class PacketPhaseUtil {
 
         player.containerMenu.broadcastChanges();
         player.containerMenu.resumeRemoteUpdates();
-        player.connection.send(new ClientboundContainerSetSlotPacket(player.containerMenu.containerId, slotId, itemStack));
+        player.connection.send(new ClientboundContainerSetSlotPacket(player.containerMenu.containerId, player.containerMenu.getStateId(), slotId, itemStack));
     }
 
     // Check if all transactions are invalid

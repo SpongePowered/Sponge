@@ -84,7 +84,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
     public void set(@Nullable final ItemStack stack) {
         super.set(stack);
         if (this.player instanceof ServerPlayer) {
-            ((ServerPlayer) this.player).connection.send(new ClientboundContainerSetSlotPacket(0, 0, stack));
+            ((ServerPlayer) this.player).connection.send(new ClientboundContainerSetSlotPacket(0, 0, 0, stack));
         }
     }
 
