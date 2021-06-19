@@ -113,6 +113,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.NetherPortalType;
@@ -1058,11 +1059,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             opcode = Opcodes.PUTFIELD)
     )
     private void impl$ThrowIgniteEventForFire(final Entity entity, final int ticks) {
-        if (((WorldBridge) this.level).bridge$isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
-            this.remainingFireTicks = ticks; // Vanilla functionality
-            return;
-        }
-        if (this.remainingFireTicks < 1 && !this.impl$canCallIgniteEntityEvent()) {
+        if (!((WorldBridge) this.level).bridge$isFake() && ShouldFire.IGNITE_ENTITY_EVENT &&
+            this.remainingFireTicks < 1 && ticks >= Constants.Entity.MINIMUM_FIRE_TICKS &&
+            this.impl$canCallIgniteEntityEvent()) {
+
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
 
                 frame.pushCause(((org.spongepowered.api.entity.Entity) this).location().world());
@@ -1094,11 +1094,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     .filter(d -> d.key() == Keys.FIRE_TICKS)
                     .findFirst()
                     .map(Value::get)
-                    .map(o -> (int) (Object) o)
+                    .map(o -> (Ticks) (Object) o)
+                    .map(t -> (int) t.ticks())
                     .orElse(0);
-
             }
+            return;
         }
+        this.remainingFireTicks = ticks; // Vanilla functionality
     }
 
 
@@ -1165,14 +1167,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     /**
-     * Overridden method for Players to determine whether this entity is immune to fire
-     * such that {@link IgniteEntityEvent}s are not needed to be thrown as they cannot
-     * take fire damage, nor do they light on fire.
+     * Overridden method for Players to determine whether this entity is not immune to
+     * fire such that {@link IgniteEntityEvent}s are not needed to be thrown as they
+     * cannot take fire damage, nor do they light on fire.
      *
-     * @return True if this entity is immune to fire.
+     * @return True if this entity is not immune to fire.
      */
     protected boolean impl$canCallIgniteEntityEvent() {
-        return false;
+        return true;
     }
 
 }
