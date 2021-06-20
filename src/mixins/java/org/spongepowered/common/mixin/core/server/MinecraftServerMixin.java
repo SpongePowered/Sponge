@@ -185,7 +185,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
      */
     @Overwrite
     public String getServerModName() {
-        return "sponge";
+        return "Sponge";
     }
 
     @Inject(method = "tickServer", at = @At(value = "RETURN"))
