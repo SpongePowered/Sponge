@@ -45,7 +45,7 @@ public final class TagDataPackSerializer extends DataPackSerializer<TagSerialize
     }
 
     @Override
-    protected boolean serialize(final SpongeDataPackType<@NonNull ?, TagSerializedObject> type, final Path datapacksDir, final List<TagSerializedObject> objects) throws IOException {
+    protected boolean serialize(final SpongeDataPackType<@NonNull ?, TagSerializedObject> type, final Path datapacksDir, final List<TagSerializedObject> objects, int count) throws IOException {
         final Path datapackDir = datapacksDir.resolve(this.getPackName());
 
         if (!type.persistent()) {
