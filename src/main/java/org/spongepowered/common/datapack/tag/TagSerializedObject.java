@@ -33,12 +33,12 @@ import org.spongepowered.common.datapack.DataPackSerializedObject;
 public final class TagSerializedObject extends DataPackSerializedObject {
     private final TagType<@NonNull ?> tagType;
 
-    public TagSerializedObject(ResourceKey key, JsonObject object, TagType<@NonNull ?> tagType) {
+    public TagSerializedObject(final ResourceKey key, final JsonObject object, final TagType<@NonNull ?> tagType) {
         super(key, object);
         this.tagType = tagType;
     }
 
     public TagType<@NonNull ?> getTagType() {
-        return tagType;
+        return this.tagType;
     }
 }

@@ -75,7 +75,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Plugin("tagtest")
-public class TagTest {
+public final class TagTest {
 
     private final PluginContainer pluginContainer;
     private final Logger logger;
@@ -189,8 +189,6 @@ public class TagTest {
 
     @Listener
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
-        logger.info("Registering commands");
-
         final Parameter.Value<Tag<BlockType>> BLOCK_TYPE_TAG = TagTest.makeTagRegistryParameter(TagTest.BLOCK_TYPE_TAG_TOKEN, RegistryTypes.BLOCK_TYPE_TAGS, "blocktag");
         final Command.Parameterized blockHasTag = Command.builder()
                 .addParameter(BLOCK_TYPE_TAG)

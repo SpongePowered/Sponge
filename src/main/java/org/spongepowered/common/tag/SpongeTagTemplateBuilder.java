@@ -66,7 +66,7 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
     }
 
     @Override
-    public TagTemplate.Builder<T> key(ResourceKey key) {
+    public TagTemplate.Builder<T> key(final ResourceKey key) {
         this.key = key;
         return this;
     }
@@ -89,7 +89,7 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
     }
 
     @Override
-    public TagTemplate.Builder<T> addChild(TagTemplate childTag) throws IllegalArgumentException {
+    public TagTemplate.Builder<T> addChild(final TagTemplate childTag) throws IllegalArgumentException {
         this.ensureTagTypeAdded();
         final SpongeTagTemplate spongeTagTemplate = ((SpongeTagTemplate) childTag);
         if (spongeTagTemplate.tagType() != this.tagType) {
@@ -113,7 +113,7 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
     }
 
     @Override
-    public TagTemplate.Builder<T> addChildren(Map<RegistryKey<Tag<T>>, Boolean> childrenMap) {
+    public TagTemplate.Builder<T> addChildren(final Map<RegistryKey<Tag<T>>, Boolean> childrenMap) {
         childrenMap.forEach((k, v) -> this.children.put(k.location(), v));
         return this;
     }
