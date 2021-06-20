@@ -141,9 +141,6 @@ public final class LivingData {
                             return false;
                         })
                         .delete(h -> h.setLastHurtByMob(null))
-                    .create(Keys.MAX_AIR)
-                        .get(LivingEntity::getMaxAirSupply)
-                        .set((h, v) -> ((LivingEntityBridge) h).bridge$setMaxAir(v))
                     .create(Keys.MAX_HEALTH)
                         .get(h -> (double) h.getMaxHealth())
                         .set((h, v) -> h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(v))

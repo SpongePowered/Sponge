@@ -24,16 +24,11 @@
  */
 package org.spongepowered.common.bridge.world.entity;
 
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
+public interface EntityMaxAirBridge {
 
-public interface LivingEntityBridge {
+    int bridge$getDefaultMaxAir();
 
-    boolean bridge$damageEntity(DamageSource damageSource, float damage);
+    int bridge$getMaxAir();
 
-    default int bridge$getExperiencePointsOnDeath(LivingEntity entity, Player attackingPlayer) {
-        return ((LivingEntityAccessor) entity).invoker$getExperienceReward(attackingPlayer);
-    }
+    void bridge$setMaxAir(int max);
 }

@@ -25,6 +25,7 @@
 package org.spongepowered.common.data.provider.entity;
 
 import net.kyori.adventure.text.serializer.gson.GsonComponentSerializer;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
@@ -32,6 +33,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.bridge.world.entity.EntityMaxAirBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntitySnapshot;
@@ -185,8 +187,13 @@ public final class EntityData {
                         .get(m -> m.getDeltaMovement().length())
                         .set((m, v) -> m.setDeltaMovement(m.getDeltaMovement().normalize().scale(v)))
                         .supports(m -> m.getDeltaMovement().lengthSqr() > 0)
+                .asMutable(EntityMaxAirBridge.class)
+                    .create(Keys.MAX_AIR)
+                        .get(EntityMaxAirBridge::bridge$getMaxAir)
+                        .set(EntityMaxAirBridge::bridge$setMaxAir)
                 ;
 
+        registrator.spongeDataStore(ResourceKey.sponge("max_air"), EntityMaxAirBridge.class, Keys.MAX_AIR);
         registrator.newDataStore(SpongeEntitySnapshot.class, SpongeEntityArchetype.class)
                 .dataStore(Keys.CUSTOM_NAME,
                     (dv, v) -> dv.set(Constants.Entity.CUSTOM_NAME, GsonComponentSerializer.gson().serialize(v)),
