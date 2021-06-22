@@ -72,6 +72,7 @@ import org.spongepowered.math.vector.Vector3d;
 import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
@@ -97,7 +98,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public abstract double shadow$getZ();
     @Shadow public abstract net.minecraft.world.level.Level shadow$getCommandSenderWorld();
     @Shadow @Nullable public abstract MinecraftServer shadow$getServer();
-    @Shadow public abstract void shadow$setPos(double x, double y, double z);
     @Shadow public abstract void shadow$remove();
     @Shadow public abstract UUID shadow$getUUID();
     @Shadow public abstract void shadow$setRemainingFireTicks(int ticks);
@@ -122,6 +122,11 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
+    public boolean setPosition(final Vector3d position) {
+        return ((EntityBridge) this).bridge$setPosition(Objects.requireNonNull(position, "The position was null!"));
+    }
+
+    @Override
     public World<?, ?> world() {
         return (World<?, ?>) this.level;
     }
@@ -132,13 +137,12 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean setLocation(ServerLocation location) {
-        Preconditions.checkNotNull(location, "The location was null!");
-        return ((EntityBridge) this).bridge$setLocation(location);
+    public boolean setLocation(final ServerLocation location) {
+        return ((EntityBridge) this).bridge$setLocation(Objects.requireNonNull(location, "The location was null!"));
     }
 
     @Override
-    public boolean setLocationAndRotation(ServerLocation location, Vector3d rotation) {
+    public boolean setLocationAndRotation(final ServerLocation location, final Vector3d rotation) {
         if (this.setLocation(location)) {
             this.setRotation(rotation);
             return true;
@@ -168,7 +172,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         }
         Preconditions.checkNotNull(transform, "The transform cannot be null!");
         final Vector3d position = transform.position();
-        this.shadow$setPos(position.x(), position.y(), position.z());
+        ((EntityBridge) this).bridge$setPosition(transform.position());
         this.setRotation(transform.rotation());
         this.setScale(transform.scale());
         if (!((LevelBridge) this.shadow$getCommandSenderWorld()).bridge$isFake()) {

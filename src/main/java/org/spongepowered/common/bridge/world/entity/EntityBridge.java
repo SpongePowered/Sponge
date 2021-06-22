@@ -60,6 +60,8 @@ public interface EntityBridge {
 
     }
 
+    boolean bridge$setPosition(Vector3d position);
+
     boolean bridge$setLocation(ServerLocation location);
 
     /**

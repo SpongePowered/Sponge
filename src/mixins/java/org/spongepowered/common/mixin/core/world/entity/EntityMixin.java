@@ -168,6 +168,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract EntityType<?> shadow$getType();
     @Shadow public abstract boolean shadow$isInWater();
     @Shadow public abstract boolean shadow$isPassenger();
+    @Shadow public abstract void shadow$teleportToWithTicket(double x, double y, double z);
     @Shadow public abstract void shadow$teleportTo(double x, double y, double z);
     @Shadow public abstract void shadow$doEnchantDamageEffects(LivingEntity entityLivingBaseIn, Entity entityIn);
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
@@ -238,6 +239,32 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Override
+    public boolean bridge$setPosition(final Vector3d position) {
+        if (this.removed) {
+            return false;
+        }
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.pushCause(SpongeCommon.activePlugin());
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+
+            final net.minecraft.world.phys.Vec3 originalPosition = this.shadow$position();
+            Vector3d destinationPosition = position;
+            if (ShouldFire.MOVE_ENTITY_EVENT) {
+                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
+                    (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()), position, position);
+                if (SpongeCommon.post(event)) {
+                    return false;
+                }
+                destinationPosition = event.destinationPosition();
+            }
+            this.shadow$teleportToWithTicket(destinationPosition.x(), destinationPosition.y(), destinationPosition.z());
+        }
+
+        return true;
+    }
+
+    @Override
     public boolean bridge$setLocation(final ServerLocation location) {
         if (this.removed || ((LevelBridge) location.world()).bridge$isFake()) {
             return false;
@@ -250,6 +277,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             final net.minecraft.world.phys.Vec3 originalPosition = this.shadow$position();
 
             net.minecraft.server.level.ServerLevel destinationWorld = (net.minecraft.server.level.ServerLevel) location.world();
+            Vector3d destinationPosition;
 
             if (this.shadow$getCommandSenderWorld() != destinationWorld) {
                 final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.currentCause(),
@@ -262,19 +290,27 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 final ChangeEntityWorldEvent.Reposition repositionEvent =
                         SpongeEventFactory.createChangeEntityWorldEventReposition(frame.currentCause(),
                                 (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getCommandSenderWorld(),
-                                VecHelper.toVector3d(this.shadow$position()), location.position(), event.originalDestinationWorld(),
+                                VecHelper.toVector3d(originalPosition), location.position(), event.originalDestinationWorld(),
                                 location.position(), event.destinationWorld());
 
                 if (SpongeCommon.post(repositionEvent)) {
                     return false;
                 }
 
-                destinationWorld = (net.minecraft.server.level.ServerLevel) event.destinationWorld();
+                ((Entity) (Object) this).unRide();
 
-                this.shadow$setPos(repositionEvent.destinationPosition().x(),
-                        repositionEvent.destinationPosition().y(), repositionEvent.destinationPosition().z());
+                destinationWorld = (net.minecraft.server.level.ServerLevel) event.destinationWorld();
+                destinationPosition = repositionEvent.destinationPosition();
+
+                final net.minecraft.server.level.ServerLevel originalWorld = (net.minecraft.server.level.ServerLevel) this.shadow$getCommandSenderWorld();
+                ((PlatformServerLevelBridge) this.shadow$getCommandSenderWorld()).bridge$removeEntity((Entity) (Object) this, true);
+                this.bridge$revive();
+                this.shadow$setLevel(destinationWorld);
+                destinationWorld.addFromAnotherDimension((Entity) (Object) this);
+
+                originalWorld.resetEmptyTime();
+                destinationWorld.resetEmptyTime();
             } else {
-                final Vector3d destination;
                 if (ShouldFire.MOVE_ENTITY_EVENT) {
                     final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
                             (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
@@ -282,32 +318,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     if (SpongeCommon.post(event)) {
                         return false;
                     }
-                    destination = event.destinationPosition();
+                    destinationPosition = event.destinationPosition();
                 } else {
-                    destination = location.position();
+                    destinationPosition = location.position();
                 }
-                this.shadow$setPos(destination.x(), destination.y(), destination.z());
+
+                ((Entity) (Object) this).unRide();
             }
-
-            if (!destinationWorld.getChunkSource().hasChunk((int) this.shadow$getX() >> 4, (int) this.shadow$getZ() >> 4)) {
-                // Roll back the position
-                this.shadow$setPos(originalPosition.x, originalPosition.y, originalPosition.z);
-                return false;
-            }
-
-            ((Entity) (Object) this).unRide();
-
-            final net.minecraft.server.level.ServerLevel originalWorld = (net.minecraft.server.level.ServerLevel) this.shadow$getCommandSenderWorld();
-            ((PlatformServerLevelBridge) this.shadow$getCommandSenderWorld()).bridge$removeEntity((Entity) (Object) this, true);
-            this.bridge$revive();
-            this.shadow$setLevel(destinationWorld);
-            destinationWorld.addFromAnotherDimension((Entity) (Object) this);
-
-            originalWorld.resetEmptyTime();
-            destinationWorld.resetEmptyTime();
-
-            final ChunkPos chunkPos = new ChunkPos((int) this.shadow$getX() >> 4, (int) this.shadow$getZ() >> 4);
-            destinationWorld.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((Entity) (Object) this).getId());
+            this.shadow$teleportToWithTicket(destinationPosition.x(), destinationPosition.y(), destinationPosition.z());
         }
 
         return true;
