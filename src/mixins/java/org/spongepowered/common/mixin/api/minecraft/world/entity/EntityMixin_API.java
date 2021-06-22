@@ -370,8 +370,10 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         values.add(this.requireValue(Keys.IS_SNEAKING).asImmutable());
         values.add(this.requireValue(Keys.IS_SPRINTING).asImmutable());
         values.add(this.requireValue(Keys.IS_WET).asImmutable());
+        values.add(this.requireValue(Keys.MAX_AIR).asImmutable());
         values.add(this.requireValue(Keys.ON_GROUND).asImmutable());
         values.add(this.requireValue(Keys.PASSENGERS).asImmutable());
+        values.add(this.requireValue(Keys.REMAINING_AIR).asImmutable());
         values.add(this.requireValue(Keys.SCALE).asImmutable());
         values.add(this.requireValue(Keys.SCOREBOARD_TAGS).asImmutable());
         values.add(this.requireValue(Keys.TRANSIENT).asImmutable());

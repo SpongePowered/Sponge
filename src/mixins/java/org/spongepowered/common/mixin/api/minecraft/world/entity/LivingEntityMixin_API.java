@@ -80,9 +80,7 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
         values.add(this.requireValue(Keys.HEIGHT).asImmutable());
         values.add(this.requireValue(Keys.IS_ELYTRA_FLYING).asImmutable());
         values.add(this.requireValue(Keys.LAST_DAMAGE_RECEIVED).asImmutable());
-        values.add(this.requireValue(Keys.MAX_AIR).asImmutable());
         values.add(this.requireValue(Keys.MAX_HEALTH).asImmutable());
-        values.add(this.requireValue(Keys.REMAINING_AIR).asImmutable());
         values.add(this.requireValue(Keys.SCALE).asImmutable());
         values.add(this.requireValue(Keys.STUCK_ARROWS).asImmutable());
         values.add(this.requireValue(Keys.WALKING_SPEED).asImmutable());
