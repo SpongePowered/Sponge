@@ -256,14 +256,14 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         final String name = json.get("name").getAsString();
 
         final JsonArray propertiesJson = json.getAsJsonArray("properties");
-        final ImmutableList.Builder<ProfileProperty> properties = ImmutableList.builder();
+        final ImmutableList.Builder<SpongeProfileProperty> properties = ImmutableList.builder();
         for (final JsonElement propertyJson : propertiesJson) {
             final JsonObject propertyObj = propertyJson.getAsJsonObject();
             final String propertyName = propertyObj.get("name").getAsString();
             final String value = propertyObj.get("value").getAsString();
             final String signature = propertyObj.has("signature") ?
                     propertyObj.get("signature").getAsString() : null;
-            properties.add(ProfileProperty.of(propertyName, value, signature));
+            properties.add(new SpongeProfileProperty(propertyName, value, signature));
         }
 
         return new SpongeGameProfile(uniqueId, name, properties.build());

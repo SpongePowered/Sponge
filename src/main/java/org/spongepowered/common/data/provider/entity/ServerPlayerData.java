@@ -40,6 +40,7 @@ import org.spongepowered.common.bridge.server.level.ServerPlayerEntityHealthScal
 import org.spongepowered.common.bridge.stats.StatsCounterBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.profile.SpongeProfileProperty;
 import org.spongepowered.common.util.Constants;
 
 import java.util.stream.Collectors;
@@ -57,7 +58,7 @@ public final class ServerPlayerData {
                         .get(h -> (GameMode) (Object) h.gameMode.getGameModeForPlayer())
                         .set((h, v) -> h.setGameMode((GameType) (Object) v))
                     .create(Keys.SKIN_PROFILE_PROPERTY)
-                        .get(h -> (ProfileProperty) h.getGameProfile().getProperties().get(ProfileProperty.TEXTURES).iterator().next())
+                        .get(h -> new SpongeProfileProperty(h.getGameProfile().getProperties().get(ProfileProperty.TEXTURES).iterator().next()))
                     .create(Keys.SPECTATOR_TARGET)
                         .get(h -> (Entity) h.getCamera())
                         .set((h, v) -> h.setCamera((net.minecraft.world.entity.Entity) v))

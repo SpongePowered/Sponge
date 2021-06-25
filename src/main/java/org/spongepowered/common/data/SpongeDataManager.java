@@ -56,6 +56,8 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.map.MapCanvas;
 import org.spongepowered.api.map.decoration.MapDecoration;
+import org.spongepowered.api.profile.GameProfile;
+import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -71,6 +73,8 @@ import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
 import org.spongepowered.common.item.SpongeItemStackBuilder;
 import org.spongepowered.common.map.canvas.SpongeMapCanvasDataBuilder;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationDataBuilder;
+import org.spongepowered.common.profile.SpongeGameProfileDataBuilder;
+import org.spongepowered.common.profile.SpongeProfilePropertyDataBuilder;
 import org.spongepowered.common.registry.provider.DataTranslatorProvider;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.server.SpongeServerLocationBuilder;
@@ -333,6 +337,8 @@ public final class SpongeDataManager implements DataManager {
         this.registerBuilder(MapDecoration.class, new SpongeMapDecorationDataBuilder());
         this.registerBuilder(MapCanvas.class, new SpongeMapCanvasDataBuilder());
         this.registerBuilder(ServerLocation.class, new SpongeServerLocationBuilder());
+        this.registerBuilder(GameProfile.class, new SpongeGameProfileDataBuilder());
+        this.registerBuilder(ProfileProperty.class, new SpongeProfilePropertyDataBuilder());
     }
 
     public Optional<DataStore> getDataStore(ResourceKey key, Class<? extends DataHolder> typeToken) {

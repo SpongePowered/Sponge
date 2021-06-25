@@ -24,18 +24,31 @@
  */
 package org.spongepowered.common.profile;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.profile.property.ProfileProperty;
 
-import java.util.Objects;
+import java.util.Optional;
 
-public final class SpongeProfilePropertyFactory implements ProfileProperty.Factory {
+public final class SpongeProfilePropertyDataBuilder extends AbstractDataBuilder<@NonNull ProfileProperty> {
+
+    public SpongeProfilePropertyDataBuilder() {
+        super(ProfileProperty.class, 1);
+    }
 
     @Override
-    public ProfileProperty of(final String name, final String value, final @Nullable String signature) {
-        Objects.requireNonNull(name);
-        Objects.requireNonNull(value);
+    protected Optional<@NonNull ProfileProperty> buildContent(final DataView container) throws InvalidDataException {
+        if (!container.contains(Queries.PROPERTY_NAME, Queries.PROPERTY_VALUE)) {
+            return Optional.empty();
+        }
 
-        return new SpongeProfileProperty(name, value, signature);
+        return Optional.of(new SpongeProfileProperty(
+                container.getString(Queries.PROPERTY_NAME).get(),
+                container.getString(Queries.PROPERTY_VALUE).get(),
+                container.getString(Queries.PROPERTY_SIGNATURE).orElse(null)));
     }
+
 }

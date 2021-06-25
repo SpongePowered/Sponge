@@ -22,8 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.data.builder.authlib;
+package org.spongepowered.common.profile;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
@@ -33,28 +34,28 @@ import org.spongepowered.common.util.Constants;
 import java.util.Optional;
 import java.util.UUID;
 
-public final class SpongeGameProfileBuilder extends AbstractDataBuilder<GameProfile> {
+public final class SpongeGameProfileDataBuilder extends AbstractDataBuilder<@NonNull GameProfile> {
 
-    public SpongeGameProfileBuilder() {
-        super(GameProfile.class, 0);
+    public SpongeGameProfileDataBuilder() {
+        super(GameProfile.class, 1);
     }
 
     @Override
-    protected Optional<GameProfile> buildContent(DataView container) throws InvalidDataException {
+    protected Optional<GameProfile> buildContent(final DataView container) throws InvalidDataException {
         if (!container.contains(Constants.Entity.Player.UUID)) {
             return Optional.empty();
         }
-        UUID uuid = this.getUUIDByString(container.getString(Constants.Entity.Player.UUID).get());
+        final UUID uuid = this.getUUIDByString(container.getString(Constants.Entity.Player.UUID).get());
         if (!container.contains(Constants.Entity.Player.NAME)) {
             return Optional.of(GameProfile.of(uuid));
         }
         return Optional.of(GameProfile.of(uuid, container.getString(Constants.Entity.Player.NAME).get()));
     }
 
-    private UUID getUUIDByString(String uuidString) throws InvalidDataException {
+    private UUID getUUIDByString(final String uuidString) throws InvalidDataException {
         try {
             return UUID.fromString(uuidString);
-        } catch (IllegalArgumentException e) {
+        } catch (final IllegalArgumentException e) {
             throw new InvalidDataException("Invalid UUID string: " + uuidString);
         }
     }

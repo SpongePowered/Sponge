@@ -77,6 +77,7 @@ import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.profile.SpongeProfileProperty;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -392,16 +393,19 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         }
     }
 
-    public Property getSkinProperty() {
+    public SpongeProfileProperty getSkinProperty() {
         final Collection<Property> properties = this.fakeProfile.getProperties().get(ProfileProperty.TEXTURES);
         if (properties.isEmpty()) {
             return null;
         }
-        return properties.iterator().next();
+        return new SpongeProfileProperty(properties.iterator().next());
     }
 
-    public void setSkinProperty(final Property property) {
-        this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, Collections.singletonList(property));
+    public void setSkinProperty(final ProfileProperty property) {
+        this.fakeProfile.getProperties()
+                .replaceValues(
+                        ProfileProperty.TEXTURES,
+                        Collections.singletonList(((SpongeProfileProperty) property).asProperty()));
 
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();

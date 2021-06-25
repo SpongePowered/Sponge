@@ -18,7 +18,6 @@
         "adventure.bossbar.HackyBossBarPlatformBridgeMixin",
         "adventure.text.AbstractComponentMixin",
         "adventure.text.format.StyleImplMixin",
-        "authlib.properties.PropertyMixin",
         "block.BedBlockMixin",
         "block.BlockMixin",
         "block.DyeColorBlockPropertiesMixin",
