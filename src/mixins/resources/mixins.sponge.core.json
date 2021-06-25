@@ -21,7 +21,6 @@
         "block.BedBlockMixin",
         "block.BlockMixin",
         "block.DyeColorBlockPropertiesMixin",
-        "brigadier.exceptions.CommandSyntaxExceptionMixin",
         "commands.CommandsMixin",
         "commands.CommandSourceMixin",
         "commands.CommandSourceStackMixin",

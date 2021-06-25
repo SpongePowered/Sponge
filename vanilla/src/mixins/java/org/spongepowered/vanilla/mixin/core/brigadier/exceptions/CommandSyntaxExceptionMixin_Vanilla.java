@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.brigadier.exceptions;
+package org.spongepowered.vanilla.mixin.core.brigadier.exceptions;
 
 import com.mojang.brigadier.Message;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(CommandSyntaxException.class)
-public abstract class CommandSyntaxExceptionMixin implements ComponentMessageThrowable {
+public abstract class CommandSyntaxExceptionMixin_Vanilla implements ComponentMessageThrowable {
     // @formatter:off
     @Shadow public abstract Message getRawMessage();
     // @formatter:on

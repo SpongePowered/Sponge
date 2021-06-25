@@ -19,6 +19,7 @@
     ],
     "mixins": [
         "CrashReportMixin_Vanilla",
+        "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
         "core.MappedRegistryMixin_Vanilla",
         "core.RegistryMixin_Vanilla",
         "core.WritableRegistryMixin_Vanilla",
