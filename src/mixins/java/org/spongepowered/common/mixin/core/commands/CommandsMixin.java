@@ -95,7 +95,7 @@ public abstract class CommandsMixin implements CommandsBridge {
             remap = false
     ))
     private CommandDispatcher<CommandSourceStack> impl$useSpongeDispatcher() {
-        final SpongeCommandManager manager = SpongeBootstrap.getLifecycle().createCommandManager();
+        final SpongeCommandManager manager = SpongeBootstrap.lifecycle().createCommandManager();
         this.impl$commandManager = manager;
         return new DelegatingCommandDispatcher(manager.getBrigadierRegistrar());
     }
@@ -104,7 +104,7 @@ public abstract class CommandsMixin implements CommandsBridge {
             target = "Lnet/minecraft/server/commands/AdvancementCommands;register(Lcom/mojang/brigadier/CommandDispatcher;)V"))
     private void impl$setupStackFrameOnInit(final CommandDispatcher<CommandSourceStack> dispatcher) {
         this.impl$initFrame = PhaseTracker.getCauseStackManager().pushCauseFrame();
-        this.impl$initFrame.pushCause(Launch.getInstance().getMinecraftPlugin());
+        this.impl$initFrame.pushCause(Launch.instance().minecraftPlugin());
         AdvancementCommands.register(dispatcher);
     }
 

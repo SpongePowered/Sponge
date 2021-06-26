@@ -40,7 +40,6 @@ import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.PluginKeys;
 
 import java.io.IOException;
 import java.nio.file.Path;
@@ -83,7 +82,7 @@ public final class SpongeCommon {
     }
 
     public static Logger getLogger() {
-        return Launch.getInstance().getLogger();
+        return Launch.instance().logger();
     }
 
     public static boolean isInitialized() {
@@ -111,7 +110,7 @@ public final class SpongeCommon {
     }
 
     public static Path getGameDirectory() {
-        return Launch.getInstance().getPluginPlatform().baseDirectory();
+        return Launch.instance().pluginPlatform().baseDirectory();
     }
 
     public static Path getPluginConfigDirectory() {
@@ -124,22 +123,22 @@ public final class SpongeCommon {
 
     @Deprecated
     public static PluginContainer getMinecraftPlugin() {
-        return Launch.getInstance().getMinecraftPlugin();
+        return Launch.instance().minecraftPlugin();
     }
 
     @Deprecated
     public static PluginContainer getPlugin() {
-        return Launch.getInstance().getCommonPlugin();
+        return Launch.instance().commonPlugin();
     }
 
     @Deprecated
     public static List<PluginContainer> getInternalPlugins() {
-        return Launch.getInstance().getLauncherPlugins();
+        return Launch.instance().launcherPlugins();
     }
 
     public static PluginContainer getActivePlugin() {
         if (SpongeCommon.activePlugin == null) {
-            return Launch.getInstance().getMinecraftPlugin();
+            return Launch.instance().minecraftPlugin();
         }
 
         return SpongeCommon.activePlugin;

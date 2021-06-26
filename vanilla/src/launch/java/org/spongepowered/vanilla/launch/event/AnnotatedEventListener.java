@@ -22,11 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.vanilla.launch.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.event.Event;
+import org.spongepowered.common.event.SpongeEventListener;
 
 import java.lang.reflect.Method;
 
@@ -43,7 +44,7 @@ public abstract class AnnotatedEventListener implements SpongeEventListener<Even
         return this.handle;
     }
 
-    interface Factory {
+    public interface Factory {
 
         AnnotatedEventListener create(Object handle, Method method) throws Exception;
 

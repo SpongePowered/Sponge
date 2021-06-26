@@ -388,7 +388,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
             Sponge.server().scheduler().submit(Task.builder()
                     .execute(removeTask)
                     .delay(new SpongeTicks(delay))
-                    .plugin(Launch.getInstance().getCommonPlugin())
+                    .plugin(Launch.instance().commonPlugin())
                     .build());
         }
     }

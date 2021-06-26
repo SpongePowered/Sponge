@@ -129,16 +129,16 @@ public final class VanillaPlatformService implements ITransformationService {
         }
     }
 
-        @Override
-        public void onLoad(final IEnvironment env, final Set<String> otherServices) {
-            final VanillaPluginPlatform pluginPlatform = VanillaPlatformService.pluginPlatform;
-            pluginPlatform.logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
+    @Override
+    public void onLoad(final IEnvironment env, final Set<String> otherServices) {
+        final VanillaPluginPlatform pluginPlatform = VanillaPlatformService.pluginPlatform;
+        pluginPlatform.logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
             pluginPlatform.version(), this.getCodeSource());
 
-            pluginPlatform.discoverLocatorServices();
-            pluginPlatform.getLocatorServices().forEach((k, v) -> pluginPlatform.logger().info("Plugin resource locator '{}' found.", k));
-            pluginPlatform.discoverLanguageServices();
-            pluginPlatform.getLanguageServices().forEach((k, v) -> pluginPlatform.logger().info("Plugin language loader '{}' found.", k));
+        pluginPlatform.discoverLocatorServices();
+        pluginPlatform.getLocatorServices().forEach((k, v) -> pluginPlatform.logger().info("Plugin resource locator '{}' found.", k));
+        pluginPlatform.discoverLanguageServices();
+        pluginPlatform.getLanguageServices().forEach((k, v) -> pluginPlatform.logger().info("Plugin language loader '{}' found.", k));
     }
 
     @Override

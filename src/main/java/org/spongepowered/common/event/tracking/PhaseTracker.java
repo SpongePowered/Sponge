@@ -259,7 +259,7 @@ public final class PhaseTracker implements CauseStackManager {
                 }
 
             })
-            .plugin(Launch.getInstance().getCommonPlugin())
+            .plugin(Launch.instance().commonPlugin())
             .build();
     }
 

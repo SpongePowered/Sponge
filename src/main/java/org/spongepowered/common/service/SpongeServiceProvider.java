@@ -122,7 +122,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
             Registration<?> registration = null;
             if (isSpecific) {
                 final Optional<PluginContainer> specificPluginContainer =
-                        Launch.getInstance().getPluginManager().plugin(pluginId);
+                        Launch.instance().pluginManager().plugin(pluginId);
                 if (specificPluginContainer.isPresent()) {
                     registration = this.getSpecificRegistration(specificPluginContainer.get(), candidate);
                     if (registration == null) {
@@ -169,7 +169,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
                     prettyPrinter.log(SpongeCommon.getLogger(), Level.ERROR);
                 }
             } else {
-                final Collection<PluginContainer> toQuery = Launch.getInstance().getPluginManager().plugins();
+                final Collection<PluginContainer> toQuery = Launch.instance().pluginManager().plugins();
                 registration = this.attemptRegistration(toQuery, candidate);
             }
 
@@ -177,7 +177,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
                 // If we don't have a registration, we try a Sponge one (which is lowest priority)
                 registration = this.createRegistration(
                         candidate,
-                        Launch.getInstance().getCommonPlugin());
+                        Launch.instance().commonPlugin());
             }
 
             // If after all that we have a registration, we... register it.
@@ -196,7 +196,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
         final Iterator<PluginContainer> pluginContainerIterator = pluginContainers.iterator();
         while (registration == null && pluginContainerIterator.hasNext()) {
             final PluginContainer pluginContainer = pluginContainerIterator.next();
-            if (!Launch.getInstance().getLauncherPlugins().contains(pluginContainer)) {
+            if (!Launch.instance().launcherPlugins().contains(pluginContainer)) {
                 // If this succeeds, the while loop will end.
                 registration = this.getSpecificRegistration(pluginContainer, service);
             }

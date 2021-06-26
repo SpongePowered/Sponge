@@ -110,7 +110,7 @@ public final class ReflectionUtil {
         final String methodName,
         final Class<?>[] methodParameters
     ) {
-        final String targetMethodForEnvironment = Launch.getInstance().isDeveloperEnvironment() ? methodName : methodName;
+        final String targetMethodForEnvironment = Launch.instance().developerEnvironment() ? methodName : methodName;
         try {
             final Class<?> declaringClass = targetClass.getMethod(targetMethodForEnvironment, methodParameters).getDeclaringClass();
             return !ignoredClass.equals(declaringClass);

@@ -157,17 +157,17 @@ public final class InventoryUtil {
             final String pluginId = key.namespace();
             container = Sponge.pluginManager().plugin(pluginId).orElseGet(() -> {
                 SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
-                return Launch.getInstance().getMinecraftPlugin();
+                return Launch.instance().minecraftPlugin();
             });
         } else if (base instanceof SpongeUser) {
-            container = Launch.getInstance().getMinecraftPlugin();
+            container = Launch.instance().minecraftPlugin();
         } else {
             container = Sponge.pluginManager().plugin(PlatformHooks.INSTANCE
                 .getInventoryHooks()
                 .getModIdFromInventory(base.getClass()))
                 .orElseGet(() -> {
                     SpongeCommon.getLogger().debug("Unknown plugin for [{}]", base);
-                    return Launch.getInstance().getMinecraftPlugin();
+                    return Launch.instance().minecraftPlugin();
                 });
         }
         return container;

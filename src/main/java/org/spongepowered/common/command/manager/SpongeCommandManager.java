@@ -561,7 +561,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     private void registerInternalCommands(final CommandRegistrar<Parameterized> registrar) {
         try {
             registrar.register(
-                    Launch.getInstance().getCommonPlugin(),
+                    Launch.instance().commonPlugin(),
                     this.spongeCommand.get().createSpongeCommand(),
                     "sponge"
                                                                  );
@@ -572,7 +572,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
             final PaginationService paginationService = Sponge.serviceProvider().paginationService();
             if (paginationService instanceof SpongePaginationService) {
                 registrar.register(
-                        Launch.getInstance().getCommonPlugin(),
+                        Launch.instance().commonPlugin(),
                         ((SpongePaginationService) paginationService).createPaginationCommand(),
                         "pagination", "page"
                                                                      );
@@ -582,7 +582,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
         }
 
         registrar.register(
-                Launch.getInstance().getCommonPlugin(),
+                Launch.instance().commonPlugin(),
                 CallbackCommand.INSTANCE.createCommand(),
                 CallbackCommand.NAME);
     }

@@ -1113,10 +1113,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         serverChunkProvider.addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, borderRadius, world.dimension().location());
         final CompletableFuture<ServerLevel> generationFuture = new CompletableFuture<>();
         Sponge.asyncScheduler().submit(
-                Task.builder().plugin(Launch.getInstance().getPlatformPlugin())
+                Task.builder().plugin(Launch.instance().platformPlugin())
                         .execute(task -> {
                             if (serverChunkProvider.getTickingGenerated() >= spawnChunks) {
-                                Sponge.server().scheduler().submit(Task.builder().plugin(Launch.getInstance().getPlatformPlugin()).execute(() -> generationFuture.complete(world)).build());
+                                Sponge.server().scheduler().submit(Task.builder().plugin(Launch.instance().platformPlugin()).execute(() -> generationFuture.complete(world)).build());
                                 // Notify the future that we are done
                                 task.cancel(); // And cancel this task
                                 MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for world '{}' ({})", world

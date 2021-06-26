@@ -24,16 +24,22 @@
  */
 package org.spongepowered.vanilla.launch;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.Stage;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import org.spongepowered.common.inject.SpongeCommonModule;
+import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResourceLocatorService;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import org.spongepowered.vanilla.launch.inject.SpongeVanillaModule;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;
@@ -42,7 +48,9 @@ import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collection;
+import java.util.Collections;
 import java.util.Enumeration;
+import java.util.List;
 
 public abstract class VanillaLaunch extends Launch {
 
@@ -55,24 +63,19 @@ public abstract class VanillaLaunch extends Launch {
     }
 
     @Override
-    public final boolean isVanilla() {
-        return true;
-    }
-
-    @Override
-    public final Stage getInjectionStage() {
+    public final Stage injectionStage() {
         return this.injectionStage;
     }
 
     @Override
-    public final void loadPlugins() {
-        this.getPluginManager().loadPlugins(this.getPluginPlatform());
+    public final void performBootstrap() {
+        this.pluginManager().loadPlugins(this.pluginPlatform());
     }
 
     @Override
-    public final PluginContainer getPlatformPlugin() {
+    public final PluginContainer platformPlugin() {
         if (this.vanillaPlugin == null) {
-            this.vanillaPlugin = this.getPluginManager().plugin("spongevanilla").orElse(null);
+            this.vanillaPlugin = this.pluginManager().plugin("spongevanilla").orElse(null);
 
             if (this.vanillaPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing SpongeVanilla, this is a serious issue!");
@@ -127,7 +130,7 @@ public abstract class VanillaLaunch extends Launch {
             }
 
             for (final PluginMetadata metadata : read) {
-                this.getPluginManager().addDummyPlugin(new DummyPluginContainer(metadata, gameDirectory, this.getLogger(), this));
+                this.pluginManager().addDummyPlugin(new DummyPluginContainer(metadata, gameDirectory, this.logger(), this));
             }
         } catch (final IOException | URISyntaxException e) {
             throw new RuntimeException("Could not load metadata information for the implementation! This should be impossible!");
@@ -135,12 +138,27 @@ public abstract class VanillaLaunch extends Launch {
     }
 
     @Override
-    public VanillaPluginPlatform getPluginPlatform() {
+    public VanillaPluginPlatform pluginPlatform() {
         return (VanillaPluginPlatform) this.pluginPlatform;
     }
 
     @Override
-    public VanillaPluginManager getPluginManager() {
+    public VanillaPluginManager pluginManager() {
         return (VanillaPluginManager) this.pluginManager;
+    }
+
+    @Override
+    public Injector createInjector() {
+        final List<Module> modules = Lists.newArrayList(
+            new SpongeModule(),
+            new SpongeCommonModule(),
+            new SpongeVanillaModule()
+        );
+        modules.addAll(this.additionalModules());
+        return Guice.createInjector(this.injectionStage(), modules);
+    }
+
+    protected Collection<Module> additionalModules() {
+        return Collections.emptyList();
     }
 }

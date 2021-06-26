@@ -29,13 +29,11 @@ import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.Component;
-import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.Logger;
@@ -86,6 +84,6 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
     private void vanilla$callStoppingEngineEvent(final CallbackInfo ci) {
-        SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
+        SpongeBootstrap.lifecycle().callStoppingEngineEvent(this);
     }
 }

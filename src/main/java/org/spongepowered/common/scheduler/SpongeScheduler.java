@@ -302,7 +302,7 @@ public abstract class SpongeScheduler implements Scheduler {
 
     public <V> Future<V> execute(final Callable<V> callable) {
         final FutureTask<V> runnable = new FutureTask<>(callable);
-        this.submit(new SpongeTaskBuilder().execute(runnable).plugin(Launch.getInstance().getCommonPlugin()).build());
+        this.submit(new SpongeTaskBuilder().execute(runnable).plugin(Launch.instance().commonPlugin()).build());
         return runnable;
     }
 

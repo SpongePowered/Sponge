@@ -48,7 +48,7 @@ public final class FilteredPluginContainerParameter implements ValueParameter<Pl
     private final List<CommandCompletion> completions = FilteredPluginContainerParameter.createCompletions(this.validPluginContainers);
 
     private static Map<String, PluginContainer> getValidContainers() {
-        return Launch.getInstance().getPluginManager().plugins()
+        return Launch.instance().pluginManager().plugins()
                 .stream()
                 .filter(x -> !(x instanceof DummyPluginContainer))
                 .collect(Collectors.toMap(x -> x.metadata().id(), x -> x));

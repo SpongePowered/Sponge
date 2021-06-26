@@ -52,7 +52,7 @@ import java.util.function.BiConsumer;
 
 public final class PhasePrinter {
 
-    private static final boolean IN_DEVELOPMENT = Launch.getInstance().isDeveloperEnvironment();
+    private static final boolean IN_DEVELOPMENT = Launch.instance().developerEnvironment();
     static final String ASYNC_BLOCK_CHANGE_MESSAGE = "Sponge adapts the vanilla handling of block changes to power events and plugins "
                                                 + "such that it follows the known fact that block changes MUST occur on the server "
                                                 + "thread (even on clients, this exists as the InternalServer thread). It is NOT "
@@ -343,7 +343,7 @@ public final class PhasePrinter {
     }
 
     static void generateVersionInfo(final PrettyPrinter printer) {
-        for (final PluginContainer pluginContainer : Launch.getInstance().getLauncherPlugins()) {
+        for (final PluginContainer pluginContainer : Launch.instance().launcherPlugins()) {
             printer.add("%s : %s", pluginContainer.metadata().name().get(), pluginContainer.metadata().version());
         }
     }

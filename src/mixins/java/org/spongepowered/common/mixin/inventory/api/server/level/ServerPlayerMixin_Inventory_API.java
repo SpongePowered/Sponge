@@ -74,7 +74,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
                     this.closeInventory(); // Cause close event first. So cursor item is not lost.
                     this.openInventory(inventory); // Then open the inventory
                 }
-            }).plugin(Launch.getInstance().getCommonPlugin()).build();
+            }).plugin(Launch.instance().commonPlugin()).build();
             return this.openInventory();
         }
         return Optional.ofNullable((Container) InventoryEventFactory.displayContainer((net.minecraft.server.level.ServerPlayer) (Object) this, inventory, displayName));
@@ -93,7 +93,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
                     cause.context().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
                     this.closeInventory();
                 }
-            }).plugin(Launch.getInstance().getCommonPlugin()).build();
+            }).plugin(Launch.instance().commonPlugin()).build();
             return false;
         }
         // Create Close_Window to capture item drops

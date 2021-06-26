@@ -53,7 +53,7 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
         // Save config now that registries have been initialized
         ConfigHandle.setSaveSuppressed(false);
 
-        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
         lifecycle.callStartedEngineEvent(this);
         
         lifecycle.callLoadedGameEvent();
@@ -61,7 +61,7 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
 
     @Inject(method = "run", at = @At("HEAD"))
     private void vanilla$establishRegistriesAndStartingEngine(CallbackInfo ci) {
-        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
         lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
@@ -72,7 +72,7 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
 
     @Inject(method = "destroy", at = @At("HEAD"))
     private void vanilla$callStoppingEngineEvent(CallbackInfo ci) {
-        SpongeBootstrap.getLifecycle().callStoppingEngineEvent(this);
+        SpongeBootstrap.lifecycle().callStoppingEngineEvent(this);
     }
 
     @Redirect(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;singleplayerServer:Lnet/minecraft/client/server/IntegratedServer;", opcode =

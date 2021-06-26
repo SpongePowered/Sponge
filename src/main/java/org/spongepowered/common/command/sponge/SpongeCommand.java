@@ -36,7 +36,6 @@ import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.ServerLevelAccessor;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -53,9 +52,7 @@ import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.LevelAccessor;
-import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.level.PlatformLevelBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
@@ -212,9 +209,9 @@ public class SpongeCommand {
     }
 
     private @NonNull CommandResult rootCommand(final CommandContext context) {
-        final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
-        final PluginContainer apiPlugin = Launch.getInstance().getApiPlugin();
-        final PluginContainer minecraftPlugin = Launch.getInstance().getMinecraftPlugin();
+        final PluginContainer platformPlugin = Launch.instance().platformPlugin();
+        final PluginContainer apiPlugin = Launch.instance().apiPlugin();
+        final PluginContainer minecraftPlugin = Launch.instance().minecraftPlugin();
 
         context.sendMessage(Identity.nil(), Component.text().append(
                 Component.text("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(Component.space()),
@@ -249,7 +246,7 @@ public class SpongeCommand {
 
     private @NonNull CommandResult auditSubcommandExecutor(final CommandContext context) {
         SpongeCommon.getLogger().info("Starting Mixin Audit");
-        Launch.getInstance().auditMixins();
+        Launch.instance().auditMixins();
         return CommandResult.success();
     }
 
@@ -322,7 +319,7 @@ public class SpongeCommand {
     }
 
     private @NonNull CommandResult pluginsListSubcommand(final CommandContext context) {
-        final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().plugins();
+        final Collection<PluginContainer> plugins = Launch.instance().pluginManager().plugins();
         context.sendMessage(Identity.nil(), this.title("Plugins (" + plugins.size() + ")"));
         for (final PluginContainer specificContainer : plugins) {
             final PluginMetadata metadata = specificContainer.metadata();
@@ -473,7 +470,7 @@ public class SpongeCommand {
 
     private @NonNull CommandResult versionExecutor(final CommandContext context) {
         if (this.versionText == null) {
-            final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
+            final PluginContainer platformPlugin = Launch.instance().platformPlugin();
 
             final TextComponent.Builder builder = Component.text()
                     .append(
@@ -481,7 +478,7 @@ public class SpongeCommand {
                     );
 
             final Component colon = Component.text(": ", NamedTextColor.GRAY);
-            for (final PluginContainer container : Launch.getInstance().getLauncherPlugins()) {
+            for (final PluginContainer container : Launch.instance().launcherPlugins()) {
                 final PluginMetadata metadata = container.metadata();
                 builder.append(
                         Component.newline(),

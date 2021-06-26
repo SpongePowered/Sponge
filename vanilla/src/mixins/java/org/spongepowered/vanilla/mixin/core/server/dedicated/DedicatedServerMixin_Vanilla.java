@@ -47,7 +47,7 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_
         // Save config now that registries have been initialized
         ConfigHandle.setSaveSuppressed(false);
 
-        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
         lifecycle.establishServerServices();
 
 
@@ -59,7 +59,7 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_
 
     @Inject(method = "initServer", at = @At("RETURN"))
     private void vanilla$callStartedEngineAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
-        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
         lifecycle.callStartedEngineEvent(this);
 
         lifecycle.callLoadedGameEvent();

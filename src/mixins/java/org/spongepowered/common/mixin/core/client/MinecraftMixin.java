@@ -145,7 +145,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     @Redirect(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
     private Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
-        SpongeBootstrap.getLifecycle().callRegisterDataPackValueEvent(datapackDir);
+        SpongeBootstrap.lifecycle().callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
     }
 }

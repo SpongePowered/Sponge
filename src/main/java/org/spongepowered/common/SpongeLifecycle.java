@@ -59,9 +59,7 @@ import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.server.permission.SpongeContextCalculator;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
 import net.minecraft.core.Registry;

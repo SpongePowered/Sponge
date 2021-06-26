@@ -47,13 +47,13 @@ public class IntegrationTestLaunch extends VanillaLaunch {
     }
 
     @Override
-    public boolean isDedicatedServer() {
+    public boolean dedicatedServer() {
         return this.isServer;
     }
 
     public void launchPlatform(final String[] args) {
         super.onLaunch();
-        this.getLogger().info("Running Sponge integration tests...");
+        this.logger().info("Running Sponge integration tests...");
 
         SpongeBootstrap.perform("integration tests", () -> this.performIntegrationTests(args));
     }
@@ -64,15 +64,15 @@ public class IntegrationTestLaunch extends VanillaLaunch {
         Bootstrap.validate();
 
         // Prepare Sponge
-        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
         lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
 
-        this.getLogger().info("Performing Mixin audit");
-        Launch.getInstance().auditMixins();
+        this.logger().info("Performing Mixin audit");
+        Launch.instance().auditMixins();
 
-        this.getLogger().info("Testing complete, goodbye!");
+        this.logger().info("Testing complete, goodbye!");
         SpongeCommon.getGame().asyncScheduler().close();
         System.exit(0);
     }

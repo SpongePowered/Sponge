@@ -44,13 +44,13 @@ public final class DedicatedServerLaunch extends VanillaLaunch {
     }
 
     @Override
-    public boolean isDedicatedServer() {
+    public boolean dedicatedServer() {
         return true;
     }
 
     public void launchPlatform(final String[] args) {
         super.onLaunch();
-        this.getLogger().info("Loading Sponge, please wait...");
+        this.logger().info("Loading Sponge, please wait...");
 
         SpongeBootstrap.perform("Server", () -> Main.main(args));
     }

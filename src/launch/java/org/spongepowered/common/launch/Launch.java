@@ -25,6 +25,7 @@
 package org.spongepowered.common.launch;
 
 import com.google.common.base.Preconditions;
+import com.google.inject.Injector;
 import com.google.inject.Stage;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
@@ -55,11 +56,11 @@ public abstract class Launch {
     }
 
     @SuppressWarnings("unchecked")
-    public static <L extends Launch> L getInstance() {
+    public static <L extends Launch> L instance() {
         return (L) Launch.INSTANCE;
     }
 
-    public static void setInstance(Launch instance) {
+    public static void setInstance(final Launch instance) {
         if (Launch.INSTANCE != null) {
             throw new RuntimeException("Attempt made to re-set launcher instance!");
         }
@@ -67,29 +68,27 @@ public abstract class Launch {
         Launch.INSTANCE = Preconditions.checkNotNull(instance);
     }
 
-    public abstract boolean isVanilla();
+    public abstract boolean dedicatedServer();
 
-    public abstract boolean isDedicatedServer();
-
-    public final Logger getLogger() {
+    public final Logger logger() {
         return this.logger;
     }
 
-    public PluginPlatform getPluginPlatform() {
+    public PluginPlatform pluginPlatform() {
         return this.pluginPlatform;
     }
 
-    public SpongePluginManager getPluginManager() {
+    public SpongePluginManager pluginManager() {
         return this.pluginManager;
     }
 
-    public abstract Stage getInjectionStage();
+    public abstract Stage injectionStage();
 
-    public final boolean isDeveloperEnvironment() {
-        return this.getInjectionStage() == Stage.DEVELOPMENT;
+    public final boolean developerEnvironment() {
+        return this.injectionStage() == Stage.DEVELOPMENT;
     }
 
-    public final PluginContainer getMinecraftPlugin() {
+    public final PluginContainer minecraftPlugin() {
         if (this.minecraftPlugin == null) {
             this.minecraftPlugin = this.pluginManager.plugin(PluginManager.MINECRAFT_PLUGIN_ID).orElse(null);
 
@@ -101,7 +100,7 @@ public abstract class Launch {
         return this.minecraftPlugin;
     }
 
-    public final PluginContainer getApiPlugin() {
+    public final PluginContainer apiPlugin() {
         if (this.apiPlugin == null) {
             this.apiPlugin = this.pluginManager.plugin(Platform.API_ID).orElse(null);
 
@@ -113,7 +112,7 @@ public abstract class Launch {
         return this.apiPlugin;
     }
 
-    public final PluginContainer getCommonPlugin() {
+    public final PluginContainer commonPlugin() {
         if (this.commonPlugin == null) {
             this.commonPlugin = this.pluginManager.plugin(PluginManager.SPONGE_PLUGIN_ID).orElse(null);
 
@@ -125,14 +124,14 @@ public abstract class Launch {
         return this.commonPlugin;
     }
 
-    public abstract PluginContainer getPlatformPlugin();
+    public abstract PluginContainer platformPlugin();
 
-    public final List<PluginContainer> getLauncherPlugins() {
+    public final List<PluginContainer> launcherPlugins() {
         if (this.launcherPlugins.isEmpty()) {
-            this.launcherPlugins.add(this.getMinecraftPlugin());
-            this.launcherPlugins.add(this.getApiPlugin());
-            this.launcherPlugins.add(this.getCommonPlugin());
-            this.launcherPlugins.add(this.getPlatformPlugin());
+            this.launcherPlugins.add(this.minecraftPlugin());
+            this.launcherPlugins.add(this.apiPlugin());
+            this.launcherPlugins.add(this.commonPlugin());
+            this.launcherPlugins.add(this.platformPlugin());
         }
 
         return this.launcherPlugins;
@@ -148,6 +147,7 @@ public abstract class Launch {
         MixinEnvironment.getCurrentEnvironment().audit();
     }
 
-    public void loadPlugins() {
-    }
+    public abstract Injector createInjector();
+
+    public abstract void performBootstrap();
 }
