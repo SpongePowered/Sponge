@@ -24,9 +24,8 @@
  */
 package org.spongepowered.vanilla.launch.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
 import co.aikar.timings.Timing;
+import co.aikar.timings.sponge.TimingsManager;
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
 import com.google.common.collect.HashMultimap;
@@ -56,7 +55,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
 import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
-import co.aikar.timings.sponge.TimingsManager;
 import org.spongepowered.common.util.EngineUtil;
 import org.spongepowered.common.util.TypeTokenUtil;
 import org.spongepowered.configurate.util.Types;
@@ -84,20 +82,18 @@ import java.util.stream.Stream;
 @Singleton
 public final class VanillaEventManager implements SpongeEventManager {
 
+    public final ListenerChecker checker;
     private final Object lock;
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent;
-    private final Map<ClassLoader, AnnotatedEventListener.Factory> classLoaders;
-    private final Set<Object> registeredListeners;
-
-    public final ListenerChecker checker;
-
     /**
      * A cache of all the handlers for an event type for quick event posting.
      * <p>The cache is currently entirely invalidated if handlers are added or
      * removed.</p>
      */
     protected final LoadingCache<EventType<?>, RegisteredListener.Cache> handlersCache =
-            Caffeine.newBuilder().initialCapacity(150).build(this::bakeHandlers);
+        Caffeine.newBuilder().initialCapacity(150).build(this::bakeHandlers);
+    private final Map<ClassLoader, AnnotatedEventListener.Factory> classLoaders;
+    private final Set<Object> registeredListeners;
 
     public VanillaEventManager() {
         this.lock = new Object();
@@ -123,42 +119,12 @@ public final class VanillaEventManager implements SpongeEventManager {
             final Field cacheData = innerCacheClass.getDeclaredField("data");
             cacheData.setAccessible(true);
             final ConcurrentHashMap<Class<? extends Event>, RegisteredListener.Cache> newBackingData =
-                    new ConcurrentHashMap<>(150, 0.75f, 1);
+                new ConcurrentHashMap<>(150, 0.75f, 1);
             cacheData.set(innerCacheValue, newBackingData);
         } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
-            SpongeCommon.getLogger().warn("Failed to set event cache backing array, type was " + this.handlersCache.getClass().getName());
-            SpongeCommon.getLogger().warn("  Caused by: " + e.getClass().getName() + ": " + e.getMessage());
+            SpongeCommon.logger().warn("Failed to set event cache backing array, type was " + this.handlersCache.getClass().getName());
+            SpongeCommon.logger().warn("  Caused by: " + e.getClass().getName() + ": " + e.getMessage());
         }
-    }
-
-    <T extends Event> RegisteredListener.Cache bakeHandlers(final EventType<T> eventType) {
-        final List<RegisteredListener<?>> handlers = new ArrayList<>();
-        final Stream<? extends Class<?>> types = Types.allSuperTypesAndInterfaces(eventType.getType())
-                .map(GenericTypeReflector::erase)
-                .filter(Event.class::isAssignableFrom);
-
-        // TODO: Move @Includes and @Excludes from filters to the baking process, this simplifies the generated
-        //       filter code and makes the filter baking target more specific handlers.
-        synchronized (this.lock) {
-            for (final Iterator<? extends Class<?>> it = types.iterator(); it.hasNext();) {
-                final Class<?> type = it.next();
-                final Collection<RegisteredListener<?>> listeners = this.handlersByEvent.get(type);
-                if (GenericEvent.class.isAssignableFrom(type)) {
-                    final Type genericType = Objects.requireNonNull(eventType.getGenericType());
-                    for (final RegisteredListener<?> listener : listeners) {
-                        final Type genericType1 = Objects.requireNonNull(listener.getEventType().getGenericType());
-                        if (TypeTokenUtil.isAssignable(genericType, genericType1)) {
-                            handlers.add(listener);
-                        }
-                    }
-                } else {
-                    handlers.addAll(listeners);
-                }
-            }
-        }
-
-        Collections.sort(handlers);
-        return new RegisteredListener.Cache(handlers);
     }
 
     private static @Nullable String getHandlerErrorOrNull(Method method) {
@@ -189,6 +155,52 @@ public final class VanillaEventManager implements SpongeEventManager {
         return String.join(", ", errors);
     }
 
+    private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventClass,
+        final Listener listener, final EventListener<? super T> handler) {
+        return VanillaEventManager.createRegistration(plugin, eventClass, listener.order(), listener.beforeModifications(), handler);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventType,
+        final Order order, final boolean beforeModifications, final EventListener<? super T> handler) {
+        Type genericType = null;
+        final Class<?> erased = GenericTypeReflector.erase(eventType);
+        if (GenericEvent.class.isAssignableFrom(erased)) {
+            genericType = TypeTokenUtil.typeArgumentFromSupertype(eventType, GenericEvent.class, 0);
+        }
+        return new RegisteredListener(plugin, new EventType(erased, genericType), order, handler, beforeModifications);
+    }
+
+    <T extends Event> RegisteredListener.Cache bakeHandlers(final EventType<T> eventType) {
+        final List<RegisteredListener<?>> handlers = new ArrayList<>();
+        final Stream<? extends Class<?>> types = Types.allSuperTypesAndInterfaces(eventType.getType())
+            .map(GenericTypeReflector::erase)
+            .filter(Event.class::isAssignableFrom);
+
+        // TODO: Move @Includes and @Excludes from filters to the baking process, this simplifies the generated
+        //       filter code and makes the filter baking target more specific handlers.
+        synchronized (this.lock) {
+            for (final Iterator<? extends Class<?>> it = types.iterator(); it.hasNext(); ) {
+                final Class<?> type = it.next();
+                final Collection<RegisteredListener<?>> listeners = this.handlersByEvent.get(type);
+                if (GenericEvent.class.isAssignableFrom(type)) {
+                    final Type genericType = Objects.requireNonNull(eventType.getGenericType());
+                    for (final RegisteredListener<?> listener : listeners) {
+                        final Type genericType1 = Objects.requireNonNull(listener.getEventType().getGenericType());
+                        if (TypeTokenUtil.isAssignable(genericType, genericType1)) {
+                            handlers.add(listener);
+                        }
+                    }
+                } else {
+                    handlers.addAll(listeners);
+                }
+            }
+        }
+
+        Collections.sort(handlers);
+        return new RegisteredListener.Cache(handlers);
+    }
+
     private void register(final RegisteredListener<? extends Event> handler) {
         this.register(Collections.singletonList(handler));
     }
@@ -211,13 +223,13 @@ public final class VanillaEventManager implements SpongeEventManager {
         }
     }
 
-    private void registerListener(PluginContainer plugin, Object listenerObject) {
-        checkNotNull(plugin, "plugin");
-        checkNotNull(listenerObject, "listener");
+    private void registerListener(final PluginContainer plugin, final Object listenerObject) {
+        Objects.requireNonNull(plugin, "plugin");
+        Objects.requireNonNull(listenerObject, "listener");
 
         if (this.registeredListeners.contains(listenerObject)) {
-            SpongeCommon.getLogger().warn("Plugin {} attempted to register an already registered listener ({})", plugin.metadata().id(),
-                    listenerObject.getClass().getName());
+            SpongeCommon.logger().warn("Plugin {} attempted to register an already registered listener ({})", plugin.metadata().id(),
+                listenerObject.getClass().getName());
             Thread.dumpStack();
             return;
         }
@@ -232,7 +244,7 @@ public final class VanillaEventManager implements SpongeEventManager {
         if (handlerFactory == null) {
             final DefineableClassLoader classLoader = new DefineableClassLoader(handleLoader);
             handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
-                    new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
+                new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
             this.classLoaders.put(handleLoader, handlerFactory);
         }
 
@@ -246,7 +258,7 @@ public final class VanillaEventManager implements SpongeEventManager {
                     try {
                         handler = handlerFactory.create(listenerObject, method);
                     } catch (final Exception e) {
-                        SpongeCommon.getLogger().error("Failed to create handler for {} on {}", method, handle, e);
+                        SpongeCommon.logger().error("Failed to create handler for {} on {}", method, handle, e);
                         continue;
                     }
 
@@ -271,28 +283,12 @@ public final class VanillaEventManager implements SpongeEventManager {
         }
 
         for (Map.Entry<Method, String> method : methodErrors.entrySet()) {
-            SpongeCommon.getLogger().warn("Invalid listener method {} in {}: {}", method.getKey(),
-                    method.getKey().getDeclaringClass().getName(), method.getValue());
+            SpongeCommon.logger().warn("Invalid listener method {} in {}: {}", method.getKey(),
+                method.getKey().getDeclaringClass().getName(), method.getValue());
         }
 
         this.registeredListeners.add(listenerObject);
         this.register(handlers);
-    }
-
-    private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventClass,
-            final Listener listener, final EventListener<? super T> handler) {
-        return VanillaEventManager.createRegistration(plugin, eventClass, listener.order(), listener.beforeModifications(), handler);
-    }
-
-    @SuppressWarnings({"unchecked", "rawtypes"})
-    private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventType,
-            final Order order, final boolean beforeModifications, final EventListener<? super T> handler) {
-        Type genericType = null;
-        final Class<?> erased = GenericTypeReflector.erase(eventType);
-        if (GenericEvent.class.isAssignableFrom(erased)) {
-            genericType = TypeTokenUtil.typeArgumentFromSupertype(eventType, GenericEvent.class, 0);
-        }
-        return new RegisteredListener(plugin, new EventType(erased, genericType), order, handler, beforeModifications);
     }
 
     @Override
@@ -307,31 +303,31 @@ public final class VanillaEventManager implements SpongeEventManager {
 
     @Override
     public <T extends Event> void registerListener(final PluginContainer plugin, final TypeToken<T> eventType,
-            final EventListener<? super T> listener) {
+        final EventListener<? super T> listener) {
         this.registerListener(plugin, eventType, Order.DEFAULT, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(final PluginContainer plugin, final Class<T> eventClass, final Order order,
-            final EventListener<? super T> listener) {
+        final EventListener<? super T> listener) {
         this.registerListener(plugin, eventClass, Order.DEFAULT, false, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(final PluginContainer plugin, final TypeToken<T> eventType, final Order order,
-            final EventListener<? super T> listener) {
+        final EventListener<? super T> listener) {
         this.registerListener(plugin, eventType, Order.DEFAULT, false, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(final PluginContainer plugin, final Class<T> eventClass, final Order order,
-            final boolean beforeModifications, final EventListener<? super T> listener) {
+        final boolean beforeModifications, final EventListener<? super T> listener) {
         this.registerListener(plugin, TypeToken.get(eventClass), Order.DEFAULT, false, listener);
     }
 
     @Override
     public <T extends Event> void registerListener(final PluginContainer plugin, final TypeToken<T> eventType, final Order order,
-            final boolean beforeModifications, final EventListener<? super T> listener) {
+        final boolean beforeModifications, final EventListener<? super T> listener) {
         this.register(VanillaEventManager.createRegistration(plugin, eventType.getType(), order, beforeModifications, listener));
     }
 
@@ -345,7 +341,6 @@ public final class VanillaEventManager implements SpongeEventManager {
                 if (unregister.test(handler)) {
                     itr.remove();
                     changed = true;
-                    // TODO: This doesn't seem right, even as it was before
                     this.checker.unregisterListenerFor(handler.getEventType().getType());
                     this.registeredListeners.remove(handler.getHandle());
                 }
@@ -359,23 +354,22 @@ public final class VanillaEventManager implements SpongeEventManager {
 
     @Override
     public void unregisterListeners(final Object listener) {
-        checkNotNull(listener, "listener");
+        Objects.requireNonNull(listener, "listener");
         this.unregister(handler -> listener.equals(handler.getHandle()));
     }
 
     @Override
     public void unregisterPluginListeners(final PluginContainer plugin) {
-        checkNotNull(plugin, "plugin");
+        Objects.requireNonNull(plugin, "plugin");
         this.unregister(handler -> plugin.equals(handler.getPlugin()));
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     protected RegisteredListener.Cache getHandlerCache(final Event event) {
-        checkNotNull(event, "event");
-        final Class<? extends Event> eventClass = event.getClass();
+        final Class<? extends Event> eventClass = Objects.requireNonNull(event, "event").getClass();
         final EventType<? extends Event> eventType;
         if (event instanceof GenericEvent) {
-            eventType = new EventType(eventClass, checkNotNull(((GenericEvent) event).paramType().getType()));
+            eventType = new EventType(eventClass, Objects.requireNonNull(((GenericEvent<?>) event).paramType().getType()));
         } else {
             eventType = new EventType(eventClass, null);
         }
@@ -397,7 +391,7 @@ public final class VanillaEventManager implements SpongeEventManager {
                     SpongeCommon.setActivePlugin(handler.getPlugin());
                     handler.handle(event);
                 } catch (final Throwable e) {
-                    SpongeCommon.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
+                    SpongeCommon.logger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin(), e);
                 } finally {
                     SpongeCommon.setActivePlugin(null);
                 }
@@ -410,8 +404,8 @@ public final class VanillaEventManager implements SpongeEventManager {
         TimingsManager.PLUGIN_EVENT_HANDLER.startTimingIfSync();
         for (@SuppressWarnings("rawtypes") final RegisteredListener handler : handlers) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame();
-                 final PhaseContext<?> context = this.createPluginContext(handler);
-                 final Timing timings = handler.getTimingsHandler()) {
+                final PhaseContext<?> context = this.createPluginContext(handler);
+                final Timing timings = handler.getTimingsHandler()) {
                 frame.pushCause(handler.getPlugin());
                 if (context != null) {
                     context.buildAndSwitch();
@@ -423,7 +417,7 @@ public final class VanillaEventManager implements SpongeEventManager {
                 SpongeCommon.setActivePlugin(handler.getPlugin());
                 handler.handle(event);
             } catch (Throwable e) {
-                SpongeCommon.getLogger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().metadata().id(), e);
+                SpongeCommon.logger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().metadata().id(), e);
             } finally {
                 SpongeCommon.setActivePlugin(null);
             }
@@ -460,7 +454,7 @@ public final class VanillaEventManager implements SpongeEventManager {
     }
 
     @Override
-    public boolean post(final Event event, final PluginContainer plugin) {
+    public boolean postToPlugin(final Event event, final PluginContainer plugin) {
         final List<RegisteredListener<?>> listeners = this.getHandlerCache(event).getListeners();
         final List<RegisteredListener<?>> pluginListeners = listeners.stream()
             .filter(l -> l.getPlugin() == plugin)

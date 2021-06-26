@@ -268,7 +268,7 @@ public abstract class SpongeScheduler implements Scheduler {
                     SpongeCommon.setActivePlugin(task.owner());
                     task.task.consumer().accept(task);
                 } catch (final Throwable t) {
-                    SpongeCommon.getLogger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
+                    SpongeCommon.logger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
                             task.name(), task.owner().metadata().id(), t);
                 }
             } finally {

@@ -46,7 +46,7 @@ public final class LocaleCache {
                 try {
                     return LocaleUtils.toLocale(fixedKey);
                 } catch (final IllegalArgumentException e) {
-                    SpongeCommon.getLogger().error("Could not transform '{}' or '{}' into a Locale", key, fixedKey);
+                    SpongeCommon.logger().error("Could not transform '{}' or '{}' into a Locale", key, fixedKey);
                     throw e;
                 }
             }

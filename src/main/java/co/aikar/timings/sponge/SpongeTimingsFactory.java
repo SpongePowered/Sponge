@@ -60,7 +60,7 @@ public final class SpongeTimingsFactory implements TimingsFactory {
         this.setHistoryInterval(category.historyInterval);
         this.setHistoryLength(category.historyLength);
 
-        SpongeCommon.getLogger().debug("Sponge Timings: " + this.timingsEnabled +
+        SpongeCommon.logger().debug("Sponge Timings: " + this.timingsEnabled +
                                     " - Verbose: " + this.verboseEnabled +
                                     " - Interval: " + SpongeTimingsFactory.timeSummary(this.historyInterval / 20) +
                                     " - Length: " + SpongeTimingsFactory.timeSummary(this.historyLength / 20));
@@ -146,7 +146,7 @@ public final class SpongeTimingsFactory implements TimingsFactory {
         Queue<TimingHistory> oldQueue = TimingsManager.HISTORY;
         int frames = (this.getHistoryLength() / this.getHistoryInterval());
         if (length > maxLength) {
-            SpongeCommon.getLogger().warn(
+            SpongeCommon.logger().warn(
                     "Timings Length too high. Requested " + length + ", max is " + maxLength
                             + ". To get longer history, you must increase your interval. Set Interval to "
                             + Math.ceil(length / this.MAX_HISTORY_FRAMES)

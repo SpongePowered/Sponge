@@ -128,7 +128,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
             }
             return DataTransactionResult.failResult(replacementValue);
         } catch (Exception e) {
-            SpongeCommon.getLogger().debug("An exception occurred when setting data: ", e);
+            SpongeCommon.logger().debug("An exception occurred when setting data: ", e);
             return DataTransactionResult.errorResult(replacementValue);
         }
     }
@@ -215,7 +215,7 @@ public abstract class GenericMutableDataProviderBase<H, V extends Value<E>, E> e
             }
             return DataTransactionResult.failResult(replacementValue);
         } catch (Exception e) {
-            SpongeCommon.getLogger().debug("An exception occurred when setting data: ", e);
+            SpongeCommon.logger().debug("An exception occurred when setting data: ", e);
             return DataTransactionResult.errorResult(replacementValue);
         }
     }

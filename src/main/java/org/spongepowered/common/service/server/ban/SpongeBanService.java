@@ -199,11 +199,11 @@ public final class SpongeBanService implements BanService {
     }
 
     private UserBanList getUserBanList() {
-        return SpongeCommon.getServer().getPlayerList().getBans();
+        return SpongeCommon.server().getPlayerList().getBans();
     }
 
     private IpBanList getIPBanList() {
-        return SpongeCommon.getServer().getPlayerList().getIpBans();
+        return SpongeCommon.server().getPlayerList().getIpBans();
     }
 
 }

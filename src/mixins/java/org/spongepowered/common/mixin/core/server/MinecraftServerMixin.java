@@ -112,7 +112,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Override
     public Subject subject() {
-        return SpongeCommon.getGame().systemSubject();
+        return SpongeCommon.game().systemSubject();
     }
 
     @Inject(method = "spin", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)

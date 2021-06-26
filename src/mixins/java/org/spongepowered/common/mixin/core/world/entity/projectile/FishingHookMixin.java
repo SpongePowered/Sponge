@@ -90,7 +90,7 @@ public abstract class FishingHookMixin extends EntityMixin {
     @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
     private void onSetHookedEntity(CallbackInfo ci) {
         if (SpongeCommon
-            .postEvent(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) this.hookedIn, (FishingBobber) this))) {
+            .post(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) this.hookedIn, (FishingBobber) this))) {
             this.hookedIn = null;
             ci.cancel();
         }
@@ -130,7 +130,7 @@ public abstract class FishingHookMixin extends EntityMixin {
             }
             PhaseTracker.getCauseStackManager().pushCause(playerEntity);
 
-            if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStop(PhaseTracker.getCauseStackManager().currentCause(), ((FishingBobber) this), transactions))) {
+            if (SpongeCommon.post(SpongeEventFactory.createFishingEventStop(PhaseTracker.getCauseStackManager().currentCause(), ((FishingBobber) this), transactions))) {
                 // Event is cancelled
                 return 0;
             }

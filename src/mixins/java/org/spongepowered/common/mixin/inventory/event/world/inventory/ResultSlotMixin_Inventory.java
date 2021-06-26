@@ -139,7 +139,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         final AbstractContainerMenu container = thePlayer.containerMenu;
         final Inventory craftInv = ((Inventory) container).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
-            SpongeCommon.getLogger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
+            SpongeCommon.logger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
             return;
         }
 

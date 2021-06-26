@@ -372,7 +372,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                     SpongeEventFactory.createExplosionEventPre(
                             PhaseTracker.SERVER.currentCause(),
                             explosion, ((org.spongepowered.api.world.server.ServerWorld) this));
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 return (Explosion) explosion;
             }
             explosion = event.explosion();
@@ -745,7 +745,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 // TODO - have the PhaseTracker of this particular thread print its stack
                 // since we're on that thread, maybe we might have some idea of who or what is calling it.
                 .add(new Exception("Async Block Notifcation Detected"))
-                .log(SpongeCommon.getLogger(), Level.ERROR);
+                .log(SpongeCommon.logger(), Level.ERROR);
             // Maybe? I don't think this is wise to try and sync back a notification on the main thread.
             return;
         }

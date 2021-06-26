@@ -79,7 +79,7 @@ public final class SpongeDataStore extends VanillaDataStore {
             final String message = "Failed to update content for datastore: " + this.key.asString()
                     + "\nUpdating from " + fromVersion + " to " + toVersion + " is impossible."
                     + "\nPlease notify the plugin author of this error.";
-            SpongeCommon.getLogger().warn(message);
+            SpongeCommon.logger().warn(message);
             return Optional.empty();
         }
         final ImmutableList<DataContentUpdater> updatersList = builder.build();

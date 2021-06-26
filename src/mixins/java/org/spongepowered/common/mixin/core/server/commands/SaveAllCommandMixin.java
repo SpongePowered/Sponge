@@ -39,7 +39,7 @@ public abstract class SaveAllCommandMixin {
 
     @Inject(method = "saveAll", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;saveAllChunks(ZZZ)Z"))
     private static void impl$markManualSave(final CommandSourceStack source, final boolean flush, final CallbackInfoReturnable<Integer> cir) {
-        for (final ServerLevel world : SpongeCommon.getServer().getAllLevels()) {
+        for (final ServerLevel world : SpongeCommon.server().getAllLevels()) {
             ((ServerLevelBridge) world).bridge$setManualSave(true);
         }
     }

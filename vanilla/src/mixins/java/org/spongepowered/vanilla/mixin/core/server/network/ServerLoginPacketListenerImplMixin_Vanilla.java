@@ -89,7 +89,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
                     final Cause cause = Cause.of(EventContext.empty(), this);
                     final ServerSideConnectionEvent.Handshake event =
                             SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection);
-                    SpongeCommon.postEvent(event);
+                    SpongeCommon.post(event);
                     this.impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA;
                 });
             } else if (this.impl$handshakeState == ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA) {

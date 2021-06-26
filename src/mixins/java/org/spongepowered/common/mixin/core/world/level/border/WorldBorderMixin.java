@@ -154,7 +154,7 @@ public abstract class WorldBorderMixin implements WorldBorderBridge {
     }
 
     private ChangeWorldBorderEvent.@Nullable World impl$fireWorldBorderEvent(final Supplier<org.spongepowered.api.world.border.WorldBorder> proposed) {
-        if (this.impl$associatedWorld != null && SpongeCommon.getGame().isServerAvailable()) {
+        if (this.impl$associatedWorld != null && SpongeCommon.game().isServerAvailable()) {
             final Optional<ServerWorld> world = Sponge.server().worldManager().world(this.impl$associatedWorld);
             if (world.isPresent()) {
                 final ChangeWorldBorderEvent.World event = SpongeEventFactory.createChangeWorldBorderEventWorld(

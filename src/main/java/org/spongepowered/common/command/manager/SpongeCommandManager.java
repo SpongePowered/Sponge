@@ -276,7 +276,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
     @Override
     public void updateCommandTreeForPlayer(final @NonNull ServerPlayer player) {
         Objects.requireNonNull(player, "player");
-        SpongeCommon.getServer().getCommands().sendCommands((net.minecraft.server.level.ServerPlayer) player);
+        SpongeCommon.server().getCommands().sendCommands((net.minecraft.server.level.ServerPlayer) player);
     }
 
     @Override
@@ -472,7 +472,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
         prettyPrinter.add()
                 .add("CommandCause details: ")
                 .addWrapped(cause.cause().toString())
-                .log(SpongeCommon.getLogger(), Level.ERROR);
+                .log(SpongeCommon.logger(), Level.ERROR);
     }
 
     @Override
@@ -534,7 +534,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
             // someone's gonna do it, let's not let them take us down.
             final TypeToken<?> handledType = type.handledType();
             if (handledType == null) {
-                SpongeCommon.getLogger().error("Registrar '{}' did not provide a handledType, skipping...", type.getClass());
+                SpongeCommon.logger().error("Registrar '{}' did not provide a handledType, skipping...", type.getClass());
             } else if (usedTokens.add(handledType)) { // we haven't done it yet
                 // Add the command registrar
                 final CommandRegistrar<?> registrar = type.create(this);
@@ -547,7 +547,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
 
                 this.game.eventManager().post(this.createEvent(cause, this.game, registrar));
             } else {
-                SpongeCommon.getLogger()
+                SpongeCommon.logger()
                         .warn("Command type '{}' has already been collected, skipping request from {}",
                                 handledType.toString(),
                                 type.getClass());

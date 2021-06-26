@@ -243,7 +243,7 @@ public final class PacketPhase {
 
         final BasicInventoryPacketState inventory = PacketPhase.fromState(PacketPhase.clickType(windowPacket.getSlotNum()) | mode | unpacked);
         if (inventory == PacketPhase.Inventory.INVENTORY) {
-            SpongeCommon.getLogger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
+            SpongeCommon.logger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
         }
         return inventory;
     }
@@ -312,7 +312,7 @@ public final class PacketPhase {
             final ServerboundUseItemOnPacket blockPlace = (ServerboundUseItemOnPacket) packet;
             final BlockPos blockPos = blockPlace.getHitResult().getBlockPos();
             final Direction front = blockPlace.getHitResult().getDirection();
-            final MinecraftServer server = SpongeCommon.getServer();
+            final MinecraftServer server = SpongeCommon.server();
             if (blockPos.getY() < server.getMaxBuildHeight() - 1 || front != Direction.UP && blockPos.getY() < server.getMaxBuildHeight()) {
                 return PacketPhase.General.PLACE_BLOCK;
             }

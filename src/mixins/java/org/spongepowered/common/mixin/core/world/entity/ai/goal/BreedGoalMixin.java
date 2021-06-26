@@ -70,7 +70,7 @@ public abstract class BreedGoalMixin {
                 final org.spongepowered.api.event.entity.BreedingEvent.FindMate event =
                     SpongeEventFactory.createBreedingEventFindMate(frame.currentCause(), TristateResult.Result.DEFAULT,
                         TristateResult.Result.DEFAULT, (Animal) nearbyMate, true);
-                if (SpongeCommon.postEvent(event) || event.result() == TristateResult.Result.DENY) {
+                if (SpongeCommon.post(event) || event.result() == TristateResult.Result.DENY) {
                     nearbyMate = null;
                 }
             }

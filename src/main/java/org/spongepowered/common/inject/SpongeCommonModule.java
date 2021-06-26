@@ -36,7 +36,6 @@ import org.spongepowered.api.network.channel.ChannelRegistry;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.BuilderProvider;
 import org.spongepowered.api.registry.FactoryProvider;
-import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
@@ -51,7 +50,6 @@ import org.spongepowered.common.network.channel.ChannelBufferAllocator;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.game.SpongeGameScopedServiceProvider;
 import org.spongepowered.common.sql.SpongeSqlManager;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
@@ -62,11 +60,10 @@ public final class SpongeCommonModule extends AbstractModule {
     protected void configure() {
         this.bind(Game.class).to(SpongeGame.class);
         this.bind(Platform.class).to(SpongePlatform.class);
-        this.bind(MinecraftVersion.class).toInstance(SpongeCommon.MINECRAFT_VERSION);
+        this.bind(MinecraftVersion.class).toInstance(SpongeCommon.minecraftVersion());
         this.bind(AssetManager.class).to(SpongeAssetManager.class);
         this.bind(ChannelRegistry.class).toInstance(new SpongeChannelRegistry(ChannelBufferAllocator.POOLED));
         this.bind(PluginManager.class).toInstance(Launch.instance().pluginManager());
-        this.bind(GameRegistry.class).to(SpongeGameRegistry.class);
         this.bind(DataManager.class).to(SpongeDataManager.class);
         this.bind(ConfigManager.class).to(PluginConfigManager.class);
         this.bind(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);

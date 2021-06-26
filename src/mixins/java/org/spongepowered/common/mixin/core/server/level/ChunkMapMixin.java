@@ -55,6 +55,7 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DirectionUtil;
 import org.spongepowered.math.vector.Vector3i;
 
 @Mixin(ChunkMap.class)
@@ -109,15 +110,15 @@ public abstract class ChunkMapMixin {
         if (ShouldFire.CHUNK_EVENT_UNLOAD) {
             final ChunkEvent.Unload event = SpongeEventFactory.createChunkEventUnload(PhaseTracker.getInstance().currentCause(), chunkPos,
                     (ResourceKey) (Object) this.level.dimension().location());
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
         }
 
         for (final Direction dir : Constants.Chunk.CARDINAL_DIRECTIONS) {
             final Vector3i neighborPos = chunkPos.add(dir.asBlockOffset());
             final ChunkAccess neighbor = this.level.getChunk(neighborPos.x(), neighborPos.z(), ChunkStatus.EMPTY, false);
             if (neighbor instanceof LevelChunk) {
-                final int index = SpongeCommon.directionToIndex(dir);
-                final int oppositeIndex = SpongeCommon.directionToIndex(dir.opposite());
+                final int index = DirectionUtil.directionToIndex(dir);
+                final int oppositeIndex = DirectionUtil.directionToIndex(dir.opposite());
                 ((LevelChunkBridge) chunk).bridge$setNeighborChunk(index, null);
                 ((LevelChunkBridge) neighbor).bridge$setNeighborChunk(oppositeIndex, null);
             }
@@ -134,7 +135,7 @@ public abstract class ChunkMapMixin {
             final Vector3i chunkPos = new Vector3i(chunk.getPos().x, 0, chunk.getPos().z);
             final ChunkEvent.Generated event = SpongeEventFactory.createChunkEventGenerated(PhaseTracker.getInstance().currentCause(), chunkPos,
                     (ResourceKey) (Object) this.level.dimension().location());
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
         }
     }
 
@@ -144,7 +145,7 @@ public abstract class ChunkMapMixin {
             final Vector3i chunkPos = new Vector3i(var1.getPos().x, 0, var1.getPos().z);
             final ChunkEvent.Save.Post postSave = SpongeEventFactory.createChunkEventSavePost(PhaseTracker.getInstance().currentCause(), chunkPos,
                     (ResourceKey) (Object) this.level.dimension().location());
-            SpongeCommon.postEvent(postSave);
+            SpongeCommon.post(postSave);
         }
 
     }
@@ -156,7 +157,7 @@ public abstract class ChunkMapMixin {
                 final Vector3i chunkPos = new Vector3i(var1.getPos().x, 0, var1.getPos().z);
                 final ChunkEvent.Save.Pre postSave = SpongeEventFactory.createChunkEventSavePre(PhaseTracker.getInstance().currentCause(),
                         chunkPos, (ResourceKey) (Object) this.level.dimension().location(), ((Chunk) var1));
-                SpongeCommon.postEvent(postSave);
+                SpongeCommon.post(postSave);
                 if (postSave.isCancelled()) {
                     cir.setReturnValue(false);
                 }
@@ -177,7 +178,7 @@ public abstract class ChunkMapMixin {
         if (ShouldFire.CHUNK_EVENT_LOAD) {
             final ChunkEvent.Load loadEvent = SpongeEventFactory.createChunkEventLoad(PhaseTracker.getInstance().currentCause(),
                     chunkPos, (ResourceKey) (Object) this.level.dimension().location(), ((Chunk) levelChunk));
-            SpongeCommon.postEvent(loadEvent);
+            SpongeCommon.post(loadEvent);
         }
 
         for (final Direction dir : Constants.Chunk.CARDINAL_DIRECTIONS) {
@@ -187,8 +188,8 @@ public abstract class ChunkMapMixin {
                 neighbor = ((ImposterProtoChunk) neighbor).getWrapped();
             }
             if (neighbor instanceof LevelChunk) {
-                final int index = SpongeCommon.directionToIndex(dir);
-                final int oppositeIndex = SpongeCommon.directionToIndex(dir.opposite());
+                final int index = DirectionUtil.directionToIndex(dir);
+                final int oppositeIndex = DirectionUtil.directionToIndex(dir.opposite());
                 ((LevelChunkBridge) levelChunk).bridge$setNeighborChunk(index, (LevelChunk) neighbor);
                 ((LevelChunkBridge) neighbor).bridge$setNeighborChunk(oppositeIndex, levelChunk);
             }

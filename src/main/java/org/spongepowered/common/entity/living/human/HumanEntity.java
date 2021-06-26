@@ -337,17 +337,17 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     public boolean getOrLoadSkin(final UUID minecraftAccount) {
-        GameProfile gameProfile = SpongeCommon.getServer().getProfileCache().get(minecraftAccount);
+        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount);
         if (gameProfile == null) {
             gameProfile =
-                    SpongeCommon.getServer().getSessionService().fillProfileProperties(new GameProfile(minecraftAccount, ""), true);
+                    SpongeCommon.server().getSessionService().fillProfileProperties(new GameProfile(minecraftAccount, ""), true);
             if (gameProfile == null) {
                 return false;
             }
 
             // TODO Should we put profile cache entries with UUIDs that don't have their names?
 
-            SpongeCommon.getServer().getProfileCache().add(gameProfile);
+            SpongeCommon.server().getProfileCache().add(gameProfile);
         }
 
         this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, gameProfile.getProperties().get(ProfileProperty.TEXTURES));
@@ -360,14 +360,14 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     public boolean getOrLoadSkin(final String minecraftAccount) {
         Objects.requireNonNull(minecraftAccount);
-        GameProfile gameProfile = SpongeCommon.getServer().getProfileCache().get(minecraftAccount);
+        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount);
         if (gameProfile == null) {
             return false;
         }
 
         if (gameProfile.getProperties().isEmpty()) {
-            gameProfile = SpongeCommon.getServer().getSessionService().fillProfileProperties(gameProfile, true);
-            SpongeCommon.getServer().getProfileCache().add(gameProfile);
+            gameProfile = SpongeCommon.server().getSessionService().fillProfileProperties(gameProfile, true);
+            SpongeCommon.server().getProfileCache().add(gameProfile);
         }
 
         this.fakeProfile.getProperties().clear();

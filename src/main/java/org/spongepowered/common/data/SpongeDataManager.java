@@ -130,10 +130,10 @@ public final class SpongeDataManager implements DataManager {
         Objects.requireNonNull(builder);
 
         if (this.builders.putIfAbsent(clazz, builder) != null) {
-            SpongeCommon.getLogger().warn("A DataBuilder has already been registered for {}. Attempted to register {} instead.", clazz,
+            SpongeCommon.logger().warn("A DataBuilder has already been registered for {}. Attempted to register {} instead.", clazz,
                     builder.getClass());
         } else if (!(builder instanceof AbstractDataBuilder)) {
-            SpongeCommon.getLogger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
+            SpongeCommon.logger().warn("A custom DataBuilder is not extending AbstractDataBuilder! It is recommended that "
                     + "the custom data builder does extend it to gain automated content versioning updates and maintain "
                     + "simplicity. The offending builder's class is: {}", builder.getClass());
         }

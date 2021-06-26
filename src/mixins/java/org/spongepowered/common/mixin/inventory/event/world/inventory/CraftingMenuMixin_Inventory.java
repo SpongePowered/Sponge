@@ -105,7 +105,7 @@ public abstract class CraftingMenuMixin_Inventory {
 
             final Inventory inv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
             if (!(inv instanceof CraftingInventory)) {
-                SpongeCommon.getLogger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + player.containerMenu.getClass().getName());
+                SpongeCommon.logger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + player.containerMenu.getClass().getName());
                 return;
             }
             final SlotTransaction previewTransaction = craftPreviewTransactions.get(craftPreviewTransactions.size() - 1);

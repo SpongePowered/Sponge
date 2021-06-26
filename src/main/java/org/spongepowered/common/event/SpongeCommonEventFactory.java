@@ -89,7 +89,6 @@ import org.spongepowered.api.event.action.CreateMapEvent;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.block.InteractBlockEvent;
-import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.CollideEntityEvent;
@@ -154,11 +153,8 @@ import org.spongepowered.math.vector.Vector3i;
 import java.lang.ref.WeakReference;
 import java.util.ArrayList;
 import java.util.Collections;
-import java.util.EnumMap;
-import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
 import java.util.Optional;
 import java.util.Set;
 import java.util.function.Supplier;
@@ -182,7 +178,7 @@ public final class SpongeCommonEventFactory {
             }
             final DropItemEvent.Dispense dispense =
                 SpongeEventFactory.createDropItemEventDispense(frame.currentCause(), entities);
-            SpongeCommon.postEvent(dispense);
+            SpongeCommon.post(dispense);
             if (!dispense.isCancelled()) {
                 EntityUtil.processEntitySpawnsFromEvent(context, dispense);
             }
@@ -203,7 +199,7 @@ public final class SpongeCommonEventFactory {
                 SpongeEventFactory.createClickContainerEventDropOutsideCreative(frame.currentCause(),
                         ((org.spongepowered.api.item.inventory.Container) player.containerMenu), cursorTransaction, entities,
                         Optional.empty(), Collections.emptyList());
-            SpongeCommon.postEvent(dispense);
+            SpongeCommon.post(dispense);
             if (!dispense.isCancelled()) {
                 EntityUtil.processEntitySpawnsFromEvent(context, dispense);
             }
@@ -215,7 +211,7 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             final DropItemEvent.Custom event =
                 SpongeEventFactory.createDropItemEventCustom(frame.currentCause(), items);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (!event.isCancelled()) {
                 EntityUtil.processEntitySpawnsFromEvent(context, event);
             }
@@ -226,7 +222,7 @@ public final class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.currentContext().require(EventContextKeys.SPAWN_TYPE);
             final DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.currentCause(), items);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (!event.isCancelled()) {
                 EntityUtil.processEntitySpawnsFromEvent(event, supplier);
             }
@@ -237,7 +233,7 @@ public final class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.currentContext().require(EventContextKeys.SPAWN_TYPE);
             final DropItemEvent.Close event = SpongeEventFactory.createDropItemEventClose(frame.currentCause(), items);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (!event.isCancelled()) {
                 EntityUtil.processEntitySpawnsFromEvent(event, supplier);
             }
@@ -249,7 +245,7 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
 
             final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.currentCause(), entities);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (!event.isCancelled() && event.entities().size() > 0) {
                 return EntityUtil.processEntitySpawnsFromEvent(context, event);
             }
@@ -259,7 +255,7 @@ public final class SpongeCommonEventFactory {
 
     public static void callDropItemDestruct(final List<Entity> entities, final PhaseContext<?> context) {
         final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(PhaseTracker.getCauseStackManager().currentCause(), entities);
-        SpongeCommon.postEvent(destruct);
+        SpongeCommon.post(destruct);
         if (!destruct.isCancelled()) {
             EntityUtil.processEntitySpawnsFromEvent(context, destruct);
         }
@@ -269,7 +265,7 @@ public final class SpongeCommonEventFactory {
         PhaseTracker.getCauseStackManager().currentContext().require(EventContextKeys.SPAWN_TYPE);
         try {
             final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), entities);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return !event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
         } catch (final Exception e) {
             final PrettyPrinter printer = new PrettyPrinter(60).add("Exception trying to create a Spawn Event").centre().hr()
@@ -286,7 +282,7 @@ public final class SpongeCommonEventFactory {
             printer.add();
             printer.add("Exception:");
             printer.add(e);
-            printer.log(SpongeCommon.getLogger(), org.apache.logging.log4j.Level.ERROR);
+            printer.log(SpongeCommon.logger(), org.apache.logging.log4j.Level.ERROR);
             for (final Entity entity : entities) {
                 EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
             }
@@ -296,7 +292,7 @@ public final class SpongeCommonEventFactory {
 
     public static boolean callSpawnEntityCustom(final List<Entity> entities, final PhaseContext<?> context) {
         final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().currentCause(), entities);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         return event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
     }
 
@@ -329,7 +325,7 @@ public final class SpongeCommonEventFactory {
             final List<Entity> spEntities = (List<Entity>) (List<?>) entities;
             final CollideEntityEvent event =
                     SpongeEventFactory.createCollideEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), spEntities);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
     }
@@ -442,7 +438,7 @@ public final class SpongeCommonEventFactory {
                 SpongeEventFactory.createChangeBlockEventPre(frame.currentCause(), locations,
                     (ServerWorld) worldIn
                 );
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
     }
@@ -471,7 +467,7 @@ public final class SpongeCommonEventFactory {
             final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventPre(frame.currentCause(),
                     Collections.singletonList(location), ((ServerWorld) worldIn));
 
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
     }
@@ -501,7 +497,7 @@ public final class SpongeCommonEventFactory {
             final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventAll(frame.currentCause(),
                 Collections.singletonList(transaction), ((ServerWorld) worldIn));
 
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
     }
@@ -513,7 +509,7 @@ public final class SpongeCommonEventFactory {
             if (entity instanceof Player && !((ServerWorld) player.getLevel()).properties().pvp()) {
                 event.setCancelled(true); // if PvP is disabled for world, cancel
             }
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
     }
@@ -525,7 +521,7 @@ public final class SpongeCommonEventFactory {
             final InteractEntityEvent.Secondary event = hitVec == null ?
                     SpongeEventFactory.createInteractEntityEventSecondaryOn(frame.currentCause(), (Entity) entity) :
                     SpongeEventFactory.createInteractEntityEventSecondaryAt(frame.currentCause(), (Entity) entity, hitVec);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
     }
@@ -534,7 +530,7 @@ public final class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, null, frame);
             final InteractItemEvent.Primary event = SpongeEventFactory.createInteractItemEventPrimary(frame.currentCause(), ItemStackUtil.snapshotOf(stack));
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
     }
@@ -543,7 +539,7 @@ public final class SpongeCommonEventFactory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             SpongeCommonEventFactory.applyCommonInteractContext(player, stack, hand, null, null, frame);
             final InteractItemEvent.Secondary event = SpongeEventFactory.createInteractItemEventSecondary(frame.currentCause(), ItemStackUtil.snapshotOf(stack));
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
 
@@ -576,7 +572,7 @@ public final class SpongeCommonEventFactory {
                     throw new IllegalStateException("unreachable code");
             }
 
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
     }
@@ -587,7 +583,7 @@ public final class SpongeCommonEventFactory {
             final InteractBlockEvent.Secondary event = SpongeEventFactory.createInteractBlockEventSecondary(frame.currentCause(),
                     Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, Tristate.UNDEFINED, targetBlock, hitVec,
                     targetSide);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
     }
@@ -640,7 +636,7 @@ public final class SpongeCommonEventFactory {
                     new Vector3d(entity.xOld, entity.yOld, entity.zOld), new Vector3d(entity.getX(), entity.getY(), entity.getZ()),
                     new Vector3d(entity.getX(), entity.getY(), entity.getZ()));
 
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 entity.setPos(entity.xOld, entity.yOld, entity.zOld);
             } else {
                 entity.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
@@ -664,7 +660,7 @@ public final class SpongeCommonEventFactory {
             final RotateEntityEvent event = SpongeEventFactory.createRotateEntityEvent(frame.currentCause(), (Entity) entity,
                     new Vector3d(entity.xRotO, entity.yRotO, 0), new Vector3d(entity.xRot, entity.yRot, 0));
 
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 entity.xRot = entity.xRotO;
                 entity.yRot = entity.yRotO;
             } else {
@@ -706,7 +702,7 @@ public final class SpongeCommonEventFactory {
             final DestructEntityEvent.Death event = SpongeEventFactory.createDestructEntityEventDeath(frame.currentCause(),
                     originalChannel, Optional.of(originalChannel), originalMessage, originalMessage, (Living) entity,
                     entity.level.getGameRules().getBoolean(GameRules.RULE_KEEPINVENTORY), messageCancelled);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
 
             return event;
         }
@@ -751,7 +747,7 @@ public final class SpongeCommonEventFactory {
                 default:
                     throw new IllegalArgumentException("Unknown type " + type);
             }
-            final boolean cancelled = SpongeCommon.postEvent(event);
+            final boolean cancelled = SpongeCommon.post(event);
             if (!cancelled) {
                 final EntityBridge spongeEntity = (EntityBridge) entity;
                 if (!pos.equals(spongeEntity.bridge$getLastCollidedBlockPos())) {
@@ -797,7 +793,7 @@ public final class SpongeCommonEventFactory {
                 final CollideBlockEvent.Impact event = SpongeEventFactory.createCollideBlockEventImpact(frame.currentCause(),
                         impactPoint, targetBlock.state(),
                         targetBlock.location().get(), side);
-                cancelled = SpongeCommon.postEvent(event);
+                cancelled = SpongeCommon.post(event);
                 // Track impact block if event is not cancelled
                 if (!cancelled && creator.isPresent()) {
                     final BlockPos targetPos = VecHelper.toBlockPos(impactPoint.blockPosition());
@@ -809,7 +805,7 @@ public final class SpongeCommonEventFactory {
                 final ArrayList<Entity> entityList = new ArrayList<>();
                 entityList.add((Entity) entityMovingObjectPosition.getEntity());
                 final CollideEntityEvent.Impact event = SpongeEventFactory.createCollideEntityEventImpact(frame.currentCause(), entityList, impactPoint);
-                        cancelled = SpongeCommon.postEvent(event);
+                        cancelled = SpongeCommon.post(event);
             }
 
             return cancelled;
@@ -821,7 +817,7 @@ public final class SpongeCommonEventFactory {
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
         final InteractContainerEvent.Close event =
                 SpongeEventFactory.createInteractContainerEventClose(PhaseTracker.getCauseStackManager().currentCause(), ContainerUtil.fromNative(container), cursorTransaction);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (event.isCancelled()) {
             if (clientSource && container.getSlot(0) != null) {
                 if (!(container instanceof InventoryMenu)) {
@@ -873,7 +869,7 @@ public final class SpongeCommonEventFactory {
 
     public static SetAITargetEvent callSetAttackTargetEvent(final @Nullable Entity target, final Agent agent) {
         final SetAITargetEvent event = SpongeEventFactory.createSetAITargetEvent(PhaseTracker.getCauseStackManager().currentCause(), agent, Optional.ofNullable(target));
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         return event;
     }
 
@@ -930,7 +926,7 @@ public final class SpongeCommonEventFactory {
         // FIRST we want to throw the DropItemEvent.PRE
         final DropItemEvent.Pre dropEvent = SpongeEventFactory.createDropItemEventPre(frame.currentCause(),
             ImmutableList.of(snapshot), original);
-        SpongeCommon.postEvent(dropEvent);
+        SpongeCommon.post(dropEvent);
         if (dropEvent.isCancelled()) {
             if (mixinPlayer != null) {
                 mixinPlayer.bridge$shouldRestoreInventory(true);
@@ -945,7 +941,7 @@ public final class SpongeCommonEventFactory {
         frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
         final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.currentCause(), ServerLocation.of((ServerWorld) entity.level, posX, posY, posZ), new Vector3d(0, 0, 0), EntityTypes.ITEM.get());
         frame.removeContext(EventContextKeys.SPAWN_TYPE);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (event.isCancelled()) {
             // Make sure the player is restoring inventories
             if (mixinPlayer != null) {
@@ -984,7 +980,7 @@ public final class SpongeCommonEventFactory {
         final ServerLocation location = ServerLocation.of((ServerWorld) bridge, pos.getX(), pos.getY(), pos.getZ());
         final PlaySoundEvent.Broadcast event = SpongeEventFactory.createPlaySoundEventBroadcast(frame.currentCause(), location,
             Sound.Source.HOSTILE, soundType.get(), 1.0F, volume);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         return event;
     }
 
@@ -998,7 +994,7 @@ public final class SpongeCommonEventFactory {
                 .createPlaySoundEventRecordStart(cause, apiJuke, location, recordType, Sound.Source.RECORD, recordType.sound(), 1.0F, 4.0F)
                       : SpongeEventFactory
                 .createPlaySoundEventRecordStop(cause, apiJuke, location, recordType, Sound.Source.RECORD, recordType.sound(), 1.0F, 4.0F);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         return event;
     }
 
@@ -1009,14 +1005,14 @@ public final class SpongeCommonEventFactory {
         final ServerLocation location = ServerLocation.of((ServerWorld) worldMixin, x, y, z);
         final PlaySoundEvent.AtEntity event = SpongeEventFactory.createPlaySoundEventAtEntity(cause, location,
             Optional.ofNullable((ServerPlayer) entity), SpongeAdventure.asAdventure(category), (SoundType) name, pitch, volume);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         return event;
     }
 
     public static PlaySoundEvent.NoteBlock callPlaySoundNoteBlockEvent(final Cause cause, final World world, final BlockPos pos, final SoundEvent soundEvent, final InstrumentType instrument, final NotePitch notePitch, final Float pitch) {
         final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
         final PlaySoundEvent.NoteBlock event = SpongeEventFactory.createPlaySoundEventNoteBlock(cause, instrument, location, notePitch, Sound.Source.RECORD, (SoundType)soundEvent, pitch, 3.0F);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         return event;
     }
 
@@ -1049,7 +1045,7 @@ public final class SpongeCommonEventFactory {
         }
 
         final CreateMapEvent event = SpongeEventFactory.createCreateMapEvent(cause, mapInfo);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (event.isCancelled()) {
             return Optional.empty();
         }
@@ -1058,10 +1054,10 @@ public final class SpongeCommonEventFactory {
         final int mcId = defaultWorld.getFreeMapId();
         if (id != mcId) {
             // TODO: REMOVE OR replace for Integer.MAX_VALUE
-            SpongeCommon.getLogger().warn("Map size corruption, vanilla only allows " + Integer.MAX_VALUE + "! " +
+            SpongeCommon.logger().warn("Map size corruption, vanilla only allows " + Integer.MAX_VALUE + "! " +
                     "Expected next number was not equal to the true next number.");
-            SpongeCommon.getLogger().warn("Expected: " + id + ". Got: " + mcId);
-            SpongeCommon.getLogger().warn("Automatically cancelling map creation");
+            SpongeCommon.logger().warn("Expected: " + id + ". Got: " + mcId);
+            SpongeCommon.logger().warn("Automatically cancelling map creation");
             mapIdTrackerBridge.bridge$setHighestMapId(id - 1);
             return Optional.empty();
         }

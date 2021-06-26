@@ -90,7 +90,7 @@ public final class SpongeNodePermissionCache {
                 pluginId = "unknown";
                 permString = node.getName();
                 // Add a warning here, it's likely due to a dangling redirect
-                SpongeCommon.getLogger()
+                SpongeCommon.logger()
                         .warn("No path to command node with name {} could be found when generating its permission node. "
                                 + "Unable to determine owning plugin - using \"unknown\" as plugin ID", permString);
             } else {
@@ -98,7 +98,7 @@ public final class SpongeNodePermissionCache {
                 pluginId = dispatcher.getCommandManager()
                         .commandMapping(original)
                         .map(x -> x.plugin().metadata().id()).orElseGet(() -> {
-                            SpongeCommon.getLogger().error("Root command /{} does not have an associated plugin!", original);
+                            SpongeCommon.logger().error("Root command /{} does not have an associated plugin!", original);
                             return "unknown";
                         });
                 permString = path.stream().map(x -> {

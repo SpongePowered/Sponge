@@ -56,7 +56,7 @@ public final class PluginConfigRoot implements ConfigRoot {
         try {
             Files.createDirectories(this.baseDir);
         } catch (final IOException e) {
-            SpongeCommon.getLogger().error("Failed to create plugin dir for {} at {}", this.pluginName, this.baseDir, e);
+            SpongeCommon.logger().error("Failed to create plugin dir for {} at {}", this.pluginName, this.baseDir, e);
         }
         return configFile;
     }

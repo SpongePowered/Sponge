@@ -77,7 +77,7 @@ public abstract class DimensionTypeMixin_API implements WorldType {
     @Override
     public Context context() {
         if (this.api$context == null) {
-            final ResourceLocation key = SpongeCommon.getServer().registryAccess().dimensionTypes().getKey((DimensionType) (Object) this);
+            final ResourceLocation key = SpongeCommon.server().registryAccess().dimensionTypes().getKey((DimensionType) (Object) this);
             this.api$context = new Context(Context.DIMENSION_KEY, key.getPath());
         }
 
@@ -154,7 +154,7 @@ public abstract class DimensionTypeMixin_API implements WorldType {
 
     @Override
     public WorldTypeTemplate asTemplate() {
-        return new SpongeWorldTypeTemplate((ResourceKey) (Object) SpongeCommon.getServer().registryAccess().dimensionTypes().getKey((DimensionType) (Object) this), (DimensionType) (Object) this);
+        return new SpongeWorldTypeTemplate((ResourceKey) (Object) SpongeCommon.server().registryAccess().dimensionTypes().getKey((DimensionType) (Object) this), (DimensionType) (Object) this);
     }
 
     @Intrinsic

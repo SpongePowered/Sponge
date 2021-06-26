@@ -78,7 +78,6 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedInventor
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
@@ -103,7 +102,7 @@ public class InventoryEventFactory {
                 SpongeEventFactory.createChangeInventoryEventPickupPre(
                     causeStackManager.currentCause(),
                         Optional.empty(), Collections.singletonList(snapshot), ((Inventory) player.inventory), (Item) itemToPickup, snapshot);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         causeStackManager.popCause();
         if (event.isCancelled()) {
             return false;
@@ -150,7 +149,7 @@ public class InventoryEventFactory {
         PhaseTracker.getCauseStackManager().pushCause(player);
         final ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(PhaseTracker.getCauseStackManager().currentCause(), (Inventory) player.containerMenu,
                 inventory.bridge$getCapturedSlotTransactions());
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         PhaseTracker.getCauseStackManager().popCause();
         InventoryEventFactory.applyTransactions(event);
         inventory.bridge$getCapturedSlotTransactions().clear();
@@ -166,7 +165,7 @@ public class InventoryEventFactory {
             final ChangeInventoryEvent.Pickup.Pre event =
                     SpongeEventFactory.createChangeInventoryEventPickupPre(frame.currentCause(),
                             Optional.empty(), Collections.singletonList(snapshot), (Inventory) inventory, (Item) item, snapshot);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (event.isCancelled()) {
                 return stack;
             }
@@ -219,7 +218,7 @@ public class InventoryEventFactory {
             return true;
         }
         final ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(PhaseTracker.getCauseStackManager().currentCause(), spongeInventory, trans);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         InventoryEventFactory.applyTransactions(event);
         return !event.isCancelled();
     }
@@ -283,7 +282,7 @@ public class InventoryEventFactory {
                             new ArrayList<>(captures));
             captures.clear();
             ((TrackedInventoryBridge) player.containerMenu).bridge$setCaptureInventory(false);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             frame.popCause();
             return event;
         }
@@ -295,7 +294,7 @@ public class InventoryEventFactory {
         final InteractContainerEvent.Open event =
                 SpongeEventFactory.createInteractContainerEventOpen(PhaseTracker.getCauseStackManager().currentCause(),
                         (org.spongepowered.api.item.inventory.Container) player.containerMenu, cursorTransaction);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (event.isCancelled()) {
             player.closeContainer();
             return false;
@@ -377,7 +376,7 @@ public class InventoryEventFactory {
         PhaseTracker.getCauseStackManager().pushCause(source);
         final TransferInventoryEvent.Pre event = SpongeEventFactory.createTransferInventoryEventPre(
                 PhaseTracker.getCauseStackManager().currentCause(), source, destination);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         PhaseTracker.getCauseStackManager().popCause();
         return event;
     }
@@ -408,7 +407,7 @@ public class InventoryEventFactory {
         final TransferInventoryEvent.Post event =
                 SpongeEventFactory.createTransferInventoryEventPost(PhaseTracker.getCauseStackManager().currentCause(),
                         source, sourceSlot, destination, targetSlot, transferredStack);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         slotTransactions.clear();
         PhaseTracker.getCauseStackManager().popCause();
     }
@@ -436,7 +435,7 @@ public class InventoryEventFactory {
             captureIn.bridge$getCapturedSlotTransactions().add(trans);
             return trans;
         } else {
-            SpongeCommon.getLogger().warn("Unable to capture transaction from " + inv.getClass() + " at index " + index);
+            SpongeCommon.logger().warn("Unable to capture transaction from " + inv.getClass() + " at index " + index);
             return null;
         }
     }
@@ -460,7 +459,7 @@ public class InventoryEventFactory {
 
         Optional<org.spongepowered.api.item.inventory.Slot> slot = inv.slot(index);
         if (!slot.isPresent()) {
-            SpongeCommon.getLogger().warn("Unable to capture transaction from " + inv.getClass() + " at index " + index);
+            SpongeCommon.logger().warn("Unable to capture transaction from " + inv.getClass() + " at index " + index);
             return transaction.get();
         }
         ItemStackSnapshot original = ItemStackUtil.snapshotOf(slot.get().peek());
@@ -476,7 +475,7 @@ public class InventoryEventFactory {
             final SlotTransaction previewTransaction, final @Nullable CraftingRecipe recipe, final AbstractContainerMenu container, final List<SlotTransaction> transactions) {
         final CraftItemEvent.Preview event = SpongeEventFactory
                 .createCraftItemEventPreview(PhaseTracker.getCauseStackManager().currentCause(), inventory, (Inventory) container, previewTransaction, Optional.ofNullable(recipe), transactions);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
         if (player instanceof ServerPlayer) {
             if (event.preview().custom().isPresent() || event.isCancelled() || !event.preview().isValid()) {
@@ -504,7 +503,7 @@ public class InventoryEventFactory {
         final org.spongepowered.api.item.inventory.Slot slot = inventory.result();
         final CraftItemEvent.Craft event = SpongeEventFactory.createCraftItemEventCraft(PhaseTracker.getCauseStackManager().currentCause(),
                 ContainerUtil.fromNative(container), result, inventory, cursorTransaction, Optional.ofNullable(recipe), Optional.of(slot), transactions);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
 
         final boolean capture = ((TrackedInventoryBridge) container).bridge$capturingInventory();
         ((TrackedInventoryBridge) container).bridge$setCaptureInventory(false);
@@ -529,7 +528,7 @@ public class InventoryEventFactory {
         final UpdateAnvilEventCost costs = new UpdateAnvilEventCost(levelCost, materialCost);
         final UpdateAnvilEvent event = SpongeEventFactory.createUpdateAnvilEvent(PhaseTracker.getCauseStackManager().currentCause(),
                 new Transaction<>(costs, costs), (Inventory)anvil, name, ItemStackUtil.snapshotOf(slot1), transaction, ItemStackUtil.snapshotOf(slot2));
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         return event;
     }
 
@@ -545,7 +544,7 @@ public class InventoryEventFactory {
             } else {
                 event = SpongeEventFactory.createChangeEntityEquipmentEvent(frame.currentCause(), (Entity)  entity, slot, transaction);
             }
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return event;
         }
     }
@@ -562,7 +561,7 @@ public class InventoryEventFactory {
                 SpongeEventFactory.createEnchantItemEventCalculateLevelRequirement(PhaseTracker.getCauseStackManager().currentCause(),
                         levelRequirement, levelRequirement, enchantContainer, cursorTrans, ItemStackUtil.snapshotOf(itemStack), option, power, seed);
 
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
 
         return event.levelRequirement();
     }
@@ -582,7 +581,7 @@ public class InventoryEventFactory {
                 SpongeEventFactory.createEnchantItemEventCalculateEnchantment(PhaseTracker.getCauseStackManager().currentCause(),
                         enchList, enchList, enchantContainer, cursorTrans, ItemStackUtil.snapshotOf(itemStack), level, option, seed);
 
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
 
         if (event.enchantments() != event.originalEnchantments()) {
             return SpongeRandomEnchantmentListBuilder.toNative(event.enchantments());
@@ -606,7 +605,7 @@ public class InventoryEventFactory {
                 SpongeEventFactory.createEnchantItemEventPost(PhaseTracker.getCauseStackManager().currentCause(), enchantContainer,
                         cursorTrans, enchantedItem.slot(), Optional.empty(),slotTrans, option, seed);
 
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
 
         PacketPhaseUtil.handleSlotRestore(playerIn, container, event.transactions(), event.isCancelled());
         if (event.isCancelled() || !event.cursorTransaction().isValid()) {

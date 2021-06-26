@@ -56,6 +56,7 @@ import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.bridge.world.level.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.util.DirectionUtil;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -216,7 +217,7 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
 
     @Override
     public void bridge$setNeighbor(final Direction direction, @Nullable final net.minecraft.world.level.chunk.LevelChunk neighbor) {
-        this.impl$neighbors[SpongeCommon.directionToIndex(direction)] = neighbor;
+        this.impl$neighbors[DirectionUtil.directionToIndex(direction)] = neighbor;
     }
 
     @Override

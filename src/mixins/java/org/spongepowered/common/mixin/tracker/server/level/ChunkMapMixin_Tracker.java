@@ -79,7 +79,7 @@ public abstract class ChunkMapMixin_Tracker {
                 .add(" %s : %s", "Chunk Pos", chunk.getPos().toString())
                 .add()
                 .add(new Exception("Async Chunk Scheduling Detected"))
-                .log(SpongeCommon.getLogger(), Level.ERROR);
+                .log(SpongeCommon.logger(), Level.ERROR);
             return;
         }
         if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_LOADING) {
@@ -118,7 +118,7 @@ public abstract class ChunkMapMixin_Tracker {
                     .add(" %s : %s", "Chunk Pos", chunk.getPos().toString())
                     .add()
                     .add(new Exception("Async Chunk Load Detected"))
-                    .log(SpongeCommon.getLogger(), Level.ERROR);
+                    .log(SpongeCommon.logger(), Level.ERROR);
             return;
         }
         if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {

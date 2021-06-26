@@ -64,7 +64,7 @@ public final class SpongeStatusResponse {
     }
 
     private static @Nullable ServerStatus call(final ServerStatus response, final StatusClient client) {
-        if (!SpongeCommon.postEvent(SpongeEventFactory.createClientPingServerEvent(Cause.of(EventContext.empty(), Sponge.server()), client,
+        if (!SpongeCommon.post(SpongeEventFactory.createClientPingServerEvent(Cause.of(EventContext.empty(), Sponge.server()), client,
             (ClientPingServerEvent.Response) response))) {
             return response;
         }

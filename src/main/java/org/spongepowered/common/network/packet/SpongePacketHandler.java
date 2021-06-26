@@ -96,7 +96,7 @@ public final class SpongePacketHandler {
                         return;
                     }
 
-                    final DimensionType dimensionType = SpongeCommon.getServer().registryAccess().dimensionTypes().get(packet.dimensionLogic);
+                    final DimensionType dimensionType = SpongeCommon.server().registryAccess().dimensionTypes().get(packet.dimensionLogic);
                     ((WorldBridge) world).bridge$adjustDimensionLogic(dimensionType);
                 }
         );

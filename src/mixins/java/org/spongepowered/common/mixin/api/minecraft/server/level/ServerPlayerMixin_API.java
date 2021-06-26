@@ -313,7 +313,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         final PlayerChatFormatter originalRouter = this.chatFormatter();
         final Audience audience = (Audience) this.server;
         final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(cause, audience, Optional.of(audience), originalRouter, Optional.of(originalRouter), message, message);
-        if (!SpongeCommon.postEvent(event)) {
+        if (!SpongeCommon.post(event)) {
             event.chatFormatter().ifPresent(formatter ->
                 event.audience().map(SpongeAdventure::unpackAudiences).ifPresent(targets -> {
                     for (Audience target : targets) {
@@ -367,7 +367,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
         final ChangeWorldBorderEvent.Player event =
                 SpongeEventFactory.createChangeWorldBorderEventPlayer(PhaseTracker.getCauseStackManager().currentCause(),
                         Optional.ofNullable(border), Optional.ofNullable(border), this, Optional.ofNullable(border));
-        if (SpongeCommon.postEvent(event)) {
+        if (SpongeCommon.post(event)) {
             return currentBorder;
         }
 

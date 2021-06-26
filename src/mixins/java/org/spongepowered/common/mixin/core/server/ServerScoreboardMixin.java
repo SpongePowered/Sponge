@@ -277,7 +277,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
             if (score.isPresent()) {
                 spongeObjective.removeScore(score.get());
             } else {
-                SpongeCommon.getLogger().warn("Objective {} did have have the score", name);
+                SpongeCommon.logger().warn("Objective {} did have have the score", name);
             }
         } else {
             final Component textName = lcs.deserialize(name);

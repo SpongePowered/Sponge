@@ -39,7 +39,7 @@ public final class SpongeBootstrap {
 
     public static void perform(final String engineName, final Runnable engineStart) {
         final Stage stage = SpongeGuice.getInjectorStage(Launch.instance().injectionStage());
-        SpongeCommon.getLogger().debug("Creating injector in stage '{}'", stage);
+        SpongeCommon.logger().debug("Creating injector in stage '{}'", stage);
         final Injector bootstrapInjector = Launch.instance().createInjector();
         SpongeBootstrap.injector = bootstrapInjector;
         SpongeBootstrap.lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);

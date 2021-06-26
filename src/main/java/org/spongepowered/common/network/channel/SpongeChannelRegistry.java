@@ -171,7 +171,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
 
             @Override
             public Game game() {
-                return SpongeCommon.getGame();
+                return SpongeCommon.game();
             }
 
             @Override

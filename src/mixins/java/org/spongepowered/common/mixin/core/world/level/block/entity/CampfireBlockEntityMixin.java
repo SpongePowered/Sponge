@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
 import org.spongepowered.api.block.entity.carrier.Campfire;
-import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.entity.CookingEvent;
@@ -73,7 +72,7 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
             final ItemStackSnapshot stack = ItemStackUtil.snapshotOf(this.items.get(i));
             final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (Campfire) this, stack, Optional.empty(),
                     Optional.ofNullable((CookingRecipe) impl$cookingRecipe[i]));
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (event.isCancelled()) {
                 this.cookingProgress[i]--;
             }
@@ -95,7 +94,7 @@ public abstract class CampfireBlockEntityMixin implements CampfireBlockEntityBri
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(itemStack1);
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, (Campfire) this,
                 Collections.singletonList(snapshot), Optional.empty(), Optional.ofNullable((CookingRecipe) this.impl$cookingRecipe[i]));
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         this.impl$cookingRecipe[i] = null;
     }
 

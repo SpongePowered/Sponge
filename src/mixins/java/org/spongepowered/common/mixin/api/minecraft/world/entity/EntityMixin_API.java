@@ -243,7 +243,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Override
     public boolean damage(final double damage, final org.spongepowered.api.event.cause.entity.damage.source.DamageSource damageSource) {
         if (!(damageSource instanceof DamageSource)) {
-            SpongeCommon.getLogger().error("An illegal DamageSource was provided in the cause! The damage source must extend AbstractDamageSource!");
+            SpongeCommon.logger().error("An illegal DamageSource was provided in the cause! The damage source must extend AbstractDamageSource!");
             return false;
         }
         // Causes at this point should already be pushed from plugins before this point with the cause system.

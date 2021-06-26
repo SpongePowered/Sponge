@@ -73,7 +73,7 @@ public class IntegrationTestLaunch extends VanillaLaunch {
         Launch.instance().auditMixins();
 
         this.logger().info("Testing complete, goodbye!");
-        SpongeCommon.getGame().asyncScheduler().close();
+        SpongeCommon.game().asyncScheduler().close();
         System.exit(0);
     }
 }

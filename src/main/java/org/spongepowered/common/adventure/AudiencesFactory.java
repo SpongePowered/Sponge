@@ -37,12 +37,12 @@ public final class AudiencesFactory implements Audiences.Factory {
 
     @Override
     public Audience onlinePlayers() {
-        return Audience.audience((List<ServerPlayer>) (List) SpongeCommon.getServer().getPlayerList().getPlayers());
+        return Audience.audience((List<ServerPlayer>) (List) SpongeCommon.server().getPlayerList().getPlayers());
     }
 
     @Override
     public Audience withPermission(final String permission) {
-        return (ForwardingAudience) () -> SpongeCommon.getServer().getPlayerList().getPlayers().stream()
+        return (ForwardingAudience) () -> SpongeCommon.server().getPlayerList().getPlayers().stream()
                 .map(p -> (ServerPlayer) p)
                 .filter(p -> p.hasPermission(permission))
                 .collect(Collectors.toList());

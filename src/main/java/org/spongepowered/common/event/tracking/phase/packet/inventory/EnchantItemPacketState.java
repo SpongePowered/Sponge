@@ -115,7 +115,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
                     PacketPhaseUtil.validateCapturedTransactions(packetIn.getContainerId(), openContainer, inventoryEvent.transactions());
                 }
 
-                SpongeCommon.postEvent(inventoryEvent);
+                SpongeCommon.post(inventoryEvent);
                 if (inventoryEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(inventoryEvent.transactions())) {
                     if (inventoryEvent instanceof ClickContainerEvent.Drop) {
                         capturedItems.clear();

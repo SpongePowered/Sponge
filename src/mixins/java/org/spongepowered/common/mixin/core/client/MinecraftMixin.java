@@ -68,7 +68,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$setClientOnGame(final GameConfig gameConfig, final CallbackInfo ci) {
-        SpongeCommon.getGame().setClient(this);
+        SpongeCommon.game().setClient(this);
     }
 
     @Inject(method = "run", at = @At("HEAD"))
@@ -102,7 +102,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
     @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
     private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
-        SpongeCommon.getGame().asyncScheduler().close();
+        SpongeCommon.game().asyncScheduler().close();
     }
 
     @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$RegistryHolder;)Lnet/minecraft/resources/RegistryReadOps;"))

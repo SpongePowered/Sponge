@@ -122,7 +122,7 @@ public class SpongeCriterionTrigger implements CriterionTrigger<SpongeFilteredTr
                     continue;
                 }
             }
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (event.result()) {
                 listener.run(playerAdvancements);
             }

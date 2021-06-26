@@ -146,7 +146,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
                             prettyPrinter.add()
                                     .add("Sponge will continue using the inbuilt default service.");
                         }
-                        prettyPrinter.log(SpongeCommon.getLogger(), Level.ERROR);
+                        prettyPrinter.log(SpongeCommon.logger(), Level.ERROR);
                     }
                 } else {
                     final PrettyPrinter prettyPrinter = new PrettyPrinter(80)
@@ -166,7 +166,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
                         prettyPrinter.add()
                                 .add("Sponge will continue using the inbuilt default service.");
                     }
-                    prettyPrinter.log(SpongeCommon.getLogger(), Level.ERROR);
+                    prettyPrinter.log(SpongeCommon.logger(), Level.ERROR);
                 }
             } else {
                 final Collection<PluginContainer> toQuery = Launch.instance().pluginManager().plugins();
@@ -183,7 +183,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
             // If after all that we have a registration, we... register it.
             if (registration != null) {
                 this.services.put(candidate.getServiceClass(), registration);
-                SpongeCommon.getLogger().info("Registered service [{}] to plugin '{}'.",
+                SpongeCommon.logger().info("Registered service [{}] to plugin '{}'.",
                         registration.clazz.getSimpleName(),
                         registration.pluginContainer.metadata().id());
             }
@@ -210,7 +210,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
         // This is the actual query - a generic event.
         final AbstractProvideServiceEventImpl<T> event = this.createEvent(container, service);
         try {
-            ((SpongeEventManager) this.getGame().eventManager()).post(event, container);
+            ((SpongeEventManager) this.getGame().eventManager()).postToPlugin(event, container);
         } catch (final Exception ex) {
             ex.printStackTrace();
         }
@@ -218,7 +218,7 @@ public abstract class SpongeServiceProvider implements ServiceProvider {
             try {
                 return new Registration<>(service.getServiceClass(), event.getSuggestion().get(), container);
             } catch (final Throwable e) { // if the service can't be created
-                SpongeCommon.getLogger().error("Could not create service {} from plugin {}.",
+                SpongeCommon.logger().error("Could not create service {} from plugin {}.",
                         service.getServiceClass().getSimpleName(),
                         container.metadata().id(),
                         e);

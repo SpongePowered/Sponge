@@ -94,7 +94,7 @@ public abstract class SkullBlockEntityMixin extends BlockEntity implements Ticka
         future.thenAcceptAsync(profile -> {
             this.owner = SpongeGameProfile.toMcProfile(profile);
             this.setChanged();
-        }, SpongeCommon.getServer());
+        }, SpongeCommon.server());
         this.impl$currentProfileFuture = future;
         return input;
     }

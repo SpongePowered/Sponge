@@ -75,7 +75,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
 
         final Inventory craftInv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
-            SpongeCommon.getLogger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
+            SpongeCommon.logger().warn("Detected crafting without a InventoryCrafting!? Crafting Event will not fire.");
             return;
         }
 
@@ -106,7 +106,7 @@ public final class PlaceRecipePacketState extends BasicInventoryPacketState {
                 event = SpongeEventFactory.createClickContainerEventRecipeSingle(frame.currentCause(), ((Container) player.containerMenu),
                         cursorTransaction, (Recipe) recipe, Optional.empty(), transactions);
             }
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (event.isCancelled() || !event.cursorTransaction().isValid()) {
                 PacketPhaseUtil.handleCustomCursor(player, event.cursorTransaction().original());
             } else {

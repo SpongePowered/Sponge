@@ -86,7 +86,7 @@ public final class SpongeTriggerBuilder<C extends FilteredTriggerConfiguration> 
 
     private static ConfigurationOptions defaultOptions() {
         return ConfigurationOptions.defaults()
-                .serializers(SpongeCommon.getGame().configManager().serializers());
+                .serializers(SpongeCommon.game().configManager().serializers());
     }
 
     @Override

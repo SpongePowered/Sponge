@@ -62,7 +62,7 @@ public abstract class ScoreMixin implements ScoreBridge {
             return; // Let the normal logic take over.
         }
         if (this.impl$spongeScore == null) {
-            SpongeCommon.getLogger().warn("Returning score because null score!");
+            SpongeCommon.logger().warn("Returning score because null score!");
             ci.cancel();
             return;
         }
@@ -76,7 +76,7 @@ public abstract class ScoreMixin implements ScoreBridge {
             return; // Let the normal logic take over.
         }
         if (this.impl$spongeScore == null) {
-            SpongeCommon.getLogger().warn("Returning score because null score!");
+            SpongeCommon.logger().warn("Returning score because null score!");
             ci.cancel();
             return;
         }

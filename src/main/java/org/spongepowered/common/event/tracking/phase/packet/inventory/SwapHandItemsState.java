@@ -59,7 +59,7 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
             final TrackedInventoryBridge mixinInventory = ((TrackedInventoryBridge) player.inventory);
             final List<SlotTransaction> trans = mixinInventory.bridge$getCapturedSlotTransactions();
             final ChangeInventoryEvent.SwapHand swapItemEvent = this.createInventoryEvent(((Inventory) player.inventory), trans);
-            SpongeCommon.postEvent(swapItemEvent);
+            SpongeCommon.post(swapItemEvent);
             PacketPhaseUtil.handleSlotRestore(player, null, swapItemEvent.transactions(), swapItemEvent.isCancelled());
             mixinInventory.bridge$setCaptureInventory(false);
             mixinInventory.bridge$getCapturedSlotTransactions().clear();

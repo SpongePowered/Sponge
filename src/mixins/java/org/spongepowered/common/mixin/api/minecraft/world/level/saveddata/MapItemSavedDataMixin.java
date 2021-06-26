@@ -139,7 +139,7 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
         try {
             this.impl$mapId = Integer.parseInt(id);
         } catch (final NumberFormatException e) {
-            SpongeCommon.getLogger().error("Map id could not be got from map name, (" + mapname + ")", e);
+            SpongeCommon.logger().error("Map id could not be got from map name, (" + mapname + ")", e);
         }
         final SpongeMapStorage mapStorage = (SpongeMapStorage) Sponge.server().mapStorage();
         mapStorage.addMapInfo((MapInfo) this);

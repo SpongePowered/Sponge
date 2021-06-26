@@ -122,10 +122,10 @@ public final class UsernameCache {
             final Type type = new TypeToken<Map<UUID, String>>() { private static final long serialVersionUID = 1L; }.getType();
             this.usernameByUniqueId.putAll(this.gson.fromJson(reader, type));
         } catch (final JsonSyntaxException e) {
-            SpongeCommon.getLogger().error("Could not parse username cache file as valid json, deleting file", e);
+            SpongeCommon.logger().error("Could not parse username cache file as valid json, deleting file", e);
             this.deleteCacheFile();
         } catch (final IOException e) {
-            SpongeCommon.getLogger().error("Failed to read username cache file from disk, deleting file", e);
+            SpongeCommon.logger().error("Failed to read username cache file from disk, deleting file", e);
             this.deleteCacheFile();
         }
     }
@@ -134,7 +134,7 @@ public final class UsernameCache {
         try {
             Files.deleteIfExists(this.cacheFile);
         } catch (IOException e) {
-            SpongeCommon.getLogger().error("Failed to delete username cache file from disk!", e);
+            SpongeCommon.logger().error("Failed to delete username cache file from disk!", e);
         }
     }
 
@@ -149,7 +149,7 @@ public final class UsernameCache {
             Files.write(this.cacheFile, serialized.getBytes(UsernameCache.CHARSET));
             this.dirty = false;
         } catch (final IOException e) {
-            SpongeCommon.getLogger().error("Failed to save username cache to file!", e);
+            SpongeCommon.logger().error("Failed to save username cache to file!", e);
         }
     }
 }

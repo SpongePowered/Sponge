@@ -49,7 +49,6 @@ public final class ListenerChecker {
     private Map<String, FieldData> fields = new HashMap<>();
     private Map<Class<?>, FieldData> fieldClassMap = new IdentityHashMap<>();
 
-
     private static String getName(Class<?> clazz) {
         // Properly account for inner classes. Class#getName uses a $
         // to separate inner classes, so the last '.' is the end of the package name
@@ -188,7 +187,7 @@ public final class ListenerChecker {
                 this.listenerCount--;
             }
             if (this.listenerCount < 0) {
-                SpongeCommon.getLogger().error(String.format("Decremented listener count to %s for field %s", this.listenerCount, this.field), new Exception("Dummy exception"));
+                SpongeCommon.logger().error(String.format("Decremented listener count to %s for field %s", this.listenerCount, this.field), new Exception("Dummy exception"));
             }
             boolean val = this.listenerCount > 0;
 
@@ -199,7 +198,7 @@ public final class ListenerChecker {
             try {
                 this.field.set(null, val);
             } catch (IllegalAccessException e) {
-                SpongeCommon.getLogger().error(String.format("Error setting field %s to %s", this.field, val), e);
+                SpongeCommon.logger().error(String.format("Error setting field %s to %s", this.field, val), e);
             }
         }
     }

@@ -24,9 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.Iterables;
 import com.mojang.authlib.GameProfileRepository;
@@ -59,6 +56,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.gamemode.GameMode;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.item.recipe.RecipeManager;
 import org.spongepowered.api.map.MapStorage;
 import org.spongepowered.api.profile.GameProfileManager;
 import org.spongepowered.api.registry.RegistryHolder;
@@ -101,6 +99,7 @@ import java.net.Proxy;
 import java.util.Collection;
 import java.util.Collections;
 import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
 
@@ -111,6 +110,8 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     // @formatter:off
     @Shadow @Final public long[] tickTimes;
     @Shadow @Final protected WorldData worldData;
+
+    @Shadow public abstract net.minecraft.world.item.crafting.RecipeManager shadow$getRecipeManager();
     @Shadow public abstract PlayerList shadow$getPlayerList();
     @Shadow public abstract boolean shadow$usesAuthentication();
     @Shadow public abstract String shadow$getMotd();
@@ -160,6 +161,11 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
+    public RecipeManager recipeManager() {
+        return (RecipeManager) this.shadow$getRecipeManager();
+    }
+
+    @Override
     public @NonNull Iterable<? extends Audience> audiences() {
         if (this.audiences == null) {
             this.audiences = Iterables.concat((List) this.shadow$getPlayerList().getPlayers(), Collections.singleton(Sponge.game().systemSubject()));
@@ -183,7 +189,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
 
     @Override
     public void setBroadcastAudience(final Audience channel) {
-        this.api$broadcastAudience = checkNotNull(channel, "channel");
+        this.api$broadcastAudience = Objects.requireNonNull(channel, "channel");
     }
 
     @Override
@@ -271,7 +277,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
 
     @Override
     public Optional<ServerPlayer> player(final UUID uniqueId) {
-        Preconditions.checkNotNull(uniqueId);
+        Objects.requireNonNull(uniqueId, "uniqueId");
         if (this.shadow$getPlayerList() == null) {
             return Optional.empty();
         }
@@ -327,7 +333,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
 
     @Override
     public void shutdown(final Component kickMessage) {
-        Preconditions.checkNotNull(kickMessage);
+        Objects.requireNonNull(kickMessage, "kickMessage");
         for (final ServerPlayer player : this.onlinePlayers()) {
             player.kick(kickMessage);
         }
@@ -356,7 +362,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     @Override
     public Optional<Scoreboard> serverScoreboard() {
         if (this.api$scoreboard == null) {
-            final ServerLevel world = SpongeCommon.getServer().overworld();
+            final ServerLevel world = SpongeCommon.server().overworld();
             if (world == null) {
                 return Optional.empty();
             }
@@ -434,6 +440,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     public RegistryHolder registries() {
         return this.api$registryHolder;
     }
+
     @Override
     public MapStorage mapStorage() {
         return this.api$mapStorage;

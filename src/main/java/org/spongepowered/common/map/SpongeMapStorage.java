@@ -31,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.map.MapInfo;
 import org.spongepowered.api.map.MapStorage;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -68,7 +67,7 @@ public final class SpongeMapStorage implements MapStorage {
         for (int i = 0; i <= highestId; i++) {
             final @Nullable MapInfo mapInfo = (MapInfo) defaultWorld.getMapData(Constants.Map.MAP_PREFIX + i);
             if (mapInfo == null) {
-                SpongeCommon.getLogger().warn("Missing map with id: " + i);
+                SpongeCommon.logger().warn("Missing map with id: " + i);
                 continue;
             }
             this.addMapInfo(mapInfo);

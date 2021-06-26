@@ -66,7 +66,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
         final ContainerBridge openContainer = (ContainerBridge) this.containerMenu;
         if (openContainer.bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-            SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
+            SpongeCommon.logger().warn("This player is currently modifying an open container. This action will be delayed.");
             Task.builder().delay(Ticks.zero()).execute(() -> {
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
@@ -86,7 +86,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
         final net.minecraft.world.inventory.AbstractContainerMenu openContainer = this.containerMenu;
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-            SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
+            SpongeCommon.logger().warn("This player is currently modifying an open container. This action will be delayed.");
             Task.builder().delay(Ticks.zero()).execute(() -> {
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);

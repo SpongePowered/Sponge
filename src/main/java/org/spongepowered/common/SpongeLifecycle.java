@@ -159,7 +159,7 @@ public final class SpongeLifecycle {
 
     public void callConstructEvent() {
         for (final PluginContainer plugin : this.filterInternalPlugins(this.game.pluginManager().plugins())) {
-            ((SpongeEventManager) this.game.eventManager()).post(SpongeEventFactory.createConstructPluginEvent(Cause.of(EventContext.empty(),
+            ((SpongeEventManager) this.game.eventManager()).postToPlugin(SpongeEventFactory.createConstructPluginEvent(Cause.of(EventContext.empty(),
                     this.game), this.game, plugin), plugin);
         }
     }

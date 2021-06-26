@@ -90,7 +90,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
             frame.pushCause(this.player);
             final Audience audience = (Audience) this.server;
             final PlayerChatEvent event = SpongeEventFactory.createPlayerChatEvent(frame.currentCause(), audience, Optional.of(audience), chatFormatter, Optional.of(chatFormatter), rawMessage, rawMessage);
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 ci.cancel();
             } else {
                 event.chatFormatter().ifPresent(formatter ->

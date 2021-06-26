@@ -87,7 +87,7 @@ public class CorePlugin extends AbstractMixinConfigPlugin {
                         + "for your consideration, and have a nice day!")
             .add()
             .add(new IncompatibleClassChangeError("FoamFix Incompatibility Detected"))
-            .log(SpongeCommon.getLogger(), Level.FATAL);
+            .log(SpongeCommon.logger(), Level.FATAL);
         throw new MissingImplementationException("SpongeCommon", "forceEarlyExit");
     }
 

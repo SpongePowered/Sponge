@@ -137,7 +137,7 @@ public abstract class SpongeChannel implements Channel {
         try {
             this.exceptionHandler.handle(connection, this, ChannelExceptionUtil.of(cause), future);
         } catch (final Throwable ex) {
-            SpongeCommon.getLogger().error("The exception handler of the channel " + this.key() + " failed to handle an exception.", ex);
+            SpongeCommon.logger().error("The exception handler of the channel " + this.key() + " failed to handle an exception.", ex);
         }
     }
 

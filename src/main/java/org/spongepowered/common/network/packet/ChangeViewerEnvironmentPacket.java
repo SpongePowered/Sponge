@@ -38,7 +38,7 @@ public final class ChangeViewerEnvironmentPacket implements Packet {
     }
 
     public ChangeViewerEnvironmentPacket(final DimensionType dimensionType) {
-        this.dimensionLogic = (ResourceLocation) (Object) SpongeCommon.getServer().registryAccess().dimensionTypes().getKey(dimensionType);
+        this.dimensionLogic = (ResourceLocation) (Object) SpongeCommon.server().registryAccess().dimensionTypes().getKey(dimensionType);
     }
 
     @Override

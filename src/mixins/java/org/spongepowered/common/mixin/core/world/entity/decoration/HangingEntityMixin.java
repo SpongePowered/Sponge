@@ -72,7 +72,7 @@ public abstract class HangingEntityMixin extends EntityMixin {
             frame.pushCause(source);
             final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(),
                 (Entity) this, new ArrayList<>(), 0, amount);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
             }

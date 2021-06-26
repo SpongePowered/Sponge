@@ -62,7 +62,7 @@ public abstract class RconClientMixin_API extends GenericThread implements Remot
         try {
             this.client.close();
         } catch (final IOException ex) {
-            SpongeCommon.getLogger().error("An error occurred while closing a RCON connection.", ex);
+            SpongeCommon.logger().error("An error occurred while closing a RCON connection.", ex);
         }
     }
 }

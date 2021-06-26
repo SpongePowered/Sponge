@@ -64,7 +64,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.scores.Scoreboard;
 import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Cause;
@@ -212,7 +211,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                 csm.pushCause(this);
                 final BlockPos bedLocation = this.shadow$getSleepingPos().get();
                 final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(bedLocation.getX(), bedLocation.getY(), bedLocation.getZ());
-                SpongeCommon.postEvent(SpongeEventFactory.createSleepingEventTick(csm.currentCause(), snapshot, (Living) this));
+                SpongeCommon.post(SpongeEventFactory.createSleepingEventTick(csm.currentCause(), snapshot, (Living) this));
                 csm.popCause();
             }
             return true;
@@ -451,7 +450,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                     final Cause currentCause = isMainthread ? PhaseTracker.getInstance().currentCause() : Cause.of(EventContext.empty(), damageSource);
                     final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(currentCause, (org.spongepowered.api.entity.Entity) targetEntity,
                         originalFunctions, knockbackModifier, originalBaseDamage);
-                    SpongeCommon.postEvent(event);
+                    SpongeCommon.post(event);
                     if (isMainthread) {
                         PhaseTracker.getInstance().popCause();
                     }
@@ -530,7 +529,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                                         final AttackEntityEvent sweepingAttackEvent = SpongeEventFactory.createAttackEntityEvent(
                                             currentCause, (org.spongepowered.api.entity.Entity) livingEntity,
                                             sweapingFunctions, 1, 1.0D);
-                                        SpongeCommon.postEvent(sweepingAttackEvent);
+                                        SpongeCommon.post(sweepingAttackEvent);
                                         if (!sweepingAttackEvent.isCancelled()) {
                                             livingEntity.knockback(sweepingAttackEvent.knockbackModifier() * 0.4F,
                                                     (double) Mth.sin(this.yRot * ((float)Math.PI / 180F)),

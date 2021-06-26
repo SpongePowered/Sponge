@@ -90,7 +90,7 @@ public abstract class TeleportCommandMixin {
                             (org.spongepowered.api.entity.Entity) entityIn, VecHelper.toVector3d(entityIn.position()),
                             new Vector3d(x, y, z), new Vector3d(x, y, z));
 
-                    if (SpongeCommon.postEvent(posEvent)) {
+                    if (SpongeCommon.post(posEvent)) {
                         return;
                     }
 
@@ -104,7 +104,7 @@ public abstract class TeleportCommandMixin {
                             (org.spongepowered.api.entity.Entity) entityIn, new Vector3d(actualPitch, actualYaw, 0),
                             new Vector3d(pitch, yaw, 0));
 
-                    SpongeCommon.postEvent(rotateEvent);
+                    SpongeCommon.post(rotateEvent);
                     actualYaw = rotateEvent.isCancelled() ? entityIn.yRot : rotateEvent.toRotation().y();
                     actualPitch = rotateEvent.isCancelled() ? entityIn.xRot : rotateEvent.toRotation().x();
                 }
@@ -143,7 +143,7 @@ public abstract class TeleportCommandMixin {
 
                     final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(entityIn,
                             worldIn);
-                    if (SpongeCommon.postEvent(preEvent)) {
+                    if (SpongeCommon.post(preEvent)) {
                         return;
                     }
 
@@ -154,7 +154,7 @@ public abstract class TeleportCommandMixin {
                                     VecHelper.toVector3d(entityIn.position()), new Vector3d(x, y, z), preEvent.originalDestinationWorld(),
                                     new Vector3d(x, y, z), preEvent.destinationWorld());
 
-                    if (SpongeCommon.postEvent(posEvent)) {
+                    if (SpongeCommon.post(posEvent)) {
                         return;
                     }
 
@@ -169,7 +169,7 @@ public abstract class TeleportCommandMixin {
                                 (org.spongepowered.api.entity.Entity) entityIn, new Vector3d(entityIn.xRot, entityIn.yRot, 0),
                                 new Vector3d(actualPitch, actualYaw, 0));
 
-                        if (!SpongeCommon.postEvent(rotateEvent)) {
+                        if (!SpongeCommon.post(rotateEvent)) {
                             actualYaw = Mth.wrapDegrees(rotateEvent.toRotation().y());
                             actualPitch = Mth.wrapDegrees(rotateEvent.toRotation().x());
                             actualPitch = Mth.clamp(actualPitch, -90.0F, 90.0F);

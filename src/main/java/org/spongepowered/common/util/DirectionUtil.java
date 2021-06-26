@@ -81,6 +81,25 @@ public final class DirectionUtil {
         return holder.setValue(property, direction);
     }
 
+    public static int directionToIndex(final Direction direction) {
+        switch (direction) {
+            case NORTH:
+            case NORTHEAST:
+            case NORTHWEST:
+                return 0;
+            case SOUTH:
+            case SOUTHEAST:
+            case SOUTHWEST:
+                return 1;
+            case EAST:
+                return 2;
+            case WEST:
+                return 3;
+            default:
+                throw new IllegalArgumentException("Unexpected direction");
+        }
+    }
+
     private DirectionUtil() {
     }
 }

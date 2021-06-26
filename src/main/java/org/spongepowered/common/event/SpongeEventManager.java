@@ -30,5 +30,5 @@ import org.spongepowered.plugin.PluginContainer;
 
 public interface SpongeEventManager extends EventManager {
 
-    boolean post(final Event event, final PluginContainer plugin);
+    boolean postToPlugin(Event event, PluginContainer plugin);
 }

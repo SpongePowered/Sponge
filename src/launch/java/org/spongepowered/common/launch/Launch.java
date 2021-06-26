@@ -41,6 +41,7 @@ import java.util.List;
 public abstract class Launch {
 
     private static Launch INSTANCE;
+    private static final String ID = "sponge";
 
     protected final PluginPlatform pluginPlatform;
     protected final SpongePluginManager pluginManager;
@@ -49,7 +50,7 @@ public abstract class Launch {
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
 
     protected Launch(final PluginPlatform pluginPlatform, final SpongePluginManager pluginManager) {
-        this.logger = LogManager.getLogger("Sponge");
+        this.logger = LogManager.getLogger("Launch");
         this.pluginPlatform = pluginPlatform;
         this.pluginManager = pluginManager;
         this.launcherPlugins = new ArrayList<>();
@@ -66,6 +67,10 @@ public abstract class Launch {
         }
 
         Launch.INSTANCE = Preconditions.checkNotNull(instance);
+    }
+
+    public final String id() {
+        return Launch.ID;
     }
 
     public abstract boolean dedicatedServer();
