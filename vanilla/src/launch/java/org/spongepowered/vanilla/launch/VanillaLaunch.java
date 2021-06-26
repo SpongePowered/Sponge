@@ -25,7 +25,7 @@
 package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
-import org.spongepowered.common.applaunch.plugin.PluginEngine;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
@@ -33,7 +33,7 @@ import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResourceLocatorService;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;
@@ -49,7 +49,7 @@ public abstract class VanillaLaunch extends Launch {
     private final Stage injectionStage;
     private PluginContainer vanillaPlugin;
 
-    protected VanillaLaunch(final VanillaPluginEngine pluginEngine, final Stage injectionStage) {
+    protected VanillaLaunch(final VanillaPluginPlatform pluginEngine, final Stage injectionStage) {
         super(pluginEngine, new VanillaPluginManager());
         this.injectionStage = injectionStage;
     }
@@ -66,7 +66,7 @@ public abstract class VanillaLaunch extends Launch {
 
     @Override
     public final void loadPlugins() {
-        this.getPluginManager().loadPlugins(this.getPluginEngine());
+        this.getPluginManager().loadPlugins(this.getPluginPlatform());
     }
 
     @Override
@@ -83,9 +83,8 @@ public abstract class VanillaLaunch extends Launch {
     }
 
     @Override
-    protected final void createPlatformPlugins(final PluginEngine pluginEngine) {
-        final Path gameDirectory = this.pluginEngine.getPluginEnvironment().blackboard().get(PluginKeys.BASE_DIRECTORY)
-                .orElseThrow(() -> new RuntimeException("The game directory has not been added to the environment!"));
+    protected final void createPlatformPlugins(final PluginPlatform platform) {
+        final Path gameDirectory = platform.baseDirectory();
 
         try {
             // This is a bit nasty, but allows Sponge to detect builtin platform plugins when it's not the first entry on the classpath.
@@ -136,8 +135,8 @@ public abstract class VanillaLaunch extends Launch {
     }
 
     @Override
-    public VanillaPluginEngine getPluginEngine() {
-        return (VanillaPluginEngine) this.pluginEngine;
+    public VanillaPluginPlatform getPluginPlatform() {
+        return (VanillaPluginPlatform) this.pluginPlatform;
     }
 
     @Override

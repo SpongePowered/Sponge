@@ -22,26 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.applaunch.handler.dev;
+package org.spongepowered.common.applaunch.plugin;
 
-import cpw.mods.modlauncher.api.ITransformingClassLoader;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
-import org.spongepowered.vanilla.applaunch.Main;
-import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
+import org.apache.logging.log4j.Logger;
 
-public final class ServerDevLaunchHandler extends AbstractVanillaLaunchHandler {
+import java.nio.file.Path;
+import java.util.List;
 
-    @Override
-    public String name() {
-        return AppLaunchTargets.SERVER_DEVELOPMENT.getLaunchTarget();
+public interface PluginPlatform {
+
+    String version();
+
+    void setVersion(String version);
+
+    Logger logger();
+
+    default boolean vanilla() {
+        return true;
     }
 
-    @Override
-    protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
-        Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLaunch", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
-                .invoke(null, AppLaunch.pluginPlatform(), Boolean.TRUE, arguments);
-    }
+    Path baseDirectory();
+
+    void setBaseDirectory(Path baseDirectory);
+
+    List<Path> pluginDirectories();
+
+    void setPluginDirectories(List<Path> pluginDirectories);
 }

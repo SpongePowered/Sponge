@@ -111,8 +111,7 @@ public final class SpongeCommon {
     }
 
     public static Path getGameDirectory() {
-        return Launch.getInstance().getPluginEngine().getPluginEnvironment().blackboard().get(PluginKeys.BASE_DIRECTORY)
-                .orElseThrow(() -> new IllegalStateException("No game directory has been set in the launcher!"));
+        return Launch.getInstance().getPluginPlatform().baseDirectory();
     }
 
     public static Path getPluginConfigDirectory() {

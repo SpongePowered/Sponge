@@ -64,14 +64,14 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
         TimingHistory.entityTicks += this.entitiesById.size();
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.runBlockEvents()V"))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;runBlockEvents()V"))
     protected void impl$wrapRunBlockEventsTimings(ServerLevel level) {
         this.bridge$getTimingsHandler().scheduledBlocks.startTiming();
         this.shadow$runBlockEvents();
         this.bridge$getTimingsHandler().scheduledBlocks.stopTiming();
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.tickBlockEntities()V"))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;tickBlockEntities()V"))
     protected void impl$wrapBlockEntitiesTimings(ServerLevel level) {
         this.bridge$getTimingsHandler().tickEntities.stopTiming();
         this.bridge$getTimingsHandler().tileEntityTick.startTiming();
@@ -80,12 +80,12 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
         TimingHistory.tileEntityTicks += this.blockEntityList.size();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.removeFromChunk(Lnet/minecraft/world/entity/Entity;)V"))
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeFromChunk(Lnet/minecraft/world/entity/Entity;)V"))
     protected void impl$startEntityRemovalTimings(BooleanSupplier var1, CallbackInfo ci) {
         this.bridge$getTimingsHandler().entityRemoval.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.onEntityRemoved(Lnet/minecraft/world/entity/Entity;)V", shift = At.Shift.AFTER))
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;onEntityRemoved(Lnet/minecraft/world/entity/Entity;)V", shift = At.Shift.AFTER))
     protected void impl$stopEntityRemovalTimings(BooleanSupplier var1, CallbackInfo ci) {
         this.bridge$getTimingsHandler().entityRemoval.startTiming();
     }

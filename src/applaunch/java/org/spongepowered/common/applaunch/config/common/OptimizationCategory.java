@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
@@ -115,6 +116,6 @@ public final class OptimizationCategory {
     public OptimizationCategory() {
         // Enabled by default on SpongeVanilla, disabled by default on SpongeForge.
         // Because of how early this constructor gets called, we can't use SpongeImplHooks or even Game
-        this.dropsPreMerge = SpongeConfigs.getPluginEnvironment().blackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
+        this.dropsPreMerge = AppLaunch.pluginPlatform().vanilla();
     }
 }

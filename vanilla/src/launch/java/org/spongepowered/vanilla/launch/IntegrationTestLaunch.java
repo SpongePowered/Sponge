@@ -30,17 +30,17 @@ import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 public class IntegrationTestLaunch extends VanillaLaunch {
     private final boolean isServer;
 
-    protected IntegrationTestLaunch(final VanillaPluginEngine pluginEngine, final boolean isServer) {
+    protected IntegrationTestLaunch(final VanillaPluginPlatform pluginEngine, final boolean isServer) {
         super(pluginEngine, Stage.DEVELOPMENT);
         this.isServer = isServer;
     }
 
-    public static void launch(final VanillaPluginEngine pluginEngine, final Boolean isServer, final String[] args) {
+    public static void launch(final VanillaPluginPlatform pluginEngine, final Boolean isServer, final String[] args) {
         final IntegrationTestLaunch launcher = new IntegrationTestLaunch(pluginEngine, isServer);
         Launch.setInstance(launcher);
         launcher.launchPlatform(args);

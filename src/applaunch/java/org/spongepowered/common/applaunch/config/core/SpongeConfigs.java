@@ -28,8 +28,8 @@ import com.google.common.collect.ImmutableSet;
 import io.leangen.geantyref.GenericTypeReflector;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.common.applaunch.config.common.CommonConfig;
 import org.spongepowered.configurate.CommentedConfigurationNode;
 import org.spongepowered.configurate.ConfigurationOptions;
@@ -40,15 +40,10 @@ import org.spongepowered.configurate.objectmapping.ConfigSerializable;
 import org.spongepowered.configurate.objectmapping.ObjectMapper;
 import org.spongepowered.configurate.objectmapping.meta.NodeResolver;
 import org.spongepowered.configurate.transformation.ConfigurationTransformation;
-import org.spongepowered.plugin.Blackboard;
-import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.PluginKeys;
 
 import java.io.IOException;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.nio.file.StandardOpenOption;
 import java.util.Set;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
@@ -59,8 +54,6 @@ import java.util.stream.Stream;
  * Common utility methods for sponge configurations and necessary helpers for early init.
  */
 public final class SpongeConfigs {
-
-    public static final Blackboard.Key<Boolean> IS_VANILLA_PLATFORM = Blackboard.Key.of("is_vanilla", Boolean.class);
 
     public static final String GLOBAL_NAME = "global.conf";
     public static final String METRICS_NAME = "metrics.conf";
@@ -89,30 +82,13 @@ public final class SpongeConfigs {
     static final Logger LOGGER = LogManager.getLogger();
 
     public static final Lock initLock = new ReentrantLock();
-    private static @MonotonicNonNull PluginEnvironment environment;
     private static Path configDir;
 
     private static ConfigHandle<CommonConfig> sponge;
 
-    public static void initialize(final PluginEnvironment environment) {
-        if (SpongeConfigs.environment != null) {
-            throw new IllegalArgumentException("Cannot initialize SpongeConfigs twice!");
-        }
-        SpongeConfigs.environment = environment;
-    }
-
-    public static PluginEnvironment getPluginEnvironment() {
-        if (SpongeConfigs.environment == null) {
-            throw new IllegalStateException("SpongeConfigs has not yet been initialized with a PluginEnvironment");
-        }
-        return SpongeConfigs.environment;
-    }
-
     public static Path getDirectory() {
         if (SpongeConfigs.configDir == null) {
-            SpongeConfigs.configDir = SpongeConfigs.getPluginEnvironment().blackboard()
-                    .get(PluginKeys.BASE_DIRECTORY)
-                    .orElseThrow(() -> new IllegalStateException("No base directory was set"))
+            SpongeConfigs.configDir = AppLaunch.pluginPlatform().baseDirectory()
                     .resolve("config")
                     .resolve("sponge");
         }

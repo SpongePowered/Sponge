@@ -36,15 +36,13 @@ import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.network.channel.SpongeChannelRegistry;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
-import org.spongepowered.plugin.Blackboard;
 
 import java.util.List;
 
 public final class SpongeBootstrap {
 
+    public static Injector injector;
     private static SpongeLifecycle lifecycle;
-
-    public static Blackboard.Key<Injector> PARENT_INJECTOR = Blackboard.Key.of("parent_injector", Injector.class);
 
     public static void perform(final String engineName, final Runnable engineStart) {
         final Stage stage = SpongeGuice.getInjectorStage(Launch.getInstance().getInjectionStage());
@@ -54,9 +52,7 @@ public final class SpongeBootstrap {
                 new SpongeCommonModule()
         );
         final Injector bootstrapInjector = Guice.createInjector(stage, modules);
-
-        Launch.getInstance().getPluginEngine().getPluginEnvironment().blackboard().getOrCreate(SpongeBootstrap.PARENT_INJECTOR,
-                () -> bootstrapInjector);
+        SpongeBootstrap.injector = bootstrapInjector;
         SpongeBootstrap.lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);
         SpongeBootstrap.lifecycle.establishFactories();
         SpongeBootstrap.lifecycle.establishBuilders();

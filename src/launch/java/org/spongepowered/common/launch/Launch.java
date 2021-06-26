@@ -31,7 +31,7 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.asm.mixin.MixinEnvironment;
-import org.spongepowered.common.applaunch.plugin.PluginEngine;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 import java.util.ArrayList;
@@ -41,15 +41,15 @@ public abstract class Launch {
 
     private static Launch INSTANCE;
 
-    protected final PluginEngine pluginEngine;
+    protected final PluginPlatform pluginPlatform;
     protected final SpongePluginManager pluginManager;
     private final Logger logger;
     private final List<PluginContainer> launcherPlugins;
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
 
-    protected Launch(final PluginEngine pluginEngine, final SpongePluginManager pluginManager) {
+    protected Launch(final PluginPlatform pluginPlatform, final SpongePluginManager pluginManager) {
         this.logger = LogManager.getLogger("Sponge");
-        this.pluginEngine = pluginEngine;
+        this.pluginPlatform = pluginPlatform;
         this.pluginManager = pluginManager;
         this.launcherPlugins = new ArrayList<>();
     }
@@ -75,8 +75,8 @@ public abstract class Launch {
         return this.logger;
     }
 
-    public PluginEngine getPluginEngine() {
-        return this.pluginEngine;
+    public PluginPlatform getPluginPlatform() {
+        return this.pluginPlatform;
     }
 
     public SpongePluginManager getPluginManager() {
@@ -139,10 +139,10 @@ public abstract class Launch {
     }
 
     protected void onLaunch() {
-        this.createPlatformPlugins(this.pluginEngine);
+        this.createPlatformPlugins(this.pluginPlatform);
     }
 
-    protected abstract void createPlatformPlugins(final PluginEngine engine);
+    protected abstract void createPlatformPlugins(final PluginPlatform platform);
 
     public final void auditMixins() {
         MixinEnvironment.getCurrentEnvironment().audit();

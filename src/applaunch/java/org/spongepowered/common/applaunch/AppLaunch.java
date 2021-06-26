@@ -22,11 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.plugin;
+package org.spongepowered.common.applaunch;
 
-import org.spongepowered.plugin.PluginEnvironment;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 
-public interface PluginEngine {
+public final class AppLaunch {
 
-    PluginEnvironment getPluginEnvironment();
+    private static PluginPlatform pluginPlatform;
+
+    public static <P extends PluginPlatform> P setPluginPlatform(final PluginPlatform pluginPlatform) {
+        if (AppLaunch.pluginPlatform != null) {
+            throw new RuntimeException("The plugin platform cannot be set twice! (Same classloader ?)");
+        }
+        AppLaunch.pluginPlatform = pluginPlatform;
+        return (P) pluginPlatform;
+    }
+
+    public static <P extends PluginPlatform> P pluginPlatform() {
+        return (P) AppLaunch.pluginPlatform;
+    }
 }
