@@ -86,8 +86,8 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
      */
     static final int NO_DYNAMIC_OPCODE = -1;
 
-    public SpongePacketChannel(final int type, final ResourceKey key, final SpongeChannelManager registry) {
-        super(type, key, registry);
+    public SpongePacketChannel(final int type, final ResourceKey key, final SpongeChannelManager manager) {
+        super(type, key, manager);
     }
 
     private <P extends RequestPacket<R>, R extends Packet> void sendRequestPacketTo(final EngineConnection connection, final P packet,
@@ -103,7 +103,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final boolean isLoginPhase = ConnectionUtil.isLoginPhase(connection);
         final EngineConnectionSide<?> side = connection.side();
 
-        final ChannelBuf payload = this.registry().getBufferAllocator().buffer();
+        final ChannelBuf payload = this.manager().getBufferAllocator().buffer();
         final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (isLoginPhase) {
@@ -154,7 +154,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final boolean isLoginPhase = ConnectionUtil.isLoginPhase(connection);
         final EngineConnectionSide<?> side = connection.side();
 
-        final ChannelBuf payload = this.registry().getBufferAllocator().buffer();
+        final ChannelBuf payload = this.manager().getBufferAllocator().buffer();
         final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (packet == null || requestBinding instanceof SpongeFixedTransactionalPacketBinding) {
@@ -210,7 +210,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
         final boolean isLoginPhase = ConnectionUtil.isLoginPhase(connection);
         final EngineConnectionSide<?> side = connection.side();
 
-        final ChannelBuf payload = this.registry().getBufferAllocator().buffer();
+        final ChannelBuf payload = this.manager().getBufferAllocator().buffer();
         final Supplier<net.minecraft.network.protocol.Packet<?>> mcPacketSupplier;
 
         if (isLoginPhase) {

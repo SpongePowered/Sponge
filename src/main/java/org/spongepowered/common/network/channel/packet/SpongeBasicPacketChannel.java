@@ -197,7 +197,7 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
     }
 
     private ChannelBuf encodePayload(final int opcode, final Packet packet) {
-        final ChannelBuf payload = this.registry().getBufferAllocator().buffer();
+        final ChannelBuf payload = this.manager().getBufferAllocator().buffer();
         payload.writeByte((byte) opcode);
         this.encodePayload(payload, packet);
         return payload;
@@ -205,8 +205,8 @@ public final class SpongeBasicPacketChannel extends AbstractPacketChannel implem
 
     // This only exists for forge compatibility
     private ChannelBuf encodeLoginPayload(final int opcode, final Packet packet) {
-        final ChannelBuf loginPayload = this.registry().getBufferAllocator().buffer();
-        final ChannelBuf payload = this.registry().getBufferAllocator().buffer();
+        final ChannelBuf loginPayload = this.manager().getBufferAllocator().buffer();
+        final ChannelBuf payload = this.manager().getBufferAllocator().buffer();
         try {
             this.encodePayloadUnsafe(payload, packet);
             loginPayload.writeString(this.key().formatted());

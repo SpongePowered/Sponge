@@ -85,7 +85,7 @@ public abstract class AbstractPacketChannel extends SpongeChannel implements Tra
     }
 
     protected void encodePayload(final ChannelBuf payload, final Packet packet) {
-        final ChannelBuf packetContent = this.registry().getBufferAllocator().buffer();
+        final ChannelBuf packetContent = this.manager().getBufferAllocator().buffer();
         try {
             this.encodePayloadUnsafe(packetContent, packet);
             ChannelBuffers.write(payload, packetContent);
