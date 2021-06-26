@@ -1,13 +1,8 @@
 {
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.movementcheck",
     "plugin": "org.spongepowered.common.mixin.plugin.MovementCheckPlugin",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "mixins": [
         "server.network.ServerGamePacketListenerImplMixin_MovementCheck"
-    ],
-    "injectors": {
-        "defaultRequire": 1
-    }
+    ]
 }

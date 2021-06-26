@@ -1,9 +1,7 @@
 {
     "required": true,
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.api",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1100,
     "mixins": [
         "common.entity.living.HumanEntityMixin_API",
@@ -391,9 +389,6 @@
     "server": [
         "minecraft.server.dedicated.DedicatedServerMixin_API"
     ],
-    "injectors": {
-        "defaultRequire": 1
-    },
     "overwrites": {
         "conformVisibility": true
     }

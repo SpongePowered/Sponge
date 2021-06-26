@@ -1,9 +1,7 @@
 {
     "required": true,
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.accessor",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "client": [
         "client.KeyMappingAccessor",
         "client.gui.components.AbstractSelectionListAccessor"

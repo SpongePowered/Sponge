@@ -1,9 +1,7 @@
 {
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.optimization",
     "plugin": "org.spongepowered.common.mixin.plugin.OptimizationPlugin",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "mixins": [
         "entity.EntityMixin_Optimization_Collision",
         "tileentity.HopperTileEntityMixin_Optimization_Hopper",
@@ -18,8 +16,5 @@
         "world.level.block.entity.EnderChestBlockEntityMixin_Optimization_BlockEntity",
         "world.level.saveddata.maps.MapItemSavedData_HoldingPlayerMixin_Optimization_Map",
         "world.server.ServerWorldMixin_Optimization_Collision"
-    ],
-    "injectors": {
-        "defaultRequire": 1
-    }
+    ]
 }

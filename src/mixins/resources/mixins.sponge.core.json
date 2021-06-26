@@ -1,9 +1,7 @@
 {
     "required": true,
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.core",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1101,
     "mixins": [
         "advancements.Advancement_BuilderMixin",
@@ -238,7 +236,6 @@
         "server.dedicated.DedicatedServerMixin"
     ],
     "injectors": {
-        "defaultRequire": 1,
         "maxShiftBy": 3
     },
     "overwrites": {

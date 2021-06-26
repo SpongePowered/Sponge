@@ -1,13 +1,8 @@
 {
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.concurrentcheck",
     "plugin": "org.spongepowered.common.mixin.plugin.ConcurrentCheckPlugin",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "mixins": [
         "util.ClassInstanceMultiMapMixin_ConcurrentCheck"
-    ],
-    "injectors": {
-        "defaultRequire": 1
-    }
+    ]
 }

@@ -1,9 +1,7 @@
 {
     "required": true,
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.inventory",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "mixinPriority": 900,
     "mixins": [
         "api.TraitMixin_AdapterInventory_API",
@@ -75,5 +73,8 @@
         "impl.world.inventory.SlotMixin_Fabric_Inventory",
         "impl.world.inventory.SlotMixin_Lens_Inventory",
         "impl.world.level.block.entity.CampfireBlockEntityMixin_Fabric_Inventory"
-    ]
+    ],
+    "injectors": {
+        "defaultRequire": 0
+    }
 }
