@@ -52,7 +52,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundCustomPayloadPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.vanilla.chat.ChatFormatter;
 
 import java.util.Optional;
@@ -70,7 +70,7 @@ public abstract class ServerGamePacketListenerImplMixin_Vanilla implements Serve
         // method of its class, only applicable to this packet, so just retain here.
         ((ServerboundCustomPayloadPacketAccessor) packet).accessor$data().retain();
 
-        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.channelRegistry();
+        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
         this.server.execute(() -> channelRegistry.handlePlayPayload((EngineConnection) this, packet));
     }
 

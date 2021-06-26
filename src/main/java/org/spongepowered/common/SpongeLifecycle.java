@@ -49,7 +49,7 @@ import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.registry.SpongeRegistries;
@@ -122,7 +122,7 @@ public final class SpongeLifecycle {
     }
 
     public void callRegisterChannelEvent() {
-        ((SpongeChannelRegistry) this.game.channelRegistry()).postRegistryEvent();
+        ((SpongeChannelManager) this.game.channelManager()).postRegistryEvent();
     }
 
     public void initTimings() {

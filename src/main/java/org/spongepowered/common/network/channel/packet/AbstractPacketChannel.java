@@ -42,7 +42,7 @@ import org.spongepowered.api.network.channel.packet.TransactionalPacketBinding;
 import org.spongepowered.api.network.channel.packet.TransactionalPacketRegistry;
 import org.spongepowered.common.network.channel.ChannelBuffers;
 import org.spongepowered.common.network.channel.SpongeChannel;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 
 import java.util.Collection;
 import java.util.Map;
@@ -58,7 +58,7 @@ public abstract class AbstractPacketChannel extends SpongeChannel implements Tra
     protected final Map<Class<?>, PacketBinding<?>> byType = new ConcurrentHashMap<>();
     protected final Map<Integer, PacketBinding<?>> byOpcode = new ConcurrentHashMap<>();
 
-    public AbstractPacketChannel(final int type, final ResourceKey key, final SpongeChannelRegistry registry) {
+    public AbstractPacketChannel(final int type, final ResourceKey key, final SpongeChannelManager registry) {
         super(type, key, registry);
     }
 

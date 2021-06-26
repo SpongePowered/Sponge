@@ -51,7 +51,7 @@ import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge, ConnectionHolderBridge {
@@ -112,7 +112,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             } else {
                 // Sponge start - Also send the channel registrations using the minecraft channel, for compatibility
                 final ServerSideConnection connection = (ServerSideConnection) this;
-                ((SpongeChannelRegistry) Sponge.channelRegistry()).sendChannelRegistrations(connection);
+                ((SpongeChannelManager) Sponge.channelManager()).sendChannelRegistrations(connection);
                 // Sponge end
                 this.server.getPlayerList().placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
             }

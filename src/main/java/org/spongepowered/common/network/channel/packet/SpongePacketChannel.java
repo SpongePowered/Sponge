@@ -39,7 +39,7 @@ import org.spongepowered.api.network.channel.packet.RequestPacketHandler;
 import org.spongepowered.common.network.channel.ConnectionUtil;
 import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.PacketUtil;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.TransactionResult;
 import org.spongepowered.common.network.channel.TransactionStore;
 import org.spongepowered.common.util.Constants;
@@ -86,7 +86,7 @@ public class SpongePacketChannel extends AbstractPacketChannel implements Packet
      */
     static final int NO_DYNAMIC_OPCODE = -1;
 
-    public SpongePacketChannel(final int type, final ResourceKey key, final SpongeChannelRegistry registry) {
+    public SpongePacketChannel(final int type, final ResourceKey key, final SpongeChannelManager registry) {
         super(type, key, registry);
     }
 

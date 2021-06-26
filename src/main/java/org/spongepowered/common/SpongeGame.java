@@ -35,7 +35,7 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.network.channel.ChannelRegistry;
+import org.spongepowered.api.network.channel.ChannelManager;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.BuilderProvider;
 import org.spongepowered.api.registry.FactoryProvider;
@@ -64,7 +64,7 @@ public final class SpongeGame implements Game {
     private final EventManager eventManager;
     private final AssetManager assetManager;
     private final PluginConfigManager configManager;
-    private final ChannelRegistry channelRegistry;
+    private final ChannelManager channelManager;
     private final MetricsConfigManager metricsConfigManager;
     private final SqlManager sqlManager;
     private final ServiceProvider.GameScoped serviceProvider;
@@ -81,7 +81,7 @@ public final class SpongeGame implements Game {
     public SpongeGame(final Platform platform, final BuilderProvider builderProvider,
             final FactoryProvider factoryProvider, final DataManager dataManager, final PluginManager pluginManager,
             final EventManager eventManager, final AssetManager assetManager, final PluginConfigManager configManager,
-            final ChannelRegistry channelRegistry, final MetricsConfigManager metricsConfigManager,
+            final ChannelManager channelManager, final MetricsConfigManager metricsConfigManager,
             final SqlManager sqlManager, final ServiceProvider.GameScoped serviceProvider) {
 
         this.platform = platform;
@@ -92,13 +92,12 @@ public final class SpongeGame implements Game {
         this.eventManager = eventManager;
         this.assetManager = assetManager;
         this.configManager = configManager;
-        this.channelRegistry = channelRegistry;
+        this.channelManager = channelManager;
         this.metricsConfigManager = metricsConfigManager;
         this.sqlManager = sqlManager;
         this.serviceProvider = serviceProvider;
 
         this.asyncScheduler = new AsyncScheduler();
-        //this.registryHolder = new SpongeRegistryHolder();
     }
 
     @Override
@@ -155,8 +154,8 @@ public final class SpongeGame implements Game {
     }
 
     @Override
-    public ChannelRegistry channelRegistry() {
-        return this.channelRegistry;
+    public ChannelManager channelManager() {
+        return this.channelManager;
     }
 
     @Override
