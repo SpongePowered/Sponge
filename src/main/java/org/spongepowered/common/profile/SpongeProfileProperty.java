@@ -22,39 +22,73 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.mojang.authlib.properties;
+package org.spongepowered.common.profile;
 
 import com.mojang.authlib.properties.Property;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.profile.property.ProfileProperty;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 
-@Mixin(value = Property.class, remap = false)
-public abstract class PropertyMixin_API implements ProfileProperty {
+public final class SpongeProfileProperty implements ProfileProperty {
 
-    @Shadow @Final private String name;
-    @Shadow @Final private String value;
-    @Shadow @Final private @Nullable String signature;
+    private final String name;
+    private final String value;
+    private final @Nullable String signature;
+
+    public SpongeProfileProperty(final Property property) {
+        this(property.getName(), property.getValue(), property.getSignature());
+    }
+
+    public SpongeProfileProperty(final String name, final String value, final @Nullable String signature) {
+        this.name = name;
+        this.value = value;
+        this.signature = signature;
+    }
 
     @Override
+    public int contentVersion() {
+        return 1;
+    }
+
+    @Override
+    @NonNull
+    public DataContainer toContainer() {
+        final DataContainer container = DataContainer.createNew()
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
+                .set(Queries.PROPERTY_NAME, this.name)
+                .set(Queries.PROPERTY_VALUE, this.value);
+        if (this.signature != null) {
+            container.set(Queries.PROPERTY_SIGNATURE, this.signature);
+        }
+        return container;
+    }
+
+    @Override
+    @NonNull
     public String name() {
         return this.name;
     }
 
     @Override
+    @NonNull
     public String value() {
         return this.value;
     }
 
     @Override
-    public Optional<String> signature() { // We don't need to make this @Implements because the signature difference
+    @NonNull
+    public Optional<String> signature() {
         return Optional.ofNullable(this.signature);
+    }
+
+    public Property asProperty() {
+        return new Property(this.name, this.value, this.signature);
     }
 
     @Override
@@ -64,13 +98,13 @@ public abstract class PropertyMixin_API implements ProfileProperty {
 
     @Override
     public boolean equals(final Object obj) {
-        if (!(obj instanceof ProfileProperty)) {
+        if (!(obj instanceof SpongeProfileProperty)) {
             return false;
         }
-        final ProfileProperty other = (ProfileProperty) obj;
+        final SpongeProfileProperty other = (SpongeProfileProperty) obj;
         return other.name().equals(this.name) &&
                 other.value().equals(this.value) &&
-                Objects.equals(other.signature().orElse(null), this.signature);
+                Objects.equals(other.signature, this.signature);
     }
 
     @Override
@@ -81,4 +115,5 @@ public abstract class PropertyMixin_API implements ProfileProperty {
                 .add("signature='" + this.signature + "'")
                 .toString();
     }
+
 }

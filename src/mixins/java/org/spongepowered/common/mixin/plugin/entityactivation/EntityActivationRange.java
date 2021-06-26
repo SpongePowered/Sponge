@@ -229,7 +229,7 @@ public final class EntityActivationRange {
             }
 
             maxRange = Math.min((((ServerWorld) world).properties().viewDistance() << 4) - 8, maxRange);
-            ((ActivationCapabilityBridge) player).activation$setActivatedTick(SpongeCommon.getServer().getTickCount());
+            ((ActivationCapabilityBridge) player).activation$setActivatedTick(SpongeCommon.server().getTickCount());
             final AABB aabb = EntityActivationRange.maxBB;
             EntityActivationRange.growBb(aabb, player.getBoundingBox(), maxRange, 256, maxRange);
 
@@ -261,7 +261,7 @@ public final class EntityActivationRange {
                 continue;
             }
             final ActivationCapabilityBridge spongeEntity = (ActivationCapabilityBridge) entity;
-            final long currentTick = SpongeCommon.getServer().getTickCount();
+            final long currentTick = SpongeCommon.server().getTickCount();
             if (!((TrackableBridge) entity).bridge$shouldTick()) {
                 continue;
             }
@@ -383,7 +383,7 @@ public final class EntityActivationRange {
             return true;
         }
 
-        final long currentTick = SpongeCommon.getServer().getTickCount();
+        final long currentTick = SpongeCommon.server().getTickCount();
         final ActivationCapabilityBridge spongeEntity = (ActivationCapabilityBridge) entity;
         boolean isActive = spongeEntity.activation$getActivatedTick() >= currentTick || spongeEntity.activation$getDefaultActivationState();
 

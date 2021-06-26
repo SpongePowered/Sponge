@@ -122,7 +122,7 @@ public abstract class MobMixin extends LivingEntityMixin {
             csm.pushCause(entity);
         }
         final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(csm.currentCause(), (Living) this);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         csm.popCause();
         if (event.isCancelled()) {
             ci.cancel();
@@ -227,7 +227,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         PhaseTracker.getCauseStackManager().pushCause(damageSource);
         final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
             originalFunctions, knockbackModifier, originalBaseDamage);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         PhaseTracker.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             return false;

@@ -49,7 +49,7 @@ public final class OpenInventoryState extends BasicInventoryPacketState {
             final InteractContainerEvent.Open event =
                 SpongeEventFactory.createInteractContainerEventOpen(frame.currentCause(), ContainerUtil.fromNative(player.containerMenu),
                         cursorTransaction);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (event.isCancelled()) {
                 player.closeContainer();
             } else {

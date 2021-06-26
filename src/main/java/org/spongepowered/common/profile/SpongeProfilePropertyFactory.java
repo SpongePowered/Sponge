@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.profile;
 
-import com.mojang.authlib.properties.Property;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.profile.property.ProfileProperty;
 
@@ -37,6 +36,6 @@ public final class SpongeProfilePropertyFactory implements ProfileProperty.Facto
         Objects.requireNonNull(name);
         Objects.requireNonNull(value);
 
-        return (ProfileProperty) new Property(name, value, signature);
+        return new SpongeProfileProperty(name, value, signature);
     }
 }

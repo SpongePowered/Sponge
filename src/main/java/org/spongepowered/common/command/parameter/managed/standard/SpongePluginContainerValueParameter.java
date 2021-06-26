@@ -48,7 +48,7 @@ public final class SpongePluginContainerValueParameter extends ResourceKeyedArgu
 
     @Override
     public List<CommandCompletion> complete(final @NonNull CommandCause context, final String currentInput) {
-        return Launch.getInstance().getPluginManager().plugins().stream()
+        return Launch.instance().pluginManager().plugins().stream()
                 .filter(x -> x.metadata().id().startsWith(currentInput))
                 .map(entry -> {
                     final Component tooltip = Component.text(entry.metadata().name().orElse(entry.metadata().id()));
@@ -62,7 +62,7 @@ public final class SpongePluginContainerValueParameter extends ResourceKeyedArgu
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader) throws ArgumentParseException {
 
         final String id = reader.parseString();
-        final Optional<PluginContainer> container = Launch.getInstance().getPluginManager().plugin(id);
+        final Optional<PluginContainer> container = Launch.instance().pluginManager().plugin(id);
         if (container.isPresent()) {
             return container;
         }

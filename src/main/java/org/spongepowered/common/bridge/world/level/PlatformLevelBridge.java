@@ -22,24 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.brigadier.exceptions;
+package org.spongepowered.common.bridge.world.level;
 
-import com.mojang.brigadier.Message;
-import com.mojang.brigadier.exceptions.CommandSyntaxException;
-import net.kyori.adventure.text.Component;
-import net.kyori.adventure.util.ComponentMessageThrowable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.adventure.SpongeAdventure;
+public interface PlatformLevelBridge {
 
-@Mixin(CommandSyntaxException.class)
-public abstract class CommandSyntaxExceptionMixin implements ComponentMessageThrowable {
-    // @formatter:off
-    @Shadow public abstract Message getRawMessage();
-    // @formatter:on
-
-    @Override
-    public Component componentMessage() {
-        return SpongeAdventure.asAdventure(this.getRawMessage());
+    default long[] bridge$recentTickTimes() {
+        return new long[100];
     }
 }

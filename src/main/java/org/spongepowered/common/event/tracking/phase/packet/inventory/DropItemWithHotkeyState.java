@@ -113,7 +113,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     ContainerUtil.fromNative(player.containerMenu),
                     cursorTrans, Lists.newArrayList(slotTrans), entities, usedButton, slot);
 
-                SpongeCommon.postEvent(dropItemEvent);
+                SpongeCommon.post(dropItemEvent);
                 if (dropItemEvent.isCancelled() || PacketPhaseUtil.allTransactionsInvalid(
                     dropItemEvent.transactions())) {
                     ((ServerPlayerBridge) player).bridge$restorePacketItem(InteractionHand.MAIN_HAND);

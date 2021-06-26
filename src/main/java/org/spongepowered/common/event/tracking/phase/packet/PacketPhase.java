@@ -29,6 +29,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundChatPacket;
 import net.minecraft.network.protocol.game.ServerboundClientCommandPacket;
@@ -241,7 +243,7 @@ public final class PacketPhase {
 
         final BasicInventoryPacketState inventory = PacketPhase.fromState(PacketPhase.clickType(windowPacket.getSlotNum()) | mode | unpacked);
         if (inventory == PacketPhase.Inventory.INVENTORY) {
-            SpongeCommon.getLogger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
+            SpongeCommon.logger().warn(String.format("Unable to find InventoryPacketState handler for click window packet: %s", windowPacket));
         }
         return inventory;
     }

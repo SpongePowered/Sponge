@@ -262,7 +262,7 @@ public class TimingHistory {
         final double avg;
 
         PingRecord() {
-            final Collection<ServerPlayer> onlinePlayers = SpongeCommon.getGame().server().onlinePlayers();
+            final Collection<ServerPlayer> onlinePlayers = SpongeCommon.game().server().onlinePlayers();
             int totalPing = 0;
             for (ServerPlayer player : onlinePlayers) {
                 totalPing += player.connection().latency();

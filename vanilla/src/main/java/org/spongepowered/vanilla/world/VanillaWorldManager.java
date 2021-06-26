@@ -423,7 +423,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
                 registryKey, (DimensionType) worldType, chunkStatusListener, template.generator(), isDebugGeneration, seed, ImmutableList.of(), true);
         this.worlds.put(registryKey, world);
 
-        return SpongeCommon.getAsyncScheduler().submit(() -> this.prepareWorld(world, isDebugGeneration)).thenApply(w -> {
+        return SpongeCommon.asyncScheduler().submit(() -> this.prepareWorld(world, isDebugGeneration)).thenApply(w -> {
             ((MinecraftServerAccessor) this.server).invoker$forceDifficulty();
             return w;
         }).thenCompose(w -> this.postWorldLoad(w, false))
@@ -779,10 +779,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             return FutureUtil.completedWithException(e);
         }
 
-        final Path configFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds").resolve(key
+        final Path configFile = SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds").resolve(key
                 .namespace()).resolve(key.value() + ".conf");
 
-        final Path copiedConfigFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds")
+        final Path copiedConfigFile = SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds")
                 .resolve(movedKey.namespace()).resolve(movedKey.value() + ".conf");
 
         try {
@@ -844,7 +844,8 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             }
         }
 
-        final Path configFile = SpongeCommon.getSpongeConfigDirectory().resolve(SpongeCommon.ECOSYSTEM_ID).resolve("worlds").resolve(key.namespace()).resolve(key.value() + ".conf");
+        final Path configFile = SpongeCommon.spongeConfigDirectory().resolve(Launch.instance().id()).resolve("worlds").resolve(key.namespace())
+            .resolve(key.value() + ".conf");
 
         try {
             Files.deleteIfExists(configFile);
@@ -871,7 +872,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
             throw new IOException(String.format("World '%s' was told to unload but players remain.", registryKey.location()));
         }
 
-        SpongeCommon.getLogger().info("Unloading world '{}' ({})", registryKey.location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
+        SpongeCommon.logger().info("Unloading world '{}' ({})", registryKey.location(), RegistryTypes.WORLD_TYPE.get().valueKey((WorldType) world.dimensionType()));
 
         final BlockPos spawnPoint = world.getSharedSpawnPos();
         world.getChunkSource().removeRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, new ChunkPos(spawnPoint), 11, registryKey.location());
@@ -889,7 +890,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         this.worlds.remove(registryKey);
 
-        SpongeCommon.postEvent(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.world.server.ServerWorld) world));
+        SpongeCommon.post(SpongeEventFactory.createUnloadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.world.server.ServerWorld) world));
     }
 
     @Override
@@ -902,7 +903,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final boolean multiworldEnabled = this.server.isSingleplayer() || this.server.isNetherEnabled();
         if (!multiworldEnabled) {
-            SpongeCommon.getLogger().warn("The option 'allow-nether' has been set to 'false' in the server.properties. "
+            SpongeCommon.logger().warn("The option 'allow-nether' has been set to 'false' in the server.properties. "
                     + "Multi-World support has been disabled and no worlds besides the default world will be loaded.");
         }
 
@@ -922,7 +923,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
             MinecraftServerAccessor.accessor$LOGGER().info("Loading world '{}' ({})", worldKey, worldTypeKey);
             if (!isDefaultWorld && !templateBridge.bridge$loadOnStartup()) {
-                SpongeCommon.getLogger().warn("World '{}' has been disabled from loading at startup. Skipping...", worldKey);
+                SpongeCommon.logger().warn("World '{}' has been disabled from loading at startup. Skipping...", worldKey);
                 continue;
             }
 
@@ -1018,7 +1019,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         }
 
         ((SpongeUserManager) Sponge.server().userManager()).init();
-        ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().load();
+        ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().load();
     }
 
     private ServerLevel prepareWorld(final ServerLevel world, final boolean isDebugGeneration) {
@@ -1034,7 +1035,7 @@ public final class VanillaWorldManager implements SpongeWorldManager {
 
         final boolean isInitialized = levelData.isInitialized();
 
-        SpongeCommon.postEvent(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(),
+        SpongeCommon.post(SpongeEventFactory.createLoadWorldEvent(PhaseTracker.getCauseStackManager().currentCause(),
             (org.spongepowered.api.world.server.ServerWorld) world, isInitialized));
 
         // Set the view distance back on it's self to trigger the logic
@@ -1113,10 +1114,10 @@ public final class VanillaWorldManager implements SpongeWorldManager {
         serverChunkProvider.addRegionTicket(VanillaWorldManager.SPAWN_CHUNKS, chunkPos, borderRadius, world.dimension().location());
         final CompletableFuture<ServerLevel> generationFuture = new CompletableFuture<>();
         Sponge.asyncScheduler().submit(
-                Task.builder().plugin(Launch.getInstance().getPlatformPlugin())
+                Task.builder().plugin(Launch.instance().platformPlugin())
                         .execute(task -> {
                             if (serverChunkProvider.getTickingGenerated() >= spawnChunks) {
-                                Sponge.server().scheduler().submit(Task.builder().plugin(Launch.getInstance().getPlatformPlugin()).execute(() -> generationFuture.complete(world)).build());
+                                Sponge.server().scheduler().submit(Task.builder().plugin(Launch.instance().platformPlugin()).execute(() -> generationFuture.complete(world)).build());
                                 // Notify the future that we are done
                                 task.cancel(); // And cancel this task
                                 MinecraftServerAccessor.accessor$LOGGER().info("Done preparing start region for world '{}' ({})", world

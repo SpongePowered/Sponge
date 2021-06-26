@@ -87,7 +87,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
         checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
 
-        final net.minecraft.advancements.Advancement advancement = SpongeCommon.getServer().getAdvancements().getAdvancement(this.impl$advancementKey);
+        final net.minecraft.advancements.Advancement advancement = SpongeCommon.server().getAdvancements().getAdvancement(this.impl$advancementKey);
         if (advancement == null) {
             throw new IllegalStateException("The advancement of this advancement progress is unloaded: " + this.impl$advancementKey);
         }
@@ -259,7 +259,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             event = SpongeEventFactory.createCriterionEventGrant(
                     cause, this.bridge$getAdvancement(), criterion, player, Instant.now());
         }
-        if (SpongeCommon.postEvent(event)) {
+        if (SpongeCommon.post(event)) {
             return false;
         }
         criterionProgress.grant();
@@ -318,7 +318,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
             event = SpongeEventFactory.createCriterionEventRevoke(
                     cause, advancement, criterion, player);
         }
-        if (SpongeCommon.postEvent(event)) {
+        if (SpongeCommon.post(event)) {
             return false;
         }
         criterionProgress.revoke();
@@ -334,7 +334,7 @@ public abstract class AdvancementProgressMixin implements AdvancementProgressBri
     private Optional<Advancement> getOptionalAdvancement() {
         checkState(PlatformHooks.INSTANCE.getGeneralHooks().onServerThread());
         checkState(this.impl$advancementKey != null, "The advancement is not yet initialized");
-        final net.minecraft.advancements.Advancement advancement = SpongeCommon.getServer().getAdvancements().getAdvancement(this.impl$advancementKey);
+        final net.minecraft.advancements.Advancement advancement = SpongeCommon.server().getAdvancements().getAdvancement(this.impl$advancementKey);
         return Optional.ofNullable((Advancement)advancement);
     }
 }

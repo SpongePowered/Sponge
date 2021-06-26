@@ -40,7 +40,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 
 import java.util.Objects;
 import java.util.Optional;
@@ -50,7 +50,7 @@ public final class SpongePacketHandler {
 
     private static PacketChannel channel;
 
-    public static void init(final SpongeChannelRegistry registry) {
+    public static void init(final SpongeChannelManager registry) {
         SpongePacketHandler.channel = registry.createChannel(ResourceKey.sponge("default"), PacketChannel.class);
         SpongePacketHandler.channel.registerTransactional(RequestBlockTrackerDataPacket.class, TrackerDataResponsePacket.class, 0)
                 .setRequestHandler(EngineConnectionTypes.SERVER_PLAYER, (requestPacket, connection, response) -> {
@@ -98,7 +98,7 @@ public final class SpongePacketHandler {
                     }
 
                     final DimensionType dimensionType =
-                            SpongeCommon.getServer().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(packet.dimensionLogic);
+                            SpongeCommon.server().registryAccess().registryOrThrow(Registry.DIMENSION_TYPE_REGISTRY).get(packet.dimensionLogic);
                     ((WorldBridge) world).bridge$adjustDimensionLogic(dimensionType);
                 }
         );

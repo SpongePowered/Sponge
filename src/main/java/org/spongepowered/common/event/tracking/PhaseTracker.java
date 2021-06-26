@@ -187,14 +187,14 @@ public final class PhaseTracker implements CauseStackManager {
         try {
             initialPoolSize = Integer.parseInt(System.getProperty(PhaseTracker.INITIAL_POOL_SIZE_PROPERTY, "50"));
         } catch (final NumberFormatException ex) {
-            SpongeCommon.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 50.",
+            SpongeCommon.logger().warn("{} must be an integer, was set to {}. Defaulting to 50.",
                 PhaseTracker.INITIAL_POOL_SIZE_PROPERTY,
                 System.getProperty(PhaseTracker.INITIAL_POOL_SIZE_PROPERTY));
         }
         try {
             maxPoolSize = Integer.parseInt(System.getProperty(PhaseTracker.MAX_POOL_SIZE_PROPERTY, "100"));
         } catch (final NumberFormatException ex) {
-            SpongeCommon.getLogger().warn("{} must be an integer, was set to {}. Defaulting to 100.",
+            SpongeCommon.logger().warn("{} must be an integer, was set to {}. Defaulting to 100.",
                 PhaseTracker.MAX_POOL_SIZE_PROPERTY,
                 System.getProperty(PhaseTracker.MAX_POOL_SIZE_PROPERTY));
         }
@@ -259,7 +259,7 @@ public final class PhaseTracker implements CauseStackManager {
                 }
 
             })
-            .plugin(Launch.getInstance().getCommonPlugin())
+            .plugin(Launch.instance().commonPlugin())
             .build();
     }
 
@@ -328,7 +328,7 @@ public final class PhaseTracker implements CauseStackManager {
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
                 .add()
                 .add(new Exception("Async Block Change Detected"))
-                .log(SpongeCommon.getLogger(), Level.ERROR);
+                .log(SpongeCommon.logger(), Level.ERROR);
             // Maybe? I don't think this is wise.
             return;
         }
@@ -358,7 +358,7 @@ public final class PhaseTracker implements CauseStackManager {
                 .addWrapped(PhasePrinter.ASYNC_TRACKER_ACCESS)
                 .add()
                 .add(new Exception("Async Block Change Detected"))
-                .log(SpongeCommon.getLogger(), Level.ERROR);
+                .log(SpongeCommon.logger(), Level.ERROR);
             return;
         }
         final PhaseContext<?> currentContext = this.stack.peek();
@@ -489,7 +489,7 @@ public final class PhaseTracker implements CauseStackManager {
         this.enforceMainThread();
         if (this.cached_cause == null || this.cached_ctx == null) {
             if (this.cause.isEmpty()) {
-                this.cached_cause = Cause.of(this.currentContext(), SpongeCommon.getGame());
+                this.cached_cause = Cause.of(this.currentContext(), SpongeCommon.game());
             } else {
                 this.cached_cause = Cause.of(this.currentContext(), this.cause);
             }
@@ -632,7 +632,7 @@ public final class PhaseTracker implements CauseStackManager {
             if (!PhaseTracker.DEBUG_CAUSE_FRAMES) {
                 printer.add()
                     .add("Please add -Dsponge.debugcauseframes=true to your startup flags to enable further debugging output.");
-                SpongeCommon.getLogger().warn("  Add -Dsponge.debugcauseframes to your startup flags to enable further debugging output.");
+                SpongeCommon.logger().warn("  Add -Dsponge.debugcauseframes to your startup flags to enable further debugging output.");
             } else {
                 printer.add()
                     .add("Attempting to pop frame:")
@@ -651,7 +651,7 @@ public final class PhaseTracker implements CauseStackManager {
                 this.popCauseFrame(f);
                 offset--;
             }
-            printer.trace(System.err, SpongeCommon.getLogger(), Level.ERROR);
+            printer.trace(System.err, SpongeCommon.logger(), Level.ERROR);
             if (offset == -1) {
                 // Popping a frame that was not on the stack is not recoverable
                 // so we throw an exception.
@@ -742,7 +742,7 @@ public final class PhaseTracker implements CauseStackManager {
             throw new IllegalStateException(String.format(
                 "CauseStackManager called from off main thread (current='%s', expected='%s')!",
                 ThreadUtil.getDescription(Thread.currentThread()),
-                ThreadUtil.getDescription(SpongeCommon.getServer().getRunningThread())
+                ThreadUtil.getDescription(SpongeCommon.server().getRunningThread())
             ));
         }
         this.checkProviders();

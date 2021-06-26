@@ -24,9 +24,7 @@
  */
 package org.spongepowered.common.inject;
 
-import com.google.inject.PrivateModule;
-import com.google.inject.binder.AnnotatedBindingBuilder;
-import org.apache.logging.log4j.Logger;
+import com.google.inject.AbstractModule;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.api.Platform;
@@ -34,12 +32,10 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.config.ConfigManager;
 import org.spongepowered.api.data.DataManager;
-import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.network.channel.ChannelRegistry;
+import org.spongepowered.api.network.channel.ChannelManager;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.BuilderProvider;
 import org.spongepowered.api.registry.FactoryProvider;
-import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.service.ServiceProvider;
 import org.spongepowered.api.sql.SqlManager;
 import org.spongepowered.api.util.metric.MetricsConfigManager;
@@ -49,44 +45,34 @@ import org.spongepowered.common.SpongePlatform;
 import org.spongepowered.common.asset.SpongeAssetManager;
 import org.spongepowered.common.config.PluginConfigManager;
 import org.spongepowered.common.data.SpongeDataManager;
-import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.network.channel.ChannelBufferAllocator;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.service.game.SpongeGameScopedServiceProvider;
 import org.spongepowered.common.sql.SpongeSqlManager;
 import org.spongepowered.common.util.metric.SpongeMetricsConfigManager;
 
-public final class SpongeCommonModule extends PrivateModule {
+public final class SpongeCommonModule extends AbstractModule {
 
     @Override
     protected void configure() {
-        this.bind(Logger.class).toInstance(SpongeCommon.getLogger());
-        this.bindAndExpose(Game.class).to(SpongeGame.class);
-        this.bindAndExpose(Platform.class).to(SpongePlatform.class);
-        this.bindAndExpose(MinecraftVersion.class).toInstance(SpongeCommon.MINECRAFT_VERSION);
-        this.bindAndExpose(AssetManager.class).to(SpongeAssetManager.class);
-        this.bindAndExpose(ChannelRegistry.class).toInstance(new SpongeChannelRegistry(ChannelBufferAllocator.POOLED));
-        this.bindAndExpose(EventManager.class).to(SpongeEventManager.class);
-        this.bindAndExpose(PluginManager.class).toInstance(Launch.getInstance().getPluginManager());
-        this.bindAndExpose(GameRegistry.class).to(SpongeGameRegistry.class);
-        this.bindAndExpose(DataManager.class).to(SpongeDataManager.class);
-        this.bindAndExpose(ConfigManager.class).to(PluginConfigManager.class);
-        this.bindAndExpose(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
-        this.bindAndExpose(SqlManager.class).to(SpongeSqlManager.class);
-        this.bindAndExpose(ServiceProvider.GameScoped.class).to(SpongeGameScopedServiceProvider.class);
-        this.bindAndExpose(FactoryProvider.class).to(SpongeFactoryProvider.class);
-        this.bindAndExpose(BuilderProvider.class).to(SpongeBuilderProvider.class);
+        this.bind(Game.class).to(SpongeGame.class);
+        this.bind(Platform.class).to(SpongePlatform.class);
+        this.bind(MinecraftVersion.class).toInstance(SpongeCommon.minecraftVersion());
+        this.bind(AssetManager.class).to(SpongeAssetManager.class);
+        this.bind(ChannelManager.class).toInstance(new SpongeChannelManager(ChannelBufferAllocator.POOLED));
+        this.bind(PluginManager.class).toInstance(Launch.instance().pluginManager());
+        this.bind(DataManager.class).to(SpongeDataManager.class);
+        this.bind(ConfigManager.class).to(PluginConfigManager.class);
+        this.bind(MetricsConfigManager.class).to(SpongeMetricsConfigManager.class);
+        this.bind(SqlManager.class).to(SpongeSqlManager.class);
+        this.bind(ServiceProvider.GameScoped.class).to(SpongeGameScopedServiceProvider.class);
+        this.bind(FactoryProvider.class).to(SpongeFactoryProvider.class);
+        this.bind(BuilderProvider.class).to(SpongeBuilderProvider.class);
 
         this.requestStaticInjection(SpongeCommon.class);
         this.requestStaticInjection(Sponge.class);
-    }
-
-    protected <T> AnnotatedBindingBuilder<T> bindAndExpose(final Class<T> type) {
-        this.expose(type);
-        return this.bind(type);
     }
 }

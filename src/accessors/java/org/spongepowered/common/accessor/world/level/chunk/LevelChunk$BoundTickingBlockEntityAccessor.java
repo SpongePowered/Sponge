@@ -35,5 +35,4 @@ public interface LevelChunk$BoundTickingBlockEntityAccessor {
     @Accessor("blockEntity") BlockEntity accessor$blockEntity();
 
     @Accessor("ticker") BlockEntityTicker accessor$ticker();
-
 }

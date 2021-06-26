@@ -48,12 +48,12 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
     @Shadow protected abstract void shadow$runBlockEvents();
     // @formatter:on
 
-    @Inject(method = "tick", at = @At(value = "HEAD"))
+    @Inject(method = "tick", at = @At("HEAD"))
     private void impl$startWorldTimings(final BooleanSupplier var1, final CallbackInfo ci) {
         this.bridge$getTimingsHandler().doTick.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "RETURN"))
+    @Inject(method = "tick", at = @At("RETURN"))
     private void impl$stopWorldTimings(final BooleanSupplier var1, final CallbackInfo ci) {
         this.bridge$getTimingsHandler().doTick.stopTiming();
     }
@@ -64,14 +64,14 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
         TimingHistory.entityTicks += ((EntityTickListAccessor) this.entityTickList).accessor$active().size();
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.runBlockEvents()V"))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;runBlockEvents()V"))
     protected void impl$wrapRunBlockEventsTimings(final ServerLevel level) {
         this.bridge$getTimingsHandler().scheduledBlocks.startTiming();
         this.shadow$runBlockEvents();
         this.bridge$getTimingsHandler().scheduledBlocks.stopTiming();
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "net/minecraft/server/level/ServerLevel.tickBlockEntities()V"))
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;tickBlockEntities()V"))
     protected void impl$wrapBlockEntitiesTimings(final ServerLevel level) {
         this.bridge$getTimingsHandler().tickEntities.stopTiming();
         this.bridge$getTimingsHandler().tileEntityTick.startTiming();

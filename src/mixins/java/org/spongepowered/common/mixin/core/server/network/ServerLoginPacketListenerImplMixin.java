@@ -26,14 +26,11 @@ package org.spongepowered.common.mixin.core.server.network;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
-import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
-import net.minecraft.server.players.PlayerList;
-import org.apache.logging.log4j.Logger;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -47,7 +44,6 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
@@ -55,9 +51,7 @@ import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerImplBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
-
-import java.net.SocketAddress;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge, ConnectionHolderBridge {
@@ -118,11 +112,11 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             } else {
                 // Sponge start - Also send the channel registrations using the minecraft channel, for compatibility
                 final ServerSideConnection connection = (ServerSideConnection) this;
-                ((SpongeChannelRegistry) Sponge.channelRegistry()).sendChannelRegistrations(connection);
+                ((SpongeChannelManager) Sponge.channelManager()).sendChannelRegistrations(connection);
                 // Sponge end
                 this.server.getPlayerList().placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
             }
-        }, SpongeCommon.getServer());
+        }, SpongeCommon.server());
     }
 
     private void impl$disconnectClient(final Component disconnectMessage) {
@@ -136,7 +130,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
         final Cause cause = Cause.of(EventContext.empty(), this);
         final ServerSideConnectionEvent.Auth event = SpongeEventFactory.createServerSideConnectionEventAuth(
                 cause, disconnectMessage, disconnectMessage, (ServerSideConnection) this);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (event.isCancelled()) {
             this.impl$disconnectClient(event.message());
         }

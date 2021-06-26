@@ -36,8 +36,6 @@ import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.command.brigadier.argument.CustomArgumentParser;
-import org.spongepowered.common.command.brigadier.context.SpongeCommandContext;
 
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
@@ -86,8 +84,8 @@ public final class CommandUtil {
                     .forEach(completion -> builder.suggest(completion.completion(),
                             completion.tooltip().map(SpongeAdventure::asVanilla).orElse(null)));
         } catch (final CommandException ex) {
-            SpongeCommon.getLogger().error("Could not determine completions for {}", rawCommand);
-            SpongeCommon.getLogger().error(ex);
+            SpongeCommon.logger().error("Could not determine completions for {}", rawCommand);
+            SpongeCommon.logger().error(ex);
         }
         return builder;
     }

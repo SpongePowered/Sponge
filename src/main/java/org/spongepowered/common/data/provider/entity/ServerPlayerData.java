@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
+import com.mojang.authlib.properties.Property;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.stats.Stat;
 import net.minecraft.world.level.GameType;
@@ -40,8 +41,10 @@ import org.spongepowered.common.bridge.server.level.ServerPlayerEntityHealthScal
 import org.spongepowered.common.bridge.stats.StatsCounterBridge;
 import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.profile.SpongeProfileProperty;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Collection;
 import java.util.stream.Collectors;
 
 public final class ServerPlayerData {
@@ -57,7 +60,13 @@ public final class ServerPlayerData {
                         .get(h -> (GameMode) (Object) h.gameMode.getGameModeForPlayer())
                         .set((h, v) -> h.setGameMode((GameType) (Object) v))
                     .create(Keys.SKIN_PROFILE_PROPERTY)
-                        .get(h -> (ProfileProperty) h.getGameProfile().getProperties().get(ProfileProperty.TEXTURES).iterator().next())
+                        .get(h -> {
+                            final Collection<Property> properties = h.getGameProfile().getProperties().get(ProfileProperty.TEXTURES);
+                            if (properties.isEmpty()) {
+                                return null;
+                            }
+                            return new SpongeProfileProperty(properties.iterator().next());
+                        })
                     .create(Keys.SPECTATOR_TARGET)
                         .get(h -> (Entity) h.getCamera())
                         .set((h, v) -> h.setCamera((net.minecraft.world.entity.Entity) v))

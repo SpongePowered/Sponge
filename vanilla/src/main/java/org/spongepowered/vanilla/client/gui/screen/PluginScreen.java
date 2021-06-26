@@ -58,7 +58,7 @@ public final class PluginScreen extends Screen {
         super(new TextComponent("Plugins"));
         this.previousScreen = previousScreen;
         this.metadata = new ObjectArrayList<>();
-        final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().plugins();
+        final Collection<PluginContainer> plugins = Launch.instance().pluginManager().plugins();
         this.metadata.addAll(plugins.stream().map(PluginContainer::metadata).collect(Collectors.toList()));
     }
 
@@ -74,7 +74,7 @@ public final class PluginScreen extends Screen {
         // Add plugin list
         this.selectionList.setSelectConsumer(e -> this.contentPanel.setMetadata(e == null ? null : e.metadata));
         this.generateEntries(
-            Launch.getInstance().getPluginManager().plugins().stream().map(PluginContainer::metadata).collect(Collectors.toList()));
+            Launch.instance().pluginManager().plugins().stream().map(PluginContainer::metadata).collect(Collectors.toList()));
 
         // Add search text field
         this.searchField = new EditBox(this.font, this.width / 2 - 100, 22, 200, 20, new TranslatableComponent(I18n.get("itemGroup.search")));

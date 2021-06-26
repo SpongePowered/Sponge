@@ -77,7 +77,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.entity.living.Humanoid;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
@@ -232,7 +231,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(SpongeCommon.getActivePlugin());
+            frame.pushCause(SpongeCommon.activePlugin());
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
             ServerLevel destinationWorld = (net.minecraft.server.level.ServerLevel) location.world();
@@ -243,7 +242,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.currentCause(),
                         (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getLevel(),
                         location.world(), location.world());
-                if (SpongeCommon.postEvent(event)) {
+                if (SpongeCommon.post(event)) {
                     return false;
                 }
 
@@ -253,7 +252,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                                 VecHelper.toVector3d(this.shadow$position()), location.position(), event.originalDestinationWorld(),
                                 location.position(), event.destinationWorld());
 
-                if (SpongeCommon.postEvent(repositionEvent)) {
+                if (SpongeCommon.post(repositionEvent)) {
                     return false;
                 }
 
@@ -265,7 +264,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
                             (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
                             location.position(), location.position());
-                    if (SpongeCommon.postEvent(event)) {
+                    if (SpongeCommon.post(event)) {
                         return false;
                     }
 
@@ -446,7 +445,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             if (!hasMovementContext) {
-                frame.pushCause(SpongeCommon.getActivePlugin());
+                frame.pushCause(SpongeCommon.activePlugin());
                 frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
             }
 
@@ -456,7 +455,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                             (org.spongepowered.api.entity.Entity) player, VecHelper.toVector3d(player.position()),
                             new Vector3d(x, y, z), new Vector3d(x, y, z));
 
-                    if (SpongeCommon.postEvent(posEvent)) {
+                    if (SpongeCommon.post(posEvent)) {
                         return;
                     }
 
@@ -470,7 +469,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                             (org.spongepowered.api.entity.Entity) player, new Vector3d(actualPitch, actualYaw, 0),
                             new Vector3d(pitch, yaw, 0));
 
-                    SpongeCommon.postEvent(rotateEvent);
+                    SpongeCommon.post(rotateEvent);
 
                     actualYaw = rotateEvent.isCancelled() ? player.getYRot() : rotateEvent.toRotation().y();
                     actualPitch = rotateEvent.isCancelled() ? player.getXRot() : rotateEvent.toRotation().x();
@@ -491,7 +490,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                 world.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkpos, 1, player.getId());
             } else {
                 final ChangeEntityWorldEvent.Pre preEvent = PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre(player, world);
-                if (SpongeCommon.postEvent(preEvent)) {
+                if (SpongeCommon.post(preEvent)) {
                     return;
                 }
 
@@ -500,7 +499,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                             (org.spongepowered.api.entity.Entity) player, preEvent.originalWorld(), VecHelper.toVector3d(player.position()),
                             new Vector3d(x, y, z), preEvent.originalDestinationWorld(), new Vector3d(x, y, z), preEvent.destinationWorld());
 
-                    if (SpongeCommon.postEvent(posEvent)) {
+                    if (SpongeCommon.post(posEvent)) {
                         return;
                     }
 
@@ -515,7 +514,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                             (org.spongepowered.api.entity.Entity) player, new Vector3d(actualYaw, actualPitch, 0),
                             new Vector3d(yaw, pitch, 0));
 
-                    if (!SpongeCommon.postEvent(rotateEvent)) {
+                    if (!SpongeCommon.post(rotateEvent)) {
                         actualYaw = (float) rotateEvent.toRotation().x();
                         actualPitch = (float) rotateEvent.toRotation().y();
                     }
@@ -758,7 +757,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     private User impl$getUserObjectOnConstruction() {
-        final SpongeUserManager manager = (SpongeUserManager) SpongeCommon.getGame().server().userManager();
+        final SpongeUserManager manager = (SpongeUserManager) SpongeCommon.game().server().userManager();
         if (this.impl$isFake) {
             return manager.findOrCreate(SpongeUserManager.FAKEPLAYER_PROFILE);
         }
@@ -807,7 +806,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     (ServerPlayer) this,
                     packet.getChatColors(),
                     viewDistance);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
         }
     }
 

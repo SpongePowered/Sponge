@@ -24,13 +24,17 @@
  */
 package org.spongepowered.vanilla.applaunch.plugin;
 
-import org.spongepowered.common.applaunch.plugin.PluginEngine;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.plugin.PluginCandidate;
 import org.spongepowered.plugin.PluginEnvironment;
+import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.PluginResourceLocatorService;
 
+import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.IdentityHashMap;
@@ -41,7 +45,7 @@ import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
 
-public final class VanillaPluginEngine implements PluginEngine {
+public final class VanillaPluginPlatform implements PluginPlatform {
 
     private final PluginEnvironment pluginEnvironment;
     private final Map<String, PluginResourceLocatorService<PluginResource>> locatorServices;
@@ -50,7 +54,7 @@ public final class VanillaPluginEngine implements PluginEngine {
     private final Map<String, List<PluginResource>> locatorResources;
     private final Map<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> pluginCandidates;
 
-    public VanillaPluginEngine(final PluginEnvironment pluginEnvironment) {
+    public VanillaPluginPlatform(final PluginEnvironment pluginEnvironment) {
         this.pluginEnvironment = pluginEnvironment;
         this.locatorServices = new HashMap<>();
         this.languageServices = new HashMap<>();
@@ -59,6 +63,41 @@ public final class VanillaPluginEngine implements PluginEngine {
     }
 
     @Override
+    public String version() {
+        return this.pluginEnvironment.blackboard().get(PluginKeys.VERSION).orElse("dev");
+    }
+
+    @Override
+    public void setVersion(final String version) {
+        this.pluginEnvironment.blackboard().getOrCreate(PluginKeys.VERSION, () -> version);
+    }
+
+    @Override
+    public Logger logger() {
+        return this.pluginEnvironment.logger();
+    }
+
+    @Override
+    public Path baseDirectory() {
+        return this.pluginEnvironment.blackboard().get(PluginKeys.BASE_DIRECTORY).orElse(Paths.get("."));
+    }
+
+    @Override
+    public void setBaseDirectory(final Path baseDirectory) {
+        this.pluginEnvironment.blackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> baseDirectory);
+    }
+
+    @Override
+    public List<Path> pluginDirectories() {
+        return this.pluginEnvironment.blackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElseThrow(() -> new IllegalStateException("No plugin "
+            + "directories have been specified!"));
+    }
+
+    @Override
+    public void setPluginDirectories(final List<Path> pluginDirectories) {
+        this.pluginEnvironment.blackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> pluginDirectories);
+    }
+
     public PluginEnvironment getPluginEnvironment() {
         return this.pluginEnvironment;
     }
@@ -105,7 +144,7 @@ public final class VanillaPluginEngine implements PluginEngine {
 
     public void discoverLanguageServices() {
         final ServiceLoader<PluginLanguageService<PluginResource>> serviceLoader = (ServiceLoader<PluginLanguageService<PluginResource>>) (Object) ServiceLoader.load(
-                PluginLanguageService.class, VanillaPluginEngine.class.getClassLoader());
+                PluginLanguageService.class, VanillaPluginPlatform.class.getClassLoader());
 
         for (final Iterator<PluginLanguageService<PluginResource>> iter = serviceLoader.iterator(); iter.hasNext(); ) {
             final PluginLanguageService<PluginResource> next;

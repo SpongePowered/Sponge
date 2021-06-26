@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
@@ -142,6 +143,6 @@ public final class PhaseTrackerCategory {
     public final Map<String, Boolean> autoFixNullSourceBlockProvidingBlockEntities = new HashMap<>();
 
     private boolean isVanilla() {
-        return SpongeConfigs.getPluginEnvironment().blackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
+        return AppLaunch.pluginPlatform().vanilla();
     }
 }

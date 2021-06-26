@@ -53,12 +53,12 @@ public class SpongeRegistryReference<T> extends SpongeRegistryKey<T> implements 
         T found = this.getFromHolder(Objects.requireNonNull(holder, "holder"));
         if (found == null) {
             if (holder instanceof Engine) {
-                found = this.getFromHolder(SpongeCommon.getGame().registries());
+                found = this.getFromHolder(SpongeCommon.game().registries());
             } else if (holder instanceof World) {
                 found = this.getFromHolder(EngineUtil.determineEngine().registries());
 
                 if (found == null) {
-                    found = this.getFromHolder(SpongeCommon.getGame().registries());
+                    found = this.getFromHolder(SpongeCommon.game().registries());
                 }
             }
         }

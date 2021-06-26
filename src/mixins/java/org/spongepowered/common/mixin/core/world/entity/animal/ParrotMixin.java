@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity.animal;
 
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.animal.Parrot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -51,7 +50,7 @@ public abstract class ParrotMixin extends AgableMobMixin {
             stack.setCount(stack.getCount() + 1);
             try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(player);
-                if (!SpongeCommon.postEvent(SpongeEventFactory.createTameEntityEvent(frame.currentCause(), (Parrot) this))) {
+                if (!SpongeCommon.post(SpongeEventFactory.createTameEntityEvent(frame.currentCause(), (Parrot) this))) {
                     stack.setCount(stack.getCount() - 1);
                     return random;
                 }

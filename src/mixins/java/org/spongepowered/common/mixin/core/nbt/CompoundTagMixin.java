@@ -85,7 +85,7 @@ public abstract class CompoundTagMixin {
                 }
             }
             printer.add();
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
             return null;
         }
     }
@@ -94,7 +94,7 @@ public abstract class CompoundTagMixin {
     private Tag impl$checkForNullNBTValuesDuringCopy(CompoundTag compound, String key, Tag value) {
         if (value == null) {
             final IllegalStateException exception = new IllegalStateException("There is a null NBT component in the compound for key: " + key);
-            SpongeCommon.getLogger().error("Printing out a stacktrace to catch an exception in performing an NBTTagCompound.copy!\n"
+            SpongeCommon.logger().error("Printing out a stacktrace to catch an exception in performing an NBTTagCompound.copy!\n"
                                          + "If you are seeing this, then Sponge is preventing an exception from being thrown due to unforseen\n"
                                          + "possible bugs in any mods present. Please report this to SpongePowered and/or the relative mod\n"
                                          + "authors for the offending compound data!", exception);

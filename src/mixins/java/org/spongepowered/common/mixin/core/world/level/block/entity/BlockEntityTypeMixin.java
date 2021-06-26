@@ -53,7 +53,7 @@ public abstract class BlockEntityTypeMixin implements ResourceKeyBridge, BlockEn
         )
     )
     private static Object impl$setKeyAndInitializeTrackerState(final Registry<Object> registry, final String key, final Object tileEntityType) {
-        final PluginContainer plugin = SpongeCommon.getActivePlugin();
+        final PluginContainer plugin = SpongeCommon.activePlugin();
 
         Registry.register(registry, key, tileEntityType);
 

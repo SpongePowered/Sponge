@@ -54,7 +54,7 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
 
     @Override
     public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
-        SpongeCommon.getServer().sendMessage(SpongeAdventure.asVanilla(message), identity.uuid());
+        SpongeCommon.server().sendMessage(SpongeAdventure.asVanilla(message), identity.uuid());
     }
 
     @Override
@@ -62,17 +62,17 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
         return new CommandSourceStack(this,
                 Vec3.ZERO,
                 Vec2.ZERO,
-                SpongeCommon.getServer().getLevel(Level.OVERWORLD),
+                SpongeCommon.server().getLevel(Level.OVERWORLD),
                 4,
                 "System Subject",
                 new TextComponent("System Subject"),
-                SpongeCommon.getServer(),
+                SpongeCommon.server(),
                 null);
     }
 
     @Override
     public void sendMessage(final net.minecraft.network.chat.Component component, final UUID identity) {
-        SpongeCommon.getLogger().info(component.getString());
+        SpongeCommon.logger().info(component.getString());
     }
 
     @Override
@@ -95,8 +95,8 @@ public final class ServerConsoleSystemSubject extends SpongeSystemSubject implem
     public Locale locale() {
         // If we're running a client, then get the client's locale rather than assume the
         // default locale.
-        if (SpongeCommon.getGame().isClientAvailable()) {
-            return SpongeCommon.getGame().client().locale();
+        if (SpongeCommon.game().isClientAvailable()) {
+            return SpongeCommon.game().client().locale();
         }
         // Dedicated servers only support the default locale.
         return Locales.DEFAULT;

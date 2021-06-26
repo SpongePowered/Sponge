@@ -61,7 +61,7 @@ public class TimedEventListener<T extends Event> implements EventListener<T> {
 
     @Override
     public void handle(T event) throws Exception {
-        if (!Timings.isTimingsEnabled() || !SpongeCommon.getServer().isSameThread()) {
+        if (!Timings.isTimingsEnabled() || !SpongeCommon.server().isSameThread()) {
             this.listener.handle(event);
             return;
         }

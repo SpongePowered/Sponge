@@ -96,7 +96,7 @@ public class SpongeScoreCriterionProgress implements ScoreCriterionProgress, Imp
             event = SpongeEventFactory.createCriterionEventScoreChange(
                     cause, advancement, this.criterion(), player, lastScore, score);
         }
-        if (SpongeCommon.postEvent(event)) {
+        if (SpongeCommon.post(event)) {
             return this.get();
         }
         SpongeScoreCriterion.BYPASS_EVENT = true;

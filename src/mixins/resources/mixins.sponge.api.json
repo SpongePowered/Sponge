@@ -375,7 +375,6 @@
         "minecraft.world.scores.Team_VisibilityMixin_API",
         "minecraft.world.scores.criteria.ObjectiveCriteria_RenderTypeMixin_API",
         "minecraft.world.scores.criteria.ObjectiveCriteriaMixin_API",
-        "mojang.authlib.properties.PropertyMixin_API",
         "service.permission.SubjectMixin_API",
         "world.LocatableBlockMixin_API"
     ],

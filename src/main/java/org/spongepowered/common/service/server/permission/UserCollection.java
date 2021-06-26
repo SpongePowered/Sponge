@@ -60,7 +60,7 @@ public class UserCollection extends SpongeSubjectCollection {
         try {
             return SpongeGameProfile.toMcProfile(Sponge.server().gameProfileManager().basicProfile(uuid).get());
         } catch (final Exception e) {
-            SpongeCommon.getLogger().warn("Failed to lookup game profile for {}", uuid, e);
+            SpongeCommon.logger().warn("Failed to lookup game profile for {}", uuid, e);
             // TODO: I'm sure this is null for a reason, but it breaks subjects.
             // Temporary.
             return new GameProfile(uuid, null);
@@ -89,7 +89,7 @@ public class UserCollection extends SpongeSubjectCollection {
     @Override
     @SuppressWarnings({"unchecked", "rawtypes"})
     public Collection<Subject> loadedSubjects() {
-        return (Collection) SpongeCommon.getGame().server().onlinePlayers();
+        return (Collection) SpongeCommon.game().server().onlinePlayers();
         /*return ImmutableSet.copyOf(Iterables.concat(
                 Iterables.<Object, Subject>transform(SpongePermissionService.getOps().getValues().values(),
                         new Function<Object, Subject>() {

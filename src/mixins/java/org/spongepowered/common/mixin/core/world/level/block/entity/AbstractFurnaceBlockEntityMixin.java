@@ -85,7 +85,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         final AbstractCookingRecipe recipe = ((AbstractFurnaceBlockEntityMixin) (Object) entity).impl$getCurrentRecipe();
         final CookingEvent.ConsumeFuel event = SpongeEventFactory.createCookingEventConsumeFuel(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
                 Optional.of((CookingRecipe) recipe), Collections.singletonList(transaction));
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (event.isCancelled()) {
             ((AbstractFurnaceBlockEntityMixin) (Object) entity).cookingTotalTime = 0;
             return;
@@ -125,13 +125,13 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         if (((AbstractFurnaceBlockEntityMixin) (Object) (entity)).cookingProgress == 0) { // Start
             final CookingEvent.Start event = SpongeEventFactory.createCookingEventStart(cause, (FurnaceBlockEntity) entity, Optional.of(fuel),
                     Optional.of((CookingRecipe) recipe));
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return !event.isCancelled();
         } else { // Tick up
             final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(((AbstractFurnaceBlockEntityMixin) (Object) entity).items.get(0));
             final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, cooking, Optional.of(fuel),
                     Optional.of((CookingRecipe) recipe));
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             return !event.isCancelled();
         }
     }
@@ -147,7 +147,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         final ItemStackSnapshot cooking = ItemStackUtil.snapshotOf(((AbstractFurnaceBlockEntityMixin) (Object) entity).items.get(0));
         final CookingEvent.Tick event = SpongeEventFactory.createCookingEventTick(cause, (FurnaceBlockEntity) entity, cooking, Optional.of(fuel),
                 Optional.of((CookingRecipe) recipe));
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (event.isCancelled()) {
             return ((AbstractFurnaceBlockEntityMixin) (Object) entity).cookingProgress; // dont tick down
         }
@@ -199,7 +199,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
             final AbstractCookingRecipe recipe = this.impl$getCurrentRecipe();
             final CookingEvent.Interrupt event = SpongeEventFactory.createCookingEventInterrupt(cause, (FurnaceBlockEntity) this, Optional.of(fuel),
                                                                                             Optional.ofNullable((CookingRecipe) recipe));
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
         }
     }
 
@@ -218,7 +218,7 @@ public abstract class AbstractFurnaceBlockEntityMixin extends BaseContainerBlock
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(recipe.getResultItem());
         final CookingEvent.Finish event = SpongeEventFactory.createCookingEventFinish(cause, entity,
                 Collections.singletonList(snapshot), Optional.of(fuel), Optional.ofNullable((CookingRecipe) recipe));
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
     }
 
     // Custom recipes

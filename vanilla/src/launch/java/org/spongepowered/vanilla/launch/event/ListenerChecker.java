@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.vanilla.launch.event;
 
 import com.google.common.base.CaseFormat;
 import io.leangen.geantyref.GenericTypeReflector;
@@ -48,7 +48,6 @@ public final class ListenerChecker {
     private final Class<?> clazz;
     private Map<String, FieldData> fields = new HashMap<>();
     private Map<Class<?>, FieldData> fieldClassMap = new IdentityHashMap<>();
-
 
     private static String getName(Class<?> clazz) {
         // Properly account for inner classes. Class#getName uses a $
@@ -188,7 +187,7 @@ public final class ListenerChecker {
                 this.listenerCount--;
             }
             if (this.listenerCount < 0) {
-                SpongeCommon.getLogger().error(String.format("Decremented listener count to %s for field %s", this.listenerCount, this.field), new Exception("Dummy exception"));
+                SpongeCommon.logger().error(String.format("Decremented listener count to %s for field %s", this.listenerCount, this.field), new Exception("Dummy exception"));
             }
             boolean val = this.listenerCount > 0;
 
@@ -199,7 +198,7 @@ public final class ListenerChecker {
             try {
                 this.field.set(null, val);
             } catch (IllegalAccessException e) {
-                SpongeCommon.getLogger().error(String.format("Error setting field %s to %s", this.field, val), e);
+                SpongeCommon.logger().error(String.format("Error setting field %s to %s", this.field, val), e);
             }
         }
     }

@@ -40,8 +40,8 @@ public final class HumanData {
         registrator
                 .asMutable(HumanEntity.class)
                     .create(Keys.SKIN_PROFILE_PROPERTY)
-                        .get(h -> (ProfileProperty) h.getSkinProperty())
-                        .set((h, v) -> h.setSkinProperty((Property) v))
+                        .get(HumanEntity::getSkinProperty)
+                        .set(HumanEntity::setSkinProperty)
                         .delete(h -> h.setSkinProperty(null));
     }
     // @formatter:on

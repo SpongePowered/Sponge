@@ -65,7 +65,7 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin
 
     @Inject(method = "initServer", at = @At("HEAD"))
     private void vanilla$runEngineStartLifecycle(final CallbackInfoReturnable<Boolean> cir) {
-        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
         lifecycle.establishServerServices();
 
         lifecycle.establishServerFeatures();
@@ -76,7 +76,7 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin
 
     @Inject(method = "initServer", at = @At("RETURN"))
     private void vanilla$callStartedEngineAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
-        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
         lifecycle.callStartedEngineEvent(this);
     }
 

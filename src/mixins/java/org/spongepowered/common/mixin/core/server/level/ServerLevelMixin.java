@@ -215,7 +215,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
                     event =
                     SpongeEventFactory.createExplosionEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                             explosion, (org.spongepowered.api.world.server.ServerWorld) this);
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 return;
             }
             explosion = event.explosion();
@@ -333,8 +333,8 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
                 levelData.setCustomBossEvents(((ServerLevelBridge) this).bridge$getBossBarManager().save());
 
-                ((ServerLevelBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.getServer().registryAccess()
-                    , (PrimaryLevelData) this.shadow$getLevelData(), this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.getServer().getPlayerList()
+                ((ServerLevelBridge) this).bridge$getLevelSave().saveDataTag(SpongeCommon.server().registryAccess()
+                    , (PrimaryLevelData) this.shadow$getLevelData(), this.shadow$dimension() == Level.OVERWORLD ? SpongeCommon.server().getPlayerList()
                         .getSingleplayerData() : null);
 
                 // Sponge End

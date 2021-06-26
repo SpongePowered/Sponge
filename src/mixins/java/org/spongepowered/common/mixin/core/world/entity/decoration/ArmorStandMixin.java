@@ -62,7 +62,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.currentCause(),
                 (Entity) this, new ArrayList<>(), Math.max(1000, this.shadow$getHealth()));
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 cir.setReturnValue(false);
             }
             if (event.finalDamage() < this.shadow$getHealth()) {
@@ -97,7 +97,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.currentCause(),
                 (Entity) this, new ArrayList<>(), amount);
-            if (!SpongeCommon.postEvent(event)) {
+            if (!SpongeCommon.post(event)) {
                 this.shadow$causeDamage(source, (float) event.finalDamage());
             }
         }
@@ -121,7 +121,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
             DamageEventHandler.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.currentCause(),
                 (Entity) this, new ArrayList<>(), 0);
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 cir.setReturnValue(false);
             }
         }

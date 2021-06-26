@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.network.channel.ConnectionUtil;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.TransactionStore;
 
 @Mixin(ServerLoginPacketListenerImpl.class)
@@ -69,7 +69,7 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
     private void onResponsePayload(final ServerboundCustomQueryPacket packet, final CallbackInfo ci) {
         ci.cancel();
 
-        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.channelRegistry();
+        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
         this.server.execute(() -> channelRegistry.handleLoginResponsePayload((EngineConnection) this, packet));
     }
 
@@ -80,16 +80,16 @@ public abstract class ServerLoginPacketListenerImplMixin_Vanilla implements Serv
             if (this.impl$handshakeState == ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_NOT_STARTED) {
                 this.impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_CLIENT_TYPE;
 
-                ((SpongeChannelRegistry) Sponge.channelRegistry()).requestClientType(connection).thenAccept(result -> {
+                ((SpongeChannelManager) Sponge.channelManager()).requestClientType(connection).thenAccept(result -> {
                     this.impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS;
                 });
 
             } else if (this.impl$handshakeState == ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_CHANNEL_REGISTRATIONS) {
-                ((SpongeChannelRegistry) Sponge.channelRegistry()).sendLoginChannelRegistry(connection).thenAccept(result -> {
+                ((SpongeChannelManager) Sponge.channelManager()).sendLoginChannelRegistry(connection).thenAccept(result -> {
                     final Cause cause = Cause.of(EventContext.empty(), this);
                     final ServerSideConnectionEvent.Handshake event =
                             SpongeEventFactory.createServerSideConnectionEventHandshake(cause, connection);
-                    SpongeCommon.postEvent(event);
+                    SpongeCommon.post(event);
                     this.impl$handshakeState = ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA;
                 });
             } else if (this.impl$handshakeState == ServerLoginPacketListenerImplMixin_Vanilla.HANDSHAKE_SYNC_PLUGIN_DATA) {

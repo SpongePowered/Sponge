@@ -44,7 +44,6 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.ai.attributes.Attribute;
 import net.minecraft.world.entity.ai.attributes.AttributeInstance;
 import net.minecraft.world.entity.ai.attributes.AttributeMap;
-import net.minecraft.world.entity.animal.Fox;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.apache.logging.log4j.Level;
@@ -258,7 +257,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                             originalDamage);
             if (damageSource
                     != SpongeDamageSources.IGNORED) { // Basically, don't throw an event if it's our own damage source
-                SpongeCommon.postEvent(event);
+                SpongeCommon.post(event);
             }
             if (event.isCancelled()) {
                 return false;
@@ -428,7 +427,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                     + " stacktrace to the most appropriate mod/plugin available.")
                 .add()
                 .add(new IllegalArgumentException("Null DamageSource"))
-                .log(SpongeCommon.getLogger(), Level.WARN);
+                .log(SpongeCommon.logger(), Level.WARN);
             return false;
         }
         // Sponge - This hook is for forge use mainly
@@ -676,7 +675,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                             this.shadow$getZ()),
                     new Vector3d(x, y, z));
 
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 this.shadow$teleportTo(this.impl$preTeleportPosition.x(), this.impl$preTeleportPosition.y(),
                         this.impl$preTeleportPosition.z());
                 cir.setReturnValue(false);
@@ -743,7 +742,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 stack.getUseDuration(), stack.getUseDuration(), snapshot);
         }
 
-        if (SpongeCommon.postEvent(event)) {
+        if (SpongeCommon.post(event)) {
             ci.cancel();
         } else {
             this.useItemRemaining = event.remainingDuration();
@@ -794,7 +793,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             this.impl$addSelfToFrame(frame, snapshot, handType);
             event = SpongeEventFactory.createUseItemStackEventTick(PhaseTracker.getCauseStackManager().currentCause(),
                 this.useItemRemaining, this.useItemRemaining, snapshot);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
         }
         // Because the item usage will only finish if useItemRemaining == 0 and decrements it first, it should be >= 1
         this.useItemRemaining = Math.max(event.remainingDuration(), 1);
@@ -828,7 +827,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             event = SpongeEventFactory.createUseItemStackEventFinish(PhaseTracker.getCauseStackManager().currentCause(),
                 this.useItemRemaining, this.useItemRemaining, snapshot);
         }
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (event.remainingDuration() > 0) {
             this.useItemRemaining = event.remainingDuration();
             ci.cancel();
@@ -869,7 +868,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 new Transaction<>(ItemStackUtil.snapshotOf(this.impl$activeItemStackCopy), snapshot));
         }
 
-        if (SpongeCommon.postEvent(event)) {
+        if (SpongeCommon.post(event)) {
             this.shadow$setItemInHand(hand, this.impl$activeItemStackCopy.copy());
             return;
         }
@@ -896,7 +895,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
             final HandType handType = (HandType) (Object) this.shadow$getUsedItemHand();
             this.impl$addSelfToFrame(frame, snapshot, handType);
-            if (!SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().currentCause(),
+            if (!SpongeCommon.post(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().currentCause(),
                 duration, duration, snapshot))) {
                 stack.releaseUsing(world, self, duration);
             }
@@ -916,7 +915,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             this.impl$addSelfToFrame(frame, snapshot);
-            SpongeCommon.postEvent(SpongeEventFactory.createUseItemStackEventReset(PhaseTracker.getCauseStackManager().currentCause(),
+            SpongeCommon.post(SpongeEventFactory.createUseItemStackEventReset(PhaseTracker.getCauseStackManager().currentCause(),
                 this.useItemRemaining, this.useItemRemaining, snapshot));
         }
         this.impl$activeItemStackCopy = null;

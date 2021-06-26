@@ -84,10 +84,10 @@ public abstract class FishingHookMixin extends EntityMixin {
 
     @Nullable private ProjectileSource impl$projectileSource;
 
-    @Inject(method = "setHookedEntity", at = @At(value = "HEAD"), cancellable = true)
+    @Inject(method = "setHookedEntity", at = @At("HEAD"), cancellable = true)
     private void onSetHookedEntity(@Nullable net.minecraft.world.entity.Entity hookedIn, CallbackInfo ci) {
         if (hookedIn != null && SpongeCommon
-            .postEvent(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) hookedIn, (FishingBobber) this))) {
+            .post(SpongeEventFactory.createFishingEventHookEntity(PhaseTracker.getCauseStackManager().currentCause(), (Entity) hookedIn, (FishingBobber) this))) {
             this.hookedIn = null;
             ci.cancel();
         }
@@ -127,7 +127,7 @@ public abstract class FishingHookMixin extends EntityMixin {
             }
             PhaseTracker.getCauseStackManager().pushCause(playerEntity);
 
-            if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStop(PhaseTracker.getCauseStackManager().currentCause(), ((FishingBobber) this), transactions))) {
+            if (SpongeCommon.post(SpongeEventFactory.createFishingEventStop(PhaseTracker.getCauseStackManager().currentCause(), ((FishingBobber) this), transactions))) {
                 // Event is cancelled
                 return 0;
             }

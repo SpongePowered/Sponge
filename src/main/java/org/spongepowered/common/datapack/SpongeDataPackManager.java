@@ -118,7 +118,7 @@ public final class SpongeDataPackManager {
             }
         } catch (final IOException e) {
             dataPacksToLoad.remove("file/" + implType.getPackSerializer().getPackName());
-            SpongeCommon.getLogger().error(e);
+            SpongeCommon.logger().error(e);
         }
     }
 }

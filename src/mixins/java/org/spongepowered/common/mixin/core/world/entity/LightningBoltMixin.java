@@ -112,7 +112,7 @@ public abstract class LightningBoltMixin extends EntityMixin {
                 for (final Entity e : strike.entities()) {
                     ((net.minecraft.world.entity.Entity) e).thunderHit((ServerLevel) this.level, (LightningBolt) (Object) this);
                 }
-                SpongeCommon.postEvent(SpongeEventFactory.createLightningEventPost(frame.currentCause()));
+                SpongeCommon.post(SpongeEventFactory.createLightningEventPost(frame.currentCause()));
             }
         }
     }

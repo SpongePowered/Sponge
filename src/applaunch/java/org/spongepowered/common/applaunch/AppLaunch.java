@@ -22,31 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.applaunch;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 
-import org.spongepowered.api.event.Event;
+public final class AppLaunch {
 
-import java.lang.reflect.Method;
+    private static PluginPlatform pluginPlatform;
 
-public abstract class AnnotatedEventListener implements SpongeEventListener<Event> {
-
-    protected final Object handle;
-
-    protected AnnotatedEventListener(Object handle) {
-        this.handle = checkNotNull(handle, "handle");
+    public static <P extends PluginPlatform> P setPluginPlatform(final PluginPlatform pluginPlatform) {
+        if (AppLaunch.pluginPlatform != null) {
+            throw new RuntimeException("The plugin platform cannot be set twice! (Same classloader ?)");
+        }
+        AppLaunch.pluginPlatform = pluginPlatform;
+        return (P) pluginPlatform;
     }
 
-    @Override
-    public final Object getHandle() {
-        return this.handle;
+    public static <P extends PluginPlatform> P pluginPlatform() {
+        return (P) AppLaunch.pluginPlatform;
     }
-
-    interface Factory {
-
-        AnnotatedEventListener create(Object handle, Method method) throws Exception;
-
-    }
-
 }

@@ -22,11 +22,16 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.applaunch.plugin;
+package org.spongepowered.vanilla.launch.inject;
 
-import org.spongepowered.plugin.PluginEnvironment;
+import com.google.inject.AbstractModule;
+import org.spongepowered.api.event.EventManager;
+import org.spongepowered.vanilla.launch.event.VanillaEventManager;
 
-public interface PluginEngine {
+public final class SpongeVanillaModule extends AbstractModule {
 
-    PluginEnvironment getPluginEnvironment();
+    @Override
+    protected void configure() {
+        this.bind(EventManager.class).to(VanillaEventManager.class);
+    }
 }

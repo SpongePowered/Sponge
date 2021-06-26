@@ -51,7 +51,7 @@ public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginContainer> 
         try {
             final String mainClass = container.metadata().mainClass();
             final Class<?> pluginClass = Class.forName(mainClass, true, targetClassLoader);
-            final Injector parentInjector = environment.blackboard().get(SpongeBootstrap.PARENT_INJECTOR).orElse(null);
+            final Injector parentInjector = SpongeBootstrap.injector();
             if (parentInjector != null) {
                 final Injector childInjector = parentInjector.createChildInjector(new PluginModule(container, pluginClass));
                 return childInjector.getInstance(pluginClass);

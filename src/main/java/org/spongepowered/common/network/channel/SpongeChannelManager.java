@@ -35,7 +35,7 @@ import org.spongepowered.api.event.lifecycle.RegisterChannelEvent;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.channel.Channel;
 import org.spongepowered.api.network.channel.ChannelBuf;
-import org.spongepowered.api.network.channel.ChannelRegistry;
+import org.spongepowered.api.network.channel.ChannelManager;
 import org.spongepowered.api.network.channel.NoResponseException;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.api.network.channel.packet.basic.BasicPacketChannel;
@@ -69,14 +69,14 @@ import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 
 @SuppressWarnings("unchecked")
-public class SpongeChannelRegistry implements ChannelRegistry {
+public class SpongeChannelManager implements ChannelManager {
 
     private final Map<ResourceKey, SpongeChannel> channels = new HashMap<>();
     private final Map<Class<?>, Tuple<Integer, CreateFunction<SpongeChannel>>> channelBuilders = new HashMap<>();
 
     private final ChannelBufferAllocator bufferAllocator;
 
-    public SpongeChannelRegistry(final ChannelBufferAllocator bufferAllocator) {
+    public SpongeChannelManager(final ChannelBufferAllocator bufferAllocator) {
         this.bufferAllocator = bufferAllocator;
 
         this.registerChannelType(0, RawDataChannel.class, SpongeRawDataChannel::new);
@@ -90,7 +90,7 @@ public class SpongeChannelRegistry implements ChannelRegistry {
 
     interface CreateFunction<C extends Channel> {
 
-        C create(int type, ResourceKey key, SpongeChannelRegistry registry);
+        C create(int type, ResourceKey key, SpongeChannelManager registry);
     }
 
     private <T extends Channel> void registerChannelType(final int id,
@@ -163,12 +163,12 @@ public class SpongeChannelRegistry implements ChannelRegistry {
 
             @Override
             public <C extends Channel> C register(ResourceKey channelKey, Class<C> channelType) throws DuplicateRegistrationException {
-                return SpongeChannelRegistry.this.createChannel(channelKey, channelType);
+                return SpongeChannelManager.this.createChannel(channelKey, channelType);
             }
 
             @Override
             public Game game() {
-                return SpongeCommon.getGame();
+                return SpongeCommon.game();
             }
 
             @Override

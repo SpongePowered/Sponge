@@ -42,7 +42,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.profile.GameProfileProvider;
 import org.spongepowered.api.profile.ProfileNotFoundException;
-import org.spongepowered.api.profile.property.ProfileProperty;
 import org.spongepowered.common.SpongeCommon;
 
 import java.io.IOException;
@@ -66,11 +65,11 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
     private static final Gson GSON = new Gson();
 
     private <T> CompletableFuture<T> submit(final Callable<T> callable) {
-        return SpongeCommon.getAsyncScheduler().submit(callable);
+        return SpongeCommon.asyncScheduler().submit(callable);
     }
 
     private void submit(final Runnable runnable) {
-        SpongeCommon.getAsyncScheduler().execute(runnable);
+        SpongeCommon.asyncScheduler().execute(runnable);
     }
 
     /*
@@ -89,7 +88,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
 
     private CompletableFuture<@Nullable CachedProfile> requestProfile(final UUID uniqueId) {
         return this.submit(() -> {
-            final com.mojang.authlib.GameProfile mcProfile = SpongeCommon.getServer().getSessionService().fillProfileProperties(
+            final com.mojang.authlib.GameProfile mcProfile = SpongeCommon.server().getSessionService().fillProfileProperties(
                     new com.mojang.authlib.GameProfile(uniqueId, ""), true);
             if (mcProfile == null) {
                 return null;
@@ -175,7 +174,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
             });
         }
         final CompletableFuture<GameProfile> result = new CompletableFuture<>();
-        this.submit(() -> SpongeCommon.getServer().getProfileRepository().findProfilesByNames(new String[] { name }, Agent.MINECRAFT,
+        this.submit(() -> SpongeCommon.server().getProfileRepository().findProfilesByNames(new String[] { name }, Agent.MINECRAFT,
                 new SingleProfileLookupCallback(result)));
         return result;
     }
@@ -203,7 +202,7 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         }
         final List<String> nameList = Lists.newArrayList(names);
         final String[] namesArray = nameList.toArray(new String[0]);
-        this.submit(() -> SpongeCommon.getServer().getProfileRepository().findProfilesByNames(namesArray, Agent.MINECRAFT,
+        this.submit(() -> SpongeCommon.server().getProfileRepository().findProfilesByNames(namesArray, Agent.MINECRAFT,
                 new MapProfileLookupCallback(result, nameList)));
         return result;
     }
@@ -256,14 +255,14 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
         final String name = json.get("name").getAsString();
 
         final JsonArray propertiesJson = json.getAsJsonArray("properties");
-        final ImmutableList.Builder<ProfileProperty> properties = ImmutableList.builder();
+        final ImmutableList.Builder<SpongeProfileProperty> properties = ImmutableList.builder();
         for (final JsonElement propertyJson : propertiesJson) {
             final JsonObject propertyObj = propertyJson.getAsJsonObject();
             final String propertyName = propertyObj.get("name").getAsString();
             final String value = propertyObj.get("value").getAsString();
             final String signature = propertyObj.has("signature") ?
                     propertyObj.get("signature").getAsString() : null;
-            properties.add(ProfileProperty.of(propertyName, value, signature));
+            properties.add(new SpongeProfileProperty(propertyName, value, signature));
         }
 
         return new SpongeGameProfile(uniqueId, name, properties.build());

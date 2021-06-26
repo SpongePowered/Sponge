@@ -108,11 +108,7 @@ public final class Constants {
     public static final DataQuery UUID_MOST_QUERY = DataQuery.of(Constants.UUID_MOST);
     public static final String UUID_LEAST = "UUIDLeast";
     public static final DataQuery UUID_LEAST_QUERY = DataQuery.of(Constants.UUID_LEAST);
-    public static final BlockPos DUMMY_POS = new BlockPos(0, 0, 0);
     public static final String MINECRAFT = "minecraft";
-    public static final int MINECRAFT_DATA_VERSION = SharedConstants.getCurrentVersion().getWorldVersion();
-    public static final String MINECRAFT_VERSION = SharedConstants.getCurrentVersion().getName();
-    public static final int MINECRAFT_PROTOCOL_VERSION = SharedConstants.getCurrentVersion().getProtocolVersion();
     public static final String MINECRAFT_CLIENT = "net.minecraft.client.Minecraft";
     public static final String DEDICATED_SERVER = "net.minecraft.server.dedicated.DedicatedServer";
     public static final String MINECRAFT_SERVER = "net.minecraft.server.MinecraftServer";

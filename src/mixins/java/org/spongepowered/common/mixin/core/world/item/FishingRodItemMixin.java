@@ -73,7 +73,7 @@ public abstract class FishingRodItemMixin {
         int j = EnchantmentHelper.getFishingLuckBonus(itemstack);
         FishingHook fishHook = new FishingHook(player, world, j, k);
         PhaseTracker.getCauseStackManager().pushCause(player);
-        if (SpongeCommon.postEvent(SpongeEventFactory.createFishingEventStart(PhaseTracker.getCauseStackManager().currentCause(), (FishingBobber) fishHook))) {
+        if (SpongeCommon.post(SpongeEventFactory.createFishingEventStart(PhaseTracker.getCauseStackManager().currentCause(), (FishingBobber) fishHook))) {
             fishHook.remove(Entity.RemovalReason.DISCARDED); // Bye
             cir.setReturnValue(new InteractionResultHolder<>(InteractionResult.SUCCESS, player.getItemInHand(hand)));
         } else {

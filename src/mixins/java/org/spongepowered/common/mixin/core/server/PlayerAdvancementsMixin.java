@@ -198,7 +198,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
                 (ServerPlayer) this.player, instant, false
 
         );
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (!event.isMessageCancelled()) {
             event.audience().ifPresent(eventChannel -> eventChannel.sendMessage(Identity.nil(), event.message()));
         }
@@ -213,7 +213,7 @@ public abstract class PlayerAdvancementsMixin implements PlayerAdvancementsBridg
     private void impl$callRevokeEventIfSuccessful(final Advancement advancement, final String string, final CallbackInfoReturnable<Boolean> ci, boolean var0) {
         if (var0) {
             final Cause currentCause = Sponge.server().causeStackManager().currentCause();
-            SpongeCommon.postEvent(SpongeEventFactory.createAdvancementEventRevoke(currentCause, (org.spongepowered.api.advancement.Advancement) advancement, (ServerPlayer) this.player));
+            SpongeCommon.post(SpongeEventFactory.createAdvancementEventRevoke(currentCause, (org.spongepowered.api.advancement.Advancement) advancement, (ServerPlayer) this.player));
         }
     }
 

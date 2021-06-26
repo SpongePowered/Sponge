@@ -91,7 +91,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.TimingBridge;
-import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
@@ -114,6 +113,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.NetherPortalType;
@@ -212,6 +212,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$setYRot(final float param0);
     @Shadow public abstract void shadow$setXRot(final float param0);
     @Shadow protected abstract Vec3 shadow$collide(Vec3 param0);
+    @Shadow protected abstract boolean shadow$fireImmune();
     // @formatter:on
 
     @Shadow protected String stringUUID;
@@ -253,7 +254,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(SpongeCommon.getActivePlugin());
+            frame.pushCause(SpongeCommon.activePlugin());
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
             final net.minecraft.world.phys.Vec3 originalPosition = this.shadow$position();
@@ -264,7 +265,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.currentCause(),
                         (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getCommandSenderWorld(), location.world(),
                         location.world());
-                if (SpongeCommon.postEvent(event) && ((WorldBridge) event.destinationWorld()).bridge$isFake()) {
+                if (SpongeCommon.post(event) && ((WorldBridge) event.destinationWorld()).bridge$isFake()) {
                     return false;
                 }
 
@@ -274,7 +275,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                                 VecHelper.toVector3d(this.shadow$position()), location.position(), event.originalDestinationWorld(),
                                 location.position(), event.destinationWorld());
 
-                if (SpongeCommon.postEvent(repositionEvent)) {
+                if (SpongeCommon.post(repositionEvent)) {
                     return false;
                 }
 
@@ -288,7 +289,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
                             (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
                             location.position(), location.position());
-                    if (SpongeCommon.postEvent(event)) {
+                    if (SpongeCommon.post(event)) {
                         return false;
                     }
                     destination = event.destinationPosition();
@@ -329,7 +330,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.pushCause(this);
                 frame.addContext(EventContextKeys.DISMOUNT_TYPE, type);
-                if (SpongeCommon.postEvent(SpongeEventFactory.
+                if (SpongeCommon.post(SpongeEventFactory.
                         createRideEntityEventDismount(frame.currentCause(), (org.spongepowered.api.entity.Entity) this.shadow$getVehicle()))) {
                     return false;
                 }
@@ -700,7 +701,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 targetWorld
         );
 
-        SpongeCommon.postEvent(reposition);
+        SpongeCommon.post(reposition);
         return reposition;
     }
 
@@ -734,7 +735,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             if (ShouldFire.MOVE_ENTITY_EVENT) {
                 if (!server.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
                     hasMovementContext = false;
-                    server.pushCause(SpongeCommon.getActivePlugin());
+                    server.pushCause(SpongeCommon.activePlugin());
                     server.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
                 }
 
@@ -747,7 +748,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     server.removeContext(EventContextKeys.MOVEMENT_TYPE);
                 }
 
-                if (SpongeCommon.postEvent(event)) {
+                if (SpongeCommon.post(event)) {
                     return;
                 }
 
@@ -776,7 +777,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         final CallbackInfoReturnable<Boolean> ci) {
         if (!this.level.isClientSide && ShouldFire.RIDE_ENTITY_EVENT_MOUNT) {
             PhaseTracker.getCauseStackManager().pushCause(this);
-            if (SpongeCommon.postEvent(SpongeEventFactory.createRideEntityEventMount(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
+            if (SpongeCommon.post(SpongeEventFactory.createRideEntityEventMount(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.entity.Entity) vehicle))) {
                 ci.cancel();
             }
             PhaseTracker.getCauseStackManager().popCause();
@@ -1065,18 +1066,17 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             opcode = Opcodes.PUTFIELD)
     )
     private void impl$ThrowIgniteEventForFire(final Entity entity, final int ticks) {
-        if (((WorldBridge) this.level).bridge$isFake() || !ShouldFire.IGNITE_ENTITY_EVENT) {
-            this.remainingFireTicks = ticks; // Vanilla functionality
-            return;
-        }
-        if (this.remainingFireTicks < 1 && !this.impl$canCallIgniteEntityEvent()) {
+        if (!((WorldBridge) this.level).bridge$isFake() && ShouldFire.IGNITE_ENTITY_EVENT &&
+            this.remainingFireTicks < 1 && ticks >= Constants.Entity.MINIMUM_FIRE_TICKS &&
+            this.impl$canCallIgniteEntityEvent()) {
+
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
 
                 frame.pushCause(((org.spongepowered.api.entity.Entity) this).location().world());
                 final IgniteEntityEvent event = SpongeEventFactory.
                     createIgniteEntityEvent(frame.currentCause(), ticks, ticks, (org.spongepowered.api.entity.Entity) this);
 
-                if (SpongeCommon.postEvent(event)) {
+                if (SpongeCommon.post(event)) {
                     // Don't do anything
                     return;
                 }
@@ -1101,11 +1101,13 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     .filter(d -> d.key() == Keys.FIRE_TICKS)
                     .findFirst()
                     .map(Value::get)
-                    .map(o -> (int) (Object) o)
+                    .map(o -> (Ticks) (Object) o)
+                    .map(t -> (int) t.ticks())
                     .orElse(0);
-
             }
+            return;
         }
+        this.remainingFireTicks = ticks; // Vanilla functionality
     }
 
 
@@ -1172,14 +1174,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     /**
-     * Overridden method for Players to determine whether this entity is immune to fire
-     * such that {@link IgniteEntityEvent}s are not needed to be thrown as they cannot
-     * take fire damage, nor do they light on fire.
+     * Overridden method for Players to determine whether this entity is not immune to
+     * fire such that {@link IgniteEntityEvent}s are not needed to be thrown as they
+     * cannot take fire damage, nor do they light on fire.
      *
-     * @return True if this entity is immune to fire.
+     * @return True if this entity is not immune to fire.
      */
     protected boolean impl$canCallIgniteEntityEvent() {
-        return false;
+        return !this.shadow$fireImmune();
     }
 
     /*@Redirect(

@@ -27,15 +27,21 @@ package org.spongepowered.common.command.sponge;
 import co.aikar.timings.Timings;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
+import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextDecoration;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.adventure.SpongeComponents;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.manager.CommandMapping;
@@ -46,8 +52,10 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.PlatformLevelBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -202,9 +210,9 @@ public class SpongeCommand {
     }
 
     private @NonNull CommandResult rootCommand(final CommandContext context) {
-        final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
-        final PluginContainer apiPlugin = Launch.getInstance().getApiPlugin();
-        final PluginContainer minecraftPlugin = Launch.getInstance().getMinecraftPlugin();
+        final PluginContainer platformPlugin = Launch.instance().platformPlugin();
+        final PluginContainer apiPlugin = Launch.instance().apiPlugin();
+        final PluginContainer minecraftPlugin = Launch.instance().minecraftPlugin();
 
         context.sendMessage(Identity.nil(), Component.text().append(
                 Component.text("SpongePowered", NamedTextColor.YELLOW, TextDecoration.BOLD).append(Component.space()),
@@ -238,17 +246,18 @@ public class SpongeCommand {
     }
 
     private @NonNull CommandResult auditSubcommandExecutor(final CommandContext context) {
-        SpongeCommon.getLogger().info("Starting Mixin Audit");
-        Launch.getInstance().auditMixins();
+        SpongeCommon.logger().info("Starting Mixin Audit");
+        Launch.instance().auditMixins();
         return CommandResult.success();
     }
 
     private Command.Parameterized chunksSubcommand() {
         final Command.Parameterized globalCommand = Command.builder()
                 .executor(context -> {
-                    for (final ServerWorld world : SpongeCommon.getGame().server().worldManager().worlds()) {
-                        context.sendMessage(Identity.nil(), Component.text().content("World ")
-                                        .append(Component.text(world.key().toString(), Style.style(TextDecoration.BOLD)))
+                    for (final ServerWorld world : SpongeCommon.game().server().worldManager().worlds()) {
+                        context.sendMessage(Identity.nil(), Component.text().content("World: ")
+                                        .append(Component.text(world.key().toString(), NamedTextColor.GREEN))
+                                        .append(Component.newline())
                                         .append(this.getChunksInfo(world))
                                         .build());
                     }
@@ -259,8 +268,9 @@ public class SpongeCommand {
                 .addParameter(CommonParameters.WORLD)
                 .executor(context -> {
                     final ServerWorld world = context.requireOne(CommonParameters.WORLD);
-                    context.sendMessage(Identity.nil(), Component.text().content("World ")
-                            .append(Component.text(world.key().toString(), Style.style(TextDecoration.BOLD)))
+                    context.sendMessage(Identity.nil(), Component.text().content("World: ")
+                            .append(Component.text(world.key().toString(), NamedTextColor.GREEN))
+                            .append(Component.newline())
                             .append(this.getChunksInfo(world))
                             .build());
                     return CommandResult.success();
@@ -290,34 +300,34 @@ public class SpongeCommand {
         final File file = new File(new File(new File("."), "dumps"),
                 "heap-dump-" + DateTimeFormatter.ofPattern("yyyy-MM-dd_HH.mm.ss").format(LocalDateTime.now()) + "-server.hprof");
         // src.sendMessage(Text.of("Writing JVM heap data to: ", file));
-        SpongeCommon.getLogger().info("Writing JVM heap data to: {}", file.getAbsolutePath());
+        SpongeCommon.logger().info("Writing JVM heap data to: {}", file.getAbsolutePath());
         try {
             if (file.getParentFile() != null) {
                 file.getParentFile().mkdirs();
             }
 
-            final Class clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
+            final Class<?> clazz = Class.forName("com.sun.management.HotSpotDiagnosticMXBean");
             final MBeanServer server = ManagementFactory.getPlatformMBeanServer();
             final Object hotspotMBean = ManagementFactory.newPlatformMXBeanProxy(server, "com.sun.management:type=HotSpotDiagnostic", clazz);
             final Method m = clazz.getMethod("dumpHeap", String.class, boolean.class);
             m.invoke(hotspotMBean, file.getPath(), true);
         } catch (final Throwable t) {
-            SpongeCommon.getLogger().fatal(MessageFormat.format("Could not write heap to {0}", file));
+            SpongeCommon.logger().fatal(MessageFormat.format("Could not write heap to {0}", file));
         }
         // src.sendMessage(Text.of("Heap dump complete"));
-        SpongeCommon.getLogger().info("Heap dump complete");
+        SpongeCommon.logger().info("Heap dump complete");
         return CommandResult.success();
     }
 
     private @NonNull CommandResult pluginsListSubcommand(final CommandContext context) {
-        final Collection<PluginContainer> plugins = Launch.getInstance().getPluginManager().plugins();
+        final Collection<PluginContainer> plugins = Launch.instance().pluginManager().plugins();
         context.sendMessage(Identity.nil(), this.title("Plugins (" + plugins.size() + ")"));
         for (final PluginContainer specificContainer : plugins) {
             final PluginMetadata metadata = specificContainer.metadata();
             final TextComponent.Builder builder = Component.text();
             this.createShortContainerMeta(builder.append(SpongeCommand.INDENT_COMPONENT), metadata);
-            // builder.clickEvent(SpongeComponents.executeCallback(cause ->
-            //         cause.sendMessage(this.createContainerMeta(metadata))));
+            builder.clickEvent(SpongeComponents.executeCallback(cause ->
+                    cause.sendMessage(Identity.nil(), this.createContainerMeta(metadata))));
             context.sendMessage(Identity.nil(), builder.build());
         }
 
@@ -334,15 +344,15 @@ public class SpongeCommand {
         final Optional<PluginContainer> pluginContainer = context.one(this.pluginContainerKey);
         final RefreshGameEvent event = SpongeEventFactory.createRefreshGameEvent(
                 PhaseTracker.getCauseStackManager().currentCause(),
-                SpongeCommon.getGame()
+                SpongeCommon.game()
         );
         if (pluginContainer.isPresent()) {
             // just send the reload event to that
-            context.sendMessage(Identity.nil(), Component.text("Sending refresh event to" + pluginContainer.get().metadata().id() + ", please wait..."));
-            ((SpongeEventManager) SpongeCommon.getGame().eventManager()).post(event, pluginContainer.get());
+            context.sendMessage(Identity.nil(), Component.text("Sending refresh event to " + pluginContainer.get().metadata().id() + ", please wait..."));
+            ((SpongeEventManager) SpongeCommon.game().eventManager()).postToPlugin(event, pluginContainer.get());
         } else {
             context.sendMessage(Identity.nil(), Component.text("Sending refresh event to all plugins, please wait..."));
-            SpongeCommon.getGame().eventManager().post(event);
+            SpongeCommon.game().eventManager().post(event);
         }
 
         context.sendMessage(Identity.nil(), Component.text("Completed plugin refresh."));
@@ -423,27 +433,30 @@ public class SpongeCommand {
                 .build();
     }
 
-    private CommandResult tpsExecutor(final CommandContext context) {
-         final List<Component> tps = new ArrayList<>();
-          // Uncomment when per-world TPS is in and working.
-//        for (final ServerWorld world : Sponge.getServer().worldManager().getWorlds()) {
-//            // Add code to get the average here.
-//            final TextComponent.Builder builder =
-//                    TextComponent.builder("World [")
-//                            .append(Component.text(world.getKey().asString(), NamedTextColor.DARK_GREEN))
-//                            .append(Component.text("]"));
-//            tps.add(this.appendTickTime(((MinecraftServerBridge) SpongeCommon.getServer()).bridge$getWorldTickTimes()));
-//        }
+    private @NonNull CommandResult tpsExecutor(final CommandContext context) {
+        if (SpongeCommon.game().isServerAvailable()) {
 
-        tps.add(this.appendTickTime(SpongeCommon.getServer().tickTimes, Component.text().content("Overall TPS: ")).build());
+            final List<Component> tps = new ArrayList<>();
+            for (final ServerWorld world : Sponge.server().worldManager().worlds()) {
+                final TextComponent.Builder builder =
+                        Component.text()
+                                .content("World [")
+                                .append(Component.text(world.key().asString(), NamedTextColor.DARK_GREEN))
+                                .append(Component.text("] - TPS: "));
+                tps.add(this.appendTickTime(((PlatformLevelBridge) world).bridge$recentTickTimes(), builder).build());
+            }
 
-        SpongeCommon.getGame().serviceProvider()
-                .paginationService()
-                .builder()
-                .contents(tps)
-                .title(Component.text("Server TPS", NamedTextColor.WHITE))
-                .padding(Component.text("-", NamedTextColor.WHITE))
-                .sendTo(context.cause().audience());
+            tps.add(this.appendTickTime(SpongeCommon.server().tickTimes, Component.text().content("Overall TPS: ")).build());
+            SpongeCommon.game().serviceProvider()
+                    .paginationService()
+                    .builder()
+                    .contents(tps)
+                    .title(Component.text("Server TPS", NamedTextColor.WHITE))
+                    .padding(Component.text("-", NamedTextColor.WHITE))
+                    .sendTo(context.cause().audience());
+        } else {
+            context.sendMessage(Identity.nil(), Component.text("Server is not running."));
+        }
 
         return CommandResult.success();
     }
@@ -458,7 +471,7 @@ public class SpongeCommand {
 
     private @NonNull CommandResult versionExecutor(final CommandContext context) {
         if (this.versionText == null) {
-            final PluginContainer platformPlugin = Launch.getInstance().getPlatformPlugin();
+            final PluginContainer platformPlugin = Launch.instance().platformPlugin();
 
             final TextComponent.Builder builder = Component.text()
                     .append(
@@ -466,7 +479,7 @@ public class SpongeCommand {
                     );
 
             final Component colon = Component.text(": ", NamedTextColor.GRAY);
-            for (final PluginContainer container : Launch.getInstance().getLauncherPlugins()) {
+            for (final PluginContainer container : Launch.instance().launcherPlugins()) {
                 final PluginMetadata metadata = container.metadata();
                 builder.append(
                         Component.newline(),
@@ -523,7 +536,7 @@ public class SpongeCommand {
             .whenComplete(($, error) -> {
                 if (error != null) {
                     context.sendMessage(Identity.nil(), Component.text("Failed to reload global configuration. See the console for details.", NamedTextColor.RED));
-                    SpongeCommon.getLogger().error("Failed to reload global configuration", error);
+                    SpongeCommon.logger().error("Failed to reload global configuration", error);
                 } else {
                     context.sendMessage(Identity.nil(), Component.text("Successfully reloaded global configuration!", NamedTextColor.GREEN));
                 }
@@ -542,7 +555,7 @@ public class SpongeCommand {
                         .append(Component.text(worldId.toString(), Style.style(TextDecoration.BOLD)))
                         .append(Component.text(". See the console for details."))
                         .color(NamedTextColor.RED)));
-                SpongeCommon.getLogger().error("Failed to reload configuration of world '{}'", worldId, error);
+                SpongeCommon.logger().error("Failed to reload configuration of world '{}'", worldId, error);
             } else {
                 context.sendMessage(Identity.nil(), Component.text("Successfully reloaded configuration for world ", NamedTextColor.GREEN)
                     .append(Component.text(worldId.toString(), Style.style(TextDecoration.BOLD)))
@@ -554,26 +567,31 @@ public class SpongeCommand {
 
     // --
 
-    protected Component getChunksInfo(final ServerWorld worldserver) {
-        if (((WorldBridge) worldserver).bridge$isFake() || worldserver.worldStorage().worldProperties() == null) {
-            return Component.text().append(Component.newline(), Component.text("Fake world")).build();
+    protected Component getChunksInfo(final ServerWorld serverWorld) {
+        if (((WorldBridge) serverWorld).bridge$isFake()) {
+            return Component.text().append(Component.newline(), Component.text(serverWorld.key().asString() + " is a fake world")).build();
         }
-        return Component.text().append(Component.newline(), Component.text("chunk stuff here")).build();
-        /*
-                key("DimensionId: "), value(((WorldServerBridge) worldserver).bridge$getDimensionId()), TextComponent.newline(),
-                key("Loaded chunks: "), value(worldserver.getChunkProvider().getLoadedChunkCount()), TextComponent.newline(),
-                key("Active chunks: "), value(worldserver.getChunkProvider().loadedChunks().size()), TextComponent.newline(),
-                key("Entities: "), value(worldserver.loadedEntityList.size()), TextComponent.newline(),
-                key("Tile Entities: "), value(worldserver.loadedTileEntityList.size()), TextComponent.newline(),
-                key("Removed Entities:"), value(((WorldAccessor) worldserver).accessor$getUnloadedEntityList().size()), TextComponent.newline(),
-                key("Removed Tile Entities: "), value(((WorldAccessor) worldserver).accessor$getTileEntitiesToBeRemoved()), TextComponent.newline()*/
+        final ServerLevel serverLevel = (ServerLevel) serverWorld;
+        final int entitiesToRemove = (int) serverWorld.entities().stream().filter(x -> ((Entity) x).isRemoved()).count();
+        return LinearComponents.linear(
+                this.key("Loaded chunks: "), this.value(serverLevel.getChunkSource().chunkMap.size()),
+                Component.newline(),
+                this.key("Entities: "), this.value(serverWorld.entities().size()),
+                Component.newline(),
+                this.key("Block Entities: "), this.value(serverWorld.blockEntities().size()),
+                Component.newline(),
+                this.key("Removed Entities:"), this.value(entitiesToRemove),
+                Component.newline(),
+                this.key("Removed Block Entities: "), this.value((int) ((LevelAccessor) serverLevel).accessor$blockEntityTickers().stream().filter(
+                TickingBlockEntity::isRemoved).count())
+        );
     }
 
     protected Component key(final String text) {
         return Component.text(text, NamedTextColor.GOLD);
     }
 
-    protected Component value(final String text) {
+    protected Component value(final int text) {
         return Component.text(text, NamedTextColor.GRAY);
     }
 

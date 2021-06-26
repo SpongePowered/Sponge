@@ -174,7 +174,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     public void initialize() {
         SpongeUser.initializedUsers.add(this);
         this.compound = new CompoundTag();
-        final ServerLevel world = SpongeCommon.getServer().overworld();
+        final ServerLevel world = SpongeCommon.server().overworld();
         if (world == null) {
             return;
         }
@@ -190,7 +190,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
                 this.readCompound(NbtIo.readCompressed(in));
             }
         } catch (final IOException e) {
-            SpongeCommon.getLogger().warn("Corrupt user file '{}'!", file, e);
+            SpongeCommon.logger().warn("Corrupt user file '{}'!", file, e);
         }
     }
 
@@ -424,7 +424,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             return;
         }
         if (!this.isInitialized()) {
-            SpongeCommon.getLogger()
+            SpongeCommon.logger()
                     .warn("Unable to mark user data for [{}] as dirty, data is not initialized! Any changes may be lost.",
                             this.profile.getId());
         } else {
@@ -450,7 +450,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             SpongeUser.dirtyUsers.remove(this);
             this.invalidate();
         } catch (final IOException e) {
-            SpongeCommon.getLogger().warn("Failed to save user file [{}]!", file, e);
+            SpongeCommon.logger().warn("Failed to save user file [{}]!", file, e);
         }
     }
 
@@ -500,7 +500,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
 
     @Override
     public Optional<ServerPlayer> player() {
-        return Optional.ofNullable((ServerPlayer) SpongeCommon.getServer().getPlayerList().getPlayer(this.profile.getId()));
+        return Optional.ofNullable((ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.profile.getId()));
     }
 
     @Override

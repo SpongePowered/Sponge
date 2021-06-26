@@ -75,9 +75,9 @@ public final class DataUtil {
         final ResourceKey world = view.getResourceKey(Queries.WORLD_KEY).orElseThrow(DataUtil.dataNotFound());
         final Vector3d pos = DataUtil.getPosition3d(view, null);
         if (castToInt) {
-            return ServerLocation.of(SpongeCommon.getGame().server().worldManager().world(world).orElseThrow(DataUtil.dataNotFound()), pos.toInt());
+            return ServerLocation.of(SpongeCommon.game().server().worldManager().world(world).orElseThrow(DataUtil.dataNotFound()), pos.toInt());
         }
-        return ServerLocation.of(SpongeCommon.getGame().server().worldManager().world(world).orElseThrow(DataUtil.dataNotFound()), pos);
+        return ServerLocation.of(SpongeCommon.game().server().worldManager().world(world).orElseThrow(DataUtil.dataNotFound()), pos);
     }
 
     public static Vector3i getPosition3i(final DataView view) {

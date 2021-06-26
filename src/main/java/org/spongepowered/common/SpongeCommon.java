@@ -24,45 +24,36 @@
  */
 package org.spongepowered.common;
 
-import com.google.common.base.Preconditions;
 import com.google.inject.Inject;
 import com.google.inject.Singleton;
+import net.minecraft.SharedConstants;
 import net.minecraft.server.MinecraftServer;
+import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.scheduler.ServerScheduler;
-import org.spongepowered.common.util.Constants;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.PluginKeys;
 
 import java.io.IOException;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.List;
 
 @Singleton
 public final class SpongeCommon {
 
-    public static final String ECOSYSTEM_ID = "sponge";
-
-    public static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion(
-            Constants.MINECRAFT_VERSION,
-            Constants.MINECRAFT_PROTOCOL_VERSION
+    private static final Logger LOGGER = LogManager.getLogger(Launch.instance().id());
+    private static final SpongeMinecraftVersion MINECRAFT_VERSION = new SpongeMinecraftVersion(
+        SharedConstants.getCurrentVersion().getName(),
+        SharedConstants.getCurrentVersion().getProtocolVersion()
     );
 
     @Inject private @Nullable static SpongeGame game;
-
     private @Nullable static PluginContainer activePlugin;
-
-    private SpongeCommon() {
-    }
 
     static {
         Runtime.getRuntime().addShutdownHook(new Thread(() -> {
@@ -71,76 +62,62 @@ public final class SpongeCommon {
                 try {
                     game.configManager().close();
                 } catch (final IOException e) {
-                    SpongeCommon.getLogger().error("Failed to shut down configuration watch service", e);
+                    SpongeCommon.logger().error("Failed to shut down configuration watch service", e);
                 }
             }
         }, "Sponge shutdown thread"));
     }
 
-    private static <T> T check(@Nullable T instance) {
-        Preconditions.checkState(instance != null, "SpongeCommon has not been initialized!");
-        return instance;
+    private SpongeCommon() {
     }
 
-    public static Logger getLogger() {
-        return Launch.getInstance().getLogger();
-    }
-
-    public static boolean isInitialized() {
+    public static boolean initialized() {
         return SpongeCommon.game != null;
     }
 
-    public static SpongeGame getGame() {
-        return SpongeCommon.check(SpongeCommon.game);
+    public static Logger logger() {
+        return SpongeCommon.LOGGER;
     }
 
-    public static MinecraftServer getServer() {
+    public static SpongeMinecraftVersion minecraftVersion() {
+        return SpongeCommon.MINECRAFT_VERSION;
+    }
+
+    public static SpongeGame game() {
+        if (SpongeCommon.game == null) {
+            throw new IllegalStateException("SpongeCommon has not been initialized yet!");
+        }
+
+        return SpongeCommon.game;
+    }
+
+    public static MinecraftServer server() {
         return (MinecraftServer) Sponge.server();
     }
 
-    public static SpongeGameRegistry getRegistry() {
-        return (SpongeGameRegistry) Sponge.registry();
-    }
-
-    public static ServerScheduler getServerScheduler() {
+    public static ServerScheduler serverScheduler() {
         return (ServerScheduler) Sponge.server().scheduler();
     }
 
-    public static AsyncScheduler getAsyncScheduler() {
-        return SpongeCommon.getGame().asyncScheduler();
+    public static AsyncScheduler asyncScheduler() {
+        return SpongeCommon.game().asyncScheduler();
     }
 
-    public static Path getGameDirectory() {
-        return Launch.getInstance().getPluginEngine().getPluginEnvironment().blackboard().get(PluginKeys.BASE_DIRECTORY)
-                .orElseThrow(() -> new IllegalStateException("No game directory has been set in the launcher!"));
+    public static Path gameDirectory() {
+        return Launch.instance().pluginPlatform().baseDirectory();
     }
 
-    public static Path getPluginConfigDirectory() {
+    public static Path pluginConfigDirectory() {
         return Paths.get(SpongeConfigs.getCommon().get().general.configDir.getParsed());
     }
 
-    public static Path getSpongeConfigDirectory() {
-        return SpongeCommon.getGameDirectory().resolve("config");
+    public static Path spongeConfigDirectory() {
+        return SpongeCommon.gameDirectory().resolve("config");
     }
 
-    @Deprecated
-    public static PluginContainer getMinecraftPlugin() {
-        return Launch.getInstance().getMinecraftPlugin();
-    }
-
-    @Deprecated
-    public static PluginContainer getPlugin() {
-        return Launch.getInstance().getCommonPlugin();
-    }
-
-    @Deprecated
-    public static List<PluginContainer> getInternalPlugins() {
-        return Launch.getInstance().getLauncherPlugins();
-    }
-
-    public static PluginContainer getActivePlugin() {
+    public static PluginContainer activePlugin() {
         if (SpongeCommon.activePlugin == null) {
-            return Launch.getInstance().getMinecraftPlugin();
+            return Launch.instance().minecraftPlugin();
         }
 
         return SpongeCommon.activePlugin;
@@ -150,70 +127,7 @@ public final class SpongeCommon {
         SpongeCommon.activePlugin = plugin;
     }
 
-    /**
-     * Throws the given event.
-     *
-     * @param event The event
-     * @return True if the event is cancellable and is cancelled, false if not cancelled
-     */
-    public static boolean postEvent(Event event) {
+    public static boolean post(final Event event) {
         return Sponge.eventManager().post(event);
     }
-
-    @Deprecated
-    public static boolean postEvent(Event event, boolean allowClientThread) {
-        return Sponge.eventManager().post(event);
-    }
-
-    public static int directionToIndex(Direction direction) {
-        switch (direction) {
-            case NORTH:
-            case NORTHEAST:
-            case NORTHWEST:
-                return 0;
-            case SOUTH:
-            case SOUTHEAST:
-            case SOUTHWEST:
-                return 1;
-            case EAST:
-                return 2;
-            case WEST:
-                return 3;
-            default:
-                throw new IllegalArgumentException("Unexpected direction");
-        }
-    }
-
-    public static Direction getCardinalDirection(Direction direction) {
-        switch (direction) {
-            case NORTH:
-            case NORTHEAST:
-            case NORTHWEST:
-                return Direction.NORTH;
-            case SOUTH:
-            case SOUTHEAST:
-            case SOUTHWEST:
-                return Direction.SOUTH;
-            case EAST:
-                return Direction.EAST;
-            case WEST:
-                return Direction.WEST;
-            default:
-                throw new IllegalArgumentException("Unexpected direction");
-        }
-    }
-
-    public static Direction getSecondaryDirection(Direction direction) {
-        switch (direction) {
-            case NORTHEAST:
-            case SOUTHEAST:
-                return Direction.EAST;
-            case NORTHWEST:
-            case SOUTHWEST:
-                return Direction.WEST;
-            default:
-                return Direction.NONE;
-        }
-    }
-
 }

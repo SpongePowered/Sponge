@@ -127,7 +127,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
             return null;
         }
 
-        final ServerLevel world = SpongeCommon.getServer().getLevel(SpongeWorldManager.createRegistryKey(this.impl$key));
+        final ServerLevel world = SpongeCommon.server().getLevel(SpongeWorldManager.createRegistryKey(this.impl$key));
         if (world == null) {
             return null;
         }
@@ -303,7 +303,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
             return (ServerLevelData) this;
         }
 
-        return (ServerLevelData) SpongeCommon.getServer().getLevel(Level.OVERWORLD).getLevelData();
+        return (ServerLevelData) SpongeCommon.server().getLevel(Level.OVERWORLD).getLevelData();
     }
 
     @Redirect(method = "setTagData", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", ordinal = 0))

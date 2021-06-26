@@ -76,13 +76,13 @@ public abstract class RconClientMixin extends GenericThread implements RconClien
     @Inject(method = "closeSocket", at = @At("HEAD"))
     private void impl$rconLogoutCallback(final CallbackInfo ci) {
         if (this.authed) {
-            SpongeCommon.getServerScheduler().execute(() -> {
+            SpongeCommon.serverScheduler().execute(() -> {
                 final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
                 causeStackManager.pushCause(this);
                 causeStackManager.pushCause(this.impl$source);
                 final RconConnectionEvent.Disconnect event = SpongeEventFactory.createRconConnectionEventDisconnect(
                         causeStackManager.currentCause(), (RconConnection) this.impl$source);
-                SpongeCommon.postEvent(event);
+                SpongeCommon.post(event);
                 causeStackManager.popCauses(2);
                 return event;
             });
@@ -99,19 +99,19 @@ public abstract class RconClientMixin extends GenericThread implements RconClien
     public void run() {
         /// Sponge: START
         // Initialize the source
-        this.impl$source = new RconConsoleSource(SpongeCommon.getServer());
+        this.impl$source = new RconConsoleSource(SpongeCommon.server());
         ((RconConsoleSourceBridge) this.impl$source).bridge$setClient((RconClient) (Object) this);
 
         // Call the connection event
         final RconConnectionEvent.Connect connectEvent;
         try {
-            connectEvent = SpongeCommon.getServerScheduler().execute(() -> {
+            connectEvent = SpongeCommon.serverScheduler().execute(() -> {
                 final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
                 causeStackManager.pushCause(this);
                 causeStackManager.pushCause(this.impl$source);
                 final RconConnectionEvent.Connect event = SpongeEventFactory.createRconConnectionEventConnect(
                         causeStackManager.currentCause(), (RconConnection) this.impl$source);
-                SpongeCommon.postEvent(event);
+                SpongeCommon.post(event);
                 causeStackManager.popCauses(2);
                 return event;
             }).get();
@@ -164,12 +164,12 @@ public abstract class RconClientMixin extends GenericThread implements RconClien
                                 try {
                                     /// Sponge: START
                                     // Execute the command on the main thread and wait for it
-                                    SpongeCommon.getServerScheduler().execute(() -> {
+                                    SpongeCommon.serverScheduler().execute(() -> {
                                         final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
                                         // Only add the RemoteConnection here, the RconSource
                                         // will be added by the command manager
                                         causeStackManager.pushCause(this);
-                                        SpongeCommon.getServer().getCommands().performCommand(this.impl$source.createCommandSourceStack(), command);
+                                        SpongeCommon.server().getCommands().performCommand(this.impl$source.createCommandSourceStack(), command);
                                         causeStackManager.popCause();
                                     }).get();
                                     final String logContents = this.impl$source.getCommandResponse();
@@ -187,13 +187,13 @@ public abstract class RconClientMixin extends GenericThread implements RconClien
                             final String password = PktUtils.stringFromByteArray(this.buf, j, i);
                             if (!password.isEmpty() && password.equals(this.rconPassword)) {
                                 /// Sponge: START
-                                final RconConnectionEvent.Auth event = SpongeCommon.getServerScheduler().execute(() -> {
+                                final RconConnectionEvent.Auth event = SpongeCommon.serverScheduler().execute(() -> {
                                     final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
                                     causeStackManager.pushCause(this);
                                     causeStackManager.pushCause(this.impl$source);
                                     final RconConnectionEvent.Auth event1 = SpongeEventFactory.createRconConnectionEventAuth(
                                             causeStackManager.currentCause(), (RconConnection) this.impl$source);
-                                    SpongeCommon.postEvent(event1);
+                                    SpongeCommon.post(event1);
                                     causeStackManager.popCauses(2);
                                     return event1;
                                 }).get();

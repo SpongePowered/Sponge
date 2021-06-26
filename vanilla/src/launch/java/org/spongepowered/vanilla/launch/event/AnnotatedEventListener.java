@@ -22,26 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.registry;
+package org.spongepowered.vanilla.launch.event;
 
-import com.google.inject.Singleton;
-import net.minecraft.server.MinecraftServer;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.adventure.AdventureRegistry;
-import org.spongepowered.api.item.recipe.RecipeRegistry;
-import org.spongepowered.api.registry.GameRegistry;
-import org.spongepowered.common.adventure.AdventureRegistryImpl;
+import static com.google.common.base.Preconditions.checkNotNull;
 
-@Singleton
-public final class SpongeGameRegistry implements GameRegistry {
+import org.spongepowered.api.event.Event;
+import org.spongepowered.common.event.SpongeEventListener;
 
-    @Override
-    public AdventureRegistry adventureRegistry() {
-        return AdventureRegistryImpl.INSTANCE;
+import java.lang.reflect.Method;
+
+public abstract class AnnotatedEventListener implements SpongeEventListener<Event> {
+
+    protected final Object handle;
+
+    protected AnnotatedEventListener(Object handle) {
+        this.handle = checkNotNull(handle, "handle");
     }
 
     @Override
-    public RecipeRegistry recipeRegistry() {
-        return ((RecipeRegistry) ((MinecraftServer) Sponge.server()).getRecipeManager());
+    public final Object getHandle() {
+        return this.handle;
     }
+
+    public interface Factory {
+
+        AnnotatedEventListener create(Object handle, Method method) throws Exception;
+
+    }
+
 }

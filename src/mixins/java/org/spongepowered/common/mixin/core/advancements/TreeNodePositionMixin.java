@@ -48,6 +48,6 @@ public abstract class TreeNodePositionMixin {
         final TreeLayout layout = new SpongeTreeLayout(advancementTree);
         final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         final AdvancementTreeEvent.GenerateLayout event = SpongeEventFactory.createAdvancementTreeEventGenerateLayout(cause, layout, advancementTree);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
     }
 }

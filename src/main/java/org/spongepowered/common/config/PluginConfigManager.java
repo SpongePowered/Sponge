@@ -66,13 +66,13 @@ public final class PluginConfigManager implements ConfigManager {
     @Override
     public ConfigRoot sharedConfig(final PluginContainer container) {
         return new PluginConfigRoot(this.serializers, container.metadata().id().toLowerCase(),
-                                    SpongeCommon.getPluginConfigDirectory());
+                                    SpongeCommon.pluginConfigDirectory());
     }
 
     @Override
     public ConfigRoot pluginConfig(final PluginContainer container) {
         return new PluginConfigRoot(this.serializers, container.metadata().id().toLowerCase(),
-                                    SpongeCommon.getPluginConfigDirectory().resolve(container.metadata().id().toLowerCase()));
+                                    SpongeCommon.pluginConfigDirectory().resolve(container.metadata().id().toLowerCase()));
     }
 
     @Override

@@ -53,7 +53,7 @@ public final class VanillaConsole extends SimpleTerminalConsole {
         final Supplier<CommandSourceStack> commandSourceProvider = this.server::createCommandSourceStack;
 
         return super.buildReader(builder
-            .appName(Launch.getInstance().getPlatformPlugin().metadata().name().get())
+            .appName(Launch.instance().platformPlugin().metadata().name().get())
             .completer(new BrigadierJLineCompleter<>(dispatcherProvider, commandSourceProvider))
             .highlighter(new BrigadierHighlighter<>(dispatcherProvider, commandSourceProvider))
             .option(LineReader.Option.COMPLETE_IN_WORD, true)); // Seems to fix trying to complete at the beginning of a word

@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 
 @Mixin(ClientPacketListener.class)
 public abstract class ClientPacketListenerMixin_Vanilla implements ClientGamePacketListener {
@@ -41,7 +41,7 @@ public abstract class ClientPacketListenerMixin_Vanilla implements ClientGamePac
     @Inject(method = "handleCustomPayload", cancellable = true, at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/protocol/game/ClientboundCustomPayloadPacket;getIdentifier()Lnet/minecraft/resources/ResourceLocation;"))
     private void vanilla$handleCustomPayload(final ClientboundCustomPayloadPacket packet, final CallbackInfo ci) {
-        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.channelRegistry();
+        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
         if (channelRegistry.handlePlayPayload((EngineConnection) this, packet)) {
             ci.cancel();
         }

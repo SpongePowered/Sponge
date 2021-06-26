@@ -90,7 +90,7 @@ class TimingHandler implements Timing {
             return;
         }
 
-        if (Sponge.isServerAvailable() && SpongeCommon.getServer().isSameThread()) {
+        if (Sponge.isServerAvailable() && SpongeCommon.server().isSameThread()) {
             this.startTiming();
         }
     }
@@ -101,7 +101,7 @@ class TimingHandler implements Timing {
             return;
         }
 
-        if (Sponge.isServerAvailable() && SpongeCommon.getServer().isSameThread()) {
+        if (Sponge.isServerAvailable() && SpongeCommon.server().isSameThread()) {
             this.stopTiming();
         }
     }

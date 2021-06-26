@@ -68,7 +68,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$setClientOnGame(final GameConfig gameConfig, final CallbackInfo ci) {
-        SpongeCommon.getGame().setClient(this);
+        SpongeCommon.game().setClient(this);
     }
 
     @Inject(method = "run", at = @At("HEAD"))
@@ -102,7 +102,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
     @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
     private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
-        SpongeCommon.getGame().asyncScheduler().close();
+        SpongeCommon.game().asyncScheduler().close();
     }
 
     @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;createAndLoad(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess;)Lnet/minecraft/resources/RegistryReadOps;"))
@@ -145,7 +145,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     @Redirect(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
     private Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
-        SpongeBootstrap.getLifecycle().callRegisterDataPackValueEvent(datapackDir);
+        SpongeBootstrap.lifecycle().callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
     }
 }

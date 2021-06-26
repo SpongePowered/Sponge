@@ -84,7 +84,7 @@ public class SpongeIngredient extends Ingredient {
     public static SpongeIngredient spongeFromPredicate(ResourceKey key, Predicate<org.spongepowered.api.item.inventory.ItemStack> predicate, net.minecraft.world.item.ItemStack... exemplaryIngredients) {
         final Predicate<ItemStack> mcPredicate = stack -> predicate.test(ItemStackUtil.fromNative(stack));
         if (SpongeIngredient.cachedPredicates.put(key.toString(), mcPredicate) != null) {
-            SpongeCommon.getLogger().warn(MessageFormat.format("Predicate ingredient registered twice! {} was replaced.", key.toString()));
+            SpongeCommon.logger().warn(MessageFormat.format("Predicate ingredient registered twice! {} was replaced.", key.toString()));
         }
         final SpongePredicateItemList itemList = new SpongePredicateItemList(key.toString(), mcPredicate, exemplaryIngredients);
         return new SpongeIngredient(itemList);

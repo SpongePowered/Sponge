@@ -90,8 +90,8 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge,
-        CommandSourceProviderBridge, SubjectProxy, CommandSourceBridge {
+public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge, CommandSourceProviderBridge, SubjectProxy,
+    CommandSourceBridge {
 
     // @formatter:off
     @Shadow @Final private Map<ResourceKey<Level>, ServerLevel> levels;
@@ -113,7 +113,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
 
     @Override
     public Subject subject() {
-        return SpongeCommon.getGame().systemSubject();
+        return SpongeCommon.game().systemSubject();
     }
 
     @Inject(method = "spin", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)

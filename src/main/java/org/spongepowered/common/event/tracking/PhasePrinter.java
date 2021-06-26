@@ -52,7 +52,7 @@ import java.util.function.BiConsumer;
 
 public final class PhasePrinter {
 
-    private static final boolean IN_DEVELOPMENT = Launch.getInstance().isDeveloperEnvironment();
+    private static final boolean IN_DEVELOPMENT = Launch.instance().developerEnvironment();
     static final String ASYNC_BLOCK_CHANGE_MESSAGE = "Sponge adapts the vanilla handling of block changes to power events and plugins "
                                                 + "such that it follows the known fact that block changes MUST occur on the server "
                                                 + "thread (even on clients, this exists as the InternalServer thread). It is NOT "
@@ -106,7 +106,7 @@ public final class PhasePrinter {
 
         PhasePrinter.printPhaseStackWithException(instance.stack, printer, e);
         printer
-            .log(SpongeCommon.getLogger(), Level.WARN);
+            .log(SpongeCommon.logger(), Level.WARN);
     }
 
 
@@ -132,7 +132,7 @@ public final class PhasePrinter {
         if (PhasePrinter.IN_DEVELOPMENT) {
             printer.print(System.err);
         } else {
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
         }
     }
 
@@ -145,7 +145,7 @@ public final class PhasePrinter {
         }
         final PrettyPrinter printer = new PrettyPrinter(60).add("Exception attempting to capture or spawn an Entity!").centre().hr();
         PhasePrinter.printPhasestack(tracker, context, e, printer);
-        printer.log(SpongeCommon.getLogger(), Level.ERROR);
+        printer.log(SpongeCommon.logger(), Level.ERROR);
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             PhasePrinter.printedExceptionsForEntities.add(context.state);
         }
@@ -170,7 +170,7 @@ public final class PhasePrinter {
             .add("%s : %s", "Notified Position", otherPos);
         PhasePrinter.printPhaseStackWithException(instance.stack, printer, e);
         printer
-            .log(SpongeCommon.getLogger(), Level.WARN);
+            .log(SpongeCommon.logger(), Level.WARN);
     }
 
     static void printNullSourceBlockNeighborNotificationWithNoTileSource(final BlockPos pos, final Block blockIn, final BlockPos otherPos,
@@ -191,7 +191,7 @@ public final class PhasePrinter {
             .add("%s : %s", "Notified Position", otherPos);
         PhasePrinter.printPhaseStackWithException(instance.stack, printer, e);
         printer
-            .log(SpongeCommon.getLogger(), Level.WARN);
+            .log(SpongeCommon.logger(), Level.WARN);
     }
 
     static void printPhaseStackWithException(final PhaseStack stack, final PrettyPrinter printer, final Throwable e) {
@@ -214,7 +214,7 @@ public final class PhasePrinter {
         if (PhasePrinter.IN_DEVELOPMENT) {
             printer.print(System.err);
         } else {
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
         }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             PhasePrinter.printedExceptionsForBlocks.add(phaseState);
@@ -258,7 +258,7 @@ public final class PhasePrinter {
         if (PhasePrinter.IN_DEVELOPMENT) {
             printer.print(System.err);
         } else {
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
         }
     }
 
@@ -283,7 +283,7 @@ public final class PhasePrinter {
         if (PhasePrinter.IN_DEVELOPMENT) {
             printer.print(System.err);
         } else {
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
         }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             PhasePrinter.printedExceptionsForState.add(context.state);
@@ -311,7 +311,7 @@ public final class PhasePrinter {
         if (PhasePrinter.IN_DEVELOPMENT) {
             printer.print(System.err);
         } else {
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
         }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && PhasePrinter.printRunawayCount++ > SpongeConfigs.getCommon().get().phaseTracker.maximumPrintedRunawayCounts) {
             PhasePrinter.hasPrintedAboutRunnawayPhases = true;
@@ -335,7 +335,7 @@ public final class PhasePrinter {
         if (PhasePrinter.IN_DEVELOPMENT) {
             printer.print(System.err);
         } else {
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
         }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose && PhasePrinter.printRunawayCount++ > 3) {
             PhasePrinter.hasPrintedAboutRunnawayPhases = true;
@@ -343,7 +343,7 @@ public final class PhasePrinter {
     }
 
     static void generateVersionInfo(final PrettyPrinter printer) {
-        for (final PluginContainer pluginContainer : Launch.getInstance().getLauncherPlugins()) {
+        for (final PluginContainer pluginContainer : Launch.instance().launcherPlugins()) {
             printer.add("%s : %s", pluginContainer.metadata().name().get(), pluginContainer.metadata().version());
         }
     }
@@ -375,7 +375,7 @@ public final class PhasePrinter {
         if (PhasePrinter.IN_DEVELOPMENT) {
             printer.print(System.err);
         } else {
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
         }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             PhasePrinter.completedIncorrectStates.add(new Tuple<>(prevState, state));
@@ -405,7 +405,7 @@ public final class PhasePrinter {
         if (PhasePrinter.IN_DEVELOPMENT) {
             printer.print(System.err);
         } else {
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
         }
         if (!SpongeConfigs.getCommon().get().phaseTracker.verbose) {
             PhasePrinter.hasPrintedEmptyOnce = true;
@@ -423,7 +423,7 @@ public final class PhasePrinter {
         if (PhasePrinter.IN_DEVELOPMENT) {
             printer.print(System.err);
         } else {
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
         }
     }
 
@@ -439,7 +439,7 @@ public final class PhasePrinter {
                         + "lead to further issues, not just with sponge or plugins, but other mods as well.")
             .add()
             .add(new Exception("Async Block Change Detected"))
-            .log(SpongeCommon.getLogger(), Level.ERROR);
+            .log(SpongeCommon.logger(), Level.ERROR);
     }
 
     static void printAsyncEntitySpawn(final Entity entity) {
@@ -474,7 +474,7 @@ public final class PhasePrinter {
             if (PhasePrinter.IN_DEVELOPMENT) {
                 printer.print(System.err);
             } else {
-                printer.log(SpongeCommon.getLogger(), Level.ERROR);
+                printer.log(SpongeCommon.logger(), Level.ERROR);
             }
             PhasePrinter.hasPrintedAsyncEntities = true;
             return;
@@ -508,7 +508,7 @@ public final class PhasePrinter {
         if (PhasePrinter.IN_DEVELOPMENT) {
             printer.print(System.err);
         } else {
-            printer.log(SpongeCommon.getLogger(), Level.ERROR);
+            printer.log(SpongeCommon.logger(), Level.ERROR);
         }
         PhasePrinter.hasPrintedAsyncEntities = true;
     }

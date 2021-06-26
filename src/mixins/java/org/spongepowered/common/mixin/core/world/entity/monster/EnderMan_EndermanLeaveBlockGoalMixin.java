@@ -97,7 +97,7 @@ public abstract class EnderMan_EndermanLeaveBlockGoalMixin extends Goal {
                 final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
                 final ChangeBlockEvent.Pre event = SpongeEventFactory.createChangeBlockEventPre(cause, list,
                     ((ServerWorld) this.enderman.level));
-                return !SpongeCommon.postEvent(event);
+                return !SpongeCommon.post(event);
             }
             // Sponge end
             return true;

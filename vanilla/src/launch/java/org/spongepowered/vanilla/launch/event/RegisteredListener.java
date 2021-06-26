@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.vanilla.launch.event;
 
 import static com.google.common.base.Preconditions.checkNotNull;
 
@@ -32,6 +32,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
 import org.spongepowered.api.event.Order;
 import co.aikar.timings.sponge.SpongeTimings;
+import org.spongepowered.common.event.SpongeEventListener;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.ArrayList;

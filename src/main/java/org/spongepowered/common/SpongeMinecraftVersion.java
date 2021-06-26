@@ -25,6 +25,7 @@
 package org.spongepowered.common;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.SharedConstants;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.common.util.Constants;
 
@@ -67,7 +68,7 @@ public final class SpongeMinecraftVersion implements ProtocolMinecraftVersion, M
 
     @Override
     public OptionalInt dataVersion() {
-        return OptionalInt.of(Constants.MINECRAFT_DATA_VERSION);
+        return OptionalInt.of(SharedConstants.getCurrentVersion().getWorldVersion());
     }
 
     @Override

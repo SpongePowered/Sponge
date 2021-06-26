@@ -35,11 +35,10 @@ import org.spongepowered.api.Server;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.api.data.DataManager;
 import org.spongepowered.api.event.EventManager;
-import org.spongepowered.api.network.channel.ChannelRegistry;
+import org.spongepowered.api.network.channel.ChannelManager;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.api.registry.BuilderProvider;
 import org.spongepowered.api.registry.FactoryProvider;
-import org.spongepowered.api.registry.GameRegistry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.service.ServiceProvider;
@@ -58,7 +57,6 @@ import java.util.Locale;
 public final class SpongeGame implements Game {
 
     private final Platform platform;
-    private final GameRegistry registry;
     private final BuilderProvider builderProvider;
     private final FactoryProvider factoryProvider;
     private final DataManager dataManager;
@@ -66,7 +64,7 @@ public final class SpongeGame implements Game {
     private final EventManager eventManager;
     private final AssetManager assetManager;
     private final PluginConfigManager configManager;
-    private final ChannelRegistry channelRegistry;
+    private final ChannelManager channelManager;
     private final MetricsConfigManager metricsConfigManager;
     private final SqlManager sqlManager;
     private final ServiceProvider.GameScoped serviceProvider;
@@ -80,14 +78,13 @@ public final class SpongeGame implements Game {
     private ServerConsoleSystemSubject systemSubject;
 
     @Inject
-    public SpongeGame(final Platform platform, final GameRegistry registry, final BuilderProvider builderProvider,
+    public SpongeGame(final Platform platform, final BuilderProvider builderProvider,
             final FactoryProvider factoryProvider, final DataManager dataManager, final PluginManager pluginManager,
             final EventManager eventManager, final AssetManager assetManager, final PluginConfigManager configManager,
-            final ChannelRegistry channelRegistry, final MetricsConfigManager metricsConfigManager,
+            final ChannelManager channelManager, final MetricsConfigManager metricsConfigManager,
             final SqlManager sqlManager, final ServiceProvider.GameScoped serviceProvider) {
 
         this.platform = platform;
-        this.registry = registry;
         this.builderProvider = builderProvider;
         this.factoryProvider = factoryProvider;
         this.dataManager = dataManager;
@@ -95,18 +92,17 @@ public final class SpongeGame implements Game {
         this.eventManager = eventManager;
         this.assetManager = assetManager;
         this.configManager = configManager;
-        this.channelRegistry = channelRegistry;
+        this.channelManager = channelManager;
         this.metricsConfigManager = metricsConfigManager;
         this.sqlManager = sqlManager;
         this.serviceProvider = serviceProvider;
 
         this.asyncScheduler = new AsyncScheduler();
-        //this.registryHolder = new SpongeRegistryHolder();
     }
 
     @Override
     public Path gameDirectory() {
-        return SpongeCommon.getGameDirectory();
+        return SpongeCommon.gameDirectory();
     }
 
     @Override
@@ -120,11 +116,6 @@ public final class SpongeGame implements Game {
     @Override
     public Platform platform() {
         return this.platform;
-    }
-
-    @Override
-    public GameRegistry registry() {
-        return this.registry;
     }
 
     @Override
@@ -163,8 +154,8 @@ public final class SpongeGame implements Game {
     }
 
     @Override
-    public ChannelRegistry channelRegistry() {
-        return this.channelRegistry;
+    public ChannelManager channelManager() {
+        return this.channelManager;
     }
 
     @Override
