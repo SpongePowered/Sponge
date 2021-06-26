@@ -54,17 +54,17 @@ import java.util.concurrent.CompletableFuture;
 public abstract class SpongeChannel implements Channel {
 
     private final ResourceKey key;
-    private final SpongeChannelManager registry;
+    private final SpongeChannelManager manager;
     private final Logger logger;
     private final int type;
 
     private volatile ChannelExceptionHandler<EngineConnection> exceptionHandler =
             ChannelExceptionHandler.logEverything().suppress(ChannelNotSupportedException.class);
 
-    public SpongeChannel(final int type, final ResourceKey key, final SpongeChannelManager registry) {
+    public SpongeChannel(final int type, final ResourceKey key, final SpongeChannelManager manager) {
         this.type = type;
         this.key = key;
-        this.registry = registry;
+        this.manager = manager;
         this.logger = LogManager.getLogger("channel/" + key.formatted());
     }
 
@@ -77,8 +77,8 @@ public abstract class SpongeChannel implements Channel {
     }
 
     @Override
-    public SpongeChannelManager registry() {
-        return this.registry;
+    public SpongeChannelManager manager() {
+        return this.manager;
     }
 
     @Override
