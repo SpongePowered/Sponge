@@ -37,10 +37,10 @@ import java.util.Map;
 import java.util.function.Supplier;
 
 public class PluginSpiWrappedModFile implements IModFile {
-    private final SpongeModLocator locator;
+    private final ForgeBootstrap locator;
     private final PluginResource resource;
 
-    public PluginSpiWrappedModFile(final SpongeModLocator locator, final PluginResource resource) {
+    public PluginSpiWrappedModFile(final ForgeBootstrap locator, final PluginResource resource) {
         this.locator = locator;
         this.resource = resource;
     }
@@ -86,7 +86,7 @@ public class PluginSpiWrappedModFile implements IModFile {
     }
 
     @Override
-    public SpongeModLocator getLocator() {
+    public ForgeBootstrap getLocator() {
         return this.locator;
     }
 

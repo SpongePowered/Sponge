@@ -27,16 +27,17 @@ package org.spongepowered.forge.launch;
 import com.google.inject.Stage;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLLoader;
-import org.spongepowered.common.applaunch.plugin.PluginEngine;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.forge.launch.plugin.ForgePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
-public class ForgeLaunch extends Launch {
+public final class ForgeLaunch extends Launch {
+
     private PluginContainer spongeForgePlugin;
 
-    public ForgeLaunch(final PluginEngine engine) {
-        super(engine, new ForgePluginManager());
+    public ForgeLaunch(final PluginPlatform platform) {
+        super(platform, new ForgePluginManager());
     }
 
     @Override
@@ -68,7 +69,7 @@ public class ForgeLaunch extends Launch {
     }
 
     @Override
-    protected void createPlatformPlugins(final PluginEngine engine) {
-        // todo
+    protected void createPlatformPlugins(PluginPlatform platform) {
+
     }
 }

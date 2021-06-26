@@ -30,32 +30,23 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.forge.launch.ForgeLaunch;
-import org.spongepowered.forge.launch.plugin.ForgePluginEngine;
-import org.spongepowered.plugin.Blackboard;
-import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.PluginKeys;
+import org.spongepowered.forge.launch.plugin.ForgePluginPlatform;
 
 @Mixin(Main.class)
 public class MainMixin_Forge {
 
     @Inject(method = "<clinit>", at = @At("RETURN"))
     private static void forge$initLaunch(final CallbackInfo ci) {
-        // this is wrong, we need to get set up from within a non-transformable class that is on the TransformingClassLoader
-        // otherwise configs die
-        final ForgeLaunch launch = new ForgeLaunch(new ForgePluginEngine(new PluginEnvironment()));
-        final Blackboard blackboard = launch.getPluginEngine().getPluginEnvironment().blackboard();
-        final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
+        final String implementationVersion = PluginPlatform.class.getPackage().getImplementationVersion();
+        final ForgePluginPlatform pluginPlatform = new ForgePluginPlatform();
+        pluginPlatform.setVersion(implementationVersion == null ? "dev" : implementationVersion);
+        pluginPlatform.setBaseDirectory(FMLLoader.getGamePath());
 
-        blackboard.getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
-        blackboard.getOrCreate(SpongeConfigs.IS_VANILLA_PLATFORM, () -> false);
-        blackboard.getOrCreate(PluginKeys.BASE_DIRECTORY, FMLLoader::getGamePath);
-        // todo: do this properly, break it out to work somewhere on server?
-
+        final ForgeLaunch launch = new ForgeLaunch(pluginPlatform);
         Launch.setInstance(launch);
-        SpongeConfigs.initialize(launch.getPluginEngine().getPluginEnvironment());
     }
 
 }
