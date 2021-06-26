@@ -96,7 +96,7 @@ public final class SpongeTagTemplate implements TagTemplate {
             container.set(DataQuery.of("replace"), this.replace);
             return container;
         } catch (IOException e) {
-            SpongeCommon.getLogger().error("Error reading json serialized by minecraft", e);
+            SpongeCommon.logger().error("Error reading json serialized by minecraft", e);
             return DataContainer.createNew();
         }
     }
