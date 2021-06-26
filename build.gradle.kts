@@ -28,6 +28,7 @@ val pluginSpiVersion: String by project
 val guavaVersion: String by project
 val junitVersion: String by project
 val timingsVersion: String by project
+val checkerVersion: String by project
 
 val commonManifest = the<JavaPluginConvention>().manifest {
     attributes(
@@ -178,7 +179,7 @@ dependencies {
     launchConfig("org.ow2.asm:asm-util:$asmVersion")
 
     // Applaunch -- initialization that needs to occur without game access
-    applaunchConfig("org.spongepowered:plugin-spi:$pluginSpiVersion")
+    applaunchConfig("org.checkerframework:checker-qual:$checkerVersion")
     applaunchConfig("org.apache.logging.log4j:log4j-api:$log4jVersion")
     applaunchConfig("com.google.guava:guava:$guavaVersion")
     applaunchConfig(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
