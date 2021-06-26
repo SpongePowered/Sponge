@@ -156,18 +156,6 @@ public final class LivingData {
                             }
                         })
                         .delete(LivingEntity::removeAllEffects)
-                    .create(Keys.REMAINING_AIR)
-                        .get(h -> Math.max(0, h.getAirSupply()))
-                        .setAnd((h, v) -> {
-                            if (v < 0 || v > h.getMaxAirSupply()) {
-                                return false;
-                            }
-                            if (v == 0 && h.getAirSupply() < 0) {
-                                return false;
-                            }
-                            h.setAirSupply(v);
-                            return true;
-                        })
                     .create(Keys.SCALE)
                         .get(h -> (double) h.getScale())
                     .create(Keys.STUCK_ARROWS)

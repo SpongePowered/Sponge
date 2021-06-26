@@ -44,11 +44,11 @@ public abstract class EntityMaxAirMixin implements EntityMaxAirBridge {
     @Override
     public int bridge$getDefaultMaxAir() {
         if (this.impl$maxAir == null) {
-            return bridge$getMaxAir();
+            return this.bridge$getMaxAir();
         }
         int customMaxAir = this.impl$maxAir;
         this.impl$maxAir = null;
-        int defaultMaxAir = bridge$getMaxAir();
+        int defaultMaxAir = this.bridge$getMaxAir();
         this.impl$maxAir = customMaxAir;
         return defaultMaxAir;
     }
@@ -59,14 +59,18 @@ public abstract class EntityMaxAirMixin implements EntityMaxAirBridge {
     }
 
     @Override
-    public void bridge$setMaxAir(int max) {
-        if (bridge$getDefaultMaxAir() == max) {
+    public void bridge$setMaxAir(int maxAir) {
+        Entity entity = (Entity) (Object) this;
+        if (entity.getAirSupply() > maxAir) {
+            entity.setAirSupply(maxAir);
+        }
+        if (this.bridge$getDefaultMaxAir() == maxAir) {
             this.impl$maxAir = null;
             ((SpongeDataHolderBridge) this).bridge$remove(Keys.MAX_AIR);
             return;
         }
-        this.impl$maxAir = max;
-        ((SpongeDataHolderBridge) this).bridge$offer(Keys.MAX_AIR, max);
+        this.impl$maxAir = maxAir;
+        ((SpongeDataHolderBridge) this).bridge$offer(Keys.MAX_AIR, maxAir);
     }
 
     @Inject(method = "getMaxAirSupply", at = @At("RETURN"), cancellable = true)

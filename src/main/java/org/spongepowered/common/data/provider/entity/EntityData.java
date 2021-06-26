@@ -166,6 +166,18 @@ public final class EntityData {
                             ((EntityAccessor) h).accessor$passengers().clear();
                             v.forEach(v1 -> ((EntityAccessor) h).accessor$passengers().add((Entity) v1));
                         })
+                    .create(Keys.REMAINING_AIR)
+                        .get(h -> Math.max(0, h.getAirSupply()))
+                        .setAnd((h, v) -> {
+                            if (v < 0 || v > h.getMaxAirSupply()) {
+                                return false;
+                            }
+                            if (v == 0 && h.getAirSupply() < 0) {
+                                return false;
+                            }
+                            h.setAirSupply(v);
+                            return true;
+                        })
                     .create(Keys.SCALE)
                         .get(h -> 1d)
                     .create(Keys.SCOREBOARD_TAGS)
