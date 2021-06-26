@@ -24,15 +24,14 @@
  */
 package org.spongepowered.forge.applaunch.discovery;
 
-import net.minecraftforge.fml.loading.moddiscovery.ModFile;
-import net.minecraftforge.fml.loading.moddiscovery.ModFileParser;
+import cpw.mods.modlauncher.Launcher;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import org.apache.commons.lang3.tuple.Pair;
+import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.forge.applaunch.plugin.ForgeAppPluginPlatform;
 
-import java.net.URISyntaxException;
 import java.nio.file.Path;
-import java.nio.file.Paths;
 import java.security.CodeSigner;
 import java.util.Collections;
 import java.util.List;
@@ -41,8 +40,7 @@ import java.util.Optional;
 import java.util.function.Consumer;
 import java.util.jar.Manifest;
 
-public class SpongeModLocator implements IModLocator {
-    // this is run in an isolated classloader, we might have to inject dependencies in the static initializer to be able to interface with plugin-meta/plugin-spi
+public final class ForgeBootstrap implements IModLocator {
 
     @Override
     public List<IModFile> scanMods() {
@@ -61,7 +59,7 @@ public class SpongeModLocator implements IModLocator {
 
     @Override
     public void scanFile(final IModFile modFile, final Consumer<Path> pathConsumer) {
-
+        Thread.dumpStack();
     }
 
     @Override
@@ -76,7 +74,7 @@ public class SpongeModLocator implements IModLocator {
 
     @Override
     public void initArguments(final Map<String, ?> arguments) {
-
+        AppLaunch.setPluginPlatform(new ForgeAppPluginPlatform(Launcher.INSTANCE.environment()));
     }
 
     @Override

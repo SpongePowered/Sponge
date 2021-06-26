@@ -50,7 +50,7 @@ public class AddSpongeBackToClasspathModLocator extends AbstractJarFileLocator {
     @Override
     public List<IModFile> scanMods() {
         try {
-            final ModFile file = ModFile.newFMLInstance(Paths.get(SpongeModLocator.class.getProtectionDomain().getCodeSource().getLocation().toURI()), this);
+            final ModFile file = ModFile.newFMLInstance(Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI()), this);
             this.modJars.compute(file, (mf, fs) -> this.createFileSystem(mf));
             return Collections.singletonList(file);
         } catch (final URISyntaxException ex) {

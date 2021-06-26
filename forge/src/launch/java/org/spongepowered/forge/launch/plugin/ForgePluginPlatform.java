@@ -24,18 +24,51 @@
  */
 package org.spongepowered.forge.launch.plugin;
 
-import org.spongepowered.common.applaunch.plugin.PluginEngine;
-import org.spongepowered.plugin.PluginEnvironment;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 
-public class ForgePluginEngine implements PluginEngine {
-    private final PluginEnvironment environment;
+import java.nio.file.Path;
+import java.util.List;
 
-    public ForgePluginEngine(final PluginEnvironment environment) {
-        this.environment = environment;
+public final class ForgePluginPlatform implements PluginPlatform {
+
+    @Override
+    public String version() {
+        return null;
     }
 
     @Override
-    public PluginEnvironment getPluginEnvironment() {
-        return this.environment;
+    public void setVersion(String version) {
+
+    }
+
+    @Override
+    public Logger logger() {
+        return null;
+    }
+
+    @Override
+    public boolean vanilla() {
+        return false;
+    }
+
+    @Override
+    public Path baseDirectory() {
+        return null;
+    }
+
+    @Override
+    public void setBaseDirectory(Path baseDirectory) {
+
+    }
+
+    @Override
+    public List<Path> pluginDirectories() {
+        return null;
+    }
+
+    @Override
+    public void setPluginDirectories(List<Path> pluginDirectories) {
+
     }
 }
