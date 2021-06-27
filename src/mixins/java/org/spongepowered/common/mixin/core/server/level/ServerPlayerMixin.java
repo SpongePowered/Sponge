@@ -829,14 +829,19 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @Inject(method = "setPlayerInput", at = @At("HEAD"))
     public void onSetPlayerInput(final float sway, final float surge, final boolean jumping, final boolean dismount, final CallbackInfo ci) {
-        SpongeCommon.postEvent(SpongeEventFactory.createSteerVehicleEvent(
-                PhaseTracker.getCauseStackManager().currentCause(),
-                (org.spongepowered.api.entity.living.player.server.ServerPlayer) this,
-                SteerVehicleEvent.Surge.valueOf(surge),
-                SteerVehicleEvent.Sway.valueOf(sway),
-                jumping,
-                dismount
-        ));
+        if(isPassenger()) {
+            if(sway == this.xxa && surge == this.zza && jumping == this.jumping) {
+                return;
+            }
+
+            Sponge.eventManager().post(SpongeEventFactory.createSteerVehicleEvent(
+                    PhaseTracker.getCauseStackManager().currentCause(),
+                    (org.spongepowered.api.entity.living.player.server.ServerPlayer) this,
+                    jumping,
+                    surge,
+                    sway
+            ));
+        }
     }
 
 }

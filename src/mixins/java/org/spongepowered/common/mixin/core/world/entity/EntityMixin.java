@@ -206,6 +206,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow @Nullable protected abstract PortalInfo shadow$findDimensionEntryPoint(ServerLevel param0);
     // @formatter:on
 
+    @Shadow public abstract boolean isPassenger();
+
     private boolean impl$isConstructing = true;
     private boolean impl$vanishPreventsTargeting = false;
     private boolean impl$isVanished = false;
