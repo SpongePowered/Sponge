@@ -76,9 +76,11 @@ nb-configuration.xml
 *.launch
 /.nb-gradle/
 # We need to exclude the copied files.
-buildSrc/src/api
+/buildSrc/src/api
 # forge-loom always generates this for some reason...
 /.vscode/
+
+/src/*/generated/ # IntelliJ AP generated files
 
 # This is to optionally enable testplugins in development.
 # the test plugins themselves can be committed as examples.

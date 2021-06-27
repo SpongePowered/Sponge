@@ -74,11 +74,6 @@ tasks {
     check {
         dependsOn(gradle.includedBuild("SpongeAPI").task(":check"))
     }
-
-    prepareWorkspace {
-        dependsOn(gradle.includedBuild("SpongeAPI").task(":genEventImpl"))
-    }
-
 }
 
 version = spongeImpl.generateImplementationVersionString(apiVersion, minecraftVersion, recommendedVersion)
