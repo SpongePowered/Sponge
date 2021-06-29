@@ -24,41 +24,66 @@
  */
 package org.spongepowered.forge.launch;
 
+import com.google.common.collect.Lists;
+import com.google.inject.Guice;
+import com.google.inject.Injector;
+import com.google.inject.Module;
 import com.google.inject.Stage;
 import net.minecraftforge.api.distmarker.Dist;
 import net.minecraftforge.fml.loading.FMLLoader;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import org.spongepowered.common.inject.SpongeCommonModule;
+import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.forge.launch.plugin.ForgePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.util.List;
+
 public final class ForgeLaunch extends Launch {
 
+    private final ForgePluginManager pluginManager;
     private PluginContainer spongeForgePlugin;
 
     public ForgeLaunch(final PluginPlatform platform) {
-        super(platform, new ForgePluginManager());
+        super(platform);
+        this.pluginManager = new ForgePluginManager();
     }
 
     @Override
-    public boolean isVanilla() {
-        return false;
-    }
-
-    @Override
-    public boolean isDedicatedServer() {
+    public boolean dedicatedServer() {
         return FMLLoader.getDist() == Dist.DEDICATED_SERVER;
     }
 
     @Override
-    public Stage getInjectionStage() {
+    public ForgePluginManager pluginManager() {
+        return this.pluginManager;
+    }
+
+    @Override
+    public Stage injectionStage() {
         return FMLLoader.isProduction() ? Stage.PRODUCTION : Stage.DEVELOPMENT;
     }
 
     @Override
-    public PluginContainer getPlatformPlugin() {
+    public Injector createInjector() {
+        final List<Module> modules = Lists.newArrayList(
+                new SpongeModule(),
+                new SpongeCommonModule()
+        );
+        return Guice.createInjector(this.injectionStage(), modules);
+    }
+
+    @Override
+    public void performLifecycle() {
+
+    }
+
+    @Override
+    public PluginContainer platformPlugin() {
         if (this.spongeForgePlugin == null) {
-            this.spongeForgePlugin = this.getPluginManager().plugin("spongeforge").orElse(null);
+            this.spongeForgePlugin = this.pluginManager().plugin("spongeforge").orElse(null);
 
             if (this.spongeForgePlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing SpongeForge, this is a serious issue!");
@@ -66,10 +91,5 @@ public final class ForgeLaunch extends Launch {
         }
 
         return this.spongeForgePlugin;
-    }
-
-    @Override
-    protected void createPlatformPlugins(PluginPlatform platform) {
-
     }
 }

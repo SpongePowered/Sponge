@@ -5,6 +5,9 @@
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
     "priority": 1301,
+    "mixins": [
+        "fml.ModContainerMixin_Forge_SPI"
+    ],
     "client": [
         "client.main.MainMixin_Forge"
     ]

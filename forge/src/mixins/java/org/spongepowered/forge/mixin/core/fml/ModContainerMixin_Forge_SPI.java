@@ -22,45 +22,50 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.plugin;
+package org.spongepowered.forge.mixin.core.fml;
 
-import org.spongepowered.common.launch.plugin.DummyPluginContainer;
-import org.spongepowered.common.launch.plugin.SpongePluginManager;
+import net.minecraftforge.fml.ModContainer;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.plugin.metadata.PluginMetadata;
 
-import java.util.Collection;
-import java.util.Collections;
+import java.io.InputStream;
+import java.net.URL;
+import java.nio.file.Path;
 import java.util.Optional;
 
-public final class ForgePluginManager implements SpongePluginManager {
+@Mixin(ModContainer.class)
+public abstract class ModContainerMixin_Forge_SPI implements PluginContainer {
 
     @Override
-    public Optional<PluginContainer> fromInstance(final Object instance) {
+    public PluginMetadata metadata() {
+        // TODO IModInfo -> PluginMetadata
+        return null;
+    }
+
+    @Override
+    public Path path() {
+        return null;
+    }
+
+    @Override
+    public Logger logger() {
+        return null;
+    }
+
+    @Override
+    public Object instance() {
+        return null;
+    }
+
+    @Override
+    public Optional<URL> locateResource(URL relative) {
         return Optional.empty();
     }
 
     @Override
-    public Optional<PluginContainer> plugin(final String id) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Collection<PluginContainer> plugins() {
-        return Collections.emptyList();
-    }
-
-    @Override
-    public boolean isLoaded(final String id) {
-        return false;
-    }
-
-    @Override
-    public void addPlugin(final PluginContainer plugin) {
-
-    }
-
-    @Override
-    public void addDummyPlugin(final DummyPluginContainer plugin) {
-
+    public Optional<InputStream> openResource(URL relative) {
+        return PluginContainer.super.openResource(relative);
     }
 }
