@@ -47,10 +47,8 @@ public final class ClientLaunch extends VanillaLaunch {
         return false;
     }
 
-    public void launchPlatform(final String[] args) {
-        super.onLaunch();
-        this.logger().info("Loading Sponge, please wait...");
-
+    @Override
+    protected void performBootstrap(final String[] args) {
         SpongeBootstrap.perform("Client", () -> Main.main(args));
     }
 }
