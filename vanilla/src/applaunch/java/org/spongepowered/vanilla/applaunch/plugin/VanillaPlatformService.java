@@ -78,15 +78,15 @@ public final class VanillaPlatformService implements ITransformationService {
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
-        for (final Map.Entry<String, List<PluginResource>> resourcesEntry : VanillaPlatformService.pluginPlatform.getResources().entrySet()) {
-            final List<PluginResource> resources = resourcesEntry.getValue();
+        for (final Map.Entry<String, Set<PluginResource>> resourcesEntry : VanillaPlatformService.pluginPlatform.getResources().entrySet()) {
+            final Set<PluginResource> resources = resourcesEntry.getValue();
             for (final PluginResource resource : resources) {
 
                 // Handle Access Transformers
                 if ((accessWidener != null || mixin != null) && resource instanceof JVMPluginResource) {
                     if (mixin != null) {
                         // Offer jar to the Mixin service
-                        mixin.offerResource(resource.path(), resource.path().getFileName().toString());
+                        mixin.offerResource(((JVMPluginResource) resource).path(), ((JVMPluginResource) resource).path().getFileName().toString());
                     }
 
                     // Offer jar to the AW service
@@ -98,30 +98,31 @@ public final class VanillaPlatformService implements ITransformationService {
                                     if (!atFile.endsWith(".accesswidener")) {
                                         continue;
                                     }
-                                    accessWidener.offerResource(resource.fileSystem().getPath(atFile), atFile);
+                                    accessWidener.offerResource(((JVMPluginResource) resource).fileSystem().getPath(atFile), atFile);
                                 }
                             }
                         }
                         if (mixin != null && manifest.getMainAttributes().getValue(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS) != null) {
-                            if (!VanillaPlatformService.isSponge(resource)) {
+                            if (!VanillaPlatformService.isSponge((JVMPluginResource) resource)) {
                                 VanillaPlatformService.pluginPlatform.logger().warn(
                                     "Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the "
-                                        + "problem to Sponge!", resource.path()
+                                        + "problem to Sponge!", ((JVMPluginResource) resource).path()
                                 );
                             }
                         }
                     });
-                }
 
-                final Map.Entry<String, Path> entry = Maps.immutableEntry(resource.path().getFileName().toString(), resource.path());
-                launchResources.add(entry);
+                    final Map.Entry<String, Path> entry = Maps.immutableEntry(((JVMPluginResource) resource).path().getFileName().toString(),
+                        ((JVMPluginResource) resource).path());
+                    launchResources.add(entry);
+                }
             }
         }
 
         return launchResources;
     }
 
-    private static boolean isSponge(final PluginResource resource) {
+    private static boolean isSponge(final JVMPluginResource resource) {
         try {
             return resource.path().toUri().equals(VanillaPlatformService.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         } catch (final URISyntaxException ex) {

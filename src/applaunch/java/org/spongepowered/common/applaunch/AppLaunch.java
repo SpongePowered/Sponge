@@ -24,11 +24,18 @@
  */
 package org.spongepowered.common.applaunch;
 
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 
 public final class AppLaunch {
 
+    private static final Logger LOGGER = LogManager.getLogger("app launch");
     private static PluginPlatform pluginPlatform;
+
+    public static Logger logger() {
+        return AppLaunch.LOGGER;
+    }
 
     public static <P extends PluginPlatform> P setPluginPlatform(final PluginPlatform pluginPlatform) {
         if (AppLaunch.pluginPlatform != null) {

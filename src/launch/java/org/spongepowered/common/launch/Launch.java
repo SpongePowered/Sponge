@@ -49,7 +49,7 @@ public abstract class Launch {
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
 
     protected Launch(final PluginPlatform pluginPlatform) {
-        this.logger = LogManager.getLogger("Launch");
+        this.logger = LogManager.getLogger("launch");
         this.pluginPlatform = pluginPlatform;
         this.launcherPlugins = new ArrayList<>();
     }

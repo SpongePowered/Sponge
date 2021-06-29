@@ -157,7 +157,7 @@ public abstract class VanillaLaunch extends Launch {
             }
 
             for (final PluginMetadata metadata : read) {
-                this.pluginManager().addDummyPlugin(new DummyPluginContainer(metadata, gameDirectory, this.logger(), this));
+                this.pluginManager().addDummyPlugin(new DummyPluginContainer(metadata, this.logger(), this));
             }
         } catch (final IOException | URISyntaxException e) {
             throw new RuntimeException("Could not load metadata information for the implementation! This should be impossible!");
