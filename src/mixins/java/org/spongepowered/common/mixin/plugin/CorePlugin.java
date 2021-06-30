@@ -41,7 +41,6 @@ import java.util.function.Consumer;
 
 public class CorePlugin extends AbstractMixinConfigPlugin {
 
-
     private static final Map<String, BiConsumer<ClassNode, IMixinInfo>> SUPERCLASS_TRANSFORMATIONS;
     private static final Map<String, Consumer<ClassNode>> INCOMPATIBILITY_DETECTION_ERRORS;
 
@@ -50,7 +49,6 @@ public class CorePlugin extends AbstractMixinConfigPlugin {
         SUPERCLASS_TRANSFORMATIONS = Collections.unmodifiableMap(transformers);
         INCOMPATIBILITY_DETECTION_ERRORS = new ConcurrentHashMap<>();
     }
-
 
     private static final List<String> MUTABLE_BLOCK_POS_FIELDS = ImmutableList.<String>builder()
         .add("x:field_177997_b")
