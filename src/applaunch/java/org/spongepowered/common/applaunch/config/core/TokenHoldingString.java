@@ -56,6 +56,10 @@ public final class TokenHoldingString {
         });
     }
 
+    private static String sanitizePath(final String path) { // for use in Matcher.appendReplacement
+        return path.replace("\\", "\\\\");
+    }
+
     /**
      * Create and parse a string.
      *
@@ -89,7 +93,7 @@ public final class TokenHoldingString {
             final String token = matcher.group(1);
             final Function<PluginPlatform, String> replacer = TokenHoldingString.TOKENS.get(token.toLowerCase());
             final String replaced = replacer == null ? "" : replacer.apply(AppLaunch.pluginPlatform());
-            matcher.appendReplacement(result, replaced == null ? "" : replaced);
+            matcher.appendReplacement(result, replaced == null ? "" : TokenHoldingString.sanitizePath(replaced));
         } while (matcher.find());
         matcher.appendTail(result);
         return result.toString();

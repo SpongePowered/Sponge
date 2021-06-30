@@ -45,13 +45,10 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.Set;
@@ -116,12 +113,14 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             try {
                 final URI uri = url.toURI();
                 if (!this.isTransformable(uri)) {
+                    this.logger.debug("Non-transformable system classpath entry: {}", uri);
                     continue;
                 }
 
                 builder.addTransformationPath(Paths.get(uri));
+                this.logger.debug("Transformable system classpath entry: {}", uri);
             } catch (final URISyntaxException | IOException ex) {
-                this.logger.error("Failed to add to transformation path", ex);
+                this.logger.error("Failed to add {} to transformation path", url, ex);
             }
         }
 
