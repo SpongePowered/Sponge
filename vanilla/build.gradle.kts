@@ -179,8 +179,7 @@ minecraft {
             mainClass("org.spongepowered.vanilla.applaunch.Main")
             classpath.setFrom(
                 vanillaAppLaunch.output,
-                vanillaAppLaunch.runtimeClasspath,
-                configurations.minecraft
+                vanillaAppLaunch.runtimeClasspath
             )
             ideaRunSourceSet.set(vanillaAppLaunch)
         }
