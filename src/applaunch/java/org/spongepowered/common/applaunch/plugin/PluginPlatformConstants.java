@@ -22,23 +22,15 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.plugin;
+package org.spongepowered.common.applaunch.plugin;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.builtin.jvm.JVMPluginContainer;
-import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
+public final class PluginPlatformConstants {
 
-public final class VanillaJavaPluginContainer extends JVMPluginContainer {
-
-    public VanillaJavaPluginContainer(final PluginCandidate<JVMPluginResource> candidate) {
-        super(candidate);
+    private PluginPlatformConstants() {
     }
 
-    @Override
-    protected void initializeInstance(final Object instance) {
-        super.initializeInstance(instance);
+    public static final String METADATA_FILE_NAME = "sponge_plugins";
+    public static final String METADATA_FILE_NAME_WITH_EXTENSION = PluginPlatformConstants.METADATA_FILE_NAME + ".json";
+    public static final String METADATA_FILE_LOCATION = "META-INF/" + PluginPlatformConstants.METADATA_FILE_NAME_WITH_EXTENSION;
 
-        Sponge.eventManager().registerListeners(this, instance);
-    }
 }

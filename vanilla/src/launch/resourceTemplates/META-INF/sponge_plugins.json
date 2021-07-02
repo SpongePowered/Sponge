@@ -1,11 +1,15 @@
 {
+    "loader": {
+        "name": "java_plain",
+        "version": "1.0"
+    },
+    "license": "MIT",
     "plugins": [
         {
-            "loader": "java_plain",
             "id": "minecraft",
             "name": "Minecraft",
             "version": "${minecraftVersion}",
-            "main-class": "org.spongepowered.common.launcher.Launcher",
+            "entrypoint": "org.spongepowered.common.launcher.Launcher",
             "links": {
                 "homepage": "https://www.minecraft.net"
             },
@@ -14,16 +18,14 @@
                     "name": "Mojang AB",
                     "description": "Lead Developer"
                 }
-            ],
-            "dependencies": [],
-            "extra": {}
+            ]
         },
         {
             "loader": "java_plain",
             "id": "spongeapi",
             "name": "SpongeAPI",
             "version": "${apiVersion}",
-            "main-class": "org.spongepowered.api.Sponge",
+            "entrypoint": "org.spongepowered.api.Sponge",
             "description": "The Minecraft API specification",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -35,16 +37,13 @@
                     "name": "SpongePowered",
                     "description": "Lead Developer"
                 }
-            ],
-            "dependencies": [],
-            "extra": {}
+            ]
         },
         {
-            "loader": "java_plain",
             "id": "sponge",
             "name": "Sponge",
             "version": "${minecraftVersion}-${apiVersion}",
-            "main-class": "org.spongepowered.common.SpongeCommon",
+            "entrypoint": "org.spongepowered.common.SpongeCommon",
             "description": "The common Sponge implementation",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -66,15 +65,13 @@
                     "id": "spongeapi",
                     "version": "${apiVersion}"
                 }
-            ],
-            "extra": {}
+            ]
         },
         {
-            "loader": "java_plain",
             "id": "spongevanilla",
             "name": "SpongeVanilla",
             "version": "${version}",
-            "main-class": "org.spongepowered.vanilla.SpongeVanilla",
+            "entrypoint": "org.spongepowered.vanilla.SpongeVanilla",
             "description": "Vanilla Minecraft with Sponge",
             "links": {
                 "homepage": "https://www.spongepowered.org",
@@ -92,8 +89,7 @@
                     "id": "sponge",
                     "version": "${minecraftVersion}-${apiVersion}"
                 }
-            ],
-            "extra": {}
+            ]
         }
     ]
 }

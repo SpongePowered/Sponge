@@ -118,7 +118,7 @@ import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;

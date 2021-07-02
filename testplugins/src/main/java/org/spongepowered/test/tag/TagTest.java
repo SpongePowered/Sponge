@@ -67,7 +67,7 @@ import org.spongepowered.api.tag.Taggable;
 import org.spongepowered.api.util.blockray.RayTrace;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.util.Collection;
 import java.util.List;

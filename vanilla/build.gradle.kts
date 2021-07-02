@@ -200,6 +200,7 @@ minecraft {
 dependencies {
     val apiAdventureVersion: String by project
     val apiConfigurateVersion: String by project
+    val apiPluginSpiVersion: String by project
     val asmVersion: String by project
     val guavaVersion: String by project
     val jlineVersion: String by project
@@ -207,7 +208,6 @@ dependencies {
     val log4jVersion: String by project
     val mixinVersion: String by project
     val modlauncherVersion: String by project
-    val pluginSpiVersion: String by project
     val timingsVersion: String by project
     val tinyLogVersion: String by project
 
@@ -252,7 +252,7 @@ dependencies {
     appLaunch("org.ow2.asm:asm-util:$asmVersion")
     appLaunch("org.ow2.asm:asm-tree:$asmVersion")
     appLaunch("com.google.guava:guava:$guavaVersion")
-    appLaunch("org.spongepowered:plugin-spi:$pluginSpiVersion")
+    appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
     appLaunch("javax.inject:javax.inject:1")
     appLaunch("org.apache.logging.log4j:log4j-api:$log4jVersion")
     appLaunch("org.apache.logging.log4j:log4j-core:$log4jVersion")

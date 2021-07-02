@@ -48,4 +48,10 @@ public interface PluginPlatform {
     List<Path> pluginDirectories();
 
     void setPluginDirectories(List<Path> pluginDirectories);
+
+    String metadataFilePath();
+
+    void setMetadataFilePath(String metadataFilePath);
+
+
 }
