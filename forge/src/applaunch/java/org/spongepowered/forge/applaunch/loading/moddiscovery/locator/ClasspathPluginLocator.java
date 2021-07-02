@@ -31,6 +31,7 @@ import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileLocator;
 import net.minecraftforge.forgespi.locating.IModFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.ModFileParsers;
 
 import java.io.IOException;
@@ -47,13 +48,13 @@ import java.util.stream.Collectors;
 
 public final class ClasspathPluginLocator extends AbstractJarFileLocator {
     private static final Logger LOGGER = LogManager.getLogger();
-    private static final String PLUGINS_JSON = "META-INF/plugins.json";
+    private static final String PLUGINS_JSON = "META-INF/sponge_plugins.json";
     private Set<Path> modCoords;
 
     @Override
     public List<IModFile> scanMods() {
         return this.modCoords.stream().
-                map(mc -> ModFileParsers.newPluginInstance(mc, this, "plugins")).
+                map(mc -> ModFileParsers.newPluginInstance(mc, this, PluginPlatformConstants.METADATA_FILE_NAME)).
                 peek(f -> this.modJars.compute(f, (mf, fs)->createFileSystem(mf))).
                 collect(Collectors.toList());
     }

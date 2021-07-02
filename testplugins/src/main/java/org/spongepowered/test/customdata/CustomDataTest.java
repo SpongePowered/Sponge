@@ -60,7 +60,7 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.math.vector.Vector3i;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.util.Collections;
 import java.util.HashMap;

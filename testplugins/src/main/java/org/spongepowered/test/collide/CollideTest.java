@@ -41,7 +41,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.block.CollideBlockEvent;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 @Plugin("collidetest")

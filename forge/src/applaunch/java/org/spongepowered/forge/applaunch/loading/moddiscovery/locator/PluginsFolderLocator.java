@@ -33,6 +33,7 @@ import net.minecraftforge.forgespi.locating.IModFile;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.ModFileParsers;
 
 import java.nio.file.FileSystem;
@@ -67,7 +68,7 @@ public final class PluginsFolderLocator extends AbstractJarFileLocator {
             .filter((p) -> !excluded.contains(p))
             .sorted(Comparator.comparing((path) -> StringUtils.toLowerCase(path.getFileName().toString())))
             .filter((p) -> StringUtils.toLowerCase(p.getFileName().toString()).endsWith(".jar"))
-            .map((p) -> ModFileParsers.newPluginInstance(p, this, "plugins"))
+            .map((p) -> ModFileParsers.newPluginInstance(p, this, PluginPlatformConstants.METADATA_FILE_NAME))
             .peek((f) -> this.modJars.compute(f, (mf, fs) -> this.createFileSystem(mf)))
             .filter(f -> {
                 if (!f.identifyMods()) {

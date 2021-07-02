@@ -25,37 +25,45 @@
 package org.spongepowered.vanilla.launch.plugin;
 
 import com.google.inject.Injector;
+import org.apache.maven.artifact.versioning.ArtifactVersion;
+import org.apache.maven.artifact.versioning.DefaultArtifactVersion;
 import org.spongepowered.common.inject.plugin.PluginModule;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.plugin.Environment;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
-import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.jvm.JVMPluginContainer;
-import org.spongepowered.plugin.jvm.JVMPluginLoader;
-import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
+import org.spongepowered.plugin.builtin.jvm.JVMPluginLoader;
+import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
 
-import java.util.Optional;
+public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginResource, VanillaJavaPluginContainer> {
 
-public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginContainer> {
+    private final ArtifactVersion version = new DefaultArtifactVersion("1.0");
 
     @Override
-    public Optional<JVMPluginContainer> createPluginContainer(final PluginCandidate<JVMPluginResource> candidate, final PluginEnvironment environment) {
-        return Optional.of(new VanillaJavaPluginContainer(candidate));
+    public ArtifactVersion version() {
+        return this.version;
     }
 
     @Override
-    protected Object createPluginInstance(final PluginEnvironment environment, final JVMPluginContainer container, final ClassLoader targetClassLoader) throws InvalidPluginException {
+    public VanillaJavaPluginContainer loadPlugin(final Environment environment, final PluginCandidate<JVMPluginResource> candidate, final ClassLoader targetClassLoader)
+            throws InvalidPluginException {
+        final VanillaJavaPluginContainer container = new VanillaJavaPluginContainer(candidate);
         try {
-            final String mainClass = container.metadata().mainClass();
+            final String mainClass = container.metadata().entrypoint();
             final Class<?> pluginClass = Class.forName(mainClass, true, targetClassLoader);
             final Injector parentInjector = Launch.instance().lifecycle().platformInjector();
+            final Object plugin;
             if (parentInjector != null) {
                 final Injector childInjector = parentInjector.createChildInjector(new PluginModule(container, pluginClass));
-                return childInjector.getInstance(pluginClass);
+                plugin = childInjector.getInstance(pluginClass);
+            } else {
+                plugin = pluginClass.newInstance();
             }
-            return pluginClass.newInstance();
+            container.initializeInstance(plugin);
+            return container;
         } catch (final Exception ex) {
             throw new InvalidPluginException("An error occurred creating an instance of plugin '" + container.metadata().id() + "'!", ex);
         }
     }
+
 }

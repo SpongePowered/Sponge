@@ -35,7 +35,7 @@ import org.spongepowered.api.event.GenericEvent;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.lifecycle.LifecycleEvent;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
 @Plugin("lifecycletest")

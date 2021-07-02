@@ -33,8 +33,8 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
-import org.spongepowered.plugin.jvm.locator.ResourceType;
+import org.spongepowered.plugin.builtin.jvm.locator.JVMPluginResource;
+import org.spongepowered.plugin.builtin.jvm.locator.ResourceType;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 import java.io.File;
@@ -104,7 +104,9 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             "net.minecrell.terminalconsole.",
             // Guice (for easier opening to reflection)
             "com.google.inject.",
-            "org.slf4j."
+            "org.slf4j.",
+            // Maven artifacts -- specifically for versioning
+            "org.apache.maven.artifact."
     };
 
     @Override

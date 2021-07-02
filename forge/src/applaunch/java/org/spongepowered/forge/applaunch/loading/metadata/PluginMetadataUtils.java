@@ -26,10 +26,12 @@ package org.spongepowered.forge.applaunch.loading.metadata;
 
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
-import org.spongepowered.plugin.metadata.PluginContributor;
-import org.spongepowered.plugin.metadata.PluginDependency;
-import org.spongepowered.plugin.metadata.PluginLinks;
 import org.spongepowered.plugin.metadata.PluginMetadata;
+import org.spongepowered.plugin.metadata.builtin.StandardPluginMetadata;
+import org.spongepowered.plugin.metadata.builtin.model.StandardPluginContributor;
+import org.spongepowered.plugin.metadata.builtin.model.StandardPluginDependency;
+import org.spongepowered.plugin.metadata.builtin.model.StandardPluginLinks;
+import org.spongepowered.plugin.metadata.model.PluginDependency;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -40,21 +42,21 @@ import java.util.List;
 public final class PluginMetadataUtils {
 
     public static PluginMetadata modToPlugin(final ModInfo info) {
-        final PluginMetadata.Builder builder = PluginMetadata.builder();
+        final StandardPluginMetadata.Builder builder = StandardPluginMetadata.builder();
         builder
-                .loader(info.getOwningFile().getModLoader())
                 .id(info.getModId())
                 .name(info.getDisplayName())
                 .version(info.getVersion().toString())
                 .description(info.getDescription())
-                .mainClass("unknown") // TODO Map main class to mod id
-                .addContributor(PluginContributor.builder().name(info.getConfigElement("authors").orElse("unknown").toString())
+                .entrypoint("unknown") // TODO Map main class to mod id
+                .addContributor(StandardPluginContributor.builder()
+                        .name(info.getConfigElement("authors").orElse("unknown").toString())
                         .build());
-        builder.links(PluginLinks.builder().issues(info.getOwningFile().getIssueURL()).build());
+        builder.links(StandardPluginLinks.builder().issues(info.getOwningFile().getIssueURL()).build());
 
-        final List<PluginDependency> dependencies = new ArrayList<>();
+        final List<StandardPluginDependency> dependencies = new ArrayList<>();
         for (final IModInfo.ModVersion dependency : info.getDependencies()) {
-            final PluginDependency.Builder depBuilder = PluginDependency.builder();
+            final StandardPluginDependency.Builder depBuilder = StandardPluginDependency.builder();
             depBuilder
                     .id(dependency.getModId())
                     .loadOrder(PluginMetadataUtils.orderingToLoad(dependency.getOrdering()))

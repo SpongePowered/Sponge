@@ -38,7 +38,7 @@ import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.api.network.channel.packet.basic.BasicPacketChannel;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.jvm.Plugin;
+import org.spongepowered.plugin.builtin.jvm.Plugin;
 
 import java.util.concurrent.CompletionException;
 

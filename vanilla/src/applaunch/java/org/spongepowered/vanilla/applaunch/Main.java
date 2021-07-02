@@ -25,11 +25,10 @@
 package org.spongepowered.vanilla.applaunch;
 
 import cpw.mods.modlauncher.Launcher;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.plugin.PluginEnvironment;
+import org.spongepowered.common.applaunch.plugin.PluginPlatformConstants;
+import org.spongepowered.plugin.builtin.StandardEnvironment;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.applaunch.util.ArgumentList;
 
@@ -48,7 +47,7 @@ public final class Main {
     private final VanillaPluginPlatform pluginPlatform;
 
     public Main() {
-        this.pluginPlatform = AppLaunch.setPluginPlatform(new VanillaPluginPlatform(new PluginEnvironment()));
+        this.pluginPlatform = AppLaunch.setPluginPlatform(new VanillaPluginPlatform(new StandardEnvironment()));
     }
 
     public static void main(final String[] args) throws Exception {
@@ -57,7 +56,7 @@ public final class Main {
     }
 
     public void run() throws IOException {
-        final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
+        final String implementationVersion = StandardEnvironment.class.getPackage().getImplementationVersion();
 
         this.pluginPlatform.setVersion(implementationVersion == null ? "dev" : implementationVersion);
         this.pluginPlatform.setBaseDirectory(AppCommandLine.gameDirectory);
@@ -73,6 +72,7 @@ public final class Main {
             pluginDirectories.add(pluginsDirectory);
         }
         this.pluginPlatform.setPluginDirectories(pluginDirectories);
+        this.pluginPlatform.setMetadataFilePath(PluginPlatformConstants.METADATA_FILE_LOCATION);
 
         AppLaunch.logger().info("Transitioning to ModLauncher, please wait...");
         final ArgumentList lst = ArgumentList.from(AppCommandLine.RAW_ARGS);

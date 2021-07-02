@@ -174,7 +174,7 @@ dependencies {
 
     val apiAdventureVersion: String by project
     val apiConfigurateVersion: String by project
-    val pluginSpiVersion: String by project
+    val apiPluginSpiVersion: String by project
     val timingsVersion: String by project
     val log4jVersion: String by project
 
@@ -186,7 +186,7 @@ dependencies {
 
     val appLaunch = forgeBootstrapLibrariesConfig.name
     appLaunch("org.spongepowered:spongeapi:$apiVersion") { isTransitive = false }
-    appLaunch("org.spongepowered:plugin-spi:$pluginSpiVersion")
+    appLaunch("org.spongepowered:plugin-spi:$apiPluginSpiVersion")
     appLaunch(platform("org.spongepowered:configurate-bom:$apiConfigurateVersion"))
     appLaunch("org.spongepowered:configurate-core") {
         exclude(group = "org.checkerframework", module = "checker-qual")
