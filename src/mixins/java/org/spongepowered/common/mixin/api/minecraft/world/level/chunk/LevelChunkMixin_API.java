@@ -33,12 +33,14 @@ import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.levelgen.Heightmap;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
@@ -51,6 +53,8 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.util.ChunkUtil;
 import org.spongepowered.common.util.SpongeTicks;
+import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
@@ -74,7 +78,11 @@ public abstract class LevelChunkMixin_API implements Chunk {
     @Shadow @Final private Level level;
 
     @Shadow public abstract boolean shadow$isEmpty();
+    @Shadow public abstract int shadow$getHeight(Heightmap.Types param0, int param1, int param2);
     //@formatter:on
+
+    private Vector3i api$blockMin;
+    private Vector3i api$blockMax;
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
@@ -278,5 +286,41 @@ public abstract class LevelChunkMixin_API implements Chunk {
             }
         );
     }
-// TODO implement the rest of it
+
+    @Override
+    public int highestYAt(final int x, final int z) {
+        return this.shadow$getHeight((Heightmap.Types) (Object) HeightTypes.WORLD_SURFACE.get(), x, z);
+    }
+
+    @Override
+    public Vector3i blockMin() {
+        if (this.api$blockMin == null) {
+            this.api$blockMin = SpongeChunkLayout.INSTANCE.forceToWorld(this.chunkPosition());
+        }
+        return this.api$blockMin;
+    }
+
+    @Override
+    public Vector3i blockMax() {
+        if (this.api$blockMax == null) {
+            this.api$blockMax = this.blockMin().add(SpongeChunkLayout.CHUNK_SIZE).sub(1, 1, 1);
+        }
+        return this.api$blockMax;
+    }
+
+    @Override
+    public Vector3i blockSize() {
+        return SpongeChunkLayout.CHUNK_SIZE;
+    }
+
+    @Override
+    public boolean containsBlock(final int x, final int y, final int z) {
+        return VecHelper.inBounds(x, y, z, this.blockMin(), this.blockMax());
+    }
+
+    @Override
+    public boolean isAreaAvailable(final int x, final int y, final int z) {
+        return VecHelper.inBounds(x, y, z, this.blockMin(), this.blockMax());
+    }
+
 }
