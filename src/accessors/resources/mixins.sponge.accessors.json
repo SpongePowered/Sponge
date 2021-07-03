@@ -55,6 +55,7 @@
         "server.players.PlayerListAccessor",
         "server.players.StoredUserEntryAccessor",
         "server.players.StoredUserListAccessor",
+        "server.rcon.thread.RconClientAccessor",
         "util.WeighedRandom_WeighedRandomItemAccessor",
         "util.datafix.schemas.V100Accessor",
         "world.CompoundContainerAccessor",
