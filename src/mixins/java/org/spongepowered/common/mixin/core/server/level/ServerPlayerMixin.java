@@ -875,6 +875,11 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         return (net.minecraft.world.scores.Scoreboard) this.impl$scoreboard;
     }
 
+    @Override
+    public Team shadow$getTeam() {
+        return ((net.minecraft.world.scores.Scoreboard) this.impl$scoreboard).getPlayersTeam(this.shadow$getScoreboardName());
+    }
+
     @Inject(method = "startSleepInBed", at = @At(value = "RETURN"), cancellable = true)
     private void impl$onReturnSleep(final BlockPos param0, final CallbackInfoReturnable<Either<Player.BedSleepingProblem, Unit>> cir) {
         final Either<Player.BedSleepingProblem, Unit> returnValue = cir.getReturnValue();

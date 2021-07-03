@@ -63,6 +63,7 @@ import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.scores.Scoreboard;
+import net.minecraft.world.scores.Team;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -92,6 +93,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
@@ -621,5 +623,19 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
     @Override
     public boolean impl$canCallIgniteEntityEvent() {
         return super.impl$canCallIgniteEntityEvent() && !this.shadow$isSpectator() && !this.shadow$isCreative();
+    }
+
+    @Inject(method = "canHarmPlayer", at = @At("HEAD"), cancellable = true)
+    private void impl$onCanHarmPlayer(final net.minecraft.world.entity.player.Player other, final CallbackInfoReturnable<Boolean> cir) {
+        if (!(other instanceof org.spongepowered.api.entity.living.player.server.ServerPlayer)) {
+            return;
+        }
+
+        //Check whatever the other player can hit this player
+        //Fixes per player scoreboards which could have different team set up for each player
+        final Team otherTeam = other.getTeam();
+        final Team thisTeam = ((net.minecraft.world.scores.Scoreboard) ((ServerPlayerBridge) other).bridge$getScoreboard()).getPlayersTeam(this.shadow$getScoreboardName());
+
+        cir.setReturnValue(otherTeam == null || !otherTeam.isAlliedTo(thisTeam) || otherTeam.isAllowFriendlyFire());
     }
 }
