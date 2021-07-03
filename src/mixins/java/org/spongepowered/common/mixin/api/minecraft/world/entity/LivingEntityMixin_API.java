@@ -77,7 +77,7 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
         values.add(this.requireValue(Keys.BODY_ROTATIONS).asImmutable());
         values.add(this.requireValue(Keys.CHEST_ROTATION).asImmutable());
         values.add(this.requireValue(Keys.HEAD_ROTATION).asImmutable());
-        values.add(this.requireValue(Keys.HEIGHT).asImmutable());
+        values.add(this.requireValue(Keys.HEALTH).asImmutable());
         values.add(this.requireValue(Keys.IS_ELYTRA_FLYING).asImmutable());
         values.add(this.requireValue(Keys.LAST_DAMAGE_RECEIVED).asImmutable());
         values.add(this.requireValue(Keys.MAX_HEALTH).asImmutable());

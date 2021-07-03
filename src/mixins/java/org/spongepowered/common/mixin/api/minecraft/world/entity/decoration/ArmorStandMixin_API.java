@@ -49,6 +49,7 @@ public abstract class ArmorStandMixin_API extends LivingEntityMixin_API implemen
         values.add(this.requireValue(Keys.HAS_MARKER).asImmutable());
         values.add(this.requireValue(Keys.HEAD_ROTATION).asImmutable());
         values.add(this.requireValue(Keys.IS_PLACING_DISABLED).asImmutable());
+        values.add(this.requireValue(Keys.IS_SMALL).asImmutable());
         values.add(this.requireValue(Keys.IS_TAKING_DISABLED).asImmutable());
         values.add(this.requireValue(Keys.LEFT_ARM_ROTATION).asImmutable());
         values.add(this.requireValue(Keys.LEFT_LEG_ROTATION).asImmutable());

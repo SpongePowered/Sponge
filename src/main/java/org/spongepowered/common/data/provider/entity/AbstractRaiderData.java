@@ -46,9 +46,6 @@ public final class AbstractRaiderData {
                     .create(Keys.IS_CELEBRATING)
                         .get(h -> h.getEntityData().get(RaiderAccessor.accessor$IS_CELEBRATING()))
                         .set(Raider::setCelebrating)
-                    .create(Keys.IS_LEADER)
-                        .get(PatrollingMonster::isPatrolLeader)
-                        .set(PatrollingMonster::setPatrolLeader)
                     .create(Keys.RAID_WAVE)
                         .get(h -> ((RaidBridge) h.getCurrentRaid()).bridge$getWaves().get(h.getWave()));
     }

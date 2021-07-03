@@ -362,7 +362,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         values.add(this.requireValue(Keys.INVULNERABILITY_TICKS).asImmutable());
         values.add(this.requireValue(Keys.INVULNERABLE).asImmutable());
         values.add(this.requireValue(Keys.IS_CUSTOM_NAME_VISIBLE).asImmutable());
-        values.add(this.requireValue(Keys.IS_FLYING).asImmutable());
         values.add(this.requireValue(Keys.IS_GLOWING).asImmutable());
         values.add(this.requireValue(Keys.IS_GRAVITY_AFFECTED).asImmutable());
         values.add(this.requireValue(Keys.IS_INVISIBLE).asImmutable());

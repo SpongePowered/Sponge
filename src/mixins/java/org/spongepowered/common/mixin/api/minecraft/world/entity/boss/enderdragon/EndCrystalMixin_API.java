@@ -47,7 +47,7 @@ public abstract class EndCrystalMixin_API extends EntityMixin_API implements End
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        values.add(this.requireValue(Keys.HEIGHT).asImmutable());
+        values.add(this.requireValue(Keys.HEALTH).asImmutable());
         values.add(this.requireValue(Keys.SHOW_BOTTOM).asImmutable());
 
         this.getValue(Keys.EXPLOSION_RADIUS).map(Value::asImmutable).ifPresent(values::add);
