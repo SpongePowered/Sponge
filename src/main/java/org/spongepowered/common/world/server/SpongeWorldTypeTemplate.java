@@ -27,8 +27,6 @@ package org.spongepowered.common.world.server;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.MapCodec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.Registry;
-import net.minecraft.resources.RegistryFileCodec;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.BlockTags;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -56,7 +54,6 @@ import org.spongepowered.common.util.SpongeMinecraftDayTime;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.OptionalLong;
-import java.util.function.Supplier;
 
 public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed implements WorldTypeTemplate {
 
@@ -86,8 +83,6 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             SpongeWorldTypeTemplate.SPONGE_CODEC, (type, data) -> ((DimensionTypeBridge) type).bridge$decorateData(data), type -> ((DimensionTypeBridge)
             type).bridge$createData()));
     }
-
-    public static final Codec<Supplier<DimensionType>> CODEC = RegistryFileCodec.create(Registry.DIMENSION_TYPE_REGISTRY, SpongeWorldTypeTemplate.DIRECT_CODEC);
 
     protected SpongeWorldTypeTemplate(final BuilderImpl builder) {
         super(builder.key);
@@ -411,6 +406,25 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
 
         @Override
         public @NonNull WorldTypeTemplate build0() {
+            if (this.maximumHeight < 16) {
+                throw new IllegalStateException(String.format("Template '%s' specified a maximum height less than 16!", this.key));
+            }
+            if (this.minY + this.maximumHeight > DimensionType.MAX_Y + 1) {
+                throw new IllegalStateException(String.format("Template '%s' specified min_y ['%s'] and maximum height ['%s'] combined greater "
+                        + "than ['%s']!", this.key, this.minY, this.maximumHeight, (DimensionType.MIN_Y + 1)));
+            }
+            if (this.logicalHeight > this.maximumHeight) {
+                throw new IllegalStateException(String.format("Template '%s' specified a logical height ['%s'] greater than height ['%s']!",
+                        this.key, this.logicalHeight, this.maximumHeight));
+            }
+            if (this.maximumHeight % 16 != 0) {
+                throw new IllegalStateException(String.format("Template '%s' specified a maximum height ['%s'] that is not a multiple of 16!",
+                        this.key, this.maximumHeight));
+            }
+            if (this.minY % 16 != 0) {
+                throw new IllegalStateException(String.format("Template '%s' specified a min_y ['%s'] that is not a multiple of 16!",
+                        this.key, this.minY));
+            }
             return new SpongeWorldTypeTemplate(this);
         }
     }
