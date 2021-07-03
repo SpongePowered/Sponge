@@ -32,6 +32,7 @@ import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -87,6 +88,11 @@ public class SpongeCommand {
     protected static final Component INDENT_COMPONENT = Component.text(SpongeCommand.INDENT);
     protected static final Component LONG_INDENT_COMPONENT = Component.text(SpongeCommand.LONG_INDENT);
     protected static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
+
+    protected static final TextColor GREEN = TextColor.color(0x42C742);
+    protected static final TextColor YELLOW = TextColor.color(0xDEDE00);
+    protected static final TextColor ORANGE = TextColor.color(0xE36504);
+    protected static final TextColor RED = TextColor.color(0xC74242);
 
     private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", PluginContainer.class);
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", CommandMapping.class);
@@ -434,25 +440,24 @@ public class SpongeCommand {
 
     private @NonNull CommandResult tpsExecutor(final CommandContext context) {
         if (SpongeCommon.game().isServerAvailable()) {
-
             final List<Component> tps = new ArrayList<>();
             for (final ServerWorld world : Sponge.server().worldManager().worlds()) {
                 final TextComponent.Builder builder =
-                        Component.text()
-                                .content("World [")
-                                .append(Component.text(world.key().asString(), NamedTextColor.DARK_GREEN))
-                                .append(Component.text("] - TPS: "));
+                  Component.text()
+                    .append(Component.text(world.key().asString(), TextColor.color(0xC9C9C9)))
+                    .append(Component.text(": "));
                 tps.add(this.appendTickTime(((PlatformLevelBridge) world).bridge$recentTickTimes(), builder).build());
             }
 
-            tps.add(this.appendTickTime(SpongeCommon.server().tickTimes, Component.text().content("Overall TPS: ")).build());
+            tps.add(Component.newline());
+            tps.add(this.appendTickTime(SpongeCommon.server().tickTimes, Component.text().content("Overall: ")).build());
             SpongeCommon.game().serviceProvider()
-                    .paginationService()
-                    .builder()
-                    .contents(tps)
-                    .title(Component.text("Server TPS", NamedTextColor.WHITE))
-                    .padding(Component.text("-", NamedTextColor.WHITE))
-                    .sendTo(context.cause().audience());
+              .paginationService()
+              .builder()
+              .contents(tps)
+              .title(Component.text("Ticks Per Second (TPS)", NamedTextColor.WHITE))
+              .padding(Component.text("-", NamedTextColor.WHITE))
+              .sendTo(context.cause().audience());
         } else {
             context.sendMessage(Identity.nil(), Component.text("Server is not running."));
         }
@@ -462,10 +467,26 @@ public class SpongeCommand {
 
     private TextComponent.Builder appendTickTime(final long[] tickTimes, final TextComponent.Builder builder) {
         final double averageTickTime = Mth.average(tickTimes) * 1.0E-6D;
-        builder.append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (averageTickTime), 20)), NamedTextColor.LIGHT_PURPLE))
-                .append(Component.text(", Mean: "))
-                .append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime) + "ms", NamedTextColor.RED));
+        final double tps = Math.min(1000.0 / (averageTickTime), 20);
+        builder.append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(tps), this.tpsColor(tps)))
+          .append(Component.text(" (", NamedTextColor.GRAY)
+            .append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime), NamedTextColor.GRAY)
+              .append(Component.text("ms avg"))
+              .append(Component.text(")"))))
+        ;
         return builder;
+    }
+
+    private TextColor tpsColor(final double tps) {
+        if (tps >= 18) {
+            return SpongeCommand.GREEN;
+        } else if (tps >= 15) {
+            return SpongeCommand.YELLOW;
+        } else if (tps >= 10) {
+            return SpongeCommand.ORANGE;
+        } else {
+            return SpongeCommand.RED;
+        }
     }
 
     private @NonNull CommandResult versionExecutor(final CommandContext context) {
