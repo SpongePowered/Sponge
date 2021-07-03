@@ -152,7 +152,7 @@ dependencies {
     implementation("org.xerial:sqlite-jdbc:3.20.0")
     implementation("javax.inject:javax.inject:1")
 
-    // Timings
+    // Observability
     implementation("org.spongepowered:timings:$timingsVersion")
     implementation("org.spongepowered:observer:$observerVersion") {
         exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
@@ -202,6 +202,9 @@ dependencies {
 
     mixinsConfig(sourceSets.named("main").map { it.output })
     mixinsConfig("org.spongepowered:timings:$timingsVersion")
+    mixinsConfig("org.spongepowered:observer:$observerVersion") {
+        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+    }
     add(mixins.get().implementationConfigurationName, "org.spongepowered:spongeapi:$apiVersion")
 
     // Tests

@@ -68,4 +68,5 @@ public final class SpongeGameScopedServiceProvider extends SpongeServiceProvider
     public final @NonNull PaginationService paginationService() {
         return this.provideUnchecked(PaginationService.class);
     }
+
 }

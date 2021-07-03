@@ -209,6 +209,7 @@ dependencies {
     val modlauncherVersion: String by project
     val pluginSpiVersion: String by project
     val timingsVersion: String by project
+    val observerVersion: String by project
     val tinyLogVersion: String by project
 
     api(project(":", configuration = "launch"))
@@ -284,6 +285,9 @@ dependencies {
     // https://github.com/SpongePowered/Sponge/issues/3429
     libraries("org.fusesource.jansi:jansi:$jansiVersion")
     libraries("org.spongepowered:timings:$timingsVersion")
+    libraries("org.spongepowered:observer:$observerVersion") {
+        exclude(group = "org.checkerframework", module = "checker-qual") // We use our own version
+    }
 
     // Launch Dependencies - Needed to bootstrap the engine(s)
     // The ModLauncher compatibility launch layer
