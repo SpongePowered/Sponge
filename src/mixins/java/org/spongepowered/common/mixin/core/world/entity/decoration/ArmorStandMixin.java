@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
+import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin;
 import java.util.ArrayList;
@@ -58,7 +58,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
      */
     private void fireDestroyDamageEvent(final DamageSource source, final CallbackInfoReturnable<Boolean> cir) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            DamageEventHandler.generateCauseFor(source, frame);
+            DamageEventUtil.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.currentCause(),
                 (Entity) this, new ArrayList<>(), Math.max(1000, this.shadow$getHealth()));
             if (SpongeCommon.post(event)) {
@@ -93,7 +93,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
     @Redirect(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;causeDamage(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
     private void impl$fireDamageEventDamage(final ArmorStand self, final DamageSource source, final float amount) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            DamageEventHandler.generateCauseFor(source, frame);
+            DamageEventUtil.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.currentCause(),
                 (Entity) this, new ArrayList<>(), amount);
             if (!SpongeCommon.post(event)) {
@@ -117,7 +117,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
         // While this doesn't technically "damage" the armor stand, it feels
         // like damage in other respects, so fire an event.
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            DamageEventHandler.generateCauseFor(source, frame);
+            DamageEventUtil.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.currentCause(),
                 (Entity) this, new ArrayList<>(), 0);
             if (SpongeCommon.post(event)) {

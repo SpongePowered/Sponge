@@ -100,7 +100,7 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
+import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -388,7 +388,8 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                 final MobType creatureAttribute = targetEntity instanceof LivingEntity
                     ? ((LivingEntity) targetEntity).getMobType()
                     : MobType.UNDEFINED;
-                final List<DamageFunction> enchantmentModifierFunctions = DamageEventHandler.createAttackEnchantmentFunction(this.shadow$getMainHandItem(), creatureAttribute, attackStrength);
+                final List<DamageFunction> enchantmentModifierFunctions = DamageEventUtil
+                        .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), creatureAttribute, attackStrength);
                 // This is kept for the post-damage event handling
                 final List<DamageModifier> enchantmentModifiers = enchantmentModifierFunctions.stream()
                     .map(ModifierFunction::modifier)
@@ -401,7 +402,8 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                 originalFunctions.addAll(enchantmentModifierFunctions);
                 // Sponge End
 
-                originalFunctions.add(DamageEventHandler.provideCooldownAttackStrengthFunction((net.minecraft.world.entity.player.Player) (Object) this, attackStrength));
+                originalFunctions.add(
+                        DamageEventUtil.provideCooldownAttackStrengthFunction((net.minecraft.world.entity.player.Player) (Object) this, attackStrength));
                 damage = damage * (0.2F + attackStrength * attackStrength * 0.8F);
                 enchantmentDamage = enchantmentDamage * attackStrength;
                 this.shadow$resetAttackStrengthTicker();
@@ -427,7 +429,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                     if (isCriticalAttack) {
                         // Sponge Start - add critical attack tuple
                         // damage *= 1.5F; // Sponge - This is handled in the event
-                        originalFunctions.add(DamageEventHandler.provideCriticalAttackTuple((net.minecraft.world.entity.player.Player) (Object) this));
+                        originalFunctions.add(DamageEventUtil.provideCriticalAttackTuple((net.minecraft.world.entity.player.Player) (Object) this));
                         // Sponge End
                     }
 

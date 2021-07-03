@@ -107,7 +107,7 @@ import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.data.value.ImmutableSpongeValue;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
+import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
@@ -843,7 +843,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
         try {
             final AABB bb = this.shadow$getBoundingBox().inflate(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
-            final ServerLocation location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
+            final ServerLocation location = DamageEventUtil.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getMaterial() == Material.LAVA);
             final MinecraftBlockDamageSource lava = new MinecraftBlockDamageSource("lava", location);
             ((DamageSourceBridge) (Object) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
