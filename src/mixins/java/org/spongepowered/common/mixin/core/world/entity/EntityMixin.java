@@ -245,7 +245,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(SpongeCommon.getActivePlugin());
+            frame.pushCause(SpongeCommon.activePlugin());
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
             final net.minecraft.world.phys.Vec3 originalPosition = this.shadow$position();
@@ -253,7 +253,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             if (ShouldFire.MOVE_ENTITY_EVENT) {
                 final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
                     (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()), position, position);
-                if (SpongeCommon.postEvent(event)) {
+                if (SpongeCommon.post(event)) {
                     return false;
                 }
                 destinationPosition = event.destinationPosition();
