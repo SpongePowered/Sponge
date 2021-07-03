@@ -1,9 +1,7 @@
 {
     "required": true,
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.vanilla.mixin.core",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_11",
     "priority": 1301,
     "client": [
         "client.ClientBrandRetrieverMixin_Vanilla",
@@ -34,9 +32,6 @@
         "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla",
         "server.level.ServerLevelMixin_Vanilla"
     ],
-    "injectors": {
-        "defaultRequire": 1
-    },
     "overwrites": {
         "conformVisibility": true
     }

@@ -29,7 +29,8 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
-import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeCatalogedElementValueParameter;
 
 import java.util.ArrayList;
@@ -40,11 +41,19 @@ import java.util.function.Function;
 public final class SpongeRegistryEntryParameterBuilder<T>
         implements VariableValueParameters.RegistryEntryBuilder<T> {
 
-    private final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction;
+    private final List<Function<CommandContext, @Nullable RegistryHolder>> registryFunctions = new ArrayList<>();
+    private final RegistryType<? extends T> registryType;
     private final List<String> prefixes = new ArrayList<>();
 
-    public SpongeRegistryEntryParameterBuilder(final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction) {
-        this.registryFunction = registryFunction;
+    public SpongeRegistryEntryParameterBuilder(final RegistryType<? extends T> registryType) {
+        this.registryType = registryType;
+    }
+
+    @Override
+    public VariableValueParameters.@NonNull RegistryEntryBuilder<T> addHolderFunction(
+            final @NonNull Function<CommandContext, @Nullable RegistryHolder> holderFunction) {
+        this.registryFunctions.add(holderFunction);
+        return this;
     }
 
     @Override
@@ -55,7 +64,10 @@ public final class SpongeRegistryEntryParameterBuilder<T>
 
     @Override
     public @NonNull ValueParameter<T> build() {
-        return new SpongeCatalogedElementValueParameter<>(new ArrayList<>(this.prefixes), this.registryFunction);
+        if (this.registryFunctions.isEmpty()) {
+            throw new IllegalStateException("No RegistryHolder functions were supplied.");
+        }
+        return new SpongeCatalogedElementValueParameter<>(new ArrayList<>(this.prefixes), new ArrayList<>(this.registryFunctions), this.registryType);
     }
 
     @Override

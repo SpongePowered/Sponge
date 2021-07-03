@@ -22,12 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.cause.entity.damage;
+package org.spongepowered.common.accessor.server.level;
 
-public final class DamageObject {
+import net.minecraft.server.level.DistanceManager;
+import net.minecraft.server.level.ServerChunkCache;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-    int slot;
-    double ratio;
-    boolean augment;
-    double previousDamage;
+@Mixin(ServerChunkCache.class)
+public interface ServerChunkCacheAccessor {
+
+    @Accessor("generator") void accessor$generator(final ChunkGenerator generator);
+
+    @Accessor("distanceManager") DistanceManager accessor$distanceManager();
+
 }

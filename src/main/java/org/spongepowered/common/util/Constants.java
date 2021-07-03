@@ -77,7 +77,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Supplier;
-import net.minecraft.SharedConstants;
+
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
@@ -434,6 +434,14 @@ public final class Constants {
         public static final short Y_SHORT_MASK = 0xFF;
         public static final int Y_INT_MASK = 0xFFFFFF;
         public static final String CHUNK_DATA_SECTIONS = "Sections";
+    }
+
+    public static final class ChunkTicket {
+
+        public static final int MAX_FULL_CHUNK_TICKET_LEVEL = 33;
+
+        // Highest ticket level that will cause loading a full chunk, plus one.
+        public static final int MAX_FULL_CHUNK_DISTANCE = ChunkTicket.MAX_FULL_CHUNK_TICKET_LEVEL + 1;
     }
 
     public static final class Networking {

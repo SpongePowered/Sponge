@@ -50,7 +50,7 @@ public final class SpongeBootstrap {
         SpongeBootstrap.lifecycle.establishFactories();
         SpongeBootstrap.lifecycle.establishBuilders();
         SpongeBootstrap.lifecycle.initTimings();
-        Launch.instance().performBootstrap();
+        Launch.instance().performLifecycle();
         SpongeBootstrap.lifecycle.registerPluginListeners();
         SpongeBootstrap.lifecycle.callConstructEvent();
         SpongeBootstrap.lifecycle.callRegisterFactoryEvent();

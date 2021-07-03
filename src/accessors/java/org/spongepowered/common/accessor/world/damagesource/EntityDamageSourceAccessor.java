@@ -27,11 +27,12 @@ package org.spongepowered.common.accessor.world.damagesource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(EntityDamageSource.class)
 public interface EntityDamageSourceAccessor {
 
-    @Accessor("entity") void accessor$entity(final Entity entity);
+    @Accessor("entity") @Mutable void accessor$entity(final Entity entity);
 
 }

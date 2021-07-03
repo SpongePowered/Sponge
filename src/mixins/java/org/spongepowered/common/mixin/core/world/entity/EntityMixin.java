@@ -108,7 +108,7 @@ import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.data.value.ImmutableSpongeValue;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
+import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
@@ -226,6 +226,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     private boolean impl$transient = false;
     private boolean impl$shouldFireRepositionEvent = true;
     private WeakReference<ServerWorld> impl$originalDestinationWorld = null;
+    private boolean impl$customPortal = false;
     protected boolean impl$hasCustomFireImmuneTicks = false;
     protected boolean impl$dontCreateExitPortal = false;
     protected short impl$fireImmuneTicks = 0;
@@ -460,6 +461,34 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
+    @Redirect(method = "findDimensionEntryPoint",
+            at = @At(value = "FIELD", opcode = Opcodes.GETSTATIC,
+                    target = "Lnet/minecraft/world/level/Level;END:Lnet/minecraft/resources/ResourceKey;"))
+    private ResourceKey<Level> impl$getNullInsteadOfEndIfCreatingCustomPortal() {
+        if (this.impl$customPortal) {
+            // This will cause the first two conditions to be false, meaning that the
+            // standard portal checks will be disabled an a nether portal can go
+            // in any dimension
+            return null;
+        }
+        return Level.END;
+    }
+
+    @Redirect(method = "findDimensionEntryPoint",
+            at = @At(value = "FIELD", opcode = Opcodes.GETSTATIC,
+                    target = "Lnet/minecraft/world/level/Level;NETHER:Lnet/minecraft/resources/ResourceKey;"))
+    private ResourceKey<Level> impl$forceCheckToBeTrueIfCreatingCustomPortal(final ServerLevel targetDimension) {
+        if (this.impl$customPortal) {
+            // This will cause "var4" to be true in the second if check,
+            // meaning that the portal finding logic will always fire
+            //
+            // This also has the side effect of setting the other Level.NETHER
+            // access too, but that's okay as long as var4 is true.
+            return targetDimension.dimension();
+        }
+        return Level.NETHER;
+    }
+
     @Redirect(method = "findDimensionEntryPoint", at = @At(value = "NEW", target = "net/minecraft/world/level/portal/PortalInfo"))
     private PortalInfo impl$addPortalToPortalInfoForEnd(final Vec3 var1, final Vec3 var2, final float var3, final float var4, final ServerLevel serverLevel) {
         final Portal portal = new VanillaPortal(PortalTypes.END.get(), ((ServerWorld) serverLevel).location(VecHelper.toVector3d(var1)), null);
@@ -533,6 +562,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             if (preChangeEvent.isCancelled()) {
                 return null;
             }
+            this.impl$customPortal = preChangeEvent.originalDestinationWorld() != preChangeEvent.destinationWorld();
             final net.minecraft.server.level.ServerLevel targetWorld = (net.minecraft.server.level.ServerLevel) preChangeEvent.destinationWorld();
             final Vector3d currentPosition = VecHelper.toVector3d(this.shadow$position());
 
@@ -627,6 +657,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             // Reset for the next attempt.
             this.impl$shouldFireRepositionEvent = true;
             this.impl$originalDestinationWorld = null;
+            this.impl$customPortal = false;
         }
     }
 
@@ -675,11 +706,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     destinationPosition
             );
             if (!reposition.isCancelled() && reposition.destinationPosition() != destinationPosition) {
-                this.impl$dontCreateExitPortal = true;
                 // Something changed so we want to re-rerun this loop.
                 // TODO: There is an open question here about whether we want to force the creation of a portal in this
                 //  scenario, or whether we're happy if the repositioning will put someone in a nearby portal.
                 cir.setReturnValue(this.shadow$getExitPortal(targetWorld, VecHelper.toBlockPos(reposition.destinationPosition()), targetIsNether));
+                this.impl$dontCreateExitPortal = true;
             }
         }
     }
@@ -822,7 +853,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
         try {
             final AABB bb = this.shadow$getBoundingBox().inflate(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
-            final ServerLocation location = DamageEventHandler.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
+            final ServerLocation location = DamageEventUtil.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getMaterial() == Material.LAVA);
             final MinecraftBlockDamageSource lava = new MinecraftBlockDamageSource("lava", location);
             ((DamageSourceBridge) (Object) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins

@@ -37,6 +37,6 @@ public interface BiomeSourceAccessor {
 
     @Accessor("possibleBiomes") List<Biome> accessor$possibleBiomes();
 
-    @Mutable
-    @Accessor("possibleBiomes") void accessor$possibleBiomes(List<Biome> possibleBiomes);
+    @Accessor("possibleBiomes") @Mutable void accessor$possibleBiomes(List<Biome> possibleBiomes);
+
 }

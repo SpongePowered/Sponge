@@ -1,9 +1,7 @@
 {
     "required": true,
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.core",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_11",
     "mixinPriority": 1101,
     "mixins": [
         "advancements.Advancement_BuilderMixin",
@@ -58,6 +56,7 @@
         "server.dedicated.DedicatedPlayerListMixin",
         "server.level.ChunkMap_TrackedEntityMixin",
         "server.level.ChunkMapMixin",
+        "server.level.DistanceManagerMixin",
         "server.level.ServerBossEventMixin",
         "server.level.ServerChunkCacheMixin",
         "server.level.ServerEntityMixin",
@@ -67,6 +66,8 @@
         "server.level.ServerPlayerGameModeMixin",
         "server.level.ServerPlayerMixin",
         "server.level.ServerPlayerMixin_HealthScale",
+        "server.level.TicketMixin",
+        "server.level.TicketTypeMixin",
         "server.network.LegacyQueryHandlerMixin",
         "server.network.ServerGamePacketListenerImpl_1Mixin",
         "server.network.ServerGamePacketListenerImplMixin",
@@ -242,7 +243,6 @@
         "server.dedicated.DedicatedServerMixin"
     ],
     "injectors": {
-        "defaultRequire": 1,
         "maxShiftBy": 3
     },
     "overwrites": {

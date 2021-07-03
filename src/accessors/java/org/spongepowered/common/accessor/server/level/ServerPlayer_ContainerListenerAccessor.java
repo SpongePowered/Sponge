@@ -26,6 +26,7 @@ package org.spongepowered.common.accessor.server.level;
 
 import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(targets = "net/minecraft/server/level/ServerPlayer$2")

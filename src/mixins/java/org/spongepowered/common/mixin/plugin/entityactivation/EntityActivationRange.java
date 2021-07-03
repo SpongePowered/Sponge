@@ -81,12 +81,12 @@ import java.util.Map;
 public final class EntityActivationRange {
 
     private static final ImmutableMap<Byte, String> activationTypeMappings = new ImmutableMap.Builder<Byte, String>()
-            .put((byte) 1, "monster")
-            .put((byte) 2, "creature")
-            .put((byte) 3, "aquatic")
-            .put((byte) 4, "ambient")
-            .put((byte) 5, "misc")
-            .build();
+        .put((byte) 1, "monster")
+        .put((byte) 2, "creature")
+        .put((byte) 3, "aquatic")
+        .put((byte) 4, "ambient")
+        .put((byte) 5, "misc")
+        .build();
 
     static AABB maxBB = new AABB(0, 0, 0, 0, 0, 0);
     static AABB miscBB = new AABB(0, 0, 0, 0, 0, 0);
@@ -131,17 +131,17 @@ public final class EntityActivationRange {
 
         // types that should always be active
         if (entity instanceof Player && !((PlatformEntityBridge) entity).bridge$isFakePlayer()
-                || entity instanceof ThrowableProjectile
-                || entity instanceof EnderDragon
-                || entity instanceof EnderDragonPart
-                || entity instanceof WitherBoss
-                || entity instanceof AbstractHurtingProjectile
-                || entity instanceof LightningBolt
-                || entity instanceof PrimedTnt
-                || entity instanceof Painting
-                || entity instanceof EndCrystal
-                || entity instanceof FireworkRocketEntity
-                || entity instanceof FallingBlockEntity) // Always tick falling blocks
+            || entity instanceof ThrowableProjectile
+            || entity instanceof EnderDragon
+            || entity instanceof EnderDragonPart
+            || entity instanceof WitherBoss
+            || entity instanceof AbstractHurtingProjectile
+            || entity instanceof LightningBolt
+            || entity instanceof PrimedTnt
+            || entity instanceof Painting
+            || entity instanceof EndCrystal
+            || entity instanceof FireworkRocketEntity
+            || entity instanceof FallingBlockEntity) // Always tick falling blocks
         {
             return;
         }
@@ -152,7 +152,7 @@ public final class EntityActivationRange {
         final EntityTypeBridge type = (EntityTypeBridge) entity.getType();
         final ResourceLocation key = EntityType.getKey(entity.getType());
         final byte activationType = spongeEntity.activation$getActivationType();
-        final String activationTypeName = activationTypeMappings.getOrDefault(activationType, "misc");
+        final String activationTypeName = EntityActivationRange.activationTypeMappings.getOrDefault(activationType, "misc");
         if (!type.bridge$isActivationRangeInitialized()) {
             EntityActivationRange.addEntityToConfig(config.autoPopulate, key, activationType, activationTypeName);
             type.bridge$setActivationRangeInitialized(true);
@@ -192,7 +192,8 @@ public final class EntityActivationRange {
     /**
      * Utility method to grow an AABB without creating a new AABB or touching
      * the pool, so we can re-use ones we have.
-     *  @param target The AABB to modify
+     *
+     * @param target The AABB to modify
      * @param source The AABB to get initial coordinates from
      * @param x The x value to expand by
      * @param y The y value to expand by
@@ -269,14 +270,9 @@ public final class EntityActivationRange {
                 continue;
             }
             if (spongeEntity.activation$getDefaultActivationState()) {
+                EntityActivationRange.initializeEntityActivationState(entity);
                 spongeEntity.activation$setActivatedTick(currentTick);
                 continue;
-            }
-
-            // check if activation cache needs to be updated
-            if (spongeEntity.activation$requiresActivationCacheRefresh()) {
-                EntityActivationRange.initializeEntityActivationState(entity);
-                spongeEntity.activation$requiresActivationCacheRefresh(false);
             }
 
             // check for entity type overrides
@@ -350,9 +346,7 @@ public final class EntityActivationRange {
                 }
             }
 
-            if (entity instanceof FusedExplosive && ((FusedExplosive) entity).get(Keys.IS_PRIMED).orElse(false)) {
-                return true;
-            }
+            return entity instanceof FusedExplosive && ((FusedExplosive) entity).get(Keys.IS_PRIMED).orElse(false);
         }
         return false;
     }
@@ -379,7 +373,7 @@ public final class EntityActivationRange {
         }
 
         // If in forced chunk or is player
-        if (activeChunk.bridge$isPersistedChunk() || ((PlatformEntityBridge)entity).bridge$isFakePlayer() && entity instanceof ServerPlayer) {
+        if (activeChunk.bridge$isPersistedChunk() || ((PlatformEntityBridge) entity).bridge$isFakePlayer() && entity instanceof ServerPlayer) {
             return true;
         }
 
@@ -398,7 +392,8 @@ public final class EntityActivationRange {
                 isActive = true;
             }
             // Add a little performance juice to active entities. Skip 1/4 if not immune.
-        } else if (!spongeEntity.activation$getDefaultActivationState() && entity.tickCount % 4 == 0 && !EntityActivationRange.checkEntityImmunities(entity)) {
+        } else if (!spongeEntity.activation$getDefaultActivationState() && entity.tickCount % 4 == 0 && !EntityActivationRange
+            .checkEntityImmunities(entity)) {
             isActive = false;
         }
 
@@ -409,7 +404,9 @@ public final class EntityActivationRange {
         return isActive;
     }
 
-    public static void addEntityToConfig(boolean autoPopulate, final ResourceLocation key, final byte activationType, final String activationTypeName) {
+    public static void addEntityToConfig(
+        final boolean autoPopulate, final ResourceLocation key, final byte activationType, final String activationTypeName
+    ) {
         final InheritableConfigHandle<GlobalConfig> globalConfig = SpongeGameConfigs.getGlobalInheritable();
         final EntityActivationRangeCategory activationConfig = globalConfig.get().entityActivationRange;
 
@@ -444,8 +441,9 @@ public final class EntityActivationRange {
         }
 
         // check max ranges
-        int newRange = range;
-        EntityActivationRange.maxActivationRanges.compute(activationType, (k, maxRange) -> maxRange == null || newRange > maxRange ? newRange : maxRange);
+        final int newRange = range;
+        EntityActivationRange.maxActivationRanges
+            .compute(activationType, (k, maxRange) -> maxRange == null || newRange > maxRange ? newRange : maxRange);
 
         if (autoPopulate && requiresSave) {
             globalConfig.save();

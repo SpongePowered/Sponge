@@ -45,6 +45,5 @@ public interface DimensionGeneratorSettingsAccessor {
 
     @Accessor("legacyCustomOptions") Optional<String> accessor$legacyCustomOptions();
 
-    @Mutable
-    @Accessor("dimensions") void accessor$dimensions(MappedRegistry<LevelStem> dimensions);
+    @Accessor("dimensions") @Mutable void accessor$dimensions(MappedRegistry<LevelStem> dimensions);
 }

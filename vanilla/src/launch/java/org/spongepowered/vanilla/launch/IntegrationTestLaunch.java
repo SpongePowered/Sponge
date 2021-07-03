@@ -35,13 +35,13 @@ import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 public class IntegrationTestLaunch extends VanillaLaunch {
     private final boolean isServer;
 
-    protected IntegrationTestLaunch(final VanillaPluginPlatform pluginEngine, final boolean isServer) {
-        super(pluginEngine, Stage.DEVELOPMENT);
+    protected IntegrationTestLaunch(final VanillaPluginPlatform pluginPlatform, final boolean isServer) {
+        super(pluginPlatform, Stage.DEVELOPMENT);
         this.isServer = isServer;
     }
 
-    public static void launch(final VanillaPluginPlatform pluginEngine, final Boolean isServer, final String[] args) {
-        final IntegrationTestLaunch launcher = new IntegrationTestLaunch(pluginEngine, isServer);
+    public static void launch(final VanillaPluginPlatform pluginPlatform, final Boolean isServer, final String[] args) {
+        final IntegrationTestLaunch launcher = new IntegrationTestLaunch(pluginPlatform, isServer);
         Launch.setInstance(launcher);
         launcher.launchPlatform(args);
     }
@@ -51,14 +51,13 @@ public class IntegrationTestLaunch extends VanillaLaunch {
         return this.isServer;
     }
 
-    public void launchPlatform(final String[] args) {
-        super.onLaunch();
-        this.logger().info("Running Sponge integration tests...");
-
-        SpongeBootstrap.perform("integration tests", () -> this.performIntegrationTests(args));
+    @Override
+    protected void performBootstrap(String[] args) {
+        this.logger().info("Running integration tests...");
+        SpongeBootstrap.perform("integration tests", this::performIntegrationTests);
     }
 
-    private void performIntegrationTests(final String... args) {
+    private void performIntegrationTests() {
         // Prepare Vanilla
         Bootstrap.bootStrap();
         Bootstrap.validate();

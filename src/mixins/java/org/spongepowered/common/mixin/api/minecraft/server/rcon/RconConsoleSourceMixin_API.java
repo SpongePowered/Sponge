@@ -24,12 +24,28 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.server.rcon;
 
+import net.kyori.adventure.audience.MessageType;
+import net.kyori.adventure.identity.Identity;
+import net.kyori.adventure.text.Component;
 import net.minecraft.server.rcon.RconConsoleSource;
-import org.spongepowered.api.service.permission.Subject;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.network.RconConnection;
+import org.spongepowered.api.network.RemoteConnection;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.accessor.server.rcon.thread.RconClientAccessor;
+import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.server.rcon.RconConsoleSourceBridge;
+
+import java.net.InetSocketAddress;
+import java.util.UUID;
 
 @Mixin(RconConsoleSource.class)
-public abstract class RconConsoleSourceMixin_API implements Subject {
+public abstract class RconConsoleSourceMixin_API implements RconConsoleSourceBridge, RconConnection {
+
+    // @formatter:off
+    @Shadow public abstract void shadow$sendMessage(net.minecraft.network.chat.Component param0, UUID param1);
+    // @formatter:on
 
     @Override
     public String identifier() {
@@ -37,4 +53,33 @@ public abstract class RconConsoleSourceMixin_API implements Subject {
         return "Recon";
     }
 
+    @Override
+    public boolean isAuthorized() {
+        return ((RconClientAccessor) this.bridge$getClient()).accessor$authed();
+    }
+
+    @Override
+    public void setAuthorized(boolean authorized) {
+        ((RconClientAccessor) this.bridge$getClient()).accessor$authed(authorized);
+    }
+
+    @Override
+    public InetSocketAddress address() {
+        return ((RemoteConnection)this.bridge$getClient()).address();
+    }
+
+    @Override
+    public InetSocketAddress virtualHost() {
+        return ((RemoteConnection)this.bridge$getClient()).virtualHost();
+    }
+
+    @Override
+    public void close() {
+        ((RemoteConnection)this.bridge$getClient()).close();
+    }
+
+    @Override
+    public void sendMessage(final @NonNull Identity identity, final @NonNull Component message, final @NonNull MessageType type) {
+        this.shadow$sendMessage(SpongeAdventure.asVanilla(message), identity.uuid());
+    }
 }
