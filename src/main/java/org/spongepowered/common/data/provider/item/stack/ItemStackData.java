@@ -150,8 +150,8 @@ public final class ItemStackData {
                             }
                             return tag.getBoolean(Constants.Item.ITEM_UNBREAKABLE);
                         })
-                        .set(ItemStackData::setIsUnbrekable)
-                        .delete(h -> ItemStackData.setIsUnbrekable(h, false))
+                        .set(ItemStackData::setIsUnbreakable)
+                        .delete(h -> ItemStackData.setIsUnbreakable(h, false))
                     .create(Keys.LORE)
                         .get(h -> {
                             final CompoundTag tag = h.getTag();
@@ -204,7 +204,7 @@ public final class ItemStackData {
     }
     // @formatter:on
 
-    private static void setIsUnbrekable(final ItemStack stack, final Boolean value) {
+    private static void setIsUnbreakable(final ItemStack stack, final Boolean value) {
         if (value == null || (!value && !stack.hasTag())) {
             return;
         }
