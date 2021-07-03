@@ -378,7 +378,7 @@ public final class SpongeWorldTypeTemplate extends AbstractResourceKeyed impleme
             this.respawnAnchorsUsable = false;
             this.hasRaids = true;
             this.ambientLighting = 0.5f;
-            this.minY = 10;
+            this.minY = 16;
             this.logicalHeight = 256;
             this.maximumHeight = 256;
             this.coordinateMultiplier = 1;
