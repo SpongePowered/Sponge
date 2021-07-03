@@ -149,16 +149,13 @@ public final class ServerUserProvider {
     }
 
     Optional<User> getUser(final String lastKnownName) {
-        final com.mojang.authlib.GameProfile gameProfile = this.server.getProfileCache().get(lastKnownName);
-        if (gameProfile == null) {
-            return Optional.empty();
-        }
-        return this.getUser(SpongeGameProfile.of(gameProfile));
+        return this.server.getProfileCache().get(lastKnownName)
+            .flatMap(profile -> this.getUser(SpongeGameProfile.of(profile)));
     }
 
     Optional<User> getUser(final UUID uuid) {
-        final com.mojang.authlib.GameProfile gameProfile = this.server.getProfileCache().get(uuid);
-        return this.getUser(gameProfile == null ? null : SpongeGameProfile.of(gameProfile));
+        return this.server.getProfileCache().get(uuid)
+            .flatMap(profile -> this.getUser(SpongeGameProfile.of(profile)));
     }
 
     Optional<User> getUser(final @Nullable GameProfile profile) {
@@ -179,8 +176,7 @@ public final class ServerUserProvider {
                 return currentUser;
             }
             // ensure the profile is what we expect it to be
-            final com.mojang.authlib.GameProfile p = this.server.getProfileCache().get(userID);
-            resolvedProfile = p == null ? SpongeGameProfile.toMcProfile(profile) : p;
+            resolvedProfile = this.server.getProfileCache().get(userID).orElseGet(() -> SpongeGameProfile.toMcProfile(profile));
         } else {
             resolvedProfile = SpongeGameProfile.toMcProfile(profile);
             final User currentUser = this.userCache.getIfPresent(profile.uniqueId());

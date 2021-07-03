@@ -36,7 +36,7 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket;
 import net.minecraft.network.protocol.game.ClientboundPlayerInfoPacket.PlayerUpdate;
-import net.minecraft.network.protocol.game.ClientboundRemoveEntityPacket;
+import net.minecraft.network.protocol.game.ClientboundRemoveEntitiesPacket;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
@@ -337,7 +337,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     public boolean getOrLoadSkin(final UUID minecraftAccount) {
-        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount);
+        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount).orElse(null);
         if (gameProfile == null) {
             gameProfile =
                     SpongeCommon.server().getSessionService().fillProfileProperties(new GameProfile(minecraftAccount, ""), true);
@@ -360,7 +360,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     public boolean getOrLoadSkin(final String minecraftAccount) {
         Objects.requireNonNull(minecraftAccount);
-        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount);
+        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount).orElse(null);
         if (gameProfile == null) {
             return false;
         }
@@ -417,7 +417,7 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     private void respawnOnClient() {
-        this.pushPackets(new ClientboundRemoveEntityPacket(this.getId()), this.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER));
+        this.pushPackets(new ClientboundRemoveEntitiesPacket(this.getId()), this.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.ADD_PLAYER));
         this.pushPackets(this.getAddEntityPacket());
         this.removeFromTabListDelayed(null, this.createPlayerListPacket(ClientboundPlayerInfoPacket.Action.REMOVE_PLAYER));
     }

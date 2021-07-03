@@ -58,7 +58,7 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
     @Shadow @Final @Mutable private final Map<String, GameProfileCache_GameProfileInfoAccessor> profilesByName = new ConcurrentHashMap<>();
     @Shadow @Final @Mutable private final Map<UUID, GameProfileCache_GameProfileInfoAccessor> profilesByUUID = new ConcurrentHashMap<>();
 
-    @Nullable @Shadow public abstract com.mojang.authlib.GameProfile shadow$get(UUID uniqueId);
+    @Shadow public abstract Optional<com.mojang.authlib.GameProfile> shadow$get(UUID uniqueId);
     @Shadow protected abstract long shadow$getNextOperation();
     // @formatter:on
 
@@ -118,7 +118,7 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
     @Override
     public Optional<GameProfile> findById(final UUID uniqueId) {
         Objects.requireNonNull(uniqueId, "uniqueId");
-        return Optional.ofNullable(this.shadow$get(uniqueId)).map(SpongeGameProfile::of);
+        return this.shadow$get(uniqueId).map(SpongeGameProfile::of);
     }
 
     @Override
@@ -126,7 +126,7 @@ public abstract class GameProfileCacheMixin_API implements GameProfileCache {
         Objects.requireNonNull(uniqueIds, "uniqueIds");
         final Map<UUID, Optional<GameProfile>> result = new HashMap<>();
         for (final UUID uniqueId : uniqueIds) {
-            result.put(uniqueId, Optional.ofNullable(this.shadow$get(uniqueId)).map(SpongeGameProfile::of));
+            result.put(uniqueId, this.shadow$get(uniqueId).map(SpongeGameProfile::of));
         }
         return result.isEmpty() ? ImmutableMap.of() : ImmutableMap.copyOf(result);
     }
