@@ -383,7 +383,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                 // }
                 final float attackStrength = this.shadow$getAttackStrengthScale(0.5F);
 
-                final List<ModifierFunction<DamageModifier>> originalFunctions = new ArrayList<>();
+                final List<DamageFunction> originalFunctions = new ArrayList<>();
 
                 final MobType creatureAttribute = targetEntity instanceof LivingEntity
                     ? ((LivingEntity) targetEntity).getMobType()
