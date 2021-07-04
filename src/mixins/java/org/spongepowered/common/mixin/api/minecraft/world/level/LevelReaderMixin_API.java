@@ -154,7 +154,7 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
     @SuppressWarnings("ConstantConditions")
     @Override
     default ProtoChunk<@NonNull ?> chunk(final int x, final int y, final int z) {
-        return (ProtoChunk<@NonNull ?>) this.shadow$getChunk(x >> 4, z >> 4, ChunkStatus.EMPTY, true);
+        return (ProtoChunk<@NonNull ?>) this.shadow$getChunk(x, z, ChunkStatus.EMPTY, true);
     }
 
     @Override

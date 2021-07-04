@@ -44,6 +44,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.storage.LevelData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -122,7 +123,14 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public Chunk chunk(final int cx, final int cy, final int cz) {
-        return (Chunk) ((net.minecraft.world.level.Level) (Object) this).getChunk(cx >> 4, cz >> 4, ChunkStatus.EMPTY, true);
+        final ChunkAccess chunk = ((Level) (Object) this).getChunk(cx, cz, ChunkStatus.EMPTY, true);
+        if (chunk instanceof Chunk) {
+            return (Chunk) chunk;
+        }
+        if (chunk instanceof ImposterProtoChunk) {
+            return (Chunk) ((ImposterProtoChunk) chunk).getWrapped();
+        }
+        throw new IllegalStateException("Chunk is a Proto-Chunk"); // TODO this may return a ProtoChunk
     }
 
     @Override

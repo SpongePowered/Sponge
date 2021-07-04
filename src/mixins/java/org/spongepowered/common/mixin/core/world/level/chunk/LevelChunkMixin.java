@@ -25,24 +25,22 @@
 package org.spongepowered.common.mixin.core.world.level.chunk;
 
 import com.google.common.base.MoreObjects;
-import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerChunkCache;
 import net.minecraft.util.ClassInstanceMultiMap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
-import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.TickList;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
-import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.material.Fluid;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
@@ -51,22 +49,30 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.level.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DirectionUtil;
 
-import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.function.BiConsumer;
 import java.util.function.Consumer;
+import java.util.function.Function;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
 public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridge {
@@ -83,11 +89,14 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
 
     @Shadow public abstract BlockState getBlockState(BlockPos pos);
     // @formatter:on
+
     private long impl$scheduledForUnload = -1; // delay chunk unloads
     private boolean impl$persistedChunk = false;
     private boolean impl$isSpawning = false;
     private final net.minecraft.world.level.chunk.LevelChunk[] impl$neighbors = new net.minecraft.world.level.chunk.LevelChunk[4];
     private long impl$cacheKey;
+    private Map<Integer, PlayerTracker> impl$trackedIntBlockPositions = new HashMap<>();
+    private Map<Short, PlayerTracker> impl$trackedShortBlockPositions = new HashMap<>();
 
     @Inject(method = "<init>(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/ChunkPos;Lnet/minecraft/world/level/chunk/ChunkBiomeContainer;Lnet/minecraft/world/level/chunk/UpgradeData;Lnet/minecraft/world/level/TickList;Lnet/minecraft/world/level/TickList;J[Lnet/minecraft/world/level/chunk/LevelChunkSection;Ljava/util/function/Consumer;)V",
             at = @At("RETURN"))
@@ -131,55 +140,164 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
     // These methods are enabled in ChunkMixin_CreatorTracked as a Mixin plugin
 
     @Override
-    public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) {
-    }
-
-    @Override
     public Map<Integer, PlayerTracker> bridge$getTrackedIntPlayerPositions() {
-        return Collections.emptyMap();
+        return this.impl$trackedIntBlockPositions;
     }
 
     @Override
     public Map<Short, PlayerTracker> bridge$getTrackedShortPlayerPositions() {
-        return Collections.emptyMap();
+        return this.impl$trackedShortBlockPositions;
+    }
+
+    @Override
+    public void bridge$setTrackedIntPlayerPositions(final Map<Integer, PlayerTracker> trackedPositions) {
+        this.impl$trackedIntBlockPositions = trackedPositions;
+    }
+
+    @Override
+    public void bridge$setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) {
+        this.impl$trackedShortBlockPositions = trackedPositions;
+    }
+
+    @Override
+    public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final User user, final PlayerTracker.Type trackerType) {
+        if (((WorldBridge) this.level).bridge$isFake()) {
+            return;
+        }
+        if (!PhaseTracker.getInstance().getCurrentState().tracksCreatorsAndNotifiers()) {
+            // Don't track chunk gen
+            return;
+        }
+
+        // Update TE tracking cache
+        // We must always check for a TE as a mod block may not implement ITileEntityProvider if a TE exists
+        // Note: We do not check SpongeImplHooks.hasBlockTileEntity(block, state) as neighbor notifications do not include blockstate.
+        final BlockEntity blockEntity = this.blockEntities.get(pos);
+        if (blockEntity != null) {
+            if (blockEntity instanceof CreatorTrackedBridge) {
+                final CreatorTrackedBridge trackedBlockEntity = (CreatorTrackedBridge) blockEntity;
+                if (trackerType == PlayerTracker.Type.NOTIFIER) {
+                    if (trackedBlockEntity.tracked$getNotifierReference().orElse(null) == user) {
+                        return;
+                    }
+                    trackedBlockEntity.tracked$setNotifier(user);
+                } else {
+                    if (trackedBlockEntity.tracked$getCreatorReference().orElse(null) == user) {
+                        return;
+                    }
+                    trackedBlockEntity.tracked$setCreatorReference(user);
+                }
+            }
+        }
+
+        if (trackerType == PlayerTracker.Type.CREATOR) {
+            this.impl$setTrackedUUID(pos, user.uniqueId(), trackerType, (pt, idx) -> {
+                pt.creatorindex = idx;
+                pt.notifierIndex = idx;
+            });
+        } else {
+            this.impl$setTrackedUUID(pos, user.uniqueId(), trackerType, (pt, idx) -> pt.notifierIndex = idx);
+        }
     }
 
     @Override
     public Optional<User> bridge$getBlockCreator(final BlockPos pos) {
+        final Optional<UUID> uuid = this.bridge$getBlockCreatorUUID(pos);
+        return uuid.flatMap(this::impl$getValidatedUser);
+    }
+
+    public Optional<UUID> bridge$trackedUUID(final BlockPos pos, final Function<PlayerTracker, Integer> func) {
+        if (((WorldBridge) this.level).bridge$isFake()) {
+            return Optional.empty();
+        }
+
+        final int key = Constants.Sponge.blockPosToInt(pos);
+        final PlayerTracker intTracker = this.impl$trackedIntBlockPositions.get(key);
+        if (intTracker != null) {
+            final int ownerIndex = func.apply(intTracker);
+            return this.impl$getValidatedUUID(key, ownerIndex);
+        }
+        final short shortKey = Constants.Sponge.blockPosToShort(pos);
+        final PlayerTracker shortTracker = this.impl$trackedShortBlockPositions.get(shortKey);
+        if (shortTracker != null) {
+            final int ownerIndex = func.apply(shortTracker);
+            return this.impl$getValidatedUUID(shortKey, ownerIndex);
+        }
         return Optional.empty();
     }
 
     @Override
     public Optional<UUID> bridge$getBlockCreatorUUID(final BlockPos pos) {
-        return Optional.empty();
+       return this.bridge$trackedUUID(pos, pt -> pt.creatorindex);
     }
 
     @Override
     public Optional<User> bridge$getBlockNotifier(final BlockPos pos) {
-        return Optional.empty();
+        final Optional<UUID> uuid = this.bridge$getBlockNotifierUUID(pos);
+        return uuid.flatMap(this::impl$getValidatedUser);
     }
 
     @Override
     public Optional<UUID> bridge$getBlockNotifierUUID(final BlockPos pos) {
-        return Optional.empty();
+        return this.bridge$trackedUUID(pos, pt -> pt.notifierIndex);
+    }
+
+    private <T> void impl$computePlayerTracker(final Map<T, PlayerTracker> map, final T blockPos, final int index, final PlayerTracker.Type type, final BiConsumer<PlayerTracker, Integer> consumer) {
+        final PlayerTracker tracker = map.get(blockPos);
+        if (tracker != null) {
+            consumer.accept(tracker, index);
+        } else {
+            map.put(blockPos, new PlayerTracker(index, type));
+        }
+    }
+
+    private void impl$setTrackedUUID(final BlockPos pos, final UUID uuid, final PlayerTracker.Type type, final BiConsumer<PlayerTracker, Integer> consumer) {
+        if (((WorldBridge) this.level).bridge$isFake()) {
+            return;
+        }
+        final PrimaryLevelDataBridge worldInfo = (PrimaryLevelDataBridge) this.level.getLevelData();
+        final int index = uuid == null ? -1 : worldInfo.bridge$getIndexForUniqueId(uuid);
+        if (pos.getY() <= 255) {
+            final short blockPos = Constants.Sponge.blockPosToShort(pos);
+            this.impl$computePlayerTracker(this.impl$trackedShortBlockPositions, blockPos, index, type, consumer);
+            return;
+        }
+        final int blockPos = Constants.Sponge.blockPosToInt(pos);
+        this.impl$computePlayerTracker(this.impl$trackedIntBlockPositions, blockPos, index, type, consumer);
     }
 
     @Override
     public void bridge$setBlockNotifier(final BlockPos pos, @Nullable final UUID uuid) {
+       this.impl$setTrackedUUID(pos, uuid, PlayerTracker.Type.NOTIFIER, (pt, idx) -> pt.notifierIndex = idx);
     }
 
     @Override
     public void bridge$setBlockCreator(final BlockPos pos, @Nullable final UUID uuid) {
+        this.impl$setTrackedUUID(pos, uuid, PlayerTracker.Type.CREATOR, (pt, idx) -> pt.creatorindex = idx);
     }
 
-    @Override
-    public void bridge$setTrackedIntPlayerPositions(final Map<Integer, PlayerTracker> trackedPositions) {
+    private Optional<User> impl$getValidatedUser(final UUID uuid) {
+        return Sponge.server().userManager().find(uuid);
     }
 
-    @Override
-    public void bridge$setTrackedShortPlayerPositions(final Map<Short, PlayerTracker> trackedPositions) {
-    }
+    private Optional<UUID> impl$getValidatedUUID(final int key, final int ownerIndex) {
+        final PrimaryLevelDataBridge worldInfo = (PrimaryLevelDataBridge) this.level.getLevelData();
+        final UUID uuid = worldInfo.bridge$getUniqueIdForIndex(ownerIndex).orElse(null);
+        if (uuid != null) {
+            // Verify id is valid and not invalid
+            if (SpongeConfigs.getCommon().get().world.invalidLookupUuids.contains(uuid)) {
+                if (key <= Short.MAX_VALUE) {
+                    this.impl$trackedShortBlockPositions.remove((short) key);
+                }
+                this.impl$trackedIntBlockPositions.remove(key);
+                return Optional.empty();
+            }
 
+            // player is not online, get or create user from storage
+            return Optional.of(uuid);
+        }
+        return Optional.empty();
+    }
 
     // Fast neighbor methods for internal use
     @Override
@@ -242,7 +360,8 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
     public String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("World", this.level)
-                .add("Position", this.chunkPos.x + this.chunkPos.z)
+                .add("Position", this.chunkPos.x + ":" + this.chunkPos.z)
+                .add("super", super.toString())
                 .toString();
     }
 

@@ -35,6 +35,7 @@
         "world.level.block.LeavesBlockMixin_Tracker",
         "world.level.block.entity.BlockEntityMixin_Tracker",
         "world.level.chunk.LevelChunkMixin_Tracker",
+        "world.level.chunk.storage.ChunkSerializerMixin_Tracker",
         "world.level.dimension.end.EndDragonFightMixin_Tracker"
     ],
     "injectors": {

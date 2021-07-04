@@ -132,6 +132,7 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
+import java.util.UUID;
 
 @Plugin("datatest")
 public final class DataTest  {
@@ -165,6 +166,9 @@ public final class DataTest  {
         final BlockState oldState = world.block(blockPos);
 
         world.setWeather(WeatherTypes.CLEAR.get());
+
+        this.checkOfferData(location, Keys.CREATOR, player.uniqueId());
+        this.checkOfferData(location, Keys.NOTIFIER, player.uniqueId());
 
         this.checkOfferData(player, Keys.ABSORPTION, 0.0);
         this.checkOfferData(player, Keys.ABSORPTION, 10.0);
@@ -379,8 +383,6 @@ public final class DataTest  {
         world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().defaultState());
         this.checkGetData(world.blockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.zero());
         this.checkOfferData(world.blockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.of(15));
-
-        // TODO Keys.CREATOR
 
         this.checkGetData(illusioner, Keys.CURRENT_SPELL, SpellTypes.NONE.get());
         this.checkOfferData(illusioner, Keys.CURRENT_SPELL, SpellTypes.BLINDNESS.get());

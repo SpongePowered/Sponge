@@ -24,25 +24,10 @@
  */
 package org.spongepowered.common.mixin.core.world.level.storage;
 
-import com.google.common.collect.BiMap;
-import com.google.common.collect.HashBiMap;
 import com.mojang.datafixers.DataFixer;
-import com.mojang.datafixers.util.Pair;
-import com.mojang.serialization.Codec;
 import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
-import org.spongepowered.common.util.Constants;
-
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
-import net.minecraft.core.SerializableUUID;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.Tag;
 import net.minecraft.world.level.DataPackConfig;
@@ -51,6 +36,12 @@ import net.minecraft.world.level.levelgen.WorldGenSettings;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.LevelVersion;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
+import org.spongepowered.common.util.Constants;
 
 @Mixin(LevelStorageSource.class)
 public abstract class LevelStorageSourceMixin {
@@ -103,21 +94,7 @@ public abstract class LevelStorageSourceMixin {
         final PrimaryLevelData levelData = PrimaryLevelData.parse(p_237369_0_, p_237369_1_, p_237369_2_, p_237369_3_, p_237369_4_, p_237369_5_,
                 p_237369_6_, p_237369_7_);
 
-        if (LevelStorageSourceMixin.impl$spongeLevelData == null) {
-            ((PrimaryLevelDataBridge) levelData).bridge$setUniqueId(UUID.randomUUID());
-        } else {
-            ((PrimaryLevelDataBridge) levelData).bridge$setUniqueId(LevelStorageSourceMixin.impl$spongeLevelData.get(Constants.Sponge.World.UNIQUE_ID).read(
-                    SerializableUUID.CODEC).result().orElse(UUID.randomUUID()));
-
-            final List<Pair<String, UUID>> mapIndexList = LevelStorageSourceMixin.impl$spongeLevelData.get(Constants.Map.MAP_UUID_INDEX)
-                    .readMap(Codec.STRING, SerializableUUID.CODEC).result().orElse(Collections.emptyList());
-            final BiMap<Integer, UUID> mapIndex = HashBiMap.create();
-            for (final Pair<String, UUID> pair : mapIndexList) {
-                final int id = Integer.parseInt(pair.getFirst());
-                mapIndex.put(id, pair.getSecond());
-            }
-            ((PrimaryLevelDataBridge) levelData).bridge$setMapUUIDIndex(mapIndex);
-        }
+        ((PrimaryLevelDataBridge) levelData).bridge$readSpongeLevelData(LevelStorageSourceMixin.impl$spongeLevelData);
 
         LevelStorageSourceMixin.impl$spongeLevelData = null;
         return levelData;

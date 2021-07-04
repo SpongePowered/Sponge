@@ -26,14 +26,21 @@ package org.spongepowered.common.mixin.core.world.level.storage;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.mojang.datafixers.util.Pair;
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.DataResult;
+import com.mojang.serialization.Dynamic;
 import com.mojang.serialization.DynamicOps;
 import com.mojang.serialization.Lifecycle;
 import net.kyori.adventure.text.Component;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.MappedRegistry;
 import net.minecraft.core.Registry;
+import net.minecraft.core.SerializableUUID;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.IntArrayTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundSetChunkCacheRadiusPacket;
 import net.minecraft.server.MinecraftServer;
@@ -67,12 +74,17 @@ import org.spongepowered.common.bridge.world.level.levelgen.WorldGenSettingsBrid
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.inheritable.InheritableConfigHandle;
 import org.spongepowered.common.config.inheritable.WorldConfig;
+import org.spongepowered.common.data.fixer.LegacyUUIDCodec;
 import org.spongepowered.common.server.BootstrapProperties;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.MapUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.math.vector.Vector3i;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
@@ -100,6 +112,10 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     private UUID impl$uniqueId = UUID.randomUUID();
     private Boolean impl$pvp;
     private InheritableConfigHandle<WorldConfig> impl$configAdapter;
+
+    private final BiMap<Integer, UUID> impl$playerUniqueIdMap = HashBiMap.create();
+    private final List<UUID> impl$pendingUniqueIds = new ArrayList<>();
+    private int impl$trackedUniqueIdCount = 0;
 
     private boolean impl$customDifficulty = false, impl$customGameType = false, impl$customSpawnPosition = false, impl$loadOnStartup,
         impl$performsSpawnLogic;
@@ -298,6 +314,23 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
     }
 
     @Override
+    public int bridge$getIndexForUniqueId(UUID uuid) {
+        final Integer index = this.impl$playerUniqueIdMap.inverse().get(uuid);
+        if (index != null) {
+            return index;
+        }
+
+        this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount, uuid);
+        this.impl$pendingUniqueIds.add(uuid);
+        return this.impl$trackedUniqueIdCount++;
+    }
+
+    @Override
+    public Optional<UUID> bridge$getUniqueIdForIndex(final int index) {
+        return Optional.ofNullable(this.impl$playerUniqueIdMap.get(index));
+    }
+
+    @Override
     public ServerLevelData overworldData() {
         if (Level.OVERWORLD.location().equals(this.impl$key)) {
             return (ServerLevelData) this;
@@ -341,6 +374,53 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         }
 
         world.players().forEach(player -> player.connection.send(new ClientboundChangeDifficultyPacket(difficulty, isLocked)));
+    }
+
+    @Override
+    @SuppressWarnings("deprecated")
+    public void bridge$readSpongeLevelData(Dynamic<Tag> dynamic) {
+        if (dynamic == null) {
+            this.bridge$setUniqueId(UUID.randomUUID());
+            return;
+        }
+
+        this.bridge$setUniqueId(dynamic.get(Constants.Sponge.World.UNIQUE_ID).read(SerializableUUID.CODEC).result().orElse(UUID.randomUUID()));
+
+        final List<Pair<String, UUID>> mapIndexList = dynamic.get(Constants.Map.MAP_UUID_INDEX).readMap(Codec.STRING, SerializableUUID.CODEC).result().orElse(Collections.emptyList());
+        final BiMap<Integer, UUID> mapIndex = HashBiMap.create();
+        for (final Pair<String, UUID> pair : mapIndexList) {
+            final int id = Integer.parseInt(pair.getFirst());
+            mapIndex.put(id, pair.getSecond());
+        }
+        this.bridge$setMapUUIDIndex(mapIndex);
+
+        // TODO Move this to Schema
+        dynamic.get(Constants.Sponge.LEGACY_SPONGE_PLAYER_UUID_TABLE).readList(LegacyUUIDCodec.CODEC).result().orElseGet(() ->
+            dynamic.get(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE).readList(SerializableUUID.CODEC).result().orElse(Collections.emptyList())
+        ).forEach(uuid -> {
+            final Integer playerIndex = this.impl$playerUniqueIdMap.inverse().get(uuid);
+            if (playerIndex == null) {
+                this.impl$playerUniqueIdMap.put(this.impl$trackedUniqueIdCount++, uuid);
+            }
+        });
+    }
+
+    @Override
+    public CompoundTag bridge$writeSpongeLevelData() {
+        final CompoundTag data = new CompoundTag();
+        data.putUUID(Constants.Sponge.World.UNIQUE_ID, this.bridge$uniqueId());
+
+        // Map Storage
+        final CompoundTag mapUUIDIndexTag = new CompoundTag();
+        MapUtil.saveMapUUIDIndex(mapUUIDIndexTag, this.bridge$getMapUUIDIndex());
+        data.put(Constants.Map.MAP_UUID_INDEX, mapUUIDIndexTag);
+
+        final ListTag playerIdList = new ListTag();
+        data.put(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, playerIdList);
+        this.impl$pendingUniqueIds.forEach(uuid -> playerIdList.add(new IntArrayTag(SerializableUUID.uuidToIntArray(uuid))));
+        this.impl$pendingUniqueIds.clear();
+
+        return data;
     }
 
     @Override
