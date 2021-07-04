@@ -63,40 +63,40 @@ public abstract class FoodDataMixin implements FoodDataBridge {
 
     @Redirect(method = "setFoodLevel", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;foodLevel:I", opcode = Opcodes.PUTFIELD))
     private void impl$setFoodLevel(final FoodData self, final int value) {
-        this.foodLevel = this.fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
+        this.foodLevel = this.impl$fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
     }
 
     @Redirect(method = "eat(IF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;foodLevel:I", opcode = Opcodes.PUTFIELD))
     private void impl$eatSetFoodLevel(final FoodData self, final int value) {
-        this.foodLevel = this.fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
+        this.foodLevel = this.impl$fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
     }
 
     @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;foodLevel:I", opcode = Opcodes.PUTFIELD))
     private void impl$tickDrainFoodLevel(final FoodData self, final int value) {
-        this.foodLevel = this.fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
+        this.foodLevel = this.impl$fireEventAndGetValue(Keys.FOOD_LEVEL, this.foodLevel, value);
     }
 
     @Redirect(method = "eat(IF)V", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;saturationLevel:F", opcode = Opcodes.PUTFIELD))
     private void impl$eatSetSaturationLevel(final FoodData self, final float value) {
-        this.saturationLevel = this.fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
+        this.saturationLevel = this.impl$fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
     }
 
     @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;saturationLevel:F", opcode = Opcodes.PUTFIELD))
     private void impl$tickDrainSaturationLevel(final FoodData self, final float value) {
-        this.saturationLevel = this.fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
+        this.saturationLevel = this.impl$fireEventAndGetValue(Keys.SATURATION, (double) this.saturationLevel, (double) value).floatValue();
     }
 
     @Redirect(method = "addExhaustion", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;exhaustionLevel:F", opcode = Opcodes.PUTFIELD))
     private void impl$addExhaustion(final FoodData self, final float value) {
-        this.exhaustionLevel = this.fireEventAndGetValue(Keys.EXHAUSTION, (double) this.exhaustionLevel, (double) value).floatValue();
+        this.exhaustionLevel = this.impl$fireEventAndGetValue(Keys.EXHAUSTION, (double) this.exhaustionLevel, (double) value).floatValue();
     }
 
     @Redirect(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/food/FoodData;exhaustionLevel:F", opcode = Opcodes.PUTFIELD))
     private void impl$tickDrainExhaustion(final FoodData self, final float value) {
-        this.exhaustionLevel = this.fireEventAndGetValue(Keys.EXHAUSTION, (double) this.exhaustionLevel, (double) value).floatValue();
+        this.exhaustionLevel = this.impl$fireEventAndGetValue(Keys.EXHAUSTION, (double) this.exhaustionLevel, (double) value).floatValue();
     }
 
-    private <E> E fireEventAndGetValue(final Key<? extends Value<E>> key, final E currentValue, final E value) {
+    private <E> E impl$fireEventAndGetValue(final Key<? extends Value<E>> key, final E currentValue, final E value) {
         if (!ShouldFire.CHANGE_DATA_HOLDER_EVENT_VALUE_CHANGE || Objects.equals(currentValue, value)) {
             return currentValue;
         }
