@@ -41,10 +41,13 @@ public abstract class CatMixin_API extends TamableAnimalMixin_API implements Cat
 
         values.add(this.requireValue(Keys.CAT_TYPE).asImmutable());
         values.add(this.requireValue(Keys.DYE_COLOR).asImmutable());
-        values.add(this.requireValue(Keys.IS_BEGGING_FOR_FOOD).asImmutable());
-        values.add(this.requireValue(Keys.IS_HISSING).asImmutable());
+        // TODO MissingImplementationException
+        // values.add(this.requireValue(Keys.IS_BEGGING_FOR_FOOD).asImmutable());
+        // TODO MissingImplementationException
+        // values.add(this.requireValue(Keys.IS_HISSING).asImmutable());
         values.add(this.requireValue(Keys.IS_LYING_DOWN).asImmutable());
-        values.add(this.requireValue(Keys.IS_PURRING).asImmutable());
+        // TODO MissingImplementationException
+        // values.add(this.requireValue(Keys.IS_PURRING).asImmutable());
         values.add(this.requireValue(Keys.IS_RELAXED).asImmutable());
 
         return values;

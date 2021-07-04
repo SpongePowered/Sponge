@@ -24,12 +24,13 @@
  */
 package org.spongepowered.common.data.provider.entity;
 
-import net.minecraft.world.entity.monster.PatrollingMonster;
 import net.minecraft.world.entity.raid.Raider;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.accessor.world.entity.raid.RaiderAccessor;
 import org.spongepowered.common.bridge.world.entity.raid.RaidBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+
+import javax.annotation.Nullable;
 
 public final class AbstractRaiderData {
 
@@ -47,7 +48,14 @@ public final class AbstractRaiderData {
                         .get(h -> h.getEntityData().get(RaiderAccessor.accessor$IS_CELEBRATING()))
                         .set(Raider::setCelebrating)
                     .create(Keys.RAID_WAVE)
-                        .get(h -> ((RaidBridge) h.getCurrentRaid()).bridge$getWaves().get(h.getWave()));
+                        .get(h -> {
+                            @Nullable
+                            RaidBridge raid = (RaidBridge) h.getCurrentRaid();
+                            if (raid == null) {
+                                return null;
+                            }
+                            return raid.bridge$getWaves().get(h.getWave());
+                        });
     }
     // @formatter:on
 }

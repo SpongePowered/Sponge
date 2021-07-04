@@ -42,7 +42,8 @@ public abstract class AreaEffectCloudMixin_API extends EntityMixin_API implement
         values.add(this.requireValue(Keys.COLOR).asImmutable());
         values.add(this.requireValue(Keys.DURATION).asImmutable());
         values.add(this.requireValue(Keys.DURATION_ON_USE).asImmutable());
-        values.add(this.requireValue(Keys.PARTICLE_EFFECT).asImmutable());
+        // TODO MissingImplementationException
+        // values.add(this.requireValue(Keys.PARTICLE_EFFECT).asImmutable());
         values.add(this.requireValue(Keys.POTION_EFFECTS).asImmutable());
         values.add(this.requireValue(Keys.RADIUS).asImmutable());
         values.add(this.requireValue(Keys.RADIUS_ON_USE).asImmutable());

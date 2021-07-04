@@ -39,7 +39,8 @@ public abstract class ShulkerBulletMixin_API extends ProjectileMixin_API impleme
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
         values.add(this.requireValue(Keys.DIRECTION).asImmutable());
-        values.add(this.requireValue(Keys.TARGET_ENTITY).asImmutable());
+
+        this.getValue(Keys.TARGET_ENTITY).map(Value::asImmutable).ifPresent(values::add);
 
         return values;
     }
