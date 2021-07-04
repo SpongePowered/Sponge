@@ -173,42 +173,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
     @Nullable private ItemStack impl$activeItemStackCopy;
     @Nullable private Vector3d impl$preTeleportPosition;
     private int impl$deathEventsPosted;
-    private int impl$maxAir = this.shadow$getMaxAirSupply();
 
-/*    @Override
-    public int bridge$getMaxAir() {
-        return this.impl$maxAir;
-    }
-
-    @Override
-    public void bridge$setMaxAir(final int air) {
-        this.impl$maxAir = air;
-        if (air != Constants.Sponge.Entity.DEFAULT_MAX_AIR) {
-            final CompoundNBT spongeData = ((DataCompoundHolder) this).data$getSpongeDataCompound();
-            spongeData.putInt(Constants.Sponge.Entity.MAX_AIR, air);
-        } else {
-            if (((DataCompoundHolder) this).data$hasSpongeDataCompound()) {
-                ((DataCompoundHolder) this).data$getSpongeDataCompound().remove(Constants.Sponge.Entity.MAX_AIR);
-            }
-        }
-    }
-
-    @Override
-    public void impl$readFromSpongeCompound(final CompoundNBT compound) {
-        super.impl$readFromSpongeCompound(compound);
-        if (compound.contains(Constants.Sponge.Entity.MAX_AIR)) {
-            this.impl$maxAir = compound.getInt(Constants.Sponge.Entity.MAX_AIR);
-        }
-    }
-
-    @Override
-    public void impl$writeToSpongeCompound(final CompoundNBT compound) {
-        super.impl$writeToSpongeCompound(compound);
-        if (this.impl$maxAir != Constants.Sponge.Entity.DEFAULT_MAX_AIR) { // We don't need to set max air unless it's really necessary
-            compound.putInt(Constants.Sponge.Entity.MAX_AIR, this.impl$maxAir);
-        }
-    }
- */
     @Override
     public boolean bridge$damageEntity(final DamageSource damageSource, float damage) {
         if (this.shadow$isInvulnerableTo(damageSource)) {
