@@ -43,7 +43,7 @@ enum RegistryScope {
         @Override
         protected MethodSpec registryFactory(final String registryTypeName, final TypeName valueType) {
             return MethodSpec.methodBuilder("registry")
-                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .returns(ParameterizedTypeName.get(this.registryType(), valueType))
                     .addCode(
                             "return $T.game().registries().registry($T.$L);",
@@ -72,7 +72,7 @@ enum RegistryScope {
         @Override
         protected MethodSpec registryFactory(final String registryTypeName, final TypeName valueType) {
             return MethodSpec.methodBuilder("registry")
-                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
                     .returns(ParameterizedTypeName.get(this.registryType(), valueType))
                     .addCode(
                             "return $T.server().registries().registry($T.$L);",
