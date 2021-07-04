@@ -62,14 +62,16 @@ public final class SpongeOrientation implements Orientation {
     }
 
     @Override
-    public boolean equals(final Object anotherObject) {
-        if (anotherObject == null) return false;
-        if (anotherObject == this) return true;
-        if (anotherObject instanceof SpongeOrientation) {
-            SpongeOrientation anotherOrientation = (SpongeOrientation) anotherObject;
-            return anotherOrientation.angle == this.angle;
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
         }
-        return false;
+
+        if (!(obj instanceof SpongeOrientation)) {
+            return false;
+        }
+
+        return ((SpongeOrientation) obj).angle == this.angle;
     }
 
     @Override
