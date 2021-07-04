@@ -27,6 +27,7 @@ package org.spongepowered.vanilla.generator;
 import com.squareup.javapoet.AnnotationSpec;
 import com.squareup.javapoet.ClassName;
 import com.squareup.javapoet.CodeBlock;
+import com.squareup.javapoet.FieldSpec;
 import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
@@ -39,6 +40,19 @@ import javax.lang.model.element.Modifier;
 
 enum RegistryScope {
     GAME {
+        @Override
+        protected MethodSpec registryFactory(final String registryTypeName, final TypeName valueType) {
+            return MethodSpec.methodBuilder("registry")
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                    .returns(ParameterizedTypeName.get(this.registryType(), valueType))
+                    .addCode(
+                            "return $T.game().registries().registry($T.$L);",
+                            Types.SPONGE,
+                            Types.REGISTRY_TYPES,
+                            registryTypeName.toUpperCase(Locale.ROOT)
+                    ).build();
+        }
+
         @Override
         protected CodeBlock registryKeyToReference() {
             return CodeBlock.of("asDefaultedReference(() -> $T.game().registries())", Types.SPONGE);
@@ -56,6 +70,19 @@ enum RegistryScope {
     },
     SERVER {
         @Override
+        protected MethodSpec registryFactory(final String registryTypeName, final TypeName valueType) {
+            return MethodSpec.methodBuilder("registry")
+                    .addModifiers(Modifier.PRIVATE, Modifier.STATIC)
+                    .returns(ParameterizedTypeName.get(this.registryType(), valueType))
+                    .addCode(
+                            "return $T.server().registries().registry($T.$L);",
+                            Types.SPONGE,
+                            Types.REGISTRY_TYPES,
+                            registryTypeName.toUpperCase(Locale.ROOT)
+                    ).build();
+        }
+
+        @Override
         protected CodeBlock registryKeyToReference() {
             return CodeBlock.of("asDefaultedReference(() -> $T.server().registries())", Types.SPONGE);
         }
@@ -71,6 +98,21 @@ enum RegistryScope {
         }
     },
     WORLD {
+        @Override
+        protected MethodSpec registryFactory(final String registryTypeName, final TypeName valueType) {
+            final var worldParam = ParameterSpec.builder(Types.SERVER_WORLD, "world", Modifier.FINAL).build();
+            return MethodSpec.methodBuilder("registry")
+                    .addModifiers(Modifier.PUBLIC, Modifier.STATIC)
+                    .returns(ParameterizedTypeName.get(this.registryType(), valueType))
+                    .addParameter(worldParam)
+                    .addCode(
+                            "return $N.registries().registry($T.$L);",
+                            worldParam,
+                            Types.REGISTRY_TYPES,
+                            registryTypeName.toUpperCase(Locale.ROOT)
+                    ).build();
+        }
+
         @Override
         protected CodeBlock registryKeyToReference() {
             return CodeBlock.of("asReference()");
@@ -96,9 +138,15 @@ enum RegistryScope {
 
     protected abstract CodeBlock registryKeyToReference();
 
+    protected abstract MethodSpec registryFactory(String registryTypeName, final TypeName valueType);
+
     abstract ClassName registryReferenceType();
 
     abstract AnnotationSpec registryScopeAnnotation();
+
+    final ClassName registryType() {
+        return Types.REGISTRY;
+    }
 
     final MethodSpec registryReferenceFactory(final String registryTypeName, final TypeName valueType) {
         final var locationParam = ParameterSpec.builder(Types.RESOURCE_KEY, "location", Modifier.FINAL).build();

@@ -35,6 +35,7 @@ import net.minecraft.resources.ResourceLocation;
 
 import java.io.IOException;
 import java.util.Comparator;
+import java.util.Locale;
 import java.util.function.Predicate;
 
 import javax.lang.model.element.Modifier;
@@ -116,6 +117,15 @@ class RegistryEntriesGenerator<V> implements Generator {
         }
 
         clazz.addAnnotation(scopeType.registryScopeAnnotation());
+
+        // Write REGISTRY field (or not, depending on scope)
+        final MethodSpec registryMethod = scopeType.registryFactory(this.registryTypeName, this.valueType);
+        if (scopeType != RegistryScope.WORLD) {
+            clazz.addField(this.makeRegistryField(this.targetClassSimpleName, ParameterizedTypeName.get(Types.REGISTRY, this.valueType), registryMethod));
+        }
+        clazz.addMethod(registryMethod);
+
+        // Commence writing of fields
         final var fieldType = ParameterizedTypeName.get(scopeType.registryReferenceType(), this.valueType);
         final var factoryMethod = scopeType.registryReferenceFactory(this.registryTypeName, this.valueType);
 
@@ -143,6 +153,12 @@ class RegistryEntriesGenerator<V> implements Generator {
         if (!constructors.isEmpty()) {
             constructors.get(0).setLineComment("@formatter:on");
         }
+    }
+
+    private FieldSpec makeRegistryField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod) {
+        return FieldSpec.builder(fieldType, "REGISTRY", Modifier.PUBLIC, Modifier.STATIC, Modifier.FINAL)
+                .initializer("$L.$N()", ownType, factoryMethod)
+                .build();
     }
 
     private FieldSpec makeField(final String ownType, final TypeName fieldType, final MethodSpec factoryMethod, final ResourceLocation element) {
