@@ -82,6 +82,7 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
     @Shadow @Final private ChunkPos chunkPos;
     @Shadow private boolean loaded;
     @Shadow private boolean unsaved;
+    @Shadow @Final private Map<BlockPos, BlockEntity> blockEntities;
 
     @Shadow @Nullable public abstract BlockEntity getBlockEntity(BlockPos pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType p_177424_2_);
 
