@@ -101,11 +101,11 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             // Sponge end
             this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
             if (this.server.getCompressionThreshold() >= 0 && !this.connection.isMemoryConnection()) {
-                this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), (param0) -> this.connection.setupCompression(this.server.getCompressionThreshold()));
+                this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), (param0) -> this.connection.setupCompression(this.server.getCompressionThreshold(), true));
             }
 
             this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
-            ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
+            final ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
             if (var1 != null) {
                 this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
                 this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile);
