@@ -163,7 +163,11 @@ public final class Constants {
         public static final String SPONGE_ENTITY_CREATOR = "Creator";
         public static final String SPONGE_ENTITY_NOTIFIER = "Notifier";
         public static final String SPONGE_BLOCK_POS_TABLE = "BlockPosTable";
-        public static final String SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
+
+        @Deprecated
+        public static final String LEGACY_SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
+        public static final String SPONGE_PLAYER_UUID_TABLE = "player-uuid-table";
+
         // General DataQueries
         public static final DataQuery UNSAFE_NBT = of("UnsafeData");
         public static final DataQuery DATA_MANIPULATORS = of("Data");

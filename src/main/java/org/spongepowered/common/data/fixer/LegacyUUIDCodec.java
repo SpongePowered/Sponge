@@ -22,18 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.entity;
+package org.spongepowered.common.data.fixer;
 
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
+import com.mojang.serialization.Codec;
+import com.mojang.serialization.codecs.RecordCodecBuilder;
+import org.spongepowered.common.util.Constants;
 
-public interface LivingEntityBridge {
+import java.util.UUID;
 
-    boolean bridge$damageEntity(DamageSource damageSource, float damage);
+public final class LegacyUUIDCodec {
 
-    default int bridge$getExperiencePointsOnDeath(LivingEntity entity, Player attackingPlayer) {
-        return ((LivingEntityAccessor) entity).invoker$getExperienceReward(attackingPlayer);
+    public static final Codec<UUID> CODEC = RecordCodecBuilder.create(r ->
+            r.group(Codec.LONG.fieldOf(Constants.UUID_MOST).forGetter(UUID::getMostSignificantBits),
+                    Codec.LONG.fieldOf(Constants.UUID_LEAST).forGetter(UUID::getLeastSignificantBits))
+            .apply(r, UUID::new)
+    );
+
+    private LegacyUUIDCodec() {
     }
 }

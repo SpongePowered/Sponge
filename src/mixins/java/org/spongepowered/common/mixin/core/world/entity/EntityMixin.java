@@ -176,7 +176,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract boolean shadow$isInWater();
     @Shadow public abstract boolean shadow$isPassenger();
     @Shadow public abstract void shadow$teleportTo(double x, double y, double z);
-    @Shadow public abstract int shadow$getMaxAirSupply();
     @Shadow public abstract void shadow$doEnchantDamageEffects(LivingEntity entityLivingBaseIn, Entity entityIn);
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
     @Shadow public abstract Level shadow$getCommandSenderWorld();

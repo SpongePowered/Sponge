@@ -22,18 +22,10 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.entity;
+package org.spongepowered.common.bridge.world.food;
 
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 
-public interface LivingEntityBridge {
-
-    boolean bridge$damageEntity(DamageSource damageSource, float damage);
-
-    default int bridge$getExperiencePointsOnDeath(LivingEntity entity, Player attackingPlayer) {
-        return ((LivingEntityAccessor) entity).invoker$getExperienceReward(attackingPlayer);
-    }
+public interface FoodDataBridge {
+    void bridge$setPlayer(final Player player);
 }

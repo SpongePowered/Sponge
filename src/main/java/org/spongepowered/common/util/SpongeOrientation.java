@@ -26,16 +26,56 @@ package org.spongepowered.common.util;
 
 import org.spongepowered.api.util.orientation.Orientation;
 
+import java.util.Optional;
+
 public final class SpongeOrientation implements Orientation {
+
+    public static final class Factory implements Orientation.Factory {
+
+        @Override
+        public Optional<Orientation> fromDegrees(final int degrees) {
+            if (degrees % 45 == 0) {
+                return Optional.of(new SpongeOrientation(degrees % 360));
+            }
+
+            return Optional.empty();
+        }
+    }
 
     private final int angle;
 
     public SpongeOrientation(final int angle) {
-        this.angle = angle;
+        if (angle % 45 != 0) {
+            throw new IllegalArgumentException("The angle should be a multiple of 45 degrees!");
+        }
+        this.angle = angle % 360;
     }
 
     @Override
     public int angle() {
         return this.angle;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.angle;
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof SpongeOrientation)) {
+            return false;
+        }
+
+        return ((SpongeOrientation) obj).angle == this.angle;
+    }
+
+    @Override
+    public String toString() {
+        return getClass().getSimpleName() + "{angle=" + this.angle + "}";
     }
 }

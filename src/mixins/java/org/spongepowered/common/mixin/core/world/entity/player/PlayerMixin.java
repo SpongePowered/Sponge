@@ -91,6 +91,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
@@ -99,6 +100,7 @@ import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.food.FoodDataBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.util.DamageEventUtil;
@@ -386,7 +388,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                 // }
                 final float attackStrength = this.shadow$getAttackStrengthScale(0.5F);
 
-                final List<ModifierFunction<DamageModifier>> originalFunctions = new ArrayList<>();
+                final List<DamageFunction> originalFunctions = new ArrayList<>();
 
                 final MobType creatureAttribute = targetEntity instanceof LivingEntity
                     ? ((LivingEntity) targetEntity).getMobType()
@@ -642,5 +644,10 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
         final Team thisTeam = ((net.minecraft.world.scores.Scoreboard) ((ServerPlayerBridge) other).bridge$getScoreboard()).getPlayersTeam(this.shadow$getScoreboardName());
 
         cir.setReturnValue(otherTeam == null || !otherTeam.isAlliedTo(thisTeam) || otherTeam.isAllowFriendlyFire());
+    }
+
+    @Inject(method = "<init>", at = @At(value = "RETURN"))
+    private void impl$foodData(final CallbackInfo ci) {
+        ((FoodDataBridge) this.shadow$getFoodData()).bridge$setPlayer((net.minecraft.world.entity.player.Player) (Object) this);
     }
 }

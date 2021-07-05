@@ -182,6 +182,14 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                 return Collections.emptyEnumeration();
             }
 
+            final URI asUri;
+            try {
+                asUri = new URI(null, null, s, null);
+            } catch (final URISyntaxException ex) {
+                this.logger.error("Failed to convert resource path {} to a URI", s, ex);
+                return Collections.emptyEnumeration();
+            }
+
             return new Enumeration<URL>() {
                 final Iterator<Set<PluginResource>> serviceResources = ((VanillaPluginPlatform) AppLaunch.pluginPlatform()).getResources()
                     .values().iterator();
@@ -223,7 +231,7 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                                 }
                             }
 
-                            final Optional<URI> uri = resource.locateResource(URI.create(s));
+                            final Optional<URI> uri = resource.locateResource(asUri);
                             if (uri.isPresent()) {
                                 try {
                                     return uri.get().toURL();
