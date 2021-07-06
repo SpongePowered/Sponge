@@ -22,42 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.tag;
+package org.spongepowered.common.mixin.core.core;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
+import com.mojang.serialization.Lifecycle;
+import net.minecraft.core.Registry;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
+import org.spongepowered.common.bridge.core.RegistryBridge;
+import org.spongepowered.common.registry.SpongeRegistryType;
 
-import java.util.Collection;
+@Mixin(Registry.class)
+public abstract class RegistryMixin<T> implements RegistryBridge<T> {
 
-@Mixin(targets = "net.minecraft.tags.StaticTagHelper$Wrapper")
-@Implements(@Interface(iface = org.spongepowered.api.tag.Tag.class, prefix = "spongetag$"))
-public abstract class TagWrapperMixin_API<T> implements Tag.Named<T>, org.spongepowered.api.tag.Tag<T> {
-
-    // @formatter:on
-    @Shadow @Final protected ResourceLocation name;
-    @Shadow public abstract boolean shadow$contains(T param0);
-    // @formatter:off
-
-    @Override
-    public Collection<T> values() {
-        return this.getValues();
-    }
+    private RegistryType<T> impl$type;
 
     @Override
-    public ResourceKey key() {
-        return (ResourceKey) (Object) this.name;
+    public RegistryType<T> bridge$type() {
+        return this.impl$type;
     }
 
-    @Intrinsic
-    public boolean spongetag$contains(final T value) {
-        return this.shadow$contains(value);
+    @Inject(method = "<init>", at = @At("TAIL"))
+    private void impl$setType(final net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> key,
+                                 final Lifecycle p_i232510_2_, final CallbackInfo ci) {
+        this.impl$type = new SpongeRegistryType<T>((ResourceKey) (Object) ((ResourceKeyAccessor) key).accessor$registryName(),
+                (ResourceKey) (Object) key.location());
     }
 
 }

@@ -34,20 +34,20 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.registry.SpongeRegistryEntry;
-import org.spongepowered.common.registry.SpongeRegistryKey;
 import org.spongepowered.common.registry.SpongeRegistryType;
 
 @Mixin(MappedRegistry.class)
 public abstract class MappedRegistryMixin_Vanilla<T> extends WritableRegistryMixin_Vanilla<T> {
 
     @Inject(method = "registerMapping(ILnet/minecraft/resources/ResourceKey;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;Z)Ljava/lang/Object;", at = @At("TAIL"))
-    private void vanilla$cacheRegistryEntry(int p_243537_1_, net.minecraft.resources.ResourceKey<T> p_243537_2_, T p_243537_3_, Lifecycle p_243537_4_, boolean p_243537_5_,
-            CallbackInfoReturnable<T> cir) {
+    private void vanilla$cacheRegistryEntry(final int p_243537_1_, final net.minecraft.resources.ResourceKey<T> p_243537_2_, final T p_243537_3_, final Lifecycle p_243537_4_, final boolean p_243537_5_,
+                                            final CallbackInfoReturnable<T> cir) {
 
         final net.minecraft.resources.ResourceKey<? extends Registry<T>> registryKey = this.shadow$key();
         final ResourceKey root = (ResourceKey) (Object) ((ResourceKeyAccessor) registryKey).accessor$registryName();
         final ResourceKey location = (ResourceKey) (Object) registryKey.location();
-        this.bridge$getEntries().put((ResourceKey) (Object) p_243537_2_.location(), new SpongeRegistryEntry<>(new SpongeRegistryType<>(root, location),
+        this.bridge$register(new SpongeRegistryEntry<>(new SpongeRegistryType<>(root, location),
                 (ResourceKey) (Object) p_243537_2_.location(), p_243537_3_));
     }
+
 }

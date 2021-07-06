@@ -22,42 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.tag;
+package org.spongepowered.common.tag;
 
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.tags.Tag;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Implements;
-import org.spongepowered.asm.mixin.Interface;
-import org.spongepowered.asm.mixin.Intrinsic;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.tag.TagTemplate;
+import org.spongepowered.api.tag.TagType;
+import org.spongepowered.api.tag.Taggable;
 
-import java.util.Collection;
+import java.util.Objects;
 
-@Mixin(targets = "net.minecraft.tags.StaticTagHelper$Wrapper")
-@Implements(@Interface(iface = org.spongepowered.api.tag.Tag.class, prefix = "spongetag$"))
-public abstract class TagWrapperMixin_API<T> implements Tag.Named<T>, org.spongepowered.api.tag.Tag<T> {
-
-    // @formatter:on
-    @Shadow @Final protected ResourceLocation name;
-    @Shadow public abstract boolean shadow$contains(T param0);
-    // @formatter:off
+public final class SpongeTagTemplateFactory implements TagTemplate.Factory {
 
     @Override
-    public Collection<T> values() {
-        return this.getValues();
-    }
-
-    @Override
-    public ResourceKey key() {
-        return (ResourceKey) (Object) this.name;
-    }
-
-    @Intrinsic
-    public boolean spongetag$contains(final T value) {
-        return this.shadow$contains(value);
+    public <T extends Taggable<T>> TagTemplate.Builder<T> builder(final TagType<T> tagType) {
+        return new SpongeTagTemplateBuilder<>(Objects.requireNonNull(tagType, "tagType"));
     }
 
 }

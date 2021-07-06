@@ -32,7 +32,6 @@ import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.lifecycle.RegisterDataPackValueEventImpl;
 import org.spongepowered.common.item.recipe.ingredient.IngredientResultUtil;
@@ -51,7 +50,6 @@ public final class SpongeDataPackManager {
     public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.game());
 
     private final Game game;
-    private RegistryHolder registryHolder;
 
     private Map<DataPackType, Runnable> delayed = new HashMap<>();
 
@@ -90,7 +88,8 @@ public final class SpongeDataPackManager {
 
     @SuppressWarnings("unchecked")
     public <T extends DataPackSerializable> void serialize(final DataPackType<T> type, final Path dataPacksDirectory,
-        final Collection<String> dataPacksToLoad, final List<T> serializables, boolean delayed) {
+                                                           final Collection<String> dataPacksToLoad,
+                                                           final List<T> serializables, final boolean delayed) {
         if (serializables.isEmpty()) {
             return;
         }
@@ -111,8 +110,8 @@ public final class SpongeDataPackManager {
         this.serializePack(dataPacksDirectory, dataPacksToLoad, implType, serialized, serializables.size());
     }
 
-    private void serializePack(Path dataPacksDirectory, Collection<String> dataPacksToLoad, SpongeDataPackType implType,
-            List<DataPackSerializedObject> serialized, int count) {
+    private void serializePack(final Path dataPacksDirectory, final Collection<String> dataPacksToLoad, final SpongeDataPackType implType,
+                               final List<DataPackSerializedObject> serialized, final int count) {
         // When reloading we must update the dataPacksToLoad
         try {
             if (implType.getPackSerializer().serialize(implType, dataPacksDirectory, serialized, count)) {

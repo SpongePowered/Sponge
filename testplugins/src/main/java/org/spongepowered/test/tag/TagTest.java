@@ -55,7 +55,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.registry.DefaultedRegistryType;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.api.registry.RegistryKey;
-import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.service.pagination.PaginationList;
@@ -94,43 +93,38 @@ public final class TagTest {
 
     @Listener
     public void registerTags(final RegisterDataPackValueEvent<@NonNull TagTemplate> event) {
-        logger.info("Adding tags.");
+        this.logger.info("Adding tags.");
 
-        final TagTemplate tagRegistration = TagTemplate.builder()
-                .key(ResourceKey.of(pluginContainer, "wool"))
-                .type(TagTypes.BLOCK_TYPE.get())
+        final TagTemplate tagRegistration = TagTemplate.builder(TagTypes.BLOCK_TYPE)
+                .key(ResourceKey.of(this.pluginContainer, "wool"))
                 .addValue(BlockTypes.GRASS)
                 .build();
 
         event.register(tagRegistration);
 
-        final TagTemplate woolLog = TagTemplate.builder()
+        final TagTemplate woolLog = TagTemplate.builder(TagTypes.BLOCK_TYPE)
                 .key(BlockTypeTags.WOOL.location())
-                .type(TagTypes.BLOCK_TYPE.get())
                 .addValue(BlockTypes.OAK_LOG)
                 .build();
 
         event.register(woolLog);
 
-        final TagTemplate woolGrass = TagTemplate.builder()
+        final TagTemplate woolGrass = TagTemplate.builder(TagTypes.BLOCK_TYPE)
                 .key(ResourceKey.minecraft("wool"))
-                .type(TagTypes.BLOCK_TYPE.get())
                 .addValue(BlockTypes.GRASS_BLOCK)
                 .build();
 
         event.register(woolGrass);
 
-        final TagTemplate underwaterDiamond = TagTemplate.builder()
+        final TagTemplate underwaterDiamond = TagTemplate.builder(TagTypes.BLOCK_TYPE)
                 .key(BlockTypeTags.UNDERWATER_BONEMEALS.location())
-                .type(TagTypes.BLOCK_TYPE.get())
                 .addValue(BlockTypes.DIAMOND_BLOCK)
                 .build();
 
         event.register(underwaterDiamond);
 
-        final TagTemplate ores = TagTemplate.builder()
+        final TagTemplate ores = TagTemplate.builder(TagTypes.BLOCK_TYPE)
                 .key(ResourceKey.of(this.pluginContainer, "ores"))
-                .type(TagTypes.BLOCK_TYPE.get())
                 .addValue(BlockTypes.COAL_ORE)
                 .addValue(BlockTypes.IRON_ORE)
                 .addValue(BlockTypes.LAPIS_ORE)
@@ -143,9 +137,8 @@ public final class TagTest {
 
         event.register(ores);
 
-        final TagTemplate oresAndBlocks = TagTemplate.builder()
+        final TagTemplate oresAndBlocks = TagTemplate.builder(TagTypes.BLOCK_TYPE)
                 .key(ResourceKey.of(this.pluginContainer, "oresandblocks"))
-                .type(TagTypes.BLOCK_TYPE.get())
                 .addValue(BlockTypes.COAL_BLOCK)
                 .addValue(BlockTypes.IRON_BLOCK)
                 .addValue(BlockTypes.LAPIS_BLOCK)
@@ -160,25 +153,22 @@ public final class TagTest {
         event.register(oresAndBlocks);
 
         final ResourceKey nonExistentKey = ResourceKey.of("notrealnamespace", "notrealvalue");
-        final TagTemplate brokenChildTag = TagTemplate.builder()
+        final TagTemplate brokenChildTag = TagTemplate.builder(TagTypes.ITEM_TYPE)
                 .key(ResourceKey.of(this.pluginContainer, "brokenchildtag"))
-                .type(TagTypes.ITEM_TYPE.get())
                 .addChild(RegistryKey.of(RegistryTypes.ITEM_TYPE_TAGS, nonExistentKey), true)
                 .build();
 
         event.register(brokenChildTag);
 
-        final TagTemplate brokenValueTag = TagTemplate.builder()
+        final TagTemplate brokenValueTag = TagTemplate.builder(TagTypes.ITEM_TYPE)
                 .key(ResourceKey.of(this.pluginContainer, "brokenvaluetag"))
-                .type(TagTypes.ITEM_TYPE.get())
                 .addValue(RegistryKey.of(RegistryTypes.ITEM_TYPE, nonExistentKey))
                 .build();
 
         event.register(brokenValueTag);
 
-        final TagTemplate stillWorkingTag = TagTemplate.builder()
+        final TagTemplate stillWorkingTag = TagTemplate.builder(TagTypes.ITEM_TYPE)
                 .key(ResourceKey.of(this.pluginContainer, "stillworkingtag"))
-                .type(TagTypes.ITEM_TYPE.get())
                 .addValue(RegistryKey.of(RegistryTypes.ITEM_TYPE, nonExistentKey), false)
                 .addChild(RegistryKey.of(RegistryTypes.ITEM_TYPE_TAGS, nonExistentKey), false)
                 .addValue(ItemTypes.REDSTONE)
@@ -189,11 +179,11 @@ public final class TagTest {
 
     @Listener
     public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
-        final Parameter.Value<Tag<BlockType>> BLOCK_TYPE_TAG = TagTest.makeTagRegistryParameter(TagTest.BLOCK_TYPE_TAG_TOKEN, RegistryTypes.BLOCK_TYPE_TAGS, "blocktag");
+        final Parameter.Value<Tag<BlockType>> blockTypeTagParameter = TagTest.makeTagRegistryParameter(TagTest.BLOCK_TYPE_TAG_TOKEN, RegistryTypes.BLOCK_TYPE_TAGS, "blocktag");
         final Command.Parameterized blockHasTag = Command.builder()
-                .addParameter(BLOCK_TYPE_TAG)
+                .addParameter(blockTypeTagParameter)
                 .executor(ctx -> {
-                    final Tag<BlockType> tag = ctx.requireOne(BLOCK_TYPE_TAG);
+                    final Tag<BlockType> tag = ctx.requireOne(blockTypeTagParameter);
 
                     final BlockType blockType = TagTest.raytraceBlock(ctx).blockState().type();
                     TagTest.sendTagMessage(blockType, RegistryTypes.BLOCK_TYPE, tag, tag.key(RegistryTypes.BLOCK_TYPE_TAGS), ctx.cause().audience());
@@ -201,11 +191,11 @@ public final class TagTest {
                 })
                 .build();
 
-        final Parameter.Value<Tag<ItemType>> ITEM_TYPE_TAG = TagTest.makeTagRegistryParameter(TagTest.ITEM_TYPE_TAG_TOKEN, RegistryTypes.ITEM_TYPE_TAGS, "itemtag");
+        final Parameter.Value<Tag<ItemType>> itemTypeTagParameter = TagTest.makeTagRegistryParameter(TagTest.ITEM_TYPE_TAG_TOKEN, RegistryTypes.ITEM_TYPE_TAGS, "itemtag");
         final Command.Parameterized itemHasTag = Command.builder()
-                .addParameter(ITEM_TYPE_TAG)
+                .addParameter(itemTypeTagParameter)
                 .executor(ctx -> {
-                    final Tag<ItemType> tag = ctx.requireOne(ITEM_TYPE_TAG);
+                    final Tag<ItemType> tag = ctx.requireOne(itemTypeTagParameter);
 
                     final ItemType itemType = TagTest.requireItemInHand(ctx);
                     TagTest.sendTagMessage(itemType, RegistryTypes.ITEM_TYPE, tag, tag.key(RegistryTypes.ITEM_TYPE_TAGS), ctx.cause().audience());
@@ -213,11 +203,11 @@ public final class TagTest {
                 })
                 .build();
 
-        final Parameter.Value<Tag<EntityType<?>>> ENTITY_TYPE_TAG = TagTest.makeTagRegistryParameter(TagTest.ENTITY_TYPE_TAG_TOKEN, RegistryTypes.ENTITY_TYPE_TAGS, "entitytag");
+        final Parameter.Value<Tag<EntityType<?>>> entityTypeTagParameter = TagTest.makeTagRegistryParameter(TagTest.ENTITY_TYPE_TAG_TOKEN, RegistryTypes.ENTITY_TYPE_TAGS, "entitytag");
         final Command.Parameterized entityHasTag = Command.builder()
-                .addParameter(ENTITY_TYPE_TAG)
+                .addParameter(entityTypeTagParameter)
                 .executor(ctx -> {
-                    final Tag<EntityType<?>> tag = ctx.requireOne(ENTITY_TYPE_TAG);
+                    final Tag<EntityType<?>> tag = ctx.requireOne(entityTypeTagParameter);
 
                     final EntityType<?> type = TagTest.raytraceEntity(ctx);
 
@@ -226,11 +216,11 @@ public final class TagTest {
                 })
                 .build();
 
-        final Parameter.Value<Tag<FluidType>> FLUID_TYPE_TAG = TagTest.makeTagRegistryParameter(TagTest.FLUID_TYPE_TAG_TOKEN, RegistryTypes.FLUID_TYPE_TAGS, "fluidtag");
+        final Parameter.Value<Tag<FluidType>> fluidTypeTagParameter = TagTest.makeTagRegistryParameter(TagTest.FLUID_TYPE_TAG_TOKEN, RegistryTypes.FLUID_TYPE_TAGS, "fluidtag");
         final Command.Parameterized fluidHasTag = Command.builder()
-                .addParameter(FLUID_TYPE_TAG)
+                .addParameter(fluidTypeTagParameter)
                 .executor(ctx -> {
-                    final Tag<FluidType> tag = ctx.requireOne(FLUID_TYPE_TAG);
+                    final Tag<FluidType> tag = ctx.requireOne(fluidTypeTagParameter);
 
                     final FluidType fluidType = TagTest.raytraceBlock(ctx).serverLocation().fluid().type();
 
@@ -301,7 +291,7 @@ public final class TagTest {
                 .executor(ctx -> {
                     final TagType<@NonNull ?> tagType = ctx.requireOne(TAG_TYPE);
 
-                    List<Component> contents = Sponge.game().registries().registry(tagType.tagRegistry()).streamEntries()
+                    final List<Component> contents = Sponge.game().registries().registry(tagType.tagRegistry()).streamEntries()
                             .map(RegistryEntry::key)
                             .map(ResourceKey::toString)
                             .map(s -> Component.text(s, NamedTextColor.AQUA))
@@ -320,7 +310,8 @@ public final class TagTest {
     }
 
     private static <T> Parameter.Value<Tag<T>> makeTagRegistryParameter(final TypeToken<Tag<T>> token, final RegistryType<Tag<T>> registryType, final String key) {
-        final ValueParameter<Tag<T>> valueParameter = VariableValueParameters.registryEntryBuilder(x -> Sponge.game().registries().registry(registryType))
+        final ValueParameter<Tag<T>> valueParameter = VariableValueParameters.registryEntryBuilder(
+                    VariableValueParameters.RegistryEntryBuilder.GLOBAL_HOLDER_PROVIDER, registryType)
                 .defaultNamespace(ResourceKey.MINECRAFT_NAMESPACE)
                 .build();
         return Parameter.builder(token, valueParameter).key(key).build();
@@ -366,7 +357,7 @@ public final class TagTest {
     }
 
     private static <T extends Taggable<@NonNull T>> void sendTagMessage(final T taggable, final DefaultedRegistryType<T> registry, final Tag<T> tag, final ResourceKey tagKey, final Audience audience) {
-        boolean contained = tag.contains(taggable);
+        final boolean contained = tag.contains(taggable);
         final Component message = contained ? Component.text(taggable.key(registry) + " has tag " + tagKey, NamedTextColor.GREEN)
                 : Component.text(taggable.key(registry) + " does not have tag " + tagKey, NamedTextColor.RED);
         audience.sendMessage(message);

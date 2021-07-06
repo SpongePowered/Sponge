@@ -26,6 +26,10 @@ package org.spongepowered.common.registry;
 
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.tags.StaticTagHelper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
@@ -46,11 +50,6 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.ResourceLocation;
 
 public final class SpongeRegistryHolder implements RegistryHolder {
 
@@ -235,7 +234,7 @@ public final class SpongeRegistryHolder implements RegistryHolder {
                     (ResourceLocation) (Object) type.location()
             );
         }
-        registry = new TagRegistry<>(key, staticTagHelper, type, Lifecycle.stable());
+        registry = new TagRegistry<>(key, staticTagHelper, Lifecycle.stable());
 
         ((WritableRegistry) root).register(key, registry, Lifecycle.stable());
         return (Registry<T>) registry;

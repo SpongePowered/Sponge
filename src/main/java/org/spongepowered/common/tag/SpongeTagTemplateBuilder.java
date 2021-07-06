@@ -28,8 +28,6 @@ import com.google.common.collect.ImmutableMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.ResourceKeyed;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.tag.Tag;
 import org.spongepowered.api.tag.TagTemplate;
@@ -38,31 +36,18 @@ import org.spongepowered.api.tag.Taggable;
 
 import java.util.Collection;
 import java.util.HashMap;
-import java.util.HashSet;
 import java.util.Map;
-import java.util.Set;
-import java.util.stream.Collectors;
 
 public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements TagTemplate.Builder<T> {
 
-    @Nullable
-    private TagType<T> tagType;
-    @Nullable
-    private ResourceKey key;
+    private final TagType<T> tagType;
+    private @Nullable ResourceKey key;
     private boolean replace = false;
     private final Map<ResourceKey, Boolean> values = new HashMap<>();
-    // ResourceKey to whether it is required.
     private final Map<ResourceKey, Boolean> children = new HashMap<>();
 
-    @Override
-    public <NT extends Taggable<NT>> TagTemplate.Builder<NT> type(final TagType<NT> tagType) {
-        if (!this.values.isEmpty() || !children.isEmpty()) {
-            throw new IllegalStateException("Cannot change tag type once values are added!");
-        }
-        this.tagType = null;
-        final SpongeTagTemplateBuilder<NT> builder = (SpongeTagTemplateBuilder<NT>) this;
-        builder.tagType = tagType;
-        return builder;
+    public SpongeTagTemplateBuilder(final TagType<T> tagType) {
+        this.tagType = tagType;
     }
 
     @Override
@@ -73,24 +58,18 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
 
     @Override
     public TagTemplate.Builder<T> replace(final boolean replace) {
-        this.ensureTagTypeAdded();
         this.replace = replace;
         return this;
     }
 
     @Override
-    public TagTemplate.Builder<T> addChild(final RegistryKey<Tag<T>> childTag, boolean required) {
-        this.ensureTagTypeAdded();
-        if (this.tagType == null) {
-            throw new IllegalStateException("Tag type must be set first!");
-        }
+    public TagTemplate.Builder<T> addChild(final RegistryKey<Tag<T>> childTag, final boolean required) {
         this.children.put(childTag.location(), required);
         return this;
     }
 
     @Override
     public TagTemplate.Builder<T> addChild(final TagTemplate childTag) throws IllegalArgumentException {
-        this.ensureTagTypeAdded();
         final SpongeTagTemplate spongeTagTemplate = ((SpongeTagTemplate) childTag);
         if (spongeTagTemplate.tagType() != this.tagType) {
             throw new IllegalArgumentException("TagTemplate given is not compatible with this builder, it is for a different type!");
@@ -107,7 +86,6 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
 
     @Override
     public TagTemplate.Builder<T> addChildren(final Collection<RegistryKey<Tag<T>>> children, final boolean required) {
-        this.ensureTagTypeAdded();
         children.stream().map(RegistryKey::location).forEach(key -> this.children.put(key, required));
         return this;
     }
@@ -120,31 +98,20 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
 
     @Override
     public TagTemplate.Builder<T> addValue(final RegistryKey<T> value, final boolean required) throws IllegalArgumentException {
-        this.ensureTagTypeAdded();
         this.values.put(value.location(), required);
         return this;
     }
 
     @Override
-    public TagTemplate.Builder<T> addValues(final Collection<RegistryKey<T>> values, boolean required) throws IllegalArgumentException {
-        this.ensureTagTypeAdded();
+    public TagTemplate.Builder<T> addValues(final Collection<RegistryKey<T>> values, final boolean required) throws IllegalArgumentException {
         values.forEach(v -> this.values.put(v.location(), required));
         return this;
-    }
-
-    private void ensureTagTypeAdded() {
-        if (this.tagType == null) {
-            throw new IllegalStateException("Tag type must be set first!");
-        }
     }
 
     @Override
     public @NonNull SpongeTagTemplate build() {
         if (this.key == null) {
             throw new IllegalStateException("Key has not been provided yet!");
-        }
-        if (this.tagType == null) {
-            throw new IllegalStateException("Tag type has not been provided yet!");
         }
         return new SpongeTagTemplate(this.key,
                 this.tagType,
@@ -155,10 +122,10 @@ public final class SpongeTagTemplateBuilder<T extends Taggable<T>> implements Ta
 
     @Override
     public TagTemplate.Builder<T> reset() {
-        this.tagType = null;
         this.replace = false;
         this.values.clear();
         this.children.clear();
         return this;
     }
+
 }

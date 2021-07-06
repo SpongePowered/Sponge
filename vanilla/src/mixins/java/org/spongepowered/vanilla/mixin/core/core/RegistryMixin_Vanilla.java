@@ -24,15 +24,21 @@
  */
 package org.spongepowered.vanilla.mixin.core.core;
 
+import net.minecraft.core.Registry;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.core.RegistryBridge;
 
 import java.util.LinkedHashMap;
 import java.util.Map;
-import net.minecraft.core.Registry;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @Mixin(Registry.class)
 public abstract class RegistryMixin_Vanilla<T> implements RegistryBridge<T> {
@@ -42,9 +48,41 @@ public abstract class RegistryMixin_Vanilla<T> implements RegistryBridge<T> {
     // @formatter:on
 
     private final Map<ResourceKey, RegistryEntry<T>> vanilla$entries = new LinkedHashMap<>();
+    private Supplier<Stream<RegistryEntry<T>>> vanilla$streamOverride = null;
 
     @Override
-    public Map<ResourceKey, RegistryEntry<T>> bridge$getEntries() {
-        return this.vanilla$entries;
+    public void bridge$overrideStream(final Supplier<Stream<RegistryEntry<T>>> override) {
+        this.vanilla$streamOverride = override;
     }
+
+    @Override
+    public void bridge$register(final RegistryEntry<T> entry) {
+        this.vanilla$entries.put(entry.key(), entry);
+    }
+
+    @Override
+    public Optional<RegistryEntry<T>> bridge$get(final ResourceKey resourceKey) {
+        if (this.vanilla$streamOverride != null) {
+            return this.vanilla$streamOverride.get()
+                    .filter(x -> x.key().equals(resourceKey))
+                    .findFirst();
+        }
+        return Optional.ofNullable(this.vanilla$entries.get(resourceKey));
+    }
+
+    @Override
+    public Stream<RegistryEntry<T>> bridge$streamEntries() {
+        if (this.vanilla$streamOverride != null) {
+            return this.vanilla$streamOverride.get();
+        }
+        return this.vanilla$entries.values().stream();
+    }
+
+    @Inject(method = "stream", at = @At("HEAD"), cancellable = true)
+    private void vanilla$useStreamOverride(final CallbackInfoReturnable<Stream<T>> cir) {
+        if (this.vanilla$streamOverride != null) {
+            cir.setReturnValue(this.vanilla$streamOverride.get().map(RegistryEntry::value));
+        }
+    }
+
 }
