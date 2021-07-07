@@ -115,7 +115,8 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     }
 
     @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getDataTag(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/world/level/DataPackConfig;)Lnet/minecraft/world/level/storage/WorldData;"))
-    private static WorldData impl$setBootstrapProperties(final LevelStorageSource.LevelStorageAccess levelSave, final DynamicOps<Tag> p_237284_1_, final DataPackConfig p_237284_2_, final LevelStorageSource.LevelStorageAccess p_238181_0_, final RegistryAccess.RegistryHolder p_238181_1_) {
+    private static WorldData impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties(final LevelStorageSource.LevelStorageAccess levelSave, final DynamicOps<Tag> p_237284_1_, final DataPackConfig p_237284_2_, final LevelStorageSource.LevelStorageAccess p_238181_0_, final RegistryAccess.RegistryHolder p_238181_1_) {
+        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
         final WorldData saveData = levelSave.getDataTag(p_237284_1_, p_237284_2_);
         BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(), saveData.getDifficulty(), true, saveData.isHardcore(),
             saveData.getAllowCommands(), 10, p_238181_1_);
@@ -123,8 +124,10 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     }
 
     @Inject(method = "createLevel", at = @At("HEAD"))
-    private void impl$setBootstrapProperties(String levelName, LevelSettings settings, RegistryAccess.RegistryHolder registries,
-            WorldGenSettings dimensionGeneratorSettings, CallbackInfo ci) {
+    private void impl$setBootstrapProperties(final String levelName, final LevelSettings settings,
+                                             final RegistryAccess.RegistryHolder registries,
+                                             final WorldGenSettings dimensionGeneratorSettings,
+                                             final CallbackInfo ci) {
         BootstrapProperties.init(dimensionGeneratorSettings, settings.gameType(), settings.difficulty(), true, settings.hardcore(),
             settings.allowCommands(), 10, registries);
         BootstrapProperties.setIsNewLevel(true);
@@ -137,12 +140,6 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 //            final CallbackInfoReturnable<WorldData> cir) {
 //        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
 //    }
-
-    @Inject(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getDataTag(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/world/level/DataPackConfig;)Lnet/minecraft/world/level/storage/WorldData;"))
-    private static void impl$serializeDelayedDataPackOnLoad(final LevelStorageSource.LevelStorageAccess param0, final RegistryAccess.RegistryHolder param1,
-            ResourceManager param2, DataPackConfig param3, CallbackInfoReturnable<WorldData> cir) {
-        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
-    }
 
     @Redirect(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
     private Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
