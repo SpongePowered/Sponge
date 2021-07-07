@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
@@ -61,8 +60,9 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
     }
 
     @Override
-    public BlockChange associateBlockChangeWithSnapshot(final GrowablePhaseContext phaseContext,
-        final BlockState newState, final Block newBlock, final BlockState currentState, final SpongeBlockSnapshot snapshot,
+    public BlockChange associateBlockChangeWithSnapshot(
+        final GrowablePhaseContext phaseContext,
+        final BlockState newState, final Block newBlock, final BlockState currentState,
         final Block originalBlock
     ) {
         return BlockChange.GROW;

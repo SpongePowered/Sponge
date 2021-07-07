@@ -24,9 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -116,8 +116,12 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public BlockChange associateBlockChangeWithSnapshot(final BlockTickContext phaseContext, final net.minecraft.world.level.block.state.BlockState newState, final Block newBlock,
-                                                        final net.minecraft.world.level.block.state.BlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
+    public BlockChange associateBlockChangeWithSnapshot(
+        final BlockTickContext phaseContext, final BlockState newState,
+        final Block newBlock,
+        final BlockState currentState,
+        final Block originalBlock
+    ) {
         if (phaseContext.tickingBlock instanceof BonemealableBlock) {
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
@@ -126,7 +130,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                 return BlockChange.GROW;
             }
         }
-        return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, snapshot, originalBlock);
+        return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, originalBlock);
     }
 
     @Override

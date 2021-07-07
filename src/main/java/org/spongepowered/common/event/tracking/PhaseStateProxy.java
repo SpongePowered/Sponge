@@ -417,7 +417,8 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         final BlockState currentState, final SpongeBlockSnapshot snapshot,
         final Block originalBlock
     ) {
-        return this.getState().associateBlockChangeWithSnapshot(this.asContext(), newState, newBlock,currentState, snapshot, originalBlock);
+        return this.getState().associateBlockChangeWithSnapshot(this.asContext(), newState, newBlock,currentState,
+            originalBlock);
     }
 
     /**
@@ -484,8 +485,8 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         this.getState().populateLootContext(this.asContext(), lootBuilder);
     }
 
-    default Operation getBlockOperation(final SpongeBlockSnapshot original, final BlockChange blockChange) {
-        return this.getState().getBlockOperation(original, blockChange);
+    default Operation getBlockOperation(final SpongeBlockSnapshot original, final SpongeBlockSnapshot result) {
+        return this.getState().getBlockOperation(this.asContext(), original, result);
     }
 
     default void foldContextForThread(final TickTaskBridge returnValue) {

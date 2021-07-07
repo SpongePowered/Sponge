@@ -109,7 +109,7 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
                 } else {
                     intermediary = ImmutableList.of();
                 }
-                final Operation operation = context.getBlockOperation(original, original.blockChange);
+                final Operation operation = context.getBlockOperation(original, result);
                 final BlockTransaction eventTransaction = new BlockTransaction(original, result, intermediary, operation);
                 return Optional.of(eventTransaction);
             })
