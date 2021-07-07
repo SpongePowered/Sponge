@@ -53,7 +53,6 @@ public abstract class BlockMixin_API extends AbstractBlockMixin_API implements S
 
     // @formatter:off
     @Shadow @Final protected StateDefinition<Block, net.minecraft.world.level.block.state.BlockState> stateDefinition;
-    @Shadow public abstract Item shadow$asItem();
     @Shadow public abstract String shadow$getDescriptionId();
     @Shadow public abstract net.minecraft.world.level.block.state.BlockState shadow$defaultBlockState();
     // @formatter:on
