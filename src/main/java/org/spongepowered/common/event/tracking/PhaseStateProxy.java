@@ -133,16 +133,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     /**
-     * Specifically designed to allow certain registries use the event listener hooks to prevent unnecessary off-threaded
-     * checks and allows for registries to restrict additional registrations ouside of events.
-     *
-     * @return True if this is an event listener state
-     */
-    default boolean isEvent() {
-        return this.getState().isEvent();
-    }
-
-    /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place.
      *  @param blockChange The block change performed

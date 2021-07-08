@@ -24,15 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
 
 /**
  * A specialized phase for forge event listeners during pre tick, may need to do the same
@@ -45,10 +44,6 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
 
     }
 
-    @Override
-    public boolean isNotReEntrant() {
-        return false;
-    }
 
     @Override
     public void associateNeighborStateNotifier(final L unwindingContext, final @Nullable BlockPos sourcePos, final Block block, final BlockPos notifyPos,

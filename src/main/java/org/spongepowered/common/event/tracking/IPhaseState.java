@@ -172,16 +172,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Specifically designed to allow certain registries use the event listener hooks to prevent unnecessary off-threaded
-     * checks and allows for registries to restrict additional registrations ouside of events.
-     *
-     * @return True if this is an event listener state
-     */
-    default boolean isEvent() {
-        return false;
-    }
-
-    /**
      * The exit point of any phase. Every phase should have an unwinding
      * process where if anything is captured, events should be thrown and
      * processed accordingly. The outcome of each phase is dependent on
