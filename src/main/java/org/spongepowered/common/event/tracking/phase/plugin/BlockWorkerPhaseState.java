@@ -40,11 +40,6 @@ public class BlockWorkerPhaseState extends BasicPluginState {
         TrackingUtil.processBlockCaptures(phaseContext);
     }
 
-    @Override
-    public boolean handlesOwnStateCompletion() {
-        return true;
-    }
-
     public @Nullable PhaseContext<@NonNull ?> switchIfNecessary(final PhaseTracker server) {
 
         final PhaseTracker instance = PhaseTracker.getInstance();

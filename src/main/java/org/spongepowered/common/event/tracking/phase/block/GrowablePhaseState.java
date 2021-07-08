@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -33,8 +35,6 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.state.BlockState;
 
 @SuppressWarnings({"unchecked", "rawTypes"})
 public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> implements IPhaseState<GrowablePhaseContext> {

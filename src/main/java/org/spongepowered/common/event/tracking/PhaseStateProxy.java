@@ -283,17 +283,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
 
 
     /**
-     * Gets whether this state is going to complete itself for plugin provided
-     * changes. Used for BlockWorkers.
-     * TODO - Investigate whether we can enable listener phase states to handle
-     * this as well.
-     * @return True if this state does not need a custom block worker state for plugin changes
-     */
-    default boolean handlesOwnStateCompletion() {
-        return this.getState().handlesOwnStateCompletion();
-    }
-
-    /**
      * Associates any notifier/owner information from expected states that will assuredly provide
      * said information. In some states, like world gen, there is no information to provide.
      *
