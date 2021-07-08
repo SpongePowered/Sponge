@@ -149,17 +149,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * If this returns {@link true}, block decays will be processed in this
-     * phase state. If this returns {@link false}, block decays will be
-     * processed in a separate phase state.
-     *
-     * @return Whether this phase should track decays
-     */
-    default boolean includesDecays() {
-        return false;
-    }
-
-    /**
      * The exit point of any phase. Every phase should have an unwinding
      * process where if anything is captured, events should be thrown and
      * processed accordingly. The outcome of each phase is dependent on

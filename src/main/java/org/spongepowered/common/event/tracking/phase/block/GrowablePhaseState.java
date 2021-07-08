@@ -72,11 +72,6 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
         return this.FRAME_MODIFIER;
     }
 
-    @Override
-    public boolean includesDecays() {
-        return true;
-    }
-
     private final String desc = TrackingUtil.phaseStateToString("Growable", this);
 
     @Override

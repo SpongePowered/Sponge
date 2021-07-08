@@ -109,17 +109,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     /**
-     * If this returns {@link true}, block decays will be processed in this
-     * phase state. If this returns {@link false}, block decays will be
-     * processed in a separate phase state.
-     *
-     * @return Whether this phase should track decays
-     */
-    default boolean includesDecays() {
-        return this.getState().includesDecays();
-    }
-
-    /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place.
      *  @param blockChange The block change performed

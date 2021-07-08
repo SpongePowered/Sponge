@@ -66,11 +66,6 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> exten
     }
 
     @Override
-    public boolean includesDecays() {
-        return true;
-    }
-
-    @Override
     public boolean allowsEventListener() {
         return false;
     }
