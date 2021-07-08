@@ -98,7 +98,7 @@ public abstract class FoodDataMixin implements FoodDataBridge {
 
     private <E> E impl$fireEventAndGetValue(final Key<? extends Value<E>> key, final E currentValue, final E value) {
         if (!ShouldFire.CHANGE_DATA_HOLDER_EVENT_VALUE_CHANGE || Objects.equals(currentValue, value)) {
-            return currentValue;
+            return value;
         }
 
         final DataTransactionResult transaction = DataTransactionResult.builder()
@@ -123,6 +123,6 @@ public abstract class FoodDataMixin implements FoodDataBridge {
             }
         }
 
-        return currentValue;
+        return value;
     }
 }
