@@ -57,7 +57,6 @@ import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 import org.spongepowered.common.world.BlockChange;
 
@@ -107,18 +106,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
      */
     default boolean isTicking() {
         return this.getState().isTicking();
-    }
-
-    /**
-     * Gets whether this state is considered a "world generation" state. Usually world generation
-     * is a common flag to say "hey, don't bother capturing anything". So, as it would be expected,
-     * block changes, entity spawns, and whatnot are not tracked in any way during generation
-     * states.
-     *
-     * @return Whether this state is a world generation state or not
-     */
-    default boolean isWorldGeneration() {
-        return this.getState().isWorldGeneration();
     }
 
     /**

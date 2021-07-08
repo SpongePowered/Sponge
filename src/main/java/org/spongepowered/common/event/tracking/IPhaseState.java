@@ -149,18 +149,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state is considered a "world generation" state. Usually world generation
-     * is a common flag to say "hey, don't bother capturing anything". So, as it would be expected,
-     * block changes, entity spawns, and whatnot are not tracked in any way during generation
-     * states.
-     *
-     * @return Whether this state is a world generation state or not
-     */
-    default boolean isWorldGeneration() {
-        return false;
-    }
-
-    /**
      * If this returns {@link true}, block decays will be processed in this
      * phase state. If this returns {@link false}, block decays will be
      * processed in a separate phase state.
