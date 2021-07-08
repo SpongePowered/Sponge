@@ -51,11 +51,6 @@ abstract class ListenerPhaseState<L extends ListenerPhaseContext<L>> extends Plu
     }
 
     @Override
-    public boolean isEvent() {
-        return true;
-    }
-
-    @Override
     public void associateNeighborStateNotifier(final L unwindingContext, final @Nullable BlockPos sourcePos, final Block block, final BlockPos notifyPos,
         final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         unwindingContext.getCapturedPlayer().ifPresent(player ->

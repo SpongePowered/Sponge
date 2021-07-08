@@ -127,18 +127,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this phase is expected to potentially re-enter itself, in some cases where
-     * other operations tend to cause extra operations being performed. Examples include but are
-     * not limited to: World Generation, {@link GenerationPhase.State#TERRAIN_GENERATION} or
-     * {@link GenerationPhase.State#POPULATOR_RUNNING}. If thi
-     *
-     * @return True if this phase is potentially expected to re-enter on itself
-     */
-    default boolean isNotReEntrant() {
-        return true;
-    }
-
-    /**
      * Gets whether this state is considered an interaction, specifically to determine
      * whether a pre-block event check can be performed prior to actual block modifications
      * are done and potentially "captured" as a result. This is specific to allow mod compatibility

@@ -79,11 +79,6 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> exten
     }
 
     @Override
-    public final boolean isNotReEntrant() {
-        return false;
-    }
-
-    @Override
     public boolean ignoresBlockEvent() {
         return true;
     }
