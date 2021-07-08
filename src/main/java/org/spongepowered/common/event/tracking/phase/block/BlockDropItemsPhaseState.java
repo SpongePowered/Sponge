@@ -28,7 +28,6 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
@@ -50,13 +49,6 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
     @Override
     public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {
         return this.BLOCK_DROP_MODIFIER;
-    }
-
-    @Override
-    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
-        return super.createNewContext(tracker)
-                .addBlockCaptures()
-                .addEntityCaptures();
     }
 
     @SuppressWarnings({"unchecked", "Duplicates", "RedundantCast"})

@@ -35,7 +35,6 @@ final class EventListenerPhaseState extends ListenerPhaseState<EventListenerPhas
     @Override
     public EventListenerPhaseContext createNewContext(final PhaseTracker tracker) {
         return new EventListenerPhaseContext(this, tracker)
-            .addCaptures()
             .player();
     }
 

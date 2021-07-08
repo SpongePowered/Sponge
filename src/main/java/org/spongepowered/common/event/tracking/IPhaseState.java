@@ -67,7 +67,6 @@ import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
@@ -84,9 +83,7 @@ import java.util.stream.Collectors;
 /**
  * A literal phase state of which the {@link World} is currently running
  * in. As these should be enums, there's no data that should be stored on
- * this state. It can have control flow with {@link #isNotReEntrant()}
- * where preventing switching to another state is possible (likely points out
- * either errors or runaway states not being unwound).
+ * this state.
  */
 @DefaultQualifier(NonNull.class)
 public interface IPhaseState<C extends PhaseContext<C>> {

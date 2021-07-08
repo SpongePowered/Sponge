@@ -59,9 +59,7 @@ public final class PacketCommandState extends PacketState<PlayerCommandPhaseCont
 
     @Override
     public PlayerCommandPhaseContext createNewContext(final PhaseTracker tracker) {
-        return new PlayerCommandPhaseContext(this, tracker)
-            .addCaptures()
-            .addEntityDropCaptures();
+        return new PlayerCommandPhaseContext(this, tracker);
     }
 
     @Override

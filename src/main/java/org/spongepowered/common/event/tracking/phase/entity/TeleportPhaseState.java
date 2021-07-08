@@ -30,8 +30,7 @@ public final class TeleportPhaseState extends EntityPhaseState<TeleportContext> 
 
     @Override
     protected TeleportContext createNewContext(PhaseTracker tracker) {
-        return new TeleportContext(this, tracker)
-                .addBlockCaptures();
+        return new TeleportContext(this, tracker);
     }
 
     @Override

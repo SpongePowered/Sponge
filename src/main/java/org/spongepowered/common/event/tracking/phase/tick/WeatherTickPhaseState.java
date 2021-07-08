@@ -33,7 +33,7 @@ class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
 
     @Override
     public TickContext.General createNewContext(final PhaseTracker tracker) {
-        return new TickContext.General(this, tracker).addCaptures();
+        return new TickContext.General(this, tracker);
     }
 
     @Override

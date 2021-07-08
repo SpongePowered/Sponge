@@ -24,15 +24,20 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.LiquidBlock;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.material.FlowingFluid;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -40,11 +45,6 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.LiquidBlock;
-import net.minecraft.world.level.material.FlowingFluid;
 
 class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> {
     private final BiConsumer<CauseStackManager.StackFrame, FluidTickContext> LOCATION_MODIFIER =
@@ -66,8 +66,7 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
 
     @Override
     public FluidTickContext createNewContext(final PhaseTracker tracker) {
-        return new FluidTickContext(this, tracker)
-                .addCaptures();
+        return new FluidTickContext(this, tracker);
     }
 
 

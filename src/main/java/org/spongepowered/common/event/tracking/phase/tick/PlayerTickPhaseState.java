@@ -44,10 +44,7 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
 
     @Override
     protected PlayerTickContext createNewContext(final PhaseTracker tracker) {
-        return new PlayerTickContext(tracker)
-                .addCaptures()
-                .addEntityDropCaptures()
-                ;
+        return new PlayerTickContext(tracker);
     }
 
     @Override

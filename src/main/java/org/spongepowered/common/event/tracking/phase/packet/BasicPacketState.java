@@ -33,9 +33,7 @@ public class BasicPacketState extends PacketState<BasicPacketContext> {
 
     @Override
     public BasicPacketContext createNewContext(final PhaseTracker tracker) {
-        return new BasicPacketContext(this, tracker)
-            .addCaptures()
-            .addEntityDropCaptures();
+        return new BasicPacketContext(this, tracker);
     }
 
     @Override

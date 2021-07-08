@@ -127,32 +127,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         return (P) this;
     }
 
-    private void checkBlockSuppliers() {
-    }
-
-    public P addBlockCaptures() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        this.checkBlockSuppliers();
-
-        this.transactor = new TransactionalCaptureSupplier();
-        return (P) this;
-    }
-
-    public P addCaptures() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        return (P) this;
-    }
-
-    public P addEntityCaptures() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        return (P) this;
-    }
-
-    public P addEntityDropCaptures() {
-        checkState(!this.isCompleted, "Cannot add a new object to the context if it's already marked as completed!");
-        return (P) this;
-    }
-
     public P setBulkBlockCaptures(final boolean captures) {
         this.allowsBulkBlockCaptures = captures;
         return (P) this;

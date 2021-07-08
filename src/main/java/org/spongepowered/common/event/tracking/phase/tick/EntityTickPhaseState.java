@@ -24,6 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.CombatEntry;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.entity.item.FallingBlockEntity;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -44,15 +53,6 @@ import org.spongepowered.common.world.BlockChange;
 
 import java.util.List;
 import java.util.function.BiConsumer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.CombatEntry;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.HangingEntity;
-import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.phys.AABB;
 
 class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
@@ -163,7 +163,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
     @Override
     protected EntityTickContext createNewContext(final PhaseTracker tracker) {
-        return new EntityTickContext(this, tracker).addCaptures();
+        return new EntityTickContext(this, tracker);
     }
 
     @Override

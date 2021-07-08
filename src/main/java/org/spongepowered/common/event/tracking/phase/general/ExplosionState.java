@@ -25,6 +25,11 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.level.Explosion;
+import net.minecraft.world.level.storage.loot.LootContext;
+import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.Living;
@@ -44,11 +49,6 @@ import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTr
 
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Explosion;
-import net.minecraft.world.level.storage.loot.LootContext;
-import net.minecraft.world.level.storage.loot.parameters.LootContextParams;
 
 final class ExplosionState extends GeneralState<ExplosionContext> {
 
@@ -75,9 +75,6 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     @Override
     public ExplosionContext createNewContext(final PhaseTracker tracker) {
         return new ExplosionContext(tracker)
-            .addEntityCaptures()
-            .addEntityDropCaptures()
-            .addBlockCaptures()
             .populateFromCurrentState();
     }
 

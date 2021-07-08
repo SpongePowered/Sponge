@@ -24,17 +24,16 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.Blocks;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
-import net.minecraft.world.level.block.state.BlockState;
 
 final class BlockDecayPhaseState extends BlockPhaseState {
 
@@ -43,12 +42,6 @@ final class BlockDecayPhaseState extends BlockPhaseState {
             .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
         frame.pushCause(locatable);
     });
-
-    @Override
-    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
-        return super.createNewContext(tracker)
-            .addCaptures();
-    }
 
     @Override
     public BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> getFrameModifier() {

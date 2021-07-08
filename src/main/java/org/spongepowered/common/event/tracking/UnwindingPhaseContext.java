@@ -45,8 +45,6 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
         }
         return new UnwindingPhaseContext(context)
                 .source(context.getSource())
-                .addCaptures()
-                .addEntityDropCaptures()
                 .buildAndSwitch();
     }
 

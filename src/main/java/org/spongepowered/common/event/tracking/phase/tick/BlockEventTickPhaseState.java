@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.event.CauseStackManager;
@@ -37,9 +40,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
 import java.util.function.BiConsumer;
 
 class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
@@ -59,9 +59,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     @Override
     public BlockEventTickContext createNewContext(final PhaseTracker tracker) {
-        return new BlockEventTickContext(tracker)
-                .addBlockCaptures()
-                .addEntityCaptures();
+        return new BlockEventTickContext(tracker);
     }
 
     @Override

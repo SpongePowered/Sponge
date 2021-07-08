@@ -31,8 +31,7 @@ final class PlayerWakeUpState extends EntityPhaseState<BasicEntityContext> {
 
     @Override
     public BasicEntityContext createNewContext(final PhaseTracker tracker) {
-        return new BasicEntityContext(this, tracker)
-            .addCaptures();
+        return new BasicEntityContext(this, tracker);
     }
 
     @Override

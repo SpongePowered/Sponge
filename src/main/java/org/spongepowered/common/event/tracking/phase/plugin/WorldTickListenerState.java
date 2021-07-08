@@ -37,7 +37,7 @@ final class WorldTickListenerState extends ListenerPhaseState<WorldTickListenerC
 
     @Override
     public WorldTickListenerContext createNewContext(final PhaseTracker tracker) {
-        return new WorldTickListenerContext(this, tracker).addCaptures().player();
+        return new WorldTickListenerContext(this, tracker).player();
     }
 
     @Override

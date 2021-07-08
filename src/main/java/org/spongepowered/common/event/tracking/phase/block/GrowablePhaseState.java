@@ -50,8 +50,7 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
 
     @Override
     public GrowablePhaseContext createNewContext(final PhaseTracker tracker) {
-        final GrowablePhaseContext context = new GrowablePhaseContext(this, tracker);
-        return context.addBlockCaptures();
+        return new GrowablePhaseContext(this, tracker);
     }
 
     @Override

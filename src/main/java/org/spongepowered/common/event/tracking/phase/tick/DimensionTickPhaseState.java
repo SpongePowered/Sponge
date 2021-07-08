@@ -36,10 +36,7 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
 
     @Override
     public DimensionContext createNewContext(final PhaseTracker tracker) {
-        return new DimensionContext(tracker)
-                .addBlockCaptures()
-                .addEntityCaptures()
-                .addEntityDropCaptures();
+        return new DimensionContext(tracker);
     }
 
     @Override
