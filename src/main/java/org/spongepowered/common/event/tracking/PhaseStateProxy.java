@@ -156,8 +156,8 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
      *
      * @return Whether this state should fire entity collision events
      */
-    default boolean isCollision() {
-        return this.getState().isCollision();
+    default boolean allowsEntityCollisionEvents() {
+        return this.getState().allowsEntityCollisionEvents();
     }
 
     /**

@@ -57,6 +57,7 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
@@ -297,27 +298,18 @@ public final class SpongeCommonEventFactory {
     }
 
     @SuppressWarnings("unchecked")
-    public static <T extends net.minecraft.world.entity.Entity> @Nullable CollideEntityEvent callCollideEntityEvent(
-            final Level world, final net.minecraft.world.entity.@Nullable Entity sourceEntity,
-            final List<T> entities) {
+    public static <T extends net.minecraft.world.entity.Entity> CollideEntityEvent callCollideEntityEvent(
+        final net.minecraft.world.entity.@Nullable Entity sourceEntity,
+        final List<T> entities
+    ) {
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseContext<?> currentContext = phaseTracker.getPhaseContext();
+        final PhaseContext<@NonNull ?> currentContext = phaseTracker.getPhaseContext();
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             if (sourceEntity != null) {
                 // We only want to push the source entity if it's not the current entity being ticked or "sourced". They will be already pushed.
                 if (currentContext.getSource() != sourceEntity) {
                     frame.pushCause(sourceEntity);
-                }
-            } else {
-                // If there is no source, then... well... find one and push it.
-                final Object source = currentContext.getSource();
-                if (source instanceof LocatableBlock) {
-                    frame.pushCause(source);
-                } else if (source instanceof BlockEntity) {
-                    frame.pushCause(source);
-                } else if (source instanceof Entity) {
-                    frame.pushCause(source);
                 }
             }
             currentContext.addCreatorAndNotifierToCauseStack(frame);

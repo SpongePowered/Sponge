@@ -24,12 +24,15 @@
  */
 package org.spongepowered.common.mixin.entitycollision.world.level.chunk;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
@@ -39,6 +42,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.List;
 import java.util.function.Predicate;
+
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.boss.enderdragon.EnderDragon;
@@ -50,36 +54,40 @@ import net.minecraft.world.phys.AABB;
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
 public abstract class LevelChunkMixin_EntityCollision {
 
+    //@formatter:off
     @Shadow public abstract Level shadow$getLevel();
+    //@formatter:on
 
-    @Inject(method = "getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V",
-            at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false), cancellable = true)
-    private void collisionsImpl$checkForCollisionRules(final @Nullable Entity entity,
-            final AABB bb,
-            final List<Entity> entities,
-            final Predicate<? super Entity> filter,
-            final CallbackInfo ci) {
+    @SuppressWarnings("InvalidInjectorMethodSignature")
+    @Inject(method = {
+        "getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V",
+        "getEntities(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V",
+        "getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V",
+    },
+        at = @At(value = "INVOKE",
+            target = "Ljava/util/List;add(Ljava/lang/Object;)Z",
+            remap = false),
+        cancellable = true)
+    private void collisionsImpl$checkForCollisionRules(
+        final @Nullable @Coerce Object entity,
+        final AABB bb,
+        final List<Entity> entities,
+        final Predicate<? super Entity> filter,
+        final CallbackInfo ci
+    ) {
         // ignore players and entities with parts (ex. EnderDragon)
-        if (this.shadow$getLevel().isClientSide() || entities == null || entity instanceof Player || entity instanceof EnderDragon) {
+        if (this.shadow$getLevel().isClientSide() || entities == null) {
+            return;
+        }
+        if (entity instanceof Class && (Player.class.isAssignableFrom(
+            (Class<?>) entity) || ItemEntity.class == entity)) {
+            return;
+        }
+        if (entity instanceof Player || entity instanceof EnderDragon) {
             return;
         }
         // Run hook in LivingEntity to support maxEntityCramming
         if (entity instanceof LivingEntity && ((CollisionCapabilityBridge) entity).collision$isRunningCollideWithNearby()) {
-            return;
-        }
-
-        if (!this.entityCollision$allowEntityCollision(entities)) {
-            ci.cancel();
-        }
-    }
-
-    @Inject(method = "getEntitiesOfClass",
-            at = @At(value = "INVOKE", target = "Ljava/util/List;add(Ljava/lang/Object;)Z", remap = false), cancellable = true)
-    private <T extends Entity> void collisionsImpl$checkForCollisionRules(final Class<? extends T> entityClass, final AABB bb,
-            final List<T> entities, final Predicate<? super T> filter, final CallbackInfo ci) {
-        // ignore player checks
-        // ignore item check (ex. Hoppers)
-        if (this.shadow$getLevel().isClientSide() || Player.class.isAssignableFrom(entityClass) || ItemEntity.class == entityClass) {
             return;
         }
 
@@ -93,12 +101,12 @@ public abstract class LevelChunkMixin_EntityCollision {
             return true;
         }
 
-        if (PhaseTracker.getInstance().getPhaseContext().isCollision()) {
+        final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
+        if (!phaseContext.allowsEntityCollisionEvents()) {
             // allow explosions
             return true;
         }
 
-        final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
         final Object source = phaseContext.getSource();
         if (source == null) {
             return true;

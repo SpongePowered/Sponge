@@ -33,6 +33,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 
 import javax.annotation.Nullable;
 import net.minecraft.world.InteractionHand;
@@ -61,6 +62,7 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
     @Shadow protected abstract void shadow$createWitherRose(@Nullable LivingEntity p_226298_1_);
     @Shadow public abstract boolean shadow$isEffectiveAi();
     @Shadow public abstract void shadow$swing(InteractionHand p_184609_1_);
+    @Shadow protected abstract void shadow$pushEntities();
     // @formatter:on
 
     /**
@@ -126,4 +128,23 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
         }
         // Sponge End
     }
+
+    @Redirect(
+        method = "aiStep",
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;pushEntities()V")
+    )
+    private void tracker$switchIntoCollisions(final LivingEntity livingEntity) {
+        if (this.level.isClientSide) {
+            this.shadow$pushEntities();
+            return;
+        }
+        try (final PhaseContext<@NonNull ?> context = EntityPhase.State.COLLISION
+            .createPhaseContext(PhaseTracker.SERVER)
+            .source(livingEntity)
+        ) {
+            context.buildAndSwitch();
+            this.shadow$pushEntities();
+        }
+    }
+
 }

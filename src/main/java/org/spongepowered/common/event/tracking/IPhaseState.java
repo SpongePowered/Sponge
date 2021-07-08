@@ -216,7 +216,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @return Whether this state should fire entity collision events
      */
-    default boolean isCollision() {
+    default boolean allowsEntityCollisionEvents() {
         return false;
     }
 

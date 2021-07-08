@@ -39,11 +39,11 @@ import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
@@ -245,11 +245,16 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
         ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, null);
     }
 
-    @Inject(method = "getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V", at = @At("RETURN"))
-    private void tracker$ThrowCollisionEvent(final Entity entityIn, final AABB aabb, final List<Entity> listToFill,
-        final Predicate<? super Entity> filter, final CallbackInfo ci
+    @SuppressWarnings("InvalidInjectorMethodSignature")
+    @Inject(method = {
+        "getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V",
+        "getEntities(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V",
+        "getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V",
+    }, at = @At("RETURN"))
+    private void tracker$ThrowCollisionEvent(final @Coerce Object entityIn, final AABB aabb, final List<Entity> listToFill,
+        final Predicate<?> filter, final CallbackInfo ci
     ) {
-        if (((WorldBridge) this.level).bridge$isFake() || PhaseTracker.getInstance().getPhaseContext().isCollision()) {
+        if (((WorldBridge) this.level).bridge$isFake() || !PhaseTracker.getInstance().getPhaseContext().allowsEntityCollisionEvents()) {
             return;
         }
 
@@ -261,38 +266,11 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
             return;
         }
 
-        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.level, entityIn, listToFill);
-
-        if (event == null || event.isCancelled()) {
-            if (event == null && !PhaseTracker.getInstance().getPhaseContext().isTicking()) {
-                return;
-            }
+        final @Nullable Entity entity = entityIn instanceof Entity ? ((Entity) entityIn) : null;
+        if (SpongeCommonEventFactory.callCollideEntityEvent(entity, listToFill).isCancelled()) {
             listToFill.clear();
         }
     }
-
-//    @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At("RETURN"))
-//    private <T extends Entity> void tracker$throwCollsionEvent(final Class<? extends T> entityClass,
-//            final AxisAlignedBB aabb, final List<T> listToFill, final Predicate<? super T> filter,
-//            final CallbackInfo ci) {
-//        if (((WorldBridge) this.world).bridge$isFake()
-//                || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
-//            return;
-//        }
-//
-//        if (listToFill.isEmpty()) {
-//            return;
-//        }
-//
-//        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, null, listToFill);
-//
-//        if (event == null || event.isCancelled()) {
-//            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
-//                return;
-//            }
-//            listToFill.clear();
-//        }
-//    }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "unpackTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/ProtoTickList;copyOut(Lnet/minecraft/world/level/TickList;Ljava/util/function/Function;)V"))
