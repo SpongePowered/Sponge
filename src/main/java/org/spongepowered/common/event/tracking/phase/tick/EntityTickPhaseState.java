@@ -24,8 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -168,11 +167,13 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction,
-        final EntityTickContext context) {
+    public void postBlockTransactionApplication(
+        final EntityTickContext context, final BlockChange blockChange,
+        final BlockTransactionReceipt transaction
+    ) {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
-            final BlockPos blockPos = VecHelper.toBlockPos(transaction.original().position());
+            final BlockPos blockPos = VecHelper.toBlockPos(transaction.originalBlock().position());
             final List<HangingEntity> hangingEntities = ((ServerLevel) tickingEntity.world())
                 .getEntitiesOfClass(HangingEntity.class, new AABB(blockPos, blockPos).inflate(1.1D, 1.1D, 1.1D),
                     entityIn -> {

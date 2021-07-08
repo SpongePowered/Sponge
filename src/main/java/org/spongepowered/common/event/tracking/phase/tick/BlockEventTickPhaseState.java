@@ -25,8 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
@@ -83,10 +82,12 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public void postBlockTransactionApplication(final BlockChange blockChange,
-        final Transaction<? extends BlockSnapshot> snapshotTransaction, final BlockEventTickContext context) {
-        final Block block = (Block) snapshotTransaction.original().state().type();
-        final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.original();
+    public void postBlockTransactionApplication(
+        final BlockEventTickContext context, final BlockChange blockChange,
+        final BlockTransactionReceipt receipt
+    ) {
+        final Block block = (Block) receipt.originalBlock().state().type();
+        final SpongeBlockSnapshot original = (SpongeBlockSnapshot) receipt.originalBlock();
         final BlockPos changedBlockPos = original.getBlockPos();
         original.getServerWorld().ifPresent(worldServer -> {
             final LevelChunkBridge changedMixinChunk = (LevelChunkBridge) worldServer.getChunkAt(changedBlockPos);

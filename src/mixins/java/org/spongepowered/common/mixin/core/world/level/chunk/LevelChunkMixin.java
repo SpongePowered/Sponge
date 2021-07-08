@@ -61,6 +61,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DirectionUtil;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -71,8 +72,6 @@ import java.util.UUID;
 import java.util.function.BiConsumer;
 import java.util.function.Consumer;
 import java.util.function.Function;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
 public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridge {
@@ -164,7 +163,7 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
         if (((WorldBridge) this.level).bridge$isFake()) {
             return;
         }
-        if (!PhaseTracker.getInstance().getCurrentState().tracksCreatorsAndNotifiers()) {
+        if (!PhaseTracker.getInstance().getPhaseContext().tracksCreatorsAndNotifiers()) {
             // Don't track chunk gen
             return;
         }

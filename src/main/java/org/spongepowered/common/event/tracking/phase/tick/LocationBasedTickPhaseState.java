@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -36,10 +38,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
 
 abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>> extends TickPhaseState<T> {
 
@@ -67,11 +65,13 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     }
 
     @Override
-    public void postBlockTransactionApplication(final BlockChange blockChange,
-        final Transaction<? extends BlockSnapshot> snapshotTransaction, final T context) {
+    public void postBlockTransactionApplication(
+        final T context, final BlockChange blockChange,
+        final BlockTransactionReceipt receipt
+    ) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
-            final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.original();
+            final SpongeBlockSnapshot original = (SpongeBlockSnapshot) receipt.originalBlock();
             final Block block = (Block) original.state().type();
             final BlockPos changedBlockPos = original.getBlockPos();
             original.getServerWorld().ifPresent(worldServer -> {

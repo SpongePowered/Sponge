@@ -27,8 +27,7 @@ package org.spongepowered.common.event.tracking.phase.packet.player;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -71,8 +70,10 @@ public final class PacketCommandState extends PacketState<PlayerCommandPhaseCont
     }
 
     @Override
-    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction,
-        final PlayerCommandPhaseContext context) {
+    public void postBlockTransactionApplication(
+        final PlayerCommandPhaseContext context, final BlockChange blockChange,
+        final BlockTransactionReceipt transaction
+    ) {
         // We want to investigate if there is a user on the cause stack
         // and if possible, associate the notiifer/owner based on the change flag
         // We have to check if there is a player, because command blocks can be triggered

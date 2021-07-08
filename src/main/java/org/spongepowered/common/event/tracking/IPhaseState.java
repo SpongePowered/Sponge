@@ -40,6 +40,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.Transaction;
@@ -216,13 +217,14 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place.
-     *
-     * @param blockChange The block change performed
-     * @param snapshotTransaction The transaction of the old and new snapshots
      * @param context The context for information
+     * @param blockChange The block change performed
+     * @param receipt The transaction of the old and new snapshots
      */
-    default void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> snapshotTransaction,
-        final C context) { }
+    default void postBlockTransactionApplication(
+        final C context, final BlockChange blockChange,
+        final BlockTransactionReceipt receipt
+    ) { }
 
     /**
      * Specifically gets whether this state ignores any attempts at storing

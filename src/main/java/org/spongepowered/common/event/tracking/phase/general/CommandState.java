@@ -25,8 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -71,8 +70,10 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     }
 
     @Override
-    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction,
-        final CommandPhaseContext context) {
+    public void postBlockTransactionApplication(
+        final CommandPhaseContext context, final BlockChange blockChange,
+        final BlockTransactionReceipt transaction
+    ) {
         // We want to investigate if there is a user on the cause stack
         // and if possible, associate the notiifer/owner based on the change flag
         // We have to check if there is a player, because command blocks can be triggered
