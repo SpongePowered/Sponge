@@ -239,18 +239,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return true;
     }
 
-    /**
-     * Whether this state can deny chunk load/generation requests. Certain states can allow them
-     * and certain others can deny them. Usually the denials are coming from states like ticks
-     * where we are not intending to allow chunks to be loaded due to possible generation and
-     * runaway chunk loading.
-     *
-     * @return Whether this state denies chunk requests, usually false
-     */
-    default boolean doesDenyChunkRequests(final C context) {
-        return false;
-    }
-
     default boolean doesBlockEventTracking(final C context) {
         return true;
     }

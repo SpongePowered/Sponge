@@ -74,10 +74,6 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
         }
     }
 
-    @Override
-    public boolean doesDenyChunkRequests(E context) {
-        return true;
-    }
 }
 
 

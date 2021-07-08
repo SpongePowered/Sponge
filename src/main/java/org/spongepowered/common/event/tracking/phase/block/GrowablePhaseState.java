@@ -73,11 +73,6 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
     }
 
     @Override
-    public boolean doesDenyChunkRequests(final GrowablePhaseContext context) {
-        return true;
-    }
-
-    @Override
     public boolean includesDecays() {
         return true;
     }

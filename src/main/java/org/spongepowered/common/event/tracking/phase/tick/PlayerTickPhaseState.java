@@ -77,8 +77,4 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
         explosionContext.source(player);
     }
 
-    @Override
-    public boolean doesDenyChunkRequests(final PlayerTickContext context) {
-        return false;
-    }
 }

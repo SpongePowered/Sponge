@@ -69,11 +69,6 @@ abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState
 
     }
 
-    @Override
-    public boolean doesDenyChunkRequests(final C context) {
-        return true;
-    }
-
     private final String desc = TrackingUtil.phaseStateToString("Tick", this);
 
     @Override

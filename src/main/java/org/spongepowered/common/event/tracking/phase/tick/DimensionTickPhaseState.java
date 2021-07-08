@@ -47,8 +47,4 @@ class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
         }
     }
 
-    @Override
-    public boolean doesDenyChunkRequests(final DimensionContext context) {
-        return false;
-    }
 }

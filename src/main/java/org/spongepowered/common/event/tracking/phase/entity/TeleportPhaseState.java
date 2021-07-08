@@ -33,9 +33,4 @@ public final class TeleportPhaseState extends EntityPhaseState<TeleportContext> 
         return new TeleportContext(this, tracker);
     }
 
-    @Override
-    public boolean doesDenyChunkRequests(final TeleportContext context) {
-        return !context.isPlayer();
-    }
-
 }
