@@ -814,6 +814,11 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             // TODO - async entity spawn logging
             return;
         }
+        final PhaseContext<@NonNull ?> current = tracker.getPhaseContext();
+        if (!current.doesAllowEntitySpawns()) {
+            cir.setReturnValue(false);
+            return;
+        }
 
         final Cause currentCause = tracker.currentCause();
 
@@ -826,7 +831,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
             cir.setReturnValue(false);
         }
 
-        final PhaseContext<@NonNull ?> current = tracker.getPhaseContext();
 
         if (current.allowsBulkEntityCaptures()) {
             current.getTransactor().logEntitySpawn(current, this, entityIn);
