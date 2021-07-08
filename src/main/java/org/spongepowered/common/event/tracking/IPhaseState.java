@@ -41,6 +41,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.Operation;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -485,9 +486,11 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default BlockChange associateBlockChangeWithSnapshot(final C phaseContext, final BlockState newState, final Block newBlock,
-        final BlockState currentState, final SpongeBlockSnapshot snapshot,
-        final Block originalBlock) {
+    default BlockChange associateBlockChangeWithSnapshot(
+        final C phaseContext, final BlockState newState, final Block newBlock,
+        final BlockState currentState,
+        final Block originalBlock
+    ) {
         if (newBlock == Blocks.AIR) {
             return BlockChange.BREAK;
         } else if (newBlock != originalBlock && !TrackingUtil.forceModify(originalBlock, newBlock)) {
@@ -570,8 +573,18 @@ public interface IPhaseState<C extends PhaseContext<C>> {
 
     }
 
-    default Operation getBlockOperation(final SpongeBlockSnapshot original, final BlockChange blockChange) {
-        return blockChange.toOperation();
+    default Operation getBlockOperation(
+        final C phaseContext, final SpongeBlockSnapshot original, final SpongeBlockSnapshot result
+    ) {
+        final Block resultBlock = (Block) result.state().type();
+        if (resultBlock == Blocks.AIR) {
+            return Operations.BREAK.get();
+        }
+        final Block originalBlock = (Block) original.state().type();
+        if (originalBlock != resultBlock && !TrackingUtil.forceModify(originalBlock, resultBlock)) {
+            return Operations.PLACE.get();
+        }
+        return Operations.MODIFY.get();
     }
 
     default void foldContextForThread(final C context, final TickTaskBridge returnValue) {

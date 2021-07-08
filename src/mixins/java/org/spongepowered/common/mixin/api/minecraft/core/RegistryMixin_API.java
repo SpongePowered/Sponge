@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.core;
 
-import com.mojang.serialization.Lifecycle;
+import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
@@ -35,19 +35,12 @@ import org.spongepowered.asm.mixin.Interface;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.bridge.core.RegistryBridge;
-import org.spongepowered.common.registry.SpongeRegistryType;
 
+import javax.annotation.Nullable;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.stream.Stream;
-
-import javax.annotation.Nullable;
-import net.minecraft.resources.ResourceLocation;
 
 @Mixin(net.minecraft.core.Registry.class)
 @Implements(@Interface(iface = Registry.class, prefix = "registry$"))
@@ -59,21 +52,13 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     @Shadow @Nullable public abstract T get(@org.checkerframework.checker.nullness.qual.Nullable ResourceLocation p_82594_1_);
     // @formatter:on
 
-    private RegistryType<T> api$type;
-
-    @Inject(method = "<init>", at = @At("TAIL"))
-    private void api$setType(net.minecraft.resources.ResourceKey<? extends net.minecraft.core.Registry<T>> key, Lifecycle p_i232510_2_, CallbackInfo ci) {
-        this.api$type = new SpongeRegistryType<T>((ResourceKey) (Object) ((ResourceKeyAccessor) key).accessor$registryName(),
-                (ResourceKey) (Object) key.location());
-    }
-
     @Override
     public RegistryType<T> type() {
-        return this.api$type;
+        return ((RegistryBridge<T>) this).bridge$type();
     }
 
     @Override
-    public ResourceKey valueKey(T value) {
+    public ResourceKey valueKey(final T value) {
         Objects.requireNonNull(value, "value");
         
         final ResourceLocation key = this.shadow$getKey(value);
@@ -95,7 +80,7 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
     public <V extends T> Optional<RegistryEntry<V>> findEntry(final ResourceKey key) {
         Objects.requireNonNull(key, "key");
 
-        return Optional.ofNullable(((RegistryBridge<V>) this).bridge$getEntries().get(key));
+        return ((RegistryBridge<V>) this).bridge$get(key);
     }
 
     @Override
@@ -119,12 +104,12 @@ public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     @Override
     public Stream<RegistryEntry<T>> streamEntries() {
-        return ((RegistryBridge<T>) this).bridge$getEntries().values().stream();
+        return ((RegistryBridge<T>) this).bridge$streamEntries();
     }
 
     @Intrinsic
     public Stream<T> registry$stream() {
-        return ((RegistryBridge<T>) this).bridge$getEntries().values().stream().map(RegistryEntry::value);
+        return ((RegistryBridge<T>) this).bridge$streamEntries().map(RegistryEntry::value);
     }
 
     @Override

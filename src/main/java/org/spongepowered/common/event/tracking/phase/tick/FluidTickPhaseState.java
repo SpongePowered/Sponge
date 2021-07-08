@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.event.CauseStackManager;
@@ -120,10 +121,9 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
     @Override
     public BlockChange associateBlockChangeWithSnapshot(
         final FluidTickContext phaseContext,
-        final net.minecraft.world.level.block.state.BlockState newState,
+        final BlockState newState,
         final Block newBlock,
-        final net.minecraft.world.level.block.state.BlockState currentState,
-        final SpongeBlockSnapshot snapshot,
+        final BlockState currentState,
         final Block originalBlock
     ) {
         if (phaseContext.tickingBlock.getType() instanceof FlowingFluid) {
@@ -145,23 +145,25 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
                 return BlockChange.PLACE;
             }
         }
-        return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, snapshot, originalBlock);
+        return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, originalBlock);
     }
 
     @Override
-    public Operation getBlockOperation(final SpongeBlockSnapshot original, final BlockChange blockChange
+    public Operation getBlockOperation(
+        FluidTickContext phaseContext,
+        final SpongeBlockSnapshot original, final SpongeBlockSnapshot result
     ) {
         final FluidState fluidState = original.state().fluidState();
-        if (!fluidState.isEmpty() && blockChange == BlockChange.DECAY) {
+        if (!fluidState.isEmpty() && result.blockChange == BlockChange.DECAY) {
             return Operations.LIQUID_DECAY.get();
         }
-        if (fluidState.isEmpty() && blockChange == BlockChange.PLACE) {
+        if (fluidState.isEmpty() && result.blockChange == BlockChange.PLACE) {
             return Operations.LIQUID_SPREAD.get();
         }
-        if (!fluidState.isEmpty() && blockChange == BlockChange.MODIFY) {
+        if (!fluidState.isEmpty() && result.blockChange == BlockChange.MODIFY) {
             return Operations.LIQUID_SPREAD.get();
         }
-        return super.getBlockOperation(original, blockChange);
+        return super.getBlockOperation(phaseContext, original, result);
     }
 
     @Override

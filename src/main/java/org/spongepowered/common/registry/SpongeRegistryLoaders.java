@@ -55,6 +55,10 @@ import net.minecraft.commands.synchronization.brigadier.FloatArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.IntegerArgumentSerializer;
 import net.minecraft.commands.synchronization.brigadier.LongArgumentSerializer;
 import net.minecraft.network.chat.TextComponent;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import net.minecraft.world.item.Items;
 import net.minecraft.world.item.RecordItem;
 import net.minecraft.world.level.ChunkPos;
@@ -67,6 +71,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.adventure.ResolveOperation;
 import org.spongepowered.api.adventure.ResolveOperations;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
@@ -114,6 +119,7 @@ import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.api.effect.sound.music.MusicDisc;
 import org.spongepowered.api.effect.sound.music.MusicDiscs;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorType;
 import org.spongepowered.api.entity.ai.goal.GoalExecutorTypes;
 import org.spongepowered.api.entity.ai.goal.GoalType;
@@ -138,6 +144,8 @@ import org.spongepowered.api.event.cause.entity.damage.DamageModifierType;
 import org.spongepowered.api.event.cause.entity.damage.DamageModifierTypes;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.DamageTypes;
+import org.spongepowered.api.fluid.FluidType;
+import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.menu.ClickType;
@@ -154,6 +162,9 @@ import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientation
 import org.spongepowered.api.map.decoration.orientation.MapDecorationOrientations;
 import org.spongepowered.api.placeholder.PlaceholderParser;
 import org.spongepowered.api.placeholder.PlaceholderParsers;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryKey;
+import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlot;
 import org.spongepowered.api.scoreboard.displayslot.DisplaySlots;
 import org.spongepowered.api.service.ban.Ban;
@@ -161,6 +172,10 @@ import org.spongepowered.api.service.ban.BanType;
 import org.spongepowered.api.service.ban.BanTypes;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultType;
 import org.spongepowered.api.service.economy.account.AccountDeletionResultTypes;
+import org.spongepowered.api.tag.FluidTypeTags;
+import org.spongepowered.api.tag.Tag;
+import org.spongepowered.api.tag.TagType;
+import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Nameable;
@@ -276,6 +291,7 @@ import org.spongepowered.common.map.decoration.orientation.SpongeMapDecorationOr
 import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
+import org.spongepowered.common.tag.SpongeTagType;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.EndPortalType;
 import org.spongepowered.common.world.portal.NetherPortalType;
@@ -1047,6 +1063,15 @@ public final class SpongeRegistryLoaders {
             l.add(1, MapShades.DARK, k -> new SpongeMapShade(1, 220));
             l.add(2, MapShades.DARKER, k -> new SpongeMapShade(2, 255));
             l.add(3, MapShades.DARKEST, k -> new SpongeMapShade(3, 135));
+        });
+    }
+
+    public static RegistryLoader<TagType<@NonNull ?>> tagTypes() {
+        return RegistryLoader.of(l -> {
+            l.add(TagTypes.BLOCK_TYPE, k -> new SpongeTagType<@NonNull BlockType>("blocks", RegistryTypes.BLOCK_TYPE, RegistryTypes.BLOCK_TYPE_TAGS));
+            l.add(TagTypes.ENTITY_TYPE, k -> new SpongeTagType<@NonNull EntityType<?>>("entity_types", RegistryTypes.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE_TAGS));
+            l.add(TagTypes.FLUID_TYPE, k -> new SpongeTagType<@NonNull FluidType>("fluids", RegistryTypes.FLUID_TYPE, RegistryTypes.FLUID_TYPE_TAGS));
+            l.add(TagTypes.ITEM_TYPE, k -> new SpongeTagType<@NonNull ItemType>("items", RegistryTypes.ITEM_TYPE, RegistryTypes.ITEM_TYPE_TAGS));
         });
     }
 

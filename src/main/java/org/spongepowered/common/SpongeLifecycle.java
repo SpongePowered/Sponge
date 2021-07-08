@@ -25,10 +25,12 @@
 package org.spongepowered.common;
 
 import co.aikar.timings.TimingsFactory;
+import co.aikar.timings.sponge.SpongeTimingsFactory;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
+import net.minecraft.core.Registry;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
@@ -54,7 +56,6 @@ import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.registry.SpongeRegistries;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
-import co.aikar.timings.sponge.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.server.permission.SpongeContextCalculator;
 import org.spongepowered.plugin.PluginContainer;
@@ -62,7 +63,6 @@ import org.spongepowered.plugin.PluginContainer;
 import java.nio.file.Path;
 import java.util.Collection;
 import java.util.stream.Collectors;
-import net.minecraft.core.Registry;
 
 @Singleton
 public final class SpongeLifecycle {

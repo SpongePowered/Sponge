@@ -83,6 +83,7 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
+import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.profile.SpongeGameProfileManager;

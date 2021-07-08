@@ -27,9 +27,16 @@ package org.spongepowered.common.mixin.api.minecraft.world.entity;
 import net.kyori.adventure.text.Component;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
+import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.tag.Tag;
+import org.spongepowered.api.tag.TagType;
+import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.util.TagUtil;
+
+import java.util.Collection;
 
 @Mixin(net.minecraft.world.entity.EntityType.class)
 public abstract class EntityTypeMixin_API<T extends Entity> implements EntityType<T> {
@@ -65,5 +72,15 @@ public abstract class EntityTypeMixin_API<T extends Entity> implements EntityTyp
     @Override
     public boolean isSummonable() {
         return this.shadow$canSummon();
+    }
+
+    @Override
+    public TagType<EntityType<?>> tagType() {
+        return TagTypes.ENTITY_TYPE.get();
+    }
+
+    @Override
+    public Collection<Tag<EntityType<?>>> tags() {
+        return TagUtil.getAssociatedTags(this, RegistryTypes.ENTITY_TYPE_TAGS);
     }
 }

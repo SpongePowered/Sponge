@@ -55,9 +55,12 @@ public abstract class WritableRegistryMixin_Vanilla<T> extends RegistryMixin_Van
 
     @Nullable
     @Override
-    public RegistryEntry<T> bridge$register(ResourceKey<T> key, T value, Lifecycle lifecycle) {
+    public RegistryEntry<T> bridge$register(final ResourceKey<T> key, final T value, final Lifecycle lifecycle) {
         this.shadow$register(key, value, lifecycle);
 
-        return ((RegistryBridge<T>) this).bridge$getEntries().get(key.location());
+        return ((RegistryBridge<T>) this)
+                .bridge$get((org.spongepowered.api.ResourceKey) (Object) key.location())
+                .orElse(null);
     }
+
 }

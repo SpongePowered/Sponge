@@ -99,7 +99,7 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
                     }
                     final SpongeBlockSnapshot original = snapshots.get(0);
                     final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
-                    final Operation operation = context.getBlockOperation(original, original.blockChange);
+                    final Operation operation = context.getBlockOperation(original, result);
                     final BlockTransactionReceipt eventTransaction = new BlockTransactionReceipt(original, result, operation);
                     return Optional.of(eventTransaction);
                 })
