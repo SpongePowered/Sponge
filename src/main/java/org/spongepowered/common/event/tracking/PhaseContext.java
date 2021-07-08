@@ -250,40 +250,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         return false;
     }
 
-    /**
-     * Gets the {@link List} of the <b>first</b> {@link BlockSnapshot}s that originally
-     * existed at their set {@link BlockPos block position} such that this list is not
-     * self updating and a copy of the parsed list. The reason for this to return
-     * a list of {@link SpongeBlockSnapshot}s is to handle the ability for
-     * {@link BlockChange} being ensured to be correct according to this context's
-     * {@link TransactionalCaptureSupplier}. It is intended that the returned list is not
-     * self updating, nor is it to be used as to "remove" blocks from being captured.
-     *
-     * <p>To mutate entries presented in the returned list, use {@link #getTransactor()}
-     * and methods available in {@link TransactionalCaptureSupplier} such as:
-     * <ul>
-     *     <li>{@link TransactionalCaptureSupplier#clear()} - To clear the captured lists</li>
-     *     <li>{@link TransactionalCaptureSupplier#reset()} to remove a block snapshot change</li>
-     * </ul>
-     * Provided functionality through the supplier is aimed for common manipulation in
-     * {@link IPhaseState}s and for the obvious reasons of capturing block changes, as long
-     * as {@code IPhaseState#shouldCaptureBlockChangeOrSkip(PhaseContext, BlockPos, IBlockState, IBlockState, org.spongepowered.api.world.BlockChangeFlag)} returns
-     * {@code true}.
-     *
-     * <p>If post phase processing requires constant updating of the list and/or intermediary
-     * {@link SpongeBlockSnapshot} changes to be pruned, it is advised to do so via
-     * a post state since internal tracked event transactions are not clearable.</p>
-     *
-     * @return A list of original block snapshots that are now changed
-     * @throws IllegalStateException If there is no capture supplier set up for this context
-     */
-    public List<SpongeBlockSnapshot> getCapturedOriginalBlocksChanged() throws IllegalStateException {
-        if (this.transactor == null) {
-            throw TrackingUtil.throwWithContext("Expected to be capturing blocks, but we're not capturing them!", this).get();
-        }
-        return Collections.emptyList();
-    }
-
     public TransactionalCaptureSupplier getTransactor() {
         if (this.transactor == null) {
             this.transactor = new TransactionalCaptureSupplier();
