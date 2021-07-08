@@ -37,7 +37,6 @@ public final class TickPhase {
 
         public static final IPhaseState<EntityTickContext> ENTITY = new EntityTickPhaseState();
 
-        public static final IPhaseState<DimensionContext> DIMENSION = new DimensionTickPhaseState();
         public static final IPhaseState<TileEntityTickContext> TILE_ENTITY = new TileEntityTickPhaseState();
         public static final IPhaseState<BlockEventTickContext> BLOCK_EVENT = new BlockEventTickPhaseState();
         public static final IPhaseState<PlayerTickContext> PLAYER = new PlayerTickPhaseState();
