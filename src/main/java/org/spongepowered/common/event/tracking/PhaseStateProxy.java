@@ -97,18 +97,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state is considered a "ticking" state. Specifically such that when
-     * {@link LevelChunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)} is used,
-     * we are not filtering any of the lists, whereas if this state is a ticking state, it will
-     * filter the proposed list of entities to supply any potentially captured entities.
-     *
-     * @return Whether this state is a ticking state or not
-     */
-    default boolean isTicking() {
-        return this.getState().isTicking();
-    }
-
-    /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place.
      *  @param blockChange The block change performed

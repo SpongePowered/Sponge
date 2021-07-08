@@ -137,18 +137,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state is considered a "ticking" state. Specifically such that when
-     * {@link LevelChunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)} is used,
-     * we are not filtering any of the lists, whereas if this state is a ticking state, it will
-     * filter the proposed list of entities to supply any potentially captured entities.
-     *
-     * @return Whether this state is a ticking state or not
-     */
-    default boolean isTicking() {
-        return false;
-    }
-
-    /**
      * The exit point of any phase. Every phase should have an unwinding
      * process where if anything is captured, events should be thrown and
      * processed accordingly. The outcome of each phase is dependent on
