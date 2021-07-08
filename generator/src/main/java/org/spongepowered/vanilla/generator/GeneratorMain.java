@@ -260,7 +260,7 @@ public final class GeneratorMain {
             new TagGenerator(
                     "BlockType Tags",
                     "BLOCK_TYPE_TAGS",
-                    BlockTags::getWrappers,
+                    BlockTags.class,
                     context.relativeClass("block", "BlockType"),
                     "tag",
                     "BlockTypeTags"
@@ -268,7 +268,7 @@ public final class GeneratorMain {
             new TagGenerator(
                     "ItemType Tags",
                     "ITEM_TYPE_TAGS",
-                    ItemTags::getWrappers,
+                    ItemTags.class,
                     context.relativeClass("item", "ItemType"),
                     "tag",
                     "ItemTypeTags"
@@ -276,7 +276,7 @@ public final class GeneratorMain {
             new TagGenerator(
                     "EntityType Tags",
                     "ENTITY_TYPE_TAGS",
-                    EntityTypeTags::getWrappers,
+                    EntityTypeTags.class,
                     ParameterizedTypeName.get(context.relativeClass("entity", "EntityType"), WildcardTypeName.subtypeOf(Object.class)),
                     "tag",
                     "EntityTypeTags"
@@ -284,7 +284,7 @@ public final class GeneratorMain {
             new TagGenerator(
                     "FluidType Tags",
                     "FLUID_TYPE_TAGS",
-                    FluidTags::getWrappers,
+                    FluidTags.class,
                     context.relativeClass("fluid", "FluidType"),
                     "tag",
                     "FluidTypeTags"

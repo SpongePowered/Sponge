@@ -30,10 +30,13 @@ import com.squareup.javapoet.MethodSpec;
 import com.squareup.javapoet.ParameterizedTypeName;
 import com.squareup.javapoet.TypeName;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.StaticTagHelper;
 import net.minecraft.tags.Tag;
+import net.minecraft.tags.TagCollection;
 
 import javax.lang.model.element.Modifier;
 import java.io.IOException;
+import java.lang.reflect.Field;
 import java.util.Comparator;
 import java.util.List;
 import java.util.function.Supplier;
@@ -44,28 +47,42 @@ public final class TagGenerator implements Generator {
 
     private final String registryName;
     private final String registryTypeName;
-    private final Supplier<List<? extends Tag.Named<?>>> tagSupplier;
+    private final Class<?> tagClass;
     private final TypeName typeName;
     private final String relativePackageName;
     private final String targetClassSimpleName;
+    private final Field helperField;
+    private final Field wrappersField;
 
     public TagGenerator(final String registryName,
                         final String registryTypeName,
-                        final Supplier<List<? extends Tag.Named<?>>> tagSupplier,
+                        final Class<?> tagClass,
                         final TypeName typeName,
                         final String relativePackageName,
                         final String targetClassSimpleName) {
         this.registryName = registryName;
         this.registryTypeName = registryTypeName;
-        this.tagSupplier = tagSupplier;
+        this.tagClass = tagClass;
         this.typeName = typeName;
         this.relativePackageName = relativePackageName;
         this.targetClassSimpleName = targetClassSimpleName;
+        try {
+            this.helperField = tagClass.getDeclaredField("HELPER");
+            this.helperField.setAccessible(true);
+        } catch (final NoSuchFieldException e) {
+            throw new RuntimeException("Could not get HELPER field for " + tagClass.getName(), e);
+        }
+        try {
+            this.wrappersField = StaticTagHelper.class.getDeclaredField("wrappers");
+            this.wrappersField.setAccessible(true);
+        } catch (final NoSuchFieldException e) {
+            throw new RuntimeException("Could not get wrappers field for StaticTagHelper", e);
+        }
     }
 
     @Override
     public String name() {
-        return "elements of tag registry " + registryName;
+        return "elements of tag registry " + this.registryName;
     }
 
     @Override
@@ -82,11 +99,20 @@ public final class TagGenerator implements Generator {
         final var fieldType = ParameterizedTypeName.get(Types.DEFAULTED_REGISTRY_REFERENCE, valueType);
         final var factoryMethod = TagGenerator.SCOPE.registryReferenceFactory(this.registryTypeName, valueType);
 
-        this.tagSupplier.get().stream()
-                .map(Tag.Named::getName)
-                .sorted(Comparator.naturalOrder())
-                .map(v -> this.makeField(this.targetClassSimpleName, fieldType, factoryMethod, v))
-                .forEachOrdered(clazz::addField);
+        try {
+            ((List<?>) this.wrappersField.get(this.helperField.get(null)))
+                    .stream()
+                    .<ResourceLocation>mapMulti((in, out) -> {
+                        if (in instanceof Tag.Named<?>) {
+                            out.accept(((Tag.Named<?>) in).getName());
+                        }
+                    })
+                    .sorted(Comparator.naturalOrder())
+                    .map(v -> this.makeField(this.targetClassSimpleName, fieldType, factoryMethod, v))
+                    .forEachOrdered(clazz::addField);
+        } catch (final IllegalAccessException e) {
+            throw new RuntimeException("Unable to generate fields for " + this.tagClass.getName(), e);
+        }
 
         clazz.addMethod(factoryMethod);
 
