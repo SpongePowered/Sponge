@@ -157,7 +157,7 @@ public final class TrackingUtil {
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
         try (
              final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingBridge) entity).bridge$timings()
+             final Timing entityTiming = ((TimingBridge) entity.getType()).bridge$timings()
              ) {
             entityTiming.startTiming();
             if (entity instanceof CreatorTrackedBridge) {
