@@ -27,6 +27,8 @@ package org.spongepowered.common.event.tracking.context.transaction;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.Deque;
+
 public class EffectTransactor implements AutoCloseable {
     final @Nullable ResultingTransactionBySideEffect previousEffect;
     final @Nullable GameTransaction<@NonNull ?> parent;
@@ -53,7 +55,11 @@ public class EffectTransactor implements AutoCloseable {
             && this.parent.sideEffects != null
             && this.parent.getEffects().peekLast() == this.effect
         ) {
-            this.parent.getEffects().removeLast();
+            final Deque<ResultingTransactionBySideEffect> effects = this.parent.getEffects();
+            effects.removeLast();
+            if (effects.isEmpty()) {
+                this.parent.sideEffects = null;
+            }
         }
         this.supplier.popEffect(this);
     }

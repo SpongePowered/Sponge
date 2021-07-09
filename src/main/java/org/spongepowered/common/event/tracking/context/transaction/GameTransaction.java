@@ -50,7 +50,7 @@ import java.util.function.BiConsumer;
 public abstract class GameTransaction<E extends Event & Cancellable> {
 
     private final TransactionType<? extends E> transactionType;
-    protected final ResourceKey worldKey;
+    final ResourceKey worldKey;
     boolean cancelled = false;
 
     // Children Definitions
@@ -81,6 +81,13 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
             this.sideEffects = new LinkedList<>();
         }
         return this.sideEffects;
+    }
+
+    public void addLast(final ResultingTransactionBySideEffect effect) {
+        if (this.sideEffects == null) {
+            this.sideEffects = new LinkedList<>();
+        }
+        this.sideEffects.addLast(effect);
     }
 
     public final boolean hasChildTransactions() {

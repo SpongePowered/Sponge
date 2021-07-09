@@ -123,7 +123,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             .orElse(Objects.requireNonNull(this.tail));
         final EffectTransactor effectTransactor = new EffectTransactor(effect, parentTransaction, this.effect, this);
         this.effect = effect;
-        parentTransaction.getEffects().addLast(effect);
+        parentTransaction.addLast(effect);
         return effectTransactor;
     }
 
