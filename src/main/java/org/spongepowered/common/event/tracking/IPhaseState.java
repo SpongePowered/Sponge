@@ -257,16 +257,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state is already capturing custom entity spawns from plugins.
-     * Examples include listener states, post states, or explosion states.
-     *
-     * @return True if entity spawns are already expected to be processed
-     */
-    default boolean alreadyCapturingEntitySpawns() {
-        return false;
-    }
-
-    /**
      * Gets whether this state is already expecting to capture or process changes from
      * entity ticks. Usually only used for Post states.
      *

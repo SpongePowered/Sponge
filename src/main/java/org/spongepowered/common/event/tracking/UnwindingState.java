@@ -66,11 +66,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
     }
 
     @Override
-    public boolean alreadyCapturingEntitySpawns() {
-        return true;
-    }
-
-    @Override
     public boolean alreadyCapturingEntityTicks() {
         return true;
     }

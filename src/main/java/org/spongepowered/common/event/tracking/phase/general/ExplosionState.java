@@ -84,11 +84,6 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     }
 
     @Override
-    public boolean alreadyCapturingEntitySpawns() {
-        return true;
-    }
-
-    @Override
     public void populateLootContext(final ExplosionContext phaseContext, final LootContext.Builder lootBuilder) {
         final Explosion explosion = phaseContext.getExplosion();
         lootBuilder.withOptionalParameter(LootContextParams.THIS_ENTITY, ((ExplosionAccessor) explosion).accessor$source());
