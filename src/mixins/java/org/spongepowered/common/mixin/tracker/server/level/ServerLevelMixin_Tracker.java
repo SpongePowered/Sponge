@@ -249,12 +249,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     private void tracker$wrapBlockRandomTick(final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn, final Random randomIn) {
         try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$timings()) {
             timing.startTiming();
-            final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-            if (context.alreadyCapturingBlockTicks()) {
-                blockState.randomTick(worldIn, posIn, this.random);
-            } else {
-                TrackingUtil.randomTickBlock(this, blockState, posIn, this.random);
-            }
+            TrackingUtil.randomTickBlock(this, blockState, posIn, this.random);
         }
     }
 
@@ -264,12 +259,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         )
     )
     private void tracker$wrapFluidRandomTick(final FluidState fluidState, final net.minecraft.world.level.Level worldIn, final BlockPos pos, final Random random) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-        if (context.alreadyCapturingBlockTicks()) {
-            fluidState.randomTick(worldIn, pos, this.random);
-        } else {
-            TrackingUtil.randomTickFluid(this, fluidState, pos, this.random);
-        }
+        TrackingUtil.randomTickFluid(this, fluidState, pos, this.random);
     }
 
     @Inject(

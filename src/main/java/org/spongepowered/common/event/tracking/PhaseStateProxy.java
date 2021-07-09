@@ -159,19 +159,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state is already capturing block tick changes, specifically in
-     * that some states (like post) will be smart enough to capture multiple changes for
-     * multiple block positions without the need to enter new phases. Currently gone unused
-     * since some refactor.
-     * // TODO - clean up usage? Find out where this came from and why it was used
-     *
-     * @return
-     */
-    default boolean alreadyCapturingBlockTicks() {
-        return this.getState().alreadyCapturingBlockTicks(this.asContext());
-    }
-
-    /**
      * Gets whether this state requires a post state entry for any captured objects. Usually
      * does not, get used uless this is already a post state, or an invalid packet state.
      * TODO - Investigate whether world generation states could use this.

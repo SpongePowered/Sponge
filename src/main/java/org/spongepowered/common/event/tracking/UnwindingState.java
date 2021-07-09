@@ -82,17 +82,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         }
     }
 
-    /**
-     * We want to allow the post state to do it's own thing and avoid entering extra states for block
-     * ticking from unwinds.
-     * @param context
-     * @return
-     */
-    @Override
-    public boolean alreadyCapturingBlockTicks(final UnwindingPhaseContext context) {
-        return true;
-    }
-
     private final String desc = TrackingUtil.phaseStateToString("General", this);
 
     @Override
