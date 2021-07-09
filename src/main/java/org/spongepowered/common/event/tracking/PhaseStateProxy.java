@@ -369,9 +369,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().shouldCreateWorldDirectories(this.asContext());
     }
 
-    default boolean isConvertingMaps() {
-        return this.getState().isConvertingMaps();
-    }
     default boolean allowsGettingQueuedRemovedTiles() {
         return this.getState().allowsGettingQueuedRemovedTiles();
     }
