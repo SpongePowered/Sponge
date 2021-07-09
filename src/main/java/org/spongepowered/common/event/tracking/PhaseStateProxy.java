@@ -369,10 +369,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().shouldCreateWorldDirectories(this.asContext());
     }
 
-    default boolean allowsGettingQueuedRemovedTiles() {
-        return this.getState().allowsGettingQueuedRemovedTiles();
-    }
-
     /**
      * Allows phases to be notified when an entity successfully teleports
      * between dimensions.

@@ -80,12 +80,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         return true;
     }
 
-    @Override
-    public boolean allowsGettingQueuedRemovedTiles() {
-        return true;
-    }
-
-
 
     @SuppressWarnings("unchecked")
     @Override
