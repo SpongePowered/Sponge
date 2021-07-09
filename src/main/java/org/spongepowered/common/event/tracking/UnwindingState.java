@@ -60,11 +60,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         return true;
     }
 
-    @Override
-    public boolean ignoresScheduledUpdates() {
-        return false;
-    }
-
 
     @SuppressWarnings("unchecked")
     @Override

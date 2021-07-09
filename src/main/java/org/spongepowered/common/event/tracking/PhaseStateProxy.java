@@ -170,18 +170,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state will need to perform any extra processing for
-     * scheduled block updates, specifically linking the block update event to
-     * the world, the state and possibly context. Usually only necessary for
-     * post states so that no extra processing takes place.
-     *
-     * @return False if scheduled block updates are normally processed
-     */
-    default boolean ignoresScheduledUpdates() {
-        return this.getState().ignoresScheduledUpdates();
-    }
-
-    /**
      * Gets whether this state is already capturing block tick changes, specifically in
      * that some states (like post) will be smart enough to capture multiple changes for
      * multiple block positions without the need to enter new phases. Currently gone unused

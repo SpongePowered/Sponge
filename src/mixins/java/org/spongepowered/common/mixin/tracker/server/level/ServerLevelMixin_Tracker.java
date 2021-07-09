@@ -205,11 +205,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/state/BlockState;tick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V"))
     private void tracker$wrapBlockTick(final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn, final Random randomIn, final TickNextTickData<Block> entry) {
-        final PhaseContext<@NonNull ?> currentContext = PhaseTracker.SERVER.getPhaseContext();
-        if (currentContext.alreadyCapturingBlockTicks() || currentContext.ignoresBlockUpdateTick()) {
-            blockState.tick(worldIn, posIn, randomIn);
-            return;
-        }
         if (((TickNextTickDataBridge) entry).bridge$isPartOfWorldGeneration()) {
             try (final PhaseContext<@NonNull ?> context = GenerationPhase.State.DEFERRED_SCHEDULED_UPDATE.createPhaseContext(PhaseTracker.SERVER)
                 .source(this)
