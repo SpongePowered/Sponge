@@ -65,11 +65,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         return false;
     }
 
-    @Override
-    public boolean alreadyCapturingEntityTicks() {
-        return true;
-    }
-
 
     @SuppressWarnings("unchecked")
     @Override

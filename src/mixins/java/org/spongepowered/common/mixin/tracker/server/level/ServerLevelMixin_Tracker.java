@@ -179,10 +179,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         final Timing entityTickTiming = ((TimingBridge) entity.getType()).bridge$timings();
         entityTickTiming.startTiming();
         final PhaseContext<@NonNull ?> currentState = PhaseTracker.SERVER.getPhaseContext();
-        if (currentState.alreadyCapturingEntityTicks()) {
-            this.shadow$guardEntityTick(entityUpdateConsumer, entity);
-            return;
-        }
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);
         entityTickTiming.stopTiming();
     }

@@ -195,16 +195,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state is already expecting to capture or process changes from
-     * entity ticks. Usually only used for Post states.
-     *
-     * @return True if entity tick processing is already handled in this state
-     */
-    default boolean alreadyCapturingEntityTicks() {
-        return this.getState().alreadyCapturingEntityTicks();
-    }
-
-    /**
      * Gets whether this state requires a post state entry for any captured objects. Usually
      * does not, get used uless this is already a post state, or an invalid packet state.
      * TODO - Investigate whether world generation states could use this.
