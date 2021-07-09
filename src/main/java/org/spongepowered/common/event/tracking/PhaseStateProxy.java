@@ -159,17 +159,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state will already consider any captures or extra processing for a
-     * {@link Block#tick(BlockState, net.minecraft.world.level.Level, BlockPos, Random)}. Again usually
-     * considered for world generation or post states or block restorations.
-     *
-     * @return True if it's going to be ignored
-     */
-    default boolean ignoresBlockUpdateTick() {
-        return this.getState().ignoresBlockUpdateTick(this.asContext());
-    }
-
-    /**
      * Gets whether this state is already capturing block tick changes, specifically in
      * that some states (like post) will be smart enough to capture multiple changes for
      * multiple block positions without the need to enter new phases. Currently gone unused

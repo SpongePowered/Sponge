@@ -61,11 +61,6 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> exten
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(final G context) {
-        return true;
-    }
-
-    @Override
     public boolean allowsEventListener() {
         return false;
     }

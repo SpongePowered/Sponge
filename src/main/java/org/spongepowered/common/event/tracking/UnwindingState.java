@@ -55,11 +55,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         return false;
     }
 
-    @Override
-    public boolean ignoresBlockUpdateTick(final UnwindingPhaseContext context) {
-        return true;
-    }
-
 
     @SuppressWarnings("unchecked")
     @Override

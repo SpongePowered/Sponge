@@ -44,11 +44,6 @@ public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericG
     }
 
     @Override
-    public boolean ignoresBlockUpdateTick(final GenericGenerationContext context) {
-        return false;
-    }
-
-    @Override
     public Supplier<SpawnType> getSpawnTypeForTransaction(
         final GenericGenerationContext context, final Entity entityToSpawn
     ) {
