@@ -141,6 +141,8 @@ val mixins by sourceSets.registering {
 }
 
 dependencies {
+    val forgeFlowerVersion: String by project
+
     // api
     api("org.spongepowered:spongeapi:$apiVersion")
 
@@ -205,7 +207,7 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
     // Decompiler
-    forgeFlower("net.minecraftforge:forgeflower:1.5.498.12")
+    forgeFlower("net.minecraftforge:forgeflower:$forgeFlowerVersion")
 }
 
 val organization: String by project

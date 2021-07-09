@@ -200,6 +200,7 @@ dependencies {
     val apiAdventureVersion: String by project
     val apiConfigurateVersion: String by project
     val asmVersion: String by project
+    val forgeFlowerVersion: String by project
     val guavaVersion: String by project
     val jlineVersion: String by project
     val jansiVersion: String by project
@@ -305,7 +306,7 @@ dependencies {
     }
 
     // Decompiler
-    forgeFlower("net.minecraftforge:forgeflower:1.5.498.12")
+    forgeFlower("net.minecraftforge:forgeflower:$forgeFlowerVersion")
 }
 
 val vanillaManifest = the<JavaPluginConvention>().manifest {
