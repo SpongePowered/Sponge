@@ -24,14 +24,18 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
+import co.aikar.timings.Timing;
+import co.aikar.timings.sponge.SpongeTimings;
 import net.minecraft.core.Registry;
 import net.minecraft.world.level.block.entity.BlockEntityType;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
+import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityTypeBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
@@ -41,10 +45,11 @@ import org.spongepowered.common.config.tracker.TrackerConfig;
 import org.spongepowered.plugin.PluginContainer;
 
 @Mixin(BlockEntityType.class)
-public abstract class BlockEntityTypeMixin implements ResourceKeyBridge, BlockEntityTypeBridge {
+public abstract class BlockEntityTypeMixin implements ResourceKeyBridge, BlockEntityTypeBridge, TimingBridge {
 
-    private ResourceKey impl$key;
+    private @Nullable ResourceKey impl$key;
     private boolean impl$canTick;
+    private @Nullable Timing impl$timing;
 
     @Redirect(method = "register",
         at = @At(
@@ -113,5 +118,13 @@ public abstract class BlockEntityTypeMixin implements ResourceKeyBridge, BlockEn
     @Override
     public boolean bridge$setCanTick(final boolean canTick) {
         return this.impl$canTick = canTick;
+    }
+
+    @Override
+    public Timing bridge$timings() {
+        if (this.impl$timing == null) {
+            this.impl$timing = SpongeTimings.blockEntityTiming((BlockEntityType<?>) (Object) this);
+        }
+        return this.impl$timing;
     }
 }

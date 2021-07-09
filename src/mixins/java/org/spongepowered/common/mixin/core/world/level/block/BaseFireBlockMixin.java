@@ -56,8 +56,8 @@ public abstract class BaseFireBlockMixin extends BlockMixin {
         }
         try {
             final ServerLocation location = ServerLocation.of((ServerWorld) world, blockPos.getX(), blockPos.getY(), blockPos.getZ());
-            final MinecraftBlockDamageSource fire = new MinecraftBlockDamageSource("inFire", location);
-            ((DamageSourceBridge) (Object) fire).bridge$setFireSource();
+            final DamageSource fire = MinecraftBlockDamageSource.ofFire("inFire", location, true);
+            ((DamageSourceBridge) fire).bridge$setFireSource();
             return self.hurt(DamageSource.IN_FIRE, damage);
         } finally {
             // Since "source" is already the DamageSource.IN_FIRE object, we can re-use it to re-assign.

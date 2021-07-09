@@ -114,7 +114,7 @@ public final class TrackingUtil {
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
         try (final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
+             final Timing entityTiming = ((TimingBridge) entity.getType()).bridge$timings()
         ) {
             if (entity instanceof CreatorTrackedBridge) {
                 ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
@@ -139,12 +139,11 @@ public final class TrackingUtil {
 
     private static Optional<net.minecraft.world.level.block.entity.BlockEntity> getTickingBlockEntity(
         final TickingBlockEntity ticker) {
-        final net.minecraft.world.level.block.entity.BlockEntity tickingBlockEntity;
-        if (ticker instanceof LevelChunk$BoundTickingBlockEntityAccessor) {
-            return Optional.of(((LevelChunk$BoundTickingBlockEntityAccessor) ticker).accessor$blockEntity());
-        } else if (ticker instanceof LevelChunk$RebindableTickingBlockEntityWrapperAccessor) {
-            return getTickingBlockEntity(((LevelChunk$RebindableTickingBlockEntityWrapperAccessor) ticker).accessor$ticker());
-        } else if (ticker == LevelChunkAccessor.accessor$NULL_TICKER()){
+        if (ticker instanceof LevelChunk$BoundTickingBlockEntityAccessor beAccessor) {
+            return Optional.of(beAccessor.accessor$blockEntity());
+        } else if (ticker instanceof LevelChunk$RebindableTickingBlockEntityWrapperAccessor beAccessor) {
+            return getTickingBlockEntity(beAccessor.accessor$ticker());
+        } else if (ticker == LevelChunkAccessor.accessor$NULL_TICKER()) {
             return Optional.empty();
         }
         return Optional.empty();
@@ -183,7 +182,7 @@ public final class TrackingUtil {
             // Finally, switch the context now that we have the owner and notifier
             phaseContext.buildAndSwitch();
 
-            try (final Timing timing = ((TimingBridge) blockEntity).bridge$getTimingsHandler().startTiming()) {
+            try (final Timing timing = ((TimingBridge) blockEntity.getType()).bridge$timings().startTiming()) {
                 PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_ENTITY_TICK, () -> "Wrapping Entity Tick: " + tile.toString());
                 tile.tick();
             }
@@ -219,7 +218,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
 
         try (final PhaseContext<@NonNull ?> context = phaseContext;
-             final Timing timing = ((TimingBridge) block.getBlock()).bridge$getTimingsHandler()) {
+             final Timing timing = ((TimingBridge) block.getBlock()).bridge$timings()) {
             timing.startTiming();
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, () -> "Wrapping Block Tick: " + block.toString());
@@ -257,7 +256,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
 
         try (final PhaseContext<?> context = phaseContext;
-            final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
+            final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$timings()) {
             timing.startTiming();
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.FLUID_TICK, () -> "Wrapping Fluid Tick: " + fluidState.toString());

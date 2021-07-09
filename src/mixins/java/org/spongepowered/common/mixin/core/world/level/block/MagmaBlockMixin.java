@@ -29,6 +29,7 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.MagmaBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
@@ -49,12 +50,11 @@ public abstract class MagmaBlockMixin extends BlockMixin {
             target = "Lnet/minecraft/world/entity/Entity;hurt(Lnet/minecraft/world/damagesource/DamageSource;F)Z"
         )
     )
-    private boolean impl$swapDamageSourceForMagma(Entity entity, DamageSource source, float damage, Level world, BlockPos pos, Entity original) {
+    private boolean impl$swapDamageSourceForMagma(Entity entity, DamageSource source, float damage, Level world, BlockPos pos, BlockState state, Entity original) {
         if (!world.isClientSide) {
             try {
                 final ServerLocation location = ServerLocation.of((ServerWorld) world, pos.getX(), pos.getY(), pos.getZ());
-                final MinecraftBlockDamageSource hotFloor = new MinecraftBlockDamageSource("hotFloor", location);
-                ((DamageSourceAccessor) (Object) hotFloor).invoker$setIsFire();
+                final DamageSource hotFloor = MinecraftBlockDamageSource.ofFire("hotFloor", location, false);
                 ((DamageSourceBridge) (Object) hotFloor).bridge$setHotFloorSource();
                 return entity.hurt(DamageSource.HOT_FLOOR, damage);
             } finally {

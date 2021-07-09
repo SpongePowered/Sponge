@@ -38,6 +38,7 @@ import net.kyori.adventure.text.event.ClickEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.serializer.plain.PlainTextComponentSerializer;
 import net.minecraft.core.Registry;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -198,10 +199,12 @@ class TimingsExport extends Thread {
         // Information about loaded plugins
 
         builder.add("plugins", JSONUtil.mapArrayToObject(SpongeCommon.game().pluginManager().plugins(), (plugin) -> {
+            final @Nullable URL homepageUrl = plugin.metadata().links().homepage().orElse(null);
+            final String homepage = homepageUrl != null ? homepageUrl.toString() : "<not specified>";
             return JSONUtil.objectBuilder().add(plugin.metadata().id(), JSONUtil.objectBuilder()
                     .add("version", plugin.metadata().version())
                     .add("description", plugin.metadata().description().orElse(""))
-                    .add("website", plugin.metadata().links().homepage())
+                    .add("website", homepage)
                     .add("authors", TimingsExport.AUTHOR_LIST_JOINER.join(plugin.metadata().contributors()))
             ).build();
         }));

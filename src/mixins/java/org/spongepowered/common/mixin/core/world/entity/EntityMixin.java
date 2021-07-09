@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
-import co.aikar.timings.Timing;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.CommandSourceStack;
@@ -90,7 +89,6 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
@@ -130,7 +128,7 @@ import java.util.Optional;
 import java.util.Random;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, TimingBridge, CommandSourceProviderBridge, DataCompoundHolder {
+public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder {
 
     // @formatter:off
     @Shadow public net.minecraft.world.level.Level level;
@@ -416,11 +414,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         } else {
             ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH_PREVENTS_TARGETING);
         }
-    }
-
-    @Override
-    public Timing bridge$getTimingsHandler() {
-        return ((EntityTypeBridge) this.shadow$getType()).bridge$getTimings();
     }
 
     @Override
@@ -854,8 +847,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             final AABB bb = this.shadow$getBoundingBox().inflate(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             final ServerLocation location = DamageEventUtil.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getMaterial() == Material.LAVA);
-            final MinecraftBlockDamageSource lava = new MinecraftBlockDamageSource("lava", location);
-            ((DamageSourceBridge) (Object) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
+            final DamageSource lava = MinecraftBlockDamageSource.ofFire("lava", location, false);
+            ((DamageSourceBridge) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
             return entity.hurt(DamageSource.LAVA, damage);
         } finally {
             // Since "source" is already the DamageSource.LAVA object, we can simply re-use it here.
