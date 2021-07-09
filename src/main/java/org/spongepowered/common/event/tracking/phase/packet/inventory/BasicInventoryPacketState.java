@@ -123,12 +123,6 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Override
-    public boolean shouldCaptureEntity() {
-        // Example: Furnaces dropping XP when an item is picked up
-        return true;
-    }
-
-    @Override
     public InventoryPacketContext createNewContext(final PhaseTracker tracker) {
         return new InventoryPacketContext(this, tracker);
     }

@@ -120,6 +120,7 @@ import org.spongepowered.common.event.tracking.context.transaction.pipeline.Pipe
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.TileEntityPipeline;
 import org.spongepowered.common.event.tracking.context.transaction.pipeline.WorldPipeline;
 import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.mixin.tracker.world.level.LevelMixin_Tracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -288,6 +289,35 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         } else {
             TrackingUtil.randomTickFluid(this, fluidState, pos, this.random);
         }
+    }
+
+    @Inject(
+        method = "tickChunk",
+        at = @At(
+            value = "INVOKE_STRING",
+            target = "Lnet/minecraft/util/profiling/ProfilerFiller;push(Ljava/lang/String;)V",
+            args = "ldc=thunder"
+        )
+    )
+    private void tracker$startWeatherTickPhase(final LevelChunk param0, final int param1, final CallbackInfo ci) {
+        TickPhase.Tick.WEATHER.createPhaseContext(PhaseTracker.SERVER)
+            .buildAndSwitch();
+    }
+
+    @Inject(
+        method = "tickChunk",
+        at = @At(
+            value = "INVOKE_STRING",
+            target = "Lnet/minecraft/util/profiling/ProfilerFiller;popPush(Ljava/lang/String;)V",
+            args = "ldc=tickBlocks"
+        )
+    )
+    private void tracker$closeWeatherTickPhase(final LevelChunk param0, final int param1, final CallbackInfo ci) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        if (context.getState() != TickPhase.Tick.WEATHER) {
+            throw new IllegalStateException("Expected to be in a Weather ticking state, but we aren't.");
+        }
+        context.close();
     }
 
     @Redirect(method = "doBlockEvent",

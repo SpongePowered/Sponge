@@ -73,12 +73,8 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     @Override
     public void unwind(final InventoryPacketContext context) {
         final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
-        //final ItemStack usedStack = context.getItemUsed();
-        //final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
         final Entity spongePlayer = (Entity) player;
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(spongePlayer);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
 
             TrackingUtil.processBlockCaptures(context);
             { // TODO - figure this out with transactions

@@ -140,14 +140,6 @@ public final class EntityUtil {
         // Sponge End
     }
 
-    public static boolean isEntityDead(final net.minecraft.world.entity.Entity entity) {
-        if (entity instanceof LivingEntity) {
-            final LivingEntity base = (LivingEntity) entity;
-            return base.getHealth() <= 0 || base.deathTime > 0 || ((LivingEntityAccessor) entity).accessor$dead();
-        }
-        return entity.removed;
-    }
-
     public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<User>> entityCreatorSupplier) {
         boolean spawnedAny = false;
         for (final org.spongepowered.api.entity.Entity entity : event.entities()) {

@@ -173,4 +173,9 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
     boolean acceptDrops(final PrepareBlockDropsTransaction transaction) {
         return false;
     }
+
+    boolean shouldBuildEventAndRestartBatch(final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context) {
+        return this.getTransactionType() != pointer.getTransactionType()
+            || !this.worldKey.equals(pointer.worldKey);
+    }
 }

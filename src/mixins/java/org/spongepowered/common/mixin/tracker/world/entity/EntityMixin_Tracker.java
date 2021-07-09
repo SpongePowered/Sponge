@@ -88,7 +88,9 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Shadow protected abstract void shadow$reapplyPosition();
     @Shadow public abstract double shadow$getEyeY();
     @Shadow public abstract double shadow$getX();
+    @Shadow public abstract double shadow$getY();
     @Shadow public abstract double shadow$getZ();
+    @Shadow public abstract void shadow$remove();
     private boolean tracker$trackedInWorld = false;
     @Nullable private Cause tracker$destructCause;
     //@formatter:on
@@ -118,7 +120,6 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
 //        }
 //    }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Inject(
         method = "spawnAtLocation(Lnet/minecraft/world/item/ItemStack;F)Lnet/minecraft/world/entity/item/ItemEntity;",
         at = @At("HEAD")
@@ -242,8 +243,12 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     }
 
     @Override
-    public void populateFrameModifier(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
+    public void tracker$populateFrameInTickContext(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
+        this.tracker$populateDeathContextIfNeeded(frame, context);
+    }
 
+    protected void tracker$populateDeathContextIfNeeded(final CauseStackManager.StackFrame frame,
+        final EntityTickContext context) {
     }
 
     @Inject(method = "remove", at = @At(value = "RETURN"))

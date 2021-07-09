@@ -25,9 +25,13 @@
 package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -38,6 +42,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
     private final BiConsumer<CauseStackManager.StackFrame, TileEntityTickContext> TILE_ENTITY_MODIFIER =
@@ -64,16 +69,18 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                 .locatableBlock();
     }
 
-    @SuppressWarnings("unchecked")
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final TileEntityTickContext context, final Entity entityToSpawn
+    ) {
+        return context.requireSource(net.minecraft.world.level.block.entity.BlockEntity.class) instanceof SpawnerBlockEntity
+            ? SpawnTypes.MOB_SPAWNER
+            : SpawnTypes.BLOCK_SPAWNING;
+    }
+
     @Override
     public void unwind(final TileEntityTickContext context) {
-        final BlockEntity tickingTile = context.getSource(BlockEntity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(tickingTile.locatableBlock());
-            TrackingUtil.processBlockCaptures(context);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-        }
+        TrackingUtil.processBlockCaptures(context);
     }
 
     @Override

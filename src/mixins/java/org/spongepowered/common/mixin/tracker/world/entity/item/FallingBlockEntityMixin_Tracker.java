@@ -25,12 +25,11 @@
 package org.spongepowered.common.mixin.tracker.world.entity.item;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Blocks;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -40,13 +39,18 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.common.mixin.tracker.world.entity.EntityMixin_Tracker;
 
 @Mixin(FallingBlockEntity.class)
-public abstract class FallingBlockEntityMixin_Tracker extends Entity {
+public abstract class FallingBlockEntityMixin_Tracker extends EntityMixin_Tracker {
 
-
-    public FallingBlockEntityMixin_Tracker(EntityType<?> entityTypeIn, Level worldIn) {
-        super(entityTypeIn, worldIn);
+    @Override
+    public void tracker$populateFrameInTickContext(
+        final CauseStackManager.StackFrame frame, final EntityTickContext context
+    ) {
+        context.getCreator().ifPresent(frame::pushCause);
+        super.tracker$populateFrameInTickContext(frame, context);
     }
 
     /**
@@ -80,7 +84,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
             cancellable = true
     )
     private void tracker$handleBlockCapture(final CallbackInfo ci) {
-        final BlockPos pos = new BlockPos(this.getX(), this.getY(), this.getZ());
+        final BlockPos pos = new BlockPos(this.shadow$getX(), this.shadow$getY(), this.shadow$getZ());
         // So, there's two cases here: either the world is not cared for, or the
         // ChangeBlockEvent is not being listened to. If it's not being listened to,
         // we need to specifically just proceed as normal.
@@ -99,7 +103,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
             if (!TrackingUtil.processBlockCaptures(currentContext)) {
                 // So, it's been cancelled, we want to absolutely remove this entity.
                 // And we want to stop the entity update at this point.
-                this.remove();
+                this.shadow$remove();
                 ci.cancel();
             }
 
@@ -110,7 +114,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends Entity {
             // that means that single event was cancelled, so, the block needs to remain
             // and this entity needs to die.
         } else if (this.level.getBlockState(pos) != Blocks.AIR.defaultBlockState()) {
-            this.remove();
+            this.shadow$remove();
             ci.cancel();
         }
     }

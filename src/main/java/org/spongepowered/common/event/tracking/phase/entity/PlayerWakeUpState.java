@@ -36,8 +36,6 @@ final class PlayerWakeUpState extends EntityPhaseState<BasicEntityContext> {
 
     @Override
     public void unwind(final BasicEntityContext context) {
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);
     }
 }

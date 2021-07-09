@@ -22,36 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.generation;
+package org.spongepowered.common.mixin.tracker.world.entity.animal;
 
-import org.spongepowered.api.event.cause.entity.SpawnType;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
+import org.spongepowered.common.mixin.tracker.world.entity.LivingEntityMixin_Tracker;
 
-import net.minecraft.world.entity.Entity;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.animal.Animal;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.function.Supplier;
+@Mixin(Animal.class)
+public abstract class AnimalMixin_Tracker extends LivingEntityMixin_Tracker {
 
-public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericGenerationContext> {
-
-    public WorldSpawnerPhaseState() {
-        super("WORLD_SPAWNER_SPAWNING");
-    }
-
-    @Override
-    public GenericGenerationContext createNewContext(final PhaseTracker tracker) {
-        return new GenericGenerationContext(this, tracker);
-    }
-
-    @Override
-    public boolean ignoresBlockUpdateTick(final GenericGenerationContext context) {
-        return false;
-    }
+    //@formatter:off
+    @Shadow public abstract @Nullable ServerPlayer shadow$getLoveCause();
+    //@formatter:on
 
     @Override
-    public Supplier<SpawnType> getSpawnTypeForTransaction(
-        final GenericGenerationContext context, final Entity entityToSpawn
+    public void tracker$populateFrameInTickContext(
+        final CauseStackManager.StackFrame frame, final EntityTickContext context
     ) {
-        return SpawnTypes.WORLD_SPAWNER;
+        final ServerPlayer serverPlayer = this.shadow$getLoveCause();
+        if (serverPlayer != null) {
+            frame.addContext(EventContextKeys.PLAYER, (Player) serverPlayer);
+        }
+        super.tracker$populateFrameInTickContext(frame, context);
     }
 }

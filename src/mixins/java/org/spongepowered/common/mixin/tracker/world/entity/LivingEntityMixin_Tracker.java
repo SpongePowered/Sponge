@@ -24,16 +24,23 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity;
 
+import net.minecraft.world.damagesource.CombatEntry;
 import org.checkerframework.checker.nullness.qual.NonNull;
+
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
+import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 import javax.annotation.Nullable;
 import net.minecraft.world.InteractionHand;
@@ -63,7 +70,28 @@ public abstract class LivingEntityMixin_Tracker extends EntityMixin_Tracker {
     @Shadow public abstract boolean shadow$isEffectiveAi();
     @Shadow public abstract void shadow$swing(InteractionHand p_184609_1_);
     @Shadow protected abstract void shadow$pushEntities();
+    @Shadow public abstract float shadow$getHealth();
+    @Shadow public int deathTime;
     // @formatter:on
+
+    @Override
+    protected void tracker$populateDeathContextIfNeeded(
+        final CauseStackManager.StackFrame frame, final EntityTickContext context
+    ) {
+        if (!(this.shadow$getHealth() <= 0) && this.deathTime<=0 && !this.dead) {
+            return;
+        }
+        final CombatEntry entry = ((CombatTrackerAccessor) this.shadow$getCombatTracker()).invoker$getMostSignificantFall();
+        if (entry != null) {
+            final DamageSource source = ((CombatEntryAccessor) entry).accessor$source();
+            if (source != null) {
+                frame.addContext(
+                    EventContextKeys.LAST_DAMAGE_SOURCE,
+                    (org.spongepowered.api.event.cause.entity.damage.source.DamageSource) source
+                );
+            }
+        }
+    }
 
     /**
      * @author i509VCB

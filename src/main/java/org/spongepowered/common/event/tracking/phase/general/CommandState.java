@@ -26,6 +26,7 @@ package org.spongepowered.common.event.tracking.phase.general;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
@@ -34,6 +35,8 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -49,6 +52,7 @@ import org.spongepowered.common.world.BlockChange;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 final class CommandState extends GeneralState<CommandPhaseContext> {
 
@@ -109,4 +113,10 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         TrackingUtil.processBlockCaptures(phaseContext);
     }
 
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final CommandPhaseContext context, final Entity entityToSpawn
+    ) {
+        return SpawnTypes.PLACEMENT;
+    }
 }

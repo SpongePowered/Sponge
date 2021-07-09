@@ -20,6 +20,7 @@
         "util.thread.BlockableEventLoopMixin_Tracker",
         "world.entity.EntityMixin_Tracker",
         "world.entity.LivingEntityMixin_Tracker",
+        "world.entity.animal.AnimalMixin_Tracker",
         "world.entity.item.FallingBlockEntityMixin_Tracker",
         "world.entity.item.PrimedTntMixin_Tracker",
         "world.entity.player.InventoryMixin_Tracker",

@@ -89,18 +89,26 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
         final @Nullable GameTransaction<@NonNull ?> parent
     ) {
-        if (parent instanceof ChangeBlock) {
-            return Optional.of(((phaseContext, stackFrame) -> {
-                stackFrame.pushCause(((ChangeBlock) parent).original);
-                stackFrame.addContext(EventContextKeys.BLOCK_TARGET, ((ChangeBlock) parent).original);
-            }));
-        }
-        return Optional.empty();
+        return Optional.of((context, frame) -> {
+            if (parent instanceof ChangeBlock) {
+                frame.pushCause(((ChangeBlock) parent).original);
+                frame.addContext(EventContextKeys.BLOCK_TARGET, ((ChangeBlock) parent).original);
+            }
+            frame.addContext(EventContextKeys.SPAWN_TYPE, this.deducedSpawnType);
+        });
     }
 
     @Override
     public void addToPrinter(final PrettyPrinter printer) {
 
+    }
+
+    @Override
+    boolean shouldBuildEventAndRestartBatch(
+        final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context
+    ) {
+        return super.shouldBuildEventAndRestartBatch(pointer, context)
+            || this.deducedSpawnType != ((SpawnEntityTransaction) pointer).deducedSpawnType;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

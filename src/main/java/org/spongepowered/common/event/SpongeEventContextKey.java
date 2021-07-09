@@ -29,6 +29,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.EventContextKey;
 
 import java.lang.reflect.Type;
+import java.util.StringJoiner;
 
 public final class SpongeEventContextKey<T> implements EventContextKey<T> {
 
@@ -59,5 +60,13 @@ public final class SpongeEventContextKey<T> implements EventContextKey<T> {
     @Override
     public T cast(final Object value) {
         return (T) value;
+    }
+
+    @Override
+    public String toString() {
+        return new StringJoiner(", ", "EventContextKey[", "]")
+            .add("key=" + this.key)
+            .add("allowed=" + this.allowed)
+            .toString();
     }
 }

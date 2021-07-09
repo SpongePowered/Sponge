@@ -26,11 +26,13 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
@@ -41,6 +43,7 @@ import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
@@ -98,10 +101,14 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     @Override
     public void unwind(final BlockEventTickContext context) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-            TrackingUtil.processBlockCaptures(context);
-        }
+        TrackingUtil.processBlockCaptures(context);
+    }
+
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final BlockEventTickContext context, final Entity entityToSpawn
+    ) {
+        return SpawnTypes.CUSTOM;
     }
 
     @Override

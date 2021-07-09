@@ -24,11 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.item.SpawnEggItem;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.data.type.HandType;
@@ -45,7 +40,6 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -55,13 +49,20 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
-import java.util.function.BiConsumer;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundUseItemOnPacket;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.item.SpawnEggItem;
 
-@SuppressWarnings("unchecked")
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+
 public final class PlaceBlockPacketState extends BasicPacketState {
 
-    private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER =
-            ((BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER)
+    private final BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER =
+            super.getFrameModifier()
                     .andThen((frame, ctx) -> {
                         frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().world());
                         frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
@@ -110,19 +111,20 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         blockEvent.bridge$setSourceUser(((ServerPlayer)player).user());
     }
 
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final BasicPacketContext context, final Entity entityToSpawn
+    ) {
+        final ItemStack itemStack = context.getItemUsed();
+        return itemStack.type() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT;
+    }
+
     @SuppressWarnings("ConstantConditions")
     @Override
     public void unwind(final BasicPacketContext context) {
         final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
         final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = context.getItemUsedSnapshot();
-//        context.getCapturedEntitySupplier()
-//            .acceptAndClearIfNotEmpty(entities -> {
-//                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-//                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.SPAWN_EGG);
-//                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
-//                }
-//            });
         // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
         // Swap the items used, the item used is what we want to "restore" it to the player
         final InteractionHand hand = (InteractionHand) (Object) context.getHandUsed();
@@ -137,16 +139,6 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
         trackedInventory.bridge$setCaptureInventory(false);
         trackedInventory.bridge$getCapturedSlotTransactions().clear();
-    }
-
-    @Override
-    public SpawnType getEntitySpawnType(final BasicPacketContext context) {
-        if (context.getItemUsed().type() instanceof SpawnEggItem) {
-            return SpawnTypes.SPAWN_EGG.get();
-        }
-        // Some other items directly cause entities to be spawned, such as
-        // ender crystals. Default to PLACEMENT for those.
-        return SpawnTypes.PLACEMENT.get();
     }
 
 }
