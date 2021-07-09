@@ -359,17 +359,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     /**
-     * When false, prevents directories from being created during the creation
-     * of an {@link }. Used
-     * for {@link SerializationBehavior#NONE}.
-     *
-     * @return True if directories can be created; false otherwise
-     */
-    default boolean shouldCreateWorldDirectories() {
-        return this.getState().shouldCreateWorldDirectories(this.asContext());
-    }
-
-    /**
      * Allows phases to be notified when an entity successfully teleports
      * between dimensions.
      *

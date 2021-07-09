@@ -437,18 +437,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * When false, prevents directories from being created during the creation
-     * of an {@link net.minecraft.world.chunk.storage.AnvilSaveHandler}. Used
-     * for {@link SerializationBehavior#NONE}.
-     *
-     * @param phaseContext The appropriate phase context
-     * @return True if directories can be created; false otherwise
-     */
-    default boolean shouldCreateWorldDirectories(final C phaseContext) {
-        return true;
-    }
-
-    /**
      * Allows phases to be notified when an entity successfully teleports
      * between dimensions.
      *
