@@ -838,8 +838,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             final AABB bb = this.shadow$getBoundingBox().inflate(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             final ServerLocation location = DamageEventUtil.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
                 block.getMaterial() == Material.LAVA);
-            final MinecraftBlockDamageSource lava = new MinecraftBlockDamageSource("lava", location);
-            ((DamageSourceBridge) (Object) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
+            final DamageSource lava = MinecraftBlockDamageSource.ofFire("lava", location, false);
+            ((DamageSourceBridge) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
             return entity.hurt(DamageSource.LAVA, damage);
         } finally {
             // Since "source" is already the DamageSource.LAVA object, we can simply re-use it here.
