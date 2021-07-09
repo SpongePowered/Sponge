@@ -211,10 +211,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract void shadow$setXRot(final float param0);
     @Shadow protected abstract Vec3 shadow$collide(Vec3 param0);
     @Shadow protected abstract boolean shadow$fireImmune();
-    // @formatter:on
 
     @Shadow protected String stringUUID;
     @Shadow private int remainingFireTicks;
+    // @formatter:on
+
     private boolean impl$isConstructing = true;
     private boolean impl$vanishPreventsTargeting = false;
     private boolean impl$isVanished = false;

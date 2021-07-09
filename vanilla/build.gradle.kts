@@ -129,10 +129,19 @@ minecraft {
         // Full development environment
         server("runServer") {
             args("--nogui", "--launchTarget", "sponge_server_dev")
+            jvmArgs(
+                "-Dmixin.debug.verbose=true",
+                "-Dmixin.debug.checks=true",
+                "-Dmixin.debug.export=true",
+            )
         }
         client("runClient") {
             args("--launchTarget", "sponge_client_dev")
-            // jvmArgs("-Dmixin.debug.export=true", "-Dmixin.debug=true")
+            jvmArgs(
+                "-Dmixin.debug.verbose=true",
+                "-Dmixin.debug.checks=true",
+                "-Dmixin.debug.export=true",
+            )
         }
 
         // Lightweight integration tests
@@ -150,7 +159,10 @@ minecraft {
                 // IntelliJ does not properly report its compatibility
                 jvmArgs("-Dterminal.ansi=true", "-Djansi.mode=force")
             }
-            jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml", "-Dmixin.dumpTargetOnFailure=true")
+            jvmArgs(
+                "-Dlog4j.configurationFile=log4j2_dev.xml",
+                "-Dmixin.dumpTargetOnFailure=true",
+            )
             allArgumentProviders += CommandLineArgumentProvider {
                 mixinConfigs.asSequence()
                         .flatMap { sequenceOf("--mixin.config", it) }

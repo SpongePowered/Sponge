@@ -72,6 +72,18 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
         }
     }
 
+    /**
+     * To avoid a loop between kill() and hurt(), we make sure that any killing
+     * within the hurt() method calls remove() directly, rather than using kill(),
+     * which is overridden by us to call back to hurt().
+     *
+     * @param target the killed stand
+     */
+    @Redirect(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill()V"))
+    private void impl$actuallyKill(final ArmorStand target) {
+        target.remove(net.minecraft.world.entity.Entity.RemovalReason.KILLED);
+    }
+
     @Inject(method = "hurt",
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/damagesource/DamageSource;OUT_OF_WORLD:Lnet/minecraft/world/damagesource/DamageSource;")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;kill()V", ordinal = 0),
@@ -139,7 +151,8 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
     /**
      * @author JBYoshi
      * @reason EntityArmorStand "simplifies" this method to simply call {@link
-     * #shadow$remove()}. However, this ignores our custom event. Instead, delegate
+     * #shadow$remove(net.minecraft.world.entity.Entity.RemovalReason)}. However,
+     * this ignores our custom event. Instead, delegate
      * to the superclass and use {@link ArmorStand#hurt(DamageSource, float)}.
      */
     @Overwrite
