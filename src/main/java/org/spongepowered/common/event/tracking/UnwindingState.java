@@ -70,11 +70,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         return true;
     }
 
-    @Override
-    public boolean alreadyCapturingTileTicks() {
-        return true;
-    }
-
 
     @SuppressWarnings("unchecked")
     @Override

@@ -205,16 +205,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state is already expecting to capture or process changes from
-     * tile entity ticks. Used in Post states. (this avoids re-entering new phases during post processing)
-     *
-     * @return True if entity tick processing is already handled in this state
-     */
-    default boolean alreadyCapturingTileTicks() {
-        return this.getState().alreadyCapturingTileTicks();
-    }
-
-    /**
      * Gets whether this state requires a post state entry for any captured objects. Usually
      * does not, get used uless this is already a post state, or an invalid packet state.
      * TODO - Investigate whether world generation states could use this.

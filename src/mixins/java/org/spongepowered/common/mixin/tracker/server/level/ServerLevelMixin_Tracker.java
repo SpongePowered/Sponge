@@ -189,11 +189,6 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     @Override
     protected void tracker$wrapBlockEntityTick(final TickableBlockEntity blockEntity) {
-        final PhaseContext<@NonNull ?> state = PhaseTracker.SERVER.getPhaseContext();
-        if (state.alreadyCapturingTileTicks()) {
-            blockEntity.tick();
-            return;
-        }
         TrackingUtil.tickTileEntity(this, blockEntity);
     }
 
