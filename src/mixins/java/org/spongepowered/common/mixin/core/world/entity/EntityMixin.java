@@ -48,6 +48,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.LavaCauldronBlock;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.block.state.properties.BlockStateProperties;
 import net.minecraft.world.level.material.Material;
@@ -846,7 +847,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         try {
             final AABB bb = this.shadow$getBoundingBox().inflate(-0.10000000149011612D, -0.4000000059604645D, -0.10000000149011612D);
             final ServerLocation location = DamageEventUtil.findFirstMatchingBlock((Entity) (Object) this, bb, block ->
-                block.getMaterial() == Material.LAVA);
+                block.getMaterial() == Material.LAVA || block.getBlock() instanceof LavaCauldronBlock);
             final DamageSource lava = MinecraftBlockDamageSource.ofFire("lava", location, false);
             ((DamageSourceBridge) lava).bridge$setLava(); // Bridge to bypass issue with using accessor mixins within mixins
             return entity.hurt(DamageSource.LAVA, damage);
