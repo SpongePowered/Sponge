@@ -32,7 +32,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin_Timings;
@@ -45,39 +44,35 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
 
     // @formatter:off
     @Shadow @Final private Int2ObjectMap<Entity> entitiesById;
-    @Shadow protected abstract void shadow$runBlockEvents();
     // @formatter:on
 
     @Inject(method = "tick", at = @At(value = "HEAD"))
     private void impl$startWorldTimings(BooleanSupplier var1, CallbackInfo ci) {
-        this.bridge$getTimingsHandler().doTick.startTiming();
+        this.bridge$getTimingsHandler().tick.startTiming();
     }
 
-    @Inject(method = "tick", at = @At(value = "RETURN"))
-    private void impl$stopWorldTimings(BooleanSupplier var1, CallbackInfo ci) {
-        this.bridge$getTimingsHandler().doTick.stopTiming();
+    @Inject(method = "tick", at = @At(value = "CONSTANT", args = "stringValue=blockEvents"))
+    protected void impl$startScheduledBlockTimings(BooleanSupplier param0, CallbackInfo ci) {
+        this.bridge$getTimingsHandler().scheduledBlocks.startTiming();
     }
 
     @Inject(method = "tick", at = @At(value = "CONSTANT", args = "stringValue=entities"))
     private void impl$startEntityGlobalTimings(BooleanSupplier var1, CallbackInfo ci) {
+        this.bridge$getTimingsHandler().scheduledBlocks.stopTiming();
         this.bridge$getTimingsHandler().tickEntities.startTiming();
         TimingHistory.entityTicks += this.entitiesById.size();
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;runBlockEvents()V"))
-    protected void impl$wrapRunBlockEventsTimings(ServerLevel level) {
-        this.bridge$getTimingsHandler().scheduledBlocks.startTiming();
-        this.shadow$runBlockEvents();
-        this.bridge$getTimingsHandler().scheduledBlocks.stopTiming();
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;tickBlockEntities()V"))
+    protected void impl$startBlockEntitiesTimings(BooleanSupplier param0, CallbackInfo ci) {
+        this.bridge$getTimingsHandler().tickEntities.stopTiming();
+        this.bridge$getTimingsHandler().blockEntityTick.startTiming();
     }
 
-    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;tickBlockEntities()V"))
-    protected void impl$wrapBlockEntitiesTimings(ServerLevel level) {
-        this.bridge$getTimingsHandler().tickEntities.stopTiming();
-        this.bridge$getTimingsHandler().tileEntityTick.startTiming();
-        level.tickBlockEntities();
-        this.bridge$getTimingsHandler().tileEntityTick.stopTiming();
-        TimingHistory.tileEntityTicks += this.blockEntityList.size();
+    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;tickBlockEntities()V", shift = At.Shift.AFTER))
+    private void impl$stopBlockEntitiesTimings(BooleanSupplier param0, CallbackInfo ci) {
+        this.bridge$getTimingsHandler().blockEntityTick.stopTiming();
+        TimingHistory.blockEntityTicks += this.blockEntityList.size();
     }
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeFromChunk(Lnet/minecraft/world/entity/Entity;)V"))
@@ -90,4 +85,8 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
         this.bridge$getTimingsHandler().entityRemoval.startTiming();
     }
 
+    @Inject(method = "tick", at = @At(value = "RETURN"))
+    private void impl$stopWorldTimings(BooleanSupplier var1, CallbackInfo ci) {
+        this.bridge$getTimingsHandler().tick.stopTiming();
+    }
 }

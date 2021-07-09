@@ -110,9 +110,9 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
     }
 
     @Override
-    public Timing bridge$getTimingsHandler() {
+    public Timing bridge$timings() {
         if (this.impl$timing == null) {
-            this.impl$timing = SpongeTimings.getBlockTiming((BlockType) this);
+            this.impl$timing = SpongeTimings.blockTiming((BlockType) this);
         }
         return this.impl$timing;
     }

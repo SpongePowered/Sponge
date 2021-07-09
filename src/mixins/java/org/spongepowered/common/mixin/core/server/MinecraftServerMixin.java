@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server;
 
 import co.aikar.timings.Timing;
+import co.aikar.timings.sponge.ServerTimingsHandler;
 import com.google.inject.Injector;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceKey;
@@ -107,8 +108,9 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract PackRepository shadow$getPackRepository();
     // @formatter:on
 
-    @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
-    @Nullable private ResourcePack impl$resourcePack;
+    private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
+    private @Nullable ResourcePack impl$resourcePack;
+    private @Nullable ServerTimingsHandler impl$timingsHandler;
 
     @Override
     public Subject subject() {
@@ -223,7 +225,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             this.shadow$getPlayerList().saveAll();
         }
 
-        try (Timing timing = SpongeTimings.worldSaveTimer.startTiming()) {
+        try (Timing timing = this.bridge$timingsHandler().save.startTiming()) {
             this.saveAllChunks(true, false, false);
         }
 
@@ -328,6 +330,15 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         } else {
             ((PrimaryLevelData) world.getLevelData()).setDifficulty(newDifficulty);
         }
+    }
+
+    @Override
+    public ServerTimingsHandler bridge$timingsHandler() {
+        if (this.impl$timingsHandler == null) {
+            this.impl$timingsHandler = new ServerTimingsHandler((MinecraftServer) (Object) this);
+        }
+
+        return this.impl$timingsHandler;
     }
 
     @Override

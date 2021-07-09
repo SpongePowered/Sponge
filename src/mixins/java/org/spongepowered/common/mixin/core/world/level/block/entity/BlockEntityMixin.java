@@ -24,10 +24,8 @@
  */
 package org.spongepowered.common.mixin.core.world.level.block.entity;
 
-import co.aikar.timings.Timing;
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -36,13 +34,11 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
-import co.aikar.timings.sponge.SpongeTimings;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -52,27 +48,18 @@ import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 
 @Mixin(net.minecraft.world.level.block.entity.BlockEntity.class)
-public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoundHolder, TimingBridge {
+public abstract class BlockEntityMixin implements BlockEntityBridge, DataCompoundHolder {
 
     //@formatter:off
     @Shadow @Final private BlockEntityType<?> type;
     @Shadow @Nullable private BlockState blockState;
     @Shadow protected net.minecraft.world.level.Level level;
     @Shadow protected BlockPos worldPosition;
-    @Nullable private Timing impl$timing;
 
     @Shadow public abstract BlockPos shadow$getBlockPos();
     @Shadow public abstract BlockState shadow$getBlockState();
     @Shadow public abstract void shadow$setChanged();
     //@formatter:on
-
-    @Override
-    public Timing bridge$getTimingsHandler() {
-        if (this.impl$timing == null) {
-            this.impl$timing = SpongeTimings.getTileEntityTiming((BlockEntity) this);
-        }
-        return this.impl$timing;
-    }
 
     private CompoundTag impl$customData;
 

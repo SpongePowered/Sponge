@@ -25,32 +25,13 @@
 package co.aikar.timings.sponge;
 
 import co.aikar.timings.Timing;
+import net.minecraft.server.MinecraftServer;
 
-public final class NullTimingHandler implements Timing {
+public final class ServerTimingsHandler {
 
-    @Override
-    public Timing startTiming() {
-        return this;
+    public final Timing save;
+
+    public ServerTimingsHandler(final MinecraftServer server) {
+        this.save = SpongeTimingsFactory.ofSafe("Level Save");
     }
-
-    @Override
-    public void stopTiming() {
-    }
-
-    @Override
-    public void startTimingIfSync() {
-    }
-
-    @Override
-    public void stopTimingIfSync() {
-    }
-
-    @Override
-    public void abort() {
-    }
-
-    @Override
-    public void close() {
-    }
-
 }

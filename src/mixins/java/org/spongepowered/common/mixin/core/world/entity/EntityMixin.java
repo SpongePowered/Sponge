@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.world.entity;
 
-import co.aikar.timings.Timing;
 import net.minecraft.BlockUtil;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.core.BlockPos;
@@ -129,7 +128,7 @@ import java.util.Optional;
 import java.util.Random;
 
 @Mixin(Entity.class)
-public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, TimingBridge, CommandSourceProviderBridge, DataCompoundHolder {
+public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder {
 
     // @formatter:off
     @Shadow public net.minecraft.world.level.Level level;
@@ -407,11 +406,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         } else {
             ((SpongeDataHolderBridge) this).bridge$remove(Keys.VANISH_PREVENTS_TARGETING);
         }
-    }
-
-    @Override
-    public Timing bridge$getTimingsHandler() {
-        return ((EntityTypeBridge) this.shadow$getType()).bridge$getTimings();
     }
 
     @Override

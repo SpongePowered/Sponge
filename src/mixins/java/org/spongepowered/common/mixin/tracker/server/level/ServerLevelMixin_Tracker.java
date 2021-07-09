@@ -79,6 +79,7 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
@@ -171,27 +172,28 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 args = "ldc=remove")
         )
     )
-    private void tracker$wrapNormalEntityTick(final ServerLevel serverWorld, final Consumer<Entity> entityUpdateConsumer,
+    private void tracker$wrapNormalEntityTick(final ServerLevel level, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
     ) {
-        ((ServerLevelBridge) this).bridge$getTimingsHandler().entityTick.startTiming();
+        final Timing entityTickTiming = ((TimingBridge) entity.getType()).bridge$timings();
+        entityTickTiming.startTiming();
         final PhaseContext<@NonNull ?> currentState = PhaseTracker.SERVER.getPhaseContext();
         if (currentState.alreadyCapturingEntityTicks()) {
             this.shadow$guardEntityTick(entityUpdateConsumer, entity);
             return;
         }
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);
-        ((ServerLevelBridge) this).bridge$getTimingsHandler().entityTick.stopTiming();
+        entityTickTiming.stopTiming();
     }
 
     @Override
-    protected void tracker$wrapTileEntityTick(final TickableBlockEntity tileEntity) {
+    protected void tracker$wrapBlockEntityTick(final TickableBlockEntity blockEntity) {
         final PhaseContext<@NonNull ?> state = PhaseTracker.SERVER.getPhaseContext();
         if (state.alreadyCapturingTileTicks()) {
-            tileEntity.tick();
+            blockEntity.tick();
             return;
         }
-        TrackingUtil.tickTileEntity(this, tileEntity);
+        TrackingUtil.tickTileEntity(this, blockEntity);
     }
 
 
@@ -263,7 +265,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/state/BlockState;randomTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V"))
     private void tracker$wrapBlockRandomTick(final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn, final Random randomIn) {
-        try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
+        try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$timings()) {
             timing.startTiming();
             final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
             if (context.alreadyCapturingBlockTicks()) {
