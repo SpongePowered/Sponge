@@ -192,11 +192,11 @@ public class SpongeCommand {
             .addChild(reloadWorldCommand, "world")
             .build();
 
-        // /sponge uptime
-        final Command.Parameterized uptimeCommand = Command.builder()
-                .permission("sponge.command.uptime")
-                .shortDescription(Component.text("Show server uptime."))
-                .executor(this::uptimeExecutor)
+        // /sponge status
+        final Command.Parameterized statusCommand = Command.builder()
+                .permission("sponge.command.status")
+                .shortDescription(Component.text("Show server uptime, max memory and more info."))
+                .executor(this::statusExecutor)
                 .build();
 
         // /sponge
@@ -212,7 +212,7 @@ public class SpongeCommand {
                 .addChild(versionCommand, "version")
                 .addChild(whichCommand, "which")
                 .addChild(reloadCommand, "reload")
-                .addChild(uptimeCommand, "uptime");
+                .addChild(statusCommand, "status", "uptime");
 
         this.additionalActions(commandBuilder);
         return commandBuilder.build();
@@ -572,12 +572,43 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    private @NonNull CommandResult uptimeExecutor(final CommandContext context) {
+    private @NonNull CommandResult statusExecutor(final CommandContext context) {
+        final TextComponent.Builder builder = Component.text()
+                .append(
+                        Component.text(Launch.instance().platformPlugin().metadata().name().get(), Style.style(NamedTextColor.YELLOW, TextDecoration.BOLD))
+                );
+        final Component colon = Component.text(": ", NamedTextColor.GRAY);
         final String uptime = formatDuration(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
-
-        context.sendMessage(Identity.nil(),
-                Component.text("Uptime: " + uptime, NamedTextColor.YELLOW)
+        final long maxMem = Runtime.getRuntime().maxMemory() / 1024 / 1024;
+        final long totalMem = Runtime.getRuntime().totalMemory() / 1024 / 1024;
+        final long freeMem = Runtime.getRuntime().freeMemory() / 1024 / 1024;
+        final int tps = Sponge.server().targetTicksPerSecond();
+        
+        builder.append(
+                Component.newline(),
+                Component.text("    Max memory", NamedTextColor.GRAY),
+                colon,
+                Component.text(maxMem + "MB", NamedTextColor.WHITE),
+                Component.newline(),
+                Component.text("    Total memory", NamedTextColor.GRAY),
+                colon,
+                Component.text(totalMem + "MB", NamedTextColor.WHITE),
+                Component.newline(),
+                Component.text("    Free memory", NamedTextColor.GRAY),
+                colon,
+                Component.text(freeMem + "MB", NamedTextColor.WHITE),
+                Component.newline(),
+                Component.text("    TPS", NamedTextColor.GRAY),
+                colon,
+                Component.text(tps),
+                Component.newline(),
+                Component.text("    Server uptime", NamedTextColor.GRAY),
+                colon,
+                Component.text(uptime, NamedTextColor.WHITE)
+                // welcome to the worlds messiest code
         );
+
+        context.sendMessage(Identity.nil(), builder.build());
 
         return CommandResult.success();
     }
