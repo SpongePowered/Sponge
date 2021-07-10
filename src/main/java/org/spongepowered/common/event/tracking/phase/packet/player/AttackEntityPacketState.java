@@ -57,7 +57,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean isPacketIgnored(Packet<?> packetIn, ServerPlayer packetPlayer) {
+    public boolean isPacketIgnored(final Packet<?> packetIn, final ServerPlayer packetPlayer) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that
         // doesn't exist on the server.
@@ -66,14 +66,14 @@ public final class AttackEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final BasicPacketContext context) {
         context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.getMainHandItem()))
             .handUsed(HandTypes.MAIN_HAND.get());
     }
 
 
     @Override
-    public void unwind(BasicPacketContext context) {
+    public void unwind(final BasicPacketContext context) {
         final ServerPlayer player = context.getPacketPlayer();
         final ServerboundInteractPacket useEntityPacket = context.getPacket();
         final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(player.level);
@@ -86,7 +86,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
             // TODO Minecraft 1.14 - How can attacking an Entity mean you created it??
             ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerBridge) player).bridge$getUser());
         } else {
-            ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
+            ((CreatorTrackedBridge) entity).tracked$setNotifier(((ServerPlayerBridge) player).bridge$getUser());
         }
 
         // TODO - Determine if we need to pass the supplier or perform some parameterized
