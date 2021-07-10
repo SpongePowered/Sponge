@@ -58,7 +58,6 @@ final class DeferredScheduledUpdatePhaseState extends GeneralGenerationPhaseStat
     public void associateScheduledTickUpdate(
         final Context asContext, ServerLevel level, final TickNextTickData<?> entry
     ) {
-        ((TickNextTickDataBridge) entry).bridge$setIsPartOfWorldGeneration(true);
     }
 
     public static final class Context extends GenerationContext<Context> {
