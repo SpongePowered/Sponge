@@ -195,7 +195,7 @@ public class SpongeCommand {
         // /sponge uptime
         final Command.Parameterized uptimeCommand = Command.builder()
                 .permission("sponge.command.uptime")
-                .shortDescription(Component.text("Shows Sponge JVM uptime."))
+                .shortDescription(Component.text("Show server uptime."))
                 .executor(this::uptimeExecutor)
                 .build();
 
@@ -572,14 +572,14 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    public static String formatMilisDate(Duration d) {
-        long days = d.toDays();
+    private static String formatMilisDate(Duration d) {
+        final long days = d.toDays();
         d = d.minusDays(days);
-        long hours = d.toHours();
+        final long hours = d.toHours();
         d = d.minusHours(hours);
-        long minutes = d.toMinutes();
+        final long minutes = d.toMinutes();
         d = d.minusMinutes(minutes);
-        long seconds = d.getSeconds();
+        final long seconds = d.getSeconds();
         return
                 (days ==  0?"":days+" days, ") +
                 (hours == 0?"":hours+" hours, ") +
@@ -588,10 +588,10 @@ public class SpongeCommand {
     }
 
     private @NonNull CommandResult uptimeExecutor(final CommandContext context) {
-        String uptime = formatMilisDate(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
+        final String uptime = formatMilisDate(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
 
         context.sendMessage(Identity.nil(),
-                Component.text("JVM uptime: " + uptime, NamedTextColor.YELLOW)
+                Component.text("Uptime: " + uptime, NamedTextColor.YELLOW)
         );
 
         return CommandResult.success();
