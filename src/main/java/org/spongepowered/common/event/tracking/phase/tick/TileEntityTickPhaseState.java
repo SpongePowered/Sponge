@@ -78,11 +78,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
     }
 
     @Override
-    public void unwind(final TileEntityTickContext context) {
-        TrackingUtil.processBlockCaptures(context);
-    }
-
-    @Override
     public void appendNotifierToBlockEvent(final TileEntityTickContext context, final TrackedWorldBridge mixinWorldServer,
         final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
     ) {
@@ -91,20 +86,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
         blockEvent.bridge$setTickingLocatable(tickingTile.locatableBlock());
         blockEvent.bridge$setTileEntity(tickingTile);
-    }
-
-    @Override
-    public void appendContextPreExplosion(final ExplosionContext explosionContext, final TileEntityTickContext context) {
-        context.applyNotifierIfAvailable(explosionContext::notifier);
-        context.applyOwnerIfAvailable(explosionContext::creator);
-        final BlockEntity tickingTile = context.getSource(BlockEntity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
-        explosionContext.source(tickingTile);
-    }
-
-    @Override
-    public boolean doesBlockEventTracking(final TileEntityTickContext context) {
-        return context.allowsBlockEvents();
     }
 
 }

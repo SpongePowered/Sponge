@@ -164,7 +164,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().requiresPost();
     }
 
-
     /**
      * Associates any notifier/owner information from expected states that will assuredly provide
      * said information. In some states, like world gen, there is no information to provide.

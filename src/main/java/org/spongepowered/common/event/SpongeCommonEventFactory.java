@@ -418,12 +418,6 @@ public final class SpongeCommonEventFactory {
                 }
             }
 
-            if (!phaseContext.shouldProvideModifiers()) {
-                phaseContext.getSource(BlockBridge.class).ifPresent(bridge -> {
-                    bridge.bridge$getTickFrameModifier().accept(frame, worldIn);
-                });
-            }
-
             phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
 
             final ChangeBlockEvent.Pre event =

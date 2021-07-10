@@ -32,9 +32,13 @@ import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
@@ -47,11 +51,20 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
                 .ifPresent(frame::pushCause)
         );
 
-    abstract LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context);
+    LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
+        return context.getSource(LocatableBlock.class)
+            .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
+    }
 
     @Override
     public BiConsumer<CauseStackManager.StackFrame, T> getFrameModifier() {
         return this.LOCATION_MODIFIER;
+    }
+
+
+    @Override
+    public void unwind(final T context) {
+        TrackingUtil.processBlockCaptures(context);
     }
 
     @Override
@@ -62,6 +75,35 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
             final LevelChunkBridge mixinChunk = (LevelChunkBridge) minecraftWorld.getChunkAt(notifyPos);
             mixinChunk.bridge$addTrackedBlockPosition(block, notifyPos, user, PlayerTracker.Type.NOTIFIER);
         });
+    }
+
+    /**
+     * Specifically overridden here because some states have defaults and don't check the context.
+     * @param context The context
+     * @return True if block events are to be tracked by the specific type of entity (default is true)
+     */
+    @Override
+    public boolean doesBlockEventTracking(final T context) {
+        return context.allowsBlockEvents();
+    }
+
+
+    @Override
+    public void appendNotifierToBlockEvent(
+        T context, TrackedWorldBridge mixinWorldServer, BlockPos pos,
+        TrackerBlockEventDataBridge blockEvent
+    ) {
+        final LocatableBlock source = this.getLocatableBlockSourceFromContext(context);
+        blockEvent.bridge$setTickingLocatable(source);
+    }
+
+
+    @Override
+    public void appendContextPreExplosion(final ExplosionContext explosionContext, final T context) {
+        context.applyOwnerIfAvailable(explosionContext::creator);
+        context.applyNotifierIfAvailable(explosionContext::notifier);
+        final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
+        explosionContext.source(locatableBlock);
     }
 
     @Override
