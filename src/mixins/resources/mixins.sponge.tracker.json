@@ -26,6 +26,7 @@
         "world.entity.player.InventoryMixin_Tracker",
         "world.entity.player.PlayerMixin_Tracker",
         "world.item.BoneMealItemMixin_Tracker",
+        "world.item.ItemStackMixin_Tracker",
         "world.level.BlockEventDataMixin_Tracker",
         "world.level.ExplosionMixin_Tracker",
         "world.level.LevelMixin_Tracker",

@@ -44,10 +44,8 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -60,10 +58,7 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.List;
-import java.util.Random;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 
 public interface PhaseStateProxy<C extends PhaseContext<C>> {
@@ -221,11 +216,10 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
      * Attempts to capture the player using the item stack in this state. Some states do not care for
      * this information. Usually packets do care and some scheduled tasks.
      *
-     * @param itemStack
      * @param playerIn
      */
-    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final @Nullable ServerPlayer playerIn) {
-        this.getState().capturePlayerUsingStackToBreakBlock(itemStack, playerIn, this.asContext());
+    default void capturePlayerUsingStackToBreakBlock(final @Nullable ServerPlayer playerIn) {
+        this.getState().capturePlayerUsingStackToBreakBlock(playerIn, this.asContext());
     }
 
     /**

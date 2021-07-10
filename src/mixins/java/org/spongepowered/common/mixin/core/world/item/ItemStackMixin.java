@@ -32,7 +32,6 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
@@ -47,7 +46,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
@@ -133,25 +131,6 @@ public abstract class ItemStackMixin implements SpongeDataHolderBridge, DataComp
         if (compound != null && !compound.isEmpty()) {
             DataUtil.syncTagToData(this); // Deserialize
             DataUtil.syncDataToTag(this); // Sync back after reading
-        }
-    }
-
-
-    @Inject(method = "mineBlock", at = @At("HEAD"))
-    private void impl$capturePlayerUsingItemstack(final Level worldIn, final BlockState blockIn, final BlockPos pos, final Player playerIn,
-        final CallbackInfo ci) {
-        if (!((WorldBridge) worldIn).bridge$isFake()) {
-            final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-            context.capturePlayerUsingStackToBreakBlock((org.spongepowered.api.item.inventory.ItemStack) this, (ServerPlayer) playerIn);
-        }
-    }
-
-    @Inject(method = "mineBlock", at = @At("RETURN"))
-    private void impl$nullOutCapturedPlayer(final Level worldIn, final BlockState blockIn, final BlockPos pos, final Player playerIn,
-        final CallbackInfo ci) {
-        if (!((WorldBridge) worldIn).bridge$isFake()) {
-            final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
-            context.capturePlayerUsingStackToBreakBlock((org.spongepowered.api.item.inventory.ItemStack) this, null);
         }
     }
 
