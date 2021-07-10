@@ -286,15 +286,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().isRestoring();
     }
 
-    /**
-     * Allows phases to be notified when an entity successfully teleports
-     * between dimensions.
-     *
-     */
-    default void markTeleported() {
-        this.getState().markTeleported(this.asContext());
-    }
-
     default Supplier<SpawnType> getSpawnTypeForTransaction(final Entity entityToSpawn) {
         return this.getState().getSpawnTypeForTransaction(this.asContext(), entityToSpawn);
     }

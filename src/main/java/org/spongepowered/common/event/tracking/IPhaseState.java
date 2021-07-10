@@ -363,15 +363,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    /**
-     * Allows phases to be notified when an entity successfully teleports
-     * between dimensions.
-     *
-     * @param phaseContext The appropriate phase context
-     */
-    default void markTeleported(final C phaseContext) {
-    }
-
     default Supplier<SpawnType> getSpawnTypeForTransaction(final C context, final Entity entityToSpawn) {
         if (entityToSpawn instanceof ItemEntity) {
             return SpawnTypes.DROPPED_ITEM;
