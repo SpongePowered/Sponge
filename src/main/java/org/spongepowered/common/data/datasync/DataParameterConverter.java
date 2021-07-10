@@ -26,7 +26,6 @@ package org.spongepowered.common.data.datasync;
 
 import com.google.common.base.MoreObjects;
 import org.spongepowered.api.data.DataTransactionResult;
-import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.bridge.network.syncher.EntityDataAccessorBridge;
 
 import java.util.List;
@@ -61,7 +60,7 @@ public abstract class DataParameterConverter<E> {
      */
     public abstract Optional<DataTransactionResult> createTransaction(Entity entity, E currentValue, E value);
 
-    public abstract E getValueFromEvent(E originalValue, List<Immutable<?>> immutableValues);
+    public abstract E getValueFromEvent(E originalValue, DataTransactionResult result);
 
     @Override
     public String toString() {
