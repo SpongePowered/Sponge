@@ -572,7 +572,18 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-    private static String formatMilisDate(Duration d) {
+
+    private @NonNull CommandResult uptimeExecutor(final CommandContext context) {
+        final String uptime = formatDuration(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
+
+        context.sendMessage(Identity.nil(),
+                Component.text("Uptime: " + uptime, NamedTextColor.YELLOW)
+        );
+
+        return CommandResult.success();
+    }
+    
+    private static String formatDuration(Duration d) {
         final long days = d.toDays();
         d = d.minusDays(days);
         final long hours = d.toHours();
@@ -584,16 +595,6 @@ public class SpongeCommand {
                 (hours == 0 ? "" : hours + " hours, ") +
                 (minutes == 0 ? "" : minutes + " minutes, ") +
                 (seconds == 0 ? "" : seconds + " seconds");
-    }
-
-    private @NonNull CommandResult uptimeExecutor(final CommandContext context) {
-        final String uptime = formatMilisDate(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
-
-        context.sendMessage(Identity.nil(),
-                Component.text("Uptime: " + uptime, NamedTextColor.YELLOW)
-        );
-
-        return CommandResult.success();
     }
 
     private @NonNull CommandResult reloadWorldExecutor(final CommandContext context) {
