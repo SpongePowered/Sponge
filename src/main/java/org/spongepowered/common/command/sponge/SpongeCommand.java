@@ -572,7 +572,6 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
-
     private @NonNull CommandResult uptimeExecutor(final CommandContext context) {
         final String uptime = formatDuration(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
 
@@ -582,7 +581,7 @@ public class SpongeCommand {
 
         return CommandResult.success();
     }
-    
+
     private static String formatDuration(Duration d) {
         final long days = d.toDays();
         d = d.minusDays(days);
