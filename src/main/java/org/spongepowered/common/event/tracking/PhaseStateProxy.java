@@ -239,10 +239,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().allowsEventListener();
     }
 
-    default boolean isRegeneration() {
-        return this.getState().isRegeneration();
-    }
-
     /**
      * Specifically captures a block change by {@link org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier#logBlockChange(SpongeBlockSnapshot, BlockState, BlockChangeFlag)}
      * such that the change of a {@link BlockState} will be appropriately logged, along with any changes of tile entities being removed
