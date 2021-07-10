@@ -99,9 +99,6 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if(!context.recordsEntitySpawns()) {
-            return;
-        }
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
             .logBlockDrops(context, worldIn, pos, state, null);
     }
@@ -122,9 +119,6 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if (!context.recordsEntitySpawns()) {
-            return;
-        }
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
             .logBlockDrops(context, (Level) worldIn, pos, state, tileEntity);
     }
@@ -141,9 +135,6 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if(!context.recordsEntitySpawns()) {
-            return;
-        }
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
             .logBlockDrops(context, worldIn, pos, state, tileEntity);
     }
@@ -163,9 +154,6 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
             return;
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
-        if(!context.recordsEntitySpawns()) {
-            return;
-        }
         context.getTransactor().completeBlockDrops(BlockMixin_Tracker.tracker$effectTransactorForDrops);
     }
 }

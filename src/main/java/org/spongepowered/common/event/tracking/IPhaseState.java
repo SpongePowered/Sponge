@@ -391,10 +391,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         );
     }
 
-    default boolean recordsEntitySpawns(final C context) {
-        return true;
-    }
-
     default void populateLootContext(final C phaseContext, final LootContext.Builder lootBuilder) {
 
     }

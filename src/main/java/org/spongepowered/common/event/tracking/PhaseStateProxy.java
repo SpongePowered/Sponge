@@ -306,10 +306,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().createSpawnEvent(this.asContext(), parent, collect, currentCause);
     }
 
-    default boolean recordsEntitySpawns() {
-        return this.getState().recordsEntitySpawns(this.asContext());
-    }
-
     default void populateLootContext(final LootContext.Builder lootBuilder) {
         this.getState().populateLootContext(this.asContext(), lootBuilder);
     }
