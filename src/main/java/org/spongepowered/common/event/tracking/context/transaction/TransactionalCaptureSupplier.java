@@ -538,33 +538,30 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> frameMutator = pointer.getFrameMutator(parent);
         final PhaseTracker instance = PhaseTracker.getInstance();
         try (
-            final CauseStackManager.@Nullable StackFrame frame = frameMutator
+            final CauseStackManager.StackFrame frame = frameMutator
                 .map(mutator -> {
                     final CauseStackManager.StackFrame transactionFrame = instance.pushCauseFrame();
                     mutator.accept(context, transactionFrame);
                     return transactionFrame;
                 })
-                .orElse(null)
+                .orElseGet(instance::pushCauseFrame)
         ) {
-            pointer.generateEvent(context, parent, transactions, instance.currentCause(), transactionPostEventBuilder)
+            final Optional<E> generatedEvent = pointer.generateEvent(context, parent, transactions, instance.currentCause());
+            generatedEvent
                 // It's not guaranteed that a transaction has a valid world or some other artifact,
                 // and in those cases, we don't want to treat the transaction as being "cancellable"
                 .ifPresent(e -> {
                     final EventByTransaction<E> element = new EventByTransaction<>(e, transactions, parent, pointer);
                     builder.add(element);
                     ((ImmutableMultimap.Builder) transactionPostEventBuilder).put(pointer.getTransactionType(), e);
-                    if (frame != null) {
-                        // Note that by having the event in the cause, any mutations of the event by way of the cause
-                        // is not supported and *may* lead to unsupportable side effects, because by virtue, the event
-                        // was already posted for modifications.
-                        frame.pushCause(e);
-                    }
+
                 });
 
             for (final GameTransaction<E> transaction : transactions) {
-                if (transaction.sideEffects == null) {
+                if (transaction.sideEffects == null || transaction.sideEffects.isEmpty()) {
                     continue;
                 }
+                generatedEvent.ifPresent(frame::pushCause);
                 for (final ResultingTransactionBySideEffect sideEffect : transaction.sideEffects) {
                     if (sideEffect.head == null) {
                         continue;

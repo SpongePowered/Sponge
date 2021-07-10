@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import net.minecraft.core.BlockPos;
@@ -38,7 +37,6 @@ import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -46,7 +44,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.math.vector.Vector3i;
 
@@ -66,11 +63,11 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
     }
 
     @Override
-    public final Optional<ChangeBlockEvent.All> generateEvent(final PhaseContext<@NonNull ?> context,
+    public final Optional<ChangeBlockEvent.All> generateEvent(
+        final PhaseContext<@NonNull ?> context,
         final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<ChangeBlockEvent.All>> transactions,
-        final Cause currentCause,
-        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
+        final Cause currentCause
     ) {
         final Optional<ServerWorld> o = ((SpongeServer) SpongeCommon.server()).worldManager().world(this.worldKey);
         if (!o.isPresent()) {
