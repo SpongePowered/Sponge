@@ -199,10 +199,10 @@ public class SpongeCommand {
                 .addChild(auditCommand, "audit")
                 .addChild(chunksCommand, "chunks")
                 .addChild(heapCommand, "heap")
-                .addChild(pluginsCommand, "plugins", "pl")
+                .addChild(pluginsCommand, "plugins")
                 .addChild(timingsCommand, "timings")
                 .addChild(tpsCommand, "tps")
-                .addChild(versionCommand, "version", "v", "ver")
+                .addChild(versionCommand, "version")
                 .addChild(whichCommand, "which")
                 .addChild(reloadCommand, "reload");
 
