@@ -73,11 +73,6 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(final BlockTickContext context) {
-        return context.allowsBulkBlockCaptures();
-    }
-
-    @Override
     LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
         return context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));

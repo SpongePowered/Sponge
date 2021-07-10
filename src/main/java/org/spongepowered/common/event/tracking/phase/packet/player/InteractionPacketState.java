@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.phase.packet.player;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
@@ -91,11 +90,6 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
             context.targetBlock(((TrackedWorldBridge) playerMP.level).bridge$createSnapshot(target, BlockChangeFlags.NONE));
         }
         context.handUsed(HandTypes.MAIN_HAND.get());
-    }
-
-    @Override
-    public boolean doesCaptureNeighborNotifications(final InteractionPacketContext context) {
-        return true;
     }
 
     @Override

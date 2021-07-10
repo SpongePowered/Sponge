@@ -256,10 +256,6 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().createTransaction(this.asContext(), originalBlockSnapshot, newState, flags);
     }
 
-    default boolean doesCaptureNeighborNotifications() {
-        return this.getState().doesCaptureNeighborNotifications(this.asContext());
-    }
-
     default BlockChange associateBlockChangeWithSnapshot(final BlockState newState, final Block newBlock,
         final BlockState currentState, final SpongeBlockSnapshot snapshot,
         final Block originalBlock

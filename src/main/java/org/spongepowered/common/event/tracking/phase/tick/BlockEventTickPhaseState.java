@@ -111,8 +111,4 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
         return SpawnTypes.CUSTOM;
     }
 
-    @Override
-    public boolean doesCaptureNeighborNotifications(final BlockEventTickContext context) {
-        return true;
-    }
 }

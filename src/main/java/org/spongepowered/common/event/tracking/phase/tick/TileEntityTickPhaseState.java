@@ -30,7 +30,6 @@ import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
 
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
@@ -101,11 +100,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
         final BlockEntity tickingTile = context.getSource(BlockEntity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
         explosionContext.source(tickingTile);
-    }
-
-    @Override
-    public boolean doesCaptureNeighborNotifications(final TileEntityTickContext context) {
-        return context.allowsBulkBlockCaptures();
     }
 
     @Override

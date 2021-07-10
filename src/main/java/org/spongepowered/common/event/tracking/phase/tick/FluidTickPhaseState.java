@@ -76,11 +76,6 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(final FluidTickContext context) {
-        return context.allowsBulkBlockCaptures();
-    }
-
-    @Override
     LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
         return context.getSource(LocatableBlock.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));

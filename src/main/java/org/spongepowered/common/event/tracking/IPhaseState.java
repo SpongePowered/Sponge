@@ -327,10 +327,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return changeBlock;
     }
 
-    default boolean doesCaptureNeighborNotifications(final C context) {
-        return false;
-    }
-
     default BlockChange associateBlockChangeWithSnapshot(
         final C phaseContext, final BlockState newState, final Block newBlock,
         final BlockState currentState,
