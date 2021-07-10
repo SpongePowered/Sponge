@@ -60,16 +60,15 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
     public BlockChange associateBlockChangeWithSnapshot(
         final FluidTickContext phaseContext,
         final BlockState newState,
-        final Block newBlock,
-        final BlockState currentState,
-        final Block originalBlock
+        final BlockState currentState
     ) {
+        final Block newBlock = newState.getBlock();
         if (phaseContext.tickingBlock.getType() instanceof FlowingFluid) {
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
             }
             if (currentState.getBlock() instanceof LiquidBlock) {
-                if (newState.getBlock() instanceof LiquidBlock) {
+                if (newBlock instanceof LiquidBlock) {
                     return BlockChange.MODIFY;
                 } else if (newState.isAir()) {
                     return BlockChange.DECAY;
@@ -78,17 +77,16 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
                 }
             }
 
-            if (currentState.isAir()
-                && newState.getBlock() instanceof LiquidBlock) {
+            if (currentState.isAir() && newBlock instanceof LiquidBlock) {
                 return BlockChange.PLACE;
             }
         }
-        return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, originalBlock);
+        return super.associateBlockChangeWithSnapshot(phaseContext, newState, currentState);
     }
 
     @Override
     public Operation getBlockOperation(
-        FluidTickContext phaseContext,
+        final FluidTickContext phaseContext,
         final SpongeBlockSnapshot original, final SpongeBlockSnapshot result
     ) {
         final FluidState fluidState = original.state().fluidState();

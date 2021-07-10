@@ -152,17 +152,11 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
         );
 
         // Pulled up from below
-        final Block newBlock = newState.getBlock();
-        final Block currentBlock = currentState.getBlock();
-
         final ChangeBlock transaction = context.createTransaction(snapshot, newState, flag);
 
         snapshot.blockChange = context.associateBlockChangeWithSnapshot(
             newState,
-            newBlock,
-            currentState,
-            snapshot,
-            currentBlock
+            currentState
         );
         if (((BlockStateBridge) snapshot.state()).bridge$hasTileEntity()
             && (snapshot.blockChange == BlockChange.BREAK || snapshot.blockChange == BlockChange.MODIFY)) {

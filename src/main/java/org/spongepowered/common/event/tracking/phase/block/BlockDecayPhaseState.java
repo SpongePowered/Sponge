@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.event.CauseStackManager;
@@ -57,13 +56,12 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     @Override
     public BlockChange associateBlockChangeWithSnapshot(
         final GeneralizedContext phaseContext, final BlockState newState,
-        final Block newBlock, final BlockState currentState,
-        final Block originalBlock
+        final BlockState currentState
     ) {
-        if (newBlock == Blocks.AIR) {
+        if (newState.getBlock() == Blocks.AIR) {
             return BlockChange.DECAY;
         } else {
-            return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, originalBlock);
+            return super.associateBlockChangeWithSnapshot(phaseContext, newState, currentState);
         }
     }
 

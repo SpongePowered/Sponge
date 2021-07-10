@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -61,8 +60,7 @@ public class GrowablePhaseState extends PooledPhaseState<GrowablePhaseContext> i
     @Override
     public BlockChange associateBlockChangeWithSnapshot(
         final GrowablePhaseContext phaseContext,
-        final BlockState newState, final Block newBlock, final BlockState currentState,
-        final Block originalBlock
+        final BlockState newState, final BlockState currentState
     ) {
         return BlockChange.GROW;
     }

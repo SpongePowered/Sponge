@@ -251,12 +251,11 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().createTransaction(this.asContext(), originalBlockSnapshot, newState, flags);
     }
 
-    default BlockChange associateBlockChangeWithSnapshot(final BlockState newState, final Block newBlock,
-        final BlockState currentState, final SpongeBlockSnapshot snapshot,
-        final Block originalBlock
+    default BlockChange associateBlockChangeWithSnapshot(
+        final BlockState newState,
+        final BlockState currentState
     ) {
-        return this.getState().associateBlockChangeWithSnapshot(this.asContext(), newState, newBlock,currentState,
-            originalBlock);
+        return this.getState().associateBlockChangeWithSnapshot(this.asContext(), newState, currentState);
     }
 
     /**

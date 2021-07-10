@@ -54,10 +54,9 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     @Override
     public BlockChange associateBlockChangeWithSnapshot(
         final BlockTickContext phaseContext, final BlockState newState,
-        final Block newBlock,
-        final BlockState currentState,
-        final Block originalBlock
+        final BlockState currentState
     ) {
+        final Block newBlock = newState.getBlock();
         if (phaseContext.tickingBlock instanceof BonemealableBlock) {
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
@@ -66,7 +65,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                 return BlockChange.GROW;
             }
         }
-        return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, originalBlock);
+        return super.associateBlockChangeWithSnapshot(phaseContext, newState, currentState);
     }
 
     @Override

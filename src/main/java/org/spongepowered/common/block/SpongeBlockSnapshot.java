@@ -100,6 +100,10 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         return this.blockState;
     }
 
+    public net.minecraft.world.level.block.state.BlockState nativeState() {
+        return ((net.minecraft.world.level.block.state.BlockState) this.blockState);
+    }
+
     @Override
     public BlockSnapshot withState(final BlockState blockState) {
         return this.createBuilder().blockState(blockState).build();
@@ -251,7 +255,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     @Override
     public DataContainer toContainer() {
         final DataContainer container = DataContainer.createNew()
-                .set(Queries.CONTENT_VERSION, contentVersion())
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Queries.WORLD_KEY, this.worldKey.asString())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
                 .set(Queries.POSITION_X, this.pos.x())

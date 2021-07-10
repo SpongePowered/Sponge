@@ -324,13 +324,14 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default BlockChange associateBlockChangeWithSnapshot(
-        final C phaseContext, final BlockState newState, final Block newBlock,
-        final BlockState currentState,
-        final Block originalBlock
+        final C phaseContext, final BlockState newState,
+        final BlockState currentState
     ) {
+        final Block newBlock = newState.getBlock();
+        final Block currentBlock = currentState.getBlock();
         if (newBlock == Blocks.AIR) {
             return BlockChange.BREAK;
-        } else if (newBlock != originalBlock && !TrackingUtil.forceModify(originalBlock, newBlock)) {
+        } else if (newBlock != currentBlock && !TrackingUtil.forceModify(currentBlock, newBlock)) {
             return BlockChange.PLACE;
         }
         return BlockChange.MODIFY;
@@ -381,15 +382,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default Operation getBlockOperation(
         final C phaseContext, final SpongeBlockSnapshot original, final SpongeBlockSnapshot result
     ) {
-        final Block resultBlock = (Block) result.state().type();
-        if (resultBlock == Blocks.AIR) {
-            return Operations.BREAK.get();
-        }
-        final Block originalBlock = (Block) original.state().type();
-        if (originalBlock != resultBlock && !TrackingUtil.forceModify(originalBlock, resultBlock)) {
-            return Operations.PLACE.get();
-        }
-        return Operations.MODIFY.get();
+        return this.associateBlockChangeWithSnapshot(phaseContext, result.nativeState(), original.nativeState()).toOperation();
     }
 
     default void foldContextForThread(final C context, final TickTaskBridge returnValue) {
