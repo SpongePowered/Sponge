@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.sponge;
 
+import org.spongepowered.common.util.DateUtil;
 import co.aikar.timings.Timings;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
@@ -71,6 +72,7 @@ import java.lang.reflect.Method;
 import java.net.URL;
 import java.text.DecimalFormat;
 import java.text.MessageFormat;
+import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
@@ -191,6 +193,12 @@ public class SpongeCommand {
             .addChild(reloadWorldCommand, "world")
             .build();
 
+        // /sponge uptime
+        final Command.Parameterized uptimeCommand = Command.builder()
+                .permission("sponge.command.uptime")
+                .shortDescription(Component.text("Shows Sponge JVM uptime."))
+                .executor(this::uptimeExecutor)
+                .build();
 
         // /sponge
         final Command.Builder commandBuilder = Command.builder()
@@ -204,7 +212,8 @@ public class SpongeCommand {
                 .addChild(tpsCommand, "tps")
                 .addChild(versionCommand, "version")
                 .addChild(whichCommand, "which")
-                .addChild(reloadCommand, "reload");
+                .addChild(reloadCommand, "reload")
+                .addChild(uptimeCommand, "uptime");
 
         this.additionalActions(commandBuilder);
         return commandBuilder.build();
@@ -561,6 +570,16 @@ public class SpongeCommand {
                     context.sendMessage(Identity.nil(), Component.text("Successfully reloaded global configuration!", NamedTextColor.GREEN));
                 }
             });
+        return CommandResult.success();
+    }
+
+    private @NonNull CommandResult uptimeExecutor(final CommandContext context) {
+        String uptime = DateUtil.format(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
+
+        context.sendMessage(Identity.nil(),
+                Component.text("JVM uptime: "+uptime, NamedTextColor.YELLOW)
+        );
+
         return CommandResult.success();
     }
 
