@@ -580,11 +580,10 @@ public class SpongeCommand {
         final long minutes = d.toMinutes();
         d = d.minusMinutes(minutes);
         final long seconds = d.getSeconds();
-        return
-                (days ==  0?"":days+" days, ") +
-                (hours == 0?"":hours+" hours, ") +
-                (minutes ==  0?"":minutes+" minutes, ") +
-                (seconds == 0?"":seconds+" seconds");
+        return (days == 0 ? "" : days + " days, ") +
+                (hours == 0 ? "" : hours + " hours, ") +
+                (minutes == 0 ? "" : minutes + " minutes, ") +
+                (seconds == 0 ? "" : seconds + " seconds");
     }
 
     private @NonNull CommandResult uptimeExecutor(final CommandContext context) {
