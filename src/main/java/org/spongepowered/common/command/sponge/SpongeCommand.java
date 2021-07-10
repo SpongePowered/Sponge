@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.command.sponge;
 
-import org.spongepowered.common.util.DateUtil;
 import co.aikar.timings.Timings;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
@@ -573,11 +572,26 @@ public class SpongeCommand {
         return CommandResult.success();
     }
 
+    public static String formatMilisDate(Duration d) {
+        long days = d.toDays();
+        d = d.minusDays(days);
+        long hours = d.toHours();
+        d = d.minusHours(hours);
+        long minutes = d.toMinutes();
+        d = d.minusMinutes(minutes);
+        long seconds = d.getSeconds();
+        return
+                (days ==  0?"":days+" days, ") +
+                (hours == 0?"":hours+" hours, ") +
+                (minutes ==  0?"":minutes+" minutes, ") +
+                (seconds == 0?"":seconds+" seconds");
+    }
+
     private @NonNull CommandResult uptimeExecutor(final CommandContext context) {
-        String uptime = DateUtil.format(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
+        String uptime = formatMilisDate(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
 
         context.sendMessage(Identity.nil(),
-                Component.text("JVM uptime: "+uptime, NamedTextColor.YELLOW)
+                Component.text("JVM uptime: " + uptime, NamedTextColor.YELLOW)
         );
 
         return CommandResult.success();
