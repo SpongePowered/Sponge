@@ -24,16 +24,12 @@
  */
 package org.spongepowered.common.applaunch.config.core;
 
+import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.configurate.serialize.ScalarSerializer;
-import org.spongepowered.plugin.Blackboard;
-import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.PluginKeys;
 
 import java.lang.reflect.Type;
-import java.nio.file.Path;
-import java.util.Collections;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.function.Function;
@@ -50,15 +46,18 @@ public final class TokenHoldingString {
 
     private static final Pattern TOKEN_MATCH = Pattern.compile("\\$\\{([^}]+)}");
 
-    private static final Map<String, Function<PluginEnvironment, String>> TOKENS = new HashMap<>();
+    private static final Map<String, Function<PluginPlatform, String>> TOKENS = new HashMap<>();
 
     static {
-        TokenHoldingString.register("CANONICAL_GAME_DIR", PluginKeys.BASE_DIRECTORY);
-        TokenHoldingString.register("CANONICAL_MODS_DIR", env -> {
+        TokenHoldingString.register("CANONICAL_GAME_DIR", platform -> platform.baseDirectory().toString());
+        TokenHoldingString.register("CANONICAL_MODS_DIR", platform -> {
             // TODO: this is wrong, need to decide what configurability will be provided.
-            final List<Path> directories = env.blackboard().get(PluginKeys.PLUGIN_DIRECTORIES).orElse(Collections.emptyList());
-            return directories.isEmpty() ? null : directories.get(0).toString().replace("\\", "\\\\");
+            return platform.pluginDirectories().get(0).toString();
         });
+    }
+
+    private static String sanitizePath(final String path) { // for use in Matcher.appendReplacement
+        return path.replace("\\", "\\\\");
     }
 
     /**
@@ -71,14 +70,7 @@ public final class TokenHoldingString {
         return new TokenHoldingString(input, TokenHoldingString.parsePlaceholders(input));
     }
 
-    private static void register(final String token, final Blackboard.Key<?> getter) {
-        TokenHoldingString.register(token, env -> {
-            final Object value = env.blackboard().get(getter).orElse(null);
-            return value == null ? null : value.toString().replace("\\", "\\\\");
-        });
-    }
-
-    private static void register(final String token, final Function<PluginEnvironment, String> getter) {
+    private static void register(final String token, final Function<PluginPlatform, String> getter) {
         TokenHoldingString.TOKENS.put(token.toLowerCase(Locale.ROOT), getter);
     }
 
@@ -92,7 +84,6 @@ public final class TokenHoldingString {
      * @return string with placeholders replaced
      */
     private static String parsePlaceholders(final String input) {
-        final PluginEnvironment env = SpongeConfigs.getPluginEnvironment();
         final Matcher matcher = TokenHoldingString.TOKEN_MATCH.matcher(input);
         if (!matcher.find()) {
             return input;
@@ -100,9 +91,9 @@ public final class TokenHoldingString {
         final StringBuffer result = new StringBuffer();
         do {
             final String token = matcher.group(1);
-            final Function<PluginEnvironment, String> replacer = TokenHoldingString.TOKENS.get(token.toLowerCase());
-            final String replaced = replacer == null ? "" : replacer.apply(env);
-            matcher.appendReplacement(result, replaced == null ? "" : replaced);
+            final Function<PluginPlatform, String> replacer = TokenHoldingString.TOKENS.get(token.toLowerCase());
+            final String replaced = replacer == null ? "" : replacer.apply(AppLaunch.pluginPlatform());
+            matcher.appendReplacement(result, replaced == null ? "" : TokenHoldingString.sanitizePath(replaced));
         } while (matcher.find());
         matcher.appendTail(result);
         return result.toString();

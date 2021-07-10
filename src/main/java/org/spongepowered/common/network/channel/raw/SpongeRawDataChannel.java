@@ -31,7 +31,7 @@ import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.network.channel.raw.handshake.RawHandshakeDataChannel;
 import org.spongepowered.api.network.channel.raw.play.RawPlayDataChannel;
 import org.spongepowered.common.network.channel.SpongeChannel;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.channel.TransactionResult;
 
 import java.util.function.Consumer;
@@ -41,7 +41,7 @@ public class SpongeRawDataChannel extends SpongeChannel implements RawDataChanne
     private final SpongeRawPlayDataChannel play = new SpongeRawPlayDataChannel(this);
     private final SpongeRawLoginDataChannel login = new SpongeRawLoginDataChannel(this);
 
-    public SpongeRawDataChannel(final int type, final ResourceKey key, final SpongeChannelRegistry registry) {
+    public SpongeRawDataChannel(final int type, final ResourceKey key, final SpongeChannelManager registry) {
         super(type, key, registry);
     }
 
@@ -71,7 +71,7 @@ public class SpongeRawDataChannel extends SpongeChannel implements RawDataChanne
     }
 
     ChannelBuf encodePayload(final Consumer<ChannelBuf> payload) {
-        final ChannelBuf buf = this.registry().getBufferAllocator().buffer();
+        final ChannelBuf buf = this.manager().getBufferAllocator().buffer();
         payload.accept(buf);
         return buf;
     }

@@ -77,7 +77,7 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Supplier;
-import net.minecraft.SharedConstants;
+
 import net.minecraft.commands.arguments.CompoundTagArgument;
 import net.minecraft.commands.arguments.ResourceLocationArgument;
 import net.minecraft.core.BlockPos;
@@ -108,11 +108,7 @@ public final class Constants {
     public static final DataQuery UUID_MOST_QUERY = DataQuery.of(Constants.UUID_MOST);
     public static final String UUID_LEAST = "UUIDLeast";
     public static final DataQuery UUID_LEAST_QUERY = DataQuery.of(Constants.UUID_LEAST);
-    public static final BlockPos DUMMY_POS = new BlockPos(0, 0, 0);
     public static final String MINECRAFT = "minecraft";
-    public static final int MINECRAFT_DATA_VERSION = SharedConstants.getCurrentVersion().getWorldVersion();
-    public static final String MINECRAFT_VERSION = SharedConstants.getCurrentVersion().getName();
-    public static final int MINECRAFT_PROTOCOL_VERSION = SharedConstants.getCurrentVersion().getProtocolVersion();
     public static final String MINECRAFT_CLIENT = "net.minecraft.client.Minecraft";
     public static final String DEDICATED_SERVER = "net.minecraft.server.dedicated.DedicatedServer";
     public static final String MINECRAFT_SERVER = "net.minecraft.server.MinecraftServer";
@@ -167,7 +163,11 @@ public final class Constants {
         public static final String SPONGE_ENTITY_CREATOR = "Creator";
         public static final String SPONGE_ENTITY_NOTIFIER = "Notifier";
         public static final String SPONGE_BLOCK_POS_TABLE = "BlockPosTable";
-        public static final String SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
+
+        @Deprecated
+        public static final String LEGACY_SPONGE_PLAYER_UUID_TABLE = "PlayerIdTable";
+        public static final String SPONGE_PLAYER_UUID_TABLE = "player-uuid-table";
+
         // General DataQueries
         public static final DataQuery UNSAFE_NBT = of("UnsafeData");
         public static final DataQuery DATA_MANIPULATORS = of("Data");
@@ -438,6 +438,14 @@ public final class Constants {
         public static final short Y_SHORT_MASK = 0xFF;
         public static final int Y_INT_MASK = 0xFFFFFF;
         public static final String CHUNK_DATA_SECTIONS = "Sections";
+    }
+
+    public static final class ChunkTicket {
+
+        public static final int MAX_FULL_CHUNK_TICKET_LEVEL = 33;
+
+        // Highest ticket level that will cause loading a full chunk, plus one.
+        public static final int MAX_FULL_CHUNK_DISTANCE = ChunkTicket.MAX_FULL_CHUNK_TICKET_LEVEL + 1;
     }
 
     public static final class Networking {

@@ -84,7 +84,7 @@ public abstract class CriterionTrigger_ListenerMixin {
                 final TypeToken<FilteredTriggerConfiguration> typeToken = (TypeToken) TypeToken.get(filteredTrigger.type().configurationType());
                 final CriterionEvent.Trigger event = SpongeEventFactory.createCriterionEventTrigger(cause,
                         advancement, advancementCriterion, typeToken, player, filteredTrigger, true);
-                SpongeCommon.postEvent(event);
+                SpongeCommon.post(event);
                 if (!event.result()) {
                     ci.cancel();
                     return;

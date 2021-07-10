@@ -78,7 +78,7 @@ public abstract class FallingBlockMixin {
                 new Vector3d(0, 0, 0),
                 fallingBlock
             );
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 return -1;
             }
             return pos.getY();

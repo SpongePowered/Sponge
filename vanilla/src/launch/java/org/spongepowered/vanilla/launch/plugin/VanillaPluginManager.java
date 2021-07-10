@@ -34,7 +34,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.PluginLanguageService;
 import org.spongepowered.plugin.PluginLoader;
 import org.spongepowered.plugin.PluginResource;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.launch.VanillaLaunch;
 
 import java.lang.reflect.InvocationTargetException;
@@ -104,8 +104,8 @@ public final class VanillaPluginManager implements SpongePluginManager {
         this.sortedPlugins.add(plugin);
     }
 
-    public void loadPlugins(final VanillaPluginEngine engine) {
-        for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> languageCandidates : engine.getCandidates().entrySet()) {
+    public void loadPlugins(final VanillaPluginPlatform platform) {
+        for (final Map.Entry<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> languageCandidates : platform.getCandidates().entrySet()) {
             final PluginLanguageService<PluginResource> languageService = languageCandidates.getKey();
             final Collection<PluginCandidate<PluginResource>> candidates = languageCandidates.getValue();
             final String loaderClass = languageService.pluginLoader();
@@ -125,15 +125,15 @@ public final class VanillaPluginManager implements SpongePluginManager {
                     continue;
                 }
 
-                plugin = pluginLoader.createPluginContainer(candidate, engine.getPluginEnvironment()).orElse(null);
+                plugin = pluginLoader.createPluginContainer(candidate, platform.getPluginEnvironment()).orElse(null);
                 if (plugin == null) {
-                    engine.getPluginEnvironment().logger().debug("Language service '{}' returned a null plugin container for '{}'.",
+                    platform.logger().debug("Language service '{}' returned a null plugin container for '{}'.",
                             languageService.name(), candidate.metadata().id());
                     continue;
                 }
 
                 try {
-                    pluginLoader.loadPlugin(engine.getPluginEnvironment(), plugin, VanillaLaunch.getInstance().getClass().getClassLoader());
+                    pluginLoader.loadPlugin(platform.getPluginEnvironment(), plugin, VanillaLaunch.instance().getClass().getClassLoader());
                     this.addPlugin(plugin);
                 } catch (final InvalidPluginException e) {
                     e.printStackTrace();
@@ -141,7 +141,6 @@ public final class VanillaPluginManager implements SpongePluginManager {
             }
         }
 
-        engine.getPluginEnvironment().logger().info("Loaded plugin(s): {}",
-                this.sortedPlugins.stream().map(p -> p.metadata().id()).collect(Collectors.toList()));
+        platform.logger().info("Loaded plugin(s): {}", this.sortedPlugins.stream().map(p -> p.metadata().id()).collect(Collectors.toList()));
     }
 }

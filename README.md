@@ -7,7 +7,7 @@ The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms
 * [Source]
 * [Issues]
 * [Documentation]
-* [Discord]: `#sponge`
+* [Discord] `#sponge`
 
 ## Latest Builds
 

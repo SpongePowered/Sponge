@@ -57,7 +57,7 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             final Cause cause = frame.currentCause();
             final CommandSource iCommandSource =
-                    cause.first(CommandSource.class).orElseGet(() -> SpongeCommon.getGame().systemSubject());
+                    cause.first(CommandSource.class).orElseGet(() -> SpongeCommon.game().systemSubject());
             final CommandSourceStack commandSource;
             if (iCommandSource instanceof CommandSourceProviderBridge) {
                 // We know about this one so we can create it using the factory method on the source.
@@ -87,12 +87,12 @@ public final class SpongeCommandCauseFactory implements CommandCause.Factory {
                                 .map(rot -> new Vec2((float) rot.x(), (float) rot.y()))
                                 .orElse(Vec2.ZERO),
                         context.get(EventContextKeys.LOCATION).map(x -> (ServerLevel) x.world())
-                                .orElseGet(() -> locatable == null ? SpongeCommon.getServer().getLevel(Level.OVERWORLD) :
+                                .orElseGet(() -> locatable == null ? SpongeCommon.server().getLevel(Level.OVERWORLD) :
                                         (ServerLevel) locatable.serverLocation().world()),
                         4,
                         name,
                         displayName,
-                        SpongeCommon.getServer(),
+                        SpongeCommon.server(),
                         iCommandSource instanceof Entity ? (net.minecraft.world.entity.Entity) iCommandSource : null
                 );
             }

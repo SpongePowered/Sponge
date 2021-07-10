@@ -41,13 +41,17 @@ import java.io.IOException;
 import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 public final class SpongeDataPackManager {
 
     public static SpongeDataPackManager INSTANCE = new SpongeDataPackManager(Sponge.game());
 
     private final Game game;
+
+    private Map<DataPackType, Runnable> delayed = new HashMap<>();
 
     private SpongeDataPackManager(final Game game) {
         this.game = game;
@@ -57,14 +61,16 @@ public final class SpongeDataPackManager {
         this.callRegisterDataPackValueEvents(dataPacksDirectory, new ArrayList<>());
     }
 
+    @SuppressWarnings("unchecked")
     public void callRegisterDataPackValueEvents(final Path dataPacksDirectory, final Collection<String> dataPacksToLoad) {
         SpongeIngredient.clearCache();
         IngredientResultUtil.clearCache();
 
-        this.serialize(DataPackTypes.ADVANCEMENT, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.ADVANCEMENT));
-        this.serialize(DataPackTypes.RECIPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.RECIPE));
-        this.serialize(DataPackTypes.WORLD_TYPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD_TYPE));
-        this.serialize(DataPackTypes.WORLD, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD));
+        this.serialize(DataPackTypes.ADVANCEMENT, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.ADVANCEMENT), false);
+        this.serialize(DataPackTypes.RECIPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.RECIPE), false);
+        this.serialize(DataPackTypes.WORLD_TYPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD_TYPE), false);
+        this.serialize(DataPackTypes.WORLD, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD), true);
+        this.serialize(DataPackTypes.TAG, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.TAG), false);
     }
 
     private <T extends DataPackSerializable> List<T> callRegisterDataPackValueEvent(final DataPackType<T> type) {
@@ -73,9 +79,17 @@ public final class SpongeDataPackManager {
         return event.serializables();
     }
 
+    public <T extends DataPackSerializable> void serializeDelayedDataPack(final DataPackType<T> type) {
+        final Runnable runnable = this.delayed.get(type);
+        if (runnable != null) {
+            runnable.run();
+        }
+    }
+
     @SuppressWarnings("unchecked")
     public <T extends DataPackSerializable> void serialize(final DataPackType<T> type, final Path dataPacksDirectory,
-        final Collection<String> dataPacksToLoad, final List<T> serializables) {
+                                                           final Collection<String> dataPacksToLoad,
+                                                           final List<T> serializables, final boolean delayed) {
         if (serializables.isEmpty()) {
             return;
         }
@@ -83,21 +97,31 @@ public final class SpongeDataPackManager {
         final SpongeDataPackType implType = (SpongeDataPackType) type;
         final List<DataPackSerializedObject> serialized = new ArrayList<>();
 
-        for (final DataPackSerializable serializable : serializables) {
-            final JsonObject o = (JsonObject) implType.getObjectSerializer().serialize(serializable);
-            serialized.add((DataPackSerializedObject) implType.getObjectFunction().apply(serializable, o));
+        if (delayed) {
+             this.delayed.put(type, () -> this.serialize(type, dataPacksDirectory, new ArrayList<>(), serializables, false));
+        } else {
+            for (final DataPackSerializable serializable : serializables) {
+                final JsonObject o = (JsonObject) implType.getObjectSerializer().serialize(serializable);
+                serialized.add((DataPackSerializedObject) implType.getObjectFunction().apply(serializable, o));
+            }
         }
 
+        // Serialize the pack itself now - objects later
+        this.serializePack(dataPacksDirectory, dataPacksToLoad, implType, serialized, serializables.size());
+    }
+
+    private void serializePack(final Path dataPacksDirectory, final Collection<String> dataPacksToLoad, final SpongeDataPackType implType,
+                               final List<DataPackSerializedObject> serialized, final int count) {
         // When reloading we must update the dataPacksToLoad
         try {
-            if (implType.getPackSerializer().serialize(implType, dataPacksDirectory, serialized)) {
+            if (implType.getPackSerializer().serialize(implType, dataPacksDirectory, serialized, count)) {
                 dataPacksToLoad.add("file/" + implType.getPackSerializer().getPackName());
             } else {
                 dataPacksToLoad.remove("file/" + implType.getPackSerializer().getPackName());
             }
         } catch (final IOException e) {
             dataPacksToLoad.remove("file/" + implType.getPackSerializer().getPackName());
-            SpongeCommon.getLogger().error(e);
+            SpongeCommon.logger().error(e);
         }
     }
 }

@@ -63,7 +63,7 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
         changeBlockEvents.forEach(event -> eventsByWorld.put(event.world().key(), event));
 
         eventsByWorld.asMap().forEach((key, events) -> {
-            final Optional<ServerWorld> serverWorld = ((SpongeServer) SpongeCommon.getServer()).worldManager().world(key);
+            final Optional<ServerWorld> serverWorld = ((SpongeServer) SpongeCommon.server()).worldManager().world(key);
             if (!serverWorld.isPresent()) {
                 return;
             }
@@ -99,7 +99,7 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
                     }
                     final SpongeBlockSnapshot original = snapshots.get(0);
                     final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
-                    final Operation operation = context.getBlockOperation(original, original.blockChange);
+                    final Operation operation = context.getBlockOperation(original, result);
                     final BlockTransactionReceipt eventTransaction = new BlockTransactionReceipt(original, result, operation);
                     return Optional.of(eventTransaction);
                 })
@@ -109,7 +109,7 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
 
             final Cause cause = PhaseTracker.getInstance().currentCause();
 
-            SpongeCommon.postEvent(SpongeEventFactory.createChangeBlockEventPost(cause, transactions, serverWorld.get()));
+            SpongeCommon.post(SpongeEventFactory.createChangeBlockEventPost(cause, transactions, serverWorld.get()));
         });
     }
 }

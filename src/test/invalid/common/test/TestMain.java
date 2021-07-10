@@ -27,7 +27,6 @@ package org.spongepowered.common.test;
 import com.google.inject.Guice;
 import net.minecraft.init.Bootstrap;
 import org.spongepowered.common.inject.SpongeModule;
-import org.spongepowered.common.registry.SpongeGameRegistry;
 import org.spongepowered.common.test.inject.TestImplementationModule;
 
 public final class TestMain {

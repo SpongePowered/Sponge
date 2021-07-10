@@ -24,7 +24,7 @@
  */
 package co.aikar.timings.sponge;
 
-import org.spongepowered.common.relocate.co.aikar.util.JSONUtil;
+import co.aikar.timings.util.JSONUtil;
 import com.google.gson.JsonArray;
 
 class TimingHistoryEntry {

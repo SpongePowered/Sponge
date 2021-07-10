@@ -1,9 +1,7 @@
 {
     "required": true,
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.tracker",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "mixinPriority": 1102,
     "mixins": [
         "CreatorTrackedMixin_Tracker",
@@ -37,10 +35,10 @@
         "world.level.block.LeavesBlockMixin_Tracker",
         "world.level.block.entity.BlockEntityMixin_Tracker",
         "world.level.chunk.LevelChunkMixin_Tracker",
+        "world.level.chunk.storage.ChunkSerializerMixin_Tracker",
         "world.level.dimension.end.EndDragonFightMixin_Tracker"
     ],
     "injectors": {
-        "defaultRequire": 1,
         "maxShiftBy": 3
     }
 }

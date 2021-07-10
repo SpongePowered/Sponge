@@ -103,7 +103,7 @@ public final class SpongeTask implements Task {
 
     Timing getTimingsHandler() {
         if (this.taskTimer == null) {
-            this.taskTimer = SpongeTimings.getPluginSchedulerTimings(this.owner);
+            this.taskTimer = SpongeTimings.pluginSchedulerTimings(this.owner);
         }
         return this.taskTimer;
     }

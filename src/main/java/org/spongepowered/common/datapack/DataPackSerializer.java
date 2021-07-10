@@ -38,22 +38,22 @@ import net.minecraft.SharedConstants;
 
 public class DataPackSerializer<T extends DataPackSerializedObject> {
 
-    private final String name;
-    private final String typeDirectoryName;
+    protected final String name;
+    protected final String typeDirectoryName;
 
     public DataPackSerializer(final String token, final String typeDirectoryName) {
         this.name = token;
         this.typeDirectoryName = typeDirectoryName;
     }
 
-    protected boolean serialize(final SpongeDataPackType<@NonNull ?, T> type, final Path datapacksDir, final List<T> objects) throws IOException {
+    protected boolean serialize(final SpongeDataPackType<@NonNull ?, T> type, final Path datapacksDir, final List<T> objects, int count) throws IOException {
         final Path datapackDir = datapacksDir.resolve(this.getPackName());
 
         if (!type.persistent()) {
             FileUtils.deleteDirectory(datapackDir.toFile());
         }
 
-        if (objects.isEmpty()) {
+        if (count == 0) {
             return false;
         }
 

@@ -1,0 +1,8 @@
+{
+    "minVersion": "0.8",
+    "target": "@env(DEFAULT)",
+    "compatibilityLevel": "JAVA_8",
+    "injectors": {
+        "defaultRequire": 1
+    }
+}

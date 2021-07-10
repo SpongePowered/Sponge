@@ -201,7 +201,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                         subject = permissionService.defaults();
                     }
                     return subject.hasPermission(LoginPermissions.BYPASS_WHITELIST_PERMISSION);
-                }, SpongeCommon.getServer()).thenCompose(w -> {
+                }, SpongeCommon.server()).thenCompose(w -> {
                     if (w) {
                         return CompletableFuture.completedFuture(Optional.empty());
                     }
@@ -221,7 +221,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                 return CompletableFuture.completedFuture(Optional.of(new TranslatableComponent("multiplayer.disconnect.server_full")));
             }
             return CompletableFuture.completedFuture(Optional.empty());
-        }, SpongeCommon.getServer());
+        }, SpongeCommon.server());
     }
 
     @Redirect(method = "placeNewPlayer",
@@ -240,7 +240,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         final CompoundTag compound = this.shadow$load(playerIn);
         if (compound == null) {
-            ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().setPlayerInfo(playerIn.getUUID(), Instant.now(), Instant.now());
+            ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().setPlayerInfo(playerIn.getUUID(), Instant.now(), Instant.now());
         }
         return compound;
     }
@@ -264,7 +264,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         net.minecraft.server.level.ServerLevel mcWorld = minecraftServer.getLevel(dimension);
 
         if (mcWorld == null) {
-            SpongeCommon.getLogger().warn("The player '{}' was located in a world that isn't loaded or doesn't exist. This is not safe so "
+            SpongeCommon.logger().warn("The player '{}' was located in a world that isn't loaded or doesn't exist. This is not safe so "
                             + "the player will be moved to the spawn of the default world.", mcPlayer.getGameProfile().getName());
             mcWorld = minecraftServer.overworld();
             final BlockPos spawnPoint = mcWorld.getSharedSpawnPos();
@@ -286,7 +286,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         if (kickReason != null) {
             event.setCancelled(true);
         }
-        if (SpongeCommon.postEvent(event)) {
+        if (SpongeCommon.post(event)) {
             this.impl$disconnectClient(networkManager, event.message(), player.profile());
             return null;
         }
@@ -398,7 +398,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
         final ServerSideConnectionEvent.Join event = SpongeEventFactory.createServerSideConnectionEventJoin(cause, audience,
                 Optional.of(audience), joinComponent, joinComponent, connection, player, false);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (!event.isMessageCancelled()) {
             event.audience().ifPresent(audience1 -> audience1.sendMessage(Identity.nil(), event.message()));
         }
@@ -474,7 +474,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final org.spongepowered.api.world.server.ServerWorld destinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server.getLevel(this.impl$newDestination == null ? Level.OVERWORLD : this.impl$newDestination);
 
         final RespawnPlayerEvent.Recreate event = SpongeEventFactory.createRespawnPlayerEventRecreate(PhaseTracker.getCauseStackManager().currentCause(), destinationPosition, originalWorld, originalPosition, destinationWorld, originalDestinationWorld, destinationPosition, (ServerPlayer) originalPlayer, (ServerPlayer) recreatedPlayer, this.impl$isGameMechanicRespawn, !keepAllPlayerData);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         recreatedPlayer.setPos(event.destinationPosition().x(), event.destinationPosition().y(), event.destinationPosition().z());
         this.impl$isGameMechanicRespawn = false;
         this.impl$originalDestination = null;
@@ -500,7 +500,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         final org.spongepowered.api.world.server.ServerWorld destinationWorld = (org.spongepowered.api.world.server.ServerWorld) this.server.getLevel(this.impl$newDestination == null ? Level.OVERWORLD : this.impl$newDestination);
 
         final RespawnPlayerEvent.Post event = SpongeEventFactory.createRespawnPlayerEventPost(PhaseTracker.getCauseStackManager().currentCause(), destinationWorld, originalWorld, originalDestinationWorld, (ServerPlayer) cir.getReturnValue());
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
     }
 
     @Redirect(method = "sendLevelInfo", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;overworld()Lnet/minecraft/server/level/ServerLevel;"))

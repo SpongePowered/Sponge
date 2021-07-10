@@ -25,10 +25,16 @@
 package org.spongepowered.vanilla.generator;
 
 import com.github.javaparser.utils.Log;
+import com.squareup.javapoet.ParameterizedTypeName;
+import com.squareup.javapoet.WildcardTypeName;
 import net.minecraft.core.Registry;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.Bootstrap;
+import net.minecraft.tags.BlockTags;
+import net.minecraft.tags.EntityTypeTags;
+import net.minecraft.tags.FluidTags;
+import net.minecraft.tags.ItemTags;
 import org.tinylog.Logger;
 
 import java.io.IOException;
@@ -248,7 +254,39 @@ public final class GeneratorMain {
                 $ -> true,
                 RegistryScope.SERVER
             ),
-            new BlockStatePropertiesGenerator()
+            new BlockStatePropertiesGenerator(),
+            new TagGenerator(
+                    "BlockType Tags",
+                    "BLOCK_TYPE_TAGS",
+                    BlockTags::getWrappers,
+                    context.relativeClass("block", "BlockType"),
+                    "tag",
+                    "BlockTypeTags"
+            ),
+            new TagGenerator(
+                    "ItemType Tags",
+                    "ITEM_TYPE_TAGS",
+                    ItemTags::getWrappers,
+                    context.relativeClass("item", "ItemType"),
+                    "tag",
+                    "ItemTypeTags"
+            ),
+            new TagGenerator(
+                    "EntityType Tags",
+                    "ENTITY_TYPE_TAGS",
+                    EntityTypeTags::getWrappers,
+                    ParameterizedTypeName.get(context.relativeClass("entity", "EntityType"), WildcardTypeName.subtypeOf(Object.class)),
+                    "tag",
+                    "EntityTypeTags"
+            ),
+            new TagGenerator(
+                    "FluidType Tags",
+                    "FLUID_TYPE_TAGS",
+                    FluidTags::getWrappers,
+                    context.relativeClass("fluid", "FluidType"),
+                    "tag",
+                    "FluidTypeTags"
+            )
         );
     }
 }

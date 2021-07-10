@@ -80,6 +80,9 @@ public final class SpongeBlockDamageSourceBuilder extends AbstractDamageSourceBu
         if (this.exhaustion != null) {
             accessor.accessor$exhaustion(this.exhaustion.floatValue());
         }
+        if (this.fire) {
+            accessor.invoker$setIsFire();
+        }
         return (BlockDamageSource) (Object) damageSource;
     }
 

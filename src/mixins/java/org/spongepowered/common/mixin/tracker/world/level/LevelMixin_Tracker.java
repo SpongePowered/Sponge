@@ -89,7 +89,7 @@ public abstract class LevelMixin_Tracker implements WorldBridge {
     @Redirect(method = "tickBlockEntities",
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/entity/TickableBlockEntity;tick()V"))
-    protected void tracker$wrapTileEntityTick(final TickableBlockEntity tileEntity) {
+    protected void tracker$wrapBlockEntityTick(final TickableBlockEntity tileEntity) {
         tileEntity.tick();
     }
 

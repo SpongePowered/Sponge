@@ -254,6 +254,27 @@
         },
         {
             "loader": "java_plain",
+            "id": "portaltest",
+            "name": "Portal Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.portal.PortalTest",
+            "description": "Now you're thinking with portals",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
             "id": "advancementtest",
             "name": "Advancement Test",
             "version": "8.0.0",
@@ -532,6 +553,52 @@
             "version": "8.0.0",
             "main-class": "org.spongepowered.test.worldborder.WorldBorderTest",
             "description": "World Border testing",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [
+                {
+                    "name": "SpongePowered",
+                    "description": "Lead Developer"
+                }
+            ],
+            "dependencies": [
+                {
+                    "id": "spongeapi",
+                    "version": "8.0.0"
+                }
+            ]
+        },
+        {
+            "loader": "java_plain",
+            "id": "chunkmanagertest",
+            "name": "Chunk Manager Test",
+            "version": "1.0.0",
+            "main-class": "org.spongepowered.test.chunkmanager.ChunkManagerTest",
+            "description": "Tests the Chunk Manager",
+            "links": {
+                "homepage": "https://www.spongepowered.org",
+                "source": "https://www.spongepowered.org/source",
+                "issues": "https://www.spongepowered.org/issues"
+            },
+            "contributors": [{
+                "name": "SpongePowered",
+                "description": "Lead Developer"
+            }],
+            "dependencies": [{
+                "id": "spongeapi",
+                "version": "8.0.0"
+            }]
+        },
+        {
+            "loader": "java_plain",
+            "id": "tagtest",
+            "name": "Tag Test",
+            "version": "8.0.0",
+            "main-class": "org.spongepowered.test.tag.TagTest",
+            "description": "Tag Testing",
             "links": {
                 "homepage": "https://www.spongepowered.org",
                 "source": "https://www.spongepowered.org/source",

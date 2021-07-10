@@ -143,7 +143,7 @@ public final class AsyncScheduler extends SpongeScheduler {
             // The taskMap has been modified; there is work to do.
             // Continue on without handling the Exception.
         } catch (final IllegalMonitorStateException e) {
-            SpongeCommon.getLogger().error("The scheduler internal state machine suffered a catastrophic error", e);
+            SpongeCommon.logger().error("The scheduler internal state machine suffered a catastrophic error", e);
         }
     }
 
@@ -195,12 +195,12 @@ public final class AsyncScheduler extends SpongeScheduler {
                         .addWithIndices(tasks)
                         .add()
                         .add("We will now attempt immediate shutdown.")
-                        .log(SpongeCommon.getLogger(), Level.WARN);
+                        .log(SpongeCommon.logger(), Level.WARN);
 
                 this.executor.shutdownNow();
             }
         } catch (final InterruptedException e) {
-            SpongeCommon.getLogger().error("The async scheduler was interrupted while awaiting shutdown!");
+            SpongeCommon.logger().error("The async scheduler was interrupted while awaiting shutdown!");
         }
     }
 }

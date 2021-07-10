@@ -268,7 +268,7 @@ public abstract class SpongeScheduler implements Scheduler {
                     SpongeCommon.setActivePlugin(task.owner());
                     task.task.consumer().accept(task);
                 } catch (final Throwable t) {
-                    SpongeCommon.getLogger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
+                    SpongeCommon.logger().error("The Scheduler tried to run the task '{}' owned by '{}' but an error occurred.",
                             task.name(), task.owner().metadata().id(), t);
                 }
             } finally {
@@ -302,7 +302,7 @@ public abstract class SpongeScheduler implements Scheduler {
 
     public <V> Future<V> execute(final Callable<V> callable) {
         final FutureTask<V> runnable = new FutureTask<>(callable);
-        this.submit(new SpongeTaskBuilder().execute(runnable).plugin(Launch.getInstance().getCommonPlugin()).build());
+        this.submit(new SpongeTaskBuilder().execute(runnable).plugin(Launch.instance().commonPlugin()).build());
         return runnable;
     }
 

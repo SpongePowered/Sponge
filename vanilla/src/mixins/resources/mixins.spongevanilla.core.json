@@ -1,9 +1,7 @@
 {
     "required": true,
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.vanilla.mixin.core",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "priority": 1301,
     "client": [
         "client.ClientBrandRetrieverMixin_Vanilla",
@@ -19,6 +17,7 @@
     ],
     "mixins": [
         "CrashReportMixin_Vanilla",
+        "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
         "core.MappedRegistryMixin_Vanilla",
         "core.RegistryMixin_Vanilla",
         "core.WritableRegistryMixin_Vanilla",
@@ -30,11 +29,9 @@
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
-        "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla"
+        "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla",
+        "server.level.ServerLevelMixin_Vanilla"
     ],
-    "injectors": {
-        "defaultRequire": 1
-    },
     "overwrites": {
         "conformVisibility": true
     }

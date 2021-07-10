@@ -1,9 +1,7 @@
 {
-    "minVersion": "0.8",
+    "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.common.mixin.ipforward",
     "plugin": "org.spongepowered.common.mixin.plugin.IpForwardPlugin",
-    "target": "@env(DEFAULT)",
-    "compatibilityLevel": "JAVA_8",
     "mixins": [
         "network.ConnectionMixin_IpForward",
         "network.protocol.handshake.ClientIntentionPacketMixin_IpForward",
@@ -13,8 +11,5 @@
     ],
     "server": [
         "server.dedicated.DedicatedServerMixin_IpForward"
-    ],
-    "injectors": {
-        "defaultRequire": 1
-    }
+    ]
 }

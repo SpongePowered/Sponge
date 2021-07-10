@@ -39,11 +39,11 @@ public abstract class ClassInstanceMultiMapMixin_ConcurrentCheck {
     @Inject(method = "add", at = @At("HEAD"), cancellable = true)
     private void concurrentCheck$checkThreadOnAdd(final Object entity, final CallbackInfoReturnable<Boolean> cir) {
         // This class gets used on the client, but we only care about the server
-        if (SpongeCommon.getGame().platform().executionType() != Platform.Type.CLIENT && !PlatformHooks.INSTANCE
+        if (SpongeCommon.game().platform().executionType() != Platform.Type.CLIENT && !PlatformHooks.INSTANCE
             .getGeneralHooks()
             .onServerThread()) {
             Thread.dumpStack();
-            SpongeCommon.getLogger().error("Detected attempt to add entity '" + entity + "' to ClassInheritanceMultiMap asynchronously.\n"
+            SpongeCommon.logger().error("Detected attempt to add entity '" + entity + "' to ClassInheritanceMultiMap asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
                     + " Skipping...");
             cir.setReturnValue(false);
@@ -52,11 +52,11 @@ public abstract class ClassInstanceMultiMapMixin_ConcurrentCheck {
 
     @Inject(method = "remove", at = @At("HEAD"), cancellable = true)
     private void concurrentCheck$checkServerThreadSide(final Object entity, final CallbackInfoReturnable<Boolean> cir) {
-        if (SpongeCommon.getGame().platform().executionType() != Platform.Type.CLIENT && !PlatformHooks.INSTANCE
+        if (SpongeCommon.game().platform().executionType() != Platform.Type.CLIENT && !PlatformHooks.INSTANCE
             .getGeneralHooks()
             .onServerThread()) {
             Thread.dumpStack();
-            SpongeCommon.getLogger().error("Detected attempt to remove entity '" + entity + "' from ClassInheritanceMultiMap asynchronously.\n"
+            SpongeCommon.logger().error("Detected attempt to remove entity '" + entity + "' from ClassInheritanceMultiMap asynchronously.\n"
                     + " This is very bad as it can cause ConcurrentModificationException's during a server tick.\n"
                     + " Skipping...");
             cir.setReturnValue(false);

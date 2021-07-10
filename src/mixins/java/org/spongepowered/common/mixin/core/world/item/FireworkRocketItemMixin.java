@@ -135,7 +135,7 @@ public abstract class FireworkRocketItemMixin {
                 final ConstructEntityEvent.Pre event = SpongeEventFactory.createConstructEntityEventPre(frame.currentCause(),
                         ServerLocation.of((ServerWorld) world, player.getX(), player.getY(), player.getZ()), new Vector3d(0, 0, 0),
                         EntityTypes.FIREWORK_ROCKET.get());
-                return SpongeCommon.postEvent(event);
+                return SpongeCommon.post(event);
             }
         }
         return false;

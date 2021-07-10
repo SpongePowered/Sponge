@@ -32,6 +32,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.asset.Asset;
 import org.spongepowered.api.asset.AssetManager;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.net.URL;
@@ -58,6 +59,6 @@ public final class SpongeAssetManager implements AssetManager {
 
     @Override
     public Optional<Asset> asset(String name) {
-        return this.asset(SpongeCommon.getPlugin(), name);
+        return this.asset(Launch.instance().platformPlugin(), name);
     }
 }

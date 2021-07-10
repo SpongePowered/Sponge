@@ -80,7 +80,7 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
             final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
                     (org.spongepowered.api.entity.Entity) entity, VecHelper.toVector3d(entity.position()),
                     VecHelper.toVector3d(this.shadow$position()), VecHelper.toVector3d(this.shadow$position()));
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 // Eventhough the event is made, the pearl was still created so remove it anyways
                 this.shadow$remove();
                 return;

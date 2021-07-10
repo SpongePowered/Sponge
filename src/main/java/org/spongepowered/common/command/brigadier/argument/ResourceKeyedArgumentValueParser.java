@@ -25,7 +25,6 @@
 package org.spongepowered.common.command.brigadier.argument;
 
 import com.mojang.brigadier.CommandDispatcher;
-import com.mojang.brigadier.suggestion.Suggestion;
 import com.mojang.brigadier.suggestion.SuggestionsBuilder;
 import net.minecraft.commands.CommandSourceStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -81,7 +80,7 @@ public abstract class ResourceKeyedArgumentValueParser<T> extends AbstractArgume
 
         @Override
         public final List<CommandCompletion> complete(final @NonNull CommandCause cause, final @NonNull String currentInput) {
-            final CommandDispatcher<CommandSourceStack> dispatcher = SpongeCommon.getServer().getCommands().getDispatcher();
+            final CommandDispatcher<CommandSourceStack> dispatcher = SpongeCommon.server().getCommands().getDispatcher();
             final SpongeCommandContextBuilder builder = new SpongeCommandContextBuilder(
                     dispatcher,
                     (CommandSourceStack) cause,

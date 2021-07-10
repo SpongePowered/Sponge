@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.block;
 
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
@@ -63,12 +62,15 @@ final class BlockDecayPhaseState extends BlockPhaseState {
     }
 
     @Override
-    public BlockChange associateBlockChangeWithSnapshot(final GeneralizedContext phaseContext, final BlockState newState,
-        final Block newBlock, final BlockState currentState, final SpongeBlockSnapshot snapshot, final Block originalBlock) {
+    public BlockChange associateBlockChangeWithSnapshot(
+        final GeneralizedContext phaseContext, final BlockState newState,
+        final Block newBlock, final BlockState currentState,
+        final Block originalBlock
+    ) {
         if (newBlock == Blocks.AIR) {
             return BlockChange.DECAY;
         } else {
-            return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, snapshot, originalBlock);
+            return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, originalBlock);
         }
     }
 

@@ -77,7 +77,7 @@ final class BrigadierJLineCompleter<S> implements Completer {
         } catch (InterruptedException e) {
             Thread.currentThread().interrupt();
         } catch (ExecutionException e) {
-            SpongeCommon.getLogger().error("Failed to tab complete", e);
+            SpongeCommon.logger().error("Failed to tab complete", e);
         }
     }
 

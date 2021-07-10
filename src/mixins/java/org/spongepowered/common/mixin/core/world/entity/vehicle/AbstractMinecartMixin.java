@@ -119,7 +119,7 @@ public abstract class AbstractMinecartMixin extends EntityMixin implements Abstr
             frame.pushCause(this);
             frame.pushCause(source);
             final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(), (MinecartLike) this, new ArrayList<>(), 0, amount);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
             }

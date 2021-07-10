@@ -50,8 +50,8 @@ public final class SpongeLevelFixer extends DataFix {
     }
 
     private Typed<?> fixPlayerIdTable(Typed<?> typed, Type<?> levelType) {
-        Type<?> fieldType = levelType.findFieldType(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE);
-        OpticFinder<List.ListType<?>> listFinder = DSL.fieldFinder(Constants.Sponge.SPONGE_PLAYER_UUID_TABLE, (List.ListType)fieldType);
+        Type<?> fieldType = levelType.findFieldType(Constants.Sponge.LEGACY_SPONGE_PLAYER_UUID_TABLE);
+        OpticFinder<List.ListType<?>> listFinder = DSL.fieldFinder(Constants.Sponge.LEGACY_SPONGE_PLAYER_UUID_TABLE, (List.ListType)fieldType);
 
         Typed<List.ListType<?>> listTyped = typed.getTyped(listFinder);
         // TODO is this correct?

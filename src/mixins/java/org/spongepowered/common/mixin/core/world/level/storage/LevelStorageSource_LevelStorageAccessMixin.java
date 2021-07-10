@@ -63,15 +63,7 @@ public abstract class LevelStorageSource_LevelStorageAccessMixin {
     )
     private Tag impl$saveSpongeLevelData(final CompoundTag root, final String path, final Tag data, final RegistryAccess p_237288_1_,
             final WorldData levelData) {
-        final CompoundTag spongeLevelData = new CompoundTag();
-        root.put(Constants.Sponge.Data.V2.SPONGE_DATA, spongeLevelData);
-        spongeLevelData.putUUID(Constants.Sponge.World.UNIQUE_ID, ((PrimaryLevelDataBridge) levelData).bridge$uniqueId());
-
-        // Map Storage
-        final CompoundTag mapUUIDIndexTag = new CompoundTag();
-        MapUtil.saveMapUUIDIndex(mapUUIDIndexTag, ((PrimaryLevelDataBridge) levelData).bridge$getMapUUIDIndex());
-        spongeLevelData.put(Constants.Map.MAP_UUID_INDEX, mapUUIDIndexTag);
-
+        root.put(Constants.Sponge.Data.V2.SPONGE_DATA, ((PrimaryLevelDataBridge) levelData).bridge$writeSpongeLevelData());
         return root.put(path, data);
     }
 }

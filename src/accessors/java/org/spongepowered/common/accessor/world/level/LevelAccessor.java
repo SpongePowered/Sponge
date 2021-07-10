@@ -38,4 +38,5 @@ public interface LevelAccessor {
 
     @Accessor("updatingBlockEntities") boolean accessor$updatingBlockEntities();
 
+    @Accessor("blockEntitiesToUnload") List<BlockEntity> accessor$blockEntitiesToUnload();
 }

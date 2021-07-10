@@ -69,7 +69,7 @@ public abstract class ObjectiveMixin implements ObjectiveBridge {
         }
 
         if (this.impl$spongeScoreboard == null) {
-            SpongeCommon.getLogger().warn("Returning objective cause null!");
+            SpongeCommon.logger().warn("Returning objective cause null!");
             ci.cancel();
             return;
         }
@@ -85,7 +85,7 @@ public abstract class ObjectiveMixin implements ObjectiveBridge {
         }
 
         if (this.impl$spongeScoreboard == null) {
-            SpongeCommon.getLogger().warn("Returning render objective cause null!");
+            SpongeCommon.logger().warn("Returning render objective cause null!");
             ci.cancel();
             return;
         }

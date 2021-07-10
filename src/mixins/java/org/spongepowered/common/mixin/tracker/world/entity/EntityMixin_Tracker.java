@@ -173,7 +173,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
         // post the removal event here, basically.
         if (!tracked && this.tracker$destructCause != null && ShouldFire.DESTRUCT_ENTITY_EVENT) {
             final Audience originalChannel = Audience.empty();
-            SpongeCommon.postEvent(SpongeEventFactory.createDestructEntityEvent(
+            SpongeCommon.post(SpongeEventFactory.createDestructEntityEvent(
                 this.tracker$destructCause,
                 originalChannel,
                 Optional.of(originalChannel),

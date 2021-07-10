@@ -79,6 +79,7 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
@@ -171,27 +172,28 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 args = "ldc=remove")
         )
     )
-    private void tracker$wrapNormalEntityTick(final ServerLevel serverWorld, final Consumer<Entity> entityUpdateConsumer,
+    private void tracker$wrapNormalEntityTick(final ServerLevel level, final Consumer<Entity> entityUpdateConsumer,
         final Entity entity
     ) {
-        ((ServerLevelBridge) this).bridge$getTimingsHandler().entityTick.startTiming();
+        final Timing entityTickTiming = ((TimingBridge) entity.getType()).bridge$timings();
+        entityTickTiming.startTiming();
         final PhaseContext<@NonNull ?> currentState = PhaseTracker.SERVER.getPhaseContext();
         if (currentState.alreadyCapturingEntityTicks()) {
             this.shadow$guardEntityTick(entityUpdateConsumer, entity);
             return;
         }
         TrackingUtil.tickEntity(entityUpdateConsumer, entity);
-        ((ServerLevelBridge) this).bridge$getTimingsHandler().entityTick.stopTiming();
+        entityTickTiming.stopTiming();
     }
 
     @Override
-    protected void tracker$wrapTileEntityTick(final TickableBlockEntity tileEntity) {
+    protected void tracker$wrapBlockEntityTick(final TickableBlockEntity blockEntity) {
         final PhaseContext<@NonNull ?> state = PhaseTracker.SERVER.getPhaseContext();
         if (state.alreadyCapturingTileTicks()) {
-            tileEntity.tick();
+            blockEntity.tick();
             return;
         }
-        TrackingUtil.tickTileEntity(this, tileEntity);
+        TrackingUtil.tickTileEntity(this, blockEntity);
     }
 
 
@@ -263,7 +265,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/level/block/state/BlockState;randomTick(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Ljava/util/Random;)V"))
     private void tracker$wrapBlockRandomTick(final BlockState blockState, final ServerLevel worldIn, final BlockPos posIn, final Random randomIn) {
-        try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
+        try (final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$timings()) {
             timing.startTiming();
             final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
             if (context.alreadyCapturingBlockTicks()) {
@@ -372,7 +374,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                     SpongeEventFactory.createExplosionEventPre(
                             PhaseTracker.SERVER.currentCause(),
                             explosion, ((org.spongepowered.api.world.server.ServerWorld) this));
-            if (SpongeCommon.postEvent(event)) {
+            if (SpongeCommon.post(event)) {
                 return (Explosion) explosion;
             }
             explosion = event.explosion();
@@ -745,7 +747,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
                 // TODO - have the PhaseTracker of this particular thread print its stack
                 // since we're on that thread, maybe we might have some idea of who or what is calling it.
                 .add(new Exception("Async Block Notifcation Detected"))
-                .log(SpongeCommon.getLogger(), Level.ERROR);
+                .log(SpongeCommon.logger(), Level.ERROR);
             // Maybe? I don't think this is wise to try and sync back a notification on the main thread.
             return;
         }

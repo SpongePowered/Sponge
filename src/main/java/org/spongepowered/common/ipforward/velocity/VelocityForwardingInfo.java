@@ -65,7 +65,7 @@ public class VelocityForwardingInfo {
         private static final RawHandshakeDataChannel CHANNEL;
 
         static {
-            final RawDataChannel rawData = Sponge.channelRegistry().ofType(VelocityChannel.PLAYER_INFO_CHANNEL, RawDataChannel.class);
+            final RawDataChannel rawData = Sponge.channelManager().ofType(VelocityChannel.PLAYER_INFO_CHANNEL, RawDataChannel.class);
             rawData.setExceptionHandler(ChannelExceptionHandler.logEverything().suppressIfFutureIsPresent(NoResponseException.class));
             CHANNEL = rawData.handshake();
         }

@@ -77,7 +77,7 @@ public final class SpongePlayerDataManager {
                     playerFiles.add(entry);
                 }
             } catch (final DirectoryIteratorException e) {
-                SpongeCommon.getLogger().error("Something happened when trying to gather all player files", e);
+                SpongeCommon.logger().error("Something happened when trying to gather all player files", e);
             }
             for (final Path playerFile : playerFiles) {
                 if (Files.isReadable(playerFile)) {
@@ -149,7 +149,7 @@ public final class SpongePlayerDataManager {
         if (data != null) {
             this.saveFile(uniqueId.toString(), this.createCompoundFor(data));
         } else {
-            SpongeCommon.getLogger().error("Couldn't find a player data for the uuid: " + uniqueId.toString());
+            SpongeCommon.logger().error("Couldn't find a player data for the uuid: " + uniqueId.toString());
         }
     }
 
@@ -169,7 +169,7 @@ public final class SpongePlayerDataManager {
             }
             Files.move(newDatPath, finalDatPath, StandardCopyOption.REPLACE_EXISTING);
         } catch (Exception e) {
-            SpongeCommon.getLogger().error("Failed to save player data for [{}]!", id, e);
+            SpongeCommon.logger().error("Failed to save player data for [{}]!", id, e);
         }
     }
 

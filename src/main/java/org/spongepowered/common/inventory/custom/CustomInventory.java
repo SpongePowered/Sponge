@@ -64,7 +64,7 @@ public class CustomInventory implements Container, CarriedBridge {
         this.lens = lens;
         this.slotLensProvider = provider;
         this.inventories = inventories;
-        this.plugin = SpongeCommon.getActivePlugin();
+        this.plugin = SpongeCommon.activePlugin();
     }
 
     public Carrier getCarrier() {

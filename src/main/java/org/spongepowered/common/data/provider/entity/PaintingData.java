@@ -80,8 +80,8 @@ public final class PaintingData {
                                     players.add(player);
                                 }
                                 for (final ServerPlayer player : players) {
-                                    SpongeCommon.getServerScheduler().submit(Task.builder()
-                                            .plugin(Launch.getInstance().getCommonPlugin())
+                                    SpongeCommon.serverScheduler().submit(Task.builder()
+                                            .plugin(Launch.instance().commonPlugin())
                                             .delay(new SpongeTicks(SpongeGameConfigs.getForWorld(h.level).get().entity.painting.respawnDelay))
                                             .execute(() -> {
                                                 final ClientboundAddPaintingPacket packet = new ClientboundAddPaintingPacket(h);

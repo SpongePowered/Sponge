@@ -196,7 +196,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
                             .add("Position: " + this.pos)
                             .add("Desired BlockState: " + this.blockState);
                         printer.add();
-                        printer.log(SpongeCommon.getLogger(), Level.ERROR);
+                        printer.log(SpongeCommon.logger(), Level.ERROR);
                         return true; // I mean, I guess. the block was set up, but not the tile entity.
                     }
 

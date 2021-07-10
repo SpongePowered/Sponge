@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.applaunch.config.common;
 
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.configurate.objectmapping.meta.Comment;
 import org.spongepowered.configurate.objectmapping.meta.Setting;
 import org.spongepowered.configurate.objectmapping.ConfigSerializable;
@@ -96,7 +97,7 @@ public final class PhaseTrackerCategory {
                                                            + "Some mods may interact badly with Sponge's block capturing system, causing Sponge to\n"
                                                            + "end up capturing block transactions every time it tries to process an existing batch.\n"
                                                             + "Due to the recursive nature of the depth-first processing that Sponge uses to handle block transactions,\n"
-                                                            + "this can result in a stack overflow, which causes us to lose all infomration about the original cause of the issue.\n"
+                                                            + "this can result in a stack overflow, which causes us to lose all information about the original cause of the issue.\n"
                                                             + "To prevent a stack overflow, Sponge tracks the current processing depth, and aborts processing when it exceeds\n"
                                                             + "this threshold.\n"
                                                             + "The default value should almost always work properly -  it's unlikely you'll ever have to change it.")
@@ -142,6 +143,6 @@ public final class PhaseTrackerCategory {
     public final Map<String, Boolean> autoFixNullSourceBlockProvidingBlockEntities = new HashMap<>();
 
     private boolean isVanilla() {
-        return SpongeConfigs.getPluginEnvironment().blackboard().get(SpongeConfigs.IS_VANILLA_PLATFORM).orElse(true);
+        return AppLaunch.pluginPlatform().vanilla();
     }
 }

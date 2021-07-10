@@ -62,7 +62,7 @@ public abstract class PlayerDataStorageMixin {
         playerEntity.load(compound);
         final Path file = new File(this.playerDir, playerEntity.getStringUUID() + ".dat").toPath();
         final Instant creationTime = Files.exists(file) ? Files.readAttributes(file, BasicFileAttributes.class).creationTime().toInstant() : null;
-        ((SpongeServer) SpongeCommon.getServer()).getPlayerDataManager().readPlayerData(compound, null, creationTime);
+        ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().readPlayerData(compound, null, creationTime);
     }
 
     @Inject(method = "save",

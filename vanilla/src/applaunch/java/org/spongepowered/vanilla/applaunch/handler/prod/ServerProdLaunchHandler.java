@@ -25,10 +25,11 @@
 package org.spongepowered.vanilla.applaunch.handler.prod;
 
 import cpw.mods.modlauncher.api.ITransformingClassLoader;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.vanilla.applaunch.AppLaunchTargets;
 import org.spongepowered.vanilla.applaunch.Main;
 import org.spongepowered.vanilla.applaunch.handler.AbstractVanillaLaunchHandler;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 public final class ServerProdLaunchHandler extends AbstractVanillaLaunchHandler {
 
@@ -40,7 +41,7 @@ public final class ServerProdLaunchHandler extends AbstractVanillaLaunchHandler 
     @Override
     protected void launchService0(final String[] arguments, final ITransformingClassLoader launchClassLoader) throws Exception {
         Class.forName("org.spongepowered.vanilla.launch.DedicatedServerLaunch", true, launchClassLoader.getInstance())
-                .getMethod("launch", VanillaPluginEngine.class, Boolean.class, String[].class)
-                .invoke(null, Main.getInstance().getPluginEngine(), Boolean.FALSE, arguments);
+                .getMethod("launch", VanillaPluginPlatform.class, Boolean.class, String[].class)
+                .invoke(null, AppLaunch.pluginPlatform(), Boolean.FALSE, arguments);
     }
 }

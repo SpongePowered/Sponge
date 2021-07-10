@@ -31,10 +31,11 @@ import cpw.mods.modlauncher.api.ITransformingClassLoader;
 import cpw.mods.modlauncher.api.ITransformingClassLoaderBuilder;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 import org.spongepowered.plugin.jvm.locator.ResourceType;
-import org.spongepowered.vanilla.applaunch.Main;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 import java.io.File;
 import java.io.IOException;
@@ -44,15 +45,13 @@ import java.net.URI;
 import java.net.URISyntaxException;
 import java.net.URL;
 import java.net.URLConnection;
-import java.nio.file.Files;
-import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.Collections;
 import java.util.Enumeration;
 import java.util.Iterator;
-import java.util.List;
 import java.util.NoSuchElementException;
 import java.util.Optional;
+import java.util.Set;
 import java.util.concurrent.Callable;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ConcurrentMap;
@@ -68,7 +67,7 @@ import java.util.jar.Manifest;
 public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerService {
 
     private static final String JAVA_HOME_PATH = System.getProperty("java.home");
-    protected final Logger logger = LogManager.getLogger("Launch");
+    protected final Logger logger = LogManager.getLogger("launch");
 
     /**
      * Classes or packages that mark jar files that should be excluded from the transformation path
@@ -114,12 +113,14 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             try {
                 final URI uri = url.toURI();
                 if (!this.isTransformable(uri)) {
+                    this.logger.debug("Non-transformable system classpath entry: {}", uri);
                     continue;
                 }
 
                 builder.addTransformationPath(Paths.get(uri));
+                this.logger.debug("Transformable system classpath entry: {}", uri);
             } catch (final URISyntaxException | IOException ex) {
-                this.logger.error("Failed to add to transformation path", ex);
+                this.logger.error("Failed to add {} to transformation path", url, ex);
             }
         }
 
@@ -156,7 +157,7 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
 
     @Override
     public Callable<Void> launchService(final String[] arguments, final ITransformingClassLoader launchClassLoader) {
-        this.logger.info("Transitioning to Sponge launcher, please wait...");
+        this.logger.info("Transitioning to Sponge launch, please wait...");
 
         launchClassLoader.addTargetPackageFilter(klass -> {
             for (final String pkg : AbstractVanillaLaunchHandler.EXCLUDED_PACKAGES) {
@@ -181,9 +182,17 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                 return Collections.emptyEnumeration();
             }
 
+            final URI asUri;
+            try {
+                asUri = new URI(null, null, s, null);
+            } catch (final URISyntaxException ex) {
+                this.logger.error("Failed to convert resource path {} to a URI", s, ex);
+                return Collections.emptyEnumeration();
+            }
+
             return new Enumeration<URL>() {
-                final Iterator<List<PluginResource>> serviceResources =
-                        Main.getInstance().getPluginEngine().getResources().values().iterator();
+                final Iterator<Set<PluginResource>> serviceResources = ((VanillaPluginPlatform) AppLaunch.pluginPlatform()).getResources()
+                    .values().iterator();
                 Iterator<PluginResource> resources;
                 URL next = this.computeNext();
 
@@ -222,10 +231,10 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
                                 }
                             }
 
-                            final Path resolved = resource.fileSystem().getPath(s);
-                            if (Files.exists(resolved)) {
+                            final Optional<URI> uri = resource.locateResource(asUri);
+                            if (uri.isPresent()) {
                                 try {
-                                    return resolved.toUri().toURL();
+                                    return uri.get().toURL();
                                 } catch (final MalformedURLException ex) {
                                     throw new RuntimeException(ex);
                                 }
@@ -245,12 +254,12 @@ public abstract class AbstractVanillaLaunchHandler implements ILaunchHandlerServ
             if (connection instanceof JarURLConnection) {
                 final URL jarFileUrl = ((JarURLConnection) connection).getJarFileURL();
                 final Optional<Manifest> manifest =  this.manifestCache.computeIfAbsent(jarFileUrl, key -> {
-                    for (final List<PluginResource> resources : Main.getInstance().getPluginEngine().getResources().values()) {
+                    for (final Set<PluginResource> resources : ((VanillaPluginPlatform) AppLaunch.pluginPlatform()).getResources().values()) {
                         for (final PluginResource resource : resources) {
                             if (resource instanceof JVMPluginResource) {
                                 final JVMPluginResource jvmResource = (JVMPluginResource) resource;
                                 try {
-                                    if (jvmResource.type() == ResourceType.JAR && resource.path().toAbsolutePath().normalize().equals(Paths.get(key.toURI()).toAbsolutePath().normalize())) {
+                                    if (jvmResource.type() == ResourceType.JAR && ((JVMPluginResource) resource).path().toAbsolutePath().normalize().equals(Paths.get(key.toURI()).toAbsolutePath().normalize())) {
                                         return jvmResource.manifest();
                                     }
                                 } catch (final URISyntaxException ex) {

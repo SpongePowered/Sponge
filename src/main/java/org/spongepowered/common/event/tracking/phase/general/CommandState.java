@@ -102,7 +102,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
             if (!list.isEmpty()) {
                 final ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.currentCause(),
                         ((Inventory) playerSource.get().inventory), list);
-                SpongeCommon.postEvent(event);
+                SpongeCommon.post(event);
                 PacketPhaseUtil.handleSlotRestore(playerSource.get(), null, list, event.isCancelled());
                 list.clear();
             }

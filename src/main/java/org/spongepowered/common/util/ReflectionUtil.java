@@ -110,12 +110,12 @@ public final class ReflectionUtil {
         final String methodName,
         final Class<?>[] methodParameters
     ) {
-        final String targetMethodForEnvironment = Launch.getInstance().isDeveloperEnvironment() ? methodName : methodName;
+        final String targetMethodForEnvironment = Launch.instance().developerEnvironment() ? methodName : methodName;
         try {
             final Class<?> declaringClass = targetClass.getMethod(targetMethodForEnvironment, methodParameters).getDeclaringClass();
             return !ignoredClass.equals(declaringClass);
         } catch (final NoSuchMethodException e) {
-            SpongeCommon.getLogger().fatal(ReflectionUtil.STUPID_REFLECTION, "Could not find desired method {} under environment method name {}", methodName, targetMethodForEnvironment);
+            SpongeCommon.logger().fatal(ReflectionUtil.STUPID_REFLECTION, "Could not find desired method {} under environment method name {}", methodName, targetMethodForEnvironment);
             return true;
         }
 
@@ -145,7 +145,7 @@ public final class ReflectionUtil {
         try {
             return ctor.newInstance(args);
         } catch (final InstantiationException | IllegalAccessException | InvocationTargetException e) {
-            SpongeCommon.getLogger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
+            SpongeCommon.logger().error("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()
                                          + "with the args: " + Arrays.toString(args), e);
         }
         throw new IllegalArgumentException("Couldn't find an appropriate constructor for " + objectClass.getCanonicalName()

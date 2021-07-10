@@ -49,7 +49,7 @@ final class ComponentFlattenerProvider {
     static {
         final ComponentFlattener.Builder builder = ComponentFlattener.basic().toBuilder();
 
-        if (!Launch.getInstance().isDedicatedServer()) {
+        if (!Launch.instance().dedicatedServer()) {
             builder.mapper(KeybindComponent.class, ComponentFlattenerProvider::resolveKeybind);
         }
 

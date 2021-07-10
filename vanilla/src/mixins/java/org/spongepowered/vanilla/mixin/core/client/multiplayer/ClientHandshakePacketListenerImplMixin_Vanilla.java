@@ -38,7 +38,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.network.channel.PacketSender;
 import org.spongepowered.common.network.channel.PacketUtil;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 
 @Mixin(ClientHandshakePacketListenerImpl.class)
 public abstract class ClientHandshakePacketListenerImplMixin_Vanilla implements ClientLoginPacketListener {
@@ -50,7 +50,7 @@ public abstract class ClientHandshakePacketListenerImplMixin_Vanilla implements 
     private void vanilla$handleRequestPayload(final ClientboundCustomQueryPacket packet, final CallbackInfo ci) {
         ci.cancel();
 
-        final SpongeChannelRegistry channelRegistry = (SpongeChannelRegistry) Sponge.channelRegistry();
+        final SpongeChannelManager channelRegistry = (SpongeChannelManager) Sponge.channelManager();
         this.minecraft.execute(() -> {
             final EngineConnection connection = (EngineConnection) this;
             if (!channelRegistry.handleLoginRequestPayload(connection, packet)) {

@@ -72,7 +72,7 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
         final Cause currentCause,
         final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
-        final Optional<ServerWorld> o = ((SpongeServer) SpongeCommon.getServer()).worldManager().world(this.worldKey);
+        final Optional<ServerWorld> o = ((SpongeServer) SpongeCommon.server()).worldManager().world(this.worldKey);
         if (!o.isPresent()) {
             return Optional.empty();
         }
@@ -109,7 +109,7 @@ abstract class BlockEventBasedTransaction extends GameTransaction<ChangeBlockEve
                 } else {
                     intermediary = ImmutableList.of();
                 }
-                final Operation operation = context.getBlockOperation(original, original.blockChange);
+                final Operation operation = context.getBlockOperation(original, result);
                 final BlockTransaction eventTransaction = new BlockTransaction(original, result, intermediary, operation);
                 return Optional.of(eventTransaction);
             })

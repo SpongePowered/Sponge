@@ -28,5 +28,5 @@ import co.aikar.timings.Timing;
 
 public interface TimingBridge {
 
-    Timing bridge$getTimingsHandler();
+    Timing bridge$timings();
 }

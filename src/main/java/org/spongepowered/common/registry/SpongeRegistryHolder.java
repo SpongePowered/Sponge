@@ -26,6 +26,11 @@ package org.spongepowered.common.registry;
 
 import com.mojang.serialization.Lifecycle;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.core.MappedRegistry;
+import net.minecraft.core.RegistryAccess;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.StaticTagHelper;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
@@ -34,6 +39,7 @@ import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryRoots;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
+import org.spongepowered.api.tag.Tag;
 import org.spongepowered.common.accessor.core.RegistryAccessAccessor;
 import org.spongepowered.common.accessor.resources.ResourceKeyAccessor;
 import org.spongepowered.common.bridge.core.WritableRegistryBridge;
@@ -44,11 +50,6 @@ import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
-
-import net.minecraft.core.MappedRegistry;
-import net.minecraft.core.RegistryAccess;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.ResourceLocation;
 
 public final class SpongeRegistryHolder implements RegistryHolder {
 
@@ -210,6 +211,32 @@ public final class SpongeRegistryHolder implements RegistryHolder {
         if (registry instanceof CallbackRegistry) {
             ((CallbackRegistry<?>) registry).setCallbackEnabled(true);
         }
+        return (Registry<T>) registry;
+    }
+
+    public <T> Registry<T> wrapTagHelperAsRegistry(final RegistryType<Tag<T>> type, final StaticTagHelper<T> staticTagHelper) {
+        Objects.requireNonNull(type, "type");
+
+        final net.minecraft.core.Registry<net.minecraft.core.Registry<?>> root = this.roots.get(type.root());
+        if (root == null) {
+            throw new ValueNotFoundException(String.format("No '%s' root registry has been defined", type.root()));
+        }
+        net.minecraft.core.Registry<?> registry = root.get((ResourceLocation) (Object) type.location());
+        if (registry != null) {
+            throw new DuplicateRegistrationException(String.format("Registry '%s' in root '%s' has already been defined", type.location(), type.root()));
+        }
+        final net.minecraft.resources.ResourceKey<net.minecraft.core.Registry<Tag<T>>> key;
+        if (net.minecraft.core.Registry.ROOT_REGISTRY_NAME.equals(type.root())) {
+            key = net.minecraft.resources.ResourceKey.createRegistryKey((ResourceLocation) (Object) type.location());
+        } else {
+            key = ResourceKeyAccessor.invoker$create(
+                    (ResourceLocation) (Object) RegistryRoots.SPONGE,
+                    (ResourceLocation) (Object) type.location()
+            );
+        }
+        registry = new TagRegistry<>(key, staticTagHelper, Lifecycle.stable());
+
+        ((WritableRegistry) root).register(key, registry, Lifecycle.stable());
         return (Registry<T>) registry;
     }
 }

@@ -97,7 +97,7 @@ public class BrigadierHighlighter<S> implements Highlighter {
 
             return builder.toAttributedString();
         } catch (final Exception ex) {
-            SpongeCommon.getLogger().warn("Error while highlighting console command line", ex);
+            SpongeCommon.logger().warn("Error while highlighting console command line", ex);
             return new AttributedString(buffer);
         }
     }

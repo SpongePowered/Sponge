@@ -52,7 +52,7 @@ import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.event.cause.entity.damage.DamageEventHandler;
+import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.ArrayList;
@@ -122,7 +122,7 @@ public abstract class MobMixin extends LivingEntityMixin {
             csm.pushCause(entity);
         }
         final UnleashEntityEvent event = SpongeEventFactory.createUnleashEntityEvent(csm.currentCause(), (Living) this);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         csm.popCause();
         if (event.isCancelled()) {
             ci.cancel();
@@ -216,7 +216,7 @@ public abstract class MobMixin extends LivingEntityMixin {
 
         if (targetEntity instanceof LivingEntity) {
             // Sponge Start - Gather modifiers
-            originalFunctions.addAll(DamageEventHandler
+            originalFunctions.addAll(DamageEventUtil
                 .createAttackEnchantmentFunction(this.shadow$getMainHandItem(), ((LivingEntity) targetEntity).getMobType(), 1.0F)); // 1.0F is for full attack strength since mobs don't have the concept
             // baseDamage += EnchantmentHelper.getModifierForCreature(this.getHeldItem(), ((EntityLivingBase) targetEntity).getCreatureAttribute());
             knockbackModifier += EnchantmentHelper.getKnockbackBonus((Mob) (Object) this);
@@ -227,7 +227,7 @@ public abstract class MobMixin extends LivingEntityMixin {
         PhaseTracker.getCauseStackManager().pushCause(damageSource);
         final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), (org.spongepowered.api.entity.Entity) targetEntity,
             originalFunctions, knockbackModifier, originalBaseDamage);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         PhaseTracker.getCauseStackManager().popCause();
         if (event.isCancelled()) {
             return false;

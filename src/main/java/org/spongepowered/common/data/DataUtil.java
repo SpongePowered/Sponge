@@ -82,7 +82,7 @@ public class DataUtil {
                         if (dataStore.get() instanceof SpongeDataStore) {
                             ((SpongeDataStore) dataStore.get()).getUpdaterFor(contentVersion).ifPresent(updater -> {
                                 dataStoreData.set(Constants.Sponge.Data.V3.CONTENT, updater.update(dataStoreData.getView(Constants.Sponge.Data.V3.CONTENT).get()));
-                                SpongeCommon.getLogger().info("Updated datastore {} from {} to {} ", dataStoreKey.asString(), contentVersion, ((SpongeDataStore) dataStore.get()).getVersion());
+                                SpongeCommon.logger().info("Updated datastore {} from {} to {} ", dataStoreKey.asString(), contentVersion, ((SpongeDataStore) dataStore.get()).getVersion());
                             });
                         }
                     } else {
@@ -100,7 +100,7 @@ public class DataUtil {
                 // and set data in CustomDataHolderBridge
                 dataHolder.bridge$mergeDeserialized(deserialized);
             } catch (Exception e) {
-                SpongeCommon.getLogger().error("Could not merge data from datastore: {}", deserialized, e);
+                SpongeCommon.logger().error("Could not merge data from datastore: {}", deserialized, e);
             }
         }
     }
@@ -131,9 +131,9 @@ public class DataUtil {
                 final DataView dataStoreData = spongeDataV3.createView(DataQuery.of(key.namespace(), key.value()));
                 dataStoreData.set(Constants.Sponge.Data.V3.CONTENT_VERSION, contentVersion);
                 dataStoreData.set(Constants.Sponge.Data.V3.CONTENT, data);
-                SpongeCommon.getLogger().info("Upgraded custom data for datastore: {}", key);
+                SpongeCommon.logger().info("Upgraded custom data for datastore: {}", key);
             } catch (Exception e) {
-                SpongeCommon.getLogger().error("Error when upgrading V2 custom data", e);
+                SpongeCommon.logger().error("Error when upgrading V2 custom data", e);
             }
         }
 
@@ -143,10 +143,10 @@ public class DataUtil {
         for (DataQuery spongeDataKey : spongeDataV2.keys(false)) {
             final DataQuery query = SpongeDataManager.INSTANCE.legacySpongeDataQuery(spongeDataKey.toString());
             if (query == null) {
-                SpongeCommon.getLogger().error("Missing legacy sponge data query mapping {}", spongeDataKey.toString());
+                SpongeCommon.logger().error("Missing legacy sponge data query mapping {}", spongeDataKey.toString());
             } else {
                 final Object value = spongeDataV2.get(spongeDataKey).get();
-                SpongeCommon.getLogger().info("Upgraded sponge data: {}->{} type {}", spongeDataKey.toString(), query.toString(), value.getClass().getSimpleName());
+                SpongeCommon.logger().info("Upgraded sponge data: {}->{} type {}", spongeDataKey.toString(), query.toString(), value.getClass().getSimpleName());
                 spongeDataV3.set(query, value);
             }
         }

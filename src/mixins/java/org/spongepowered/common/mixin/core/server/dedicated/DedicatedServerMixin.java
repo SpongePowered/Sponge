@@ -54,7 +54,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
             DataFixer p_i232601_8_, MinecraftSessionService p_i232601_9_, GameProfileRepository p_i232601_10_, GameProfileCache p_i232601_11_,
             ChunkProgressListenerFactory p_i232601_12_, CallbackInfo ci) {
 
-        SpongeCommon.getGame().setServer(this);
+        SpongeCommon.game().setServer(this);
         p_i232601_11_.load();
     }
 
@@ -67,7 +67,7 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Inject(method = "stopServer", at = @At("TAIL"))
     private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
-        SpongeCommon.getGame().asyncScheduler().close();
+        SpongeCommon.game().asyncScheduler().close();
     }
 
     @Override

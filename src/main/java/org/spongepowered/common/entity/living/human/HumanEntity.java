@@ -77,6 +77,7 @@ import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.accessor.world.entity.player.PlayerAccessor;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.profile.SpongeProfileProperty;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -336,17 +337,17 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
     }
 
     public boolean getOrLoadSkin(final UUID minecraftAccount) {
-        GameProfile gameProfile = SpongeCommon.getServer().getProfileCache().get(minecraftAccount);
+        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount);
         if (gameProfile == null) {
             gameProfile =
-                    SpongeCommon.getServer().getSessionService().fillProfileProperties(new GameProfile(minecraftAccount, ""), true);
+                    SpongeCommon.server().getSessionService().fillProfileProperties(new GameProfile(minecraftAccount, ""), true);
             if (gameProfile == null) {
                 return false;
             }
 
             // TODO Should we put profile cache entries with UUIDs that don't have their names?
 
-            SpongeCommon.getServer().getProfileCache().add(gameProfile);
+            SpongeCommon.server().getProfileCache().add(gameProfile);
         }
 
         this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, gameProfile.getProperties().get(ProfileProperty.TEXTURES));
@@ -359,14 +360,14 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
 
     public boolean getOrLoadSkin(final String minecraftAccount) {
         Objects.requireNonNull(minecraftAccount);
-        GameProfile gameProfile = SpongeCommon.getServer().getProfileCache().get(minecraftAccount);
+        GameProfile gameProfile = SpongeCommon.server().getProfileCache().get(minecraftAccount);
         if (gameProfile == null) {
             return false;
         }
 
         if (gameProfile.getProperties().isEmpty()) {
-            gameProfile = SpongeCommon.getServer().getSessionService().fillProfileProperties(gameProfile, true);
-            SpongeCommon.getServer().getProfileCache().add(gameProfile);
+            gameProfile = SpongeCommon.server().getSessionService().fillProfileProperties(gameProfile, true);
+            SpongeCommon.server().getProfileCache().add(gameProfile);
         }
 
         this.fakeProfile.getProperties().clear();
@@ -387,21 +388,24 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
             Sponge.server().scheduler().submit(Task.builder()
                     .execute(removeTask)
                     .delay(new SpongeTicks(delay))
-                    .plugin(Launch.getInstance().getCommonPlugin())
+                    .plugin(Launch.instance().commonPlugin())
                     .build());
         }
     }
 
-    public Property getSkinProperty() {
+    public SpongeProfileProperty getSkinProperty() {
         final Collection<Property> properties = this.fakeProfile.getProperties().get(ProfileProperty.TEXTURES);
         if (properties.isEmpty()) {
             return null;
         }
-        return properties.iterator().next();
+        return new SpongeProfileProperty(properties.iterator().next());
     }
 
-    public void setSkinProperty(final Property property) {
-        this.fakeProfile.getProperties().replaceValues(ProfileProperty.TEXTURES, Collections.singletonList(property));
+    public void setSkinProperty(final ProfileProperty property) {
+        this.fakeProfile.getProperties()
+                .replaceValues(
+                        ProfileProperty.TEXTURES,
+                        Collections.singletonList(((SpongeProfileProperty) property).asProperty()));
 
         if (this.isAliveAndInWorld()) {
             this.respawnOnClient();

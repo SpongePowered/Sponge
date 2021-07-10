@@ -30,50 +30,49 @@ import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
 public class IntegrationTestLaunch extends VanillaLaunch {
     private final boolean isServer;
 
-    protected IntegrationTestLaunch(final VanillaPluginEngine pluginEngine, final boolean isServer) {
-        super(pluginEngine, Stage.DEVELOPMENT);
+    protected IntegrationTestLaunch(final VanillaPluginPlatform pluginPlatform, final boolean isServer) {
+        super(pluginPlatform, Stage.DEVELOPMENT);
         this.isServer = isServer;
     }
 
-    public static void launch(final VanillaPluginEngine pluginEngine, final Boolean isServer, final String[] args) {
-        final IntegrationTestLaunch launcher = new IntegrationTestLaunch(pluginEngine, isServer);
+    public static void launch(final VanillaPluginPlatform pluginPlatform, final Boolean isServer, final String[] args) {
+        final IntegrationTestLaunch launcher = new IntegrationTestLaunch(pluginPlatform, isServer);
         Launch.setInstance(launcher);
         launcher.launchPlatform(args);
     }
 
     @Override
-    public boolean isDedicatedServer() {
+    public boolean dedicatedServer() {
         return this.isServer;
     }
 
-    public void launchPlatform(final String[] args) {
-        super.onLaunch();
-        this.getLogger().info("Running Sponge integration tests...");
-
-        SpongeBootstrap.perform("integration tests", () -> this.performIntegrationTests(args));
+    @Override
+    protected void performBootstrap(String[] args) {
+        this.logger().info("Running integration tests...");
+        SpongeBootstrap.perform("integration tests", this::performIntegrationTests);
     }
 
-    private void performIntegrationTests(final String... args) {
+    private void performIntegrationTests() {
         // Prepare Vanilla
         Bootstrap.bootStrap();
         Bootstrap.validate();
 
         // Prepare Sponge
-        final SpongeLifecycle lifecycle = SpongeBootstrap.getLifecycle();
+        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
         lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
 
-        this.getLogger().info("Performing Mixin audit");
-        Launch.getInstance().auditMixins();
+        this.logger().info("Performing Mixin audit");
+        Launch.instance().auditMixins();
 
-        this.getLogger().info("Testing complete, goodbye!");
-        SpongeCommon.getGame().asyncScheduler().close();
+        this.logger().info("Testing complete, goodbye!");
+        SpongeCommon.game().asyncScheduler().close();
         System.exit(0);
     }
 }

@@ -29,17 +29,14 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.AttackEntityEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import java.util.ArrayList;
 
-import javax.annotation.Nullable;
 import net.minecraft.world.damagesource.DamageSource;
 
 @Mixin(net.minecraft.world.entity.decoration.ItemFrame.class)
@@ -56,7 +53,7 @@ public abstract class ItemFrameMixin extends HangingEntityMixin {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(source);
             final AttackEntityEvent event = SpongeEventFactory.createAttackEntityEvent(frame.currentCause(), (ItemFrame) this, new ArrayList<>(), 0, amount);
-            SpongeCommon.postEvent(event);
+            SpongeCommon.post(event);
             if (event.isCancelled()) {
                 cir.setReturnValue(true);
             }

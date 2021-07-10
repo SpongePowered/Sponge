@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.bridge.world.entity;
 
-import co.aikar.timings.Timing;
-
 public interface EntityTypeBridge {
 
     boolean bridge$isActivationRangeInitialized();
@@ -39,6 +37,4 @@ public interface EntityTypeBridge {
     boolean bridge$overridesDamageEntity();
 
     void bridge$setOverridesDamageEntity(boolean damagesEntity);
-
-    Timing bridge$getTimings();
 }

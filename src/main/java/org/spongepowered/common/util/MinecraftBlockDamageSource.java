@@ -36,6 +36,15 @@ public final class MinecraftBlockDamageSource extends DamageSource {
     private final ServerLocation location;
     private final BlockSnapshot blockSnapshot;
 
+    public static DamageSource ofFire(final String damageTypeIn, final ServerLocation location, final boolean bypassesArmor) {
+        final MinecraftBlockDamageSource source = new MinecraftBlockDamageSource(damageTypeIn, location);
+        source.setIsFire();
+        if (bypassesArmor) {
+            source.bypassArmor();
+        }
+        return source;
+    }
+
     public MinecraftBlockDamageSource(final String damageTypeIn, final ServerLocation location) {
         super(damageTypeIn);
         this.location = Objects.requireNonNull(location);

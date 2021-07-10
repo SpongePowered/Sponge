@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.server;
 
 import co.aikar.timings.Timing;
+import co.aikar.timings.sponge.ServerTimingsHandler;
 import com.google.inject.Injector;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.resources.ResourceKey;
@@ -41,6 +42,7 @@ import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.resourcepack.ResourcePack;
@@ -88,8 +90,8 @@ import java.util.function.Function;
 import javax.annotation.Nullable;
 
 @Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge,
-        CommandSourceProviderBridge, SubjectProxy, CommandSourceBridge {
+public abstract class MinecraftServerMixin implements SpongeServer, MinecraftServerBridge, CommandSourceProviderBridge, SubjectProxy,
+    CommandSourceBridge {
 
     // @formatter:off
     @Shadow @Final private Map<ResourceKey<Level>, ServerLevel> levels;
@@ -106,12 +108,13 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract PackRepository shadow$getPackRepository();
     // @formatter:on
 
-    @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
-    @Nullable private ResourcePack impl$resourcePack;
+    private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
+    private @Nullable ResourcePack impl$resourcePack;
+    private @Nullable ServerTimingsHandler impl$timingsHandler;
 
     @Override
     public Subject subject() {
-        return SpongeCommon.getGame().systemSubject();
+        return SpongeCommon.game().systemSubject();
     }
 
     @Inject(method = "spin", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
@@ -222,7 +225,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             this.shadow$getPlayerList().saveAll();
         }
 
-        try (Timing timing = SpongeTimings.worldSaveTimer.startTiming()) {
+        try (Timing timing = this.bridge$timingsHandler().save.startTiming()) {
             this.saveAllChunks(true, false, false);
         }
 
@@ -330,6 +333,15 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @Override
+    public ServerTimingsHandler bridge$timingsHandler() {
+        if (this.impl$timingsHandler == null) {
+            this.impl$timingsHandler = new ServerTimingsHandler((MinecraftServer) (Object) this);
+        }
+
+        return this.impl$timingsHandler;
+    }
+
+    @Override
     public void bridge$initServices(final Game game, final Injector injector) {
         if (this.impl$serviceProvider == null) {
             this.impl$serviceProvider = new SpongeServerScopedServiceProvider(this, game, injector);
@@ -346,6 +358,13 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     public void impl$reloadResources(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR), datapacksToLoad);
         this.shadow$getPackRepository().reload();
+    }
+
+    @Inject(method = "reloadResources", at = @At(value = "RETURN"))
+    public void impl$serializeDelayedDataPack(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+        cir.getReturnValue().thenAccept(v -> {
+            SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
+        });
     }
 
     @Override

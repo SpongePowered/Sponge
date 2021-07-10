@@ -26,8 +26,8 @@ package co.aikar.timings.sponge;
 
 import co.aikar.timings.Timing;
 
-import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
-import org.spongepowered.common.relocate.co.aikar.util.MRUMapCache;
+import co.aikar.timings.util.LoadingMap;
+import co.aikar.timings.util.MRUMapCache;
 
 import java.util.ArrayDeque;
 import java.util.Map;
@@ -71,13 +71,10 @@ final class TimingIdentifier {
     // identity comparison.
     @Override
     public boolean equals(Object o) {
-        if (o == null) {
-            return false;
-        }
         if (!(o instanceof TimingIdentifier)) {
             return false;
         }
-        TimingIdentifier that = (TimingIdentifier) o;
+        final TimingIdentifier that = (TimingIdentifier) o;
         return this.group == that.group && this.name == that.name;
     }
 

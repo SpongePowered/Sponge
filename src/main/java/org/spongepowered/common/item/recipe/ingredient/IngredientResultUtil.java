@@ -82,7 +82,7 @@ public final class IngredientResultUtil {
     public static <C extends Container> String cacheResultFunction(ResourceLocation id,
         Function<C, net.minecraft.world.item.ItemStack> resultFunction) {
         if (IngredientResultUtil.cachedResultFunctions.put(id.toString(), resultFunction) != null) {
-            SpongeCommon.getLogger().warn(MessageFormat.format(
+            SpongeCommon.logger().warn(MessageFormat.format(
                 "Duplicate cache result registration! " + id + " was replaced.",
                 new Object[]{}
             ));
@@ -103,7 +103,7 @@ public final class IngredientResultUtil {
     public static <C extends Container> String cacheRemainingItemsFunction(ResourceLocation id,
         Function<C, NonNullList<net.minecraft.world.item.ItemStack>> resultFunction) {
         if (IngredientResultUtil.cachedRemainingItemsFunctions.put(id.toString(), resultFunction) != null) {
-            SpongeCommon.getLogger().warn(MessageFormat.format(
+            SpongeCommon.logger().warn(MessageFormat.format(
                 "Duplicate cache result registration! " + id + " was replaced.",
                 new Object[]{}
             ));

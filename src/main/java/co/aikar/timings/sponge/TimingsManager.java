@@ -29,7 +29,7 @@ import co.aikar.timings.Timings;
 import com.google.common.collect.EvictingQueue;
 import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.relocate.co.aikar.util.LoadingMap;
+import co.aikar.timings.util.LoadingMap;
 import org.spongepowered.plugin.PluginContainer;
 
 import java.util.ArrayDeque;
@@ -46,11 +46,9 @@ public final class TimingsManager {
             LoadingMap.newHashMap((id) -> (id.protect ? new UnsafeTimingHandler(id) : new TimingHandler(id)), 256, .5F));
     public static final FullServerTickHandler FULL_SERVER_TICK = new FullServerTickHandler();
     public static final TimingHandler TIMINGS_TICK = SpongeTimingsFactory.ofSafe("Timings Tick", TimingsManager.FULL_SERVER_TICK);
-    public static final Timing DATA_GROUP_HANDLER = SpongeTimingsFactory.ofSafe("Data");
     public static final Timing MOD_EVENT_HANDLER = SpongeTimingsFactory.ofSafe("Mod Events");
     public static final Timing PLUGIN_SCHEDULER_HANDLER = SpongeTimingsFactory.ofSafe("Plugin Scheduler");
     public static final Timing PLUGIN_EVENT_HANDLER = SpongeTimingsFactory.ofSafe("Plugin Events");
-    public static final Timing PLUGIN_GROUP_HANDLER = SpongeTimingsFactory.ofSafe("Plugins");
     public static List<String> hiddenConfigs = new ArrayList<>();
     public static boolean privacy = false;
 
@@ -89,7 +87,7 @@ public final class TimingsManager {
                 handler.processTick(violated);
             }
 
-            TimingHistory.playerTicks += SpongeCommon.getGame().server().onlinePlayers().size();
+            TimingHistory.playerTicks += SpongeCommon.game().server().onlinePlayers().size();
             TimingHistory.timedTicks++;
             // Generate TPS/Ping/Tick reports every minute
         }
@@ -119,7 +117,7 @@ public final class TimingsManager {
                 }
             }
             if (TimingsManager.timingStart != 0) {
-                SpongeCommon.getLogger().info("Timings reset");
+                SpongeCommon.logger().info("Timings reset");
             }
             TimingsManager.HISTORY.clear();
             TimingsManager.needsFullReset = false;
@@ -143,20 +141,4 @@ public final class TimingsManager {
     static TimingHandler getHandler(String group, String name, Timing parent, boolean protect) {
         return TimingsManager.TIMING_MAP.get(new TimingIdentifier(group, name, parent, protect));
     }
-
-    // TODO Revise this
-    public static Timing getCommandTiming(String pluginName, CommandMapping command) {
-        Optional<PluginContainer> plugin = Optional.empty();
-        if (!("minecraft".equals(pluginName)
-                || "bukkit".equals(pluginName)
-                || "Spigot".equals(pluginName))) {
-            plugin = SpongeCommon.getGame().pluginManager().plugin(pluginName);
-        }
-        if (!plugin.isPresent()) {
-            return SpongeTimingsFactory.ofSafe("Command: " + pluginName + ":" + command.primaryAlias());
-        }
-
-        return SpongeTimingsFactory.ofSafe(plugin.get(), "Command: " + pluginName + ":" + command.primaryAlias());
-    }
-
 }

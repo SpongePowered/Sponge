@@ -77,7 +77,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
         }
         final GoalEvent.Add event = SpongeEventFactory.createGoalEventAdd(PhaseTracker.getCauseStackManager().currentCause(), priority, priority,
                 (Agent) this.owner, (GoalExecutor<?>) this, (org.spongepowered.api.entity.ai.goal.Goal<?>) base);
-        SpongeCommon.postEvent(event);
+        SpongeCommon.post(event);
         if (event.isCancelled()) {
             ((GoalBridge) base).bridge$setGoalExecutor(null);
             return false;
@@ -121,7 +121,7 @@ public abstract class GoalSelectorMixin implements GoalSelectorBridge {
                 if (ShouldFire.GOAL_EVENT_REMOVE && this.owner != null && !((EntityBridge) this.owner).bridge$isConstructing()) {
                     GoalEvent.Remove event = SpongeEventFactory.createGoalEventRemove(PhaseTracker.getCauseStackManager().currentCause(),
                             (Agent) this.owner, (GoalExecutor) this, (org.spongepowered.api.entity.ai.goal.Goal) task, prioritizedGoal.getPriority());
-                    SpongeCommon.postEvent(event);
+                    SpongeCommon.post(event);
                     if (event.isCancelled()) {
                         return false;
                     }

@@ -223,7 +223,7 @@ public final class ContainerUtil {
             }
         } catch (Exception e) {
             SpongeCommon
-                .getLogger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);
+                .logger().error("Error while creating CraftingInventoryLensImpl or GridInventoryLensImpl for " + container.getClass().getName(), e);
         }
         if (chestHeight > 0) { // Add container grid for chest/double chest
             additional.add(new GridInventoryLens(0, 9, chestHeight, slots));

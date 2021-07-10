@@ -50,7 +50,6 @@ import java.util.concurrent.ForkJoinPool;
 import java.util.function.Supplier;
 import java.util.function.UnaryOperator;
 
-
 /**
  * A holder for load/save state of a configuration.
  */

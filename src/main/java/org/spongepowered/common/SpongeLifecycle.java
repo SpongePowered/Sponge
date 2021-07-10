@@ -25,10 +25,12 @@
 package org.spongepowered.common;
 
 import co.aikar.timings.TimingsFactory;
+import co.aikar.timings.sponge.SpongeTimingsFactory;
 import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
+import net.minecraft.core.Registry;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
@@ -49,22 +51,18 @@ import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
-import org.spongepowered.common.network.channel.SpongeChannelRegistry;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.registry.SpongeRegistries;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
-import co.aikar.timings.sponge.SpongeTimingsFactory;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.server.permission.SpongeContextCalculator;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.io.IOException;
 import java.nio.file.Path;
-import java.util.ArrayList;
 import java.util.Collection;
 import java.util.stream.Collectors;
-import net.minecraft.core.Registry;
 
 @Singleton
 public final class SpongeLifecycle {
@@ -124,7 +122,7 @@ public final class SpongeLifecycle {
     }
 
     public void callRegisterChannelEvent() {
-        ((SpongeChannelRegistry) this.game.channelRegistry()).postRegistryEvent();
+        ((SpongeChannelManager) this.game.channelManager()).postRegistryEvent();
     }
 
     public void initTimings() {
@@ -161,7 +159,7 @@ public final class SpongeLifecycle {
 
     public void callConstructEvent() {
         for (final PluginContainer plugin : this.filterInternalPlugins(this.game.pluginManager().plugins())) {
-            ((SpongeEventManager) this.game.eventManager()).post(SpongeEventFactory.createConstructPluginEvent(Cause.of(EventContext.empty(),
+            ((SpongeEventManager) this.game.eventManager()).postToPlugin(SpongeEventFactory.createConstructPluginEvent(Cause.of(EventContext.empty(),
                     this.game), this.game, plugin), plugin);
         }
     }

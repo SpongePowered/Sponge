@@ -66,7 +66,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
         final ContainerBridge openContainer = (ContainerBridge) this.containerMenu;
         if (openContainer.bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-            SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
+            SpongeCommon.logger().warn("This player is currently modifying an open container. This action will be delayed.");
             Task.builder().delay(Ticks.zero()).execute(() -> {
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
@@ -74,7 +74,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
                     this.closeInventory(); // Cause close event first. So cursor item is not lost.
                     this.openInventory(inventory); // Then open the inventory
                 }
-            }).plugin(Launch.getInstance().getCommonPlugin()).build();
+            }).plugin(Launch.instance().commonPlugin()).build();
             return this.openInventory();
         }
         return Optional.ofNullable((Container) InventoryEventFactory.displayContainer((net.minecraft.server.level.ServerPlayer) (Object) this, inventory, displayName));
@@ -86,14 +86,14 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
         final net.minecraft.world.inventory.AbstractContainerMenu openContainer = this.containerMenu;
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
             final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-            SpongeCommon.getLogger().warn("This player is currently modifying an open container. This action will be delayed.");
+            SpongeCommon.logger().warn("This player is currently modifying an open container. This action will be delayed.");
             Task.builder().delay(Ticks.zero()).execute(() -> {
                 try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                     cause.all().forEach(frame::pushCause);
                     cause.context().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
                     this.closeInventory();
                 }
-            }).plugin(Launch.getInstance().getCommonPlugin()).build();
+            }).plugin(Launch.instance().commonPlugin()).build();
             return false;
         }
         // Create Close_Window to capture item drops

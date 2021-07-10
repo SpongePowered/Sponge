@@ -87,7 +87,7 @@ public final class ServerUserProvider {
                     StandardWatchEventKinds.ENTRY_CREATE,
                     StandardWatchEventKinds.ENTRY_DELETE);
         } catch (final IOException e) {
-            SpongeCommon.getLogger().warn("Could not start file watcher");
+            SpongeCommon.logger().warn("Could not start file watcher");
             if (this.filesystemWatchService != null) {
                 // it might be the watchKey that failed, so null it out again.
                 try {
@@ -234,7 +234,7 @@ public final class ServerUserProvider {
             try {
                 return Files.deleteIfExists(dataFile);
             } catch (final SecurityException | IOException e) {
-                SpongeCommon.getLogger().warn("Unable to delete file {}", dataFile, e);
+                SpongeCommon.logger().warn("Unable to delete file {}", dataFile, e);
                 return false;
             }
         }

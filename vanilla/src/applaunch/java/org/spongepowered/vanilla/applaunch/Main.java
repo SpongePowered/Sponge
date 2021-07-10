@@ -28,10 +28,9 @@ import cpw.mods.modlauncher.Launcher;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.fusesource.jansi.AnsiConsole;
-import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.PluginEnvironment;
-import org.spongepowered.plugin.PluginKeys;
-import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginEngine;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.applaunch.util.ArgumentList;
 
 import java.io.IOException;
@@ -46,15 +45,10 @@ public final class Main {
         AnsiConsole.systemInstall();
     }
 
-    private static Main instance;
-
-    private final Logger logger;
-    private final VanillaPluginEngine pluginEngine;
+    private final VanillaPluginPlatform pluginPlatform;
 
     public Main() {
-        Main.instance = this;
-        this.logger = LogManager.getLogger("App Launch");
-        this.pluginEngine = new VanillaPluginEngine(new PluginEnvironment());
+        this.pluginPlatform = AppLaunch.setPluginPlatform(new VanillaPluginPlatform(new PluginEnvironment()));
     }
 
     public static void main(final String[] args) throws Exception {
@@ -62,18 +56,12 @@ public final class Main {
         new Main().run();
     }
 
-    public static Main getInstance() {
-        return Main.instance;
-    }
-
     public void run() throws IOException {
         final String implementationVersion = PluginEnvironment.class.getPackage().getImplementationVersion();
 
-        this.pluginEngine.getPluginEnvironment().blackboard()
-                .getOrCreate(PluginKeys.VERSION, () -> implementationVersion == null ? "dev" : implementationVersion);
-        this.pluginEngine.getPluginEnvironment().blackboard().getOrCreate(PluginKeys.BASE_DIRECTORY, () -> AppCommandLine.gameDirectory);
+        this.pluginPlatform.setVersion(implementationVersion == null ? "dev" : implementationVersion);
+        this.pluginPlatform.setBaseDirectory(AppCommandLine.gameDirectory);
 
-        SpongeConfigs.initialize(this.pluginEngine.getPluginEnvironment());
         final Path modsDirectory = AppCommandLine.gameDirectory.resolve("mods");
         if (Files.notExists(modsDirectory)) {
             Files.createDirectories(modsDirectory);
@@ -84,14 +72,10 @@ public final class Main {
         if (Files.exists(pluginsDirectory)) {
             pluginDirectories.add(pluginsDirectory);
         }
-        this.pluginEngine.getPluginEnvironment().blackboard().getOrCreate(PluginKeys.PLUGIN_DIRECTORIES, () -> pluginDirectories);
+        this.pluginPlatform.setPluginDirectories(pluginDirectories);
 
-        this.logger.info("Transitioning to ModLauncher, please wait...");
+        AppLaunch.logger().info("Transitioning to ModLauncher, please wait...");
         final ArgumentList lst = ArgumentList.from(AppCommandLine.RAW_ARGS);
         Launcher.main(lst.getArguments());
-    }
-
-    public VanillaPluginEngine getPluginEngine() {
-        return this.pluginEngine;
     }
 }

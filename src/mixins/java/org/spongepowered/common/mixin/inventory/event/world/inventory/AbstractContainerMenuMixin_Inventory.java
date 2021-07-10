@@ -531,7 +531,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                     }
                 }
             } catch (IndexOutOfBoundsException e) {
-                SpongeCommon.getLogger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
+                SpongeCommon.logger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
             }
         }
     }

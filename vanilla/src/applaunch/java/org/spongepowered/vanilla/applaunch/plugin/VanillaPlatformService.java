@@ -32,7 +32,7 @@ import cpw.mods.modlauncher.api.ITransformer;
 import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.launch.MixinLaunchPlugin;
-import org.spongepowered.asm.service.modlauncher.MixinServiceModLauncher;
+import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
@@ -51,7 +51,7 @@ public final class VanillaPlatformService implements ITransformationService {
 
     private static final String NAME = "vanilla_platform";
 
-    private static final VanillaPluginEngine pluginEngine = Main.getInstance().getPluginEngine();
+    private static final VanillaPluginPlatform pluginPlatform = AppLaunch.pluginPlatform();
 
     @Override
     public @NonNull String name() {
@@ -60,7 +60,7 @@ public final class VanillaPlatformService implements ITransformationService {
 
     @Override
     public void initialize(final IEnvironment environment) {
-        Main.getInstance().getPluginEngine().initialize();
+        VanillaPlatformService.pluginPlatform.initialize();
     }
 
     @Override
@@ -70,23 +70,23 @@ public final class VanillaPlatformService implements ITransformationService {
 
     @Override
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
-        VanillaPlatformService.pluginEngine.locatePluginResources();
-        VanillaPlatformService.pluginEngine.createPluginCandidates();
+        VanillaPlatformService.pluginPlatform.locatePluginResources();
+        VanillaPlatformService.pluginPlatform.createPluginCandidates();
         final ILaunchPluginService accessWidener = environment.findLaunchPlugin(AccessWidenerLaunchService.NAME).orElse(null);
         final ILaunchPluginService mixin = environment.findLaunchPlugin(MixinLaunchPlugin.NAME).orElse(null);
 
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
-        for (final Map.Entry<String, List<PluginResource>> resourcesEntry : VanillaPlatformService.pluginEngine.getResources().entrySet()) {
-            final List<PluginResource> resources = resourcesEntry.getValue();
+        for (final Map.Entry<String, Set<PluginResource>> resourcesEntry : VanillaPlatformService.pluginPlatform.getResources().entrySet()) {
+            final Set<PluginResource> resources = resourcesEntry.getValue();
             for (final PluginResource resource : resources) {
 
                 // Handle Access Transformers
                 if ((accessWidener != null || mixin != null) && resource instanceof JVMPluginResource) {
                     if (mixin != null) {
                         // Offer jar to the Mixin service
-                        mixin.offerResource(resource.path(), resource.path().getFileName().toString());
+                        mixin.offerResource(((JVMPluginResource) resource).path(), ((JVMPluginResource) resource).path().getFileName().toString());
                     }
 
                     // Offer jar to the AW service
@@ -98,30 +98,31 @@ public final class VanillaPlatformService implements ITransformationService {
                                     if (!atFile.endsWith(".accesswidener")) {
                                         continue;
                                     }
-                                    accessWidener.offerResource(resource.fileSystem().getPath(atFile), atFile);
+                                    accessWidener.offerResource(((JVMPluginResource) resource).fileSystem().getPath(atFile), atFile);
                                 }
                             }
                         }
                         if (mixin != null && manifest.getMainAttributes().getValue(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS) != null) {
-                            if (!VanillaPlatformService.isSponge(resource)) {
-                                VanillaPlatformService.pluginEngine.getPluginEnvironment().logger().warn(
+                            if (!VanillaPlatformService.isSponge((JVMPluginResource) resource)) {
+                                VanillaPlatformService.pluginPlatform.logger().warn(
                                     "Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the "
-                                        + "problem to Sponge!", resource.path()
+                                        + "problem to Sponge!", ((JVMPluginResource) resource).path()
                                 );
                             }
                         }
                     });
-                }
 
-                final Map.Entry<String, Path> entry = Maps.immutableEntry(resource.path().getFileName().toString(), resource.path());
-                launchResources.add(entry);
+                    final Map.Entry<String, Path> entry = Maps.immutableEntry(((JVMPluginResource) resource).path().getFileName().toString(),
+                        ((JVMPluginResource) resource).path());
+                    launchResources.add(entry);
+                }
             }
         }
 
         return launchResources;
     }
 
-    private static boolean isSponge(final PluginResource resource) {
+    private static boolean isSponge(final JVMPluginResource resource) {
         try {
             return resource.path().toUri().equals(VanillaPlatformService.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         } catch (final URISyntaxException ex) {
@@ -129,19 +130,16 @@ public final class VanillaPlatformService implements ITransformationService {
         }
     }
 
-        @Override
-        public void onLoad(final IEnvironment env, final Set<String> otherServices) {
-        final VanillaPluginEngine pluginEngine = VanillaPlatformService.pluginEngine;
+    @Override
+    public void onLoad(final IEnvironment env, final Set<String> otherServices) {
+        final VanillaPluginPlatform pluginPlatform = VanillaPlatformService.pluginPlatform;
+        pluginPlatform.logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
+            pluginPlatform.version(), this.getCodeSource());
 
-        pluginEngine.getPluginEnvironment().logger().info("SpongePowered PLUGIN Subsystem Version={} Source={}",
-            pluginEngine.getPluginEnvironment().blackboard().get(PluginKeys.VERSION).get(), this.getCodeSource());
-
-        pluginEngine.discoverLocatorServices();
-        pluginEngine.getLocatorServices().forEach((k, v) -> pluginEngine.getPluginEnvironment()
-                .logger().info("Plugin resource locator '{}' found.", k));
-        pluginEngine.discoverLanguageServices();
-        pluginEngine.getLanguageServices().forEach((k, v) -> pluginEngine.getPluginEnvironment()
-                .logger().info("Plugin language loader '{}' found.", k));
+        pluginPlatform.discoverLocatorServices();
+        pluginPlatform.getLocatorServices().forEach((k, v) -> pluginPlatform.logger().info("Plugin resource locator '{}' found.", k));
+        pluginPlatform.discoverLanguageServices();
+        pluginPlatform.getLanguageServices().forEach((k, v) -> pluginPlatform.logger().info("Plugin language loader '{}' found.", k));
     }
 
     @Override

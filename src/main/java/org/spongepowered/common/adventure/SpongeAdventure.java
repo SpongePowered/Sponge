@@ -76,6 +76,7 @@ import org.spongepowered.common.bridge.adventure.BossBarBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
 import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
+import org.spongepowered.common.launch.Launch;
 
 import java.io.IOException;
 import java.util.ArrayList;
@@ -628,7 +629,7 @@ public final class SpongeAdventure {
         public @NonNull ClickEvent callbackClickEvent(final @NonNull Consumer<CommandCause> callback) {
             Objects.requireNonNull(callback);
             final UUID key = CallbackCommand.INSTANCE.registerCallback(callback);
-            return ClickEvent.runCommand(String.format("/%s:%s %s", SpongeCommon.ECOSYSTEM_ID, CallbackCommand.NAME, key));
+            return ClickEvent.runCommand(String.format("/%s:%s %s", Launch.instance().id(), CallbackCommand.NAME, key));
         }
 
         @Override

@@ -27,7 +27,15 @@ package org.spongepowered.common.datapack;
 import com.google.gson.JsonObject;
 import com.mojang.serialization.JsonOps;
 import io.leangen.geantyref.TypeToken;
+import net.minecraft.data.recipes.FinishedRecipe;
+import net.minecraft.resources.RegistryWriteOps;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.BiomeZoomer;
+import net.minecraft.world.level.chunk.ChunkGenerator;
+import net.minecraft.world.level.dimension.DimensionType;
+import net.minecraft.world.level.dimension.LevelStem;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.advancement.Advancement;
 import org.spongepowered.api.datapack.DataPackSerializable;
 import org.spongepowered.api.datapack.DataPackType;
@@ -38,19 +46,14 @@ import org.spongepowered.common.accessor.world.level.dimension.DimensionTypeAcce
 import org.spongepowered.common.bridge.world.level.dimension.LevelStemBridge;
 import org.spongepowered.common.datapack.recipe.RecipeDataPackSerializer;
 import org.spongepowered.common.datapack.recipe.RecipeSerializedObject;
+import org.spongepowered.common.datapack.tag.TagSerializedObject;
 import org.spongepowered.common.server.BootstrapProperties;
+import org.spongepowered.common.tag.SpongeTagTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
 
 import java.util.OptionalLong;
 import java.util.function.BiFunction;
-import net.minecraft.data.recipes.FinishedRecipe;
-import net.minecraft.resources.RegistryWriteOps;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.biome.BiomeZoomer;
-import net.minecraft.world.level.chunk.ChunkGenerator;
-import net.minecraft.world.level.dimension.DimensionType;
-import net.minecraft.world.level.dimension.LevelStem;
 
 public final class SpongeDataPackType<T extends DataPackSerializable, U extends DataPackSerializedObject> implements DataPackType<T> {
 
@@ -135,6 +138,17 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
                 true
         );
 
+        private final SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject> tag = new SpongeDataPackType<@NonNull SpongeTagTemplate, TagSerializedObject>(TypeToken.get(SpongeTagTemplate.class),
+                new TagDataPackSerializer("Tag", "tags"),
+                s -> {
+                    final JsonObject jsonObject = s.toJson();
+                    jsonObject.addProperty("replace", s.replace());
+                    return jsonObject;
+                },
+                (i1, i2) -> new TagSerializedObject(i1.key(), i2, i1.tagType()),
+                false
+        );
+
         @Override
         public DataPackType<RecipeRegistration> recipe() {
             return this.recipe;
@@ -153,6 +167,11 @@ public final class SpongeDataPackType<T extends DataPackSerializable, U extends 
         @Override
         public DataPackType<WorldTemplate> world() {
             return world;
+        }
+
+        @Override
+        public DataPackType tag() {
+            return this.tag;
         }
     }
 }
