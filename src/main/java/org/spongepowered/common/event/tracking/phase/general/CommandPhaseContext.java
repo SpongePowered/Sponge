@@ -30,13 +30,15 @@ import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.util.PrettyPrinter;
+
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 
 public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext> {
 
     @Nullable String command;
     @Nullable CommandMapping commandMapping;
-    private @Nullable TrackedInventoryBridge inventory;
 
     CommandPhaseContext(final IPhaseState<CommandPhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);
@@ -44,7 +46,7 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
 
     @Override
     public boolean hasCaptures() {
-        return (this.inventory != null && !this.inventory.bridge$getCapturedSlotTransactions().isEmpty()) || super.hasCaptures();
+        return super.hasCaptures();
     }
 
     @Override
@@ -52,7 +54,6 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
         super.reset();
         this.command = null;
         this.commandMapping = null;
-        this.inventory = null;
     }
 
     public CommandPhaseContext command(final String command) {
@@ -71,15 +72,7 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
         super.printCustom(printer, indent)
             .add(s + "- %s: %s", "Command", this.command == null ? "empty command" : this.command)
             .add(s + "- %s: %s", "Command Mapping", this.commandMapping == null ? "no mapping" : this.commandMapping.toString());
-        if (this.inventory != null) {
-            printer.add(s + "-%s: %s", "Inventory", this.inventory.bridge$getCapturedSlotTransactions());
-        }
         return printer;
-    }
-
-    public CommandPhaseContext inventory(final TrackedInventoryBridge inventory) {
-        this.inventory = inventory;
-        return this;
     }
 
     // Maybe we could provide the command?

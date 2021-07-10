@@ -53,6 +53,7 @@ import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
@@ -66,11 +67,11 @@ import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
 import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -101,10 +102,9 @@ public final class PacketPhaseUtil {
             }
         }
         if (containerMenu != null) {
-            final boolean capture = ((TrackedInventoryBridge) containerMenu).bridge$capturingInventory();
-            ((TrackedInventoryBridge) containerMenu).bridge$setCaptureInventory(false);
-            containerMenu.broadcastChanges();
-            ((TrackedInventoryBridge) containerMenu).bridge$setCaptureInventory(capture);
+            try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).buildAndSwitch()) {
+                containerMenu.broadcastChanges();
+            }
             // If event is cancelled, always resync with player
             // we must also validate the player still has the same container open after the event has been processed
             if (eventCancelled && player.containerMenu == containerMenu && player instanceof net.minecraft.server.level.ServerPlayer) {

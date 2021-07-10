@@ -24,29 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.CombatEntry;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.TickNextTickData;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
@@ -58,12 +42,37 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.effect.ClickContainerEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
+
+import com.google.common.collect.ImmutableList;
+import com.google.common.collect.ImmutableMultimap;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.damagesource.CombatEntry;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
@@ -233,6 +242,35 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final SpawnEntityTransaction transaction = new SpawnEntityTransaction(worldSupplier, entityIn, contextualType);
         this.logTransaction(transaction);
     }
+
+    public void logContainerSlotTransaction(
+        final PhaseContext<@NonNull ?> phaseContext, final SlotTransaction newTransaction,
+        final AbstractContainerMenu abstractContainerMenu
+    ) {
+        if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, abstractContainerMenu)) {
+            return;
+        }
+        final Supplier<ServerLevel> worldSupplier = phaseContext.attemptWorldKey();
+        final ContainerSlotTransaction transaction = new ContainerSlotTransaction(
+            worldSupplier, abstractContainerMenu, newTransaction);
+        this.logTransaction(transaction);
+    }
+
+    public EffectTransactor logClickContainer(
+        final AbstractContainerMenu menu, final int slotId, final int dragType, final ClickType clickType, final Player player
+    ) {
+        final @Nullable Slot slot;
+        if (dragType >= 0) { // We have a valid slot
+            slot = ((InventoryAdapter) menu).inventoryAdapter$getSlot(slotId).orElse(null);
+        } else {
+            slot = null;
+        }
+        final ClickMenuTransaction transaction = new ClickMenuTransaction(
+            player, menu, slotId, dragType, clickType, slot, ItemStackUtil.snapshotOf(player.inventory.getCarried()));
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+    }
+
     private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable BlockEntity existing,
         final BlockEntity proposed, final Supplier<ServerLevel> worldSupplier
     ) {
@@ -455,7 +493,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 }
                 for (final GameTransaction<@NonNull ?> gameTransaction : eventByTransaction.transactions.reverse()) {
                     if (gameTransaction.cancelled) {
-                        gameTransaction.restore();
+                        ((GameTransaction) gameTransaction).restore(context, eventByTransaction.event);
                     }
                 }
             }
@@ -607,5 +645,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             this.effect = null;
         }
     }
+
 
 }

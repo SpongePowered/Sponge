@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
@@ -51,10 +49,7 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
 
     @Override
     public boolean hasCaptures() {
-        if (!((TrackedContainerBridge) this.packetPlayer.containerMenu).bridge$getPreviewTransactions().isEmpty()) {
-            return true;
-        }
-        if (!((TrackedInventoryBridge) this.packetPlayer.containerMenu).bridge$getCapturedSlotTransactions().isEmpty()) {
+        if (super.hasCaptures()) {
             return true;
         }
         if (this.state == PacketPhase.Inventory.DROP_ITEMS) {
@@ -87,7 +82,6 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
         ) {
             return true;
         }
-        ((TrackedInventoryBridge) this.packetPlayer.containerMenu).bridge$setCaptureInventory(false);
 
         return super.hasCaptures();
     }

@@ -22,35 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.effect;
 
-import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.BlockPipeline;
+import org.spongepowered.common.event.tracking.context.transaction.pipeline.PipelineCursor;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraft.world.level.block.state.BlockState;
 
-import java.util.stream.Stream;
+public final class ClickContainerEffect implements ProcessingSideEffect {
 
-@SuppressWarnings("rawtypes")
-public class ResultingTransactionBySideEffect {
-    public final ProcessingSideEffect effect;
-    @Nullable GameTransaction head;
-    @Nullable GameTransaction tail;
+    private static final class Holder {
+        static final ClickContainerEffect INSTANCE = new ClickContainerEffect();
+    }
+    public static ClickContainerEffect getInstance() {
+        return Holder.INSTANCE;
+    }
+    ClickContainerEffect() {}
 
-    public ResultingTransactionBySideEffect(final ProcessingSideEffect effect) {
-        this.effect = effect;
+    @Override
+    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
+        final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
+    ) {
+        return EffectResult.NULL_RETURN;
     }
 
-    public void addChild(final GameTransaction child) {
-        if (this.tail != null) {
-            this.tail.next = child;
-            child.previous = this.tail;
-        } else {
-            this.head = child;
-        }
-        this.tail = child;
-    }
 
-    public Stream<GameTransaction<?>> stream() {
-        return Stream.iterate();
-    }
 }

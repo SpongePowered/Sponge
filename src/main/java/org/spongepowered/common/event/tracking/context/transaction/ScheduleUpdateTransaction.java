@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.level.TickNextTickDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -77,7 +78,7 @@ public class ScheduleUpdateTransaction extends BlockEventBasedTransaction {
     }
 
     @Override
-    public void restore() {
+    public void restore(PhaseContext<?> context, ChangeBlockEvent.All event) {
         ((TickNextTickDataBridge<?>) this.data).bridge$cancelForcibly();
     }
 

@@ -131,7 +131,7 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     }
 
     @Override
-    public void restore() {
+    public void restore(PhaseContext<?> context, SpawnEntityEvent event) {
         final ServerLevel serverWorld = this.worldSupplier.get();
         if (((ServerLevelAccessor) serverWorld).accessor$tickingEntities()) {
             // More than likely we could also be needing to remove the entity from both the entities to add

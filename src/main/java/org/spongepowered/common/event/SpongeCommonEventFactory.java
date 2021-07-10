@@ -93,7 +93,6 @@ import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -727,9 +726,11 @@ public final class SpongeCommonEventFactory {
                 handleCustomCursor(player, event.cursorTransaction().original());
             }
         } else {
-            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.containerMenu;
-            mixinContainer.bridge$getCapturedSlotTransactions().clear();
-            mixinContainer.bridge$setCaptureInventory(false);
+            // TODO - log a transaction for container close.
+//
+//            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.containerMenu;
+//            mixinContainer.bridge$getCapturedSlotTransactions().clear();
+//            mixinContainer.bridge$setCaptureInventory(false);
             // Handle cursor
             if (!event.cursorTransaction().isValid()) {
                 handleCustomCursor(player, event.cursorTransaction().original());

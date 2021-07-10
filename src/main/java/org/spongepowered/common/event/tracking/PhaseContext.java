@@ -27,17 +27,13 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import net.minecraft.world.entity.player.Player;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
@@ -45,6 +41,12 @@ import org.spongepowered.common.entity.player.SpongeUserView;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.util.PrettyPrinter;
+
+import net.minecraft.world.entity.player.Player;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
 
 import java.util.Deque;
 import java.util.Objects;
@@ -124,6 +126,9 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         return (P) this;
     }
 
+    public ItemStackSnapshot getCursor() {
+        return ItemStackSnapshot.empty();
+    }
     public P setBulkBlockCaptures(final boolean captures) {
         this.allowsBulkBlockCaptures = captures;
         return (P) this;

@@ -32,6 +32,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.event.entity.HarvestEntityEvent;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.registry.DefaultedRegistryReference;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.registry.RegistryScope;
@@ -53,6 +54,8 @@ public final class TransactionTypes {
     public static final DefaultedRegistryReference<TransactionType<NotifyNeighborBlockEvent>> NEIGHBOR_NOTIFICATION = TransactionTypes.key(ResourceKey.sponge("neighbor_notification"));
 
     public static final DefaultedRegistryReference<TransactionType<SpawnEntityEvent>> SPAWN_ENTITY = TransactionTypes.key(ResourceKey.sponge("spawn_entity"));
+
+    public static final DefaultedRegistryReference<TransactionType<ClickContainerEvent>> CLICK_CONTAINER_EVENT = TransactionTypes.key(ResourceKey.sponge("click_container"));
 
     // SORTFIELDS:OFF
 

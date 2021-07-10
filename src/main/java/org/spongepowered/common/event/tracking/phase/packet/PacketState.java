@@ -37,6 +37,14 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
+
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.LevelChunk;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
@@ -112,6 +120,11 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         final P asContext, final ServerLevel level, final TickNextTickData<?> entry
     ) {
         asContext.getTransactor().logScheduledUpdate(level, entry);
+    }
+
+    @Override
+    public Supplier<ServerLevel> attemptWorldKey(final P context) {
+        return VolumeStreamUtils.createWeaklyReferencedSupplier(context.packetPlayer.getLevel(), "ServerLevel by Player packet");
     }
 
     public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet, final P context) {

@@ -36,24 +36,25 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
 import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
-import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.ArrayList;
-import java.util.List;
-
-import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -68,10 +69,19 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.List;
 
 @Mixin(AbstractContainerMenu.class)
-public abstract class AbstractContainerMenuMixin_Inventory implements TrackedContainerBridge, InventoryAdapter, TrackedInventoryBridge {
+public abstract class AbstractContainerMenuMixin_Inventory implements TrackedContainerBridge, InventoryAdapter {
 
+    //@formatter:off
+    @Shadow public abstract NonNullList<ItemStack> shadow$getItems();
+    @Shadow protected abstract ItemStack shadow$doClick(int param0, int param1, ClickType param2, Player param3);
+    //@formatter:on
     // TrackedContainerBridge
 
     private boolean impl$shiftCraft = false;
@@ -103,7 +113,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Nullable private ItemStack impl$previousCursor = ItemStack.EMPTY;
 
     @Override
-    public void bridge$setPreviousCursor(@Nullable ItemStack stack) {
+    public void bridge$setPreviousCursor(@Nullable final ItemStack stack) {
         this.impl$previousCursor = stack;
     }
 
@@ -158,7 +168,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         // TODO else unknown inventory - try to provide wrapper ViewableInventory?
     }
 
-    private void impl$setViewed(@Nullable Object viewed) {
+    private void impl$setViewed(@Nullable final Object viewed) {
         if (viewed == null) {
             this.impl$unTrackViewable(this.impl$viewed);
         }
@@ -183,20 +193,21 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // Captures the SlotTransaction for later event
     @Inject(method = "setItem", at = @At(value = "HEAD") )
     private void impl$addTransaction(final int slotId, final ItemStack itemstack, final CallbackInfo ci) {
-        if (this.bridge$capturingInventory()) {
+        if (PhaseTracker.SERVER.onSidedThread()) {
             final Slot slot = this.shadow$getSlot(slotId);
             if (slot != null) {
                 final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(slot.getItem());
                 final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(itemstack);
-
                 final org.spongepowered.api.item.inventory.Slot adapter = this.inventoryAdapter$getSlot(slotId).get();
-                this.bridge$getCapturedSlotTransactions().add(new SlotTransaction(adapter, originalItem, newItem));
+                final SlotTransaction slotTransaction = new SlotTransaction(adapter, originalItem, newItem);
+                final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
+                phaseContext.getTransactor().logContainerSlotTransaction(phaseContext, slotTransaction, (AbstractContainerMenu) (Object) this);
             }
         }
     }
 
     @Inject(method = "removed", at = @At(value = "HEAD"))
-    private void onOnContainerClosed(Player player, CallbackInfo ci) {
+    private void onOnContainerClosed(final Player player, final CallbackInfo ci) {
         this.impl$setViewed(null);
     }
 
@@ -255,7 +266,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             return entityItem;
         }
         if (entityItem == null) {
-            ItemStack original;
+            final ItemStack original;
             if (player.inventory.getCarried().isEmpty()) {
                 original = itemStackIn;
             } else {
@@ -276,9 +287,22 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     // Called before the item is thrown ; PART 1/2
     // Captures the original state and affected slot
-    @Redirect(method = "doClick", at = @At(value = "INVOKE",
+    //
+    @Redirect(method = "doClick",
+        at = @At(
+            value = "INVOKE",
             target = "Lnet/minecraft/world/inventory/Slot;mayPickup(Lnet/minecraft/world/entity/player/Player;)Z",
-            ordinal = 4))
+            ordinal = 0
+        ),
+        slice = @Slice(
+            from = @At(value = "FIELD",
+                target = "Lnet/minecraft/world/inventory/ClickType;THROW:Lnet/minecraft/world/inventory/ClickType;"
+            ),
+            to = @At(value = "FIELD",
+                target = "Lnet/minecraft/world/inventory/ClickType;PICKUP_ALL:Lnet/minecraft/world/inventory/ClickType;"
+            )
+        )
+    )
     public boolean onCanTakeStack(final Slot slot, final Player playerIn) {
         boolean readonly = false;
         if (((MenuBridge) this).bridge$isReadonlyMenu(slot)) {
@@ -294,6 +318,25 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             this.impl$lastSlotUsed = null;
         }
         return result;
+    }
+
+    @Redirect(
+        method = "clicked",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;doClick(IILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/item/ItemStack;"))
+    private ItemStack inventory$wrapDoClickWithTransaction(
+        final AbstractContainerMenu menu, final int slotId, final int dragType,
+        final ClickType clickType,
+        final Player player
+    ) {
+        if (((WorldBridge) player.level).bridge$isFake()) {
+            return this.shadow$doClick(slotId, dragType, clickType, player);
+        }
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (final EffectTransactor ignored = transactor.logClickContainer(menu, slotId, dragType, clickType, player)) {
+            return this.shadow$doClick(slotId, dragType, clickType, player);
+        }
     }
 
     // Called dropping the item ; PART 2/2
@@ -347,7 +390,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     private ItemStack redirectOnTakeThrow(final Slot slot, final Player player, final ItemStack stackToDrop) {
         this.bridge$setLastCraft(null);
         final ItemStack result = slot.onTake(player, stackToDrop);
-        CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
+        final CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
         if (lastCraft != null) {
             if (slot instanceof ResultSlot) {
                 if (lastCraft.isCancelled()) {
@@ -372,7 +415,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         this.bridge$setLastCraft(null);
         this.bridge$setShiftCrafting(true);
         ItemStack result = thisContainer.quickMoveStack(player, slotId);
-        CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
+        final CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
         if (lastCraft != null) {
             if (lastCraft.isCancelled()) {
                 result = ItemStack.EMPTY; // Return empty to stop shift-crafting
@@ -394,7 +437,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         // TODO check if when canceling crafting etc. the client is getting informed correctly already - maybe this is not needed
         // previously from CraftingContainerMixin
         if (((Object) this) instanceof CraftingMenu || ((Object) this) instanceof InventoryMenu) {
-            for (ContainerListener listener : this.containerListeners) {
+            for (final ContainerListener listener : this.containerListeners) {
                 if (slotId == 0) {
                     listener.refreshContainer((AbstractContainerMenu) (Object) this, this.shadow$getItems());
                 } else {
@@ -424,29 +467,27 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Final @Shadow private List<ContainerListener> containerListeners;
     @Final @Shadow private List<DataSlot> dataSlots;
 
-    @Shadow public abstract NonNullList<ItemStack> shadow$getItems();
-
     @Override
     public void bridge$detectAndSendChanges(final boolean captureOnly) {
         // Code-Flow changed from vanilla completely!
 
-        SpongeInventoryMenu menu = ((MenuBridge)this).bridge$getMenu();
+        final SpongeInventoryMenu menu = ((MenuBridge)this).bridge$getMenu();
         // We first collect all differences and check if cancelled for readonly menu changes
-        List<Integer> changes = new ArrayList<>();
+        final List<Integer> changes = new ArrayList<>();
 
         for (int i = 0; i < this.slots.size(); ++i) {
             final Slot slot = this.slots.get(i);
             final ItemStack newStack = slot.getItem();
-            ItemStack oldStack = this.lastSlots.get(i);
+            final ItemStack oldStack = this.lastSlots.get(i);
             if (!ItemStack.matches(oldStack, newStack)) {
                 changes.add(i);
             }
         }
 
         // For each change
-        for (Integer i : changes) {
+        for (final Integer i : changes) {
             final Slot slot = this.slots.get(i);
-            ItemStack newStack = slot.getItem();
+            final ItemStack newStack = slot.getItem();
             ItemStack oldStack = this.lastSlots.get(i);
 
             // Check for on change menu callbacks
@@ -467,7 +508,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 oldStack = newStack.isEmpty() ? ItemStack.EMPTY : newStack.copy();
                 this.lastSlots.set(i, oldStack);
                 // TODO forge checks !itemstack1.equals(itemstack, true) before doing this
-                for (ContainerListener listener : this.containerListeners) {
+                for (final ContainerListener listener : this.containerListeners) {
                     listener.slotChanged(((AbstractContainerMenu) (Object) this), i, oldStack);
                 }
             }
@@ -481,9 +522,9 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         }
     }
 
-    public void impl$sendSlotContents(Integer i, ItemStack oldStack) {
+    public void impl$sendSlotContents(final Integer i, final ItemStack oldStack) {
 
-        for (ContainerListener listener : this.containerListeners) {
+        for (final ContainerListener listener : this.containerListeners) {
             boolean isChangingQuantityOnly = true;
             if (listener instanceof ServerPlayer) {
                 isChangingQuantityOnly = ((ServerPlayer) listener).ignoreSlotUpdateHack;
@@ -498,21 +539,21 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     private void impl$detectAndSendPropertyChanges() {
         for(int j = 0; j < this.dataSlots.size(); ++j) {
-            DataSlot intreferenceholder = this.dataSlots.get(j);
+            final DataSlot intreferenceholder = this.dataSlots.get(j);
             if (intreferenceholder.checkAndClearUpdateFlag()) {
-                for(ContainerListener icontainerlistener1 : this.containerListeners) {
+                for(final ContainerListener icontainerlistener1 : this.containerListeners) {
                     icontainerlistener1.setContainerData((AbstractContainerMenu) (Object) this, j, intreferenceholder.get());
                 }
             }
         }
     }
 
-    private void impl$capture(Integer index, ItemStack itemstack, ItemStack itemstack1) {
-        if (this.bridge$capturingInventory()) {
+    private void impl$capture(final Integer index, final ItemStack itemstack, final ItemStack itemstack1) {
+        if (PhaseTracker.SERVER.onSidedThread() && !PhaseTracker.SERVER.getPhaseContext().isRestoring()) {
             final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(itemstack1);
             final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(itemstack);
 
-            org.spongepowered.api.item.inventory.Slot adapter;
+            final org.spongepowered.api.item.inventory.Slot adapter;
             try {
                 adapter = this.inventoryAdapter$getSlot(index).get();
                 SlotTransaction newTransaction = new SlotTransaction(adapter, originalItem, newItem);
@@ -521,16 +562,17 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                     previewTransactions.add(newTransaction);
                 } else {
                     if (!previewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
-                        SlotTransaction previewTransaction = previewTransactions.get(0);
+                        final SlotTransaction previewTransaction = previewTransactions.get(0);
                         if (previewTransaction.slot().equals(newTransaction.slot())) {
                             newTransaction = null;
                         }
                     }
                     if (newTransaction != null) {
-                        this.bridge$getCapturedSlotTransactions().add(newTransaction);
+                        final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
+                        phaseContext.getTransactor().logContainerSlotTransaction(phaseContext, newTransaction, (AbstractContainerMenu) (Object) this);
                     }
                 }
-            } catch (IndexOutOfBoundsException e) {
+            } catch (final IndexOutOfBoundsException e) {
                 SpongeCommon.logger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
             }
         }
