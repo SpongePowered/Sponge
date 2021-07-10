@@ -111,7 +111,7 @@ public final class AdvancementTest implements LoadableModule {
     }
 
     @Listener
-    public void onTreeAdjust(final AdvancementTreeEvent.GenerateLayout event) {
+    private void onTreeAdjust(final AdvancementTreeEvent.GenerateLayout event) {
         final AdvancementTree tree = event.tree();
         if (tree.equals(this.rootAdvancement)) {
             final TreeLayoutElement layoutElement1 = event.layout().element(this.counterAdvancement1).get();
@@ -122,22 +122,22 @@ public final class AdvancementTest implements LoadableModule {
     }
 
     @Listener
-    public void onGranted(final AdvancementEvent.Grant event) {
+    private void onGranted(final AdvancementEvent.Grant event) {
         this.logger.info("{} was granted", event.advancement().key());
     }
 
     @Listener
-    public void onGranted(final AdvancementEvent.Revoke event) {
+    private void onGranted(final AdvancementEvent.Revoke event) {
         this.logger.info("{} was revoked", event.advancement().key());
     }
 
     @Listener
-    public void onTrigger(final CriterionEvent.Trigger<?> event) {
+    private void onTrigger(final CriterionEvent.Trigger<?> event) {
         this.logger.info("{} for {} was triggered", event.trigger().type().key(), event.advancement().key());
     }
 
     @Listener
-    public void onTriggerRegistry(final RegisterRegistryValueEvent.GameScoped event) {
+    private void onTriggerRegistry(final RegisterRegistryValueEvent.GameScoped event) {
         Sponge.dataManager().registerBuilder(InventoryChangeTriggerConfig.class, new InventoryChangeTriggerConfig.Builder());
         this.inventoryChangeTrigger = Trigger.builder()
                 .dataSerializableConfig(InventoryChangeTriggerConfig.class)
@@ -154,7 +154,7 @@ public final class AdvancementTest implements LoadableModule {
 
 
     @Listener
-    public void onAdvancementRegistry(final RegisterDataPackValueEvent<Advancement> event) {
+    private void onAdvancementRegistry(final RegisterDataPackValueEvent<Advancement> event) {
 
         if (!this.enabled) {
             return;
@@ -278,15 +278,15 @@ public final class AdvancementTest implements LoadableModule {
         event.register(combinationAdvancement);
     }
 
-    public class TriggerListeners {
+    class TriggerListeners {
 
         @Listener
-        public void onContainerEvent(final ChangeInventoryEvent event, @First final ServerPlayer player) {
+        private void onContainerEvent(final ChangeInventoryEvent event, @First final ServerPlayer player) {
             AdvancementTest.this.inventoryChangeTrigger.trigger(player);
         }
 
         @Listener
-        public void onConainterEvent(final InteractContainerEvent.Open event, @First final ServerPlayer player) {
+        private void onConainterEvent(final InteractContainerEvent.Open event, @First final ServerPlayer player) {
 
             final AdvancementProgress progress1 = player.progress(AdvancementTest.this.counterAdvancement1);
             if (progress1.achieved()) {

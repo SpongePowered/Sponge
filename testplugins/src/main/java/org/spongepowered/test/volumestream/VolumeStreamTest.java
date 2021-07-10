@@ -84,8 +84,7 @@ public final class VolumeStreamTest implements LoadableModule {
     }
 
     @Listener
-    public void onGamePreInitialization(final RegisterCommandEvent<Command.Parameterized> event) {
-
+    private void onGamePreInitialization(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(
             this.plugin,
             Command.builder()
@@ -164,10 +163,10 @@ public final class VolumeStreamTest implements LoadableModule {
     }
 
 
-    public static class CopyPastaListener {
+    static class CopyPastaListener {
 
         @Listener
-        public void onInteract(final InteractBlockEvent.Secondary event, @Root final Player player) {
+        private void onInteract(final InteractBlockEvent.Secondary event, @Root final Player player) {
             final HandType handUsed = event.context().require(EventContextKeys.USED_HAND);
             event.context().get(EventContextKeys.USED_ITEM).ifPresent(snapshot -> {
                 final BlockSnapshot block = event.block();

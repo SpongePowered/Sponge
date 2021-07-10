@@ -59,7 +59,7 @@ public final class ConfigTest implements LoadableModule {
     }
 
     @Listener
-    public void onConstruction(final ConstructPluginEvent event) {
+    private void onConstruction(final ConstructPluginEvent event) {
         this.logger.info("Asset one: {}, asset two: {}", this.testOne.url(), this.secondTest.url());
         try {
             this.config = this.reference.referenceTo(ExampleConfiguration.class);
@@ -70,7 +70,7 @@ public final class ConfigTest implements LoadableModule {
     }
 
     @Listener
-    public void clientConnected(final ServerSideConnectionEvent.Join event) {
+    private void clientConnected(final ServerSideConnectionEvent.Join event) {
         final Component motd = this.config.get().getMotd();
         if (motd == null || motd == Component.empty()) {
             return;

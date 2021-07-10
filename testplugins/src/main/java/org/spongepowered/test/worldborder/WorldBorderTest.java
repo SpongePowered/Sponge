@@ -68,7 +68,7 @@ public final class WorldBorderTest implements LoadableModule {
     }
 
     @Listener
-    public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.pluginContainer, Command.builder()
                 .addChild(this.setWorldBorder(), "world")
                 .addChild(

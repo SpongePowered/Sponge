@@ -148,7 +148,7 @@ public class TradeTest implements LoadableModule {
         }
 
         @Listener
-        public void onSpawn(final SpawnEntityEvent event) {
+        private void onSpawn(final SpawnEntityEvent event) {
             // Here we create the villager that will sell out stuff.
             // Sponge takes inspiration from Entity systems, where any object can have any data.
             // The data we're setting here is then represented as the key.

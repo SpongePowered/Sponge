@@ -92,7 +92,7 @@ public final class TagTest {
     private static final TypeToken<TagType<@NonNull ?>> TAG_TYPE_TOKEN = new TypeToken<TagType<@NonNull ?>>() {};
 
     @Listener
-    public void registerTags(final RegisterDataPackValueEvent<@NonNull TagTemplate> event) {
+    private void registerTags(final RegisterDataPackValueEvent<@NonNull TagTemplate> event) {
         this.logger.info("Adding tags.");
 
         final TagTemplate tagRegistration = TagTemplate.builder(TagTypes.BLOCK_TYPE)
@@ -178,7 +178,7 @@ public final class TagTest {
     }
 
     @Listener
-    public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<Tag<BlockType>> blockTypeTagParameter = TagTest.makeTagRegistryParameter(TagTest.BLOCK_TYPE_TAG_TOKEN, RegistryTypes.BLOCK_TYPE_TAGS, "blocktag");
         final Command.Parameterized blockHasTag = Command.builder()
                 .addParameter(blockTypeTagParameter)

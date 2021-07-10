@@ -56,7 +56,7 @@ public final class InteractTest implements LoadableModule {
 
     public static class InteractListener {
         @Listener
-        public void onInteractBlock(final InteractBlockEvent event) {
+        private void onInteractBlock(final InteractBlockEvent event) {
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
@@ -68,7 +68,7 @@ public final class InteractTest implements LoadableModule {
             Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.context().toString())).build());
         }
         @Listener
-        public void onInteractItem(final InteractItemEvent event) {
+        private void onInteractItem(final InteractItemEvent event) {
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(),
@@ -80,7 +80,7 @@ public final class InteractTest implements LoadableModule {
             Sponge.game().systemSubject().sendMessage(Identity.nil(), Component.text().append(Component.text("/ Context: ")).append(Component.text(event.context().toString())).build());
         }
         @Listener
-        public void onInteractEntity(final InteractEntityEvent event) {
+        private void onInteractEntity(final InteractEntityEvent event) {
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text("/*************"));
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(), Component.text().append(Component.text("/* Event: ")).append(Component.text(event.getClass().getSimpleName())).build());
             Sponge.server().broadcastAudience().sendMessage(Identity.nil(),

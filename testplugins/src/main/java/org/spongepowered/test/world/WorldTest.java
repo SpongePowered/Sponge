@@ -87,7 +87,7 @@ public final class WorldTest {
     }
 
     @Listener
-    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ServerPlayer> optPlayerParameter = Parameter.player().optional().key("player").build();
         final Parameter.Value<ResourceKey> worldKeyParameter = Parameter.resourceKey().key("world").build();
         final Parameter.Value<ServerWorld> optWorldParameter = Parameter.world().optional().key("world").build();

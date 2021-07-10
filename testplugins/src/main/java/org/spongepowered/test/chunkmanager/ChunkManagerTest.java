@@ -64,7 +64,7 @@ public final class ChunkManagerTest implements LoadableModule {
     }
 
     @Listener
-    public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.pluginContainer,
                 Command.builder()
                        .addChild(this.registerTicketCommand(), "register")
@@ -128,7 +128,7 @@ public final class ChunkManagerTest implements LoadableModule {
         ctx.sendMessage(Identity.nil(), Component.text("Enabled ChunkManagerTest listener"));
     }
 
-    public static class ChunkListener {
+    static class ChunkListener {
 
         private final Logger logger;
 
@@ -137,7 +137,7 @@ public final class ChunkManagerTest implements LoadableModule {
         }
 
         @Listener
-        public void onChunkLoad(final ChunkEvent.Load event) {
+        private void onChunkLoad(final ChunkEvent.Load event) {
             this.logger.info("Chunk load: {}, {}", event.chunkWorld(), event.chunkPosition());
         }
 

@@ -110,7 +110,7 @@ public class MapTest implements LoadableModule {
     }
 
     @Listener
-    public void onGameInit(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void onGameInit(final RegisterCommandEvent<Command.Parameterized> event) {
         final Command.Builder builder = Command.builder();
         builder.addChild(Command.builder().executor((this::printMapData)).build(), "printMapData");
         builder.addChild(Command.builder().executor((this::setMapNether)).build(), "setmapnether");
@@ -600,7 +600,7 @@ public class MapTest implements LoadableModule {
         }
     }
 
-    public static class Listeners {
+    private static class Listeners {
 
         private final Logger logger;
 
@@ -609,7 +609,7 @@ public class MapTest implements LoadableModule {
         }
 
         @Listener
-        public void onMapCreate(final CreateMapEvent event, @Supports("MAP_CANVAS") @Getter("mapInfo") final MapInfo mapInfo) {
+        private void onMapCreate(final CreateMapEvent event, @Supports("MAP_CANVAS") @Getter("mapInfo") final MapInfo mapInfo) {
             this.logger.info("ON MAP CREATE EVENT");
             mapInfo.offer(Keys.MAP_CANVAS, MapCanvas.builder()
                     .paintAll(MapColor.of(MapColorTypes.COLOR_BLUE))

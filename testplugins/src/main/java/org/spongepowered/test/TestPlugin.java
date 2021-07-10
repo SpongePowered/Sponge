@@ -53,7 +53,7 @@ public final class TestPlugin {
     }
 
     @Listener
-    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<PluginContainer> pluginKey = Parameter.plugin().key("plugin").completer(
                 (context, currentInput) -> Sponge.pluginManager().plugins().stream()
                         .filter(pc -> pc.instance() instanceof LoadableModule)

@@ -50,7 +50,7 @@ public final class RayTraceTest {
     }
 
     @Listener
-    public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ServerLocation> serverLocationParameter = Parameter.builder(ServerLocation.class)
                 .key("target_location")
                 .addParser(ResourceKeyedValueParameters.TARGET_BLOCK)

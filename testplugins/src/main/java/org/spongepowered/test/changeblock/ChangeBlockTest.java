@@ -82,7 +82,7 @@ public final class ChangeBlockTest implements LoadableModule {
     }
 
     @Listener
-    public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.plugin, Command.builder()
             .executor(context -> {
                 this.cancelAll = !this.cancelAll;
@@ -167,10 +167,10 @@ public final class ChangeBlockTest implements LoadableModule {
         );
     }
 
-    public class HarvestEntityListener {
+    class HarvestEntityListener {
 
         @Listener
-        public void onEntityHarvest(final HarvestEntityEvent event) {
+        private void onEntityHarvest(final HarvestEntityEvent event) {
             if (!ChangeBlockTest.this.printEntityHarvests) {
                 return;
             }
@@ -186,9 +186,9 @@ public final class ChangeBlockTest implements LoadableModule {
         }
     }
 
-    public class SpawnEntityListener {
+    class SpawnEntityListener {
         @Listener
-        public void onEntitySpawn(final SpawnEntityEvent event) {
+        private void onEntitySpawn(final SpawnEntityEvent event) {
             if (!ChangeBlockTest.this.printEntitySpawns) {
                 return;
             }
@@ -204,9 +204,9 @@ public final class ChangeBlockTest implements LoadableModule {
         }
     }
 
-    public class EntityDeathPrinter {
+    class EntityDeathPrinter {
         @Listener
-        public void onEntitySpawn(final DestructEntityEvent.Death event) {
+        private void onEntitySpawn(final DestructEntityEvent.Death event) {
             if (!ChangeBlockTest.this.printEntityDeaths) {
                 return;
             }
@@ -222,9 +222,9 @@ public final class ChangeBlockTest implements LoadableModule {
         }
     }
 
-    public class ChangeBlockListener {
+    class ChangeBlockListener {
         @Listener
-        public void onChangeBlock(final ChangeBlockEvent.All post) {
+        private void onChangeBlock(final ChangeBlockEvent.All post) {
             final Logger pluginLogger = ChangeBlockTest.this.plugin.logger();
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/*************");
             pluginLogger.log(Level.INFO, ChangeBlockTest.marker, "/* ChangeBlockEvent");
@@ -267,14 +267,14 @@ public final class ChangeBlockTest implements LoadableModule {
         }
     }
 
-    public class RegressionTester {
+    class RegressionTester {
 
         @Listener
-        public void onChangeBlock(final ChangeBlockEvent.All all) {
+        private void onChangeBlock(final ChangeBlockEvent.All all) {
             if (!ChangeBlockTest.this.regressionTest) {
                 return;
             }
-            for (BlockTransaction transaction : all.transactions()) {
+            for (final BlockTransaction transaction : all.transactions()) {
                 if (transaction.operation() == Operations.BREAK.get()) {
                     transaction.setValid(false);
                 }

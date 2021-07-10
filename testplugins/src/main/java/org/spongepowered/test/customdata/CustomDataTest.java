@@ -93,7 +93,7 @@ public final class CustomDataTest {
     }
 
     @Listener
-    public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<Integer> numberKey = Parameter.integerNumber().key("number").optional().build();
         final Parameter.Value<Type> type = Parameter.enumValue(Type.class).key("type").optional().build();
         final Command.Parameterized myCommand = Command.builder()
@@ -156,7 +156,7 @@ public final class CustomDataTest {
     }
 
     @Listener
-    public void onRegisterData(final RegisterDataEvent event) {
+    private void onRegisterData(final RegisterDataEvent event) {
         final ResourceKey key = ResourceKey.of(this.plugin, "mydata");
         this.myDataKey = Key.builder().key(key).elementType(Integer.class).build();
 
@@ -206,7 +206,7 @@ public final class CustomDataTest {
     }
 
     @Listener
-    public void onJoin(final ServerSideConnectionEvent.Join event) {
+    private void onJoin(final ServerSideConnectionEvent.Join event) {
         final Optional<Integer> myValue = event.player().get(this.myDataKey);
         myValue.ifPresent(integer -> this.plugin.logger().info("CustomData: {}", integer));
     }

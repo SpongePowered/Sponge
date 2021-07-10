@@ -91,7 +91,7 @@ public final class CommandTest {
     }
 
     @Listener
-    public void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void onRegisterSpongeCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<ServerPlayer> playerKey = Parameter.player().key("player")
                 .usage(key -> "[any player]")
                 .build();
@@ -597,7 +597,7 @@ public final class CommandTest {
     }
 
     @Listener
-    public void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
+    private void onRegisterRawSpongeCommand(final RegisterCommandEvent<Command.Raw> event) {
         event.register(this.plugin, new RawCommandTest(), "rawcommandtest");
         event.register(this.plugin, new ClientSuggestionsRawCommandTest(), "rawrecipescommandtest");
     }

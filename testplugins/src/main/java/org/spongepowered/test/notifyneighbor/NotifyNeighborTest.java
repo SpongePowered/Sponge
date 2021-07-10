@@ -49,9 +49,9 @@ public final class NotifyNeighborTest implements LoadableModule {
         Sponge.eventManager().registerListeners(this.plugin, new NotifyNeighborListener());
     }
 
-    public static class NotifyNeighborListener {
+    static class NotifyNeighborListener {
         @Listener
-        public void onChangeBlock(final NotifyNeighborBlockEvent event) {
+        private void onChangeBlock(final NotifyNeighborBlockEvent event) {
             final Object root = event.cause().root();
             Sponge.game().systemSubject().sendMessage(Component.text(root + " is the cause"));
             event.tickets().forEach(ticket -> {

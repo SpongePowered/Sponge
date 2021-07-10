@@ -56,7 +56,7 @@ public final class ArchetypeTest implements LoadableModule {
     }
 
     @Listener
-    public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.plugin, Command.builder()
                 .addChild(Command.builder().executor(this::testEntityArchetype).build(), "entity")
                 .build(), "testarchetypes");
@@ -76,10 +76,10 @@ public final class ArchetypeTest implements LoadableModule {
     }
 
 
-    public class ArchetypeTestListener {
+    class ArchetypeTestListener {
         // TODO we're missing InteractEntityEvent implementation so we cannot test with this yet
         @Listener
-        public void onRightClickEntity(InteractEntityEvent.Secondary event) {
+        private void onRightClickEntity(InteractEntityEvent.Secondary event) {
             final Entity entity = event.entity();
             ArchetypeTest.this.testEntityArchetype(entity);
         }

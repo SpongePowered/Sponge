@@ -64,7 +64,7 @@ public final class HumanTest {
     }
 
     @Listener
-    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<String> nameParameter = Parameter.string().key("name").optional().build();
         final Parameter.Value<String> mimicParameter = Parameter.string().key("mimic_username").optional().build();
 
