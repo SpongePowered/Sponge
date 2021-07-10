@@ -24,30 +24,41 @@
  */
 package org.spongepowered.vanilla.launch.event;
 
-import static com.google.common.base.Preconditions.checkNotNull;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.plugin.PluginCandidate;
+import org.spongepowered.plugin.jvm.JVMPluginContainer;
+import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 
-import org.spongepowered.api.event.Event;
-import org.spongepowered.common.event.SpongeEventListener;
+import java.lang.invoke.MethodHandles;
+import java.util.Objects;
 
-import java.lang.reflect.Method;
+/**
+ * A plugin container that provides access to a plugin's Lookup instance.
+ */
+public class ModuleAwareJVMPluginContainer extends JVMPluginContainer {
 
-public abstract class AnnotatedEventListener implements SpongeEventListener<Event> {
+    private MethodHandles.Lookup lookup;
 
-    protected final Object handle;
-
-    protected AnnotatedEventListener(Object handle) {
-        this.handle = checkNotNull(handle, "handle");
+    public ModuleAwareJVMPluginContainer(final PluginCandidate<JVMPluginResource> candidate) {
+        super(candidate);
     }
 
-    @Override
-    public final Object getHandle() {
-        return this.handle;
+    public ModuleAwareJVMPluginContainer(final PluginCandidate<JVMPluginResource> candidate, final Logger logger) {
+        super(candidate, logger);
     }
 
-    public interface Factory {
-
-        AnnotatedEventListener create(Object handle, Method method) throws Throwable;
-
+    /**
+     * {@return A lookup with access to internals of the module containing this plugin}
+     */
+    MethodHandles.Lookup lookup() {
+        return this.lookup;
     }
 
+    public void initializeLookup(final MethodHandles.Lookup lookup) {
+        if (this.lookup != null) {
+            throw new RuntimeException(String.format("Attempt made to set the lookup for plugin container '%s' twice!",
+                this.metadata().id()));
+        }
+        this.lookup = Objects.requireNonNull(lookup);
+    }
 }

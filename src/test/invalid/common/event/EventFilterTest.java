@@ -42,7 +42,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.world.biome.BiomeTypes;
 import org.spongepowered.api.world.extent.Extent;
 import org.spongepowered.common.event.filter.FilterFactory;
-import org.spongepowered.common.event.gen.DefineableClassLoader;
 import org.spongepowered.common.event.listener.AllCauseListener;
 import org.spongepowered.common.event.listener.BeforeAfterCauseListener;
 import org.spongepowered.common.event.listener.CancelledListener;

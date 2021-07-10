@@ -26,8 +26,8 @@ package org.spongepowered.common.event.filter;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
 import com.github.benmanes.caffeine.cache.LoadingCache;
-import org.spongepowered.common.event.gen.DefineableClassLoader;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
 import java.util.concurrent.atomic.AtomicInteger;
 
@@ -37,33 +37,28 @@ import static com.google.common.base.Preconditions.checkNotNull;
 public class FilterFactory {
 
     private final AtomicInteger id = new AtomicInteger();
-    private final DefineableClassLoader classLoader;
-    private final LoadingCache<Method, Class<? extends EventFilter>> cache = Caffeine.newBuilder()
+    private final MethodHandles.Lookup lookup;
+    private final LoadingCache<Method, MethodHandles.Lookup> cache = Caffeine.newBuilder()
             .weakValues().build(this::createClass);
-    private final String targetPackage;
 
-    public FilterFactory(String targetPackage, DefineableClassLoader classLoader) {
-        checkNotNull(targetPackage, "targetPackage");
-        checkArgument(!targetPackage.isEmpty(), "targetPackage cannot be empty");
-        this.targetPackage = targetPackage + '.';
-        this.classLoader = checkNotNull(classLoader, "classLoader");
+    public FilterFactory(final MethodHandles.Lookup lookup) {
+        this.lookup = checkNotNull(lookup, "lookup");
     }
 
-    public Class<? extends EventFilter> createFilter(Method method) throws Exception {
-        final Class<? extends EventFilter> clazz = this.cache.get(method);
-        return clazz == EventFilter.class ? null : clazz;
+    public Class<? extends EventFilter> createFilter(final Method method) {
+        final MethodHandles.Lookup lookup = this.cache.get(method);
+        return  lookup == null ? null : lookup.lookupClass().asSubclass(EventFilter.class);
     }
 
-    Class<? extends EventFilter> createClass(Method method) {
-        Class<?> handle = method.getDeclaringClass();
-        Class<?> eventClass = method.getParameterTypes()[0];
-        String name = this.targetPackage + eventClass.getSimpleName() + "Filter_" + handle.getSimpleName() + '_'
-                + method.getName() + this.id.incrementAndGet();
-        byte[] cls = FilterGenerator.getInstance().generateClass(name, method);
+    MethodHandles.Lookup createClass(final Method method) throws IllegalAccessException {
+        final Class<?> handle = method.getDeclaringClass();
+        final String name = "Filter_" + method.getName() + this.id.incrementAndGet();
+        final byte[] cls = FilterGenerator.getInstance().generateClass(handle, name, method);
         if (cls == null) {
-            return EventFilter.class; // cache does not permit nulls
+            return null;
         }
-        return this.classLoader.defineClass(name, cls);
+        return MethodHandles.privateLookupIn(handle, this.lookup)
+            .defineHiddenClass(cls, true, MethodHandles.Lookup.ClassOption.NESTMATE);
     }
 
 }

@@ -34,14 +34,14 @@ import java.lang.reflect.Method;
 
 public final class InvokeEventListenerFactory implements AnnotatedEventListener.Factory {
 
-    private FilterFactory filterFactory;
+    private final FilterFactory filterFactory;
 
-    public InvokeEventListenerFactory(FilterFactory factory) {
+    public InvokeEventListenerFactory(final FilterFactory factory) {
         this.filterFactory = checkNotNull(factory, "filterFactory");
     }
 
     @Override
-    public AnnotatedEventListener create(Object handle, Method method) throws Exception {
+    public AnnotatedEventListener create(final Object handle, final Method method) throws Exception {
         final Class<? extends EventFilter> eventFilter = this.filterFactory.createFilter(method);
         if (eventFilter == null && method.getParameterCount() != 1) {
             // basic sanity check
@@ -56,19 +56,19 @@ public final class InvokeEventListenerFactory implements AnnotatedEventListener.
         private final Method method;
         private final EventFilter filter;
 
-        InvokeEventHandler(Object handle, Method method, EventFilter filter) {
+        InvokeEventHandler(final Object handle, final Method method, final EventFilter filter) {
             super(handle);
             this.method = checkNotNull(method, "method");
             this.filter = filter;
         }
 
         @Override
-        public void handle(Event event) throws Exception {
+        public void handle(final Event event) throws Exception {
             if (this.filter != null) {
-                Object[] filtered = this.filter.filter(event);
+                final Object[] filtered = this.filter.filter(event);
                 if (filtered != null) {
-                    StringBuilder args = new StringBuilder();
-                    for (Object o : filtered) {
+                    final StringBuilder args = new StringBuilder();
+                    for (final Object o : filtered) {
                         args.append(o.getClass().getName()).append(" ");
                     }
                     this.method.invoke(this.handle, filtered);
