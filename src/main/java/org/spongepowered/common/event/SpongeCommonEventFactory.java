@@ -190,9 +190,6 @@ public final class SpongeCommonEventFactory {
             printer.add("Exception:");
             printer.add(e);
             printer.log(SpongeCommon.logger(), org.apache.logging.log4j.Level.ERROR);
-            for (final Entity entity : entities) {
-                EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
-            }
             return true;
         }
     }

@@ -27,22 +27,16 @@ package org.spongepowered.common.entity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
-import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.Optional;
-import java.util.Random;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
@@ -54,12 +48,18 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.storage.LevelData;
+
+import java.util.Optional;
+import java.util.Random;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public final class EntityUtil {
 
@@ -144,7 +144,7 @@ public final class EntityUtil {
         boolean spawnedAny = false;
         for (final org.spongepowered.api.entity.Entity entity : event.entities()) {
             // Here is where we need to handle the custom items potentially having custom entities
-            spawnedAny = EntityUtil.processEntitySpawn(entity, entityCreatorSupplier);
+            spawnedAny = EntityUtil.processEntitySpawn(entity, entityCreatorSupplier, e ->  e.level.addFreshEntity(e));
         }
         return spawnedAny;
     }
@@ -153,8 +153,7 @@ public final class EntityUtil {
         return EntityUtil.processEntitySpawnsFromEvent(destruct, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<User>> supplier) {
+    public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<User>> supplier, final Consumer<Entity> spawner) {
         final Entity minecraftEntity = (Entity) entity;
         if (minecraftEntity instanceof ItemEntity) {
             final ItemStack item = ((ItemEntity) minecraftEntity).getItem();
@@ -181,14 +180,8 @@ public final class EntityUtil {
             }
         }
 
-        supplier.get()
-            .ifPresent(spawned -> {
-                if (entity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) entity).tracked$setCreatorReference(spawned);
-                }
-            });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((net.minecraft.world.level.Level) entity.world()).addFreshEntity((Entity) entity);
+        spawner.accept((Entity) entity);
         return true;
     }
 

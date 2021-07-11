@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -49,14 +47,6 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.world.SpongeBlockChangeFlag;
 import org.spongepowered.math.vector.Vector3i;
 
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.Collections;
-import java.util.List;
-import java.util.Objects;
-import java.util.Optional;
-import java.util.Random;
-import java.util.UUID;
 import net.minecraft.core.BlockPos;
 import net.minecraft.util.Mth;
 import net.minecraft.world.level.Level;
@@ -68,6 +58,17 @@ import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkBiomeContainer;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.storage.LevelData;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
 
 @Mixin(LevelAccessor.class)
 @Implements(@Interface(iface = ProtoWorld.class, prefix = "protoWorld$"))
@@ -157,7 +158,7 @@ public interface LevelAccessorMixin_API {
             return Collections.emptyList();
         }
         for (final Entity entity : event.entities()) {
-            EntityUtil.processEntitySpawn(entity, Optional::empty);
+            EntityUtil.processEntitySpawn(entity, Optional::empty, e -> e.level.addFreshEntity(e));
         }
         return Collections.unmodifiableCollection(new ArrayList<>(event.entities()));
     }
