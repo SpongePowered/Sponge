@@ -140,16 +140,17 @@ public class InventoryEventFactory {
 
 
     public static boolean callPlayerChangeInventoryPickupEvent(final Player player, final TrackedInventoryBridge inventory) {
-        if (inventory.bridge$getCapturedSlotTransactions().isEmpty()) {
+        final List<SlotTransaction> transactions = inventory.bridge$getCapturedSlotTransactions();
+        if (transactions.isEmpty()) {
             return true;
         }
         PhaseTracker.getCauseStackManager().pushCause(player);
-        final ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(PhaseTracker.getCauseStackManager().currentCause(), (Inventory) player.containerMenu,
-                inventory.bridge$getCapturedSlotTransactions());
+        final ChangeInventoryEvent.Pickup event = SpongeEventFactory
+                .createChangeInventoryEventPickup(PhaseTracker.getCauseStackManager().currentCause(), (Inventory) player.containerMenu, transactions);
         SpongeCommon.post(event);
         PhaseTracker.getCauseStackManager().popCause();
         InventoryEventFactory.applyTransactions(event);
-        inventory.bridge$getCapturedSlotTransactions().clear();
+        transactions.clear();
         return !event.isCancelled();
     }
 

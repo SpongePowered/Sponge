@@ -59,6 +59,7 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {
+        // TODO handle event creation for item pickup (see ItemEntityMixin_Inventory)
         @Nullable final ChangeInventoryEvent event = context.createInventoryEvent(cause, this.inventory, slotTransactions, entities);
         return Optional.ofNullable(event);
     }

@@ -28,14 +28,19 @@ import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin_Inventory {
@@ -51,6 +56,7 @@ public abstract class ItemEntityMixin_Inventory {
         cancellable = true
     )
     private void spongeImpl$ThrowPickupEvent(final Player entityIn, final CallbackInfo ci) {
+        // TODO use transactions if possible
         if (!InventoryEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (ItemEntity) (Object) this, this.pickupDelay)) {
             ci.cancel();
         }
@@ -59,14 +65,17 @@ public abstract class ItemEntityMixin_Inventory {
     @Redirect(method = "playerTouch", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/player/Inventory;add(Lnet/minecraft/world/item/ItemStack;)Z"))
     private boolean spongeImpl$throwPickupEventForAddItem(final Inventory inventory, final ItemStack itemStack, final Player player) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final boolean added;
+        try (final EffectTransactor ignored = transactor.logPlayerInventoryChange(player)) {
+             added = inventory.add(itemStack);
+        }
 
-        final TrackedInventoryBridge inv = inventory;
-        inv.bridge$setCaptureInventory(true);
-        final boolean added = inventory.add(itemStack);
-        inv.bridge$setCaptureInventory(false);
-        inv.bridge$getCapturedSlotTransactions();
-        if (!InventoryEventFactory.callPlayerChangeInventoryPickupEvent(player, inv)) {
-            return false;
+        // TODO use transactions (we do not have a BasicInventoryPacketState here!)
+        InventoryEventFactory.callPlayerChangeInventoryPickupEvent(player, inv);
+        if (TrackingUtil.processBlockCaptures(context)) {
+            return false; // if PickupEvent was cancelled return false
         }
         return added;
     }
