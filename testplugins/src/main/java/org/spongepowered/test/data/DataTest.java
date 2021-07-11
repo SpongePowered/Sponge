@@ -660,6 +660,12 @@ public final class DataTest  {
         this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.WHITE.get());
         this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.BLACK_DOTS.get());
 
+        final ItemStack snowball = ItemStack.of(ItemTypes.SNOWBALL, 16);
+        this.checkGetData(snowball, Keys.INACCURACY, 1.0);
+        this.checkOfferData(snowball, Keys.INACCURACY, 10.0);
+        snowball.offer(Keys.CUSTOM_NAME, Component.text("I am very inaccurate :)", NamedTextColor.RED));
+        player.inventory().offer(snowball);
+
         this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, true);
         this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, false);
         this.checkOfferData(itemEntity, Keys.INFINITE_PICKUP_DELAY, true);

@@ -31,6 +31,8 @@
         "core.dispenser.AbstractProjectileDispenseBehaviorMixin",
         "data.SpongeDataHolderMixin",
         "item.EmptyMapItemMixin",
+        "item.ThrowableInaccurateItemMixin",
+        "item.YeetableInaccurateItemMixin",
         "network.ConnectionMixin",
         "network.FriendlyByteBufMixin",
         "network.PacketEncoderMixin",

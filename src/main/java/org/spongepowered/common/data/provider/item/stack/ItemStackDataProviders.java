@@ -40,6 +40,7 @@ public final class ItemStackDataProviders extends DataProviderRegistratorBuilder
         FireworkItemStackData.register(this.registrator);
         HideFlagsItemStackData.register(this.registrator);
         IDyeableArmorItemStackData.register(this.registrator);
+        InaccuracyItemStackData.register(this.registrator);
         ItemStackData.register(this.registrator);
         MusicDiscItemStackData.register(this.registrator);
         PotionItemStackData.register(this.registrator);
