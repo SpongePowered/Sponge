@@ -50,6 +50,7 @@ import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.filter.FilterFactory;
+import org.spongepowered.common.event.filter.FilterGenerator;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
@@ -238,17 +239,15 @@ public final class VanillaEventManager implements SpongeEventManager {
 
         final Class<?> handle = listenerObject.getClass();
 
-        AnnotatedEventListener.Factory handlerFactory = this.pluginFactories.get(plugin);
-        if (handlerFactory == null) {
+        final AnnotatedEventListener.Factory handlerFactory = this.pluginFactories.computeIfAbsent(plugin, key -> {
             final MethodHandles.Lookup lookup;
-            if (plugin instanceof ModuleAwareJVMPluginContainer modular) {
+            if (key instanceof ModuleAwareJVMPluginContainer modular) {
                 lookup = modular.lookup();
             } else {
                 lookup = VanillaEventManager.OWN_LOOKUP; // won't provide appropriate module access, but that doesn't matter in a non-modular context
             }
-            handlerFactory = new ClassEventListenerFactory(new FilterFactory(lookup), lookup);
-            this.pluginFactories.put(plugin, handlerFactory);
-        }
+            return new ClassEventListenerFactory(FilterGenerator::create, lookup);
+        });
 
         for (final Method method : handle.getDeclaredMethods()) {
             final Listener listener = method.getAnnotation(Listener.class);

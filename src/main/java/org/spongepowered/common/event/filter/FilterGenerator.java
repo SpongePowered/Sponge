@@ -40,6 +40,7 @@ import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V11;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -84,6 +85,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -95,13 +98,34 @@ import java.util.function.Function;
 
 public class FilterGenerator {
 
-    public static final boolean FILTER_DEBUG = Boolean.parseBoolean(System.getProperty("sponge.filter.debug", "false"));
+    public static final boolean FILTER_DEBUG = Boolean.parseBoolean(System.getProperty("sponge.filter.debug", "true"));
+    public static final String FILTER_DESCRIPTOR = "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;";
 
     public static FilterGenerator getInstance() {
         return Holder.INSTANCE;
     }
 
     FilterGenerator() {
+    }
+
+    public static @Nullable EventFilter create(final Method method, final MethodHandles.Lookup lookup) throws IllegalAccessException {
+        if (!lookup.hasFullPrivilegeAccess()) {
+            throw new IllegalArgumentException("The provided lookup '" + lookup
+                + "' does not have full privilege access required to create a hidden class");
+        }
+        final Class<?> handle = method.getDeclaringClass();
+        final String name = "Filter_" + method.getName();
+        final byte[] cls = FilterGenerator.getInstance().generateClass(handle, name, method);
+        if (cls == null) {
+            return null;
+        }
+        final MethodHandles.Lookup filter = lookup.defineHiddenClass(cls, true, MethodHandles.Lookup.ClassOption.NESTMATE);
+        try {
+            return (EventFilter) filter.findConstructor(filter.lookupClass(), MethodType.methodType(void.class))
+                .invoke();
+        } catch (final Throwable ex) {
+            throw new IllegalStateException("Generated filter class did not have expected empty constructor!", ex);
+        }
     }
 
     public byte[] generateClass(final Class<?> handle, final String localName, final Method method) {
@@ -159,7 +183,7 @@ public class FilterGenerator {
             mv.visitEnd();
         }
         {
-            mv = cw.visitMethod(ACC_PUBLIC, "filter", "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;", null, null);
+            mv = cw.visitMethod(ACC_PUBLIC, "filter", FilterGenerator.FILTER_DESCRIPTOR, null, null);
             mv.visitCode();
             // index of the next available local variable
             int local = 2;

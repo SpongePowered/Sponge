@@ -30,24 +30,27 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.common.event.filter.EventFilter;
 import org.spongepowered.common.event.filter.FilterFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 public final class InvokeEventListenerFactory implements AnnotatedEventListener.Factory {
 
     private final FilterFactory filterFactory;
+    private final MethodHandles.Lookup lookup;
 
-    public InvokeEventListenerFactory(final FilterFactory factory) {
+    public InvokeEventListenerFactory(final FilterFactory factory, final MethodHandles.Lookup lookup) {
         this.filterFactory = checkNotNull(factory, "filterFactory");
+        this.lookup = Objects.requireNonNull(lookup, "lookup");
     }
 
     @Override
     public AnnotatedEventListener create(final Object handle, final Method method) throws Exception {
-        final Class<? extends EventFilter> eventFilter = this.filterFactory.createFilter(method);
-        if (eventFilter == null && method.getParameterCount() != 1) {
+        final EventFilter filter = this.filterFactory.create(method, MethodHandles.privateLookupIn(method.getDeclaringClass(), this.lookup));
+        if (filter == null && method.getParameterCount() != 1) {
             // basic sanity check
             throw new IllegalStateException("Failed to generate EventFilter for non trivial filtering operation.");
         }
-        final EventFilter filter = eventFilter == null ? null : eventFilter.getConstructor().newInstance();
         return new InvokeEventHandler(handle, method, filter);
     }
 

@@ -34,20 +34,15 @@ import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ASTORE;
 import static org.objectweb.asm.Opcodes.BIPUSH;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
-import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.IFNULL;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
-import static org.objectweb.asm.Opcodes.NEW;
-import static org.objectweb.asm.Opcodes.PUTSTATIC;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V11;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.Label;
@@ -57,43 +52,40 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.common.event.filter.EventFilter;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.LoaderClassWriter;
+import org.spongepowered.common.event.filter.FilterGenerator;
 import org.spongepowered.common.util.generator.GeneratorUtils;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.util.Objects;
-import java.util.concurrent.atomic.AtomicInteger;
 
 public final class ClassEventListenerFactory implements AnnotatedEventListener.Factory {
 
-    private final AtomicInteger id = new AtomicInteger();
+    private static final String FILTER = "filter";
     private final MethodHandles.Lookup lookup;
-    private final LoadingCache<Method, MethodHandles.Lookup> cache = Caffeine.newBuilder()
-        .weakValues().build(this::createClass);
     private final FilterFactory filterFactory;
 
     public ClassEventListenerFactory(final FilterFactory factory, final MethodHandles.Lookup lookup) {
         this.filterFactory = Objects.requireNonNull(factory, "filterFactory");
-        this.lookup = Objects.requireNonNull(lookup, "classLoader");
+        this.lookup = Objects.requireNonNull(lookup, "lookup");
     }
 
     @Override
     public AnnotatedEventListener create(final Object handle, final Method method) throws Throwable {
-        final MethodHandles.Lookup lookup = this.cache.get(method);
+        final MethodHandles.Lookup lookup = this.createLookup(method);
         return (AnnotatedEventListener) lookup.findConstructor(
             lookup.lookupClass(),
             MethodType.methodType(void.class, method.getDeclaringClass())
         ).invoke(handle);
     }
 
-    MethodHandles.Lookup createClass(final Method method) throws Exception {
+    MethodHandles.Lookup createLookup(final Method method) throws Exception {
         final Class<?> handle = method.getDeclaringClass();
         final Class<?> eventClass = method.getParameterTypes()[0];
-        final String listenerName = "Listener_" + handle.getSimpleName() + '_' + method.getName()
-                + this.id.incrementAndGet();
+        final String listenerName = "Listener_" + handle.getSimpleName() + '_' + method.getName();
         final MethodHandles.Lookup lookup = MethodHandles.privateLookupIn(handle, this.lookup);
-        final Class<? extends EventFilter> filter = this.filterFactory.createFilter(method);
+        final EventFilter filter = this.filterFactory.create(method, lookup);
 
         if (filter == null && method.getParameterCount() != 1) {
             // basic sanity check
@@ -105,9 +97,8 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
                 true,
                 MethodHandles.Lookup.ClassOption.NESTMATE
             );
-            final EventFilter filterInstance = filter.getConstructor().newInstance();
-            clazz.findStaticVarHandle(clazz.lookupClass(), "FILTER", EventFilter.class)
-                .set(filterInstance);
+            clazz.findStaticVarHandle(clazz.lookupClass(), ClassEventListenerFactory.FILTER, EventFilter.class)
+                .set(filter);
             return clazz;
         }
         return lookup.defineHiddenClass(
@@ -119,7 +110,6 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
 
     private static final String BASE_HANDLER = Type.getInternalName(AnnotatedEventListener.class);
     private static final String HANDLE_METHOD_DESCRIPTOR = '(' + Type.getDescriptor(Event.class) + ")V";
-    private static final String FILTER_DESCRIPTOR = "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;";
 
     // generates a class -- the FILTER field must be set to the event filter class
     private static byte[] generateFilteredClass(final String listenerName, final Class<?> handle, final Method method, final Class<?> eventClass) {
@@ -138,7 +128,13 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
 
         cw.visit(V11, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, ClassEventListenerFactory.BASE_HANDLER, null);
         {
-            fv = cw.visitField(ACC_PRIVATE + ACC_STATIC, "FILTER", EventFilter.class.descriptorString(), null, null);
+            fv = cw.visitField(
+                ACC_PRIVATE + ACC_STATIC,
+                ClassEventListenerFactory.FILTER,
+                EventFilter.class.descriptorString(),
+                null,
+                null
+            );
             fv.visitEnd();
         }
         {
@@ -155,10 +151,10 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
             mv = cw.visitMethod(ACC_PUBLIC, "handle",
                 ClassEventListenerFactory.HANDLE_METHOD_DESCRIPTOR, null, new String[] { "java/lang/Exception" });
             mv.visitCode();
-            mv.visitFieldInsn(GETSTATIC, name, "FILTER", EventFilter.class.descriptorString());
+            mv.visitFieldInsn(GETSTATIC, name, ClassEventListenerFactory.FILTER, EventFilter.class.descriptorString());
             mv.visitVarInsn(ALOAD, 1);
             mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(EventFilter.class), "filter",
-                ClassEventListenerFactory.FILTER_DESCRIPTOR, true);
+                FilterGenerator.FILTER_DESCRIPTOR, true);
             mv.visitVarInsn(ASTORE, 2);
             mv.visitVarInsn(ALOAD, 2);
             final Label l2 = new Label();

@@ -24,41 +24,25 @@
  */
 package org.spongepowered.common.event.filter;
 
-import com.github.benmanes.caffeine.cache.Caffeine;
-import com.github.benmanes.caffeine.cache.LoadingCache;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
-import java.util.concurrent.atomic.AtomicInteger;
 
-import static com.google.common.base.Preconditions.checkArgument;
-import static com.google.common.base.Preconditions.checkNotNull;
+@FunctionalInterface
+public interface FilterFactory {
 
-public class FilterFactory {
-
-    private final AtomicInteger id = new AtomicInteger();
-    private final MethodHandles.Lookup lookup;
-    private final LoadingCache<Method, MethodHandles.Lookup> cache = Caffeine.newBuilder()
-            .weakValues().build(this::createClass);
-
-    public FilterFactory(final MethodHandles.Lookup lookup) {
-        this.lookup = checkNotNull(lookup, "lookup");
-    }
-
-    public Class<? extends EventFilter> createFilter(final Method method) {
-        final MethodHandles.Lookup lookup = this.cache.get(method);
-        return  lookup == null ? null : lookup.lookupClass().asSubclass(EventFilter.class);
-    }
-
-    MethodHandles.Lookup createClass(final Method method) throws IllegalAccessException {
-        final Class<?> handle = method.getDeclaringClass();
-        final String name = "Filter_" + method.getName() + this.id.incrementAndGet();
-        final byte[] cls = FilterGenerator.getInstance().generateClass(handle, name, method);
-        if (cls == null) {
-            return null;
-        }
-        return MethodHandles.privateLookupIn(handle, this.lookup)
-            .defineHiddenClass(cls, true, MethodHandles.Lookup.ClassOption.NESTMATE);
-    }
-
+    /**
+     * Create a new filter based on the method.
+     *
+     * <p>The provided {@code lookup } must have
+     * {@link MethodHandles.Lookup#hasFullPrivilegeAccess() full privilege access}
+     * to the {@link Method#getDeclaringClass() declaring class} of {@code method}.</p>
+     *
+     * @param method the method to create a filter for
+     * @param lookup the lookup to generate the filter class. Must have
+     * @return a new filter instance, if any filtering is necessary
+     * @throws IllegalAccessException if the provided {@code lookup} does not have full privilege access
+     */
+    @Nullable EventFilter create(final Method method, final MethodHandles.Lookup lookup) throws IllegalAccessException;
 }

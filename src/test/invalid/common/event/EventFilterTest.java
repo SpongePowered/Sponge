@@ -57,15 +57,15 @@ import org.spongepowered.common.event.listener.InvalidIncludeExcludeListener;
 import org.spongepowered.common.event.listener.RootListener;
 import org.spongepowered.common.event.listener.SimpleListener;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 
 public class EventFilterTest {
     
     public static final Cause TEST_CAUSE = Cause.of(EventContext.empty(), EventFilterTest.class);
-    
-    private final DefineableClassLoader classLoader = new DefineableClassLoader(getClass().getClassLoader());
-    private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
-            new FilterFactory("org.spongepowered.common.event.filters", this.classLoader), this.classLoader);
+    private static final MethodHandles.Lookup LOOKUP = MethodHandles.lookup();
+
+    private final AnnotatedEventListener.Factory handlerFactory = new ClassEventListenerFactory(new FilterFactory(LOOKUP), LOOKUP);
 
     @Test
     public void testSimpleEvent() throws Exception {
