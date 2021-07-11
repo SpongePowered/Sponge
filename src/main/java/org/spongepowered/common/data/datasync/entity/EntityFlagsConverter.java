@@ -27,11 +27,9 @@ package org.spongepowered.common.data.datasync.entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 
-import java.util.List;
 import java.util.Optional;
 import net.minecraft.world.entity.Entity;
 
@@ -90,34 +88,27 @@ public final class EntityFlagsConverter extends DataParameterConverter<Byte> {
     }
 
     @Override
-    public Byte getValueFromEvent(final Byte originalValue, final List<Immutable<?>> immutableValues) {
-        if (immutableValues.isEmpty()) {
+    public Byte getValueFromEvent(final Byte originalValue, final DataTransactionResult result) {
+        if (result.successfulData().isEmpty()) {
             // Short circuit when there are no changes.
             return originalValue;
         }
         final boolean onFire = this.getFlag(originalValue, EntityFlagsConverter.ON_FIRE_MASK);
-        boolean newIsSneaking = this.getFlag(originalValue, EntityFlagsConverter.CROUCHED_MASK);
-        boolean newSprinting = this.getFlag(originalValue, EntityFlagsConverter.SPRINTING_MASK);
-        boolean newInvisible = this.getFlag(originalValue, EntityFlagsConverter.INVISIBLE_MASK);
-        boolean newGlowing = this.getFlag(originalValue, EntityFlagsConverter.GLOWING_MASK);
-        boolean newElytra = this.getFlag(originalValue, EntityFlagsConverter.FLYING_ELYTRA_MASK);
-        for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.key() == Keys.IS_SNEAKING) {
-                newIsSneaking = ((Boolean) immutableValue.get());
-            }
-            if (immutableValue.key() == Keys.IS_SPRINTING) {
-                newSprinting = ((Boolean) immutableValue.get());
-            }
-            if (immutableValue.key() == Keys.IS_INVISIBLE) {
-                newInvisible = (Boolean) immutableValue.get();
-            }
-            if (immutableValue.key() == Keys.IS_GLOWING) {
-                newGlowing = (Boolean) immutableValue.get();
-            }
-            if (immutableValue.key() == Keys.IS_ELYTRA_FLYING) {
-                newElytra = (Boolean) immutableValue.get();
-            }
-        }
+        final boolean newIsSneaking = result.successfulValue(Keys.IS_SNEAKING)
+                .map(Value::get)
+                .orElseGet(() -> this.getFlag(originalValue, EntityFlagsConverter.CROUCHED_MASK));
+        final boolean newSprinting = result.successfulValue(Keys.IS_SPRINTING)
+                .map(Value::get)
+                .orElseGet(() -> this.getFlag(originalValue, EntityFlagsConverter.SPRINTING_MASK));
+        final boolean newInvisible = result.successfulValue(Keys.IS_INVISIBLE)
+                .map(Value::get)
+                .orElseGet(() -> this.getFlag(originalValue, EntityFlagsConverter.INVISIBLE_MASK));
+        final boolean newGlowing = result.successfulValue(Keys.IS_GLOWING)
+                .map(Value::get)
+                .orElseGet(() -> this.getFlag(originalValue, EntityFlagsConverter.GLOWING_MASK));
+        final boolean newElytra = result.successfulValue(Keys.IS_ELYTRA_FLYING)
+                .map(Value::get)
+                .orElseGet(() -> this.getFlag(originalValue, EntityFlagsConverter.FLYING_ELYTRA_MASK));
         byte newValue = (byte) (onFire ? EntityFlagsConverter.ON_FIRE_MASK : 0);
         newValue = (byte) (newIsSneaking ? newValue | EntityFlagsConverter.CROUCHED_MASK : newValue & ~EntityFlagsConverter.CROUCHED_MASK);
         newValue = (byte) (newSprinting ? newValue | EntityFlagsConverter.SPRINTING_MASK : newValue & ~EntityFlagsConverter.SPRINTING_MASK);
