@@ -40,7 +40,6 @@ import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_6;
 
-import com.google.common.collect.Lists;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -84,6 +83,7 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
 import java.util.List;
 
 public class FilterGenerator {
@@ -101,13 +101,8 @@ public class FilterGenerator {
         name = name.replace('.', '/');
         Parameter[] params = method.getParameters();
 
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        MethodVisitor mv;
-
-        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
-
         SubtypeFilterDelegate sfilter = null;
-        List<FilterDelegate> additional = Lists.newArrayList();
+        final List<FilterDelegate> additional = new ArrayList<>();
         boolean cancellation = false;
         for (Annotation anno : method.getAnnotations()) {
             Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
@@ -127,9 +122,19 @@ public class FilterGenerator {
                 }
             }
         }
-        if (!cancellation && Cancellable.class.isAssignableFrom(method.getParameterTypes()[0])) {
+        if (!cancellation && Cancellable.class.isAssignableFrom(params[0].getType())) {
             additional.add(new CancellationEventFilterDelegate(Tristate.FALSE));
         }
+
+        // we know there are no filters, skip generating a class
+        if (additional.isEmpty() && sfilter == null && params.length == 1) {
+            return null;
+        }
+
+        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        MethodVisitor mv;
+
+        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
 
         if (sfilter != null) {
             sfilter.createFields(cw);
@@ -163,7 +168,7 @@ public class FilterGenerator {
             for (int i = 1; i < params.length; i++) {
                 Parameter param = params[i];
                 ParameterFilterSourceDelegate source = null;
-                List<ParameterFilterDelegate> paramFilters = Lists.newArrayList();
+                List<ParameterFilterDelegate> paramFilters = new ArrayList<>();
                 for (Annotation anno : param.getAnnotations()) {
                     Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
                     if (obj == null) {

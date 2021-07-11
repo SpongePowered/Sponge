@@ -54,7 +54,7 @@ public class CancellationEventFilterDelegate implements FilterDelegate {
         if (this.state == Tristate.UNDEFINED) {
             return locals;
         }
-        if (!Cancellable.class.isAssignableFrom(method.getParameters()[0].getType())) {
+        if (!Cancellable.class.isAssignableFrom(method.getParameterTypes()[0])) {
             throw new IllegalStateException("Attempted to filter a non-cancellable event type by its cancellation status");
         }
         mv.visitVarInsn(ALOAD, 1);
