@@ -98,7 +98,7 @@ import java.util.function.Function;
 
 public class FilterGenerator {
 
-    public static final boolean FILTER_DEBUG = Boolean.parseBoolean(System.getProperty("sponge.filter.debug", "true"));
+    public static final boolean FILTER_DEBUG = Boolean.parseBoolean(System.getProperty("sponge.filter.debug", "false"));
     public static final String FILTER_DESCRIPTOR = "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;";
 
     public static FilterGenerator getInstance() {
