@@ -46,7 +46,7 @@ public final class KeyBasedDataListener<E extends DataHolder> implements EventLi
 
     @Override
     public void handle(final ChangeDataHolderEvent.ValueChange event) throws Exception {
-        if (this.holderType.isInstance(event.targetHolder()) && event.endResult().successfulValue(this.key).isPresent()) {
+        if (this.holderType.isInstance(event.targetHolder()) && event.endResult().successfulData().stream().anyMatch(v -> v.key() == this.key)) {
             this.listener.handle(event);
         }
     }
