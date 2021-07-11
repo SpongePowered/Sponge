@@ -24,11 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.Recipe;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -272,10 +276,42 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
     }
 
-    public EffectTransactor logCreativeClickContainer(final int slotNum, final ItemStackSnapshot creativeStack, final Player player) {
-        final ClickCreativeMenuTransaction transaction = new ClickCreativeMenuTransaction(player, player.containerMenu, slotNum, creativeStack);
+    public EffectTransactor logPlayerInventoryChange(final Player player) {
+        final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+    }
+
+    public EffectTransactor logCreativeClickContainer(final int slotNum, final ItemStackSnapshot creativeStack, final Player player) {
+        final ClickCreativeMenuTransaction transaction = new ClickCreativeMenuTransaction(player, slotNum, creativeStack);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+    }
+
+    public EffectTransactor logDropFromPlayerInventory(final Player player, final boolean dropAll) {
+        final DropFromPlayerInventoryTransaction transaction = new DropFromPlayerInventoryTransaction(player, dropAll);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+    }
+
+    public EffectTransactor logPlaceRecipe(boolean shift, Recipe<?> recipe, ServerPlayer player, Inventory craftInv) {
+        final PlaceRecipeTransaction transaction = new PlaceRecipeTransaction(player, shift, recipe, craftInv);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+    }
+
+    public void logInventorySlotTransaction(
+            final PhaseContext<@NonNull ?> phaseContext, final Slot slot, ItemStack orig, ItemStack newStack,
+            final Inventory inventory
+    ) {
+        final SlotTransaction newTransaction = new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(newStack));
+        if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, inventory)) {
+            return;
+        }
+        final Supplier<ServerLevel> worldSupplier = phaseContext.attemptWorldKey();
+        final InventorySlotTransaction transaction = new InventorySlotTransaction(
+                worldSupplier, inventory, newTransaction);
+        this.logTransaction(transaction);
     }
 
     private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable BlockEntity existing,

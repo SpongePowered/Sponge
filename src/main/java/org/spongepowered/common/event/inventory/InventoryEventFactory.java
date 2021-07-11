@@ -112,7 +112,7 @@ public class InventoryEventFactory {
             }
 
             boolean fullTransfer = true;
-            final TrackedInventoryBridge capture = (TrackedInventoryBridge) player.inventory;
+            final TrackedInventoryBridge capture = player.inventory;
             capture.bridge$setCaptureInventory(true);
             for (final ItemStackSnapshot item : list) {
                 final org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();

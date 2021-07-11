@@ -24,49 +24,51 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import com.google.common.collect.ImmutableList;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.item.crafting.Recipe;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
+import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-
-import com.google.common.collect.ImmutableList;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
-public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
+public class PlaceRecipeTransaction extends ContainerBasedTransaction {
 
     private final ServerPlayer player;
-    private final int slotNum;
-    private final @Nullable Slot slot;
-    private final ItemStackSnapshot creativeStack;
     private final ItemStackSnapshot originalCursor;
+    private boolean shift;
+    private Recipe<?> recipe;
+    private Inventory craftingInventory;
 
-    public ClickCreativeMenuTransaction(final Player player, final int slotNum, final ItemStackSnapshot creativeStack) {
+    public PlaceRecipeTransaction(final ServerPlayer player, final boolean shift, final Recipe<?> recipe, Inventory craftingInventory) {
         super(((ServerWorld) player.level).key(), player.containerMenu);
-        this.player = (ServerPlayer) player;
-        this.slotNum = slotNum;
-        this.creativeStack = creativeStack;
+        this.player = player;
         this.originalCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
-        this.slot = ((InventoryAdapter) menu).inventoryAdapter$getSlot(slotNum).orElse(null);
+        this.shift = shift;
+        this.recipe = recipe;
+        this.craftingInventory = craftingInventory;
     }
 
     @Override
@@ -75,37 +77,42 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {
-        if (slotTransactions.isEmpty() && this.slotNum >= 0 && this.slot != null) {
-            // No SlotTransaction was captured. So we add the clicked slot as a transaction with the creative stack
-            final ItemStackSnapshot item = this.slot.peek().createSnapshot();
-            slotTransactions.add(new SlotTransaction(this.slot, item, this.creativeStack));
-        }
 
-        // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
-        final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.originalCursor, ItemStackSnapshot.empty());
-        final ClickContainerEvent.Creative event = SpongeEventFactory.createClickContainerEventCreative(cause, (Container) this.menu,
-                        cursorTransaction, Optional.ofNullable(this.slot), slotTransactions);
+        // TODO Preview Event handling
+        // Get Preview Transactions - if empty create transaction on output slot anyways
+        final List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) this.menu).bridge$getPreviewTransactions();
+        if (previewTransactions.isEmpty()) {
+            final CraftingOutput slot = ((CraftingInventory) this.craftingInventory).result();
+            final SlotTransaction st = new SlotTransaction(slot, ItemStackSnapshot.empty(), slot.peek().createSnapshot());
+            previewTransactions.add(st);
+        }
+        // Fire Preview Event
+        InventoryEventFactory.callCraftEventPre(player, ((CraftingInventory) this.craftingInventory), previewTransactions.get(0),
+                ((CraftingRecipe) recipe), this.menu, previewTransactions);
+        previewTransactions.clear();
+
+        // Recipe event
+        final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.originalCursor, ItemStackUtil.snapshotOf(player.inventory.getCarried()));
+        ClickContainerEvent.Recipe event;
+        if (shift) {
+            event = SpongeEventFactory.createClickContainerEventRecipeAll(cause, (Container) this.menu,
+                    cursorTransaction, ((CraftingRecipe) recipe), Optional.empty(), slotTransactions);
+        } else {
+            event = SpongeEventFactory.createClickContainerEventRecipeSingle(cause, (Container) this.menu,
+                    cursorTransaction, ((CraftingRecipe) recipe), Optional.empty(), slotTransactions);
+        }
         return Optional.of(event);
     }
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final ClickContainerEvent event) {
-        if (event.isCancelled()) {
-            if (this.slotNum >= 0 && this.slotNum < this.menu.slots.size()) {
-                PacketPhaseUtil.handleSlotRestore(this.player, this.menu, event.transactions(), event.isCancelled());
-                PacketPhaseUtil.handleCustomCursor(this.player, this.originalCursor);
-            }
-            return;
+        // TODO cancel/post-processing
+        if (event.isCancelled() || !event.cursorTransaction().isValid()) {
+            PacketPhaseUtil.handleCustomCursor(player, event.cursorTransaction().original());
+        } else {
+            PacketPhaseUtil.handleCustomCursor(player, event.cursorTransaction().finalReplacement());
         }
-
-        // TODO custom slot/cursor handling:
-        if (PacketPhaseUtil.handleSlotRestore(this.player, this.menu, event.transactions(), event.isCancelled())) {
-            // TODO same as canceling event we do not need to call broadcastChanges like vanilla anymore
-        }
-
-        if (event.cursorTransaction().custom().isPresent()) {
-            PacketPhaseUtil.handleCustomCursor(this.player, event.cursorTransaction().finalReplacement());
-        }
+        PacketPhaseUtil.handleSlotRestore(player, player.containerMenu, event.transactions(), event.isCancelled());
     }
 
     @Override

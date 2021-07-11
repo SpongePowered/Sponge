@@ -44,22 +44,19 @@ public final class OpenInventoryState extends BasicInventoryPacketState {
         final ItemStackSnapshot lastCursor = context.getCursor();
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            final InteractContainerEvent.Open event =
-                SpongeEventFactory.createInteractContainerEventOpen(frame.currentCause(), ContainerUtil.fromNative(player.containerMenu),
-                        cursorTransaction);
-            SpongeCommon.post(event);
-            if (event.isCancelled()) {
-                player.closeContainer();
-            } else {
-                // Custom cursor
-                final Transaction<ItemStackSnapshot> transaction = event.cursorTransaction();
-                if (!transaction.isValid()) {
-                    PacketPhaseUtil.handleCustomCursor(player, transaction.original());
-                } else if (transaction.custom().isPresent()) {
-                    PacketPhaseUtil.handleCustomCursor(player, transaction.finalReplacement());
-                }
+        final InteractContainerEvent.Open event =
+            SpongeEventFactory.createInteractContainerEventOpen(frame.currentCause(), ContainerUtil.fromNative(player.containerMenu),
+                    cursorTransaction);
+        SpongeCommon.post(event);
+        if (event.isCancelled()) {
+            player.closeContainer();
+        } else {
+            // Custom cursor
+            final Transaction<ItemStackSnapshot> transaction = event.cursorTransaction();
+            if (!transaction.isValid()) {
+                PacketPhaseUtil.handleCustomCursor(player, transaction.original());
+            } else if (transaction.custom().isPresent()) {
+                PacketPhaseUtil.handleCustomCursor(player, transaction.finalReplacement());
             }
         }
     }

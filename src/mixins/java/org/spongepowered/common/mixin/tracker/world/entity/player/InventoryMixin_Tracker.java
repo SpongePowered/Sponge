@@ -35,11 +35,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(net.minecraft.world.entity.player.Inventory.class)
-public abstract class InventoryMixin_Tracker implements TrackedInventoryBridge {
+public abstract class InventoryMixin_Tracker {
 
     @Shadow public abstract ItemStack shadow$getItem(int index);
     @Shadow protected abstract int shadow$addResource(int p_191973_1_, ItemStack p_191973_2_);

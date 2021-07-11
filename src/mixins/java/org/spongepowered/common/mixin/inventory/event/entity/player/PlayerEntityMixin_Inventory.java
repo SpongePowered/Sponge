@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity.player;
 
+import net.minecraft.world.entity.item.ItemEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -40,6 +42,8 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedInventor
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -59,21 +63,30 @@ public class PlayerEntityMixin_Inventory {
     @Inject(method = "setItemSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
     private void onSetItemStackToSlot(final EquipmentSlot slotIn, final ItemStack stack, final CallbackInfo ci)
     {
-        if (((TrackedInventoryBridge) this.inventory).bridge$capturingInventory()) {
-            List<SlotTransaction> slotTransactions = ((TrackedInventoryBridge) this.inventory).bridge$getCapturedSlotTransactions();
-            if (slotIn == EquipmentSlot.MAINHAND) {
-                final ItemStack orig = this.inventory.items.get(this.inventory.selected);
-                final Slot slot = ((PlayerInventory) this.inventory).primary().hotbar().slot(this.inventory.selected).get();
-                slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
-            } else if (slotIn == EquipmentSlot.OFFHAND) {
-                final ItemStack orig = this.inventory.offhand.get(0);
-                final Slot slot = ((PlayerInventory) this.inventory).offhand();
-                slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
-            } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
-                final ItemStack orig = this.inventory.armor.get(slotIn.getIndex());
-                final Slot slot = ((PlayerInventory) this.inventory).equipment().slot(slotIn.getIndex()).get();
-                slotTransactions.add(new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(stack)));
-            }
+        final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
+        final PlayerInventory inventory = (PlayerInventory) this.inventory;
+        if (slotIn == EquipmentSlot.MAINHAND) {
+            final ItemStack orig = this.inventory.items.get(this.inventory.selected);
+            final Slot slot = inventory.primary().hotbar().slot(this.inventory.selected).get();
+            phaseContext.getTransactor().logInventorySlotTransaction(phaseContext, slot, orig, stack, inventory);
+        } else if (slotIn == EquipmentSlot.OFFHAND) {
+            final ItemStack orig = this.inventory.offhand.get(0);
+            final Slot slot = inventory.offhand();
+            phaseContext.getTransactor().logInventorySlotTransaction(phaseContext, slot, orig, stack, inventory);
+        } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
+            final ItemStack orig = this.inventory.armor.get(slotIn.getIndex());
+            final Slot slot = inventory.equipment().slot(slotIn.getIndex()).get();
+            phaseContext.getTransactor().logInventorySlotTransaction(phaseContext, slot, orig, stack, inventory);
+        }
+    }
+
+    @Redirect(method = "drop(Z)Z",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;drop(Lnet/minecraft/world/item/ItemStack;ZZ)Lnet/minecraft/world/entity/item/ItemEntity;"))
+    private ItemEntity impl$onBroadcastCreativeActionResult(final Player player, final ItemStack param0, final boolean param1, final boolean param2, final boolean dropAll) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (final EffectTransactor ignored = transactor.logDropFromPlayerInventory(player, dropAll)) {
+            return player.drop(param0, param1, param2);
         }
     }
 

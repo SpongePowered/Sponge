@@ -127,35 +127,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     @Override
     public void unwind(final InventoryPacketContext context) {
-        final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
-        final ServerboundContainerClickPacket packetIn = context.getPacket();
-
-        if (!TrackingUtil.processBlockCaptures(context)) {
-            return;
-        }
-
-        // TODO post-transaction handling (ClickMenuTransaction)
-        final @Nullable ClickContainerEvent inventoryEvent = this.createInventoryEvent(context, cause, player, ContainerUtil.fromNative(openContainer),
-                cursorTransaction, slotTransactions, capturedItems, packetIn.getButtonNum(), slot);
-
-        if (inventoryEvent != null) {
-
-            SpongeCommon.post(inventoryEvent);
-
-            // handle event results
-            if (!inventoryEvent.isCancelled()) {
-                if (inventoryEvent instanceof SpawnEntityEvent) {
-                    PacketState.processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
-                } else if (!capturedItems.isEmpty()) {
-                    SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
-                }
-            } else if (inventoryEvent instanceof ClickContainerEvent.Drop) {
-                capturedItems.clear();
-            }
-
-        }
+        super.unwind(context);
     }
-
-
 
 }

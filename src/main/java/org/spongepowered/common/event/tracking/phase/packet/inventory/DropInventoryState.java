@@ -70,10 +70,4 @@ public final class DropInventoryState extends BasicInventoryPacketState {
         );
     }
 
-    @Override
-    public Supplier<SpawnType> getSpawnTypeForTransaction(
-        final InventoryPacketContext context, final net.minecraft.world.entity.Entity entityToSpawn
-    ) {
-        return SpawnTypes.DROPPED_ITEM;
-    }
 }

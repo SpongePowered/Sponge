@@ -66,7 +66,7 @@ public abstract class CraftingMenuMixin_Inventory {
     private static void beforeSlotChangedCraftingGrid(int p_217066_0_, final Level p_217066_1_, final Player p_217066_2_,
             final net.minecraft.world.inventory.CraftingContainer p_217066_3_, final ResultContainer p_217066_4_, final CallbackInfo ci,
             ServerPlayer serverPlayerEntity, ItemStack itemStack) {
-        TrackedInventoryBridge trackedContainer = (TrackedInventoryBridge) p_217066_2_.containerMenu;
+        TrackedInventoryBridge trackedContainer = p_217066_2_.containerMenu;
         TrackedContainerBridge container = (TrackedContainerBridge) p_217066_2_.containerMenu;
 
         // Capture Inventory is true when caused by a vanilla inventory packet

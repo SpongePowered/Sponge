@@ -137,8 +137,11 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
 
     @Override
     public boolean acceptSlotTransaction(
-        final SlotTransaction newTransaction, final AbstractContainerMenu menu
+        final SlotTransaction newTransaction, final Object menu
     ) {
+        if (menu instanceof AbstractContainerMenu) {
+            // TODO
+        }
         return super.acceptSlotTransaction(newTransaction, menu);
     }
 

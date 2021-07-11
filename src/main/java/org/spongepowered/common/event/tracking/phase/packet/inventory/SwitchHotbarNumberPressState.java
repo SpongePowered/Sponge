@@ -24,9 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
@@ -36,7 +38,6 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
-import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Optional;
 
@@ -47,13 +48,12 @@ public final class SwitchHotbarNumberPressState extends BasicInventoryPacketStat
     }
 
     @Override
-    public ClickContainerEvent createInventoryEvent(final ServerPlayer playerMP, final Container openContainer,
-        final Transaction<ItemStackSnapshot> transaction,
-        final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
-        final @Nullable Slot slot) {
+    public ClickContainerEvent createContainerEvent(InventoryPacketContext context, Cause cause,
+            ServerPlayer serverPlayer, Container openContainer, Transaction<ItemStackSnapshot> transaction,
+            List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
         return SpongeEventFactory.createClickContainerEventNumberPress(
-            PhaseTracker.getCauseStackManager().currentCause(),
-            openContainer, transaction, Optional.ofNullable(slot), slotTransactions, usedButton);
+                PhaseTracker.getCauseStackManager().currentCause(),
+                openContainer, transaction, Optional.ofNullable(slot), slotTransactions, usedButton);
     }
 
 }

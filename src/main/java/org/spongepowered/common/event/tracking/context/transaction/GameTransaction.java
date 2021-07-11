@@ -36,7 +36,6 @@ import org.spongepowered.common.util.PrettyPrinter;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -189,7 +188,7 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
 
     public boolean acceptSlotTransaction(
         final SlotTransaction newTransaction,
-        final AbstractContainerMenu abstractContainerMenu
+        final Object inventory
     ) {
         return false;
     }

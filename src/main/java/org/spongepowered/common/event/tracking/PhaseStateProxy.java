@@ -44,8 +44,10 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -317,13 +319,17 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().attemptWorldKey(this.asContext());
     }
 
-    default @Nullable ClickContainerEvent createInventoryEvent(
+    default @Nullable ClickContainerEvent createContainerEvent(
         final Cause cause, final ServerPlayer playerMP,
         final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<org.spongepowered.api.entity.Entity> capturedEntities,
         final int usedButton, final @Nullable Slot slot
     ) {
-        return this.getState().createInventoryEvent(this.asContext(), cause, playerMP, openContainer, transaction, slotTransactions, capturedEntities, usedButton, slot);
+        return this.getState().createContainerEvent(this.asContext(), cause, playerMP, openContainer, transaction, slotTransactions, capturedEntities, usedButton, slot);
     }
 
+    default @Nullable ChangeInventoryEvent createInventoryEvent(final Cause cause, final Inventory inventory,
+            final List<SlotTransaction> slotTransactions, final List<org.spongepowered.api.entity.Entity> capturedEntities) {
+        return this.getState().createInventoryEvent(this.asContext(), cause, inventory, slotTransactions, capturedEntities);
+    }
 }
