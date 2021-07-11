@@ -48,6 +48,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.REGISTRY_KEYED_VALUE_PARAMETER, SpongeRegistryLoaders.valueParameter());
         holder.createRegistry(RegistryTypes.CLICK_TYPE, SpongeRegistryLoaders.clickType());
         holder.createRegistry(RegistryTypes.CAT_TYPE, SpongeRegistryLoaders.catType());
+        holder.createRegistry(RegistryTypes.CHUNK_REGENERATE_FLAG, SpongeRegistryLoaders.chunkRegenerateFlag());
         holder.createRegistry(RegistryTypes.COMMAND_TREE_NODE_TYPE, SpongeRegistryLoaders.clientCompletionKey());
         holder.createRegistry(RegistryTypes.CLIENT_COMPLETION_TYPE, SpongeRegistryLoaders.clientCompletionType());
         holder.createRegistry(RegistryTypes.COMMAND_COMPLETION_PROVIDER, SpongeRegistryLoaders.clientSuggestionProvider());
@@ -61,6 +62,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.GOAL_TYPE, SpongeRegistryLoaders.goalType());
         holder.createRegistry(RegistryTypes.HORSE_COLOR, SpongeRegistryLoaders.horseColor());
         holder.createRegistry(RegistryTypes.HORSE_STYLE, SpongeRegistryLoaders.horseStyle());
+        holder.createRegistry(RegistryTypes.LIGHT_TYPE, SpongeRegistryLoaders.lightType());
         holder.createRegistry(RegistryTypes.LLAMA_TYPE, SpongeRegistryLoaders.llamaType());
         holder.createRegistry(RegistryTypes.MATTER_TYPE, SpongeRegistryLoaders.matterType());
         holder.createRegistry(RegistryTypes.MOVEMENT_TYPE, SpongeRegistryLoaders.movementType());
@@ -68,6 +70,7 @@ public final class SpongeRegistries {
         holder.createRegistry(RegistryTypes.NOTE_PITCH, SpongeRegistryLoaders.notePitch());
         holder.createRegistry(RegistryTypes.OPERATOR, SpongeRegistryLoaders.operator());
         holder.createRegistry(RegistryTypes.OPERATION, SpongeRegistryLoaders.operation());
+        holder.createRegistry(RegistryTypes.ORIENTATION, SpongeRegistryLoaders.orientation());
         holder.createRegistry(RegistryTypes.PALETTE_TYPE, SpongeRegistryLoaders.paletteType());
         holder.createRegistry(RegistryTypes.PARROT_TYPE, SpongeRegistryLoaders.parrotType());
         holder.createRegistry(RegistryTypes.PARTICLE_OPTION, SpongeRegistryLoaders.particleOption());

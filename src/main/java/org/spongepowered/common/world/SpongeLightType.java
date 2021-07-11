@@ -22,31 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.api.minecraft.stats;
+package org.spongepowered.common.world;
 
-import net.minecraft.stats.Stat;
-import net.minecraft.stats.StatType;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.statistic.Statistic;
-import org.spongepowered.api.statistic.StatisticCategory;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.world.LightType;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Map;
+public final class SpongeLightType implements LightType {
 
-@Mixin(StatType.class)
-public abstract class StatTypeMixin_API implements StatisticCategory {
+    private final int defaultLightValue;
 
-    // @formatter:off
-    @Shadow @Final private Map<Object, Stat<Object>> map;
-    // @formatter:on
+    public SpongeLightType(final int defaultLightValue) {
+        this.defaultLightValue = defaultLightValue;
+    }
 
     @Override
-    @SuppressWarnings({"unchecked"})
-    public @NonNull Collection<? extends Statistic> statistics() {
-        return Collections.unmodifiableCollection((Collection<? extends Statistic>) (Object) this.map.values());
+    public int defaultLightValue() {
+        return this.defaultLightValue;
     }
+
 }

@@ -248,7 +248,6 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(DisplaySlot.Factory.class, new SpongeDisplaySlotFactory())
                 .registerFactory(Weather.Factory.class, new SpongeWeather.FactoryImpl())
                 .registerFactory(NodeTree.Factory.class, new SpongeNodeTree.FactoryImpl())
-                .registerFactory(Orientation.Factory.class, new SpongeOrientation.Factory())
                 .registerFactory(TagTemplate.Factory.class, new SpongeTagTemplateFactory());
         ;
     }
