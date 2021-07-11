@@ -58,7 +58,7 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickContainerEvent createInventoryEvent(final ServerPlayer playerMP, final Container openContainer,
+    public ClickContainerEvent createInventoryEvent(InventoryPacketContext ctx, final ServerPlayer playerMP, final Container openContainer,
         final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
         final @Nullable Slot slot) {

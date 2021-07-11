@@ -107,7 +107,7 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
                 inventory.selected = itemChange.getSlot();
                 player.resetLastActionTime();
             }
-            ((TrackedInventoryBridge) openContainer).bridge$setCaptureInventory(false);
+            openContainer.bridge$setCaptureInventory(false);
         }
     }
 }

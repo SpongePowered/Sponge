@@ -24,6 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
@@ -36,28 +39,15 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
-import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.ArrayList;
-import java.util.Collections;
 import java.util.List;
-import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -139,7 +129,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
 
     @Override
     public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet, final InventoryPacketContext context) {
-        ((TrackedInventoryBridge) playerMP.containerMenu).bridge$setCaptureInventory(true);
+
     }
 
     @Override
@@ -147,85 +137,37 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         return new InventoryPacketContext(this, tracker);
     }
 
-
-    private static Set<Class<?>> containersFailedCapture = new ReferenceOpenHashSet<>();
-
     @Override
     public void unwind(final InventoryPacketContext context) {
         final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
-
         final ServerboundContainerClickPacket packetIn = context.getPacket();
-        final Transaction<ItemStackSnapshot> cursorTransaction = this.getCursorTransaction(context, player);
 
-        final net.minecraft.world.inventory.AbstractContainerMenu openContainer = player.containerMenu;
-        final List<SlotTransaction> slotTransactions = Collections.emptyList();
-
-        final int usedButton = packetIn.getButtonNum();
-        final List<Entity> capturedItems = new ArrayList<>();
-        // MAKE SURE THAT THIS IS KEPT IN SYNC WITH THE REST OF THE METHOD
-        // If you add any logic that does something even if no event listenres
-        // are registered, add it here.
-
-        // If there aren't any registered listeners,
-        // we can skip an enormous amount of logic (creating transactions,
-        // firing an event, checking for cancelled transaction, etc.)
         if (!TrackingUtil.processBlockCaptures(context)) {
             return;
         }
 
-        Slot slot = null;
-        if (packetIn.getButtonNum() >= 0) {
-            slot = ((InventoryAdapter) trackedInventory).inventoryAdapter$getSlot(packetIn.getSlotNum()).orElse(null);
-        }
-        // else TODO slot for ClickContainerEvent.Drag
-        try {
-            final @Nullable ClickContainerEvent inventoryEvent;
+        // TODO post-transaction handling (ClickMenuTransaction)
+        final @Nullable ClickContainerEvent inventoryEvent = this.createInventoryEvent(context, player, ContainerUtil.fromNative(openContainer),
+                cursorTransaction, slotTransactions, capturedItems, packetIn.getButtonNum(), slot);
 
+        if (inventoryEvent != null) {
 
-            inventoryEvent = this.createInventoryEvent(context, player, ContainerUtil.fromNative(openContainer), cursorTransaction,
-                        new ArrayList<>(slotTransactions), capturedItems, usedButton, slot);
+            SpongeCommon.post(inventoryEvent);
 
-            if (inventoryEvent != null) {
-
-                SpongeCommon.post(inventoryEvent);
-
-                // Handle cursor
-                if (!inventoryEvent.cursorTransaction().isValid()) {
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.cursorTransaction().original());
-                } else if (inventoryEvent.cursorTransaction().custom().isPresent()){
-                    PacketPhaseUtil.handleCustomCursor(player, inventoryEvent.cursorTransaction().finalReplacement());
+            // handle event results
+            if (!inventoryEvent.isCancelled()) {
+                if (inventoryEvent instanceof SpawnEntityEvent) {
+                    PacketState.processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
+                } else if (!capturedItems.isEmpty()) {
+                    SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
                 }
-
-                // Handle slots
-                PacketPhaseUtil.handleSlotRestore(player, openContainer, inventoryEvent.transactions(), inventoryEvent.isCancelled());
-
-                if (!inventoryEvent.isCancelled()) {
-                    if (inventoryEvent instanceof SpawnEntityEvent) {
-                        PacketState.processSpawnedEntities(player, (SpawnEntityEvent) inventoryEvent);
-                    } else if (!capturedItems.isEmpty()) {
-                        SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
-                    }
-                } else if (inventoryEvent instanceof ClickContainerEvent.Drop) {
-                    capturedItems.clear();
-                }
-
+            } else if (inventoryEvent instanceof ClickContainerEvent.Drop) {
+                capturedItems.clear();
             }
+
         }
     }
 
-    @Override
-    public void restoreClickContainerEvent(
-        final InventoryPacketContext context, final ClickContainerEvent event
-    ) {
-        final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
-        PacketPhaseUtil.handleCustomCursor(player, event.cursorTransaction().original());
 
-        super.restoreClickContainerEvent(context, event);
-    }
 
-    public Transaction<ItemStackSnapshot> getCursorTransaction(final InventoryPacketContext context, final net.minecraft.server.level.ServerPlayer player) {
-        final ItemStackSnapshot lastCursor = context.getCursor();
-        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
-        return new Transaction<>(lastCursor, newCursor);
-    }
 }

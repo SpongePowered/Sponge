@@ -66,7 +66,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
         // See NetHandlerPlayServerMixin processClickWindow redirect for rest of
         // fix.
         // --bloodmc
-        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
+        final TrackedInventoryBridge trackedInventory = player.containerMenu;
         if (!trackedInventory.bridge$capturingInventory()) {
             trackedInventory.bridge$getCapturedSlotTransactions().clear();
             return;

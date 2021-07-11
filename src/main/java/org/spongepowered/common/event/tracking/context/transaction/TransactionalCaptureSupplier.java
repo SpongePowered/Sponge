@@ -29,6 +29,7 @@ import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -257,16 +258,22 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     }
 
     public EffectTransactor logClickContainer(
-        final AbstractContainerMenu menu, final int slotId, final int dragType, final ClickType clickType, final Player player
+        final AbstractContainerMenu menu, final int slotNum, final int buttonNum, final ClickType clickType, final Player player
     ) {
         final @Nullable Slot slot;
-        if (dragType >= 0) { // We have a valid slot
-            slot = ((InventoryAdapter) menu).inventoryAdapter$getSlot(slotId).orElse(null);
+        if (buttonNum >= 0) { // We have a valid slot
+            slot = ((InventoryAdapter) menu).inventoryAdapter$getSlot(slotNum).orElse(null);
         } else {
-            slot = null;
+            slot = null; // TODO slot for ClickContainerEvent.Drag?
         }
         final ClickMenuTransaction transaction = new ClickMenuTransaction(
-            player, menu, slotId, dragType, clickType, slot, ItemStackUtil.snapshotOf(player.inventory.getCarried()));
+            player, menu, slotNum, buttonNum, clickType, slot, ItemStackUtil.snapshotOf(player.inventory.getCarried()));
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+    }
+
+    public EffectTransactor logCreativeClickContainer(final int slotNum, final ItemStackSnapshot creativeStack, final Player player) {
+        final ClickCreativeMenuTransaction transaction = new ClickCreativeMenuTransaction(player, player.containerMenu, slotNum, creativeStack);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
     }

@@ -35,9 +35,14 @@ public class ContainerSlotTransaction extends ContainerBasedTransaction {
     }
 
     @Override
-    public void restore(
-        PhaseContext<@NonNull ?> context, ClickContainerEvent event
-    ) {
-        this.menu
+    public void restore(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
+        // PacketPhaseUtil.handleSlotRestore
+        if (!this.newTransaction.isValid()) {
+            this.newTransaction.slot().set(this.newTransaction.original().createStack());
+        } else if (this.newTransaction.custom().isPresent()) {
+            this.newTransaction.slot().set(this.newTransaction.finalReplacement().createStack());
+        }
     }
+
+
 }

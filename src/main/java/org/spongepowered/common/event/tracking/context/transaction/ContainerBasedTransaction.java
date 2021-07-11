@@ -8,6 +8,7 @@ import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import com.google.common.collect.ImmutableList;
@@ -104,7 +105,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
         final PhaseContext<@NonNull ?> context,
         final ClickContainerEvent event
     ) {
-        context.restoreClickContainerEvent(event);
+
     }
 
     @Override

@@ -100,9 +100,9 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
 
                 final Transaction<ItemStackSnapshot> cursorTrans = new Transaction<>(ItemStackSnapshot.empty(),
                     ItemStackSnapshot.empty());
-                final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.containerMenu;
+                final TrackedInventoryBridge mixinContainer = player.containerMenu;
                 final List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
-                final ClickContainerEvent.Drop dropItemEvent = this.createInventoryEvent(player,
+                final ClickContainerEvent.Drop dropItemEvent = this.createInventoryEvent(context, player,
                     ContainerUtil.fromNative(player.containerMenu),
                     cursorTrans, Lists.newArrayList(slotTrans), entities, usedButton, slot);
 

@@ -110,7 +110,7 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
                 }
             }
 
-            final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
+            final TrackedInventoryBridge trackedInventory = player.containerMenu;
             trackedInventory.bridge$setCaptureInventory(false);
             trackedInventory.bridge$getCapturedSlotTransactions().clear();
         }

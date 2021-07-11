@@ -28,7 +28,6 @@ import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUt
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
-import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
@@ -59,7 +58,6 @@ import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -77,7 +75,6 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedContaine
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.inventory.util.InventoryUtil;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
@@ -255,36 +252,6 @@ public class InventoryEventFactory {
             } else if (trans.custom().isPresent()) {
                 trans.slot().set(trans.finalReplacement().createStack());
             }
-        }
-    }
-
-
-    public static ClickContainerEvent.Creative callCreativeClickContainerEvent(final ServerPlayer player, final ServerboundSetCreativeModeSlotPacket packetIn) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
-            // Due to this, we can only send the original item that was clicked in slot
-            final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.empty(), ItemStackSnapshot.empty());
-            org.spongepowered.api.item.inventory.Slot slot = null;
-            final List<SlotTransaction> captures = ((TrackedInventoryBridge) player.containerMenu).bridge$getCapturedSlotTransactions();
-            if (captures.isEmpty() && packetIn.getSlotNum() >= 0 && packetIn.getSlotNum() < player.containerMenu.slots.size()) {
-                slot = ((InventoryAdapter)player.containerMenu).inventoryAdapter$getSlot(packetIn.getSlotNum()).orElse(null);
-                if (slot != null) {
-                    final ItemStackSnapshot clickedItem = ItemStackUtil.snapshotOf(slot.peek());
-                    final ItemStackSnapshot replacement = ItemStackUtil.snapshotOf(packetIn.getItem());
-                    final SlotTransaction slotTransaction = new SlotTransaction(slot, clickedItem, replacement);
-                    captures.add(slotTransaction);
-                }
-            }
-            final ClickContainerEvent.Creative event =
-                    SpongeEventFactory.createClickContainerEventCreative(frame.currentCause(), (org.spongepowered.api.item.inventory.Container) player.containerMenu, cursorTransaction,
-                            Optional.ofNullable(slot),
-                            new ArrayList<>(captures));
-            captures.clear();
-            ((TrackedInventoryBridge) player.containerMenu).bridge$setCaptureInventory(false);
-            SpongeCommon.post(event);
-            frame.popCause();
-            return event;
         }
     }
 
@@ -505,8 +472,8 @@ public class InventoryEventFactory {
                 ContainerUtil.fromNative(container), result, inventory, cursorTransaction, Optional.ofNullable(recipe), Optional.of(slot), transactions);
         SpongeCommon.post(event);
 
-        final boolean capture = ((TrackedInventoryBridge) container).bridge$capturingInventory();
-        ((TrackedInventoryBridge) container).bridge$setCaptureInventory(false);
+        final boolean capture = container.bridge$capturingInventory();
+        container.bridge$setCaptureInventory(false);
         // handle slot-transactions
         PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
         if (event.isCancelled() || !event.cursorTransaction().isValid() || event.cursorTransaction().custom().isPresent()) {
@@ -519,7 +486,7 @@ public class InventoryEventFactory {
         }
 
         transactions.clear();
-        ((TrackedInventoryBridge) container).bridge$setCaptureInventory(capture);
+        container.bridge$setCaptureInventory(capture);
         return event;
     }
 

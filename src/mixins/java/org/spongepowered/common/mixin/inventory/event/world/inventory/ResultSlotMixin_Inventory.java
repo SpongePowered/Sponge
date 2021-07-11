@@ -134,7 +134,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         }
         ((TrackedContainerBridge) thePlayer.containerMenu).bridge$detectAndSendChanges(true);
 
-        ((TrackedInventoryBridge) thePlayer.containerMenu).bridge$setCaptureInventory(false);
+        thePlayer.containerMenu.bridge$setCaptureInventory(false);
 
         final AbstractContainerMenu container = thePlayer.containerMenu;
         final Inventory craftInv = ((Inventory) container).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
@@ -145,7 +145,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
 
         // retain only last slot-transactions on output slot
         SlotTransaction first = null;
-        final List<SlotTransaction> capturedTransactions = ((TrackedInventoryBridge) container).bridge$getCapturedSlotTransactions();
+        final List<SlotTransaction> capturedTransactions = container.bridge$getCapturedSlotTransactions();
         for (final Iterator<SlotTransaction> iterator = capturedTransactions.iterator(); iterator.hasNext(); ) {
             final SlotTransaction trans = iterator.next();
             Optional<Integer> slotIndex = trans.slot().get(Keys.SLOT_INDEX);
@@ -173,7 +173,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         ((TrackedContainerBridge) container).bridge$setLastCraft(event);
         ((TrackedContainerBridge) container).bridge$setFirePreview(true);
         this.impl$craftedStack = null;
-        ((TrackedInventoryBridge) thePlayer.containerMenu).bridge$setCaptureInventory(true);
+        thePlayer.containerMenu.bridge$setCaptureInventory(true);
 
         final List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) container).bridge$getPreviewTransactions();
         if (this.craftSlots.isEmpty()) {

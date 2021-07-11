@@ -58,7 +58,7 @@ public abstract class ItemEntityMixin_Inventory {
 
     @Redirect(method = "playerTouch", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/player/Inventory;add(Lnet/minecraft/world/item/ItemStack;)Z"))
-    private boolean spongeImpl$throwPikcupEventForAddItem(final Inventory inventory, final ItemStack itemStack, final Player player) {
+    private boolean spongeImpl$throwPickupEventForAddItem(final Inventory inventory, final ItemStack itemStack, final Player player) {
         final TrackedInventoryBridge inv = (TrackedInventoryBridge) inventory;
         inv.bridge$setCaptureInventory(true);
         final boolean added = inventory.add(itemStack);

@@ -136,7 +136,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
             player.setItemInHand(hand, replaced);
         }
 
-        final TrackedInventoryBridge trackedInventory = (TrackedInventoryBridge) player.containerMenu;
+        final TrackedInventoryBridge trackedInventory = player.containerMenu;
         trackedInventory.bridge$setCaptureInventory(false);
         trackedInventory.bridge$getCapturedSlotTransactions().clear();
     }
