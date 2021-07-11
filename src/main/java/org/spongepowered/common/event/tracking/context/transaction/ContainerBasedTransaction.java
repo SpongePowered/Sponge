@@ -8,7 +8,6 @@ import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import com.google.common.collect.ImmutableList;
@@ -78,7 +77,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
             .collect(Collectors.toList());
 
         return containerBasedTransactions.stream()
-            .map(t -> t.createInventoryEvent(slotTransactions, entities, context))
+            .map(t -> t.createInventoryEvent(slotTransactions, entities, context, currentCause))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst();
@@ -95,7 +94,8 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
     Optional<ClickContainerEvent> createInventoryEvent(
         final List<SlotTransaction> slotTransactions,
         final ImmutableList<Entity> entities,
-        final PhaseContext<@NonNull ?> context
+        final PhaseContext<@NonNull ?> context,
+        final Cause currentCause
     ) {
         return Optional.empty();
     }

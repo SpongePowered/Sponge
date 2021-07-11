@@ -24,20 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
-import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -47,7 +38,10 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.util.Constants;
 
-import java.util.List;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -108,12 +102,6 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         return SpawnTypes.DROPPED_ITEM;
     }
 
-    @Override
-    public @Nullable ClickContainerEvent createInventoryEvent(final InventoryPacketContext context, final net.minecraft.server.level.ServerPlayer playerMP, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
-                                                              final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, final @Nullable Slot slot) {
-        return null;
-    }
-
     // Checks the proper ShouldFire flag for the event to be fired.
     // This should be the most specific known event that will be fired.
     // It's fine for this to be a supertype of the actual event - that will
@@ -147,7 +135,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
         }
 
         // TODO post-transaction handling (ClickMenuTransaction)
-        final @Nullable ClickContainerEvent inventoryEvent = this.createInventoryEvent(context, player, ContainerUtil.fromNative(openContainer),
+        final @Nullable ClickContainerEvent inventoryEvent = this.createInventoryEvent(context, cause, player, ContainerUtil.fromNative(openContainer),
                 cursorTransaction, slotTransactions, capturedItems, packetIn.getButtonNum(), slot);
 
         if (inventoryEvent != null) {

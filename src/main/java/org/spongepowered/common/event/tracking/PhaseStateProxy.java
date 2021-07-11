@@ -317,11 +317,13 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().attemptWorldKey(this.asContext());
     }
 
-    default @Nullable ClickContainerEvent createInventoryEvent(final net.minecraft.server.level.ServerPlayer playerMP,
+    default @Nullable ClickContainerEvent createInventoryEvent(
+        final Cause cause, final ServerPlayer playerMP,
         final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<org.spongepowered.api.entity.Entity> capturedEntities,
-        final int usedButton, final @Nullable Slot slot) {
-        return this.getState().createInventoryEvent(this.asContext(), playerMP, openContainer, transaction, slotTransactions, capturedEntities, usedButton, slot);
+        final int usedButton, final @Nullable Slot slot
+    ) {
+        return this.getState().createInventoryEvent(this.asContext(), cause, playerMP, openContainer, transaction, slotTransactions, capturedEntities, usedButton, slot);
     }
 
 }

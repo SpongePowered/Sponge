@@ -24,13 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import com.google.common.collect.ImmutableList;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
@@ -42,10 +35,17 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+
+import com.google.common.collect.ImmutableList;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Collections;
 import java.util.List;
@@ -73,24 +73,24 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
     @Override
     Optional<ClickContainerEvent> createInventoryEvent(
         final List<SlotTransaction> slotTransactions, final ImmutableList<Entity> entities,
-        final PhaseContext<@NonNull ?> context
+        final PhaseContext<@NonNull ?> context,
+        final Cause cause
     ) {
         if (slotTransactions.isEmpty() && this.slotNum >= 0 && this.slot != null) {
             // No SlotTransaction was captured. So we add the clicked slot as a transaction with the creative stack
             final ItemStackSnapshot item = this.slot.peek().createSnapshot();
-            slotTransactions.add(new SlotTransaction(this.slot, item, creativeStack));
+            slotTransactions.add(new SlotTransaction(this.slot, item, this.creativeStack));
         }
 
-        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
         // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.originalCursor, ItemStackSnapshot.empty());
         final ClickContainerEvent.Creative event = SpongeEventFactory.createClickContainerEventCreative(cause, (Container) this.menu,
-                        cursorTransaction, Optional.ofNullable(slot), slotTransactions);
+                        cursorTransaction, Optional.ofNullable(this.slot), slotTransactions);
         return Optional.of(event);
     }
 
     @Override
-    public void restore(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
+    public void restore(final PhaseContext<@NonNull ?> context, final ClickContainerEvent event) {
         if (event.isCancelled()) {
             if (this.slotNum >= 0 && this.slotNum < this.menu.slots.size()) {
                 PacketPhaseUtil.handleSlotRestore(this.player, this.menu, event.transactions(), event.isCancelled());

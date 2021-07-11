@@ -28,11 +28,9 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.CauseStackManager.StackFrame;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -102,7 +100,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
                     ItemStackSnapshot.empty());
                 final TrackedInventoryBridge mixinContainer = player.containerMenu;
                 final List<SlotTransaction> slotTrans = mixinContainer.bridge$getCapturedSlotTransactions();
-                final ClickContainerEvent.Drop dropItemEvent = this.createInventoryEvent(context, player,
+                final ClickContainerEvent.Drop dropItemEvent = this.createInventoryEvent(context, cause, player,
                     ContainerUtil.fromNative(player.containerMenu),
                     cursorTrans, Lists.newArrayList(slotTrans), entities, usedButton, slot);
 
@@ -127,35 +125,39 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public ClickContainerEvent.Drop createInventoryEvent(final InventoryPacketContext context, final net.minecraft.server.level.ServerPlayer serverPlayer,
+    public ClickContainerEvent.Drop createInventoryEvent(
+        final InventoryPacketContext context, final Cause cause,
+        final net.minecraft.server.level.ServerPlayer serverPlayer,
         final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
         final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,
-        final @Nullable Slot slot) {
-        try (final StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            for (final Entity currentEntity : capturedEntities) {
-                if (currentEntity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) currentEntity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((ServerPlayer) serverPlayer).uniqueId());
-                } else {
-                    currentEntity.offer(Keys.CREATOR, serverPlayer.getUUID());
-                }
-            }
-
-            // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
-            final ClickContainerEvent.Drop event;
-            if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {
-                event = SpongeEventFactory.createClickContainerEventDropSingle(
-                    frame.currentCause(),
-                    openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
+        final @Nullable Slot slot
+    ) {
+        for (final Entity currentEntity : capturedEntities) {
+            if (currentEntity instanceof CreatorTrackedBridge) {
+                ((CreatorTrackedBridge) currentEntity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR,
+                    ((ServerPlayer) serverPlayer).uniqueId());
             } else {
-                event = SpongeEventFactory.createClickContainerEventDropFull(
-                    frame.currentCause(),
-                    openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
+                currentEntity.offer(Keys.CREATOR, serverPlayer.getUUID());
             }
-            // TODO the nature of how this event is handled prevents the cause information being preserved through
-            // the event call, somehow should not release this frame until after the event is posted
-            return event;
         }
+
+        // A 'primary click' is used by the game to indicate a single drop (e.g. pressing 'q' without holding 'control')
+        final ClickContainerEvent.Drop event;
+        if (usedButton == Constants.Networking.PACKET_BUTTON_PRIMARY_ID) {
+            event = SpongeEventFactory.createClickContainerEventDropSingle(
+                cause,
+                openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions
+            );
+        } else {
+            event = SpongeEventFactory.createClickContainerEventDropFull(
+                cause,
+                openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions
+            );
+        }
+        // TODO the nature of how this event is handled prevents the cause information being preserved through
+        // the event call, somehow should not release this frame until after the event is posted
+        return event;
+
     }
 
 }

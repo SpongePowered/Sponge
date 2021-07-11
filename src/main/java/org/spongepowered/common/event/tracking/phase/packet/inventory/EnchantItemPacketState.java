@@ -88,7 +88,7 @@ public final class EnchantItemPacketState extends BasicInventoryPacketState {
             causeStackManager.pushCause(player);
             causeStackManager.pushCause(openContainer);
             final ClickContainerEvent inventoryEvent;
-            inventoryEvent = this.createInventoryEvent(context, player, ContainerUtil.fromNative(openContainer), transaction,
+            inventoryEvent = this.createInventoryEvent(context, cause, player, ContainerUtil.fromNative(openContainer), transaction,
                         Lists.newArrayList(slotTransactions),
                         capturedItems,
                         usedButton, null);
