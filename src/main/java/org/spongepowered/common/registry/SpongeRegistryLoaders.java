@@ -955,7 +955,8 @@ public final class SpongeRegistryLoaders {
                         return new Vector2d(r.x, r.z);
                     })
             );
-            l.add(ResourceKeyedValueParameters.VECTOR3D, k -> ClientNativeArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition((CommandSourceStack) cause))));
+            l.add(ResourceKeyedValueParameters.VECTOR3D, k -> ClientNativeArgumentParser.createConverter(k, Vec3Argument.vec3(false),
+                    (reader, cause, result) -> VecHelper.toVector3d(result.getPosition((CommandSourceStack) cause))));
             l.add(ResourceKeyedValueParameters.WORLD, k -> ClientNativeArgumentParser.createConverter(k,
                     DimensionArgument.dimension(),
                     (reader, cause, result) -> Sponge.server().worldManager().world((ResourceKey) (Object) result)
