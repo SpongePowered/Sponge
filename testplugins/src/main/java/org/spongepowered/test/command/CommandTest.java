@@ -133,6 +133,20 @@ public final class CommandTest {
                 "checkuser"
         );
 
+
+        final Parameter.Value<String> choicesKey = Parameter.choices("bacon", "eggs", "spam", "spam spam spam").key("choices").build();
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .addParameter(choicesKey)
+                        .executor(context -> {
+                            context.sendMessage(Identity.nil(), Component.text(context.requireOne(choicesKey)));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "testchoices"
+        );
+
         final Parameter.Key<String> testKey = Parameter.key("testKey", String.class);
         final Parameter.Key<Component> requiredKey = Parameter.key("requiredKey", Component.class);
         event.register(
