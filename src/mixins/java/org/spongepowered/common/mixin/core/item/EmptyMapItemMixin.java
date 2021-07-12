@@ -31,6 +31,7 @@ import net.minecraft.world.InteractionResultHolder;
 import net.minecraft.world.item.EmptyMapItem;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.item.MapItem;
 import net.minecraft.world.level.Level;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandType;
@@ -66,6 +67,10 @@ public abstract class EmptyMapItemMixin {
                                                    final Level level2,
                                                    final net.minecraft.world.entity.player.Player playerIn,
                                                    final InteractionHand usedHand) {
+        if (level.isClientSide()) { // ignore on client
+            return MapItem.create(level, x, y, scale, trackingPosition, unlimitedTracking);
+        }
+
         final Player player = (Player) playerIn;
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
