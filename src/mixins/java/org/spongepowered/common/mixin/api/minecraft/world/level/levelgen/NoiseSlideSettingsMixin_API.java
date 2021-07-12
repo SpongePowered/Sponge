@@ -28,12 +28,13 @@ import net.minecraft.world.level.levelgen.NoiseSlideSettings;
 import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(NoiseSlideSettings.class)
-@Implements(@Interface(iface = SlideConfig.class, prefix = "slideConfig$"))
+@Implements(@Interface(iface = SlideConfig.class, prefix = "slideConfig$", remap = Remap.NONE))
 public abstract class NoiseSlideSettingsMixin_API implements SlideConfig {
 
     // @formatter:off

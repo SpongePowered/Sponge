@@ -28,13 +28,14 @@ import net.minecraft.world.Container;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
 
 @Mixin(Container.class)
-@Implements(@Interface(iface = Inventory.class, prefix = "inventory$"))
+@Implements(@Interface(iface = Inventory.class, prefix = "inventory$", remap = Remap.NONE))
 public interface ContainerMixin_Inventory_API extends DefaultImplementedAdapterInventory {
 
     // Soft implemented in development since the targets have the same method from IInventory

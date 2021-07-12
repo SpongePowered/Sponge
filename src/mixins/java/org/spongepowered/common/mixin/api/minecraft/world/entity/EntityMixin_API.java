@@ -53,6 +53,7 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -78,7 +79,7 @@ import java.util.function.UnaryOperator;
 import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.entity.Entity.class)
-@Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$"))
+@Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$", remap = Remap.NONE))
 public abstract class EntityMixin_API implements org.spongepowered.api.entity.Entity {
 
     // @formatter:off

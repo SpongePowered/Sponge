@@ -28,6 +28,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.living.monster.Patroller;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,7 +37,7 @@ import java.util.Set;
 import net.minecraft.world.entity.monster.PatrollingMonster;
 
 @Mixin(PatrollingMonster.class)
-@Implements(@Interface(iface = Patroller.class, prefix = "patroller$"))
+@Implements(@Interface(iface = Patroller.class, prefix = "patroller$", remap = Remap.NONE))
 public abstract class PatrollingMonsterMixin_API extends MonsterMixin_API implements Patroller {
 
     // @formatter:off

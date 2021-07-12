@@ -32,6 +32,7 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -39,7 +40,7 @@ import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(net.minecraft.world.item.enchantment.Enchantment.class)
-@Implements(@Interface(iface = EnchantmentType.class, prefix = "enchantment$"))
+@Implements(@Interface(iface = EnchantmentType.class, prefix = "enchantment$", remap = Remap.NONE))
 public abstract class EnchantmentMixin_API implements EnchantmentType {
 
     // @formatter:off

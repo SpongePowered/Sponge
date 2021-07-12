@@ -30,6 +30,7 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -37,7 +38,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import java.util.Collection;
 
 @Mixin(targets = "net.minecraft.tags.StaticTagHelper$Wrapper")
-@Implements(@Interface(iface = org.spongepowered.api.tag.Tag.class, prefix = "spongetag$"))
+@Implements(@Interface(iface = org.spongepowered.api.tag.Tag.class, prefix = "spongetag$", remap = Remap.NONE))
 public abstract class TagWrapperMixin_API<T> implements Tag.Named<T>, org.spongepowered.api.tag.Tag<T> {
 
     // @formatter:on

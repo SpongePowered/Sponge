@@ -28,13 +28,14 @@ import org.spongepowered.api.event.cause.entity.damage.DamageType;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 
 @Mixin(value = net.minecraft.world.damagesource.DamageSource.class)
-@Implements(@Interface(iface = DamageSource.class, prefix = "damageSource$"))
+@Implements(@Interface(iface = DamageSource.class, prefix = "damageSource$", remap = Remap.NONE))
 public abstract class DamageSourceMixin_API implements DamageSource {
 
     // @formatter:off
