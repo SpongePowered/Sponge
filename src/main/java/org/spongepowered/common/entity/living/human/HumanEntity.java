@@ -188,6 +188,11 @@ public final class HumanEntity extends PathfinderMob implements TeamMember, Rang
         super.readAdditionalSaveData(tag);
         if (tag.contains("profile")) {
             this.fakeProfile = NbtUtils.readGameProfile(tag.getCompound("profile"));
+            // Fix Vanilla not writing profiles with empty names, instead it skips the "name" property. We allow humans to have no names
+            // but they are players on the client. Easiest fix is just to check for the null name and make it empty
+            if (this.fakeProfile.getName() == null) {
+                this.fakeProfile = new GameProfile(this.fakeProfile.getId(), "");
+            }
         }
     }
 

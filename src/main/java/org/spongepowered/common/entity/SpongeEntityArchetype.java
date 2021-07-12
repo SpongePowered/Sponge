@@ -26,6 +26,8 @@ package org.spongepowered.common.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.MobSpawnType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -130,42 +132,43 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
             return Optional.empty();
         }
         final org.spongepowered.api.world.server.ServerWorld spongeWorld = location.world();
-        final ServerLevel worldServer = (ServerLevel) spongeWorld;
+        final ServerLevel level = (ServerLevel) spongeWorld;
 
-        final Entity entity = ((net.minecraft.world.entity.EntityType<?>) this.type).create(worldServer);
+        final ResourceLocation key = net.minecraft.world.entity.EntityType.getKey((net.minecraft.world.entity.EntityType<?>) this.type);
+        if (key == null) {
+            return Optional.empty();
+        }
+
+        final CompoundTag compound = new CompoundTag();
+        compound.putString("id", key.toString());
+
+        final Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, level, e -> {
+            e.setPos(location.x(), location.y(), location.z());
+            return e;
+        });
+
         if (entity == null) {
             return Optional.empty();
         }
-        entity.setPos(location.x(), location.y(), location.z()); // Set initial position
 
         final boolean requiresInitialSpawn;
         if (this.data.contains(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
-            requiresInitialSpawn = !this.data.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
+            requiresInitialSpawn = this.data.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
             this.data.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
         } else {
             requiresInitialSpawn = true;
         }
 
-        if (entity instanceof Mob) {
-            final Mob mobentity = (Mob) entity;
-            mobentity.yHeadRot = mobentity.yRot;
-            mobentity.yBodyRot = mobentity.xRot;
-            if (requiresInitialSpawn) {
-                // TODO null reason?
-                mobentity.finalizeSpawn(worldServer, worldServer.getCurrentDifficultyAt(mobentity.blockPosition()), null, null, null);
-            }
+        if (requiresInitialSpawn  && entity instanceof Mob) {
+            ((Mob) entity).finalizeSpawn(level, level.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null, null);
         }
 
         // like applyItemNBT
         final CompoundTag mergedNbt = entity.saveWithoutId(new CompoundTag());
-        final UUID uniqueID = entity.getUUID();
 
         mergedNbt.merge(this.data);
         mergedNbt.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
-        mergedNbt.putString(Constants.Sponge.World.WORLD_KEY, location.worldKey().formatted());
-        mergedNbt.putUUID(Constants.Entity.ENTITY_UUID, uniqueID); // TODO can we avoid this when the entity is only spawned once?
         entity.load(mergedNbt); // Read in all data
-        entity.setPos(location.x(), location.y(), location.z());
 
         // Finished building the entity. Now spawn it if not cancelled.
         final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
@@ -176,7 +179,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         final SpawnType require = PhaseTracker.getCauseStackManager().currentContext().require(EventContextKeys.SPAWN_TYPE);
         final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().currentCause(), entities);
         if (!event.isCancelled()) {
-            worldServer.addFreshEntity(entity);
+            level.tryAddFreshEntityWithPassengers(entity);
             return Optional.of(spongeEntity);
         }
         return Optional.empty();

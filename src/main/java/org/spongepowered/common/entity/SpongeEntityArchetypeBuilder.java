@@ -112,9 +112,6 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         final net.minecraft.world.entity.Entity minecraftEntity = (net.minecraft.world.entity.Entity) entity;
         final CompoundTag compound = new CompoundTag();
         minecraftEntity.saveAsPassenger(compound);
-        final String encodedId = Optional.ofNullable(((EntityAccessor) minecraftEntity).invoker$getEncodeId())
-            .orElseGet(() -> Registry.ENTITY_TYPE.getKey(minecraftEntity.getType()).toString());
-        compound.putString(Constants.Sponge.EntityArchetype.ENTITY_ID, encodedId);
         compound.remove(Constants.UUID);
         compound.remove(Constants.UUID_MOST);
         compound.remove(Constants.UUID_LEAST);
