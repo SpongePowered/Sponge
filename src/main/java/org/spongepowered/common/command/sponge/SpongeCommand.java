@@ -74,10 +74,7 @@ import java.text.MessageFormat;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
-import java.util.ArrayList;
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
 import java.util.stream.Collectors;
 
 import javax.management.MBeanServer;
@@ -583,7 +580,6 @@ public class SpongeCommand {
         final long totalMem = Runtime.getRuntime().totalMemory() / 1024 / 1024;
         final long freeMem = Runtime.getRuntime().freeMemory() / 1024 / 1024;
         final int tps = Sponge.server().targetTicksPerSecond();
-        
         builder.append(
                 Component.newline(),
                 Component.text("    Max memory", NamedTextColor.GRAY),
@@ -600,7 +596,7 @@ public class SpongeCommand {
                 Component.newline(),
                 Component.text("    TPS", NamedTextColor.GRAY),
                 colon,
-                Component.text(tps),
+                Component.text(tps, tps >= 15 ? NamedTextColor.GREEN : tps >= 10 ? NamedTextColor.YELLOW : NamedTextColor.RED),
                 Component.newline(),
                 Component.text("    Server uptime", NamedTextColor.GRAY),
                 colon,
@@ -621,10 +617,12 @@ public class SpongeCommand {
         final long minutes = d.toMinutes();
         d = d.minusMinutes(minutes);
         final long seconds = d.getSeconds();
-        return (days == 0 ? "" : days + " days, ") +
-                (hours == 0 ? "" : hours + " hours, ") +
-                (minutes == 0 ? "" : minutes + " minutes, ") +
-                (seconds == 0 ? "" : seconds + " seconds");
+        final StringJoiner joiner = new StringJoiner(", ");
+        if (days > 0) joiner.add(days + " days");
+        if (hours > 0) joiner.add(hours + " hours");
+        if (minutes > 0) joiner.add(minutes + " minutes");
+        if (seconds > 0) joiner.add(seconds + " seconds");
+        return joiner.toString();
     }
 
     private @NonNull CommandResult reloadWorldExecutor(final CommandContext context) {
