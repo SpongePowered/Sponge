@@ -211,7 +211,7 @@ public class SpongeCommand {
                 .addChild(versionCommand, "version")
                 .addChild(whichCommand, "which")
                 .addChild(reloadCommand, "reload")
-                .addChild(statusCommand, "status", "uptime");
+                .addChild(statusCommand, "status");
 
         this.additionalActions(commandBuilder);
         return commandBuilder.build();
@@ -577,39 +577,34 @@ public class SpongeCommand {
                         Component.text(Launch.instance().platformPlugin().metadata().name().get(), Style.style(NamedTextColor.YELLOW, TextDecoration.BOLD))
                 );
         final Component colon = Component.text(": ", NamedTextColor.GRAY);
-        final String uptime = formatDuration(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
+        final String uptime = SpongeCommand.formatDuration(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime()));
         final long maxMem = Runtime.getRuntime().maxMemory() / 1024 / 1024;
         final long totalMem = Runtime.getRuntime().totalMemory() / 1024 / 1024;
         final long freeMem = Runtime.getRuntime().freeMemory() / 1024 / 1024;
         final int tps = Sponge.server().targetTicksPerSecond();
         final long milisStartTime = SpongeLifecycle.tookStartedNanos / 1000000;
-        final String serverUptime = formatDuration(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime() - milisStartTime));
 
         builder.append(
                 Component.newline(),
-                Component.text("    Max memory", NamedTextColor.GRAY),
+                Component.text(SpongeCommand.INDENT + "Max memory", NamedTextColor.GRAY),
                 colon,
                 Component.text(maxMem + "MB", NamedTextColor.WHITE),
                 Component.newline(),
-                Component.text("    Total memory", NamedTextColor.GRAY),
+                Component.text(SpongeCommand.INDENT + "Total memory", NamedTextColor.GRAY),
                 colon,
                 Component.text(totalMem + "MB", NamedTextColor.WHITE),
                 Component.newline(),
-                Component.text("    Free memory", NamedTextColor.GRAY),
+                Component.text(SpongeCommand.INDENT + "Free memory", NamedTextColor.GRAY),
                 colon,
                 Component.text(freeMem + "MB", NamedTextColor.WHITE),
                 Component.newline(),
-                Component.text("    TPS", NamedTextColor.GRAY),
+                Component.text(SpongeCommand.INDENT +" TPS", NamedTextColor.GRAY),
                 colon,
                 Component.text(tps, tps >= 15 ? NamedTextColor.GREEN : tps >= 10 ? NamedTextColor.YELLOW : NamedTextColor.RED),
                 Component.newline(),
-                Component.text("    JVM uptime", NamedTextColor.GRAY),
+                Component.text(SpongeCommand.INDENT + "JVM uptime", NamedTextColor.GRAY),
                 colon,
-                Component.text(uptime, NamedTextColor.WHITE),
-                Component.newline(),
-                Component.text("    Server uptime", NamedTextColor.GRAY),
-                colon,
-                Component.text(serverUptime, NamedTextColor.WHITE)
+                Component.text(uptime, NamedTextColor.WHITE)
         );
 
         context.sendMessage(Identity.nil(), builder.build());
@@ -627,10 +622,18 @@ public class SpongeCommand {
         d = d.minusMinutes(minutes);
         final long seconds = d.getSeconds();
         final StringJoiner joiner = new StringJoiner(", ");
-        if (days > 0) joiner.add(days + " days");
-        if (hours > 0) joiner.add(hours + " hours");
-        if (minutes > 0) joiner.add(minutes + " minutes");
-        if (seconds > 0) joiner.add(seconds + " seconds");
+        if (days > 0) {
+            joiner.add(days + " days");
+        }
+        if (hours > 0) {
+            joiner.add(hours + " hours");
+        }
+        if (minutes > 0) {
+            joiner.add(minutes + " minutes");
+        }
+        if (seconds > 0) {
+            joiner.add(seconds + " seconds");
+        }
         return joiner.toString();
     }
 

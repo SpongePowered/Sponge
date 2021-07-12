@@ -33,7 +33,6 @@ import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.lifecycle.StartedEngineEvent;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.scheduler.AsyncScheduler;
