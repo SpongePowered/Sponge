@@ -28,6 +28,7 @@ import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.MobSpawnType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.EntityArchetype;
@@ -55,7 +56,6 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-import java.util.UUID;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -63,8 +63,8 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.Mob;
 
-public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity> implements EntityArchetype,
-        DataContainerHolder.Mutable {
+public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity>
+    implements EntityArchetype, DataContainerHolder.Mutable {
 
     // TODO actually validate stuff
     public static final ImmutableList<RawDataValidator> VALIDATORS = ImmutableList.of();
@@ -74,17 +74,20 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     private @Nullable Vector3d position;
 
     SpongeEntityArchetype(final SpongeEntityArchetypeBuilder builder) {
-        super(builder.entityType, builder.compound != null ? builder.compound : builder.entityData == null ? new CompoundTag() :
-                NBTTranslator.INSTANCE.translate(builder.entityData));
+        this(builder.entityType, builder.compound);
+    }
+
+    SpongeEntityArchetype(final EntityType<@NonNull ?> type, @Nullable CompoundTag compound) {
+        super(type, compound != null ? compound : new CompoundTag());
     }
 
     @Override
-    public EntityType<?> type() {
+    public EntityType<@NonNull ?> type() {
         return this.type;
     }
 
     public @Nullable CompoundTag getData() {
-        return this.data;
+        return this.compound;
     }
 
     @Override
@@ -96,11 +99,11 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         if (this.position != null) {
             return Optional.of(this.position);
         }
-        if (!this.data.contains(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_LIST)) {
+        if (!this.compound.contains(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_LIST)) {
             return Optional.empty();
         }
         try {
-            final ListTag pos = this.data.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
+            final ListTag pos = this.compound.getList(Constants.Entity.ENTITY_POSITION, Constants.NBT.TAG_DOUBLE);
             final double x = pos.getDouble(0);
             final double y = pos.getDouble(1);
             final double z = pos.getDouble(2);
@@ -118,12 +121,12 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @Override
     public void data$setDataContainer(final DataContainer container) {
-        this.data = NBTTranslator.INSTANCE.translate(container);
+        this.compound = NBTTranslator.INSTANCE.translate(Objects.requireNonNull(container, "DataContainer cannot be null!"));
     }
 
     @Override
     public DataContainer entityData() {
-        return NBTTranslator.INSTANCE.translateFrom(this.data);
+        return NBTTranslator.INSTANCE.translateFrom(this.compound);
     }
 
     @Override
@@ -152,9 +155,9 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         }
 
         final boolean requiresInitialSpawn;
-        if (this.data.contains(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
-            requiresInitialSpawn = this.data.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
-            this.data.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
+        if (this.compound.contains(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
+            requiresInitialSpawn = this.compound.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
+            this.compound.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
         } else {
             requiresInitialSpawn = true;
         }
@@ -166,7 +169,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         // like applyItemNBT
         final CompoundTag mergedNbt = entity.saveWithoutId(new CompoundTag());
 
-        mergedNbt.merge(this.data);
+        mergedNbt.merge(this.compound);
         mergedNbt.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
         entity.load(mergedNbt); // Read in all data
 
@@ -189,7 +192,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     public EntitySnapshot toSnapshot(final ServerLocation location) {
         final SpongeEntitySnapshotBuilder builder = new SpongeEntitySnapshotBuilder();
         builder.entityType = this.type;
-        final CompoundTag newCompound = this.data.copy();
+        final CompoundTag newCompound = this.compound.copy();
         final Vector3d pos = location.position();
         newCompound.put(Constants.Entity.ENTITY_POSITION, Constants.NBT.newDoubleNBTList(pos.x(), pos.y(), pos.z()));
         newCompound.putString(Constants.Sponge.World.WORLD_KEY, location.worldKey().formatted());
@@ -202,9 +205,9 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
     }
 
     private Vector3d getRotation() {
-        final ListTag listnbt3 = this.data.getList("Rotation", 5);
-        final float rotationYaw = listnbt3.getFloat(0);
-        final float rotationPitch = listnbt3.getFloat(1);
+        final ListTag tag = this.compound.getList("Rotation", 5);
+        final float rotationYaw = tag.getFloat(0);
+        final float rotationPitch = tag.getFloat(1);
         return new Vector3d(rotationPitch, rotationYaw, 0);
     }
 
@@ -227,10 +230,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
 
     @Override
     public EntityArchetype copy() {
-        final SpongeEntityArchetypeBuilder builder = new SpongeEntityArchetypeBuilder();
-        builder.entityType = this.type;
-        builder.entityData = NBTTranslator.INSTANCE.translate(this.data);
-        return builder.build();
+        return new SpongeEntityArchetype(this.type, this.compound.copy());
     }
 
     @Override
@@ -238,7 +238,7 @@ public class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntityS
         if (this == o) {
             return true;
         }
-        if (o == null || this.getClass() != o.getClass()) {
+        if (this.getClass() != o.getClass()) {
             return false;
         }
         if (!super.equals(o)) {

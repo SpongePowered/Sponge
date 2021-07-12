@@ -79,7 +79,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     public DataContainer blockEntityData() {
-        return NBTTranslator.INSTANCE.translateFrom(this.data);
+        return NBTTranslator.INSTANCE.translateFrom(this.compound);
     }
 
     @Override
@@ -94,7 +94,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
             ((org.spongepowered.api.world.World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState,
                     BlockChangeFlags.ALL);
         }
-        final CompoundTag compound = this.data.copy();
+        final CompoundTag compound = this.compound.copy();
 
         final net.minecraft.world.level.block.entity.@Nullable BlockEntity tileEntity = minecraftWorld.getBlockEntity(blockpos);
         if (tileEntity == null) {
@@ -112,7 +112,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     public BlockSnapshot toSnapshot(final ServerLocation location) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         return builder.blockState(this.blockState)
-            .addUnsafeCompound(this.data.copy())
+            .addUnsafeCompound(this.compound.copy())
             .world(location.worldKey())
             .position(location.blockPosition())
             .build();
@@ -146,7 +146,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     public org.spongepowered.api.block.entity.BlockEntityArchetype copy() {
         final SpongeBlockEntityArchetypeBuilder builder = new SpongeBlockEntityArchetypeBuilder();
         builder.type = this.type;
-        builder.data = NBTTranslator.INSTANCE.translate(this.data);
+        builder.data = NBTTranslator.INSTANCE.translate(this.compound);
         builder.blockState = this.blockState;
         return builder.build();
     }
@@ -178,6 +178,6 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("type", this.type).add("state", this.blockState).add("data", this.data).toString();
+        return MoreObjects.toStringHelper(this).add("type", this.type).add("state", this.blockState).add("data", this.compound).toString();
     }
 }
