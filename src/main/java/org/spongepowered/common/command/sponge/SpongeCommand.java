@@ -25,6 +25,7 @@
 package org.spongepowered.common.command.sponge;
 
 import co.aikar.timings.Timings;
+import com.sun.management.OperatingSystemMXBean;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.LinearComponents;
