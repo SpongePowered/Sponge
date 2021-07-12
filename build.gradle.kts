@@ -287,7 +287,9 @@ allprojects {
             if (JavaVersion.current().isJava10Compatible) {
                 options.release.set(8)
             }
-            options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
+            if (project.name != "testplugins" && System.getProperty("idea.sync.active") != null) {
+                options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
+            }
         }
 
         withType(PublishToMavenRepository::class).configureEach {

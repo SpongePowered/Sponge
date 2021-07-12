@@ -28,6 +28,7 @@ import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IFNE;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
@@ -37,32 +38,34 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.event.filter.data.Has;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Optional;
 
 public class HasDataFilterDelegate implements ParameterFilterDelegate {
 
+    private static final String HAS_DESC = Type.getMethodDescriptor(Type.getType(Optional.class), Type.getType(Key.class));
     private final Has anno;
 
-    public HasDataFilterDelegate(Has anno) {
+    public HasDataFilterDelegate(final Has anno) {
         this.anno = anno;
     }
 
     @Override
-    public void write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int localParam) {
-        if (!DataHolder.class.isAssignableFrom(param.getType())) {
-            throw new IllegalStateException("Annotated type for data filter is not a DataHolder");
+    public void write(final ClassWriter cw, final MethodVisitor mv, final Method method, final Parameter param, final int localParam) {
+        if (!ValueContainer.class.isAssignableFrom(param.getType())) {
+            throw new IllegalStateException("Annotated type for data filter is not a ValueContainer");
         }
-
         mv.visitVarInsn(ALOAD, localParam);
-        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(DataHolder.class));
-        mv.visitLdcInsn(Type.getType(this.anno.value()));
-        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(DataHolder.class), "get", "(Ljava/lang/Class;)Ljava/util/Optional;", true);
+        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(ValueContainer.class));
+        mv.visitFieldInsn(GETSTATIC, Type.getInternalName(this.anno.container()), this.anno.value(), Type.getDescriptor(Key.class));
+        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(param.getType()), "get", HasDataFilterDelegate.HAS_DESC, true);
         mv.visitMethodInsn(INVOKEVIRTUAL, "java/util/Optional", "isPresent", "()Z", false);
-        Label success = new Label();
+        final Label success = new Label();
         if (this.anno.inverse()) {
             mv.visitJumpInsn(IFEQ, success);
         } else {

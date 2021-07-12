@@ -37,6 +37,7 @@ import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
 import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.filter.IsCancelled;
 import org.spongepowered.api.util.Tristate;
 
 import java.lang.reflect.Method;
@@ -45,7 +46,11 @@ public class CancellationEventFilterDelegate implements FilterDelegate {
 
     private final Tristate state;
 
-    public CancellationEventFilterDelegate(Tristate state) {
+    public CancellationEventFilterDelegate(final IsCancelled state) {
+        this(state.value());
+    }
+
+    public CancellationEventFilterDelegate(final Tristate state) {
         this.state = state;
     }
 
