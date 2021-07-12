@@ -50,9 +50,9 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$setServerOnGame(Thread p_i232601_1_, RegistryAccess.RegistryHolder p_i232601_2_, LevelStorageSource.LevelStorageAccess p_i232601_3_,
-            PackRepository p_i232601_4_, ServerResources p_i232601_5_, WorldData p_i232601_6_, DedicatedServerSettings p_i232601_7_,
-            DataFixer p_i232601_8_, MinecraftSessionService p_i232601_9_, GameProfileRepository p_i232601_10_, GameProfileCache p_i232601_11_,
-            ChunkProgressListenerFactory p_i232601_12_, CallbackInfo ci) {
+                                      PackRepository p_i232601_4_, ServerResources p_i232601_5_, WorldData p_i232601_6_, DedicatedServerSettings p_i232601_7_,
+                                      DataFixer p_i232601_8_, MinecraftSessionService p_i232601_9_, GameProfileRepository p_i232601_10_, GameProfileCache p_i232601_11_,
+                                      ChunkProgressListenerFactory p_i232601_12_, CallbackInfo ci) {
 
         SpongeCommon.game().setServer(this);
         p_i232601_11_.load();

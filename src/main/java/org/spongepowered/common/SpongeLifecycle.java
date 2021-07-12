@@ -30,6 +30,7 @@ import com.google.inject.Inject;
 import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
+import net.minecraft.Util;
 import net.minecraft.core.Registry;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
@@ -67,6 +68,7 @@ import java.util.stream.Collectors;
 @Singleton
 public final class SpongeLifecycle {
 
+    public static long tookStartedNanos;
     private final Game game;
     private final Injector injector;
 
@@ -190,6 +192,7 @@ public final class SpongeLifecycle {
     public void callStartedEngineEvent(final Engine engine) {
         this.game.eventManager().post(SpongeEventFactory.createStartedEngineEvent(PhaseTracker.getCauseStackManager().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
+        tookStartedNanos = Util.getNanos();
     }
 
     public void callLoadedGameEvent() {

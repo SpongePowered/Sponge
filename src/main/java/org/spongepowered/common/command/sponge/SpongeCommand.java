@@ -52,6 +52,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.WorldBridge;
@@ -580,6 +581,9 @@ public class SpongeCommand {
         final long totalMem = Runtime.getRuntime().totalMemory() / 1024 / 1024;
         final long freeMem = Runtime.getRuntime().freeMemory() / 1024 / 1024;
         final int tps = Sponge.server().targetTicksPerSecond();
+        final long milisStartTime = SpongeLifecycle.tookStartedNanos / 1000000;
+        final String serverUptime = formatDuration(Duration.ofMillis(ManagementFactory.getRuntimeMXBean().getUptime() - milisStartTime));
+
         builder.append(
                 Component.newline(),
                 Component.text("    Max memory", NamedTextColor.GRAY),
@@ -598,14 +602,18 @@ public class SpongeCommand {
                 colon,
                 Component.text(tps, tps >= 15 ? NamedTextColor.GREEN : tps >= 10 ? NamedTextColor.YELLOW : NamedTextColor.RED),
                 Component.newline(),
+                Component.text("    JVM uptime", NamedTextColor.GRAY),
+                colon,
+                Component.text(uptime, NamedTextColor.WHITE),
+                Component.newline(),
                 Component.text("    Server uptime", NamedTextColor.GRAY),
                 colon,
-                Component.text(uptime, NamedTextColor.WHITE)
-                // welcome to the worlds messiest code
+                Component.text(serverUptime, NamedTextColor.WHITE)
         );
 
         context.sendMessage(Identity.nil(), builder.build());
-
+//        SpongeCommon.logger().info("(DEBUG) {}", String.valueOf(SpongeLifecycle.tookStartedNanos));
+//        SpongeCommon.logger().info("(DEBUG) {}", SpongeLifecycle.tookStartedNanos / 1000000);
         return CommandResult.success();
     }
 
