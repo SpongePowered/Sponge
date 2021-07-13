@@ -24,13 +24,26 @@
  */
 package org.spongepowered.common.event.tracking.phase.plugin;
 
+import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+
 public class BlockWorkerPhaseState extends BasicPluginState {
+
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, BasicPluginContext> getFrameModifier() {
+        return super.getFrameModifier();
+    }
 
     BlockWorkerPhaseState() {
     }
@@ -40,13 +53,25 @@ public class BlockWorkerPhaseState extends BasicPluginState {
         TrackingUtil.processBlockCaptures(phaseContext);
     }
 
-    public @Nullable PhaseContext<@NonNull ?> switchIfNecessary(final PhaseTracker server) {
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final BasicPluginContext context, final Entity entityToSpawn
+    ) {
+        return SpawnTypes.PLUGIN;
+    }
 
+    @Override
+    public boolean isApplyingStreams() {
+        return true;
+    }
+
+    public @Nullable PhaseContext<@NonNull ?> switchIfNecessary(final PhaseTracker server) {
         final PhaseTracker instance = PhaseTracker.getInstance();
         if (!server.onSidedThread()) {
             return null;
         }
-        if (this == instance.getCurrentState()) {
+        final IPhaseState<@NonNull ?> currentState = instance.getCurrentState();
+        if (currentState.isApplyingStreams())  {
             return null;
         }
         return this.createPhaseContext(server);
