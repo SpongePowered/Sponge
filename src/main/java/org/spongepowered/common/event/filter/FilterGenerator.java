@@ -53,6 +53,7 @@ import org.spongepowered.api.event.filter.cause.Before;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Last;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.filter.data.GetValue;
 import org.spongepowered.api.event.filter.data.Has;
 import org.spongepowered.api.event.filter.data.Supports;
 import org.spongepowered.api.event.filter.type.Exclude;
@@ -66,6 +67,7 @@ import org.spongepowered.common.event.filter.delegate.CancellationEventFilterDel
 import org.spongepowered.common.event.filter.delegate.ExcludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FirstCauseFilterSourceDelegate;
+import org.spongepowered.common.event.filter.delegate.GetValueFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.GetterFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.HasDataFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.IncludeSubtypeFilterDelegate;
@@ -195,7 +197,7 @@ public class FilterGenerator {
                     throw new IllegalStateException(
                             "Cannot have additional parameters filters without an array source (for " + param.getName() + ")");
                 }
-                Tuple<Integer, Integer> localState = source.write(cw, mv, method, param, local);
+                final Tuple<Integer, Integer> localState = source.write(cw, mv, method, i, local, plocals, params);
                 local = localState.first();
                 plocals[i - 1] = localState.second();
 
@@ -332,6 +334,7 @@ public class FilterGenerator {
         CAUSE_ALL(All.class, AllCauseFilterSourceDelegate::new),
         CAUSE_ROOT(Root.class, RootCauseFilterSourceDelegate::new),
         GETTER(Getter.class, GetterFilterSourceDelegate::new),
+        GET_VALUE(GetValue.class, GetValueFilterSourceDelegate::new),
         ;
 
         private static final Map<Class<? extends Annotation>, ParameterSource> BY_CLAZZ;

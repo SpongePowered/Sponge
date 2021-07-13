@@ -41,6 +41,7 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.event.filter.data.Supports;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
@@ -58,6 +59,18 @@ public class SupportsDataFilterDelegate implements ParameterFilterDelegate {
         if (!ValueContainer.class.isAssignableFrom(param.getType())) {
             throw new IllegalStateException("Annotated type for data filter is not a ValueContainer");
         }
+
+        final Field targetField;
+        try {
+            targetField = this.anno.container().getField(this.anno.value());
+        } catch (final NoSuchFieldException ex) {
+            throw new IllegalArgumentException(String.format("Field %s specified by GetValue annotation was not found in container %s", this.anno.value(), this.anno.container()));
+        }
+
+        if (!Key.class.isAssignableFrom(targetField.getType())) {
+            throw new IllegalArgumentException(String.format("Field %s.%s was not a Key", targetField.getName(), targetField.getType()));
+        }
+
         mv.visitVarInsn(ALOAD, localParam);
         mv.visitTypeInsn(CHECKCAST, Type.getInternalName(ValueContainer.class));
         mv.visitFieldInsn(GETSTATIC, Type.getInternalName(this.anno.container()), this.anno.value(), Type.getDescriptor(Key.class));

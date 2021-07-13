@@ -51,6 +51,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.filter.data.GetValue;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
@@ -90,6 +91,7 @@ public class ChatTest implements LoadableModule {
                 lang.registerAll(it, ResourceBundle.getBundle("org.spongepowered.test.chat.messages", it,
                                                               UTF8ResourceBundleControl.get()), false));
         GlobalTranslator.get().addSource(lang);
+        this.game.eventManager().registerListeners(this.container, new Listeners());
     }
 
     @Override
@@ -148,13 +150,14 @@ public class ChatTest implements LoadableModule {
         }
 
         @Listener(order = Order.LAST)
-        public void onChat(final PlayerChatEvent event, final @Root ServerPlayer player) {
+        public void onChat(final PlayerChatEvent event, final @Root ServerPlayer player, @GetValue("HEALTH") final double health) {
             ChatTest.LOGGER.info(Component.translatable("chattest.response.chat",
                                                                               event.message(),
                                                                               player.require(Keys.DISPLAY_NAME)
                                                                                       .decorate(TextDecoration.BOLD)
                                                                                       .colorIfAbsent(NamedTextColor.AQUA))
                                                                .color(NamedTextColor.DARK_AQUA));
+            ChatTest.LOGGER.info("Player has health of {}", health);
         }
     }
 }
