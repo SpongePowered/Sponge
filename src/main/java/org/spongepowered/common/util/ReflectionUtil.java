@@ -24,9 +24,23 @@
  */
 package org.spongepowered.common.util;
 
+import java.io.IOException;
+import java.io.InputStreamReader;
+import java.lang.reflect.Constructor;
+import java.lang.reflect.InvocationTargetException;
+import java.lang.reflect.Modifier;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
+import java.util.List;
+import java.util.Map;
+import java.util.Objects;
+
 import static com.google.common.base.Preconditions.checkArgument;
 import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
+import com.google.gson.Gson;
+import com.google.gson.reflect.TypeToken;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
@@ -37,13 +51,6 @@ import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.launch.Launch;
-
-import java.lang.reflect.Constructor;
-import java.lang.reflect.InvocationTargetException;
-import java.lang.reflect.Modifier;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
 
 /**
  * A handy utility for doing some neat things with generics and reflection.
@@ -76,6 +83,28 @@ public final class ReflectionUtil {
         BlockPos.class,
         Entity.class
     };
+
+    public static final String REFLECTION_PROPERTY_FILE = "reflection_mappings.json";
+    private static Map<String, String> mappingCache;
+
+    private static String getMethodNameForEnvironment(final String methodName) {
+        if (mappingCache == null) {
+            try (InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(ReflectionUtil.class.getClassLoader().getResourceAsStream(REFLECTION_PROPERTY_FILE)))) {
+                mappingCache = new Gson().fromJson(reader, new TypeToken<Map<String, String>>(){}.getType());
+            } catch (IOException | NullPointerException e) {
+                mappingCache = Collections.emptyMap();
+            }
+        }
+
+        String methodNameForEnvironment = mappingCache.get(methodName);
+
+        if (methodNameForEnvironment == null) {
+            SpongeCommon.logger().fatal(ReflectionUtil.STUPID_REFLECTION, "Could not find reflection mapping for method {} in reflection property file {}", methodName, REFLECTION_PROPERTY_FILE);
+            return methodName;
+        } else {
+            return methodNameForEnvironment;
+        }
+    }
 
     public static boolean isNeighborChangedDeclared(final Class<?> targetClass) {
         return ReflectionUtil.doesMethodExist(
@@ -110,7 +139,7 @@ public final class ReflectionUtil {
         final String methodName,
         final Class<?>[] methodParameters
     ) {
-        final String targetMethodForEnvironment = Launch.instance().developerEnvironment() ? methodName : methodName;
+        final String targetMethodForEnvironment = Launch.instance().developerEnvironment() ? methodName : getMethodNameForEnvironment(methodName);
         try {
             final Class<?> declaringClass = targetClass.getMethod(targetMethodForEnvironment, methodParameters).getDeclaringClass();
             return !ignoredClass.equals(declaringClass);
