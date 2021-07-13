@@ -158,28 +158,28 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Override
-    public CompletableFuture<Optional<net.minecraft.network.chat.Component>> bridge$canPlayerLogin(final SocketAddress param0, final com.mojang.authlib.GameProfile param1) {
+    public CompletableFuture<net.minecraft.network.chat.Component> bridge$canPlayerLogin(final SocketAddress param0, final com.mojang.authlib.GameProfile param1) {
         final SpongeGameProfile profile = SpongeGameProfile.basicOf(param1);
 
-        return Sponge.server().serviceProvider().banService().banFor(profile).<Optional<net.minecraft.network.chat.Component>>thenCompose(profileBanOpt -> {
+        return Sponge.server().serviceProvider().banService().banFor(profile).thenCompose(profileBanOpt -> {
             if (profileBanOpt.isPresent()) {
                 final Ban.Profile var0 = profileBanOpt.get();
                 final MutableComponent var1 = new TranslatableComponent("multiplayer.disconnect.banned.reason", var0.reason().orElse(Component.empty()));
                 if (var0.expirationDate().isPresent()) {
                     var1.append(new TranslatableComponent("multiplayer.disconnect.banned.expiration", BAN_DATE_FORMAT.format(var0.expirationDate().get())));
                 }
-                return CompletableFuture.completedFuture(Optional.of(var1));
+                return CompletableFuture.completedFuture(var1);
             }
 
             if (param0 instanceof LocalAddress) { // don't bother looking up IP bans on local address
-                return CompletableFuture.completedFuture(Optional.empty());
+                return CompletableFuture.completedFuture(null);
             }
 
             final InetAddress address;
             try {
                 address = InetAddress.getByName(NetworkUtil.getHostString(param0));
             } catch (final UnknownHostException ex) {
-                return CompletableFuture.completedFuture(Optional.of(new TextComponent(ex.getMessage()))); // no
+                return CompletableFuture.completedFuture(new TextComponent(ex.getMessage())); // no
             }
             return Sponge.server().serviceProvider().banService().banFor(address).thenCompose(ipBanOpt -> {
                 if (ipBanOpt.isPresent()) {
@@ -188,7 +188,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                     if (var2.expirationDate().isPresent()) {
                         var3.append(new TranslatableComponent("multiplayer.disconnect.banned_ip.expiration", BAN_DATE_FORMAT.format(var2.expirationDate().get())));
                     }
-                    return CompletableFuture.completedFuture(Optional.of(var3));
+                    return CompletableFuture.completedFuture(var3);
                 }
 
                 return CompletableFuture.supplyAsync(() -> {
@@ -203,24 +203,24 @@ public abstract class PlayerListMixin implements PlayerListBridge {
                     return subject.hasPermission(LoginPermissions.BYPASS_WHITELIST_PERMISSION);
                 }, SpongeCommon.server()).thenCompose(w -> {
                     if (w) {
-                        return CompletableFuture.completedFuture(Optional.empty());
+                        return CompletableFuture.completedFuture(null);
                     }
-                    return Sponge.server().serviceProvider().whitelistService().isWhitelisted(profile).thenCompose(whitelisted -> {
+                    return Sponge.server().serviceProvider().whitelistService().isWhitelisted(profile).<net.minecraft.network.chat.Component>thenApply(whitelisted -> {
                         if (!whitelisted) {
-                            return CompletableFuture.completedFuture(Optional.of(new TranslatableComponent("multiplayer.disconnect.not_whitelisted")));
+                            return new TranslatableComponent("multiplayer.disconnect.not_whitelisted");
                         }
-                        return CompletableFuture.completedFuture(Optional.empty());
+                        return null;
                     });
                 });
             });
-        }).thenComposeAsync(componentOpt -> {
-            if (componentOpt.isPresent()) {
-                return CompletableFuture.completedFuture(componentOpt);
+        }).thenApplyAsync(component -> {
+            if (component != null) {
+                return component;
             }
             if (this.players.size() >= this.maxPlayers && !this.shadow$canBypassPlayerLimit(param1)) {
-                return CompletableFuture.completedFuture(Optional.of(new TranslatableComponent("multiplayer.disconnect.server_full")));
+                return new TranslatableComponent("multiplayer.disconnect.server_full");
             }
-            return CompletableFuture.completedFuture(Optional.empty());
+            return null;
         }, SpongeCommon.server());
     }
 
@@ -370,7 +370,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             final long p_i242082_4_, final boolean p_i242082_6_, final Set<ResourceKey<Level>> p_i242082_7_,
             final RegistryAccess.RegistryHolder p_i242082_8_, final DimensionType p_i242082_9_, final ResourceKey<Level> p_i242082_10_,
             final int p_i242082_11_, final int p_i242082_12_, final boolean p_i242082_13_, final boolean p_i242082_14_,
-            final boolean p_i242082_15_, final boolean p_i242082_16_, Connection p_72355_1_, net.minecraft.server.level.ServerPlayer player) {
+            final boolean p_i242082_15_, final boolean p_i242082_16_, final Connection p_72355_1_,
+            final net.minecraft.server.level.ServerPlayer player) {
 
         return new ClientboundLoginPacket(p_i242082_1_, p_i242082_2_, p_i242082_3_, p_i242082_4_, p_i242082_6_, p_i242082_7_, p_i242082_8_, p_i242082_9_,
                 p_i242082_10_, p_i242082_11_, ((PrimaryLevelDataBridge) player.getLevel().getLevelData()).bridge$viewDistance().orElse(this.viewDistance),

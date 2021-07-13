@@ -26,11 +26,13 @@ package org.spongepowered.common.mixin.core.server.network;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.server.players.PlayerList;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -88,15 +90,19 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             return;
         }
         this.impl$accepted = true;
+        final PlayerList playerList = this.server.getPlayerList();
         // Sponge end
 
         // Sponge start - completable future
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.gameProfile).thenAcceptAsync(componentOpt -> {
-        // Sponge end
-            // Sponge start - we handle this later
-            if (componentOpt.isPresent()) {
-                // TODO add should fire logic to disconnect the player and return early
-                ((ConnectionBridge) this.connection).bridge$setKickReason(componentOpt.get());
+        ((PlayerListBridge) playerList).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.gameProfile).handleAsync((componentOpt, throwable) -> {
+            if (throwable != null) {
+                // An error occurred during login checks so we ask to abort.
+                ((ConnectionBridge) this.connection).bridge$setKickReason(new TextComponent("An error occurred checking ban/whitelist status."));
+                SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.gameProfile.getId().toString());
+                SpongeCommon.logger().error(throwable);
+            } else if (componentOpt != null) {
+                // We handle this later
+                ((ConnectionBridge) this.connection).bridge$setKickReason(componentOpt);
             }
             // Sponge end
             this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
@@ -105,7 +111,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             }
 
             this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
-            ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
+            final ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
             if (var1 != null) {
                 this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
                 this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile);
@@ -116,6 +122,7 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
                 // Sponge end
                 this.server.getPlayerList().placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
             }
+            return null;
         }, SpongeCommon.server());
     }
 
