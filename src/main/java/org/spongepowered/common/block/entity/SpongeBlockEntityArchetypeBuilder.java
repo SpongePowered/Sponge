@@ -132,9 +132,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z);
-        final String tileId = compound.getString(Constants.Item.BLOCK_ENTITY_ID);
         compound.remove(Constants.Item.BLOCK_ENTITY_ID);
-        compound.putString(Constants.Sponge.BlockEntityArchetype.TILE_ENTITY_ID, tileId);
         this.data = NBTTranslator.INSTANCE.translate(compound);
         this.blockState = blockEntity.block();
         this.type = blockEntity.type();

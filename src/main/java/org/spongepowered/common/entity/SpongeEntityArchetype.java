@@ -26,18 +26,21 @@ package org.spongepowered.common.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.Mob;
 import net.minecraft.world.entity.MobSpawnType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
 import org.spongepowered.api.entity.EntityType;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.SpawnType;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
 import org.spongepowered.common.data.AbstractArchetype;
@@ -47,21 +50,12 @@ import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.ArrayList;
-import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
-
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.Mob;
 
 public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, EntitySnapshot, org.spongepowered.api.entity.Entity>
     implements EntityArchetype, DataContainerHolder.Mutable {
@@ -143,11 +137,28 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
             return Optional.empty();
         }
 
-        final CompoundTag compound = new CompoundTag();
-        compound.putString("id", key.toString());
+        final CompoundTag compound = this.compound.copy();
+        compound.putString(Constants.Entity.ENTITY_TYPE_ID, key.toString());
+        final ListTag pos = new ListTag();
+        pos.add(DoubleTag.valueOf(location.x()));
+        pos.add(DoubleTag.valueOf(location.y()));
+        pos.add(DoubleTag.valueOf(location.z()));
+        compound.put(Constants.Entity.ENTITY_POSITION, pos);
+        compound.remove(Constants.Entity.ENTITY_UUID);
 
-        final Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, level, e -> {
-            e.setPos(location.x(), location.y(), location.z());
+        final boolean requiresInitialSpawn;
+        if (compound.contains(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
+            requiresInitialSpawn = compound.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
+            compound.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
+        } else {
+            requiresInitialSpawn = true;
+        }
+
+        final @Nullable Entity entity = net.minecraft.world.entity.EntityType.loadEntityRecursive(compound, level, e -> {
+            e.moveTo(location.x(), location.y(), location.z());
+            if (requiresInitialSpawn  && e instanceof Mob) {
+                ((Mob) e).finalizeSpawn(level, level.getCurrentDifficultyAt(e.blockPosition()), MobSpawnType.COMMAND, null, compound);
+            }
             return e;
         });
 
@@ -155,36 +166,8 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
             return Optional.empty();
         }
 
-        final boolean requiresInitialSpawn;
-        if (this.compound.contains(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN)) {
-            requiresInitialSpawn = this.compound.getBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
-            this.compound.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
-        } else {
-            requiresInitialSpawn = true;
-        }
-
-        if (requiresInitialSpawn  && entity instanceof Mob) {
-            ((Mob) entity).finalizeSpawn(level, level.getCurrentDifficultyAt(entity.blockPosition()), MobSpawnType.COMMAND, null, null);
-        }
-
-        // like applyItemNBT
-        final CompoundTag mergedNbt = entity.saveWithoutId(new CompoundTag());
-
-        mergedNbt.merge(this.compound);
-        mergedNbt.remove(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN);
-        entity.load(mergedNbt); // Read in all data
-
-        // Finished building the entity. Now spawn it if not cancelled.
-        final org.spongepowered.api.entity.Entity spongeEntity = (org.spongepowered.api.entity.Entity) entity;
-        final List<org.spongepowered.api.entity.Entity> entities = new ArrayList<>();
-        entities.add(spongeEntity);
-
-        // We require spawn types. This is more of a sanity check to throw an IllegalStateException otherwise for the plugin developer to properly associate the type.
-        final SpawnType require = PhaseTracker.getCauseStackManager().currentContext().require(EventContextKeys.SPAWN_TYPE);
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().currentCause(), entities);
-        if (!event.isCancelled()) {
-            level.tryAddFreshEntityWithPassengers(entity);
-            return Optional.of(spongeEntity);
+        if (level.tryAddFreshEntityWithPassengers(entity)) {
+            return Optional.of((org.spongepowered.api.entity.Entity) entity);
         }
         return Optional.empty();
     }
@@ -220,6 +203,7 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
     @Override
     public DataContainer toContainer() {
         return DataContainer.createNew()
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Sponge.EntityArchetype.ENTITY_TYPE, this.type)
                 .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, this.entityData());
     }

@@ -92,7 +92,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
     public EntityArchetype.Builder from(final EntityArchetype value) {
         this.entityType = value.type();
         this.compound = NBTTranslator.INSTANCE.translate(value.entityData());
-        this.stripCompound(this.compound);
+        SpongeEntityArchetypeBuilder.stripCompound(this.compound);
         // TODO Copy over the pending manipulator data?
         this.manipulator = null;
         return this;
@@ -125,13 +125,26 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         return this;
     }
 
+    @SuppressWarnings({"rawtypes", "EqualsBetweenInconvertibleTypes"})
     @Override
     public EntityArchetype.Builder from(final Entity entity) {
-        this.entityType = Objects.requireNonNull(Objects.requireNonNull(entity, "Cannot build an EntityArchetype for a null entity!").type(),
-            "Entity is returning a null EntityType!");
+        final EntityType<@NonNull ?> entityType = Objects.requireNonNull(
+            Objects.requireNonNull(entity, "Cannot build an EntityArchetype for a null entity!").type(),
+            "Entity is returning a null EntityType!"
+        );
+        if (!((net.minecraft.world.entity.EntityType) entityType).canSerialize() && entityType != HumanEntity.TYPE) {
+            throw new IllegalArgumentException("Attempting to archetype a non-serializable entity: " + entity);
+        }
+        this.entityType = entityType;
         final CompoundTag compound = new CompoundTag();
-        ((net.minecraft.world.entity.Entity) entity).saveAsPassenger(compound);
-        this.stripCompound(compound);
+        net.minecraft.world.entity.Entity mcEntity = (net.minecraft.world.entity.Entity) entity;
+        if (entityType == HumanEntity.TYPE) {
+            mcEntity.saveWithoutId(compound);
+        } else {
+            mcEntity.saveAsPassenger(compound);
+        }
+        this.position = new Vector3d(mcEntity.getX(), mcEntity.getY(), mcEntity.getZ());
+        SpongeEntityArchetypeBuilder.stripCompound(compound);
         compound.putBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN, true);
         this.position = entity.position();
         this.compound = compound;
@@ -143,7 +156,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         final DataContainer container = Objects.requireNonNull(view, "Provided DataView cannot be null!").copy();
         new DelegateDataValidator(SpongeEntityArchetype.VALIDATORS, ValidationTypes.ENTITY.get()).validate(container);
         this.compound = NBTTranslator.INSTANCE.translate(container);
-        this.stripCompound(this.compound);
+        SpongeEntityArchetypeBuilder.stripCompound(this.compound);
         return this;
     }
 
@@ -170,7 +183,7 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         return archetype;
     }
 
-    private void stripCompound(final CompoundTag compound) {
+    protected static void stripCompound(final CompoundTag compound) {
         compound.remove(Constants.UUID);
         compound.remove(Constants.UUID_MOST);
         compound.remove(Constants.UUID_LEAST);
