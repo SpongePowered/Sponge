@@ -79,10 +79,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
-import java.util.Optional;
 import java.util.UUID;
-import java.util.zip.GZIPOutputStream;
-import java.util.stream.Stream;
 import java.util.zip.GZIPOutputStream;
 
 @Plugin("volumestreamtest")
@@ -225,21 +222,27 @@ public final class VolumeStreamTest implements LoadableModule {
                 }).build(),
             "paste"
         );
-        final Parameter.Value<String> formatKey = Parameter.string().key("format")
-            .usage(key -> "legacy, sponge")
-            .build();
+        final Parameter.Value<String> fileName = Parameter.string().key("fileName").build();
         event.register(
             this.plugin,
             Command.builder()
                 .shortDescription(Component.text("Pastes your clipboard to where you are standing"))
                 .permission(this.plugin.metadata().id() + ".command.paste")
-                .addParameter(formatKey)
+                .addParameter(fileName)
                 .executor(src -> {
                     if (!(src.cause().root() instanceof ServerPlayer)) {
                         src.sendMessage(Identity.nil(), Component.text("Player only.", NamedTextColor.RED));
                         return CommandResult.success();
                     }
-                    final String format = src.requireOne(formatKey);
+                    final String file = src.requireOne(fileName);
+                    final Path desiredFilePath = this.schematicsDir.resolve(file + ".schematic");
+                    if (Files.exists(desiredFilePath)) {
+                        throw new CommandException(Component.text(file + " already exists, please delete the file first", NamedTextColor.RED));
+                    }
+                    if (Files.isDirectory(desiredFilePath)) {
+                        throw new CommandException(Component.text(file + "is a directory, please use a file name", NamedTextColor.RED));
+                    }
+
                     final ServerPlayer player = (ServerPlayer) src.cause().root();
                     final PlayerData data = VolumeStreamTest.get(player);
                     final ArchetypeVolume volume = data.getClipboard();
@@ -250,19 +253,10 @@ public final class VolumeStreamTest implements LoadableModule {
                         );
                         return CommandResult.success();
                     }
-                    if (!"legacy".equalsIgnoreCase(format) && !"sponge".equalsIgnoreCase(format)) {
-                        player.sendMessage(
-                            Identity.nil(),
-                            Component.text("Unsupported schematic format, supported formats are [legacy, sponge]",
-                                NamedTextColor.RED
-                            )
-                        );
-                        return CommandResult.success();
-                    }
                     final Schematic schematic = Schematic.builder()
                         .volume(data.getClipboard())
                         .metaValue(Schematic.METADATA_AUTHOR, player.name())
-                        .metaValue(Schematic.METADATA_NAME, "some_schematic")
+                        .metaValue(Schematic.METADATA_NAME, file)
                         .build();
                     final DataContainer schematicData = Sponge.dataManager().translator(Schematic.class)
                         .orElseThrow(
@@ -270,7 +264,7 @@ public final class VolumeStreamTest implements LoadableModule {
                         .translate(schematic);
 
                     try {
-                        final Path output = Files.createFile(this.schematicsDir.resolve("some_schematic.schematic"));
+                        final Path output = Files.createFile(desiredFilePath);
                         DataFormats.NBT.get().writeTo(
                             new GZIPOutputStream(Files.newOutputStream(output)), schematicData);
                         player.sendMessage(
