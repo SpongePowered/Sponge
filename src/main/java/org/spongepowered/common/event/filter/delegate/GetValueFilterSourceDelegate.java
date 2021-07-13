@@ -32,6 +32,7 @@ import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IFNE;
+import static org.objectweb.asm.Opcodes.INSTANCEOF;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
 import static org.objectweb.asm.Opcodes.INVOKEVIRTUAL;
 import static org.objectweb.asm.Opcodes.ISTORE;
@@ -188,9 +189,17 @@ public class GetValueFilterSourceDelegate implements ParameterFilterSourceDelega
             GetValueFilterSourceDelegate.OPTIONAL_GET,
             false
         );
-        final Type param = Type.getType(paramType);,
+        final Type param = Type.getType(paramType);
         if (paramType.isPrimitive()) {
             GeneratorUtils.visitUnboxingMethod(mv, param);
+        } else {
+            final Label success2 = new Label();
+            mv.visitInsn(DUP);
+            mv.visitTypeInsn(INSTANCEOF, param.getInternalName());
+            mv.visitJumpInsn(IFNE, success2);
+            mv.visitInsn(ACONST_NULL);
+            mv.visitInsn(ARETURN);
+            mv.visitLabel(success2);
         }
 
         final int paramLocal = local;
