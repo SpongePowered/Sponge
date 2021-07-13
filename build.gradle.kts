@@ -271,6 +271,9 @@ allprojects {
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        if (!JavaVersion.current().isJava11Compatible) {
+            toolchain.languageVersion.set(JavaLanguageVersion.of(11))
+        }
     }
 
     tasks.withType<AbstractArchiveTask> {
@@ -284,9 +287,7 @@ allprojects {
         withType(JavaCompile::class).configureEach {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
-            if (JavaVersion.current().isJava10Compatible) {
-                options.release.set(8)
-            }
+            options.release.set(8)
             if (project.name != "testplugins" && System.getProperty("idea.sync.active") != null) {
                 options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
             }
