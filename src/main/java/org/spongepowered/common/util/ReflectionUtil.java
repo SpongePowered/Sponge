@@ -84,10 +84,14 @@ public final class ReflectionUtil {
         Entity.class
     };
 
-    public static final String REFLECTION_PROPERTY_FILE = "reflection_mappings.json";
+    private static final String REFLECTION_PROPERTY_FILE = "reflection_mappings.json";
     private static Map<String, String> mappingCache;
 
     private static String getMethodNameForEnvironment(final String methodName) {
+        if (Launch.instance().developerEnvironment()) {
+            return methodName;
+        }
+
         if (mappingCache == null) {
             try (InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(ReflectionUtil.class.getClassLoader().getResourceAsStream(REFLECTION_PROPERTY_FILE)))) {
                 mappingCache = new Gson().fromJson(reader, new TypeToken<Map<String, String>>(){}.getType());
@@ -96,7 +100,7 @@ public final class ReflectionUtil {
             }
         }
 
-        String methodNameForEnvironment = mappingCache.get(methodName);
+        final String methodNameForEnvironment = mappingCache.get(methodName);
 
         if (methodNameForEnvironment == null) {
             SpongeCommon.logger().fatal(ReflectionUtil.STUPID_REFLECTION, "Could not find reflection mapping for method {} in reflection property file {}", methodName, REFLECTION_PROPERTY_FILE);
@@ -139,7 +143,7 @@ public final class ReflectionUtil {
         final String methodName,
         final Class<?>[] methodParameters
     ) {
-        final String targetMethodForEnvironment = Launch.instance().developerEnvironment() ? methodName : getMethodNameForEnvironment(methodName);
+        final String targetMethodForEnvironment = ReflectionUtil.getMethodNameForEnvironment(methodName);
         try {
             final Class<?> declaringClass = targetClass.getMethod(targetMethodForEnvironment, methodParameters).getDeclaringClass();
             return !ignoredClass.equals(declaringClass);
