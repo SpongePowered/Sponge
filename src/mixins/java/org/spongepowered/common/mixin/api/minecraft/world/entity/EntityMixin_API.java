@@ -59,15 +59,17 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
+import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
 import java.util.Optional;
@@ -75,8 +77,6 @@ import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$", remap = Remap.NONE))
@@ -334,7 +334,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public EntityArchetype createArchetype() {
-        return EntityArchetype.builder().from(this).build();
+        return SpongeEntityArchetypeBuilder.pooled().from(this).build();
     }
 
     @Override

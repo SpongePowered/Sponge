@@ -26,6 +26,10 @@ package org.spongepowered.common.block.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -47,10 +51,6 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 
 public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEntityType, BlockSnapshot, BlockEntity> implements
         org.spongepowered.api.block.entity.BlockEntityArchetype {
@@ -144,7 +144,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     public org.spongepowered.api.block.entity.BlockEntityArchetype copy() {
-        final SpongeBlockEntityArchetypeBuilder builder = new SpongeBlockEntityArchetypeBuilder();
+        final SpongeBlockEntityArchetypeBuilder builder = SpongeBlockEntityArchetypeBuilder.pooled();
         builder.type = this.type;
         builder.data = NBTTranslator.INSTANCE.translate(this.compound);
         builder.blockState = this.blockState;

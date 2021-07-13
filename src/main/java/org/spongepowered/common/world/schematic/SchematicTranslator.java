@@ -237,7 +237,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 final double[] pos = (double[]) view.get(Constants.Sponge.Schematic.ENTITIES_POS)
                     .orElseThrow(() -> new IllegalStateException(
                         "Schematic not abiding by format, all BlockEntities must have an x y z pos"));
-                return EntityArchetypeEntry.of(new SpongeEntityArchetypeBuilder()
+                return EntityArchetypeEntry.of(SpongeEntityArchetypeBuilder.pooled()
                     .type(type)
                     .entityData(view)
                     .build(), new Vector3d(pos[0], pos[1], pos[2]));
@@ -263,11 +263,11 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                     final int x = pos[0] - xOffset;
                     final int y = pos[1] - yOffset;
                     final int z = pos[2] - zOffset;
-                    final BlockEntityArchetype.Builder builder = new SpongeBlockEntityArchetypeBuilder()
+                    final BlockEntityArchetype.Builder builder = SpongeBlockEntityArchetypeBuilder.pooled()
                         .state(archetypeVolume.block(x, y, z))
                         .blockEntity(type);
                     blockEntityData.getView(Constants.Sponge.Schematic.BLOCKENTITY_CONTAINER)
-                        .ifPresent(data -> builder.blockEntityData(data));
+                        .ifPresent(builder::blockEntityData);
 
                     archetypeVolume.addBlockEntity(x, y, z, builder.build());
                 });

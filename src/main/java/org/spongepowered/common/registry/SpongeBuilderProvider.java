@@ -121,8 +121,8 @@ import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
-import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.schematic.PaletteType;
+import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
@@ -296,8 +296,8 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(TabListEntry.Builder.class, TabListEntryBuilder::new)
                 .register(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
                 .register(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
-                .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
-                .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
+                .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::unpooled)
+                .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::unpooled)
                 .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
                 .register(Inventory.Builder.class, SpongeInventoryBuilder::new)
                 .register(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)

@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity;
 
 import net.minecraft.nbt.CompoundTag;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -42,28 +43,48 @@ import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
 import org.spongepowered.common.data.persistence.NBTTranslator;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.math.vector.Vector3d;
 
+import java.util.Deque;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArchetype> implements EntityArchetype.Builder {
 
-    @Nullable EntityType<@NonNull ?> entityType = null;
+    private static final Deque<SpongeEntityArchetypeBuilder> pool = new ConcurrentLinkedDeque<>();
+
+    public static SpongeEntityArchetypeBuilder unpooled() {
+        return new SpongeEntityArchetypeBuilder(false);
+    }
+
+    public static SpongeEntityArchetypeBuilder pooled() {
+        final @Nullable SpongeEntityArchetypeBuilder builder = SpongeEntityArchetypeBuilder.pool.pollFirst();
+        if (builder != null) {
+            return builder.reset();
+        }
+        return new SpongeEntityArchetypeBuilder(true);
+    }
+
+    @MonotonicNonNull EntityType<@NonNull ?> entityType = null;
     @Nullable CompoundTag compound;
     DataManipulator.@Nullable Mutable manipulator;
     @Nullable Vector3d position;
+    private final boolean pooled;
 
-    public SpongeEntityArchetypeBuilder() {
+    private SpongeEntityArchetypeBuilder(final boolean pooled) {
         super(EntityArchetype.class, Constants.Sponge.EntityArchetype.BASE_VERSION);
+        this.pooled = pooled;
     }
 
     @Override
-    public EntityArchetype.Builder reset() {
+    public SpongeEntityArchetypeBuilder reset() {
         this.entityType = null;
         this.manipulator = null;
         this.compound = null;
+        this.position = null;
         return this;
     }
 
@@ -79,18 +100,19 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
 
     @Override
     protected Optional<EntityArchetype> buildContent(final DataView container) throws InvalidDataException {
+        final SpongeEntityArchetypeBuilder builder = SpongeEntityArchetypeBuilder.pooled();
         if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_TYPE)) {
-            this.type(container.getRegistryValue(Constants.Sponge.EntityArchetype.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE,
+            builder.type(container.getRegistryValue(Constants.Sponge.EntityArchetype.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE,
                 Sponge.game().registries()).orElseThrow(() -> new InvalidDataException("Could not deserialize an EntityType!")));
         } else {
             throw new InvalidDataException("Missing the EntityType! Cannot re-construct an EntityArchetype!");
         }
 
         if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_DATA)) {
-            this.entityData(container.getView(Constants.Sponge.EntityArchetype.ENTITY_DATA)
+            builder.entityData(container.getView(Constants.Sponge.EntityArchetype.ENTITY_DATA)
                     .orElseThrow(() -> new InvalidDataException("No DataView found for the 'EntityData' data tag!")));
         }
-        return Optional.of(this.build());
+        return Optional.of(builder.build());
     }
 
     @Override
@@ -140,6 +162,10 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         final SpongeEntityArchetype archetype = new SpongeEntityArchetype(this);
         if (this.manipulator != null) {
             archetype.copyFrom(this.manipulator);
+        }
+        if (this.pooled) {
+            this.reset();
+            SpongeEntityArchetypeBuilder.pool.push(this);
         }
         return archetype;
     }

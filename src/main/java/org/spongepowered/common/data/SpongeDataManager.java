@@ -331,7 +331,7 @@ public final class SpongeDataManager implements DataManager {
         this.registerBuilder(ItemStack.class, new SpongeItemStackBuilder());
         this.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotDataBuilder());
         this.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());
-        this.registerBuilder(EntityArchetype.class, new SpongeEntityArchetypeBuilder());
+        this.registerBuilder(EntityArchetype.class, SpongeEntityArchetypeBuilder.unpooled());
         this.registerBuilder(SpongePlayerData.class, new SpongePlayerDataBuilder());
         this.registerBuilder(BlockState.class, new SpongeBlockStateBuilder());
         this.registerBuilder(MapDecoration.class, new SpongeMapDecorationDataBuilder());

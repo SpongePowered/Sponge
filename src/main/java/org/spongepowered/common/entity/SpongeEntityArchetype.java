@@ -75,9 +75,10 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
 
     SpongeEntityArchetype(final SpongeEntityArchetypeBuilder builder) {
         this(builder.entityType, builder.compound);
+        this.position = builder.position;
     }
 
-    SpongeEntityArchetype(final EntityType<@NonNull ?> type, @Nullable CompoundTag compound) {
+    private SpongeEntityArchetype(final EntityType<@NonNull ?> type, @Nullable final CompoundTag compound) {
         super(type, compound != null ? compound : new CompoundTag());
     }
 
