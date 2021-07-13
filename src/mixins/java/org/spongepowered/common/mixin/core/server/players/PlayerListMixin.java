@@ -85,6 +85,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundRespawnPacketAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.bridge.client.server.IntegratedPlayerListBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
@@ -159,9 +160,16 @@ public abstract class PlayerListMixin implements PlayerListBridge {
 
     @Override
     public CompletableFuture<net.minecraft.network.chat.Component> bridge$canPlayerLogin(final SocketAddress param0, final com.mojang.authlib.GameProfile param1) {
+        if (this instanceof IntegratedPlayerListBridge) {
+            return ((IntegratedPlayerListBridge) this).bridge$canPlayerLoginClient(param0, param1);
+        }
+        return this.impl$canPlayerLoginServer(param0, param1);
+    }
+
+    protected final CompletableFuture<net.minecraft.network.chat.Component> impl$canPlayerLoginServer(final SocketAddress param0, final com.mojang.authlib.GameProfile param1) {
         final SpongeGameProfile profile = SpongeGameProfile.basicOf(param1);
 
-        return Sponge.server().serviceProvider().banService().banFor(profile).thenCompose(profileBanOpt -> {
+        return Sponge.server().serviceProvider().banService().find(profile).thenCompose(profileBanOpt -> {
             if (profileBanOpt.isPresent()) {
                 final Ban.Profile var0 = profileBanOpt.get();
                 final MutableComponent var1 = new TranslatableComponent("multiplayer.disconnect.banned.reason", var0.reason().orElse(Component.empty()));
@@ -181,7 +189,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
             } catch (final UnknownHostException ex) {
                 return CompletableFuture.completedFuture(new TextComponent(ex.getMessage())); // no
             }
-            return Sponge.server().serviceProvider().banService().banFor(address).thenCompose(ipBanOpt -> {
+            return Sponge.server().serviceProvider().banService().find(address).thenCompose(ipBanOpt -> {
                 if (ipBanOpt.isPresent()) {
                     final Ban.IP var2 = ipBanOpt.get();
                     final MutableComponent var3 = new TranslatableComponent("multiplayer.disconnect.banned_ip.reason", var2.reason().orElse(Component.empty()));

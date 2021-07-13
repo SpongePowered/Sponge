@@ -32,22 +32,23 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.bridge.client.server.IntegratedPlayerListBridge;
 import org.spongepowered.common.mixin.core.server.players.PlayerListMixin;
 
 import java.net.SocketAddress;
 import java.util.concurrent.CompletableFuture;
 
 @Mixin(IntegratedPlayerList.class)
-public abstract class IntegratedPlayerListMixin extends PlayerListMixin {
+public abstract class IntegratedPlayerListMixin extends PlayerListMixin implements IntegratedPlayerListBridge {
 
     // @formatter:off
     @Shadow public abstract Component shadow$canPlayerLogin(SocketAddress param0, GameProfile param1);
     // @formatter:on
 
-    public CompletableFuture<Component> bridge$canPlayerLogin(final SocketAddress param0, final com.mojang.authlib.GameProfile param1) {
+    public CompletableFuture<Component> bridge$canPlayerLoginClient(final SocketAddress param0, final com.mojang.authlib.GameProfile param1) {
         final Component component = this.shadow$canPlayerLogin(param0, param1);
         if (component == null) {
-            return super.bridge$canPlayerLogin(param0, param1);
+            return this.impl$canPlayerLoginServer(param0, param1);
         }
         return CompletableFuture.completedFuture(component);
     }
