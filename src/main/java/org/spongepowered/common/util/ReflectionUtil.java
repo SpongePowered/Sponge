@@ -93,7 +93,7 @@ public final class ReflectionUtil {
         }
 
         if (mappingCache == null) {
-            try (InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(ReflectionUtil.class.getClassLoader().getResourceAsStream(REFLECTION_PROPERTY_FILE)))) {
+            try (InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(ReflectionUtil.class.getClassLoader().getResourceAsStream(ReflectionUtil.REFLECTION_PROPERTY_FILE)))) {
                 mappingCache = new Gson().fromJson(reader, new TypeToken<Map<String, String>>(){}.getType());
             } catch (IOException | NullPointerException e) {
                 mappingCache = Collections.emptyMap();
@@ -103,7 +103,7 @@ public final class ReflectionUtil {
         final String methodNameForEnvironment = mappingCache.get(methodName);
 
         if (methodNameForEnvironment == null) {
-            SpongeCommon.logger().fatal(ReflectionUtil.STUPID_REFLECTION, "Could not find reflection mapping for method {} in reflection property file {}", methodName, REFLECTION_PROPERTY_FILE);
+            SpongeCommon.logger().warn(ReflectionUtil.STUPID_REFLECTION, "Could not find reflection mapping for method {} in reflection property file {}", methodName, ReflectionUtil.REFLECTION_PROPERTY_FILE);
             return methodName;
         } else {
             return methodNameForEnvironment;
