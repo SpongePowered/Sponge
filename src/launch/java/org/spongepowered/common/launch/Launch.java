@@ -145,4 +145,10 @@ public abstract class Launch {
     public abstract Injector createInjector();
 
     public abstract void performLifecycle();
+
+    /**
+     * Return {@code true} if non-Mojang mapping is used in production environment. In that
+     * case a file called reflection_mappings.json need to exists to supply the mapping.
+     */
+    public abstract boolean usesThirdPartyMappings();
 }

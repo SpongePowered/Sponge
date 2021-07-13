@@ -163,4 +163,9 @@ public abstract class VanillaLaunch extends Launch {
             throw new RuntimeException("Could not load metadata information for the implementation! This should be impossible!");
         }
     }
+
+    @Override
+    public boolean usesThirdPartyMappings() {
+        return false;
+    }
 }

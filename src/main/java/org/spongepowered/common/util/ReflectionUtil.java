@@ -88,7 +88,7 @@ public final class ReflectionUtil {
     private static Map<String, String> mappingCache;
 
     private static String getMethodNameForEnvironment(final String methodName) {
-        if (Launch.instance().developerEnvironment()) {
+        if (Launch.instance().developerEnvironment() || !Launch.instance().usesThirdPartyMappings()) {
             return methodName;
         }
 
