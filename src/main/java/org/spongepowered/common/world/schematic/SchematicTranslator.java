@@ -46,6 +46,7 @@ import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataTranslator;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
+import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryTypes;
@@ -234,21 +235,22 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             final Optional<EntityType<@NonNull ?>> entityType = Sponge.game().registries().registry(
                 RegistryTypes.ENTITY_TYPE).findValue(key);
             return entityType.map(type -> {
-                final double[] pos = (double[]) view.get(Constants.Sponge.Schematic.ENTITIES_POS)
+                final List<Double> pos = view.getDoubleList(Constants.Sponge.Schematic.ENTITIES_POS)
                     .orElseThrow(() -> new IllegalStateException(
-                        "Schematic not abiding by format, all BlockEntities must have an x y z pos"));
-                return EntityArchetypeEntry.of(SpongeEntityArchetypeBuilder.pooled()
-                    .type(type)
-                    .entityData(view)
-                    .build(), new Vector3d(pos[0], pos[1], pos[2]));
+                        "Schematic not abiding by format, all Entities must have an x y z pos"));
+                final EntityArchetype.Builder builder = SpongeEntityArchetypeBuilder.pooled()
+                    .type(type);
+                view.getView(Constants.Sponge.Schematic.BLOCKENTITY_DATA).ifPresent(builder::entityData);
+                final Vector3d entityPosition = new Vector3d(pos.get(0), pos.get(1), pos.get(2));
+                return EntityArchetypeEntry.of(builder.build(), entityPosition);
             });
         };
     }
 
     @NotNull
     private static Consumer<DataView> deserializeBlockEntities(
-        int xOffset, int yOffset, int zOffset, SpongeArchetypeVolume archetypeVolume,
-        boolean needsFixers
+        final int xOffset, final int yOffset, final int zOffset, final SpongeArchetypeVolume archetypeVolume,
+        final boolean needsFixers
     ) {
         return blockEntityData -> {
             final int[] pos = (int[]) blockEntityData.get(Constants.Sponge.Schematic.BLOCKENTITY_POS)
@@ -266,7 +268,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                     final BlockEntityArchetype.Builder builder = SpongeBlockEntityArchetypeBuilder.pooled()
                         .state(archetypeVolume.block(x, y, z))
                         .blockEntity(type);
-                    blockEntityData.getView(Constants.Sponge.Schematic.BLOCKENTITY_CONTAINER)
+                    blockEntityData.getView(Constants.Sponge.Schematic.BLOCKENTITY_DATA)
                         .ifPresent(builder::blockEntityData);
 
                     archetypeVolume.addBlockEntity(x, y, z, builder.build());
@@ -438,7 +440,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         if (schematic.blockPalette().highestId() != 0) {
             final DataView blockData = data.createView(Constants.Sponge.Schematic.BLOCK_CONTAINER);
             final Palette.Mutable<BlockState, BlockType> palette = schematic.blockPalette().asMutable(
-                Sponge.game().registries());
+                Sponge.server().registries());
             try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream(width * height * length)) {
                 for (int y = 0; y < height; y++) {
                     final int y0 = yMin + y;
@@ -519,7 +521,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         }
 
         final List<DataView> entities = schematic.entityArchetypesByPosition().stream().map(entry -> {
-            final DataContainer container = DataContainer.createNew();
+            final DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
 
             final List<Double> entityPosition = new ArrayList<>();
             entityPosition.add(entry.position().x());

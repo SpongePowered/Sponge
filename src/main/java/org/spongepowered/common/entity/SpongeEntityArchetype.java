@@ -37,6 +37,7 @@ import net.minecraft.world.entity.MobSpawnType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
@@ -202,7 +203,7 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
 
     @Override
     public DataContainer toContainer() {
-        return DataContainer.createNew()
+        return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED)
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Sponge.EntityArchetype.ENTITY_TYPE, this.type)
                 .set(Constants.Sponge.EntityArchetype.ENTITY_DATA, this.entityData());

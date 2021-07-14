@@ -254,7 +254,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public DataContainer toContainer() {
-        final DataContainer container = DataContainer.createNew()
+        final DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED)
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Queries.WORLD_KEY, this.worldKey.asString())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
@@ -302,7 +302,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     @Override
     public DataContainer data$getDataContainer() {
         if (this.compound == null) {
-            return DataContainer.createNew();
+            return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
         }
         return NBTTranslator.INSTANCE.translate(this.compound);
     }

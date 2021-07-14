@@ -24,22 +24,32 @@
  */
 package org.spongepowered.common.world.volume.buffer.archetype;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.archetype.block.entity.BlockEntityArchetypeVolume;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
+import org.spongepowered.api.world.volume.stream.VolumeApplicators;
+import org.spongepowered.api.world.volume.stream.VolumeCollectors;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
+import org.spongepowered.api.world.volume.stream.VolumePositionTranslators;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.AbstractVolumeBuffer;
@@ -51,9 +61,11 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -227,4 +239,42 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         return this.biomes.setBiome(x, y, z, biome);
     }
 
+    @Override
+    public void applyToWorld(
+        final ServerWorld target, final Vector3i placement, final Supplier<SpawnType> spawnContext
+    ) {
+        Objects.requireNonNull(target, "Target world cannot be null");
+        Objects.requireNonNull(placement, "Target position cannot be null");
+        try (final PhaseContext<@NonNull ?> context = PluginPhase.State.VOLUME_STREAM_APPLICATION
+            .createPhaseContext(PhaseTracker.SERVER)
+            .spawnType(spawnContext)
+            .source(this)) {
+            context.buildAndSwitch();
+            this.blockStateStream(this.blockMin(), this.blockMax(), StreamOptions.lazily())
+                .apply(VolumeCollectors.of(
+                    target,
+                    VolumePositionTranslators.relativeTo(placement),
+                    VolumeApplicators.applyBlocks(BlockChangeFlags.DEFAULT_PLACEMENT)
+                ));
+
+            this.biomeStream(this.blockMin(), this.blockMax(), StreamOptions.lazily())
+                .apply(VolumeCollectors.of(
+                    target,
+                    VolumePositionTranslators.relativeTo(placement),
+                    VolumeApplicators.applyBiomes()
+                ));
+            this.blockEntityArchetypeStream(this.blockMin(), this.blockMax(), StreamOptions.lazily())
+                .apply(VolumeCollectors.of(
+                    target,
+                    VolumePositionTranslators.relativeTo(placement),
+                    VolumeApplicators.applyBlockEntityArchetype()
+                ));
+            this.entityArchetypeStream(this.blockMin(), this.blockMax(), StreamOptions.lazily())
+                .apply(VolumeCollectors.of(
+                    target,
+                    VolumePositionTranslators.relativeTo(placement),
+                    VolumeApplicators.applyEntityArchetype()
+                ));
+        }
+    }
 }

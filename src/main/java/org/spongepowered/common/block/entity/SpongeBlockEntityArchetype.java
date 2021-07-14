@@ -36,6 +36,8 @@ import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -125,7 +127,8 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     public DataContainer toContainer() {
-        return DataContainer.createNew()
+        return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED)
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_TYPE, this.type)
                 .set(Constants.Sponge.BlockEntityArchetype.BLOCK_STATE, this.blockState)
                 .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_DATA, this.blockEntityData())
