@@ -107,6 +107,7 @@ import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.util.ResettableBuilder;
+import org.spongepowered.api.util.transformation.Transformation;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
@@ -204,6 +205,7 @@ import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
+import org.spongepowered.common.util.transformation.SpongeTransformationBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.biome.provider.SpongeCheckerboardBiomeConfig;
@@ -359,6 +361,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(MapColor.Builder.class, SpongeMapColorBuilder::new)
                 .register(MapDecoration.Builder.class, SpongeMapDecorationBuilder::new)
                 .register(MapCanvas.Builder.class, SpongeMapCanvasBuilder::new)
+                .register(Transformation.Builder.class, SpongeTransformationBuilder::new)
         ;
     }
 }

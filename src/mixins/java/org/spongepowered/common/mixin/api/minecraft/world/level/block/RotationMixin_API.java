@@ -25,8 +25,11 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level.block;
 
 import net.minecraft.world.level.block.Rotation;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.util.Angle;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.math.matrix.Matrix4d;
 
 @Mixin(Rotation.class)
 public abstract class RotationMixin_API implements org.spongepowered.api.util.rotation.Rotation {
@@ -34,6 +37,9 @@ public abstract class RotationMixin_API implements org.spongepowered.api.util.ro
     // @formatter:off
     @Shadow public abstract Rotation shadow$getRotated(Rotation rotation);
     // @formatter:on
+
+    private @Nullable Angle impl$angle = null;
+    private @Nullable Matrix4d impl$rotationMatrix = null;
 
     @SuppressWarnings("ConstantConditions")
     @Override
@@ -43,16 +49,27 @@ public abstract class RotationMixin_API implements org.spongepowered.api.util.ro
 
     @SuppressWarnings({"ConstantConditions", "RedundantCast"})
     @Override
-    public int angle() {
-        if ((Rotation) (Object) this == Rotation.NONE) {
-            return 0;
-        } else if ((Rotation) (Object) this == Rotation.CLOCKWISE_90) {
-            return 90;
-        } else if ((Rotation) (Object) this == Rotation.CLOCKWISE_180) {
-            return 180;
-        } else if ((Rotation) (Object) this == Rotation.COUNTERCLOCKWISE_90) {
-            return 270;
+    public Angle angle() {
+        if (this.impl$angle == null) {
+            if ((Rotation) (Object) this == Rotation.CLOCKWISE_90) {
+                this.impl$angle = Angle.fromDegrees(90);
+            } else if ((Rotation) (Object) this == Rotation.CLOCKWISE_180) {
+                this.impl$angle = Angle.fromDegrees(180);
+            } else if ((Rotation) (Object) this == Rotation.COUNTERCLOCKWISE_90) {
+                this.impl$angle = Angle.fromDegrees(270);
+            } else {
+                this.impl$angle = Angle.fromDegrees(0); // Either NONE or someone has tried to extend the enum for some reason.
+            }
         }
-        return 0; // ???? who the hell adds a new rotation?
+        return this.impl$angle;
     }
+
+    @Override
+    public Matrix4d toRotationMatrix() {
+        if (this.impl$rotationMatrix == null) {
+            this.impl$rotationMatrix = org.spongepowered.api.util.rotation.Rotation.super.toRotationMatrix();
+        }
+        return this.impl$rotationMatrix;
+    }
+
 }
