@@ -194,7 +194,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final int zOffset = offset[2];
         final SpongeArchetypeVolume archetypeVolume = new SpongeArchetypeVolume(
             new Vector3i(-xOffset, -yOffset, -zOffset), new Vector3i(width, height, length),
-            Sponge.game().registries()
+            Sponge.server().registries()
         );
 
         updatedView.getView(Constants.Sponge.Schematic.BLOCK_CONTAINER)

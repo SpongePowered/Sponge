@@ -51,25 +51,25 @@ public final class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
     private final BitSet allocation = new BitSet(MutableBimapPalette.DEFAULT_ALLOCATION_SIZE);
     private final PaletteType<T, R> paletteType;
     private final Registry<R> registry;
-    private final RegistryType<R> registryType;
     private int maxId = 0;
 
-    public MutableBimapPalette(final PaletteType<T, R> paletteType, final Registry<R> registry, final RegistryType<R> registryType) {
+    public MutableBimapPalette(
+        final PaletteType<T, R> paletteType, final Registry<R> registry
+    ) {
         this.ids = HashBiMap.create();
         this.idsr = this.ids.inverse();
         this.paletteType = paletteType;
         this.registry = registry;
-        this.registryType = registryType;
     }
 
-    public MutableBimapPalette(final PaletteType<T, R> paletteType, final Registry<R> registry, final RegistryType<R> registryType,
+    public MutableBimapPalette(
+        final PaletteType<T, R> paletteType, final Registry<R> registry,
         final BiMap<PaletteReference<T, R>, Integer> reference
     ) {
         this.ids = HashBiMap.create(reference.size());
         this.idsr = this.ids.inverse();
         this.paletteType = paletteType;
         this.registry = registry;
-        this.registryType = registryType;
         reference.forEach((key, id) -> this.getOrAssignInternal(key));
     }
 
@@ -80,7 +80,6 @@ public final class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
         this.idsr = this.ids.inverse();
         this.paletteType = paletteType;
         this.registry = registry;
-        this.registryType = registryType;
     }
 
     @Override
@@ -211,7 +210,7 @@ public final class MutableBimapPalette<T, R> implements Palette.Mutable<T, R> {
 
     @Override
     public Immutable<T, R> asImmutable() {
-        return new ImmutableBimapPalette<>(this.paletteType, this.registry, this.registryType, this.ids);
+        return new ImmutableBimapPalette<>(this.paletteType, this.registry, this.ids);
     }
 
     @Override

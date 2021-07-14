@@ -29,7 +29,6 @@ import com.google.common.collect.ImmutableBiMap;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteReference;
 import org.spongepowered.api.world.schematic.PaletteType;
@@ -48,12 +47,10 @@ public final class ImmutableBimapPalette<T, R> implements Palette.Immutable<T, R
     private final PaletteType<T, R> paletteType;
     private final int maxId;
     private final Registry<R> registry;
-    private final RegistryType<R> registryType;
 
     public ImmutableBimapPalette(
         final PaletteType<T, R> paletteType,
         final Registry<R> registry,
-        final RegistryType<R> registryType,
         final BiMap<Integer, PaletteReference<T, R>> reference
     ) {
         final ImmutableBiMap.Builder<Integer, PaletteReference<T, R>> builder = ImmutableBiMap.builder();
@@ -62,7 +59,6 @@ public final class ImmutableBimapPalette<T, R> implements Palette.Immutable<T, R
         this.idsr = this.ids.inverse();
         this.paletteType = paletteType;
         this.registry = registry;
-        this.registryType = registryType;
         int maxId = 0;
         for (final Integer id : this.ids.keySet()) {
             if (maxId < id) {
@@ -119,7 +115,7 @@ public final class ImmutableBimapPalette<T, R> implements Palette.Immutable<T, R
 
     @Override
     public Mutable<T, R> asMutable(final RegistryHolder holder) {
-        return new MutableBimapPalette<>(this.paletteType, holder.registry(this.registryType), this.registryType, this.idsr);
+        return new MutableBimapPalette<>(this.paletteType, this.registry);
     }
 
     @Override

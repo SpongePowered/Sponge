@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.volume.buffer.block;
 
+import net.minecraft.core.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
@@ -48,7 +49,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import net.minecraft.core.BlockPos;
 
 public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements BlockVolume.Mutable {
 
@@ -62,8 +62,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         this(
             new MutableBimapPalette<>(
                 PaletteTypes.BLOCK_STATE_PALETTE.get(),
-                Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE),
-                RegistryTypes.BLOCK_TYPE
+                Sponge.game().registries().registry(RegistryTypes.BLOCK_TYPE)
             ),
             BlockTypes.AIR,
             start,

@@ -80,6 +80,7 @@ import java.nio.file.Path;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.UUID;
+import java.util.zip.GZIPInputStream;
 import java.util.zip.GZIPOutputStream;
 
 @Plugin("volumestreamtest")
@@ -292,6 +293,55 @@ public final class VolumeStreamTest implements LoadableModule {
                     return CommandResult.success();
                 }).build(),
             "save"
+        );
+        event.register(
+            this.plugin,
+            Command.builder()
+                .shortDescription(Component.text("Load a schematic from file"))
+                .permission(this.plugin.metadata().id() + ".command.load")
+                .addParameter(fileName)
+                .executor(src -> {
+                    if (!(src.cause().root() instanceof ServerPlayer)) {
+                        src.sendMessage(Identity.nil(), Component.text("Player only.", NamedTextColor.RED));
+                        return CommandResult.success();
+                    }
+                    final ServerPlayer player = (ServerPlayer) src.cause().root();
+                    final String file = src.requireOne(fileName);
+                    final Path desiredFilePath = this.schematicsDir.resolve(file + ".schematic");
+                    if (!Files.isRegularFile(desiredFilePath)) {
+                        throw new CommandException(Component.text("File " + file + " was not a normal schemaic file"));
+                    }
+                    final Schematic schematic;
+                    final DataContainer schematicContainer;
+                    try (final GZIPInputStream stream = new GZIPInputStream(Files.newInputStream(desiredFilePath))) {
+                        schematicContainer = DataFormats.NBT.get().readFrom(stream);
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                        final StringWriter writer = new StringWriter();
+                        e.printStackTrace(new PrintWriter(writer));
+                        final Component errorText = Component.text(writer.toString().replace("\t", "    ")
+                            .replace("\r\n", "\n")
+                            .replace("\r", "\n")
+                        );
+
+                        final TextComponent text = Component.text(
+                            "Error loading schematic: " + e.getMessage(), NamedTextColor.RED)
+                            .hoverEvent(HoverEvent.showText(errorText));
+
+                        return CommandResult.builder()
+                            .error(text).build();
+                    }
+                    schematic = Sponge.dataManager().translator(Schematic.class)
+                        .orElseThrow(() -> new IllegalStateException("Expected a DataTranslator for a Schematic"))
+                        .translate(schematicContainer);
+                    src.sendMessage(Identity.nil(), Component.text("Loaded schematic from " + file, NamedTextColor.GREEN));
+                    final PlayerData data = VolumeStreamTest.get(player);
+                    data.setClipboard(schematic);
+                    data.setOrigin(player.blockPosition());
+                    return CommandResult.success();
+                })
+                .build(),
+            "load"
         );
     }
 
