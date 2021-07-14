@@ -52,6 +52,20 @@ public final class SpongeTransformationBuilder implements Transformation.Builder
         this.reset();
     }
 
+    SpongeTransformationBuilder(final SpongeTransformation transformation) {
+        this.reset();
+        this.origin =  transformation.origin;
+        // undo the origin transformation
+        final Matrix4d partialRotation = this.transformation.translate(this.origin.mul(-1));
+        final Matrix4d invertedMatrix = Matrix4d.createTranslation(this.origin);
+        this.transformation = partialRotation.mul(invertedMatrix);
+        this.directionTransformation = transformation.directionTransformation;
+        this.flipx = transformation.flipx;
+        this.flipz = transformation.flipz;
+        this.rotation = transformation.rotation;
+        this.performRounding = transformation.performRounding;
+    }
+
     @Override
     public @NonNull SpongeTransformationBuilder reset() {
         this.transformation = Matrix4d.IDENTITY;

@@ -147,7 +147,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     }
 
     @Override
-    public BlockEntityArchetype build() {
+    public SpongeBlockEntityArchetype build() {
         if (this.blockState == null) {
             throw new IllegalStateException("BlockState cannot be null!");
         }

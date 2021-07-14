@@ -25,6 +25,7 @@
 package org.spongepowered.common.world.volume.buffer.archetype;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
@@ -33,6 +34,7 @@ import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.transformation.Transformation;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.schematic.Palette;
@@ -57,6 +59,7 @@ import org.spongepowered.common.world.volume.buffer.archetype.blockentity.Mutabl
 import org.spongepowered.common.world.volume.buffer.archetype.entity.ObjectArrayMutableEntityArchetypeBuffer;
 import org.spongepowered.common.world.volume.buffer.biome.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
@@ -83,6 +86,19 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         this.blockEntities = new MutableMapBlockEntityArchetypeBuffer(blocks);
         this.biomes = new ByteArrayMutableBiomeBuffer(
             PaletteTypes.BIOME_PALETTE.get().create(registries, RegistryTypes.BIOME),
+            start,
+            size
+        );
+        this.entities = new ObjectArrayMutableEntityArchetypeBuffer(start, size);
+    }
+
+    private SpongeArchetypeVolume(final Vector3i start, final Vector3i size, final Palette<Biome, Biome> biomePalette) {
+        super(start, size);
+        final ArrayMutableBlockBuffer blocks = new ArrayMutableBlockBuffer(start, size);
+        this.blocks = blocks;
+        this.blockEntities = new MutableMapBlockEntityArchetypeBuffer(blocks);
+        this.biomes = new ByteArrayMutableBiomeBuffer(
+            biomePalette.asImmutable().asMutable(Sponge.server().registries()),
             start,
             size
         );
@@ -182,10 +198,10 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         } else {
             buffer = this.blocks;
         }
-        final Stream<VolumeElement<ArchetypeVolume, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
-            .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
-                .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
-                    .mapToObj(y -> VolumeElement.of((ArchetypeVolume) this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
+        final Stream<VolumeElement<ArchetypeVolume, BlockState>> stateStream = IntStream.range(min.x(), max.x() + 1)
+            .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
+                .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
+                    .mapToObj(y -> VolumeElement.of((ArchetypeVolume) this, () -> buffer.block(x, y, z), new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);
@@ -237,6 +253,11 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         return this.biomes.setBiome(x, y, z, biome);
+    }
+
+    @Override
+    public ArchetypeVolume transform(final Transformation transformation) {
+        return new ReferentArchetypeVolume(this, Objects.requireNonNull(transformation, "Transformation cannot be null"));
     }
 
     @Override

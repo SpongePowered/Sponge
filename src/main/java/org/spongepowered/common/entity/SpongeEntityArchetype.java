@@ -215,7 +215,7 @@ public final class SpongeEntityArchetype extends AbstractArchetype<EntityType, E
     }
 
     @Override
-    public EntityArchetype copy() {
+    public SpongeEntityArchetype copy() {
         return new SpongeEntityArchetype(this.type, this.compound.copy());
     }
 

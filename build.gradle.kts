@@ -207,6 +207,8 @@ dependencies {
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
 
     testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+    testImplementation("org.mockito:mockito-inline:$mockitoVersion")
 }
 
 val organization: String by project

@@ -58,6 +58,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
     private final Palette.Mutable<BlockState, BlockType> palette;
     private final RegistryReference<BlockType> defaultState;
     private BlockBackingData data;
+    private final RegistryHolder registries;
 
     public ArrayMutableBlockBuffer(final Vector3i start, final Vector3i size) {
         this(
@@ -89,6 +90,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
                 this.data.set(i, airId);
             }
         }
+        this.registries = Sponge.game().registries();
     }
 
     public ArrayMutableBlockBuffer(final Palette<BlockState, BlockType> palette, final Vector3i start, final Vector3i size, final char[] blocks) {
@@ -96,6 +98,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         this.palette = palette.asMutable(Sponge.game().registries());
         this.data = new BlockBackingData.CharBackingData(blocks);
         this.defaultState = BlockTypes.AIR;
+        this.registries = Sponge.game().registries();
     }
 
     /**
@@ -111,6 +114,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         this.palette = palette.asMutable(Sponge.game().registries());
         this.data = blocks;
         this.defaultState = BlockTypes.AIR;
+        this.registries = Sponge.game().registries();
     }
 
     @Override
@@ -145,9 +149,9 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
     @Override
     public BlockState block(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        final RegistryHolder registries = Sponge.game().registries();
-        return this.palette.get(this.data.get(this.getIndex(x, y, z)), registries)
-            .orElseGet(() -> this.defaultState.get(registries).defaultState());
+        final int id = this.data.get(this.getIndex(x, y, z));
+        return this.palette.get(id, this.registries)
+            .orElseGet(() -> this.defaultState.get(this.registries).defaultState());
     }
 
     @Override

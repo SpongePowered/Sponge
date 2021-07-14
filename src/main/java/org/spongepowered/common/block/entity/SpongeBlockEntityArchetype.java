@@ -146,7 +146,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     }
 
     @Override
-    public org.spongepowered.api.block.entity.BlockEntityArchetype copy() {
+    public SpongeBlockEntityArchetype copy() {
         final SpongeBlockEntityArchetypeBuilder builder = SpongeBlockEntityArchetypeBuilder.pooled();
         builder.type = this.type;
         builder.data = NBTTranslator.INSTANCE.translate(this.compound);

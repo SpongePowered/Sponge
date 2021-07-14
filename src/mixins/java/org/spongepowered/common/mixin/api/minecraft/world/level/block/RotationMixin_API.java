@@ -47,29 +47,46 @@ public abstract class RotationMixin_API implements org.spongepowered.api.util.ro
         return (org.spongepowered.api.util.rotation.Rotation) (Object) this.shadow$getRotated((Rotation) (Object) rotation);
     }
 
-    @SuppressWarnings({"ConstantConditions", "RedundantCast"})
     @Override
     public Angle angle() {
-        if (this.impl$angle == null) {
-            if ((Rotation) (Object) this == Rotation.CLOCKWISE_90) {
-                this.impl$angle = Angle.fromDegrees(90);
-            } else if ((Rotation) (Object) this == Rotation.CLOCKWISE_180) {
-                this.impl$angle = Angle.fromDegrees(180);
-            } else if ((Rotation) (Object) this == Rotation.COUNTERCLOCKWISE_90) {
-                this.impl$angle = Angle.fromDegrees(270);
-            } else {
-                this.impl$angle = Angle.fromDegrees(0); // Either NONE or someone has tried to extend the enum for some reason.
-            }
-        }
+        this.lazyInit();
         return this.impl$angle;
     }
 
     @Override
     public Matrix4d toRotationMatrix() {
-        if (this.impl$rotationMatrix == null) {
-            this.impl$rotationMatrix = org.spongepowered.api.util.rotation.Rotation.super.toRotationMatrix();
-        }
+        this.lazyInit();
         return this.impl$rotationMatrix;
     }
+
+    private Matrix4d createRotationMatrix(final int cos, final int sin) {
+        return Matrix4d.from(
+                cos, 0, sin, 0,
+                0, 1, 0, 0,
+                -sin, 0, cos, 0,
+                0, 0, 0, 1
+        );
+    }
+
+    @SuppressWarnings({"ConstantConditions", "RedundantCast"})
+    private void lazyInit() {
+        if (this.impl$angle == null) {
+            if ((Rotation) (Object) this == Rotation.CLOCKWISE_90) {
+                this.impl$angle = Angle.fromDegrees(90);
+                // we have to reverse the sine as Mojang co-ords are backwards on the Z axis - (+,-) and (-,+) quadrants are swapped.
+                this.impl$rotationMatrix = this.createRotationMatrix(0, -1);
+            } else if ((Rotation) (Object) this == Rotation.CLOCKWISE_180) {
+                this.impl$angle = Angle.fromDegrees(180);
+                this.impl$rotationMatrix = this.createRotationMatrix(-1, 0);
+            } else if ((Rotation) (Object) this == Rotation.COUNTERCLOCKWISE_90) {
+                this.impl$angle = Angle.fromDegrees(270);
+                this.impl$rotationMatrix = this.createRotationMatrix(0, 1);
+            } else {
+                this.impl$angle = Angle.fromDegrees(0); // Either NONE or someone has tried to extend the enum for some reason.
+                this.impl$rotationMatrix = this.createRotationMatrix(1, 0);
+            }
+        }
+    }
+
 
 }

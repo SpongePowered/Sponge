@@ -187,29 +187,27 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             ));
         }
 
-        final int[] offset = (int[]) updatedView.get(Constants.Sponge.Schematic.OFFSET).orElse(new int[3]);
-        if (offset.length != 3) {
+        final int[] offsetArray = (int[]) updatedView.get(Constants.Sponge.Schematic.OFFSET).orElse(new int[3]);
+        if (offsetArray.length != 3) {
             throw new InvalidDataException("Schematic offset was not of length 3");
         }
 
-        final int xOffset = offset[0];
-        final int yOffset = offset[1];
-        final int zOffset = offset[2];
+        final Vector3i offset = new Vector3i(offsetArray[0], offsetArray[1], offsetArray[2]);
         final SpongeArchetypeVolume archetypeVolume = new SpongeArchetypeVolume(
-            new Vector3i(-xOffset, -yOffset, -zOffset), new Vector3i(width, height, length),
+            offset, new Vector3i(width, height, length),
             Sponge.server().registries()
         );
 
         updatedView.getView(Constants.Sponge.Schematic.BLOCK_CONTAINER)
             .ifPresent(
                 blocks -> SchematicTranslator.deserializeBlockContainer(blocks, archetypeVolume, width, length,
-                    xOffset, yOffset, zOffset, needsFixers
+                    offset, needsFixers
                 ));
 
         updatedView.getView(Constants.Sponge.Schematic.BIOME_CONTAINER)
             .ifPresent(
                 biomes -> SchematicTranslator.deserializeBiomeContainer(biomes, archetypeVolume, width, length,
-                    xOffset, yOffset, zOffset
+                    offset
                 ));
 
 
@@ -251,7 +249,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
 
     @NotNull
     private static Consumer<DataView> deserializeBlockEntities(
-        final int xOffset, final int yOffset, final int zOffset, final SpongeArchetypeVolume archetypeVolume,
+        final Vector3i offset, final SpongeArchetypeVolume archetypeVolume,
         final boolean needsFixers
     ) {
         return blockEntityData -> {
@@ -264,9 +262,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .ifPresent(type -> {
-                    final int x = pos[0] - xOffset;
-                    final int y = pos[1] - yOffset;
-                    final int z = pos[2] - zOffset;
+                    final int x = pos[0] - offset.x();
+                    final int y = pos[1] - offset.y();
+                    final int z = pos[2] - offset.z();
                     final BlockEntityArchetype.Builder builder = SpongeBlockEntityArchetypeBuilder.pooled()
                         .state(archetypeVolume.block(x, y, z))
                         .blockEntity(type);
@@ -283,9 +281,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final SpongeArchetypeVolume archetypeVolume,
         final int width,
         final int length,
-        final int xOffset,
-        final int yOffset,
-        final int zOffset,
+        final Vector3i offset,
         final boolean needsFixers
     ) {
         final MutableBimapPalette<BlockState, BlockType> palette;
@@ -311,13 +307,13 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final byte[] blockData = (byte[]) view.get(Constants.Sponge.Schematic.BLOCK_DATA)
             .orElseThrow(() -> new InvalidDataException("Missing BlockData for Schematic"));
         SchematicTranslator.readByteArrayData(
-            width, (width * length), xOffset, yOffset, zOffset, palette, blockData, archetypeVolume,
+            width, (width * length), offset, palette, blockData, archetypeVolume,
             BlockVolume.Modifiable::setBlock
         );
         view.getViewList(Constants.Sponge.Schematic.BLOCKENTITY_CONTAINER)
             .ifPresent(tileData ->
                 tileData.forEach(
-                    SchematicTranslator.deserializeBlockEntities(xOffset, yOffset, zOffset, archetypeVolume, needsFixers))
+                    SchematicTranslator.deserializeBlockEntities(offset, archetypeVolume, needsFixers))
             );
     }
 
@@ -326,9 +322,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final SpongeArchetypeVolume archetypeVolume,
         final int width,
         final int length,
-        final int xOffset,
-        final int yOffset,
-        final int zOffset
+        final Vector3i offset
     ) {
         final MutableBimapPalette<Biome, Biome> biomePalette;
         final DataView biomeMap = view.getView(Constants.Sponge.Schematic.BIOME_PALETTE)
@@ -351,7 +345,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         final byte[] biomeData = (byte[]) view.get(Constants.Sponge.Schematic.BIOME_DATA)
             .orElseThrow(() -> new InvalidDataException("Missing BlockData for Schematic"));
         SchematicTranslator.readByteArrayData(
-            width, (width * length), xOffset, yOffset, zOffset, biomePalette, biomeData, archetypeVolume,
+            width, (width * length), offset, biomePalette, biomeData, archetypeVolume,
             BiomeVolume.Modifiable::setBiome
         );
     }
@@ -365,9 +359,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     private static <Buffer, Type, ParentType> void readByteArrayData(
         final int width,
         final int i1,
-        final int xOffset,
-        final int yOffset,
-        final int zOffset,
+        final Vector3i offset,
         final Palette<Type, ParentType> palette,
         final byte[] data,
         final Buffer buffer,
@@ -397,7 +389,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
             final int z = (index % i1) / width;
             final int x = (index % i1) % width;
             final Type state = palette.get(value, Sponge.game().registries()).get();
-            setter.apply(buffer, x - xOffset, y - yOffset, z - zOffset, state);
+            setter.apply(buffer, x + offset.x(), y + offset.y(), z + offset.z(), state);
 
             index++;
         }
@@ -406,7 +398,8 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     @Override
     public DataContainer translate(final Schematic schematic) throws InvalidDataException {
         final DataContainer data = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
-        this.addTo(schematic, data);
+        final DataView view = data.createView(Constants.Sponge.Schematic.SCHEMATIC);
+        this.addTo(schematic, view);
         return data;
     }
 
@@ -424,9 +417,9 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                 height, length, Constants.Sponge.Schematic.MAX_SIZE
             ));
         }
-        data.set(Constants.Sponge.Schematic.WIDTH, width);
-        data.set(Constants.Sponge.Schematic.HEIGHT, height);
-        data.set(Constants.Sponge.Schematic.LENGTH, length);
+        data.set(Constants.Sponge.Schematic.WIDTH, (short) width);
+        data.set(Constants.Sponge.Schematic.HEIGHT, (short) height);
+        data.set(Constants.Sponge.Schematic.LENGTH, (short) length);
 
         data.set(Constants.Sponge.Schematic.VERSION, Constants.Sponge.Schematic.CURRENT_VERSION);
         data.set(Constants.Sponge.Schematic.DATA_VERSION, SharedConstants.getCurrentVersion().getWorldVersion());
@@ -435,7 +428,7 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
         }
         final Set<String> requiredMods = new HashSet<>();
 
-        final int[] offset = new int[]{-xMin, -yMin, -zMin};
+        final int[] offset = new int[]{xMin, yMin, zMin};
         data.set(Constants.Sponge.Schematic.OFFSET, offset);
 
         // Check if we have blocks to store

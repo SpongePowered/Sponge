@@ -32,6 +32,7 @@ import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
+import net.kyori.adventure.text.format.TextColor;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -60,6 +61,8 @@ import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.lifecycle.StoppingEngineEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.rotation.Rotation;
+import org.spongepowered.api.util.transformation.Transformation;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
@@ -85,6 +88,10 @@ import java.util.zip.GZIPOutputStream;
 
 @Plugin("volumestreamtest")
 public final class VolumeStreamTest implements LoadableModule {
+
+    private static final String FILE_ENDING = ".schem";
+    public static final TextColor SAVE = TextColor.color(0x856C);
+    private static final TextColor GREEN = TextColor.color(0x6CA9FF);
 
     @Inject private PluginContainer plugin;
     @Inject private Logger logger;
@@ -188,7 +195,7 @@ public final class VolumeStreamTest implements LoadableModule {
                     final ArchetypeVolume archetypeVolume = player.world().createArchetypeVolume(
                         min, max, player.blockPosition());
                     data.setClipboard(archetypeVolume);
-                    player.sendMessage(Identity.nil(), Component.text("Saved to clipboard.", NamedTextColor.GREEN));
+                    player.sendMessage(Identity.nil(), Component.text("Saved to clipboard.", VolumeStreamTest.GREEN));
                     return CommandResult.success();
                 }).build(),
             "copy"
@@ -218,11 +225,12 @@ public final class VolumeStreamTest implements LoadableModule {
                         volume.applyToWorld(player.world(), player.blockPosition(), SpawnTypes.PLACEMENT::get);
                     }
                     src.sendMessage(
-                        Identity.nil(), Component.text("Pasted clipboard into world.", NamedTextColor.GREEN));
+                        Identity.nil(), Component.text("Pasted clipboard into world.", VolumeStreamTest.GREEN));
                     return CommandResult.success();
                 }).build(),
             "paste"
         );
+
         final Parameter.Value<String> fileName = Parameter.string().key("fileName").build();
         event.register(
             this.plugin,
@@ -236,7 +244,7 @@ public final class VolumeStreamTest implements LoadableModule {
                         return CommandResult.success();
                     }
                     final String file = src.requireOne(fileName);
-                    final Path desiredFilePath = this.schematicsDir.resolve(file + ".schematic");
+                    final Path desiredFilePath = this.schematicsDir.resolve(file + VolumeStreamTest.FILE_ENDING);
                     if (Files.exists(desiredFilePath)) {
                         throw new CommandException(Component.text(file + " already exists, please delete the file first", NamedTextColor.RED));
                     }
@@ -270,7 +278,7 @@ public final class VolumeStreamTest implements LoadableModule {
                             new GZIPOutputStream(Files.newOutputStream(output)), schematicData);
                         player.sendMessage(
                             Identity.nil(),
-                            Component.text("Saved schematic to " + output.toAbsolutePath(), NamedTextColor.GREEN)
+                            Component.text("Saved schematic to " + output.toAbsolutePath(), VolumeStreamTest.SAVE)
                         );
                     } catch (final Exception e) {
                         e.printStackTrace();
@@ -288,8 +296,6 @@ public final class VolumeStreamTest implements LoadableModule {
                         return CommandResult.builder()
                             .error(text).build();
                     }
-                    src.sendMessage(
-                        Identity.nil(), Component.text("Pasted clipboard into world.", NamedTextColor.GREEN));
                     return CommandResult.success();
                 }).build(),
             "save"
@@ -307,7 +313,7 @@ public final class VolumeStreamTest implements LoadableModule {
                     }
                     final ServerPlayer player = (ServerPlayer) src.cause().root();
                     final String file = src.requireOne(fileName);
-                    final Path desiredFilePath = this.schematicsDir.resolve(file + ".schematic");
+                    final Path desiredFilePath = this.schematicsDir.resolve(file + VolumeStreamTest.FILE_ENDING);
                     if (!Files.isRegularFile(desiredFilePath)) {
                         throw new CommandException(Component.text("File " + file + " was not a normal schemaic file"));
                     }
@@ -334,7 +340,7 @@ public final class VolumeStreamTest implements LoadableModule {
                     schematic = Sponge.dataManager().translator(Schematic.class)
                         .orElseThrow(() -> new IllegalStateException("Expected a DataTranslator for a Schematic"))
                         .translate(schematicContainer);
-                    src.sendMessage(Identity.nil(), Component.text("Loaded schematic from " + file, NamedTextColor.GREEN));
+                    src.sendMessage(Identity.nil(), Component.text("Loaded schematic from " + file, TextColor.color(0x003434)));
                     final PlayerData data = VolumeStreamTest.get(player);
                     data.setClipboard(schematic);
                     data.setOrigin(player.blockPosition());
@@ -343,11 +349,46 @@ public final class VolumeStreamTest implements LoadableModule {
                 .build(),
             "load"
         );
+
+        final Parameter.Value<Rotation> rotation = Parameter.registryElement(
+            TypeToken.get(Rotation.class), RegistryTypes.ROTATION)
+            .key("rotation")
+            .build();
+        event.register(this.plugin,
+            Command
+                .builder()
+                .shortDescription(Component.text("Rotate clipboard"))
+                .permission(this.plugin.metadata().id() + ".command.rotate")
+                .addParameter(rotation)
+                .executor(src -> {
+                    if (!(src.cause().root() instanceof ServerPlayer)) {
+                        src.sendMessage(Identity.nil(), Component.text("Player only.", NamedTextColor.RED));
+                        return CommandResult.success();
+                    }
+                    final ServerPlayer player = (ServerPlayer) src.cause().root();
+                    final Rotation desiredRotation = src.requireOne(rotation);
+                    final Schematic schematic;
+                    final PlayerData data = VolumeStreamTest.get(player);
+                    if (data.clipboard == null) {
+                        throw new CommandException(Component.text("Load a clipboard first before trying to rotate it"));
+                    }
+                    final ArchetypeVolume newClipboard = data.clipboard.transform(Transformation.builder()
+                        .origin(data.clipboard.blockMin().toDouble().add(data.clipboard.blockSize().toDouble().div(2)))
+                        .rotate(desiredRotation)
+                        .build());
+                    src.sendMessage(Identity.nil(), Component.text("Rotated clipboard " + desiredRotation.angle().degrees() + " degrees"));
+                    data.setClipboard(newClipboard);
+                    return CommandResult.success();
+                })
+                .build(),
+            "rotate"
+        );
     }
 
 
     public static class CopyPastaListener {
 
+        public static final TextColor TEAL = TextColor.color(0x008080);
         @Listener
         public void onLeftClick(final InteractBlockEvent.Primary event, @Root final Player player) {
             event.context().get(EventContextKeys.USED_ITEM).ifPresent(snapshot -> {
@@ -355,7 +396,7 @@ public final class VolumeStreamTest implements LoadableModule {
                 if (snapshot.type().equals(ItemTypes.WOODEN_AXE.get()) && block != BlockSnapshot.empty()) {
                     VolumeStreamTest.get(player).setPos1(block.position());
                     player.sendMessage(
-                        Component.text("Position 1 set to " + block.position(), NamedTextColor.LIGHT_PURPLE));
+                        Component.text("Position 1 set to " + block.position(), CopyPastaListener.TEAL));
 
                     if (event instanceof Cancellable) {
                         ((Cancellable) event).setCancelled(true);
@@ -371,7 +412,7 @@ public final class VolumeStreamTest implements LoadableModule {
                 if (snapshot.type().equals(ItemTypes.WOODEN_AXE.get()) && block != BlockSnapshot.empty()) {
                     VolumeStreamTest.get(player).setPos2(block.position());
                     player.sendMessage(
-                        Component.text("Position 2 set to " + block.position(), NamedTextColor.LIGHT_PURPLE));
+                        Component.text("Position 2 set to " + block.position(), CopyPastaListener.TEAL));
                     event.setCancelled(true);
                 }
             });

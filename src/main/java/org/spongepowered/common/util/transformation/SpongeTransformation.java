@@ -38,13 +38,13 @@ import java.util.Objects;
 
 public final class SpongeTransformation implements Transformation {
 
-    private final Vector3d origin;
-    private final Matrix4d transformation;
-    private final Matrix4d directionTransformation;
-    private final boolean performRounding;
-    private final Rotation rotation;
-    private final boolean flipx;
-    private final boolean flipz;
+    final Vector3d origin;
+    final Matrix4d transformation;
+    final Matrix4d directionTransformation;
+    final boolean performRounding;
+    final Rotation rotation;
+    final boolean flipx;
+    final boolean flipz;
 
     public SpongeTransformation(final Vector3d origin, final Matrix4d transformation, final Matrix4d directionTransformation,
             final boolean performRounding, final Rotation rotation, final boolean flipx, final boolean flipz) {
@@ -170,6 +170,11 @@ public final class SpongeTransformation implements Transformation {
                 inverseFlipX,
                 inverseFlipZ
         );
+    }
+
+    @Override
+    public Builder toBuilder() {
+        return new SpongeTransformationBuilder(this);
     }
 
 }

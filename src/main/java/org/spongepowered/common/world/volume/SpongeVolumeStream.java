@@ -34,6 +34,7 @@ import org.spongepowered.api.world.volume.stream.VolumeConsumer;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeFlatMapper;
 import org.spongepowered.api.world.volume.stream.VolumeMapper;
+import org.spongepowered.api.world.volume.stream.VolumePositionTranslator;
 import org.spongepowered.api.world.volume.stream.VolumePredicate;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -113,6 +114,14 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
                     element.position()
                 )
             ),
+            this.volumeSupplier
+        );
+    }
+
+    @Override
+    public VolumeStream<V, T> transform(final VolumePositionTranslator<V, T> transformer) {
+        return new SpongeVolumeStream<>(
+            this.stream.map(transformer::apply),
             this.volumeSupplier
         );
     }
