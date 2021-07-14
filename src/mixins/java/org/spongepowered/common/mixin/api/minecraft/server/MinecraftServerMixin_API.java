@@ -71,6 +71,7 @@ import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -105,7 +106,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
-@Implements(value = @Interface(iface = Server.class, prefix = "server$"))
+@Implements(value = @Interface(iface = Server.class, prefix = "server$", remap = Remap.NONE))
 public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLoop<TickTask> implements SpongeServer {
 
     // @formatter:off

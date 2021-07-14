@@ -35,6 +35,7 @@ import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -50,7 +51,7 @@ import net.minecraft.world.level.biome.BiomeZoomer;
 import net.minecraft.world.level.dimension.DimensionType;
 
 @Mixin(DimensionType.class)
-@Implements(@Interface(iface = WorldType.class, prefix = "worldType$"))
+@Implements(@Interface(iface = WorldType.class, prefix = "worldType$", remap = Remap.NONE))
 public abstract class DimensionTypeMixin_API implements WorldType {
 
     // @formatter:off

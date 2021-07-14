@@ -29,12 +29,13 @@ import net.minecraft.world.effect.MobEffect;
 import org.spongepowered.api.effect.potion.PotionEffectType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.adventure.SpongeAdventure;
 
 @Mixin(MobEffect.class)
-@Implements(@Interface(iface = PotionEffectType.class, prefix = "potionEffectType$"))
+@Implements(@Interface(iface = PotionEffectType.class, prefix = "potionEffectType$", remap = Remap.NONE))
 public abstract class MobEffectMixin_API implements PotionEffectType {
 
     // @formatter:off

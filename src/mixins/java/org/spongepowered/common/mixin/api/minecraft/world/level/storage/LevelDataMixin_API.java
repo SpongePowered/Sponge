@@ -32,6 +32,7 @@ import org.spongepowered.api.world.gamerule.GameRule;
 import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,7 +46,7 @@ import java.util.Map;
 import java.util.Objects;
 
 @Mixin(LevelData.class)
-@Implements(@Interface(iface = WorldProperties.class, prefix = "worldProperties$"))
+@Implements(@Interface(iface = WorldProperties.class, prefix = "worldProperties$", remap = Remap.NONE))
 public interface LevelDataMixin_API extends WorldProperties {
 
     // @formatter:off

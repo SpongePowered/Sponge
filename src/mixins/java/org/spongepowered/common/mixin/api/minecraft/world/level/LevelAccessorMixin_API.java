@@ -35,6 +35,7 @@ import org.spongepowered.api.world.chunk.ProtoChunk;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -71,7 +72,7 @@ import java.util.Random;
 import java.util.UUID;
 
 @Mixin(LevelAccessor.class)
-@Implements(@Interface(iface = ProtoWorld.class, prefix = "protoWorld$"))
+@Implements(@Interface(iface = ProtoWorld.class, prefix = "protoWorld$", remap = Remap.NONE))
 public interface LevelAccessorMixin_API {
 
     //@formatter:off
