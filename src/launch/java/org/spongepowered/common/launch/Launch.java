@@ -147,8 +147,10 @@ public abstract class Launch {
     public abstract void performLifecycle();
 
     /**
-     * Return {@code true} if non-Mojang mapping is used in production environment. In that
-     * case a file called reflection_mappings.json need to exists to supply the mapping.
+     * Indicate if the runtime environment uses Mojang mapping or not. If third party mapping is
+     * used, then a file called reflection_mappings.json need to exists to supply the mapping of
+     * method in the production environment.
+     * @return {@code true} if the environment uses Mojang mapping.
      */
-    public abstract boolean usesThirdPartyMappings();
+    public abstract boolean usesMojangMappings();
 }

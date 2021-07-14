@@ -165,7 +165,7 @@ public abstract class VanillaLaunch extends Launch {
     }
 
     @Override
-    public boolean usesThirdPartyMappings() {
-        return false;
+    public boolean usesMojangMappings() {
+        return true;
     }
 }
