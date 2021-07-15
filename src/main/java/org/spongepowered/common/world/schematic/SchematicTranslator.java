@@ -109,11 +109,13 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
     }
 
     @Override
-    public Schematic translate(DataView unprocessed) throws InvalidDataException {
+    public Schematic translate(final DataView unprocessed) throws InvalidDataException {
         if (SchematicTranslator.VANILLA_FIXER == null) {
             SchematicTranslator.VANILLA_FIXER = SpongeCommon.server().getFixerUpper();
         }
-        final int version = unprocessed.getInt(Constants.Sponge.Schematic.VERSION).get();
+        final DataView schematicView = unprocessed.getView(Constants.Sponge.Schematic.SCHEMATIC)
+            .orElse(unprocessed);
+        final int version = schematicView.getInt(Constants.Sponge.Schematic.VERSION).get();
 
         if (version > Constants.Sponge.Schematic.CURRENT_VERSION) {
             throw new InvalidDataException(
@@ -121,11 +123,11 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
                     Constants.Sponge.Schematic.CURRENT_VERSION
                 ));
         } else if (version == 1) {
-            unprocessed = SchematicTranslator.V2_TO_3.update(SchematicTranslator.V1_TO_2.update(unprocessed));
+            SchematicTranslator.V2_TO_3.update(SchematicTranslator.V1_TO_2.update(schematicView));
         } else if (version == 2) {
-            unprocessed = SchematicTranslator.V2_TO_3.update(unprocessed);
+            SchematicTranslator.V2_TO_3.update(schematicView);
         }
-        final int dataVersion = unprocessed.getInt(Constants.Sponge.Schematic.DATA_VERSION).get();
+        final int dataVersion = schematicView.getInt(Constants.Sponge.Schematic.DATA_VERSION).get();
         // DataFixer will be able to upgrade entity and tile entity data if and only if we're running a valid server and
         // the data version is outdated.
         final boolean needsFixers = dataVersion < SharedConstants.getCurrentVersion().getWorldVersion() && SchematicTranslator.VANILLA_FIXER != null;
@@ -133,11 +135,11 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
 
         final DataView updatedView;
         if (needsFixers) {
-            final CompoundTag compound = NBTTranslator.INSTANCE.translate(unprocessed);
+            final CompoundTag compound = NBTTranslator.INSTANCE.translate(schematicView);
             final CompoundTag updated = NbtUtils.update(SchematicTranslator.VANILLA_FIXER, DataFixTypes.CHUNK, compound, dataVersion);
             updatedView = NBTTranslator.INSTANCE.translate(updated);
         } else {
-            updatedView = unprocessed;
+            updatedView = schematicView;
         }
 
         final SpongeSchematicBuilder builder = new SpongeSchematicBuilder();

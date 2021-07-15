@@ -33,9 +33,19 @@ import com.google.common.collect.HashBiMap;
 import com.google.common.collect.Lists;
 import com.mojang.brigadier.arguments.ArgumentType;
 import com.mojang.brigadier.arguments.StringArgumentType;
+import net.minecraft.commands.arguments.CompoundTagArgument;
+import net.minecraft.commands.arguments.ResourceLocationArgument;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.DoubleTag;
+import net.minecraft.nbt.FloatTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.storage.LevelResource;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.data.persistence.DataContentUpdater;
 import org.spongepowered.api.data.persistence.DataQuery;
@@ -77,17 +87,6 @@ import java.util.Comparator;
 import java.util.EnumSet;
 import java.util.List;
 import java.util.function.Supplier;
-
-import net.minecraft.commands.arguments.CompoundTagArgument;
-import net.minecraft.commands.arguments.ResourceLocationArgument;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Registry;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.DoubleTag;
-import net.minecraft.nbt.FloatTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.world.inventory.ClickType;
-import net.minecraft.world.level.storage.LevelResource;
 
 /**
  * A standard class where all various "constants" for various data are stored.
@@ -297,7 +296,7 @@ public final class Constants {
 
             public static final DataQuery NAME = of("Name");
             public static final int CURRENT_VERSION = 3;
-            public static final int MAX_SIZE = Integer.MAX_VALUE;
+            public static final int MAX_SIZE = Integer.MAX_VALUE & 0xFFFF;
             public static final DataQuery VERSION = of("Version");
             public static final DataQuery DATA_VERSION = of("DataVersion");
             public static final DataQuery METADATA = of("Metadata");
@@ -320,6 +319,7 @@ public final class Constants {
             public static final DataQuery ENTITIES_ID = of("Id");
             public static final DataQuery ENTITIES_POS = of("Pos");
             public static final DataQuery BIOME_PALETTE = of("Palette");
+            public static final DataQuery SCHEMATIC = of("Schematic");
 
             public static final class Versions {
 
