@@ -33,6 +33,7 @@ import org.spongepowered.api.Platform;
 import org.spongepowered.api.plugin.PluginManager;
 import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import org.spongepowered.common.launch.mapping.SpongeMappingManager;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 import java.util.ArrayList;
@@ -74,6 +75,8 @@ public abstract class Launch {
     public abstract boolean dedicatedServer();
 
     public abstract SpongePluginManager pluginManager();
+
+    public abstract SpongeMappingManager mappingManager();
 
     public final Logger logger() {
         return this.logger;
@@ -145,12 +148,4 @@ public abstract class Launch {
     public abstract Injector createInjector();
 
     public abstract void performLifecycle();
-
-    /**
-     * Indicate if the runtime environment uses Mojang mapping or not. If third party mapping is
-     * used, then a file called reflection_mappings.json need to exists to supply the mapping of
-     * method in the production environment.
-     * @return {@code true} if the environment uses Mojang mapping.
-     */
-    public abstract boolean usesMojangMappings();
 }

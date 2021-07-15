@@ -84,36 +84,6 @@ public final class ReflectionUtil {
         Entity.class
     };
 
-    private static final String REFLECTION_PROPERTY_FILE = "reflection_mappings.json";
-    private static Map<String, String> mappingCache;
-
-    private static String getMethodNameForEnvironment(final String methodName) {
-        if (Launch.instance().usesMojangMappings()) {
-            return methodName;
-        }
-
-        if (Launch.instance().developerEnvironment() || Launch.instance().usesMojangMappings()) {
-            return methodName;
-        }
-
-        if (mappingCache == null) {
-            try (InputStreamReader reader = new InputStreamReader(Objects.requireNonNull(ReflectionUtil.class.getClassLoader().getResourceAsStream(ReflectionUtil.REFLECTION_PROPERTY_FILE)))) {
-                mappingCache = new Gson().fromJson(reader, new TypeToken<Map<String, String>>(){}.getType());
-            } catch (IOException | NullPointerException e) {
-                mappingCache = Collections.emptyMap();
-            }
-        }
-
-        final String methodNameForEnvironment = mappingCache.get(methodName);
-
-        if (methodNameForEnvironment == null) {
-            SpongeCommon.logger().warn(ReflectionUtil.STUPID_REFLECTION, "Could not find reflection mapping for method {} in reflection property file {}", methodName, ReflectionUtil.REFLECTION_PROPERTY_FILE);
-            return methodName;
-        } else {
-            return methodNameForEnvironment;
-        }
-    }
-
     public static boolean isNeighborChangedDeclared(final Class<?> targetClass) {
         return ReflectionUtil.doesMethodExist(
             targetClass,
@@ -147,7 +117,7 @@ public final class ReflectionUtil {
         final String methodName,
         final Class<?>[] methodParameters
     ) {
-        final String targetMethodForEnvironment = ReflectionUtil.getMethodNameForEnvironment(methodName);
+        final String targetMethodForEnvironment = Launch.instance().mappingManager().toRuntimeMethodName(targetClass, methodName, methodParameters);
         try {
             final Class<?> declaringClass = targetClass.getMethod(targetMethodForEnvironment, methodParameters).getDeclaringClass();
             return !ignoredClass.equals(declaringClass);
