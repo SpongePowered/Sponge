@@ -165,12 +165,6 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         SpongeUser.initializedUsers.remove(this);
     }
 
-    public void initializeIfRequired() {
-        if (!this.isInitialized()) {
-            this.initialize();
-        }
-    }
-
     public void initialize() {
         SpongeUser.initializedUsers.add(this);
         this.compound = new CompoundTag();

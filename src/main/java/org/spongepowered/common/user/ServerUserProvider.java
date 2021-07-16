@@ -62,19 +62,20 @@ public final class ServerUserProvider {
 
     // This is the important set - this tells us if a User file actually exists,
     // it should mirror the filesystem.
-    private final Set<UUID> knownUUIDs = new HashSet<>();
+    private final Set<UUID> knownUUIDs;
     private final Cache<UUID, User> userCache;
-
-    private final Map<String, MutableWatchEvent> watcherUpdateMap = new HashMap<>();
+    private final Map<String, MutableWatchEvent> watcherUpdateMap;
 
     private @Nullable WatchService filesystemWatchService = null;
     private @Nullable WatchKey watchKey = null;
 
     public ServerUserProvider(final Server server) {
+        this.server = (MinecraftServer) server;
+        this.knownUUIDs = new HashSet<>();
+        this.watcherUpdateMap = new HashMap<>();
         this.userCache = Caffeine.newBuilder()
                 .expireAfterAccess(1, TimeUnit.DAYS)
                 .build();
-        this.server = (MinecraftServer) server;
     }
 
     void setupWatchers() {
@@ -157,8 +158,19 @@ public final class ServerUserProvider {
     }
 
     Optional<User> getUser(final UUID uuid) {
-        final com.mojang.authlib.GameProfile gameProfile = this.server.getProfileCache().get(uuid);
-        return this.getUser(gameProfile == null ? null : SpongeGameProfile.of(gameProfile));
+        com.mojang.authlib.GameProfile gameProfile = this.server.getProfileCache().get(uuid);
+        if (gameProfile != null) {
+            return this.getUser(SpongeGameProfile.of(gameProfile));
+        // We know of the UUID so the file exists but Vanilla hasn't loaded a profile...likely cause the Player hasn't joined this user session.
+        // Trigger a profile load
+        // TODO Minecraft 1.16.5 - This isn't right and needs some thought...
+        } else if (this.knownUUIDs.contains(uuid)) {
+            gameProfile = new com.mojang.authlib.GameProfile(uuid, null);
+            this.server.getProfileCache().add(gameProfile);
+            return this.getUser(SpongeGameProfile.of(gameProfile));
+        }
+
+        return Optional.empty();
     }
 
     Optional<User> getUser(final @Nullable GameProfile profile) {
@@ -294,7 +306,7 @@ public final class ServerUserProvider {
     }
 
     private PlayerDataStorage getSaveHandler() {
-        return (PlayerDataStorage) ((PlayerListAccessor) this.server.getPlayerList()).accessor$playerIo();
+        return ((PlayerListAccessor) this.server.getPlayerList()).accessor$playerIo();
     }
 
     private Path getSaveHandlerDirectory() {
