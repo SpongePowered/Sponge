@@ -129,10 +129,8 @@ public final class TrackingUtil {
              final Timing entityTiming = ((TimingBridge) entity.getType()).bridge$timings()
         ) {
             if (entity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
-                    .ifPresent(context::notifier);
-                ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
-                    .ifPresent(context::creator);
+                ((CreatorTrackedBridge) entity).tracked$getNotifierUUID().ifPresent(context::notifier);
+                ((CreatorTrackedBridge) entity).tracked$getCreatorUUID().ifPresent(context::creator);
             }
             context.buildAndSwitch();
             entityTiming.startTiming();
@@ -162,10 +160,8 @@ public final class TrackingUtil {
              ) {
             entityTiming.startTiming();
             if (entity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
-                    .ifPresent(context::notifier);
-                ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
-                    .ifPresent(context::creator);
+                ((CreatorTrackedBridge) entity).tracked$getNotifierUUID().ifPresent(context::notifier);
+                ((CreatorTrackedBridge) entity).tracked$getCreatorUUID().ifPresent(context::creator);
             }
             context.buildAndSwitch();
             entity.rideTick();
@@ -200,11 +196,11 @@ public final class TrackingUtil {
 
             if (tile instanceof CreatorTrackedBridge) {
                 // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-                ((CreatorTrackedBridge) tile).tracked$getNotifierReference().ifPresent(phaseContext::notifier);
+                ((CreatorTrackedBridge) tile).tracked$getNotifierUUID().ifPresent(phaseContext::notifier);
                 // Allow the tile entity to validate the owner of itself. As long as the tile entity
                 // chunk is already loaded and activated, and the tile entity has already loaded
                 // the owner of itself.
-                ((CreatorTrackedBridge) tile).tracked$getCreatorReference().ifPresent(phaseContext::creator);
+                ((CreatorTrackedBridge) tile).tracked$getCreatorUUID().ifPresent(phaseContext::creator);
             }
 
             // Finally, switch the context now that we have the owner and notifier
@@ -383,7 +379,7 @@ public final class TrackingUtil {
         final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext(PhaseTracker.SERVER);
         phaseContext.source(source);
 
-        final User user = ((TrackerBlockEventDataBridge) event).bridge$getSourceUser();
+        final UUID user = ((TrackerBlockEventDataBridge) event).bridge$getSourceUserUUID();
         if (user != null) {
             phaseContext.creator = user;
             phaseContext.notifier = user;
@@ -412,14 +408,14 @@ public final class TrackingUtil {
     private TrackingUtil() {
     }
 
-    public static @Nullable User getNotifierOrOwnerFromBlock(final ServerLevel world, final BlockPos blockPos) {
+    public static @Nullable UUID getNotifierOrOwnerFromBlock(final ServerLevel world, final BlockPos blockPos) {
         final LevelChunkBridge mixinChunk = (LevelChunkBridge) world.getChunkAt(blockPos);
-        final User notifier = mixinChunk.bridge$getBlockNotifier(blockPos).orElse(null);
+        final UUID notifier = mixinChunk.bridge$getBlockNotifierUUID(blockPos).orElse(null);
         if (notifier != null) {
             return notifier;
         }
 
-        return mixinChunk.bridge$getBlockCreator(blockPos).orElse(null);
+        return mixinChunk.bridge$getBlockCreatorUUID(blockPos).orElse(null);
     }
 
     public static Supplier<IllegalStateException> throwWithContext(final String s, final PhaseContext<?> phaseContext) {
@@ -456,7 +452,7 @@ public final class TrackingUtil {
         return transactor.processTransactions(context);
     }
 
-    public static void associateTrackerToTarget(final BlockChange blockChange, final BlockTransactionReceipt receipt, final User user) {
+    public static void associateTrackerToTarget(final BlockChange blockChange, final BlockTransactionReceipt receipt, final UUID uuid) {
         final BlockSnapshot finalSnapshot = receipt.finalBlock();
         final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
         final BlockPos pos = spongeSnapshot.getBlockPos();
@@ -466,7 +462,7 @@ public final class TrackingUtil {
             .map(chunk -> (LevelChunkBridge) chunk)
             .ifPresent(spongeChunk -> {
             final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.CREATOR : PlayerTracker.Type.NOTIFIER;
-            spongeChunk.bridge$addTrackedBlockPosition(block, pos, user, trackerType);
+            spongeChunk.bridge$addTrackedBlockPosition(block, pos, uuid, trackerType);
         });
     }
 

@@ -26,6 +26,7 @@ package org.spongepowered.common.event;
 
 import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
 
+import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -101,6 +102,7 @@ import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBrid
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.entity.player.SpongeUserView;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -156,6 +158,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -307,11 +310,8 @@ public final class SpongeCommonEventFactory {
             }
             if (phaseContext.getCreator().isPresent()) {
                 phaseContext.getCreator().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
-            } else if (player instanceof ServerPlayerBridge) {
-                final @Nullable User user = ((ServerPlayerBridge) player).bridge$getUser();
-                if (user != null) {
-                    frame.addContext(EventContextKeys.CREATOR, user);
-                }
+            } else if (player instanceof ServerPlayer) {
+                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayer) player).uniqueId());
             }
 
             phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
@@ -476,8 +476,8 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
         } else {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerBridge) player).bridge$getUser());
-            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.CREATOR, player.getUUID());
+            frame.addContext(EventContextKeys.NOTIFIER, player.getUUID());
         }
 
         if (!stack.isEmpty()) {
@@ -560,7 +560,7 @@ public final class SpongeCommonEventFactory {
             final Audience originalChannel) {
 
         final Component originalMessage;
-        Optional<User> sourceCreator = Optional.empty();
+        Optional<UUID> sourceCreator = Optional.empty();
         final boolean messageCancelled = false;
 
         if (source instanceof EntityDamageSource) {
@@ -568,7 +568,7 @@ public final class SpongeCommonEventFactory {
             if (damageSource.getDirectEntity() instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) damageSource.getDirectEntity();
                 if (creatorBridge != null) {
-                    sourceCreator = creatorBridge.tracked$getCreatorReference();
+                    sourceCreator = creatorBridge.tracked$getCreatorUUID();
                 }
             }
         }
@@ -607,7 +607,7 @@ public final class SpongeCommonEventFactory {
 
             if (entity instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge spongeEntity = (CreatorTrackedBridge) entity;
-                spongeEntity.tracked$getCreatorReference().ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
+                spongeEntity.tracked$getCreatorUUID().ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
             }
 
             // TODO: Add target side support
@@ -656,7 +656,7 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
                     ? UnknownProjectileSource.UNKNOWN
                     : projectileSource);
-            final Optional<User> creator = PhaseTracker.getInstance().getPhaseContext().getCreator();
+            final Optional<UUID> creator = PhaseTracker.getInstance().getPhaseContext().getCreator();
             creator.ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
 
             final ServerLocation impactPoint = ServerLocation.of((ServerWorld) projectile.level, VecHelper.toVector3d(movingObjectPosition.getLocation()));

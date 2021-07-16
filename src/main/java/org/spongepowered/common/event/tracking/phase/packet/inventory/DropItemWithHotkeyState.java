@@ -47,6 +47,7 @@ import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -142,7 +143,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
             for (final Entity currentEntity : capturedEntities) {
                 if (currentEntity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((ServerPlayer) serverPlayer).user());
+                    ((CreatorTrackedBridge) currentEntity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((ServerPlayer) serverPlayer).uniqueId());
                 } else {
                     currentEntity.offer(Keys.CREATOR, serverPlayer.getUUID());
                 }

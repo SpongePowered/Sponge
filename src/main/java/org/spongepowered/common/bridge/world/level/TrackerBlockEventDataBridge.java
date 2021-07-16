@@ -26,8 +26,9 @@ package org.spongepowered.common.bridge.world.level;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
+
+import java.util.UUID;
 
 public interface TrackerBlockEventDataBridge {
 
@@ -35,11 +36,11 @@ public interface TrackerBlockEventDataBridge {
 
     @Nullable BlockEntity bridge$getTileEntity();
 
-    @Nullable User bridge$getSourceUser();
+    @Nullable UUID bridge$getSourceUserUUID();
 
     void bridge$setTickingLocatable(@Nullable LocatableBlock tickBlock);
 
     void bridge$setTileEntity(@Nullable BlockEntity blockEntity);
 
-    void bridge$setSourceUser(@Nullable User user);
+    void bridge$setSourceUserUUID(@Nullable UUID user);
 }

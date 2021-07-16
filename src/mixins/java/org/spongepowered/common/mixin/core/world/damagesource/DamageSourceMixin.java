@@ -45,6 +45,7 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 import org.spongepowered.common.util.MemoizedSupplier;
 
+import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
@@ -100,11 +101,10 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
                 if (explosion.getSourceMob() == null && entity instanceof CreatorTrackedBridge) {
                     // check creator
                     final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) entity;
-                    creatorBridge.tracked$getCreatorReference()
-                            .filter(user -> user instanceof Player)
-                            .map(user -> (Player) user)
+                    creatorBridge.tracked$getCreatorUUID()
+                            .flatMap(x -> Sponge.server().player(x))
                             .ifPresent(player -> {
-                                final IndirectEntityDamageSource damageSource = new IndirectEntityDamageSource("explosion.player", entity, player);
+                                final IndirectEntityDamageSource damageSource = new IndirectEntityDamageSource("explosion.player", entity, (Entity) player);
                                 damageSource.setScalesWithDifficulty().setExplosion();
                                 cir.setReturnValue(damageSource);
                             });

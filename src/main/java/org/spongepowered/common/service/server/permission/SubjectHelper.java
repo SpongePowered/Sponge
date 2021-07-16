@@ -24,13 +24,14 @@
  */
 package org.spongepowered.common.service.server.permission;
 
-import com.google.common.base.Preconditions;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+
+import java.util.Objects;
 
 /**
  * {@link SubjectBridge} helper class to apply the appropriate subject to the
@@ -41,8 +42,8 @@ public final class SubjectHelper {
     private SubjectHelper() {
     }
 
-    public static void applySubject(final SubjectBridge ref) {
-        Preconditions.checkNotNull(ref);
+    public static void applySubject(final SubjectBridge ref, final String subjectCollectionIdentifier) {
+        Objects.requireNonNull(ref);
         final PermissionService service = Sponge.server().serviceProvider().permissionService();
         final SubjectReference subject;
 
@@ -50,7 +51,7 @@ public final class SubjectHelper {
         // we can skip some unnecessary instance creation this way.
         if (service instanceof SpongePermissionService) {
             final SpongePermissionService serv = (SpongePermissionService) service;
-            final SpongeSubjectCollection collection = serv.get(ref.bridge$getSubjectCollectionIdentifier());
+            final SpongeSubjectCollection collection = serv.get(subjectCollectionIdentifier);
 
             if (ref instanceof GameProfileHolderBridge && collection instanceof UserCollection) {
                 // GameProfile is already resolved, use it directly
@@ -61,7 +62,7 @@ public final class SubjectHelper {
         } else {
             // build a new subject reference using the permission service
             // this doesn't actually load the subject, so it will be lazily init'd when needed.
-            subject = service.newSubjectReference(ref.bridge$getSubjectCollectionIdentifier(), ((Subject) ref).identifier());
+            subject = service.newSubjectReference(subjectCollectionIdentifier, ((Subject) ref).identifier());
         }
 
         ref.bridge$setSubject(subject);

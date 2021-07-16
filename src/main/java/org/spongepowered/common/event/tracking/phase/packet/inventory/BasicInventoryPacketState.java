@@ -45,6 +45,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -168,7 +169,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             if (ShouldFire.SPAWN_ENTITY_EVENT && !capturedItems.isEmpty()) {
                 for (final Entity entiy: capturedItems) {
                     if (entiy instanceof CreatorTrackedBridge) {
-                        ((CreatorTrackedBridge) entiy).tracked$setCreatorReference(((ServerPlayer) player).user());
+                        ((CreatorTrackedBridge) entiy).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((ServerPlayer) player).uniqueId());
                     } else {
                         entiy.offer(Keys.CREATOR, player.getUUID());
                     }

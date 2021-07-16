@@ -22,38 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.network;
+package org.spongepowered.common.user;
 
-import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.common.entity.player.ClientType;
-import org.spongepowered.common.network.channel.TransactionStore;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
 
-import java.net.InetSocketAddress;
-import java.util.Set;
+// Used to reduce the number of calls to maps.
+final class SpongeUserMutableWatchEvent {
 
-public interface ConnectionBridge {
+    private WatchEvent.Kind<?> kind = null;
 
-    TransactionStore bridge$getTransactionStore();
+    public WatchEvent.Kind<?> get() {
+        return this.kind;
+    }
 
-    InetSocketAddress bridge$getAddress();
+    public void set(WatchEvent.Kind<?> kind) {
+        if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+            // This should never happen, we don't listen to this.
+            // However, if it does, treat it as a create, because it
+            // infers the existence of the file.
+            kind = StandardWatchEventKinds.ENTRY_CREATE;
+        }
 
-    InetSocketAddress bridge$getVirtualHost();
-
-    void bridge$setVirtualHost(String host, int port);
-
-    net.minecraft.network.chat.Component bridge$getKickReason();
-
-    void bridge$setKickReason(net.minecraft.network.chat.Component component);
-
-    MinecraftVersion bridge$getVersion();
-
-    void bridge$setVersion(int version);
-
-    Set<ResourceKey> bridge$getRegisteredChannels();
-
-    ClientType bridge$getClientType();
-
-    void bridge$setClientType(ClientType clientType);
+        if (kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_DELETE) {
+            if (this.kind != null && this.kind != kind) {
+                this.kind = null;
+            } else {
+                this.kind = kind;
+            }
+        }
+    }
 
 }

@@ -79,7 +79,6 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
-import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
@@ -319,7 +318,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
         final BlockState state = this.shadow$getBlockState(pos);
         if (((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
-            blockEvent.bridge$setSourceUser(currentContext.getActiveUser());
+            blockEvent.bridge$setSourceUserUUID(currentContext.getActiveUserUUID());
             if (((BlockStateBridge) state).bridge$hasTileEntity()) {
                 blockEvent.bridge$setTileEntity((BlockEntity) this.shadow$getBlockEntity(pos));
             }

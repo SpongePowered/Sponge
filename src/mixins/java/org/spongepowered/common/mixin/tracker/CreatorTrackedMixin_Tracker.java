@@ -50,8 +50,6 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
 
     @Nullable private UUID tracker$creator;
     @Nullable private UUID tracker$notifier;
-    @Nullable private WeakReference<User> tracker$creatorUser;
-    @Nullable private WeakReference<User> tracker$notifierUser;
 
     @Override
     public Optional<UUID> tracked$getCreatorUUID() {
@@ -61,75 +59,6 @@ public abstract class CreatorTrackedMixin_Tracker implements CreatorTrackedBridg
     @Override
     public Optional<UUID> tracked$getNotifierUUID() {
         return Optional.ofNullable(this.tracker$notifier);
-    }
-
-    @Override
-    public void tracked$setCreatorReference(@Nullable final User creator) {
-        this.tracker$creatorUser = new WeakReference<>(creator);
-        this.tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, creator == null ? null : creator.uniqueId());
-    }
-
-    @Override
-    public Optional<User> tracked$getCreatorReference() {
-        final User value = this.tracker$creatorUser == null ? null : this.tracker$creatorUser.get();
-        if (value == null) {
-            if (this.tracker$creator != null) {
-                final Optional<User> user = this.tracked$getTrackedUser(PlayerTracker.Type.CREATOR);
-                user.ifPresent(creator -> this.tracker$creatorUser = new WeakReference<>(creator));
-                return user;
-            }
-        }
-        return Optional.ofNullable(value);
-    }
-
-    @Override
-    public void tracked$setNotifier(@Nullable final User notifier) {
-        this.tracker$notifierUser = new WeakReference<>(notifier);
-        this.tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, notifier == null ? null : notifier.uniqueId());
-    }
-
-    @Override
-    public Optional<User> tracked$getNotifierReference() {
-        final User value = this.tracker$notifierUser == null ? null : this.tracker$notifierUser.get();
-        if (value == null) {
-            if (this.tracker$creator != null) {
-                final Optional<User> user = this.tracked$getTrackedUser(PlayerTracker.Type.NOTIFIER);
-                user.ifPresent(creator -> this.tracker$notifierUser = new WeakReference<>(creator));
-                return user;
-            }
-        }
-        return Optional.ofNullable(value);
-    }
-
-    @Override
-    public Optional<User> tracked$getTrackedUser(final PlayerTracker.Type nbtKey) {
-        final UUID uuid = this.getTrackedUniqueId(nbtKey);
-
-        if (uuid == null) {
-            return Optional.empty();
-        }
-        // get player if online
-        final ServerPlayer player = Sponge.server().player(uuid).orElse(null);
-        final User user = player == null ? null : player.user();
-        if (user != null) {
-            return Optional.of(user);
-        }
-
-        // check username cache
-        final String username = ((SpongeServer) Sponge.server()).getUsernameCache().getLastKnownUsername(uuid);
-        if (username != null) {
-            return Sponge.server().userManager().find(GameProfile.of(uuid, username));
-        }
-
-        // check mojang cache
-        final GameProfile profile = Sponge.server().gameProfileManager().cache().findById(uuid).orElse(null);
-        if (profile != null) {
-            return Sponge.server().userManager().find(profile);
-        }
-
-        // If we reach this point, queue UUID for async lookup and return empty
-        ((SpongeGameProfileManager) Sponge.server().gameProfileManager()).lookupUserAsync(uuid);
-        return Optional.empty();
     }
 
     @Override

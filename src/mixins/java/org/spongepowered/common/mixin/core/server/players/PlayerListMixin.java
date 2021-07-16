@@ -87,13 +87,13 @@ import org.spongepowered.common.accessor.network.protocol.game.ClientboundRespaw
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.client.server.IntegratedPlayerListBridge;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.server.ServerScoreboardBridge;
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.entity.player.LoginPermissions;
-import org.spongepowered.common.entity.player.SpongeUser;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.server.PerWorldBorderListener;
@@ -238,14 +238,6 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         )
     )
     private CompoundTag impl$setPlayerDataForNewPlayers(final PlayerList playerList, final net.minecraft.server.level.ServerPlayer playerIn) {
-        final SpongeUser user = (SpongeUser) ((ServerPlayerBridge) playerIn).bridge$getUserObject();
-        if (user != null) {
-            if (SpongeUser.dirtyUsers.contains(user)) {
-                user.save();
-            }
-            user.invalidate();
-        }
-
         final CompoundTag compound = this.shadow$load(playerIn);
         if (compound == null) {
             ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().setPlayerInfo(playerIn.getUUID(), Instant.now(), Instant.now());
@@ -532,22 +524,8 @@ public abstract class PlayerListMixin implements PlayerListBridge {
     }
 
     @Inject(method = "saveAll()V", at = @At("RETURN"))
-    private void impl$saveOrInvalidateUserDuringSaveAll(final CallbackInfo ci) {
-        for (final SpongeUser user : SpongeUser.initializedUsers) {
-            if (SpongeUser.dirtyUsers.contains(user)) {
-                user.save();
-            } else {
-                user.invalidate();
-            }
-        }
-    }
-
-    @Inject(method = "remove", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;save(Lnet/minecraft/server/level/ServerPlayer;)V"))
-    private void impl$invalidateUserOnSave(final net.minecraft.server.level.ServerPlayer player, final CallbackInfo ci) {
-        // Just to be safe ignore dirty users that exist on online player
-        final User user = ((ServerPlayerBridge) player).bridge$getUser();
-        SpongeUser.dirtyUsers.remove(user);
-        ((SpongeUser) user).invalidate();
+    private void impl$saveDirtyUsersOnSaveAll(final CallbackInfo ci) {
+        ((SpongeServer) SpongeCommon.server()).userManager().saveDirtyUsers();
     }
 
 }

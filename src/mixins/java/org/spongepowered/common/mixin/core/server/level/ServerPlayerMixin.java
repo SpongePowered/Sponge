@@ -80,7 +80,6 @@ import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.SkinPart;
 import org.spongepowered.api.entity.living.Living;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.chat.ChatVisibility;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
@@ -130,8 +129,6 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
-import org.spongepowered.common.profile.SpongeGameProfile;
-import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
@@ -172,7 +169,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Shadow protected abstract void shadow$triggerDimensionChangeTriggers(ServerLevel serverworld);
     // @formatter:on
 
-    private final User impl$user = this.impl$getUserObjectOnConstruction();
     private net.minecraft.network.chat.@Nullable Component impl$connectionMessage;
     private Locale impl$language = Locales.EN_US;
     private Scoreboard impl$scoreboard = Sponge.game().server().serverScoreboard().get();
@@ -200,16 +196,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     @Override
     public String bridge$getSubjectCollectionIdentifier() {
         return PermissionService.SUBJECTS_USER;
-    }
-
-    @Override
-    public User bridge$getUserObject() {
-        return this.impl$user;
-    }
-
-    @Override
-    public User bridge$getUser() {
-        return this.impl$user;
     }
 
     @Override
@@ -763,15 +749,6 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             corpse.inventory.clearContent();
         }
         return keep;
-    }
-
-    private User impl$getUserObjectOnConstruction() {
-        final SpongeUserManager manager = (SpongeUserManager) SpongeCommon.game().server().userManager();
-        if (this.impl$isFake) {
-            return manager.findOrCreate(SpongeUserManager.FAKEPLAYER_PROFILE);
-        }
-        // Ensure that the game profile is up to date.
-        return manager.forceRecreateUser(SpongeGameProfile.of(this.shadow$getGameProfile()));
     }
 
     @Inject(method = "restoreFrom", at = @At("HEAD"))

@@ -71,7 +71,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     protected static void processEntities(final net.minecraft.server.level.ServerPlayer player, final Collection<Entity> entities) {
         for (final Entity entity : entities) {
-            EntityUtil.processEntitySpawn(entity, () -> Optional.of(((ServerPlayer)player).user()), e -> e.level.addFreshEntity(e));
+            EntityUtil.processEntitySpawn(entity, () -> Optional.of(((ServerPlayer) player).uniqueId()), e -> e.level.addFreshEntity(e));
         }
     }
 

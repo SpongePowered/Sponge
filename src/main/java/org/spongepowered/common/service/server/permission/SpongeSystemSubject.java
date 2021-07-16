@@ -46,7 +46,7 @@ public abstract class SpongeSystemSubject implements Subject, SystemSubject, Bri
     @Override
     public Optional<SubjectReference> bridge$resolveReferenceOptional() {
         if (this.impl$subjectReference == null) {
-            SubjectHelper.applySubject(this);
+            SubjectHelper.applySubject(this, PermissionService.SUBJECTS_SYSTEM);
         }
         return Optional.ofNullable(this.impl$subjectReference);
     }

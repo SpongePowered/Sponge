@@ -95,7 +95,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
         final BasicPacketContext context, final BlockChange blockChange,
         final BlockTransactionReceipt transaction
     ) {
-        TrackingUtil.associateTrackerToTarget(blockChange, transaction, ((ServerPlayer) context.getPacketPlayer()).user());
+        TrackingUtil.associateTrackerToTarget(blockChange, transaction, ((ServerPlayer) context.getPacketPlayer()).uniqueId());
     }
 
     @Override
@@ -108,7 +108,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
                 new SpongeLocatableBlockBuilder().world((ServerWorld) mixinWorldServer).position(pos.getX(), pos.getY(), pos.getZ()).state(state).build();
 
         blockEvent.bridge$setTickingLocatable(locatable);
-        blockEvent.bridge$setSourceUser(((ServerPlayer)player).user());
+        blockEvent.bridge$setSourceUserUUID(player.uniqueId());
     }
 
     @Override

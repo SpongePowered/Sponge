@@ -54,15 +54,5 @@ public interface CreatorTrackedBridge {
 
     Optional<UUID> tracked$getNotifierUUID();
 
-    Optional<User> tracked$getTrackedUser(PlayerTracker.Type type);
-
-    Optional<User> tracked$getCreatorReference();
-
-    void tracked$setCreatorReference(@Nullable User user);
-
-    Optional<User> tracked$getNotifierReference();
-
-    void tracked$setNotifier(@Nullable User user);
-
     void tracked$setTrackedUUID(PlayerTracker.Type type, @Nullable UUID uuid);
 }

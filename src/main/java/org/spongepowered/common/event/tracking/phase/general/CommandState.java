@@ -81,8 +81,8 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         // We have to check if there is a player, because command blocks can be triggered
         // without player interaction.
         // Fixes https://github.com/SpongePowered/SpongeForge/issues/2442
-        PhaseTracker.getCauseStackManager().currentCause().first(User.class).ifPresent(user -> {
-            TrackingUtil.associateTrackerToTarget(blockChange, transaction, user);
+        PhaseTracker.getCauseStackManager().currentCause().first(Player.class).ifPresent(user -> {
+            TrackingUtil.associateTrackerToTarget(blockChange, transaction, user.uniqueId());
         });
    }
 
@@ -91,7 +91,7 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
         final BlockPos notifyPos, final ServerLevel minecraftWorld, final PlayerTracker.Type notifier) {
         context.getSource(Player.class)
             .ifPresent(player -> ((LevelChunkBridge) minecraftWorld.getChunkAt(notifyPos))
-                .bridge$addTrackedBlockPosition(block, notifyPos, ((ServerPlayer) player).user(), PlayerTracker.Type.NOTIFIER));
+                .bridge$addTrackedBlockPosition(block, notifyPos, player.uniqueId(), PlayerTracker.Type.NOTIFIER));
     }
 
     @Override
