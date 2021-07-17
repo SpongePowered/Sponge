@@ -750,7 +750,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.shadow$getCombatTracker().recheckStatus();
     }
 
-    @Redirect(method = "restoreFrom",
+    @Redirect(method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"))
     private boolean tracker$useKeepFromBridge(final GameRules gameRules, final GameRules.Key<?> key,
@@ -774,7 +774,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         return manager.forceRecreateUser(SpongeGameProfile.of(this.shadow$getGameProfile()));
     }
 
-    @Inject(method = "restoreFrom", at = @At("HEAD"))
+    @Inject(method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V", at = @At("HEAD"))
     private void impl$copyDataOnRespawn(final net.minecraft.server.level.ServerPlayer oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
         // Copy Sponge data
         if (oldPlayer instanceof DataCompoundHolder) {
