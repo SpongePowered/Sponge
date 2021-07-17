@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.server.level.ServerLevel;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -32,8 +33,9 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
 import java.lang.ref.WeakReference;
+import java.util.Objects;
 import java.util.function.BiConsumer;
-import net.minecraft.server.level.ServerLevel;
+import java.util.function.Supplier;
 
 final class WorldTickState extends TickPhaseState<WorldTickState.WorldTickContext> {
 
@@ -59,6 +61,13 @@ final class WorldTickState extends TickPhaseState<WorldTickState.WorldTickContex
     @Override
     public void unwind(final WorldTickContext phaseContext) {
         TrackingUtil.processBlockCaptures(phaseContext);
+    }
+
+    @Override
+    public Supplier<ServerLevel> attemptWorldKey(
+        final WorldTickContext context
+    ) {
+        return () -> Objects.requireNonNull(context.serverWorld.get(), "ServerWorld reference lost during tick");
     }
 
     public static class WorldTickContext extends TickContext<WorldTickContext> {

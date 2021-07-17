@@ -27,10 +27,12 @@ package org.spongepowered.common.event.tracking.phase.tick;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
@@ -39,9 +41,11 @@ import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
+import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>> extends TickPhaseState<T> {
 
@@ -95,6 +99,17 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     ) {
         final LocatableBlock source = this.getLocatableBlockSourceFromContext(context);
         blockEvent.bridge$setTickingLocatable(source);
+    }
+
+    @Override
+    public Supplier<ServerLevel> attemptWorldKey(final T context) {
+        return MemoizedSupplier.memoize(() -> {
+            final World<@NonNull ?, @NonNull ?> world = this.getLocatableBlockSourceFromContext(context).world();
+            if (!(world instanceof ServerLevel)) {
+                throw new IllegalStateException("Attempting a world key on a non-server world!");
+            }
+            return (ServerLevel) world;
+        });
     }
 
 
