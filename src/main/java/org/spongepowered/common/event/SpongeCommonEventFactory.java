@@ -688,63 +688,6 @@ public final class SpongeCommonEventFactory {
         }
     }
 
-    public static InteractContainerEvent.Close callInteractInventoryCloseEvent(final AbstractContainerMenu container, final net.minecraft.server.level.ServerPlayer player,
-            final ItemStackSnapshot lastCursor, final ItemStackSnapshot newCursor, final boolean clientSource) {
-        final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-        final InteractContainerEvent.Close event =
-                SpongeEventFactory.createInteractContainerEventClose(PhaseTracker.getCauseStackManager().currentCause(), ContainerUtil.fromNative(container), cursorTransaction);
-        SpongeCommon.post(event);
-        if (event.isCancelled()) {
-            if (clientSource && container.getSlot(0) != null) {
-                if (!(container instanceof InventoryMenu)) {
-                    // Inventory closed by client, reopen window and send container
-                    player.containerMenu = container;
-                    final Slot slot = container.getSlot(0);
-                    final Container slotInventory = slot.container;
-                    final net.minecraft.network.chat.Component title;
-                    // TODO get name from last open
-                    if (slotInventory instanceof MenuProvider) {
-                        title = ((MenuProvider) slotInventory).getDisplayName();
-                    } else {
-                        // expected fallback for unknown types
-                        title = null;
-                    }
-                    slotInventory.startOpen(player);
-                    player.connection.send(new ClientboundOpenScreenPacket(container.containerId, container.getType(), title));
-                    // resync data to client
-                    player.refreshContainer(container);
-                } else {
-                    // TODO: Maybe print a warning or throw an exception here?
-                    // The player gui cannot be opened from the
-                    // server so allowing this event to be cancellable when the
-                    // GUI has been closed already would result
-                    // in opening the wrong GUI window.
-                }
-            }
-            // Handle cursor
-            if (!event.cursorTransaction().isValid()) {
-                handleCustomCursor(player, event.cursorTransaction().original());
-            }
-        } else {
-            // TODO - log a transaction for container close.
-//
-//            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.containerMenu;
-//            mixinContainer.bridge$getCapturedSlotTransactions().clear();
-//            mixinContainer.bridge$setCaptureInventory(false);
-            // Handle cursor
-            if (!event.cursorTransaction().isValid()) {
-                handleCustomCursor(player, event.cursorTransaction().original());
-            } else if (event.cursorTransaction().custom().isPresent()) {
-                handleCustomCursor(player, event.cursorTransaction().finalReplacement());
-            }
-            if (!clientSource && player.containerMenu != null && player.connection != null) {
-                player.closeContainer();
-            }
-        }
-
-        return event;
-    }
-
     public static SetAITargetEvent callSetAttackTargetEvent(final @Nullable Entity target, final Agent agent) {
         final SetAITargetEvent event = SpongeEventFactory.createSetAITargetEvent(PhaseTracker.getCauseStackManager().currentCause(), agent, Optional.ofNullable(target));
         SpongeCommon.post(event);

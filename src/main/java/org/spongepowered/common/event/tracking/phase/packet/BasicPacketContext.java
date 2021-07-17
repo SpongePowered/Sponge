@@ -24,29 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import static com.google.common.base.Preconditions.checkNotNull;
-
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.util.PrettyPrinter;
-
-import net.minecraft.world.inventory.AbstractContainerMenu;
 
 public class BasicPacketContext extends PacketContext<BasicPacketContext> {
 
-    private @Nullable AbstractContainerMenu container;
-
     public BasicPacketContext(final PacketState<BasicPacketContext> state, final PhaseTracker tracker) {
         super(state, tracker);
-    }
-
-    public BasicPacketContext openContainer(final AbstractContainerMenu openContainer) {
-        this.container = openContainer;
-        return this;
-    }
-
-    public AbstractContainerMenu getOpenContainer() {
-        return checkNotNull(this.container, "Open Container was null!");
     }
 
     @SuppressWarnings("unchecked")
@@ -60,19 +43,5 @@ public class BasicPacketContext extends PacketContext<BasicPacketContext> {
         }
 
         return super.hasCaptures();
-    }
-
-    @Override
-    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
-        final String s = String.format("%1$"+indent+"s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "OpenContainer", this.container)
-            ;
-    }
-
-    @Override
-    protected void reset() {
-        super.reset();
-        this.container = null;
     }
 }

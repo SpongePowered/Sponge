@@ -26,15 +26,12 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import net.minecraft.server.level.ServerLevel;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
 
-import java.util.Collections;
-import java.util.List;
 import java.util.Optional;
 import java.util.function.Supplier;
 
@@ -50,11 +47,6 @@ public class InventorySlotTransaction extends InventoryBasedTransaction {
     @Override
     Optional<SlotTransaction> getSlotTransaction() {
         return Optional.of(this.newTransaction);
-    }
-
-    @Override
-    List<Entity> getEntitiesSpawned() {
-        return Collections.emptyList();
     }
 
     @Override

@@ -26,7 +26,6 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -40,8 +39,7 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
 
     @Override
     public ChangeInventoryEvent.SwapHand createInventoryEvent(InventoryPacketContext context, Cause cause,
-            Inventory inventory, List<SlotTransaction> slotTransactions,
-            List<Entity> capturedEntities) {
+            Inventory inventory, List<SlotTransaction> slotTransactions) {
         return SpongeEventFactory.createChangeInventoryEventSwapHand(cause, inventory, slotTransactions);
     }
 

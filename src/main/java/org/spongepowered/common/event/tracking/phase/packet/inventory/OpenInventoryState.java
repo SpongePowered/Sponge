@@ -24,40 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.server.level.ServerPlayer;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.inventory.util.ContainerUtil;
-import org.spongepowered.common.item.util.ItemStackUtil;
-
 public final class OpenInventoryState extends BasicInventoryPacketState {
 
-    @Override
-    public void unwind(InventoryPacketContext context) {
-        final ServerPlayer player = context.getPacketPlayer();
-        final ItemStackSnapshot lastCursor = context.getCursor();
-        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
-        final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(lastCursor, newCursor);
-        final InteractContainerEvent.Open event =
-            SpongeEventFactory.createInteractContainerEventOpen(frame.currentCause(), ContainerUtil.fromNative(player.containerMenu),
-                    cursorTransaction);
-        SpongeCommon.post(event);
-        if (event.isCancelled()) {
-            player.closeContainer();
-        } else {
-            // Custom cursor
-            final Transaction<ItemStackSnapshot> transaction = event.cursorTransaction();
-            if (!transaction.isValid()) {
-                PacketPhaseUtil.handleCustomCursor(player, transaction.original());
-            } else if (transaction.custom().isPresent()) {
-                PacketPhaseUtil.handleCustomCursor(player, transaction.finalReplacement());
-            }
-        }
-    }
 }

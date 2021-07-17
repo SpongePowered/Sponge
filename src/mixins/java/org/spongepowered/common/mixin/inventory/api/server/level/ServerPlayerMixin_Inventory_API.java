@@ -25,26 +25,19 @@
 package org.spongepowered.common.mixin.inventory.api.server.level;
 
 import net.kyori.adventure.text.Component;
+import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContextKey;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.scheduler.Task;
-import org.spongepowered.api.util.Ticks;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.mixin.inventory.api.world.entity.player.PlayerMixin_Inventory_API;
+
 import java.util.Optional;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
@@ -65,17 +58,7 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
     public Optional<Container> openInventory(final Inventory inventory, final Component displayName) {
         final ContainerBridge openContainer = (ContainerBridge) this.containerMenu;
         if (openContainer.bridge$isInUse()) {
-            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-            SpongeCommon.logger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Task.builder().delay(Ticks.zero()).execute(() -> {
-                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    cause.all().forEach(frame::pushCause);
-                    cause.context().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
-                    this.closeInventory(); // Cause close event first. So cursor item is not lost.
-                    this.openInventory(inventory); // Then open the inventory
-                }
-            }).plugin(Launch.instance().commonPlugin()).build();
-            return this.openInventory();
+            throw new UnsupportedOperationException("This player is currently modifying an open container. Opening a new one must be delayed!");
         }
         return Optional.ofNullable((Container) InventoryEventFactory.displayContainer((net.minecraft.server.level.ServerPlayer) (Object) this, inventory, displayName));
     }
@@ -85,29 +68,23 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
     public boolean closeInventory() throws IllegalArgumentException {
         final net.minecraft.world.inventory.AbstractContainerMenu openContainer = this.containerMenu;
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
-            final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
-            SpongeCommon.logger().warn("This player is currently modifying an open container. This action will be delayed.");
-            Task.builder().delay(Ticks.zero()).execute(() -> {
-                try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-                    cause.all().forEach(frame::pushCause);
-                    cause.context().asMap().forEach((key, value) -> frame.addContext(((EventContextKey) key), value));
-                    this.closeInventory();
-                }
-            }).plugin(Launch.instance().commonPlugin()).build();
-            return false;
+            throw new UnsupportedOperationException("This player is currently modifying an open container. Closing it must be delayed!");
         }
+        final AbstractContainerMenu previousContainer = this.containerMenu;
         // Create Close_Window to capture item drops
+        final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
         try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext(PhaseTracker.SERVER)
                 .source(this)
-                .packetPlayer(((net.minecraft.server.level.ServerPlayer)(Object) this))
-                .openContainer(openContainer)
-                // intentionally missing the lastCursor to not double throw close event
+                .packetPlayer(player)
         ) {
             ctx.buildAndSwitch();
-            final net.minecraft.world.entity.player.Inventory inventory = this.inventory;
-            final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(inventory.getCarried());
-            return !SpongeCommonEventFactory.callInteractInventoryCloseEvent(openContainer, (net.minecraft.server.level.ServerPlayer) (Object) this, cursor, cursor, false).isCancelled();
+            try (final EffectTransactor ignored = ctx.getTransactor().logCloseInventory(player, true)) {
+                this.containerMenu.removed(player); // Drop & capture cursor item
+            }
         }
+        // TODO how to check if event was cancelled if not calling directly?
+        // This will NOT work for the players inventory:
+        return previousContainer != this.containerMenu;
     }
 
 }

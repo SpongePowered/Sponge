@@ -279,7 +279,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     public EffectTransactor logPlayerInventoryChange(final Player player) {
         final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
     }
 
     public EffectTransactor logCreativeClickContainer(final int slotNum, final ItemStackSnapshot creativeStack, final Player player) {
@@ -292,6 +292,18 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final DropFromPlayerInventoryTransaction transaction = new DropFromPlayerInventoryTransaction(player, dropAll);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+    }
+
+    public EffectTransactor logOpenInventory(final Player player) {
+        final OpenMenuTransaction transaction = new OpenMenuTransaction(player);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
+    }
+
+    public EffectTransactor logCloseInventory(final Player player, final boolean clientSource) {
+        final CloseMenuTransaction transaction = new CloseMenuTransaction(player, clientSource);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
     }
 
     public EffectTransactor logPlaceRecipe(boolean shift, Recipe<?> recipe, ServerPlayer player, Inventory craftInv) {

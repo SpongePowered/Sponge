@@ -29,7 +29,6 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.inventory.Slot;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -54,7 +53,7 @@ public final class SwitchHotbarScrollState extends BasicInventoryPacketState {
 
     @Override
     public ChangeInventoryEvent createInventoryEvent(final InventoryPacketContext context, final Cause cause, final Inventory inventory,
-            final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities) {
+            final List<SlotTransaction> slotTransactions) {
         final ServerPlayer player = context.getPacketPlayer();
         final ServerboundSetCarriedItemPacket itemChange = context.getPacket();
 

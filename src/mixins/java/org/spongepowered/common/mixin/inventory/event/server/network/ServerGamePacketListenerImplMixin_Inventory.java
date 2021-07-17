@@ -28,22 +28,17 @@ import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -52,18 +47,12 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
-
-import java.util.List;
-import java.util.Optional;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public class ServerGamePacketListenerImplMixin_Inventory {
@@ -79,7 +68,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
 
         // TODO handle vanilla sending a bunch of creative events (previously ignoring events within 100ms)
         try (final EffectTransactor ignored = transactor.logCreativeClickContainer(packetIn.getSlotNum(),
-                ItemStackUtil.snapshotOf(itemstack), player)) {
+                ItemStackUtil.snapshotOf(itemstack), this.player)) {
             ((TrackedContainerBridge) this.player.containerMenu).bridge$detectAndSendChanges(true); // capture changes
         }
 
@@ -92,9 +81,30 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;drop(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/world/entity/item/ItemEntity;"))
     private ItemEntity impl$onBroadcastCreativeActionResult(final ServerPlayer serverPlayer, final ItemStack param0, final boolean param1) {
         // TODO creative drop is not handled - maybe this needs a new sub-event in API?
-//        return serverPlayer.drop(param0, param1);
+        return serverPlayer.drop(param0, param1);
     }
 
+    @Redirect(method = "handlePlayerCommand",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;openInventory(Lnet/minecraft/world/entity/player/Player;)V"))
+    private void impl$onHandlePlayerCommandOpenInventory(final AbstractHorse abstractHorse, final Player player) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (final EffectTransactor ignored = transactor.logOpenInventory(player)) {
+            abstractHorse.openInventory(player);
+        }
+        // TrackingUtil.processBlockCaptures called by OpenInventoryState
+    }
+
+    @Redirect(method = "handleContainerClose",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;doCloseContainer()V"))
+    private void impl$onHandleContainerClose(final ServerPlayer player) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (final EffectTransactor ignored = transactor.logCloseInventory(player, true)) {
+            this.player.doCloseContainer();
+        }
+        // TrackingUtil.processBlockCaptures called by CloseWindowState
+    }
 
     @Redirect(method = "handlePlaceRecipe",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))

@@ -329,7 +329,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
     }
 
     default @Nullable ChangeInventoryEvent createInventoryEvent(final Cause cause, final Inventory inventory,
-            final List<SlotTransaction> slotTransactions, final List<org.spongepowered.api.entity.Entity> capturedEntities) {
-        return this.getState().createInventoryEvent(this.asContext(), cause, inventory, slotTransactions, capturedEntities);
+            final List<SlotTransaction> slotTransactions) {
+        return this.getState().createInventoryEvent(this.asContext(), cause, inventory, slotTransactions);
     }
 }

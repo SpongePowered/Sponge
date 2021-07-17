@@ -107,12 +107,11 @@ public class PlayerEntityMixin_Inventory {
             try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext(PhaseTracker.SERVER)
                     .source(serverPlayer)
                     .packetPlayer(serverPlayer)
-                    .openContainer(container)) {
-                // intentionally missing the lastCursor to not double throw close event
+            ) {
                 ctx.buildAndSwitch();
-                final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(this.inventory.getCarried());
-                container.removed(player);
-                SpongeCommonEventFactory.callInteractInventoryCloseEvent(this.containerMenu, serverPlayer, cursor, ItemStackSnapshot.empty(), false);
+                try (final EffectTransactor ignored = ctx.getTransactor().logCloseInventory(player, true)) {
+                    container.removed(player); // Drop & capture cursor item
+                }
             }
         } else {
             // Proceed as normal with client code

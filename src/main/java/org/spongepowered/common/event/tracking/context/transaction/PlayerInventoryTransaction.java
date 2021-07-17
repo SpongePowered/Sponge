@@ -24,13 +24,11 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import com.google.common.collect.ImmutableList;
 import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -54,13 +52,10 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
     }
 
     @Override
-    Optional<ChangeInventoryEvent> createInventoryEvent(
-        final List<SlotTransaction> slotTransactions, final ImmutableList<Entity> entities,
-        final PhaseContext<@NonNull ?> context,
-        final Cause cause
-    ) {
+    Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions, final PhaseContext<@NonNull ?> context,
+            final Cause cause) {
         // TODO handle event creation for item pickup (see ItemEntityMixin_Inventory)
-        @Nullable final ChangeInventoryEvent event = context.createInventoryEvent(cause, this.inventory, slotTransactions, entities);
+        @Nullable final ChangeInventoryEvent event = context.createInventoryEvent(cause, this.inventory, slotTransactions);
         return Optional.ofNullable(event);
     }
 
@@ -85,10 +80,4 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
     Optional<SlotTransaction> getSlotTransaction() {
         return Optional.empty();
     }
-
-    @Override
-    List<Entity> getEntitiesSpawned() {
-        return this.sideEffects != null ? this.sideEffects.stream().flatMap(e -> e.stream());
-    }
-
 }

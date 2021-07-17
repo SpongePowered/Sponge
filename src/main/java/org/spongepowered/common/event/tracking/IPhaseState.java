@@ -422,7 +422,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default @Nullable ChangeInventoryEvent createInventoryEvent(final C context, final Cause cause, final Inventory inventory,
-            final List<SlotTransaction> slotTransactions, final List<org.spongepowered.api.entity.Entity> capturedEntities
+            final List<SlotTransaction> slotTransactions
     ) {
         return null;
     }

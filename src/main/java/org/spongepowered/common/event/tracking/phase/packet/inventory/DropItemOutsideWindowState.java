@@ -24,28 +24,21 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.util.Constants;
 
-import net.minecraft.network.protocol.Packet;
 import java.util.List;
 import java.util.Optional;
 
@@ -63,7 +56,7 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
 
     @Override
     public ClickContainerEvent createContainerEvent(
-            final InventoryPacketContext ctx, final Cause cause, final net.minecraft.server.level.ServerPlayer serverPlayer,
+            final InventoryPacketContext ctx, final Cause cause, final ServerPlayer serverPlayer,
             final Container openContainer,
             final Transaction<ItemStackSnapshot> transaction,
             final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton,

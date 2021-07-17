@@ -74,11 +74,6 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
             .filter(tx -> tx instanceof InventoryBasedTransaction)
             .map(tx -> (InventoryBasedTransaction) tx).collect(ImmutableList.toImmutableList());
 
-        final ImmutableList<Entity> entities = containerBasedTransactions.stream()
-            .map(InventoryBasedTransaction::getEntitiesSpawned)
-            .flatMap(List::stream)
-            .collect(ImmutableList.toImmutableList());
-
         final List<SlotTransaction> slotTransactions = containerBasedTransactions
             .stream()
             .map(InventoryBasedTransaction::getSlotTransaction)
@@ -87,7 +82,7 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
             .collect(Collectors.toList());
 
         return containerBasedTransactions.stream()
-            .map(t -> t.createInventoryEvent(slotTransactions, entities, context, currentCause))
+            .map(t -> t.createInventoryEvent(slotTransactions, context, currentCause))
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst();
@@ -95,11 +90,8 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
 
     abstract Optional<SlotTransaction> getSlotTransaction();
 
-    abstract List<Entity> getEntitiesSpawned();
-
     Optional<ChangeInventoryEvent> createInventoryEvent(
         final List<SlotTransaction> slotTransactions,
-        final ImmutableList<Entity> entities,
         final PhaseContext<@NonNull ?> context,
         final Cause currentCause
     ) {
