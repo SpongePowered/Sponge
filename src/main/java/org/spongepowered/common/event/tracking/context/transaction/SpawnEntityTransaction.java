@@ -33,6 +33,7 @@ import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -154,12 +155,12 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
         Stream.of(
             context.getNotifier(),
             context.getCreator(),
-            context.getSource(ServerPlayer.class).map(ServerPlayer::user)
+            context.getSource(ServerPlayer.class).map(ServerPlayer::uniqueId)
         )
             .filter(Optional::isPresent)
             .map(Optional::get)
             .findFirst()
-            .ifPresent(creator -> event.entities().forEach(entity -> ((CreatorTrackedBridge) entity).tracked$setCreatorReference(creator)));
+            .ifPresent(creator -> event.entities().forEach(entity -> ((CreatorTrackedBridge) entity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, creator)));
     }
 
     @Override

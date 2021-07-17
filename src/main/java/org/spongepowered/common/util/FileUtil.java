@@ -22,34 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.entity.player;
+package org.spongepowered.common.util;
 
-import net.minecraft.world.inventory.PlayerEnderChestContainer;
-import net.minecraft.world.item.ItemStack;
+import org.spongepowered.common.SpongeCommon;
 
-public class SpongeUserInventoryEnderchest extends PlayerEnderChestContainer {
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 
-    private final SpongeUserData user;
+public final class FileUtil {
 
-    public SpongeUserInventoryEnderchest(final SpongeUserData user) {
-        this.user = user;
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-hhmmss").withZone(ZoneId.systemDefault());
+
+    public static void copyCorruptedFile(final File file) {
+        FileUtil.copyCorruptedFile(file.toPath());
     }
 
-    @Override
-    public ItemStack removeItemNoUpdate(final int index) {
-        this.user.markDirty();
-        return super.removeItemNoUpdate(index);
+    public static void copyCorruptedFile(final Path path) {
+        final Path corruptPath =
+                path.resolveSibling(path.getFileName().toString() + ".corrupted_" + FileUtil.FORMATTER.format(Instant.now()));
+        try {
+            Files.copy(path, corruptPath);
+            SpongeCommon.logger().info("Copied corrupted file {} to {}.", path.toAbsolutePath().toString(), corruptPath.toAbsolutePath().toString());
+        } catch (final IOException exception) {
+            SpongeCommon.logger().error("Failed to copy corrupted file {} to {}.", path.toAbsolutePath().toString(),
+                    corruptPath.toAbsolutePath().toString(), exception);
+        }
     }
 
-    @Override
-    public ItemStack removeItem(final int index, final int count) {
-        this.user.markDirty();
-        return super.removeItem(index, count);
+    private FileUtil() {
     }
 
-    @Override
-    public void setItem(final int index, final ItemStack stack) {
-        this.user.markDirty();
-        super.setItem(index, stack);
-    }
 }

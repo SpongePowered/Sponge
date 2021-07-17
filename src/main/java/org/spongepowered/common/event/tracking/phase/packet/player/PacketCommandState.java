@@ -28,6 +28,7 @@ import com.google.common.collect.ImmutableList;
 import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -77,8 +78,8 @@ public final class PacketCommandState extends PacketState<PlayerCommandPhaseCont
         // We have to check if there is a player, because command blocks can be triggered
         // without player interaction.
         // Fixes https://github.com/SpongePowered/SpongeForge/issues/2442
-        PhaseTracker.getCauseStackManager().currentCause().first(User.class).ifPresent(user -> {
-            TrackingUtil.associateTrackerToTarget(blockChange, transaction, user);
+        PhaseTracker.getCauseStackManager().currentCause().first(Player.class).ifPresent(user -> {
+            TrackingUtil.associateTrackerToTarget(blockChange, transaction, user.uniqueId());
         });
    }
 

@@ -140,11 +140,6 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
         this.impl$canSave = flag;
     }
 
-    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/GameProfileCache;load()Ljava/util/List;"))
-    private List<?> impl$callLoadAfterServerCreated(final GameProfileCache playerProfileCache) {
-        return Collections.emptyList();
-    }
-
     @Inject(method = "add", at = @At(value = "RETURN"))
     private void impl$updateCacheUsername(final com.mojang.authlib.GameProfile profile, final CallbackInfo ci) {
         if (profile.getName() != null) {
@@ -174,7 +169,7 @@ public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
     }
 
     @Inject(method = "save", at = @At("HEAD"), cancellable = true)
-    private void impl$IgnoreSavingIfCancelled(final CallbackInfo ci) {
+    private void impl$ignoreSavingIfCancelled(final CallbackInfo ci) {
         if (!this.impl$canSave) {
             ci.cancel();
         }

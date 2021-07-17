@@ -153,11 +153,13 @@ public final class SpongeBanService implements BanService {
             return CompletableFuture.completedFuture(false);
         }
         if (ban.type().equals(BanTypes.PROFILE.get())) {
-            final User user = Sponge.server().userManager().findOrCreate(((Ban.Profile) ban).profile());
-            Sponge.eventManager().post(SpongeEventFactory.createPardonUserEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.Profile) ban, user));
+            return Sponge.server().userManager().loadOrCreate(((Ban.Profile) ban).profile().uuid())
+                    .thenApplyAsync(user -> {
+                        Sponge.eventManager().post(SpongeEventFactory.createPardonUserEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.Profile) ban, user));
 
-            UserListUtil.removeEntry(this.getUserBanList(), SpongeGameProfile.toMcProfile(((Ban.Profile) ban).profile()));
-            return CompletableFuture.completedFuture(true);
+                        UserListUtil.removeEntry(this.getUserBanList(), SpongeGameProfile.toMcProfile(((Ban.Profile) ban).profile()));
+                        return true;
+                    }, SpongeCommon.server());
         } else if (ban.type().equals(BanTypes.IP.get())) {
             Sponge.eventManager().post(SpongeEventFactory.createPardonIpEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.IP) ban));
 
@@ -174,10 +176,11 @@ public final class SpongeBanService implements BanService {
 
         if (ban.type().equals(BanTypes.PROFILE.get())) {
 
-            final User user = Sponge.server().userManager().findOrCreate(((Ban.Profile) ban).profile());
-            Sponge.eventManager().post(SpongeEventFactory.createBanUserEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.Profile) ban, user));
-
-            prevBan = (Ban) UserListUtil.addEntry(this.getUserBanList(), (StoredUserEntry<?>) ban);
+            return Sponge.server().userManager().loadOrCreate(((Ban.Profile) ban).profile().uuid())
+                    .thenApplyAsync(user -> {
+                        Sponge.eventManager().post(SpongeEventFactory.createBanUserEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.Profile) ban, user));
+                        return Optional.ofNullable((Ban) UserListUtil.addEntry(this.getUserBanList(), (StoredUserEntry<?>) ban));
+                    }, SpongeCommon.server());
         } else if (ban.type().equals(BanTypes.IP.get())) {
 
             Sponge.eventManager().post(SpongeEventFactory.createBanIpEvent(PhaseTracker.getCauseStackManager().currentCause(), (Ban.IP) ban));

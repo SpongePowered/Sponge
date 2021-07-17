@@ -27,6 +27,7 @@ package org.spongepowered.common;
 import org.spongepowered.api.Server;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.common.scheduler.ServerScheduler;
+import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.UsernameCache;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.common.world.storage.SpongePlayerDataManager;
@@ -42,6 +43,8 @@ public interface SpongeServer extends SpongeEngine, Server {
     SpongePlayerDataManager getPlayerDataManager();
 
     UsernameCache getUsernameCache();
+
+    SpongeUserManager userManager();
 
     @Override
     SpongeCommandManager commandManager();

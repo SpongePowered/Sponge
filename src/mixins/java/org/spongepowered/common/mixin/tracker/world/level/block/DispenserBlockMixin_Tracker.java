@@ -68,8 +68,8 @@ public class DispenserBlockMixin_Tracker {
         final LevelChunkBridge mixinChunk = (LevelChunkBridge) worldIn.getChunkAt(pos);
         this.tracker$context = BlockPhase.State.DISPENSE.createPhaseContext(PhaseTracker.SERVER)
                 .source(spongeBlockSnapshot)
-                .creator(() -> mixinChunk.bridge$getBlockCreator(pos))
-                .notifier(() -> mixinChunk.bridge$getBlockNotifier(pos))
+                .creator(() -> mixinChunk.bridge$getBlockCreatorUUID(pos))
+                .notifier(() -> mixinChunk.bridge$getBlockNotifierUUID(pos))
                 .buildAndSwitch();
     }
 

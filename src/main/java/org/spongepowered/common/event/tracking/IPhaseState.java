@@ -204,7 +204,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this state will ignore {@link net.minecraft.world.level.Level#addBlockEvent(BlockPos, Block, int, int)}
+     * Gets whether this state will ignore {@link net.minecraft.world.level.Level#blockEvent(BlockPos, Block, int, int)}
      * additions when potentially performing notification updates etc. Usually true for world generation.
      *
      * @return False if block events are to be processed in some way by the state
@@ -265,8 +265,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         final LevelChunk chunk = world.getChunkAt(pos);
         final LevelChunkBridge mixinChunk = (LevelChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
-            mixinChunk.bridge$getBlockCreator(pos).ifPresent(phaseContext::creator);
-            mixinChunk.bridge$getBlockNotifier(pos).ifPresent(phaseContext::notifier);
+            mixinChunk.bridge$getBlockCreatorUUID(pos).ifPresent(phaseContext::creator);
+            mixinChunk.bridge$getBlockNotifierUUID(pos).ifPresent(phaseContext::notifier);
         }
     }
 

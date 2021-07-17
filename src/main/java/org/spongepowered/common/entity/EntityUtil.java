@@ -26,6 +26,7 @@ package org.spongepowered.common.entity;
 
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
@@ -56,6 +57,7 @@ import net.minecraft.world.level.storage.LevelData;
 
 import java.util.Optional;
 import java.util.Random;
+import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
 import java.util.function.Supplier;
@@ -63,9 +65,10 @@ import java.util.stream.Stream;
 
 public final class EntityUtil {
 
-    public static final Function<PhaseContext<?>, Supplier<Optional<User>>> ENTITY_CREATOR_FUNCTION = (context) ->
-        () -> Stream.<Supplier<Optional<User>>>builder()
-            .add(() -> context.getSource(User.class))
+    public static final Function<PhaseContext<?>, Supplier<Optional<UUID>>> ENTITY_CREATOR_FUNCTION = (context) ->
+        () -> Stream.<Supplier<Optional<UUID>>>builder()
+            .add(() -> context.getSource(ServerPlayer.class).map(Entity::getUUID))
+            .add(() -> context.getSource(User.class).map(Identifiable::uniqueId))
             .add(context::getNotifier)
             .add(context::getCreator)
             .build()
@@ -82,7 +85,7 @@ public final class EntityUtil {
         // Sponge Start - Send any platform dimension data
         ((ServerPlayerBridge) player).bridge$sendDimensionData(player.connection.connection, toWorld.dimensionType(), toWorld.dimension());
         // Sponge End
-        LevelData worldinfo = toWorld.getLevelData();
+        final LevelData worldinfo = toWorld.getLevelData();
         // We send dimension change for portals before loading chunks
         if (!isPortal) {
             // Sponge Start - Allow the platform to handle how dimension changes are sent down
@@ -140,7 +143,7 @@ public final class EntityUtil {
         // Sponge End
     }
 
-    public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<User>> entityCreatorSupplier) {
+    public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<UUID>> entityCreatorSupplier) {
         boolean spawnedAny = false;
         for (final org.spongepowered.api.entity.Entity entity : event.entities()) {
             // Here is where we need to handle the custom items potentially having custom entities
@@ -153,7 +156,7 @@ public final class EntityUtil {
         return EntityUtil.processEntitySpawnsFromEvent(destruct, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
     }
 
-    public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<User>> supplier, final Consumer<Entity> spawner) {
+    public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<UUID>> supplier, final Consumer<Entity> spawner) {
         final Entity minecraftEntity = (Entity) entity;
         if (minecraftEntity instanceof ItemEntity) {
             final ItemStack item = ((ItemEntity) minecraftEntity).getItem();
@@ -165,7 +168,7 @@ public final class EntityUtil {
                     supplier.get()
                         .ifPresent(spawned -> {
                             if (entityToSpawn instanceof CreatorTrackedBridge) {
-                                ((CreatorTrackedBridge) entityToSpawn).tracked$setCreatorReference(spawned);
+                                ((CreatorTrackedBridge) entityToSpawn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, spawned);
                             }
                         });
                     if (entityToSpawn.removed) {
@@ -221,7 +224,7 @@ public final class EntityUtil {
     }
 
 
-    public static boolean isUntargetable(Entity from, Entity target) {
+    public static boolean isUntargetable(final Entity from, final Entity target) {
         if (((VanishableBridge) target).bridge$isVanished() && ((VanishableBridge) target).bridge$isVanishPreventsTargeting()) {
             return true;
         }

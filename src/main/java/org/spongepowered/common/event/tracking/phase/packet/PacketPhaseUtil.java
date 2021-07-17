@@ -241,8 +241,8 @@ public final class PacketPhaseUtil {
                             .cursor(cursor);
 
                         PacketPhase.getInstance().populateContext(packetIn, packetPlayer, packetState, context);
-                        context.creator(((ServerPlayer) packetPlayer).user());
-                        context.notifier(((ServerPlayer) packetPlayer).user());
+                        context.creator(((ServerPlayer) packetPlayer).uniqueId());
+                        context.notifier(((ServerPlayer) packetPlayer).uniqueId());
                     }
                     try (final PhaseContext<?> packetContext = context) {
                         packetContext.buildAndSwitch();

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.world.level.storage;
 
+import net.minecraft.nbt.NbtIo;
 import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
@@ -34,6 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeServer;
@@ -47,6 +49,7 @@ import java.time.Instant;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.storage.PlayerDataStorage;
+import org.spongepowered.common.util.FileUtil;
 
 @Mixin(PlayerDataStorage.class)
 public abstract class PlayerDataStorageMixin {
@@ -63,6 +66,25 @@ public abstract class PlayerDataStorageMixin {
         final Path file = new File(this.playerDir, playerEntity.getStringUUID() + ".dat").toPath();
         final Instant creationTime = Files.exists(file) ? Files.readAttributes(file, BasicFileAttributes.class).creationTime().toInstant() : null;
         ((SpongeServer) SpongeCommon.server()).getPlayerDataManager().readPlayerData(compound, null, creationTime);
+    }
+
+    @Redirect(method = "load", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/NbtIo;readCompressed(Ljava/io/File;)Lnet/minecraft/nbt/CompoundTag;"))
+    private CompoundTag impl$wrapFileRead(final File param0) throws IOException {
+        try {
+            return NbtIo.readCompressed(param0);
+        } catch (final IOException exception) {
+            FileUtil.copyCorruptedFile(param0);
+            // handled below.
+            throw exception;
+        }
+    }
+
+    @Inject(method = "load",
+            at = @At(value = "INVOKE", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;Ljava/lang/Object;)V", shift = At.Shift.AFTER),
+            locals = LocalCapture.CAPTURE_FAILHARD
+    )
+    private void impl$onFailedLoad(final Player param0, final CallbackInfoReturnable<CompoundTag> cir, final CompoundTag tag, final Exception exception) {
+        throw new RuntimeException(exception);
     }
 
     @Inject(method = "save",
