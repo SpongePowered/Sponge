@@ -56,6 +56,7 @@ public class OptimizationPlugin extends AbstractMixinConfigPlugin {
             .put("org.spongepowered.common.mixin.optimization.general.DataFixersMixin_Optimization_LazyDFU", optimizationCategory -> optimizationCategory.enableLazyDFU)
             .put("org.spongepowered.common.mixin.optimization.entity.EntityMixin_Optimization_Collision", optimizationCategory -> optimizationCategory.useActiveChunksForCollisions)
             .put("org.spongepowered.common.mixin.optimization.world.entity.TamableAnimalMixin_Optimization_Owner", optimizationCategory -> optimizationCategory.cacheTameableOwners)
+            .put("org.spongepowered.common.mixin.optimization.world.level.block.entity.BellBlockEntityMixin_Optimization_BellLeak", optimizationCategory -> optimizationCategory.bellLeak)
 // TODO investigate what is still relevant and add them back
 //            .put("org.spongepowered.common.mixin.optimization.SpongeImplHooksMixin_Item_Pre_Merge",
 //                    optimizationCategory -> optimizationCategory.dropsPreMerge)

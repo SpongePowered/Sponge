@@ -198,6 +198,7 @@
         "world.level.block.entity.AbstractFurnaceBlockEntityMixin",
         "world.level.block.entity.BannerBlockEntityMixin",
         "world.level.block.entity.BaseContainerBlockEntityMixin",
+        "world.level.block.entity.BellBLockEntityMixin",
         "world.level.block.entity.BlockEntityMixin",
         "world.level.block.entity.BrewingStandBlockEntityMixin",
         "world.level.block.entity.CampfireBlockEntityMixin",
