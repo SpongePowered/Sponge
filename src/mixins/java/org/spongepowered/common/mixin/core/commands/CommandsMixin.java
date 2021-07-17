@@ -121,7 +121,7 @@ public abstract class CommandsMixin implements CommandsBridge {
     @Redirect(method = "fillUsableCommands",
             slice = @Slice(
                     from = @At("HEAD"),
-                    to = @At(value = "INVOKE", target = "Ljava/util/Iterator;hasNext()Z")
+                    to = @At(value = "INVOKE", remap = false, target = "Ljava/util/Iterator;hasNext()Z")
             ),
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;getChildren()Ljava/util/Collection;", remap = false))
     private Collection<CommandNode<CommandSourceStack>> impl$handleHiddenChildrenAndEnsureUnsortedLoop(final CommandNode<CommandSourceStack> commandNode) {

@@ -339,7 +339,7 @@ public abstract class PrimaryLevelDataMixin implements WorldData, PrimaryLevelDa
         return (ServerLevelData) SpongeCommon.server().getLevel(Level.OVERWORLD).getLevelData();
     }
 
-    @Redirect(method = "setTagData", at = @At(value = "INVOKE", target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", ordinal = 0))
+    @Redirect(method = "setTagData", at = @At(value = "INVOKE", remap = false, target = "Lcom/mojang/serialization/Codec;encodeStart(Lcom/mojang/serialization/DynamicOps;Ljava/lang/Object;)Lcom/mojang/serialization/DataResult;", ordinal = 0))
     private DataResult<Object> impl$ignorePluginDimensionsWhenWritingWorldGenSettings(final Codec codec, final DynamicOps<Object> ops, final Object input) {
         WorldGenSettings dimensionGeneratorSettings = (WorldGenSettings) input;
         // Sub levels will have an empty dimensions registry so it is an easy toggle off

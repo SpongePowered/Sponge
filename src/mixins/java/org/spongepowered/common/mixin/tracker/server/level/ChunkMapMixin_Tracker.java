@@ -132,7 +132,7 @@ public abstract class ChunkMapMixin_Tracker {
     }
 
     @Inject(method = "*",
-        at = @At(value = "INVOKE", target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V", shift = At.Shift.BY, by = 2),
+        at = @At(value = "INVOKE", remap = false, target = "Ljava/util/List;forEach(Ljava/util/function/Consumer;)V", shift = At.Shift.BY, by = 2),
         slice = @Slice(
             from = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;runPostLoad()V")
         ),

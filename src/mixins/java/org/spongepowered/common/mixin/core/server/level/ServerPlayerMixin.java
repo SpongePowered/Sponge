@@ -622,7 +622,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getExitPortal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Z)Ljava/util/Optional;"),
                     to = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/server/level/ServerPlayer;level:Lnet/minecraft/world/level/Level;")
             ),
-            at = @At(value = "INVOKE", target = "Ljava/util/Optional;isPresent()Z"))
+            at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Optional;isPresent()Z"))
     private boolean impl$dontCreatePortalIfItsAlreadyBeenAttempted(final Optional<?> optional) {
         // This prevents a second attempt at a portal creation if the portal
         // creation attempt due to a reposition event failed (this would put it
