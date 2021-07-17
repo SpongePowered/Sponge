@@ -51,6 +51,9 @@ public final class OptimizationCategory {
     @Comment("Uses theosib's redstone algorithms to completely overhaul the way redstone works.")
     public final EigenRedstoneCategory eigenRedstone = new EigenRedstoneCategory();
 
+    @Setting(value = "bell-leak-fix")
+    private boolean bellLeak = true;
+
     @Setting("faster-thread-checks")
     @Comment("If 'true', allows for Sponge to make better assumptions on single threaded\n"
                + "operations with relation to various checks for server threaded operations.\n"
