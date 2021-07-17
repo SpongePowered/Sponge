@@ -83,7 +83,7 @@ import org.spongepowered.common.event.tracking.phase.packet.inventory.SecondaryI
 import org.spongepowered.common.event.tracking.phase.packet.inventory.SecondaryInventoryShiftClickState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.SwapHandItemsState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.SwitchHotbarNumberPressState;
-import org.spongepowered.common.event.tracking.phase.packet.inventory.SwitchHotbarScrollState;
+import org.spongepowered.common.event.tracking.phase.packet.inventory.SetCarriedItemState;
 import org.spongepowered.common.event.tracking.phase.packet.player.AnimationPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.AttackEntityPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.IgnoredPacketState;
@@ -168,7 +168,7 @@ public final class PacketPhase {
         static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_STOP = new SecondaryDragInventoryStopState();
         static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_STOP = new MiddleDragInventoryStopState();
 
-        public static final BasicInventoryPacketState SWITCH_HOTBAR_SCROLL = new SwitchHotbarScrollState();
+        public static final BasicInventoryPacketState SET_CARRIED_ITEM = new SetCarriedItemState();
         public static final BasicInventoryPacketState OPEN_INVENTORY = new OpenInventoryState();
         static final BasicInventoryPacketState ENCHANT_ITEM = new EnchantItemPacketState();
         public static final BasicInventoryPacketState SWAP_HAND_ITEMS = new SwapHandItemsState();
@@ -202,7 +202,7 @@ public final class PacketPhase {
                 .add(Inventory.SECONDARY_DRAG_INVENTORY_STOP)
                 .add(Inventory.MIDDLE_DRAG_INVENTORY_STOP)
 
-                .add(Inventory.SWITCH_HOTBAR_SCROLL)
+                .add(Inventory.SET_CARRIED_ITEM)
                 .add(Inventory.OPEN_INVENTORY)
                 .add(Inventory.ENCHANT_ITEM)
                 .build();
@@ -319,7 +319,7 @@ public final class PacketPhase {
             return PacketPhase.General.INVALID;
         });
         this.packetTranslationMap.put(ServerboundUseItemPacket.class, packet -> PacketPhase.General.USE_ITEM);
-        this.packetTranslationMap.put(ServerboundSetCarriedItemPacket.class, packet -> PacketPhase.Inventory.SWITCH_HOTBAR_SCROLL);
+        this.packetTranslationMap.put(ServerboundSetCarriedItemPacket.class, packet -> PacketPhase.Inventory.SET_CARRIED_ITEM);
         this.packetTranslationMap.put(ServerboundSwingPacket.class, packet -> PacketPhase.General.ANIMATION);
         this.packetTranslationMap.put(ServerboundPlayerCommandPacket.class, packet -> {
             final ServerboundPlayerCommandPacket playerAction = (ServerboundPlayerCommandPacket) packet;

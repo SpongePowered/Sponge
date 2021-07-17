@@ -32,19 +32,8 @@ import org.spongepowered.common.util.PrettyPrinter;
 
 public class InventoryPacketContext extends PacketContext<InventoryPacketContext> {
 
-    private int oldHighlightedSlotId;
-
     public InventoryPacketContext(final PacketState<InventoryPacketContext> state, final PhaseTracker tracker) {
         super(state, tracker);
-    }
-
-    public int getOldHighlightedSlotId() {
-        return this.oldHighlightedSlotId;
-    }
-
-    public InventoryPacketContext setOldHighlightedSlot(final int highlightedSlotId) {
-        this.oldHighlightedSlotId = highlightedSlotId;
-        return this;
     }
 
     @Override
@@ -67,7 +56,7 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
         if (this.state == PacketPhase.Inventory.SWAP_HAND_ITEMS) {
             return true;
         }
-        if (this.state == PacketPhase.Inventory.SWITCH_HOTBAR_SCROLL) {
+        if (this.state == PacketPhase.Inventory.SET_CARRIED_ITEM) {
             return true;
         }
         // Fire events even without captures
@@ -84,18 +73,5 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
         }
 
         return super.hasCaptures();
-    }
-
-    @Override
-    public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
-        final String s = String.format("%1$" + indent + "s", "");
-        return super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "HighlightedSlotId", this.oldHighlightedSlotId);
-    }
-
-    @Override
-    protected void reset() {
-        super.reset();
-        this.oldHighlightedSlotId = 0;
     }
 }

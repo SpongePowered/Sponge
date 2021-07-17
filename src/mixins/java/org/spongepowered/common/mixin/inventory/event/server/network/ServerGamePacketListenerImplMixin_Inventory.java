@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.inventory.event.server.network;
 
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
@@ -38,6 +39,7 @@ import net.minecraft.world.item.crafting.Recipe;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -82,6 +84,27 @@ public class ServerGamePacketListenerImplMixin_Inventory {
     private ItemEntity impl$onBroadcastCreativeActionResult(final ServerPlayer serverPlayer, final ItemStack param0, final boolean param1) {
         // TODO creative drop is not handled - maybe this needs a new sub-event in API?
         return serverPlayer.drop(param0, param1);
+    }
+
+    @Redirect(method = "handleSetCarriedItem",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundSetCarriedItemPacket;getSlot()I"))
+    private int impl$onHandleSetCarriedItem(final ServerboundSetCarriedItemPacket packet) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final int slotIdx = packet.getSlot();
+        try (final EffectTransactor ignored = transactor.logPlayerCarriedItem(player, slotIdx)) {
+            final PlayerInventory inventory = (PlayerInventory) this.player.inventory;
+            inventory.equipment().slot(this.player.inventory.selected).ifPresent(slot -> {
+                final ItemStack item = ItemStackUtil.toNative(slot.peek());
+                transactor.logInventorySlotTransaction(context, slot, item, item, inventory);
+            });
+            inventory.equipment().slot(slotIdx).ifPresent(slot -> {
+                final ItemStack item = ItemStackUtil.toNative(slot.peek());
+                transactor.logInventorySlotTransaction(context, slot, item, item, inventory);
+            });
+        }
+        return slotIdx;
+        // TrackingUtil.processBlockCaptures called by SwitchHotbarScrollState
     }
 
     @Redirect(method = "handlePlayerCommand",

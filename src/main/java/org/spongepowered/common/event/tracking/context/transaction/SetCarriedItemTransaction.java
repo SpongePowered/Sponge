@@ -24,13 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -39,25 +43,43 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import java.util.List;
 import java.util.Optional;
 
-public class PlayerInventoryTransaction extends InventoryBasedTransaction {
+public class SetCarriedItemTransaction extends InventoryBasedTransaction {
 
     private final ServerPlayer player;
+    @Nullable private final Slot prevSlot;
+    @Nullable private final Slot newSlot;
+    private final int prevSlotId;
 
-    public PlayerInventoryTransaction(final Player player) {
+    public SetCarriedItemTransaction(final Player player, int newSlot) {
         super(((ServerWorld) player.level).key(), (Inventory) player.inventory);
         this.player = (ServerPlayer) player;
+        final PlayerInventory inventory = (PlayerInventory) this.player.inventory;
+        this.prevSlotId = this.player.inventory.selected;
+        this.prevSlot = inventory.equipment().slot(prevSlotId).orElse(null);
+        this.newSlot = inventory.equipment().slot(newSlot).orElse(null);
     }
 
     @Override
     Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions, final PhaseContext<@NonNull ?> context,
             final Cause cause) {
-        // TODO handle event creation for item pickup (see ItemEntityMixin_Inventory)
-        @Nullable final ChangeInventoryEvent event = context.createInventoryEvent(cause, this.inventory, slotTransactions);
-        return Optional.ofNullable(event);
+        if (newSlot == null || prevSlot == null) {
+            return Optional.empty();
+        }
+        final ChangeInventoryEvent.Held event =
+                SpongeEventFactory.createChangeInventoryEventHeld(cause, newSlot, (Inventory) player.inventory, prevSlot, slotTransactions);
+        return Optional.of(event);
     }
 
     @Override
     public void restore(PhaseContext<@NonNull ?> context, ChangeInventoryEvent event) {
+
+        if (event.isCancelled()) {
+            player.connection.send(new ClientboundSetCarriedItemPacket(this.prevSlotId));
+            player.inventory.selected = this.prevSlotId;
+        } else {
+            // TODO check if needed:
+            player.resetLastActionTime();
+        }
         // TODO post-transaction handling
         PacketPhaseUtil.handleSlotRestore(player, null, event.transactions(), event.isCancelled());
     }

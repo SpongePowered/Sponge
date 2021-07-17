@@ -282,6 +282,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
     }
 
+    public EffectTransactor logPlayerCarriedItem(final Player player, final int newSlot) {
+        final SetCarriedItemTransaction transaction = new SetCarriedItemTransaction(player, newSlot);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
+    }
+
     public EffectTransactor logCreativeClickContainer(final int slotNum, final ItemStackSnapshot creativeStack, final Player player) {
         final ClickCreativeMenuTransaction transaction = new ClickCreativeMenuTransaction(player, slotNum, creativeStack);
         this.logTransaction(transaction);
