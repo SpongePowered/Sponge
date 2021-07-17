@@ -26,6 +26,9 @@ package org.spongepowered.common.profile;
 
 import com.google.common.util.concurrent.ThreadFactoryBuilder;
 import net.minecraft.server.MinecraftServer;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.profile.GameProfile;
@@ -36,6 +39,7 @@ import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.bridge.server.players.GameProfileCache_GameProfileInfoBridge;
+import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.UsernameCache;
 
 import java.time.Instant;
@@ -50,8 +54,11 @@ import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.ExecutionException;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
+import java.util.concurrent.TimeUnit;
 
 public final class SpongeGameProfileManager implements GameProfileManager {
+
+    private static final Logger LOGGER = LogManager.getLogger();
 
     private final UsernameCache usernameCache;
     private final GameProfileCacheBridge cache;
@@ -62,7 +69,11 @@ public final class SpongeGameProfileManager implements GameProfileManager {
         this.usernameCache = ((SpongeServer) server).getUsernameCache();
         this.cache = (GameProfileCacheBridge) ((MinecraftServer) server).getProfileCache();
         this.gameLookupExecutorService = Executors.newSingleThreadExecutor(new ThreadFactoryBuilder()
-                .setNameFormat("Sponge - Async User Lookup Thread").build());
+            .setNameFormat("Sponge - Async User Lookup Thread").build());
+    }
+
+    static boolean canLookup(final UUID id) {
+        return id.version() == 4; // only v4 UUIDs are used by valid accounts -- everything else cannot return a response, so don't waste our time
     }
 
     @Override
@@ -171,12 +182,32 @@ public final class SpongeGameProfileManager implements GameProfileManager {
             } catch (final InterruptedException | ExecutionException e) {
                 e.printStackTrace();
             }
-
-            try {
-                Thread.sleep(SpongeConfigs.getCommon().get().world.gameProfileQueryTaskInterval * 1000L);
-            } catch (final InterruptedException e) {
-                e.printStackTrace();
+            if (SpongeGameProfileManager.canLookup(uniqueId)) { // only wait when it's possible that a lookup has actually occurred
+                try {
+                    Thread.sleep(SpongeConfigs.getCommon().get().world.gameProfileQueryTaskInterval * 1000L);
+                } catch (final InterruptedException e) {
+                    e.printStackTrace();
+                }
             }
         });
+    }
+
+    public void close() {
+        // Shut down the executor
+        this.gameLookupExecutorService.shutdown();
+
+        try {
+            if (!this.gameLookupExecutorService.awaitTermination(5, TimeUnit.SECONDS)) {
+                final List<Runnable> remaining = this.gameLookupExecutorService.shutdownNow();
+                new PrettyPrinter()
+                    .add("Sponge game profile resolver failed to shut down in 5 seconds!")
+                    .add("Remaining tasks:")
+                    .addWithIndices(remaining)
+                    .add("These tasks have been cancelled.")
+                    .log(SpongeGameProfileManager.LOGGER, Level.WARN);
+            }
+        } catch (final InterruptedException e) {
+            SpongeGameProfileManager.LOGGER.error("The async scheduler was interrupted while awaiting shutdown!");
+        }
     }
 }

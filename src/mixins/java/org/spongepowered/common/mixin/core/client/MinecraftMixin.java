@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.mixin.core.client;
 
-import com.mojang.datafixers.util.Function4;
 import com.mojang.serialization.DynamicOps;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.main.GameConfig;
@@ -46,7 +45,6 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
@@ -57,7 +55,6 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
-import java.util.function.Function;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
@@ -103,8 +100,8 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     }
 
     @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
-    private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
-        SpongeCommon.game().asyncScheduler().close();
+    private void impl$callStoppedGame(final CallbackInfo ci) {
+        SpongeBootstrap.lifecycle().callStoppedGameEvent();
     }
 
     @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$RegistryHolder;)Lnet/minecraft/resources/RegistryReadOps;"))
