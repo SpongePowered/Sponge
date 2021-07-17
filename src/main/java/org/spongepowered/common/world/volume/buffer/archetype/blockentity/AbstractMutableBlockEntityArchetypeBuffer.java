@@ -29,7 +29,6 @@ import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.volume.archetype.block.entity.BlockEntityArchetypeVolume;
-import org.spongepowered.api.world.volume.block.entity.BlockEntityVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -38,6 +37,7 @@ import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.block.AbstractBlockBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.function.Function;
@@ -62,7 +62,7 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer extends Abstract
     @Override
     public boolean setBlock(final int x, final int y, final int z, final BlockState block) {
         if (this.blockBuffer.setBlock(x, y, z, block)) {
-            if (((BlockStateBridge) block).bridge$hasTileEntity()) {
+            if (block instanceof BlockStateBridge && ((BlockStateBridge) block).bridge$hasTileEntity()) {
                 this.removeBlockEntity(x, y, z);
             }
         }
@@ -114,7 +114,7 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer extends Abstract
         final Stream<VolumeElement<BlockEntityArchetypeVolume.Mutable, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
             .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
                 .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
-                    .mapToObj(y -> VolumeElement.of((BlockEntityArchetypeVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.of((BlockEntityArchetypeVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

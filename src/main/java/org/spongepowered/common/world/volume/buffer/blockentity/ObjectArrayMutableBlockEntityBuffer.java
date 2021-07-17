@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.world.volume.buffer.blockentity;
 
+import net.minecraft.core.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.world.volume.block.entity.BlockEntityVolume;
@@ -38,7 +39,6 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
-import net.minecraft.core.BlockPos;
 
 public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEntityBuffer {
 
@@ -70,7 +70,7 @@ public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEnt
         VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
 
         final Stream<VolumeElement<BlockEntityVolume.Mutable, BlockEntity>> blockEntityStream = this.blockEntities.stream()
-            .map(be -> VolumeElement.of(this, be, be.blockPosition()));
+            .map(be -> VolumeElement.of(this, be, be.blockPosition().toDouble()));
         return new SpongeVolumeStream<>(blockEntityStream, () -> this);
     }
 

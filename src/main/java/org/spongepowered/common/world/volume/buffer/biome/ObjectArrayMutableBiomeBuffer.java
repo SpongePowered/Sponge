@@ -25,8 +25,8 @@
 package org.spongepowered.common.world.volume.buffer.biome;
 
 
+import net.minecraft.core.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
-
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.world.biome.Biome;
@@ -37,6 +37,7 @@ import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Arrays;
@@ -44,7 +45,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import net.minecraft.core.BlockPos;
 
 /**
  * Mutable view of a {@link net.minecraft.world.level.biome.Biome} array.
@@ -159,7 +159,7 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
                         final RegistryKey<Biome> key = buffer[this.getIndex(x, y, z)];
                         final Biome biome = this.registry.value(key);
                         return biome;
-                    }, new Vector3i(x, y, z)))
+                    }, new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

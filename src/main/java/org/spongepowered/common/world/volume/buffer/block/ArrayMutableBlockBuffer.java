@@ -43,6 +43,7 @@ import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.world.schematic.MutableBimapPalette;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Objects;
@@ -198,7 +199,7 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
         final Stream<VolumeElement<BlockVolume.Mutable, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
             .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
                 .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
-                    .mapToObj(y -> VolumeElement.of((BlockVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.of((BlockVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

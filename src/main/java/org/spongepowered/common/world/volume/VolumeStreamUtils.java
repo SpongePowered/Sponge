@@ -54,6 +54,7 @@ import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
+import org.spongepowered.api.world.volume.stream.VolumePositionTranslators;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.accessor.world.level.block.entity.BlockEntityAccessor;
 import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
@@ -608,7 +609,7 @@ public final class VolumeStreamUtils {
         // Then constructs the VolumeElement
         final Function<Tuple<BlockPos, MC>, VolumeElement<R, API>> elementGenerator = (tuple) -> {
             final Supplier<API> blockEntitySupplier = VolumeStreamUtils.createWeaklyReferencedSupplier((API) tuple.getB(), "Element");
-            final Vector3i blockEntityPos = VecHelper.toVector3i(tuple.getA());
+            final Vector3d blockEntityPos = VecHelper.toVector3d(tuple.getA()).add(VolumePositionTranslators.BLOCK_OFFSET);
             return VolumeElement.of(worldSupplier, blockEntitySupplier, blockEntityPos);
         };
         // Fairly trivial, but just acts as a filter and provides the set of filtered references back to the `poses`

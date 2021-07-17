@@ -88,7 +88,7 @@ public class ObjectArrayMutableEntityArchetypeBuffer extends AbstractVolumeBuffe
         }
         final Stream<VolumeElement<EntityArchetypeVolume.Mutable, EntityArchetype>> archetypeStream = entryStream
             .filter(VolumeStreamUtils.entityArchetypePositionFilter(min, max))
-            .map(tuple -> VolumeElement.of(this, tuple.second(), tuple.first().toInt()));
+            .map(tuple -> VolumeElement.of(this, tuple.second(), tuple.first()));
         return new SpongeVolumeStream<>(archetypeStream, () -> this);
     }
 

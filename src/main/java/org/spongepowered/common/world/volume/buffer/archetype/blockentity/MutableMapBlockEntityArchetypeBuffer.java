@@ -110,7 +110,7 @@ public class MutableMapBlockEntityArchetypeBuffer extends AbstractMutableBlockEn
         }
         final Stream<VolumeElement<BlockEntityArchetypeVolume.Mutable, BlockEntityArchetype>> volumeElementStream = entryStream
             .filter(VolumeStreamUtils.blockEntityArchetypePositionFilter(min, max))
-            .map(entry -> VolumeElement.of(this, entry.getValue(), entry.getKey()));
+            .map(entry -> VolumeElement.of(this, entry.getValue(), entry.getKey().toDouble()));
 
         return new SpongeVolumeStream<>(volumeElementStream, () -> this);
     }

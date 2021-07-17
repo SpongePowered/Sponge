@@ -110,7 +110,7 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
                     .mapToObj(y -> VolumeElement.of(
                         (EntityVolume.Mutable) this,
                         () -> this.blockBuffer.block(x, y, z),
-                        new Vector3i(x, y, z)
+                        new Vector3d(x, y, z)
                     ))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
@@ -230,7 +230,7 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
         VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
         // Normally, we'd be able to shadow-copy, but we can't copy entities, and we're only using a list, so we can iterate only on the list.
         final Stream<VolumeElement<EntityVolume.Mutable, Entity>> backingStream = this.entities.stream()
-            .map(entity -> VolumeElement.of(this, entity, entity.blockPosition()));
+            .map(entity -> VolumeElement.of(this, entity, entity.position()));
         return new SpongeVolumeStream<>(backingStream, () -> this);
     }
 

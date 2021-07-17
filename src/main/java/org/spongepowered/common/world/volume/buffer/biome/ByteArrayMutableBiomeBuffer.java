@@ -36,6 +36,7 @@ import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Arrays;
@@ -128,7 +129,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
                                 .registry(RegistryTypes.BIOME)
                                 .value(Biomes.OCEAN)
                             );
-                    }, new Vector3i(x, y, z)))
+                    }, new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);
