@@ -80,6 +80,10 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
             slotTransactions.add(new SlotTransaction(this.slot, item, this.creativeStack));
         }
 
+        if (!entities.isEmpty()) {
+            System.err.println("Entities are being captured but not being processed");
+        }
+
         // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.originalCursor, ItemStackSnapshot.empty());
         final ClickContainerEvent.Creative event = SpongeEventFactory.createClickContainerEventCreative(cause, (Container) this.menu,
@@ -119,11 +123,6 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
     @Override
     Optional<SlotTransaction> getSlotTransaction() {
         return Optional.empty();
-    }
-
-    @Override
-    List<Entity> getEntitiesSpawned() {
-        return Collections.emptyList();
     }
 
 }

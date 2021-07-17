@@ -1,5 +1,11 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import com.google.common.collect.ImmutableList;
+import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
@@ -10,12 +16,8 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 
-import com.google.common.collect.ImmutableList;
-import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-
+import java.util.Collections;
+import java.util.LinkedList;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
@@ -26,6 +28,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
     private static Set<Class<?>> containersFailedCapture = new ReferenceOpenHashSet<>();
 
     final AbstractContainerMenu menu;
+    @MonotonicNonNull List<net.minecraft.world.entity.Entity> entities;
 
     protected ContainerBasedTransaction(
         final ResourceKey worldKey,
@@ -43,6 +46,19 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
         return Optional.of((context, frame) -> {
             frame.pushCause(this.menu);
         });
+    }
+
+    @Override
+    public boolean acceptEntitySpawn(
+        final PhaseContext<@NonNull ?> current, final net.minecraft.world.entity.Entity entityIn
+    ) {
+        if (current.doesContainerCaptureEntitySpawn(entityIn)) {
+            if (this.entities == null) {
+                this.entities = new LinkedList<>();
+            }
+            this.entities.add(entityIn);
+        }
+        return super.acceptEntitySpawn(current, entityIn);
     }
 
     @Override
@@ -85,9 +101,12 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
 
     abstract Optional<SlotTransaction> getSlotTransaction();
 
-    abstract List<Entity> getEntitiesSpawned();
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    List<Entity> getEntitiesSpawned() {
+        return this.entities == null ? Collections.emptyList() : (List<Entity>) (List) this.entities;
+    }
 
-    boolean isContainerEventAllowed(final PhaseContext<@Nullable ?> context) {
+    boolean isContainerEventAllowed(final PhaseContext<@NonNull ?> context) {
         return true;
     }
 

@@ -24,6 +24,12 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import com.google.common.collect.ImmutableList;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Cause;
@@ -33,13 +39,6 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.util.PrettyPrinter;
-
-import com.google.common.collect.ImmutableList;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
 
 import java.util.Deque;
 import java.util.LinkedList;
@@ -190,6 +189,10 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
         final SlotTransaction newTransaction,
         final Object inventory
     ) {
+        return false;
+    }
+
+    public boolean acceptEntitySpawn(final PhaseContext<@NonNull ?> current, final Entity entityIn) {
         return false;
     }
 }

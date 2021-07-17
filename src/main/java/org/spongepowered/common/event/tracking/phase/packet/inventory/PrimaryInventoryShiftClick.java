@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -36,7 +37,6 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.util.Constants;
 
-import net.minecraft.server.level.ServerPlayer;
 import java.util.List;
 import java.util.Optional;
 
@@ -50,6 +50,10 @@ public final class PrimaryInventoryShiftClick extends BasicInventoryPacketState 
     public ClickContainerEvent createContainerEvent(InventoryPacketContext context, Cause cause,
             ServerPlayer serverPlayer, Container openContainer, Transaction<ItemStackSnapshot> transaction,
             List<SlotTransaction> slotTransactions, List<Entity> capturedEntities, int usedButton, @Nullable Slot slot) {
+
+        if (!capturedEntities.isEmpty()) {
+            System.err.println("Entities are being captured but not being processed");
+        }
         return SpongeEventFactory.createClickContainerEventShiftPrimary(cause,
                 openContainer, transaction, Optional.ofNullable(slot), slotTransactions);
     }

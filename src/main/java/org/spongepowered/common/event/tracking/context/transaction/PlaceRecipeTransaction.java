@@ -50,7 +50,6 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -127,11 +126,6 @@ public class PlaceRecipeTransaction extends ContainerBasedTransaction {
     @Override
     Optional<SlotTransaction> getSlotTransaction() {
         return Optional.empty();
-    }
-
-    @Override
-    List<Entity> getEntitiesSpawned() {
-        return Collections.emptyList();
     }
 
 }

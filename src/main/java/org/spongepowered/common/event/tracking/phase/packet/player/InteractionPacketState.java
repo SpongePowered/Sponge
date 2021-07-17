@@ -24,29 +24,30 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
-import net.minecraft.server.level.ServerPlayer;
-
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public final class InteractionPacketState extends PacketState<InteractionPacketContext> {
 
@@ -74,7 +75,9 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final InteractionPacketContext context) {
+    public void populateContext(
+        final ServerPlayer playerMP, final Packet<?> packet, final InteractionPacketContext context
+    ) {
         final ItemStack stack = ItemStackUtil.cloneDefensive(playerMP.getMainHandItem());
         if (stack != null) {
             context.itemUsed(stack);
@@ -99,23 +102,19 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
 
         final net.minecraft.world.item.ItemStack endActiveItem = player.getUseItem();
         ((LivingEntityAccessor) player).accessor$useItem(ItemStackUtil.toNative(phaseContext.getActiveItem()));
-
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-
-            final boolean hasBlocks = !phaseContext.getTransactor().isEmpty();
-            if (hasBlocks) {
-                if (!TrackingUtil.processBlockCaptures(phaseContext)) {
-                    return;
-                }
+        final boolean hasBlocks = !phaseContext.getTransactor().isEmpty();
+        if (hasBlocks) {
+            if (!TrackingUtil.processBlockCaptures(phaseContext)) {
+                return;
             }
-
-            final TrackedInventoryBridge trackedInventory = player.containerMenu;
-            trackedInventory.bridge$setCaptureInventory(false);
-            trackedInventory.bridge$getCapturedSlotTransactions().clear();
         }
-        
         ((LivingEntityAccessor) player).accessor$useItem(endActiveItem);
     }
 
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final InteractionPacketContext context, final Entity entityToSpawn
+    ) {
+        return SpawnTypes.DROPPED_ITEM;
+    }
 }

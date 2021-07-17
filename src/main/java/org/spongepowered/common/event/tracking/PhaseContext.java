@@ -27,7 +27,10 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkNotNull;
 import static com.google.common.base.Preconditions.checkState;
 
-import org.spongepowered.api.entity.living.player.User;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -35,18 +38,9 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.entity.player.SpongeUserView;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.util.PrettyPrinter;
-
-import net.minecraft.world.entity.player.Player;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
 
 import java.util.Deque;
 import java.util.Objects;
@@ -268,11 +262,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
     public boolean hasCaptures() {
         if (this.transactor != null && !this.transactor.isEmpty()) {
             return true;
-        }
-        if (this.source != null && this.source instanceof Player) {
-            if (!(((Player) this.source).inventory).bridge$getCapturedSlotTransactions().isEmpty()) {
-                return true;
-            }
         }
 
         return false;

@@ -430,4 +430,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     default void restoreClickContainerEvent(C context, ClickContainerEvent event) {
 
     }
+
+    default boolean doesContainerCaptureEntitySpawn(C context, Entity entityIn) {
+        return false;
+    }
 }

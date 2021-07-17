@@ -112,7 +112,7 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
     }
 
     @Override
-    boolean isContainerEventAllowed(final PhaseContext<@Nullable ?> context) {
+    boolean isContainerEventAllowed(final PhaseContext<@NonNull ?> context) {
         if (!(context instanceof InventoryPacketContext)) {
             return false;
         }
@@ -125,9 +125,5 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
         return Optional.empty();
     }
 
-    @Override
-    List<Entity> getEntitiesSpawned() {
-        return Collections.emptyList();
-    }
-
 }
+

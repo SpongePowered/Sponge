@@ -117,9 +117,4 @@ public class ClickMenuTransaction extends ContainerBasedTransaction {
         return Optional.empty();
     }
 
-    @Override
-    List<Entity> getEntitiesSpawned() {
-        return this.sideEffects != null ? this.sideEffects.stream().flatMap(e -> e.stream());
-    }
-
 }

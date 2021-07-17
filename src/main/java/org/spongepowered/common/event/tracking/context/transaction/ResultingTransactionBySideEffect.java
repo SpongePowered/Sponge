@@ -24,11 +24,8 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
-
 import org.checkerframework.checker.nullness.qual.Nullable;
-
-import java.util.stream.Stream;
+import org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect;
 
 @SuppressWarnings("rawtypes")
 public class ResultingTransactionBySideEffect {
@@ -48,9 +45,5 @@ public class ResultingTransactionBySideEffect {
             this.head = child;
         }
         this.tail = child;
-    }
-
-    public Stream<GameTransaction<?>> stream() {
-        return Stream.iterate();
     }
 }
