@@ -129,7 +129,8 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         // TrackingUtil.processBlockCaptures called by CloseWindowState
     }
 
-    @Redirect(method = "handlePlaceRecipe",
+    @SuppressWarnings("UnresolvedMixinReference")
+    @Redirect(method = "lambda$handlePlaceRecipe$10",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void impl$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final ServerPlayer player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
