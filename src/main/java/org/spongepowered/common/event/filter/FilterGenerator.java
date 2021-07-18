@@ -77,6 +77,7 @@ import org.spongepowered.common.event.filter.delegate.ParameterFilterSourceDeleg
 import org.spongepowered.common.event.filter.delegate.RootCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.SubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.SupportsDataFilterDelegate;
+import org.spongepowered.common.event.gen.LoaderClassWriter;
 import org.spongepowered.common.util.generator.GeneratorUtils;
 
 import java.io.File;
@@ -137,7 +138,7 @@ public class FilterGenerator {
             return null;
         }
 
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        final ClassWriter cw = new LoaderClassWriter(method.getDeclaringClass().getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
 
         cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
