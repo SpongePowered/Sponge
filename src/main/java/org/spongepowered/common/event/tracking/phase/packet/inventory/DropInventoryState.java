@@ -24,51 +24,69 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.util.Tuple;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.item.util.ItemStackUtil;
+
+import com.google.common.collect.ImmutableList;
+import net.minecraft.server.level.ServerPlayer;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public final class DropInventoryState extends BasicInventoryPacketState {
 
     @Override
-    public void unwind(InventoryPacketContext context) {
+    public BiConsumer<CauseStackManager.StackFrame, InventoryPacketContext> getFrameModifier() {
+        return super.getFrameModifier().andThen((frame, ctx) -> {
+            final ItemStack usedStack = ctx.getItemUsed();
+            final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
+            if (!usedSnapshot.isEmpty()) {
+                frame.addContext(EventContextKeys.USED_ITEM, usedSnapshot);
+            }
+        });
+    }
+
+    @Override
+    public void unwind(final InventoryPacketContext context) {
         final ServerPlayer player = context.getPacketPlayer();
-        final ItemStack usedStack = context.getItemUsed();
-        final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
-        final Entity spongePlayer = (Entity) player;
-        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(spongePlayer);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            // TODO - Determine if we need to pass the supplier or perform some parameterized
-            //  process if not empty method on the capture object.
-            TrackingUtil.processBlockCaptures(context);
-//            context.getCapturedItemsSupplier()
-//                .acceptAndClearIfNotEmpty(items -> {
-//
-//                    final ArrayList<Entity> entities = new ArrayList<>();
-//                    for (ItemEntity item : items) {
-//                        entities.add((Entity) item);
-//                    }
-//                    final DropItemEvent.Dispense dropItemEvent =
-//                        SpongeEventFactory.createDropItemEventDispense(PhaseTracker.getCauseStackManager().getCurrentCause(), entities);
-//                    SpongeCommon.postEvent(dropItemEvent);
-//                    if (!dropItemEvent.isCancelled()) {
-//                        processSpawnedEntities(player, dropItemEvent);
-//                    }
-//                });
 
-            final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.containerMenu;
-            mixinContainer.bridge$setCaptureInventory(false);
-            mixinContainer.bridge$getCapturedSlotTransactions().clear();
-        }
+        TrackingUtil.processBlockCaptures(context);
+        final TrackedInventoryBridge mixinContainer = (TrackedInventoryBridge) player.containerMenu;
+        mixinContainer.bridge$setCaptureInventory(false);
+        mixinContainer.bridge$getCapturedSlotTransactions().clear();
+    }
 
+    @Override
+    public SpawnEntityEvent createSpawnEvent(
+        final InventoryPacketContext context, final GameTransaction<@NonNull ?> parent,
+        final ImmutableList<Tuple<net.minecraft.world.entity.Entity, SpawnEntityTransaction.DummySnapshot>> collect,
+        final Cause currentCause
+    ) {
+        return SpongeEventFactory.createDropItemEventDispense(currentCause, collect.stream()
+            .map(Tuple::first).map(entity -> (Entity) entity)
+            .collect(ImmutableList.toImmutableList())
+        );
+    }
+
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final InventoryPacketContext context, final net.minecraft.world.entity.Entity entityToSpawn
+    ) {
+        return SpawnTypes.DROPPED_ITEM;
     }
 }

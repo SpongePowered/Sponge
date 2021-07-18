@@ -75,6 +75,7 @@ import java.util.Collections;
 import java.util.List;
 import java.util.Locale;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Plugin("commandtest")
@@ -131,6 +132,20 @@ public final class CommandTest {
                         })
                         .build(),
                 "checkuser"
+        );
+
+
+        final Parameter.Value<String> choicesKey = Parameter.choices("bacon", "eggs", "spam", "spam spam spam").key("choices").build();
+        event.register(
+                this.plugin,
+                Command.builder()
+                        .addParameter(choicesKey)
+                        .executor(context -> {
+                            context.sendMessage(Identity.nil(), Component.text(context.requireOne(choicesKey)));
+                            return CommandResult.success();
+                        })
+                        .build(),
+                "testchoices"
         );
 
         final Parameter.Key<String> testKey = Parameter.key("testKey", String.class);
@@ -271,13 +286,15 @@ public final class CommandTest {
                 "testrk"
         );
 
-        final Parameter.Key<User> userKey = Parameter.key("user", User.class);
+        final Parameter.Key<UUID> userKey = Parameter.key("user", UUID.class);
         event.register(
                 this.plugin,
                 Command.builder()
                     .addParameter(Parameter.user().key(userKey).build())
                     .executor(context -> {
-                        context.sendMessage(Identity.nil(), Component.text(context.requireOne(userKey).name()));
+                        Sponge.server().userManager().load(context.requireOne(userKey))
+                                .thenAcceptAsync(x -> context.sendMessage(Identity.nil(), Component.text(x.map(User::name).orElse("unknown"))),
+                                    Sponge.server().scheduler().createExecutor(this.plugin));
                         return CommandResult.success();
                     })
                     .build(),

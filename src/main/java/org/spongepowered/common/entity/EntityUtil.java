@@ -24,26 +24,23 @@
  */
 package org.spongepowered.common.entity;
 
+import net.minecraft.world.entity.LivingEntity;
 import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
+import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
+import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.math.vector.Vector3d;
 
-import java.util.Optional;
-import java.util.Random;
-import java.util.function.Function;
-import java.util.function.Supplier;
-import java.util.stream.Stream;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.game.ClientboundChangeDifficultyPacket;
 import net.minecraft.network.protocol.game.ClientboundLevelEventPacket;
@@ -55,18 +52,26 @@ import net.minecraft.server.players.PlayerList;
 import net.minecraft.util.Mth;
 import net.minecraft.world.effect.MobEffectInstance;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.storage.LevelData;
 
+import java.util.Optional;
+import java.util.Random;
+import java.util.UUID;
+import java.util.function.Consumer;
+import java.util.function.Function;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
+
 public final class EntityUtil {
 
-    public static final Function<PhaseContext<?>, Supplier<Optional<User>>> ENTITY_CREATOR_FUNCTION = (context) ->
-        () -> Stream.<Supplier<Optional<User>>>builder()
-            .add(() -> context.getSource(User.class))
+    public static final Function<PhaseContext<?>, Supplier<Optional<UUID>>> ENTITY_CREATOR_FUNCTION = (context) ->
+        () -> Stream.<Supplier<Optional<UUID>>>builder()
+            .add(() -> context.getSource(ServerPlayer.class).map(Entity::getUUID))
+            .add(() -> context.getSource(User.class).map(Identifiable::uniqueId))
             .add(context::getNotifier)
             .add(context::getCreator)
             .build()
@@ -83,7 +88,7 @@ public final class EntityUtil {
         // Sponge Start - Send any platform dimension data
         ((ServerPlayerBridge) player).bridge$sendDimensionData(player.connection.connection, toWorld.dimensionType(), toWorld.dimension());
         // Sponge End
-        LevelData worldinfo = toWorld.getLevelData();
+        final LevelData worldinfo = toWorld.getLevelData();
         // We send dimension change for portals before loading chunks
         if (!isPortal) {
             // Sponge Start - Allow the platform to handle how dimension changes are sent down
@@ -149,11 +154,11 @@ public final class EntityUtil {
         return entity.isRemoved();
     }
 
-    public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<User>> entityCreatorSupplier) {
+    public static boolean processEntitySpawnsFromEvent(final SpawnEntityEvent event, final Supplier<Optional<UUID>> entityCreatorSupplier) {
         boolean spawnedAny = false;
         for (final org.spongepowered.api.entity.Entity entity : event.entities()) {
             // Here is where we need to handle the custom items potentially having custom entities
-            spawnedAny = EntityUtil.processEntitySpawn(entity, entityCreatorSupplier);
+            spawnedAny = EntityUtil.processEntitySpawn(entity, entityCreatorSupplier, e ->  e.level.addFreshEntity(e));
         }
         return spawnedAny;
     }
@@ -162,8 +167,7 @@ public final class EntityUtil {
         return EntityUtil.processEntitySpawnsFromEvent(destruct, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<User>> supplier) {
+    public static boolean processEntitySpawn(final org.spongepowered.api.entity.Entity entity, final Supplier<Optional<UUID>> supplier, final Consumer<Entity> spawner) {
         final Entity minecraftEntity = (Entity) entity;
         if (minecraftEntity instanceof ItemEntity) {
             final ItemStack item = ((ItemEntity) minecraftEntity).getItem();
@@ -175,7 +179,7 @@ public final class EntityUtil {
                     supplier.get()
                         .ifPresent(spawned -> {
                             if (entityToSpawn instanceof CreatorTrackedBridge) {
-                                ((CreatorTrackedBridge) entityToSpawn).tracked$setCreatorReference(spawned);
+                                ((CreatorTrackedBridge) entityToSpawn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, spawned);
                             }
                         });
                     if (entityToSpawn.isRemoved()) {
@@ -190,14 +194,8 @@ public final class EntityUtil {
             }
         }
 
-        supplier.get()
-            .ifPresent(spawned -> {
-                if (entity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) entity).tracked$setCreatorReference(spawned);
-                }
-            });
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
-        ((net.minecraft.world.level.Level) entity.world()).addFreshEntity((Entity) entity);
+        spawner.accept((Entity) entity);
         return true;
     }
 
@@ -237,7 +235,7 @@ public final class EntityUtil {
     }
 
 
-    public static boolean isUntargetable(Entity from, Entity target) {
+    public static boolean isUntargetable(final Entity from, final Entity target) {
         if (((VanishableBridge) target).bridge$isVanished() && ((VanishableBridge) target).bridge$isVanishPreventsTargeting()) {
             return true;
         }

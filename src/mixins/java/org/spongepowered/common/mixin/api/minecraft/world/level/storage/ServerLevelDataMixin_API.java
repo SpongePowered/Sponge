@@ -38,6 +38,7 @@ import org.spongepowered.api.world.weather.WeatherType;
 import org.spongepowered.api.world.weather.WeatherTypes;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -51,7 +52,7 @@ import java.util.UUID;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(ServerLevelData.class)
-@Implements(@Interface(iface = ServerWorldProperties.class, prefix = "serverWorldProperties$"))
+@Implements(@Interface(iface = ServerWorldProperties.class, prefix = "serverWorldProperties$", remap = Remap.NONE))
 public interface ServerLevelDataMixin_API extends ServerWorldProperties {
 
     // @formatter:off

@@ -24,24 +24,46 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
+
+import com.google.common.collect.ImmutableList;
+import net.minecraft.world.entity.Entity;
+import org.checkerframework.checker.nullness.qual.NonNull;
+
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
+import java.util.stream.Collectors;
 
 class WeatherTickPhaseState extends TickPhaseState<TickContext.General> {
 
 
     @Override
     public TickContext.General createNewContext(final PhaseTracker tracker) {
-        return new TickContext.General(this, tracker).addCaptures();
+        return new TickContext.General(this, tracker);
     }
 
     @Override
     public void unwind(final TickContext.General phaseContext) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-//            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WEATHER);
-            TrackingUtil.processBlockCaptures(phaseContext);
-        }
+        TrackingUtil.processBlockCaptures(phaseContext);
+    }
+
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final TickContext.General context, final Entity entityToSpawn
+    ) {
+        return SpawnTypes.WEATHER;
     }
 
 }

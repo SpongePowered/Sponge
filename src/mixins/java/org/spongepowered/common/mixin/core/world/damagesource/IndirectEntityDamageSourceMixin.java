@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.core.world.damagesource;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
@@ -36,28 +37,37 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import javax.annotation.Nullable;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
 
+import java.util.UUID;
+
 @Mixin(value = IndirectEntityDamageSource.class, priority = 992)
 public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSourceMixin {
 
+    // @formatter:on
     @Shadow @Final @Mutable @Nullable private Entity owner;
 
     @Shadow @Nullable public abstract Entity shadow$getDirectEntity();
+    // @formatter:off
 
-    @Nullable private User impl$creator;
+    @Nullable private UUID impl$creatorUUID;
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void onConstruct(final CallbackInfo callbackInfo) {
-        if (!(this.owner instanceof User) && this.entity != null) { // sources can be null
-            this.impl$creator = this.shadow$getEntity() instanceof CreatorTrackedBridge
-                         ? ((CreatorTrackedBridge) this.shadow$getEntity()).tracked$getCreatorReference().orElse(null)
+        if (this.entity != null) { // sources can be null
+            final Entity mcEntity = this.shadow$getEntity();
+            this.impl$creatorUUID = mcEntity instanceof CreatorTrackedBridge
+                         ? ((CreatorTrackedBridge) mcEntity).tracked$getCreatorUUID().orElse(null)
                          : null;
-            if (this.owner == null && this.impl$creator instanceof Entity) {
-                this.owner = (Entity) this.impl$creator;
+            if (this.owner == null && this.impl$creatorUUID != null) {
+                final ServerPlayer player = SpongeCommon.server().getPlayerList().getPlayer(this.impl$creatorUUID);
+                if (player != null) {
+                    this.owner = player;
+                }
             }
         }
     }
@@ -70,8 +80,8 @@ public abstract class IndirectEntityDamageSourceMixin extends EntityDamageSource
             .add("Type", resourceKey)
             .add("Source", this.shadow$getDirectEntity())
             .add("IndirectSource", this.shadow$getEntity());
-        if (this.impl$creator != null) {
-            helper.add("SourceOwner", this.impl$creator);
+        if (this.impl$creatorUUID != null) {
+            helper.add("SourceCreator", this.impl$creatorUUID);
         }
         return helper.toString();
     }

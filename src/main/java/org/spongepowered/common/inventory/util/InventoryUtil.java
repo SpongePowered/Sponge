@@ -38,7 +38,7 @@ import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.entity.player.SpongeUserData;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.custom.CarriedWrapperInventory;
@@ -159,7 +159,7 @@ public final class InventoryUtil {
                 SpongeCommon.logger().debug("Unknown plugin for [{}]", base);
                 return Launch.instance().minecraftPlugin();
             });
-        } else if (base instanceof SpongeUser) {
+        } else if (base instanceof SpongeUserData) {
             container = Launch.instance().minecraftPlugin();
         } else {
             container = Sponge.pluginManager().plugin(PlatformHooks.INSTANCE

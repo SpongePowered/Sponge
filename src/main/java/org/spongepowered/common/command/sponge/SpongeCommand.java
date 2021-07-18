@@ -25,11 +25,13 @@
 package org.spongepowered.common.command.sponge;
 
 import co.aikar.timings.Timings;
+import co.aikar.timings.sponge.SpongeTimingsFactory;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
 import net.kyori.adventure.text.format.TextColor;
@@ -49,8 +51,14 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.util.blockray.RayTrace;
+import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.LevelAccessor;
@@ -61,7 +69,6 @@ import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
-import co.aikar.timings.sponge.SpongeTimingsFactory;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginContributor;
 import org.spongepowered.plugin.metadata.PluginMetadata;
@@ -78,6 +85,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import javax.management.MBeanServer;
@@ -91,9 +100,13 @@ public class SpongeCommand {
     protected static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
 
     protected static final TextColor GREEN = TextColor.color(0x42C742);
+    protected static final TextColor MINT = TextColor.color(0x69A877);
+    protected static final TextColor LIGHT_BLUE = TextColor.color(0x5EB3DA);
     protected static final TextColor YELLOW = TextColor.color(0xDEDE00);
     protected static final TextColor ORANGE = TextColor.color(0xE36504);
     protected static final TextColor RED = TextColor.color(0xC74242);
+
+    private static final Component EMPTY = Component.text("Empty", TextColor.color(SpongeCommand.RED));
 
     private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", PluginContainer.class);
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", CommandMapping.class);
@@ -192,6 +205,8 @@ public class SpongeCommand {
             .addChild(reloadWorldCommand, "world")
             .build();
 
+        final Command.Parameterized infoCommand = this.infoSubcommand();
+
 
         // /sponge
         final Command.Builder commandBuilder = Command.builder()
@@ -205,7 +220,9 @@ public class SpongeCommand {
                 .addChild(tpsCommand, "tps")
                 .addChild(versionCommand, "version")
                 .addChild(whichCommand, "which")
-                .addChild(reloadCommand, "reload");
+                .addChild(reloadCommand, "reload")
+                .addChild(infoCommand, "info")
+            ;
 
         this.additionalActions(commandBuilder);
         return commandBuilder.build();
@@ -255,6 +272,121 @@ public class SpongeCommand {
         SpongeCommon.logger().info("Starting Mixin Audit");
         Launch.instance().auditMixins();
         return CommandResult.success();
+    }
+
+    private CompletableFuture<Component> userIdToComponent(final @Nullable UUID uuid) {
+        if (uuid != null) {
+            return Sponge.server().userManager().load(uuid).handleAsync((userOptional, throwable) -> {
+                if (throwable != null) {
+                    return SpongeCommand.EMPTY;
+                }
+                return userOptional.map(user ->
+                        user.require(Keys.DISPLAY_NAME)
+                            .color(TextColor.color(SpongeCommand.LIGHT_BLUE))
+                            .hoverEvent(HoverEvent.showText(Component.text(user.uniqueId().toString())))).orElse(SpongeCommand.EMPTY);
+            }, SpongeCommon.server());
+        }
+        return CompletableFuture.completedFuture(SpongeCommand.EMPTY);
+    }
+
+    private Command.Parameterized infoSubcommand() {
+        final Command.Parameterized blockInfoAtCommand = Command.builder()
+            .addParameter(CommonParameters.LOCATION_ONLINE_ONLY)
+            .executor(context -> {
+                final ServerLocation serverLocation = context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY);
+                final CompletableFuture<Component> creator = this.userIdToComponent(serverLocation.get(Keys.CREATOR).orElse(null));
+                final CompletableFuture<Component> notifier = this.userIdToComponent(serverLocation.get(Keys.NOTIFIER).orElse(null));
+                CompletableFuture.allOf(creator, notifier).thenAcceptAsync(x ->
+                        context.sendMessage(Identity.nil(), Component.text()
+                            .content("Block Info: ")
+                            .color(TextColor.color(SpongeCommand.GREEN))
+                            .append(Component.text(serverLocation.blockPosition().toString())
+                                    .hoverEvent(ItemStack.builder().fromBlockState(serverLocation.block()).build().createSnapshot())
+                            )
+                            .append(Component.newline())
+                            .append(Component.text("Creator: ", TextColor.color(SpongeCommand.MINT)))
+                            .append(creator.join())
+                            .append(Component.newline())
+                            .append(Component.text("Notifier: ", TextColor.color(SpongeCommand.MINT)))
+                            .append(notifier.join())
+                            .build()), SpongeCommon.server());
+                return CommandResult.success();
+            })
+            .build();
+
+        final Command.Parameterized blockInfoLookingAt = Command.builder()
+            .executor(context -> {
+                if (!(context.cause().root() instanceof Player)) {
+                    return CommandResult.error(Component.text("Player required", TextColor.color(SpongeCommand.RED)));
+                }
+                final Player player = (Player) context.cause().root();
+                return RayTrace.block()
+                    .sourceEyePosition(player)
+                    .direction(player)
+                    .select(RayTrace.nonAir())
+                    .limit(10)
+                    .execute()
+                    .map(result -> {
+                        final LocatableBlock locatableBlock = result.selectedObject();
+                        final CompletableFuture<Component> creator = this.userIdToComponent(locatableBlock.world()
+                                .get(locatableBlock.blockPosition(), Keys.CREATOR).orElse(null));
+                        final CompletableFuture<Component> notifier = this.userIdToComponent(locatableBlock.world()
+                                .get(locatableBlock.blockPosition(), Keys.CREATOR).orElse(null));
+                        CompletableFuture.allOf(creator, notifier).thenAcceptAsync(x ->
+                                context.sendMessage(Identity.nil(), Component.text()
+                                    .content("Block Info: ")
+                                    .color(TextColor.color(SpongeCommand.GREEN))
+                                    .append(Component.text(locatableBlock.blockPosition().toString())
+                                            .hoverEvent(ItemStack.builder().fromBlockState(locatableBlock.blockState()).build().createSnapshot())
+                                    )
+                                    .append(Component.newline())
+                                    .append(Component.text("Creator: ", TextColor.color(SpongeCommand.MINT)))
+                                    .append(creator.join())
+                                    .append(Component.newline())
+                                    .append(Component.text("Notifier: ", TextColor.color(SpongeCommand.MINT)))
+                                    .append(notifier.join())
+                                    .build()), SpongeCommon.server());
+                        return CommandResult.success();
+                    }).orElseGet(() -> CommandResult.error(Component.text("Failed to find any block in range", NamedTextColor.RED)));
+            })
+            .build();
+        final Command.Parameterized entityLookingAt = Command.builder()
+            .executor(context -> {
+                if (!(context.cause().root() instanceof Player)) {
+                    return CommandResult.error(Component.text("Player required", TextColor.color(SpongeCommand.RED)));
+                }
+                final Player player = (Player) context.cause().root();
+                return RayTrace.entity()
+                    .sourceEyePosition(player)
+                    .direction(player)
+                    .limit(10)
+                    .execute()
+                    .map(result -> {
+                        final org.spongepowered.api.entity.Entity entity = result.selectedObject();
+                        final CompletableFuture<Component> creator = this.userIdToComponent(entity.get(Keys.CREATOR).orElse(null));
+                        final CompletableFuture<Component> notifier = this.userIdToComponent(entity.get(Keys.NOTIFIER).orElse(null));
+                        CompletableFuture.allOf(creator, notifier).thenAcceptAsync(x ->
+                                context.sendMessage(Identity.nil(), Component.text()
+                                    .content("Entity Info: ")
+                                    .color(TextColor.color(SpongeCommand.GREEN))
+                                    .append(entity.type().asComponent().hoverEvent(entity))
+                                    .append(Component.newline())
+                                    .append(Component.text("Creator: ", TextColor.color(SpongeCommand.MINT)))
+                                    .append(creator.join())
+                                    .append(Component.newline())
+                                    .append(Component.text("Notifier: ", TextColor.color(SpongeCommand.MINT)))
+                                    .append(notifier.join())
+                                    .build()), SpongeCommon.server());
+                        return CommandResult.success();
+                    }).orElseGet(() -> CommandResult.error(Component.text("Failed to find any block in range", NamedTextColor.RED)));
+            })
+            .build();
+        return Command.builder()
+            .addChild(blockInfoAtCommand, "blockAt")
+            .addChild(blockInfoLookingAt, "block")
+            .addChild(entityLookingAt, "entity")
+            .permission("sponge.command.info")
+            .build();
     }
 
     private Command.Parameterized chunksSubcommand() {

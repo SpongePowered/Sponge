@@ -22,36 +22,39 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.tick;
+package org.spongepowered.common.util;
 
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.SpongeCommon;
 
-class DimensionTickPhaseState extends TickPhaseState<DimensionContext> {
-    DimensionTickPhaseState() {
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.time.Instant;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
+
+public final class FileUtil {
+
+    private final static DateTimeFormatter FORMATTER = DateTimeFormatter.ofPattern("yyyy-MM-dd-hhmmss").withZone(ZoneId.systemDefault());
+
+    public static void copyCorruptedFile(final File file) {
+        FileUtil.copyCorruptedFile(file.toPath());
     }
 
-    @Override
-    public DimensionContext createNewContext(final PhaseTracker tracker) {
-        return new DimensionContext(tracker)
-                .addBlockCaptures()
-                .addEntityCaptures()
-                .addEntityDropCaptures();
-    }
-
-    @Override
-    public void unwind(final DimensionContext phaseContext) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PLACEMENT);
-            TrackingUtil.processBlockCaptures(phaseContext);
+    public static void copyCorruptedFile(final Path path) {
+        final Path corruptPath =
+                path.resolveSibling(path.getFileName().toString() + ".corrupted_" + FileUtil.FORMATTER.format(Instant.now()));
+        try {
+            Files.copy(path, corruptPath);
+            SpongeCommon.logger().info("Copied corrupted file {} to {}.", path.toAbsolutePath().toString(), corruptPath.toAbsolutePath().toString());
+        } catch (final IOException exception) {
+            SpongeCommon.logger().error("Failed to copy corrupted file {} to {}.", path.toAbsolutePath().toString(),
+                    corruptPath.toAbsolutePath().toString(), exception);
         }
     }
 
-    @Override
-    public boolean doesDenyChunkRequests(final DimensionContext context) {
-        return false;
+    private FileUtil() {
     }
+
 }

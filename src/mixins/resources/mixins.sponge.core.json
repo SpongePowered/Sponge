@@ -125,6 +125,7 @@
         "world.entity.item.FallingBlockEntityMixin",
         "world.entity.item.ItemEntityMixin",
         "world.entity.item.PrimedTntMixin",
+        "world.entity.monster.Blaze_BlazeAttackGoalMixin",
         "world.entity.monster.CreeperMixin",
         "world.entity.monster.EnderMan_EndermanLeaveBlockGoalMixin",
         "world.entity.monster.EnderMan_EndermanTakeBlockGoalMixin",
@@ -242,6 +243,7 @@
         "client.network.chat.TranslatableComponentMixin",
         "client.player.AbstractClientPlayerMixin",
         "client.renderer.entity.EntityRenderersMixin",
+        "client.server.IntegratedPlayerListMixin",
         "server.network.MemoryServerHandshakePacketListenerImplMixin"
     ],
     "server": [

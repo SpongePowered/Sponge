@@ -117,12 +117,8 @@ public abstract class FoodDataMixin implements FoodDataBridge {
             return currentValue;
         }
 
-        for (final Value.Immutable<?> immutableValue : event.endResult().successfulData()) {
-            if (immutableValue.key() == key) {
-                return (E) immutableValue.get();
-            }
-        }
-
-        return value;
+        return event.endResult().successfulValue(key)
+                .map(Value::get)
+                .orElse(value);
     }
 }

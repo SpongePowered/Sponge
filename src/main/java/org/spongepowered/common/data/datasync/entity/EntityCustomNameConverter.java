@@ -24,17 +24,14 @@
  */
 package org.spongepowered.common.data.datasync.entity;
 
-import net.kyori.adventure.text.Component;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
 
-import java.util.List;
 import java.util.Optional;
 
 public final class EntityCustomNameConverter extends DataParameterConverter<net.minecraft.network.chat.Component> {
@@ -52,16 +49,15 @@ public final class EntityCustomNameConverter extends DataParameterConverter<net.
     }
 
     @Override
-    public net.minecraft.network.chat.Component getValueFromEvent(final net.minecraft.network.chat.Component oldValue, final List<Immutable<?>> values) {
-        for (final Immutable<?> value : values) {
-            if (value.key() == Keys.DISPLAY_NAME) {
-                try {
-                    return SpongeAdventure.asVanilla((Component) value.get());
-                } catch (final Exception e) {
-                    return oldValue;
-                }
-            }
-        }
-        return oldValue;
+    public net.minecraft.network.chat.Component getValueFromEvent(final net.minecraft.network.chat.Component oldValue, final DataTransactionResult result) {
+        return result.successfulValue(Keys.DISPLAY_NAME)
+                .map(v -> {
+                    try {
+                        return SpongeAdventure.asVanilla(v.get());
+                    } catch (final Exception ignored) {
+                        return oldValue;
+                    }
+                })
+                .orElse(oldValue);
     }
 }

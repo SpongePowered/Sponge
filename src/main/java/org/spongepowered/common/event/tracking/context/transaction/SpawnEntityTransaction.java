@@ -24,32 +24,34 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
+import org.spongepowered.api.util.Tuple;
+import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
+import org.spongepowered.common.util.PrettyPrinter;
+import org.spongepowered.math.vector.Vector3d;
+
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.SpawnType;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
-import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
-import org.spongepowered.common.util.PrettyPrinter;
-import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 @DefaultQualifier(NonNull.class)
 public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEvent> {
@@ -89,13 +91,13 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
         final @Nullable GameTransaction<@NonNull ?> parent
     ) {
-        if (parent instanceof ChangeBlock) {
-            return Optional.of(((phaseContext, stackFrame) -> {
-                stackFrame.pushCause(((ChangeBlock) parent).original);
-                stackFrame.addContext(EventContextKeys.BLOCK_TARGET, ((ChangeBlock) parent).original);
-            }));
-        }
-        return Optional.empty();
+        return Optional.of((context, frame) -> {
+            if (parent instanceof ChangeBlock) {
+                frame.pushCause(((ChangeBlock) parent).original);
+                frame.addContext(EventContextKeys.BLOCK_TARGET, ((ChangeBlock) parent).original);
+            }
+            frame.addContext(EventContextKeys.SPAWN_TYPE, this.deducedSpawnType);
+        });
     }
 
     @Override
@@ -103,12 +105,19 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
 
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
     @Override
-    public Optional<SpawnEntityEvent> generateEvent(final PhaseContext<@NonNull ?> context,
+    boolean shouldBuildEventAndRestartBatch(
+        final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context
+    ) {
+        return super.shouldBuildEventAndRestartBatch(pointer, context)
+            || this.deducedSpawnType != ((SpawnEntityTransaction) pointer).deducedSpawnType;
+    }
+
+    @Override
+    public Optional<SpawnEntityEvent> generateEvent(
+        final PhaseContext<@NonNull ?> context,
         final @Nullable GameTransaction<@NonNull ?> parent,
-        final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause,
-        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
+        final ImmutableList<GameTransaction<SpawnEntityEvent>> gameTransactions, final Cause currentCause
     ) {
         final ImmutableList<Tuple<Entity, DummySnapshot>> collect = gameTransactions.stream()
             .map(transaction -> (SpawnEntityTransaction) transaction)
@@ -135,7 +144,15 @@ public final class SpawnEntityTransaction extends GameTransaction<SpawnEntityEve
 
     @Override
     public void postProcessEvent(final PhaseContext<@NonNull ?> context, final SpawnEntityEvent event) {
-
+        Stream.of(
+            context.getNotifier(),
+            context.getCreator(),
+            context.getSource(ServerPlayer.class).map(ServerPlayer::uniqueId)
+        )
+            .filter(Optional::isPresent)
+            .map(Optional::get)
+            .findFirst()
+            .ifPresent(creator -> event.entities().forEach(entity -> ((CreatorTrackedBridge) entity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, creator)));
     }
 
     @Override

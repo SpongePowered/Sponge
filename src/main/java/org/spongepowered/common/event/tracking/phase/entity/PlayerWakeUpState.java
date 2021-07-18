@@ -31,14 +31,11 @@ final class PlayerWakeUpState extends EntityPhaseState<BasicEntityContext> {
 
     @Override
     public BasicEntityContext createNewContext(final PhaseTracker tracker) {
-        return new BasicEntityContext(this, tracker)
-            .addCaptures();
+        return new BasicEntityContext(this, tracker);
     }
 
     @Override
     public void unwind(final BasicEntityContext context) {
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);
     }
 }

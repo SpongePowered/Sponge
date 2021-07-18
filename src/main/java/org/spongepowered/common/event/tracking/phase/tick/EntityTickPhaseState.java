@@ -24,18 +24,24 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.decoration.HangingEntity;
+import net.minecraft.world.entity.decoration.ItemFrame;
+import net.minecraft.world.phys.AABB;
+
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.ExperienceOrb;
+import org.spongepowered.api.entity.living.Ageable;
+import org.spongepowered.api.entity.projectile.Projectile;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
-import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
-import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.accessor.world.entity.decoration.ItemFrameAccessor;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.EntityTrackedBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -45,15 +51,7 @@ import org.spongepowered.common.world.BlockChange;
 
 import java.util.List;
 import java.util.function.BiConsumer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.core.Direction;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.damagesource.CombatEntry;
-import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.decoration.HangingEntity;
-import net.minecraft.world.entity.decoration.ItemFrame;
-import net.minecraft.world.entity.item.FallingBlockEntity;
-import net.minecraft.world.phys.AABB;
+import java.util.function.Supplier;
 
 class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
 
@@ -62,11 +60,8 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         super.getFrameModifier().andThen((frame, context) -> {
             final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
-            if (tickingEntity instanceof FallingBlockEntity) {
-                context.getCreator().ifPresent(frame::pushCause);
-            }
-            frame.pushCause(tickingEntity);
-            ((EntityTrackedBridge) tickingEntity).populateFrameModifier(frame, context);
+            ((EntityTrackedBridge) tickingEntity).tracker$populateFrameInTickContext(frame, context);
+            frame.pushCause(tickingEntity); // Push the entity last
         });
 
     EntityTickPhaseState() {
@@ -77,102 +72,48 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         return this.ENTITY_TICK_MODIFIER;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
     public void unwind(final EntityTickContext phaseContext) {
         final Entity tickingEntity = phaseContext.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", phaseContext));
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            this.processCaptures(tickingEntity, phaseContext, frame);
+        if (!TrackingUtil.processBlockCaptures(phaseContext)) {
+            ((EntityBridge) tickingEntity).bridge$onCancelledBlockChange(phaseContext);
         }
     }
 
-    protected void processCaptures(final Entity tickingEntity, final EntityTickContext phaseContext, final CauseStackManager.StackFrame frame) {
-        phaseContext.addCreatorAndNotifierToCauseStack(frame);
-        // If we're doing bulk captures for blocks, go ahead and do them. otherwise continue with entity checks
-        if (phaseContext.allowsBulkBlockCaptures()) {
-            if (!TrackingUtil.processBlockCaptures(phaseContext)) {
-                ((EntityBridge) tickingEntity).bridge$onCancelledBlockChange(phaseContext);
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final EntityTickContext context, final net.minecraft.world.entity.Entity entityToSpawn
+    ) {
+        if (entityToSpawn instanceof ExperienceOrb) {
+            return SpawnTypes.EXPERIENCE;
+        }
+        if (entityToSpawn instanceof Projectile) {
+            return SpawnTypes.PROJECTILE;
+        }
+        final Entity source = context.getSource(Entity.class)
+            .orElseThrow(() -> new IllegalStateException("Ticking over a non Entity"));
+        if (source instanceof Ageable) {
+            if (source.getClass() == entityToSpawn.getClass()) {
+                return SpawnTypes.BREEDING;
             }
         }
-        // And finally, if we're not capturing entities, there's nothing left for us to do.
-        if (!phaseContext.allowsBulkEntityCaptures()) {
-            return; // The rest of this method is all about entity captures
-        }
-//        phaseContext.getCapturedEntitySupplier()
-//                .acceptAndClearIfNotEmpty(entities -> {
-//                    final List<Entity> experience = new ArrayList<>(entities.size());
-//                    final List<Entity> nonExp = new ArrayList<>(entities.size());
-//                    final List<Entity> breeding = new ArrayList<>(entities.size());
-//                    final List<Entity> projectile = new ArrayList<>(entities.size());
-//                    for (final Entity entity : entities) {
-//                        if (entity instanceof ExperienceOrbEntity) {
-//                            experience.add(entity);
-//                        } else if (tickingEntity instanceof Ageable && tickingEntity.getClass() == entity.getClass()) {
-//                            breeding.add(entity);
-//                        } else if (entity instanceof Projectile) {
-//                            projectile.add(entity);
-//                        } else {
-//                            nonExp.add(entity);
-//                        }
-//                    }
-//
-//                    if (!experience.isEmpty()) {
-//                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-//                        this.appendContextOfPossibleEntityDeath(tickingEntity, frame);
-//                        SpongeCommonEventFactory.callSpawnEntity(experience, phaseContext);
-//                        frame.removeContext(EventContextKeys.LAST_DAMAGE_SOURCE);
-//                    }
-//                    if (!breeding.isEmpty()) {
-//                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BREEDING);
-//                        if (tickingEntity instanceof AnimalEntity) {
-//                            final PlayerEntity playerInLove = ((AnimalEntity) tickingEntity).getLoveCause();
-//                            if (playerInLove != null) {
-//                                frame.addContext(EventContextKeys.PLAYER, (Player) playerInLove);
-//                            }
-//                        }
-//                        SpongeCommonEventFactory.callSpawnEntity(breeding, phaseContext);
-//
-//                        frame.removeContext(EventContextKeys.PLAYER);
-//                    }
-//                    if (!projectile.isEmpty()) {
-//                        frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PROJECTILE);
-//                        SpongeCommonEventFactory.callSpawnEntity(projectile, phaseContext);
-//                        frame.removeContext(EventContextKeys.SPAWN_TYPE);
-//
-//                    }
-//                    frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.PASSIVE);
-//                    SpongeCommonEventFactory.callSpawnEntity(nonExp, phaseContext);
-//                    frame.removeContext(EventContextKeys.SPAWN_TYPE);
-//
-//                });
-    }
-
-    private void appendContextOfPossibleEntityDeath(final Entity tickingEntity, final CauseStackManager.StackFrame frame) {
-        if (EntityUtil.isEntityDead((net.minecraft.world.entity.Entity) tickingEntity)) {
-            if (tickingEntity instanceof LivingEntity) {
-                final CombatEntry entry = ((CombatTrackerAccessor) ((LivingEntity) tickingEntity).getCombatTracker()).invoker$getMostSignificantFall();
-                if (entry != null) {
-                    if (((CombatEntryAccessor) entry).accessor$source() != null) {
-                        frame.addContext(EventContextKeys.LAST_DAMAGE_SOURCE,
-                                (DamageSource) ((CombatEntryAccessor) entry).accessor$source());
-                    }
-                }
-            }
-        }
+        return super.getSpawnTypeForTransaction(context, entityToSpawn);
     }
 
     @Override
     protected EntityTickContext createNewContext(final PhaseTracker tracker) {
-        return new EntityTickContext(this, tracker).addCaptures();
+        return new EntityTickContext(this, tracker);
     }
 
     @Override
-    public void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction,
-        final EntityTickContext context) {
+    public void postBlockTransactionApplication(
+        final EntityTickContext context, final BlockChange blockChange,
+        final BlockTransactionReceipt transaction
+    ) {
         if (blockChange == BlockChange.BREAK) {
             final Entity tickingEntity = context.getSource(Entity.class).get();
-            final BlockPos blockPos = VecHelper.toBlockPos(transaction.original().position());
+            final BlockPos blockPos = VecHelper.toBlockPos(transaction.originalBlock().position());
             final List<HangingEntity> hangingEntities = ((ServerLevel) tickingEntity.world())
                 .getEntitiesOfClass(HangingEntity.class, new AABB(blockPos, blockPos).inflate(1.1D, 1.1D, 1.1D),
                     entityIn -> {

@@ -22,39 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.plugin;
+package org.spongepowered.common.user;
 
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
+import java.nio.file.StandardWatchEventKinds;
+import java.nio.file.WatchEvent;
 
-final class ServerTickListenerState extends ListenerPhaseState<ServerTickListenerContext> {
+// Used to reduce the number of calls to maps.
+final class SpongeUserMutableWatchEvent {
 
-    private final String desc;
+    private WatchEvent.Kind<?> kind = null;
 
-    ServerTickListenerState(final String name) {
-        this.desc = TrackingUtil.phaseStateToString("Plugin", name, this);
+    public WatchEvent.Kind<?> get() {
+        return this.kind;
     }
 
-    @Override
-    public ServerTickListenerContext createNewContext(final PhaseTracker tracker) {
-        return new ServerTickListenerContext(this, tracker).addCaptures().player();
+    public void set(WatchEvent.Kind<?> kind) {
+        if (kind == StandardWatchEventKinds.ENTRY_MODIFY) {
+            // This should never happen, we don't listen to this.
+            // However, if it does, treat it as a create, because it
+            // infers the existence of the file.
+            kind = StandardWatchEventKinds.ENTRY_CREATE;
+        }
+
+        if (kind == StandardWatchEventKinds.ENTRY_CREATE || kind == StandardWatchEventKinds.ENTRY_DELETE) {
+            if (this.kind != null && this.kind != kind) {
+                this.kind = null;
+            } else {
+                this.kind = kind;
+            }
+        }
     }
 
-    @Override
-    public void unwind(final ServerTickListenerContext phaseContext) {
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(phaseContext);
-
-    }
-
-    @Override
-    public boolean doesDenyChunkRequests(final ServerTickListenerContext context) {
-        return true;
-    }
-
-    @Override
-    public String toString() {
-        return this.desc;
-    }
 }

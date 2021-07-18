@@ -32,12 +32,14 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 
+import java.util.UUID;
+
 @Mixin(BlockEventData.class)
 public abstract class BlockEventDataMixin_Tracker implements TrackerBlockEventDataBridge {
 
     @Nullable private LocatableBlock bridge$TickingBlock = null;
     @Nullable private BlockEntity bridge$TileEntity = null;
-    @Nullable private User bridge$sourceUser = null;
+    @Nullable private UUID bridge$sourceUser = null;
 
     @Nullable
     @Override
@@ -61,14 +63,13 @@ public abstract class BlockEventDataMixin_Tracker implements TrackerBlockEventDa
         this.bridge$TileEntity = bridge$TileEntity;
     }
 
-    @Nullable
     @Override
-    public User bridge$getSourceUser() {
+    public @Nullable UUID bridge$getSourceUserUUID() {
         return this.bridge$sourceUser;
     }
 
     @Override
-    public void bridge$setSourceUser(@Nullable final User user) {
+    public void bridge$setSourceUserUUID(final @Nullable UUID user) {
         this.bridge$sourceUser = user;
     }
 

@@ -24,11 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.data.type.HandTypes;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
@@ -36,7 +34,6 @@ import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -48,10 +45,23 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerPlayer;
-import java.util.List;
+
+import java.util.function.BiConsumer;
 
 public final class InteractionPacketState extends PacketState<InteractionPacketContext> {
 
+    @Override
+    public BiConsumer<CauseStackManager.StackFrame, InteractionPacketContext> getFrameModifier() {
+        return super.getFrameModifier().andThen((frame, context) -> {
+            final ItemStack usedStack = context.getItemUsed();
+            final HandType usedHand = context.getHandUsed();
+            final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
+            final BlockSnapshot targetBlock = context.getTargetBlock();
+            frame.addContext(EventContextKeys.USED_ITEM, usedSnapshot);
+            frame.addContext(EventContextKeys.USED_HAND, usedHand);
+            frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
+        });
+    }
 
     @Override
     public InteractionPacketContext createNewContext(final PhaseTracker tracker) {
@@ -83,34 +93,16 @@ public final class InteractionPacketState extends PacketState<InteractionPacketC
     }
 
     @Override
-    public boolean shouldCaptureEntity() {
-        return true;
-    }
-
-    @Override
-    public boolean doesCaptureNeighborNotifications(final InteractionPacketContext context) {
-        return true;
-    }
-
-    @Override
     public void unwind(final InteractionPacketContext phaseContext) {
 
         final ServerPlayer player = phaseContext.getPacketPlayer();
-        final ItemStack usedStack = phaseContext.getItemUsed();
-        final HandType usedHand = phaseContext.getHandUsed();
-        final ItemStackSnapshot usedSnapshot = ItemStackUtil.snapshotOf(usedStack);
-        final Entity spongePlayer = (Entity) player;
-        final BlockSnapshot targetBlock = phaseContext.getTargetBlock();
-        
+
         final net.minecraft.world.item.ItemStack endActiveItem = player.getUseItem();
         ((LivingEntityAccessor) player).accessor$useItem(ItemStackUtil.toNative(phaseContext.getActiveItem()));
 
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(spongePlayer);
             frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            frame.addContext(EventContextKeys.USED_ITEM, usedSnapshot);
-            frame.addContext(EventContextKeys.USED_HAND, usedHand);
-            frame.addContext(EventContextKeys.BLOCK_HIT, targetBlock);
+
             final boolean hasBlocks = !phaseContext.getTransactor().isEmpty();
             if (hasBlocks) {
                 if (!TrackingUtil.processBlockCaptures(phaseContext)) {

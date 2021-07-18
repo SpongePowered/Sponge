@@ -24,32 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.world.level.block.state.BlockState;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.function.BiConsumer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.BonemealableBlock;
+import net.minecraft.world.level.block.state.BlockState;
 
 class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> {
-    private final BiConsumer<CauseStackManager.StackFrame, BlockTickContext> LOCATION_MODIFIER =
-        super.getFrameModifier().andThen((frame, context) ->
-            {
-                frame.pushCause(this.getLocatableBlockSourceFromContext(context));
-                context.tickingBlock.bridge$getTickFrameModifier().accept(frame, (ServerLevelBridge) context.world);
-            }
-        );
+
     private final String desc;
 
     BlockTickPhaseState(final String name) {
@@ -57,16 +42,9 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public BiConsumer<CauseStackManager.StackFrame, BlockTickContext> getFrameModifier() {
-        return this.LOCATION_MODIFIER;
-    }
-
-    @Override
     public BlockTickContext createNewContext(final PhaseTracker tracker) {
-        return new BlockTickContext(this, tracker)
-                .addCaptures();
+        return new BlockTickContext(this, tracker);
     }
-
 
     @Override
     public boolean shouldProvideModifiers(final BlockTickContext phaseContext) {
@@ -74,54 +52,11 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(final BlockTickContext context) {
-        return context.allowsBulkBlockCaptures();
-    }
-
-    @Override
-    LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
-        return context.getSource(LocatableBlock.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
-    }
-
-    @Override
-    public void unwind(final BlockTickContext context) {
-        TrackingUtil.processBlockCaptures(context);
-    }
-
-    @Override
-    public void appendContextPreExplosion(final ExplosionContext explosionContext, final BlockTickContext context) {
-        context.applyOwnerIfAvailable(explosionContext::creator);
-        context.applyNotifierIfAvailable(explosionContext::notifier);
-        final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
-        explosionContext.source(locatableBlock);
-    }
-
-    @Override
-    public void appendNotifierToBlockEvent(final BlockTickContext context, final TrackedWorldBridge mixinWorldServer, final BlockPos pos,
-        final TrackerBlockEventDataBridge blockEvent
-    ) {
-        final LocatableBlock source = this.getLocatableBlockSourceFromContext(context);
-        blockEvent.bridge$setTickingLocatable(source);
-    }
-
-    /**
-     * Specifically overridden here because some states have defaults and don't check the context.
-     * @param context The context
-     * @return True if block events are to be tracked by the specific type of entity (default is true)
-     */
-    @Override
-    public boolean doesBlockEventTracking(final BlockTickContext context) {
-        return context.allowsBlockEvents();
-    }
-
-    @Override
     public BlockChange associateBlockChangeWithSnapshot(
         final BlockTickContext phaseContext, final BlockState newState,
-        final Block newBlock,
-        final BlockState currentState,
-        final Block originalBlock
+        final BlockState currentState
     ) {
+        final Block newBlock = newState.getBlock();
         if (phaseContext.tickingBlock instanceof BonemealableBlock) {
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
@@ -130,7 +65,7 @@ class BlockTickPhaseState extends LocationBasedTickPhaseState<BlockTickContext> 
                 return BlockChange.GROW;
             }
         }
-        return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, originalBlock);
+        return super.associateBlockChangeWithSnapshot(phaseContext, newState, currentState);
     }
 
     @Override

@@ -24,35 +24,22 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.block.transaction.Operations;
-import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.fluid.FluidState;
-import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.function.BiConsumer;
-import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.LiquidBlock;
+import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.material.FlowingFluid;
 
 class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> {
-    private final BiConsumer<CauseStackManager.StackFrame, FluidTickContext> LOCATION_MODIFIER =
-        super.getFrameModifier().andThen((frame, context) ->
-            {
-                frame.pushCause(this.getLocatableBlockSourceFromContext(context));
-            }
-        );
+
     private final String desc;
 
     FluidTickPhaseState(final String name) {
@@ -60,16 +47,9 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
     }
 
     @Override
-    public BiConsumer<CauseStackManager.StackFrame, FluidTickContext> getFrameModifier() {
-        return this.LOCATION_MODIFIER;
-    }
-
-    @Override
     public FluidTickContext createNewContext(final PhaseTracker tracker) {
-        return new FluidTickContext(this, tracker)
-                .addCaptures();
+        return new FluidTickContext(this, tracker);
     }
-
 
     @Override
     public boolean shouldProvideModifiers(final FluidTickContext phaseContext) {
@@ -77,61 +57,18 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(final FluidTickContext context) {
-        return context.allowsBulkBlockCaptures();
-    }
-
-    @Override
-    LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
-        return context.getSource(LocatableBlock.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
-    }
-
-    @Override
-    public void unwind(final FluidTickContext context) {
-        TrackingUtil.processBlockCaptures(context);
-    }
-
-    @Override
-    public void appendContextPreExplosion(final ExplosionContext explosionContext, final FluidTickContext context) {
-        context.applyOwnerIfAvailable(explosionContext::creator);
-        context.applyNotifierIfAvailable(explosionContext::notifier);
-        final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
-        explosionContext.source(locatableBlock);
-    }
-
-    @Override
-    public void appendNotifierToBlockEvent(final FluidTickContext context, final TrackedWorldBridge mixinWorldServer, final BlockPos pos,
-        final TrackerBlockEventDataBridge blockEvent
-    ) {
-        final LocatableBlock source = this.getLocatableBlockSourceFromContext(context);
-        blockEvent.bridge$setTickingLocatable(source);
-    }
-
-    /**
-     * Specifically overridden here because some states have defaults and don't check the context.
-     * @param context The context
-     * @return True if block events are to be tracked by the specific type of entity (default is true)
-     */
-    @Override
-    public boolean doesBlockEventTracking(final FluidTickContext context) {
-        return context.allowsBlockEvents();
-    }
-
-    @Override
     public BlockChange associateBlockChangeWithSnapshot(
         final FluidTickContext phaseContext,
         final BlockState newState,
-        final Block newBlock,
-        final BlockState currentState,
-        final Block originalBlock
+        final BlockState currentState
     ) {
+        final Block newBlock = newState.getBlock();
         if (phaseContext.tickingBlock.getType() instanceof FlowingFluid) {
             if (newBlock == Blocks.AIR) {
                 return BlockChange.BREAK;
             }
             if (currentState.getBlock() instanceof LiquidBlock) {
-                if (newState.getBlock() instanceof LiquidBlock) {
+                if (newBlock instanceof LiquidBlock) {
                     return BlockChange.MODIFY;
                 } else if (newState.isAir()) {
                     return BlockChange.DECAY;
@@ -140,17 +77,16 @@ class FluidTickPhaseState extends LocationBasedTickPhaseState<FluidTickContext> 
                 }
             }
 
-            if (currentState.isAir()
-                && newState.getBlock() instanceof LiquidBlock) {
+            if (currentState.isAir() && newBlock instanceof LiquidBlock) {
                 return BlockChange.PLACE;
             }
         }
-        return super.associateBlockChangeWithSnapshot(phaseContext, newState, newBlock, currentState, originalBlock);
+        return super.associateBlockChangeWithSnapshot(phaseContext, newState, currentState);
     }
 
     @Override
     public Operation getBlockOperation(
-        FluidTickContext phaseContext,
+        final FluidTickContext phaseContext,
         final SpongeBlockSnapshot original, final SpongeBlockSnapshot result
     ) {
         final FluidState fluidState = original.state().fluidState();

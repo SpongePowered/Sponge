@@ -179,6 +179,12 @@ import org.spongepowered.api.tag.TagTypes;
 import org.spongepowered.api.util.Color;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.util.Nameable;
+import org.spongepowered.api.util.orientation.Orientation;
+import org.spongepowered.api.util.orientation.Orientations;
+import org.spongepowered.api.world.ChunkRegenerateFlag;
+import org.spongepowered.api.world.ChunkRegenerateFlags;
+import org.spongepowered.api.world.LightType;
+import org.spongepowered.api.world.LightTypes;
 import org.spongepowered.api.world.Locatable;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
@@ -292,7 +298,10 @@ import org.spongepowered.common.placeholder.SpongePlaceholderParserBuilder;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlot;
 import org.spongepowered.common.scoreboard.SpongeDisplaySlotFactory;
 import org.spongepowered.common.tag.SpongeTagType;
+import org.spongepowered.common.util.SpongeOrientation;
 import org.spongepowered.common.util.VecHelper;
+import org.spongepowered.common.world.SpongeChunkRegenerateFlag;
+import org.spongepowered.common.world.SpongeLightType;
 import org.spongepowered.common.world.portal.EndPortalType;
 import org.spongepowered.common.world.portal.NetherPortalType;
 import org.spongepowered.common.world.schematic.SpongePaletteType;
@@ -355,73 +364,6 @@ public final class SpongeRegistryLoaders {
         )));
     }
 
-    @SuppressWarnings("ConstantConditions")
-    public static RegistryLoader<ValueParameter<?>> valueParameter() {
-        return RegistryLoader.of(l -> {
-            l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
-            l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(),
-                    (reader, cause, state) -> (BlockState) state.getState()));
-            l.add(ResourceKeyedValueParameters.BOOLEAN, k -> ClientNativeArgumentParser.createIdentity(k, BoolArgumentType.bool()));
-            l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new);
-            l.add(ResourceKeyedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.DATE_TIME, SpongeDateTimeValueParameter::new);
-            l.add(ResourceKeyedValueParameters.DOUBLE, k -> ClientNativeArgumentParser.createIdentity(k, DoubleArgumentType.doubleArg()));
-            l.add(ResourceKeyedValueParameters.DURATION, SpongeDurationValueParameter::new);
-            l.add(ResourceKeyedValueParameters.ENTITY, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entity(), (reader, cause, selector) -> (Entity) selector.findSingleEntity((CommandSourceStack) cause)));
-            l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
-            l.add(ResourceKeyedValueParameters.INTEGER, k -> ClientNativeArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
-            l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
-            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
-            l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
-            l.add(ResourceKeyedValueParameters.LONG, k -> ClientNativeArgumentParser.createIdentity(k, LongArgumentType.longArg()));
-            l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(Collectors.toList())));
-            l.add(ResourceKeyedValueParameters.MANY_GAME_PROFILES, k -> ClientNativeArgumentParser.createConverter(k, GameProfileArgument.gameProfile(), (reader, cause, converter) -> converter.getNames((CommandSourceStack) cause)));
-            l.add(ResourceKeyedValueParameters.MANY_PLAYERS, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.players(), (reader, cause, selector) -> selector.findPlayers((CommandSourceStack) cause)));
-            l.add(ResourceKeyedValueParameters.NONE, SpongeNoneValueParameter::new);
-            l.add(ResourceKeyedValueParameters.OPERATOR, SpongeOperatorValueParameter::new);
-            l.add(ResourceKeyedValueParameters.PLAYER, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer((CommandSourceStack) cause)));
-            l.add(ResourceKeyedValueParameters.PLUGIN, SpongePluginContainerValueParameter::new);
-            l.add(ResourceKeyedValueParameters.REMAINING_JOINED_STRINGS, k -> ClientNativeArgumentParser.createIdentity(k, StringArgumentType.greedyString()));
-            l.add(ResourceKeyedValueParameters.RESOURCE_KEY, k -> ClientNativeArgumentParser.createConverter(k, ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation));
-            l.add(ResourceKeyedValueParameters.ROTATION, k -> ClientNativeArgumentParser.createConverter(k, RotationArgument.rotation(), (reader, cause, coords) -> {
-                final Vec2 rotation = coords.getRotation((CommandSourceStack) cause);
-                return new Vector3d(rotation.x, rotation.y, 0);
-            }));
-            l.add(ResourceKeyedValueParameters.STRING, k -> ClientNativeArgumentParser.createIdentity(k, StringArgumentType.string()));
-            l.add(ResourceKeyedValueParameters.TARGET_BLOCK, SpongeTargetBlockValueParameter::new);
-            l.add(ResourceKeyedValueParameters.TARGET_ENTITY, k -> new SpongeTargetEntityValueParameter(k, false));
-            l.add(ResourceKeyedValueParameters.TARGET_PLAYER, k -> new SpongeTargetEntityValueParameter(k, true));
-            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(), (reader, cause, result) -> LegacyComponentSerializer.legacyAmpersand().deserialize(result)));
-            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> LegacyComponentSerializer.legacyAmpersand().deserialize(result)));
-            l.add(ResourceKeyedValueParameters.TEXT_JSON, k -> ClientNativeArgumentParser.createConverter(k, ComponentArgument.textComponent(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)));
-            l.add(ResourceKeyedValueParameters.TEXT_JSON_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> GsonComponentSerializer.gson().deserialize(result)));
-            l.add(ResourceKeyedValueParameters.URL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(),
-                    (reader, cause, input) -> {
-                        try {
-                            return new URL(input);
-                        } catch (final MalformedURLException ex) {
-                            throw new SimpleCommandExceptionType(new TextComponent("Could not parse " + input + " as a URL"))
-                                    .createWithContext(reader);
-                        }
-                    })
-            );
-            l.add(ResourceKeyedValueParameters.USER, SpongeUserValueParameter::new);
-            l.add(ResourceKeyedValueParameters.UUID, k -> ClientNativeArgumentParser.createIdentity(k, UuidArgument.uuid()));
-            l.add(ResourceKeyedValueParameters.VECTOR2D, k -> ClientNativeArgumentParser.createConverter(k, Vec2Argument.vec2(),
-                    (reader, cause, result) -> {
-                        final net.minecraft.world.phys.Vec3 r = result.getPosition((CommandSourceStack) cause);
-                        return new Vector2d(r.x, r.z);
-                    })
-            );
-            l.add(ResourceKeyedValueParameters.VECTOR3D, k -> ClientNativeArgumentParser.createConverter(k, Vec3Argument.vec3(), (reader, cause, result) -> VecHelper.toVector3d(result.getPosition((CommandSourceStack) cause))));
-            l.add(ResourceKeyedValueParameters.WORLD, k -> ClientNativeArgumentParser.createConverter(k,
-                    DimensionArgument.dimension(),
-                    (reader, cause, result) -> Sponge.server().worldManager().world((ResourceKey) (Object) result)
-                            .orElseThrow(() -> DimensionArgumentAccessor.accessor$ERROR_INVALID_VALUE().createWithContext(reader, result))
-                    ));
-        });
-    }
 
     public static RegistryLoader<CatType> catType() {
         return RegistryLoader.of(l -> {
@@ -436,6 +378,15 @@ public final class SpongeRegistryLoaders {
             l.add(3, CatTypes.SIAMESE, SpongeCatType::new);
             l.add(0, CatTypes.TABBY, SpongeCatType::new);
             l.add(8, CatTypes.WHITE, SpongeCatType::new);
+        });
+    }
+
+    public static RegistryLoader<ChunkRegenerateFlag> chunkRegenerateFlag() {
+        return RegistryLoader.of(l -> {
+            l.add(ChunkRegenerateFlags.NONE, k -> new SpongeChunkRegenerateFlag(false, false));
+            l.add(ChunkRegenerateFlags.CREATE, k -> new SpongeChunkRegenerateFlag(true, false));
+            l.add(ChunkRegenerateFlags.ENTITIES, k -> new SpongeChunkRegenerateFlag(false, true));
+            l.add(ChunkRegenerateFlags.ALL, k -> new SpongeChunkRegenerateFlag(true, true));
         });
     }
 
@@ -641,6 +592,13 @@ public final class SpongeRegistryLoaders {
         });
     }
 
+    public static RegistryLoader<LightType> lightType() {
+        return RegistryLoader.of(l -> {
+            l.add(LightTypes.BLOCK, k -> new SpongeLightType(15));
+            l.add(LightTypes.SKY, k -> new SpongeLightType(15));
+        });
+    }
+
     public static RegistryLoader<LlamaType> llamaType() {
         return RegistryLoader.of(l -> {
             l.add(2, LlamaTypes.BROWN, SpongeLlamaType::new);
@@ -743,6 +701,19 @@ public final class SpongeRegistryLoaders {
                 Operations.MODIFY,
                 Operations.PLACE
         )));
+    }
+
+    public static RegistryLoader<Orientation> orientation() {
+        return RegistryLoader.of(l -> {
+            l.add(Orientations.TOP, k -> new SpongeOrientation(0));
+            l.add(Orientations.TOP_RIGHT, k -> new SpongeOrientation(45));
+            l.add(Orientations.RIGHT, k -> new SpongeOrientation(90));
+            l.add(Orientations.BOTTOM_RIGHT, k -> new SpongeOrientation(135));
+            l.add(Orientations.BOTTOM, k -> new SpongeOrientation(180));
+            l.add(Orientations.BOTTOM_LEFT, k -> new SpongeOrientation(225));
+            l.add(Orientations.LEFT, k -> new SpongeOrientation(270));
+            l.add(Orientations.TOP_LEFT, k -> new SpongeOrientation(315));
+        });
     }
 
     public static RegistryLoader<PaletteType<?, ?>> paletteType() {
@@ -923,6 +894,75 @@ public final class SpongeRegistryLoaders {
                 ValidationTypes.BLOCK_ENTITY,
                 ValidationTypes.ENTITY
         )));
+    }
+
+    @SuppressWarnings("ConstantConditions")
+    public static RegistryLoader<ValueParameter<?>> valueParameter() {
+        return RegistryLoader.of(l -> {
+            l.add(ResourceKeyedValueParameters.BIG_DECIMAL, SpongeBigDecimalValueParameter::new);
+            l.add(ResourceKeyedValueParameters.BIG_INTEGER, SpongeBigIntegerValueParameter::new);
+            l.add(ResourceKeyedValueParameters.BLOCK_STATE, k -> ClientNativeArgumentParser.createConverter(k, BlockStateArgument.block(),
+                    (reader, cause, state) -> (BlockState) state.getState()));
+            l.add(ResourceKeyedValueParameters.BOOLEAN, k -> ClientNativeArgumentParser.createIdentity(k, BoolArgumentType.bool()));
+            l.add(ResourceKeyedValueParameters.COLOR, SpongeColorValueParameter::new);
+            l.add(ResourceKeyedValueParameters.DATA_CONTAINER, SpongeDataContainerValueParameter::new);
+            l.add(ResourceKeyedValueParameters.DATE_TIME, SpongeDateTimeValueParameter::new);
+            l.add(ResourceKeyedValueParameters.DOUBLE, k -> ClientNativeArgumentParser.createIdentity(k, DoubleArgumentType.doubleArg()));
+            l.add(ResourceKeyedValueParameters.DURATION, SpongeDurationValueParameter::new);
+            l.add(ResourceKeyedValueParameters.ENTITY, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entity(), (reader, cause, selector) -> (Entity) selector.findSingleEntity((CommandSourceStack) cause)));
+            l.add(ResourceKeyedValueParameters.GAME_PROFILE, SpongeGameProfileValueParameter::new);
+            l.add(ResourceKeyedValueParameters.INTEGER, k -> ClientNativeArgumentParser.createIdentity(k, IntegerArgumentType.integer()));
+            l.add(ResourceKeyedValueParameters.IP, SpongeIPAddressValueParameter::new);
+            l.add(ResourceKeyedValueParameters.ITEM_STACK_SNAPSHOT, k -> ClientNativeArgumentParser.createConverter(k, ItemArgument.item(), (reader, cause, converter) -> new SpongeItemStackSnapshot((ItemStack) (Object) converter.createItemStack(1, true))));
+            l.add(ResourceKeyedValueParameters.LOCATION, SpongeServerLocationValueParameter::new);
+            l.add(ResourceKeyedValueParameters.LONG, k -> ClientNativeArgumentParser.createIdentity(k, LongArgumentType.longArg()));
+            l.add(ResourceKeyedValueParameters.MANY_ENTITIES, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.entities(), (reader, cause, selector) -> selector.findEntities((CommandSourceStack) cause).stream().map(x -> (Entity) x).collect(Collectors.toList())));
+            l.add(ResourceKeyedValueParameters.MANY_GAME_PROFILES, k -> ClientNativeArgumentParser.createConverter(k, GameProfileArgument.gameProfile(), (reader, cause, converter) -> converter.getNames((CommandSourceStack) cause)));
+            l.add(ResourceKeyedValueParameters.MANY_PLAYERS, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.players(), (reader, cause, selector) -> selector.findPlayers((CommandSourceStack) cause)));
+            l.add(ResourceKeyedValueParameters.NONE, SpongeNoneValueParameter::new);
+            l.add(ResourceKeyedValueParameters.OPERATOR, SpongeOperatorValueParameter::new);
+            l.add(ResourceKeyedValueParameters.PLAYER, k -> ClientNativeArgumentParser.createConverter(k, EntityArgument.player(), (reader, cause, selector) -> (Player) selector.findSinglePlayer((CommandSourceStack) cause)));
+            l.add(ResourceKeyedValueParameters.PLUGIN, SpongePluginContainerValueParameter::new);
+            l.add(ResourceKeyedValueParameters.REMAINING_JOINED_STRINGS, k -> ClientNativeArgumentParser.createIdentity(k, StringArgumentType.greedyString()));
+            l.add(ResourceKeyedValueParameters.RESOURCE_KEY, k -> ClientNativeArgumentParser.createConverter(k, ResourceLocationArgument.id(), (reader, cause, resourceLocation) -> (ResourceKey) (Object) resourceLocation));
+            l.add(ResourceKeyedValueParameters.ROTATION, k -> ClientNativeArgumentParser.createConverter(k, RotationArgument.rotation(), (reader, cause, coords) -> {
+                final Vec2 rotation = coords.getRotation((CommandSourceStack) cause);
+                return new Vector3d(rotation.x, rotation.y, 0);
+            }));
+            l.add(ResourceKeyedValueParameters.STRING, k -> ClientNativeArgumentParser.createIdentity(k, StringArgumentType.string()));
+            l.add(ResourceKeyedValueParameters.TARGET_BLOCK, SpongeTargetBlockValueParameter::new);
+            l.add(ResourceKeyedValueParameters.TARGET_ENTITY, k -> new SpongeTargetEntityValueParameter(k, false));
+            l.add(ResourceKeyedValueParameters.TARGET_PLAYER, k -> new SpongeTargetEntityValueParameter(k, true));
+            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(), (reader, cause, result) -> LegacyComponentSerializer.legacyAmpersand().deserialize(result)));
+            l.add(ResourceKeyedValueParameters.TEXT_FORMATTING_CODE_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> LegacyComponentSerializer.legacyAmpersand().deserialize(result)));
+            l.add(ResourceKeyedValueParameters.TEXT_JSON, k -> ClientNativeArgumentParser.createConverter(k, ComponentArgument.textComponent(), (reader, cause, result) -> SpongeAdventure.asAdventure(result)));
+            l.add(ResourceKeyedValueParameters.TEXT_JSON_ALL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.greedyString(), (reader, cause, result) -> GsonComponentSerializer.gson().deserialize(result)));
+            l.add(ResourceKeyedValueParameters.URL, k -> ClientNativeArgumentParser.createConverter(k, StringArgumentType.string(),
+                    (reader, cause, input) -> {
+                        try {
+                            return new URL(input);
+                        } catch (final MalformedURLException ex) {
+                            throw new SimpleCommandExceptionType(new TextComponent("Could not parse " + input + " as a URL"))
+                                    .createWithContext(reader);
+                        }
+                    })
+            );
+            l.add(ResourceKeyedValueParameters.USER, SpongeUserValueParameter::new);
+            l.add(ResourceKeyedValueParameters.UUID, k -> ClientNativeArgumentParser.createIdentity(k, UuidArgument.uuid()));
+            l.add(ResourceKeyedValueParameters.VECTOR2D, k -> ClientNativeArgumentParser.createConverter(k, Vec2Argument.vec2(),
+                    (reader, cause, result) -> {
+                        final net.minecraft.world.phys.Vec3 r = result.getPosition((CommandSourceStack) cause);
+                        return new Vector2d(r.x, r.z);
+                    })
+            );
+            l.add(ResourceKeyedValueParameters.VECTOR3D, k -> ClientNativeArgumentParser.createConverter(k, Vec3Argument.vec3(false),
+                    (reader, cause, result) -> VecHelper.toVector3d(result.getPosition((CommandSourceStack) cause))));
+            l.add(ResourceKeyedValueParameters.WORLD, k -> ClientNativeArgumentParser.createConverter(k,
+                    DimensionArgument.dimension(),
+                    (reader, cause, result) -> Sponge.server().worldManager().world((ResourceKey) (Object) result)
+                            .orElseThrow(() -> DimensionArgumentAccessor.accessor$ERROR_INVALID_VALUE().createWithContext(reader, result))
+            ));
+        });
     }
 
     public static RegistryLoader<WeatherType> weather() {

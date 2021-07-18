@@ -42,7 +42,7 @@ public abstract class Blaze_BlazeAttackGoalMixin extends Goal {
     // @formatter:on
 
     @ModifyArg(method = "tick()V",
-        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/World;addFreshEntity(Lnet/minecraft/entity/Entity;)Z"))
+        at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"))
     private Entity impl$setCanGrief(final Entity entity) {
         ((GrieferBridge) entity).bridge$setCanGrief(((GrieferBridge) this.blaze).bridge$canGrief());
         return entity;

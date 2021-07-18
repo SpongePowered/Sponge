@@ -31,7 +31,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Explosion;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -53,8 +52,9 @@ import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 import org.spongepowered.common.util.MemoizedSupplier;
 
-import javax.annotation.Nullable;
 import java.util.function.Supplier;
+
+import javax.annotation.Nullable;
 
 @Mixin(DamageSource.class)
 public abstract class DamageSourceMixin implements DamageSourceBridge {
@@ -100,11 +100,10 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
                 if (explosion.getSourceMob() == null && entity instanceof CreatorTrackedBridge) {
                     // check creator
                     final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) entity;
-                    creatorBridge.tracked$getCreatorReference()
-                            .filter(user -> user instanceof Player)
-                            .map(user -> (Player) user)
+                    creatorBridge.tracked$getCreatorUUID()
+                            .flatMap(x -> Sponge.server().player(x))
                             .ifPresent(player -> {
-                                final IndirectEntityDamageSource damageSource = new IndirectEntityDamageSource("explosion.player", entity, player);
+                                final IndirectEntityDamageSource damageSource = new IndirectEntityDamageSource("explosion.player", entity, (Entity) player);
                                 damageSource.setScalesWithDifficulty().setExplosion();
                                 cir.setReturnValue(damageSource);
                             });

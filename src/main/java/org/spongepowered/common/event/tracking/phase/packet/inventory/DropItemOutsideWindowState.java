@@ -39,6 +39,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
@@ -68,7 +69,7 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
 
             for (final Entity currentEntity : capturedEntities) {
                 if (currentEntity instanceof CreatorTrackedBridge) {
-                    ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((ServerPlayer) playerMP).user());
+                    ((CreatorTrackedBridge) currentEntity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((ServerPlayer) playerMP).uniqueId());
                 } else {
                     currentEntity.offer(Keys.CREATOR, playerMP.getUUID());
                 }

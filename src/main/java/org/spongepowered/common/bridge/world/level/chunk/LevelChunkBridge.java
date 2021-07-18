@@ -25,7 +25,6 @@
 package org.spongepowered.common.bridge.world.level.chunk;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.entity.PlayerTracker;
 
@@ -44,20 +43,15 @@ public interface LevelChunkBridge {
 
     Map<Integer, PlayerTracker> bridge$getTrackedIntPlayerPositions();
 
-    Optional<User> bridge$getBlockCreator(BlockPos pos);
-
     Optional<UUID> bridge$getBlockCreatorUUID(BlockPos pos);
 
-    Optional<User> bridge$getBlockNotifier(BlockPos pos);
-
     Optional<UUID> bridge$getBlockNotifierUUID(BlockPos pos);
-
 
     void bridge$setBlockNotifier(BlockPos pos, UUID uuid);
 
     void bridge$setBlockCreator(BlockPos pos, UUID uuid);
 
-    void bridge$addTrackedBlockPosition(Block block, BlockPos pos, User user, PlayerTracker.Type trackerType);
+    void bridge$addTrackedBlockPosition(Block block, BlockPos pos, UUID uuid, PlayerTracker.Type trackerType);
 
     void bridge$setTrackedIntPlayerPositions(Map<Integer, PlayerTracker> trackedPlayerPositions);
 

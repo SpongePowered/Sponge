@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
@@ -36,7 +35,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.transaction.NotificationTicket;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.world.LocatableBlock;
@@ -44,7 +42,6 @@ import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeNotificationTicket;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
@@ -149,11 +146,11 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
 
     @SuppressWarnings("UnstableApiUsage")
     @Override
-    public Optional<NotifyNeighborBlockEvent> generateEvent(final PhaseContext<@NonNull ?> context,
+    public Optional<NotifyNeighborBlockEvent> generateEvent(
+        final PhaseContext<@NonNull ?> context,
         final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<NotifyNeighborBlockEvent>> transactions,
-        final Cause currentCause,
-        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
+        final Cause currentCause
     ) {
         final ImmutableList<NotificationTicket> tickets = transactions.stream()
             .map(transaction -> ((NeighborNotification) transaction).ticketSupplier.get())

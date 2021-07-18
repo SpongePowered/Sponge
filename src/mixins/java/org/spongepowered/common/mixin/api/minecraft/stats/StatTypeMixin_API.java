@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.api.minecraft.stats;
 
 import net.minecraft.stats.Stat;
 import net.minecraft.stats.StatType;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.statistic.Statistic;
 import org.spongepowered.api.statistic.StatisticCategory;
 import org.spongepowered.asm.mixin.Final;
@@ -45,7 +46,7 @@ public abstract class StatTypeMixin_API implements StatisticCategory {
 
     @Override
     @SuppressWarnings({"unchecked"})
-    public Collection<? extends Statistic> statistics() {
+    public @NonNull Collection<? extends Statistic> statistics() {
         return Collections.unmodifiableCollection((Collection<? extends Statistic>) (Object) this.map.values());
     }
 }

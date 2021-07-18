@@ -64,13 +64,13 @@ import org.spongepowered.api.registry.RegistryScope;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.ServiceProvider;
-import org.spongepowered.api.user.UserManager;
 import org.spongepowered.api.world.difficulty.Difficulty;
 import org.spongepowered.api.world.storage.ChunkLayout;
 import org.spongepowered.api.world.teleport.TeleportHelper;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -83,7 +83,6 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.map.SpongeMapStorage;
 import org.spongepowered.common.profile.SpongeGameProfileManager;
@@ -105,7 +104,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
-@Implements(value = @Interface(iface = Server.class, prefix = "server$"))
+@Implements(value = @Interface(iface = Server.class, prefix = "server$", remap = Remap.NONE))
 public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLoop<TickTask> implements SpongeServer {
 
     // @formatter:off
@@ -136,10 +135,10 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     private UsernameCache api$usernameCache;
     private Audience api$broadcastAudience;
     private ServerScoreboard api$scoreboard;
-    private GameProfileManager api$profileManager;
-    private SpongeUserManager api$userManager;
+    private SpongeGameProfileManager api$profileManager;
     private MapStorage api$mapStorage;
     private RegistryHolder api$registryHolder;
+    private SpongeUserManager api$userManager;
 
     public MinecraftServerMixin_API(final String name) {
         super(name);
@@ -155,9 +154,9 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
         this.api$scheduler = new ServerScheduler();
         this.api$playerDataHandler = new SpongePlayerDataManager(this);
         this.api$teleportHelper = new SpongeTeleportHelper();
-        this.api$userManager = new SpongeUserManager(this);
         this.api$mapStorage = new SpongeMapStorage();
         this.api$registryHolder = new SpongeRegistryHolder(p_i232576_2_);
+        this.api$userManager = new SpongeUserManager((MinecraftServer) (Object) this);
     }
 
     @Override
@@ -258,7 +257,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     }
 
     @Override
-    public UserManager userManager() {
+    public SpongeUserManager userManager() {
         return this.api$userManager;
     }
 
@@ -347,6 +346,11 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
             this.api$profileManager = new SpongeGameProfileManager(this);
         }
 
+        return this.api$profileManager;
+    }
+
+    @Override
+    public SpongeGameProfileManager gameProfileManagerIfPresent() {
         return this.api$profileManager;
     }
 

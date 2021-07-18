@@ -26,11 +26,14 @@ package org.spongepowered.common.mixin.core.server.network;
 
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.Connection;
+import net.minecraft.network.chat.TextComponent;
+import net.minecraft.network.protocol.game.ClientboundDisconnectPacket;
 import net.minecraft.network.protocol.login.ClientboundGameProfilePacket;
 import net.minecraft.network.protocol.login.ClientboundLoginCompressionPacket;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+import net.minecraft.server.players.PlayerList;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cause;
@@ -44,8 +47,10 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
@@ -53,17 +58,21 @@ import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerI
 import org.spongepowered.common.bridge.server.players.PlayerListBridge;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 
+import java.io.IOException;
+import java.util.concurrent.CompletionException;
+
 @Mixin(ServerLoginPacketListenerImpl.class)
 public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginPacketListenerImplBridge, ConnectionHolderBridge {
 
     @Shadow @Final public Connection connection;
-    @Shadow private com.mojang.authlib.GameProfile gameProfile;
-    @Shadow @Final private MinecraftServer server;
-    @Shadow private ServerLoginPacketListenerImpl.State state;
+    @Shadow com.mojang.authlib.GameProfile gameProfile;
+    @Shadow @Final MinecraftServer server;
+    @Shadow ServerLoginPacketListenerImpl.State state;
     @Shadow private ServerPlayer delayedAcceptPlayer;
 
     @Shadow protected abstract com.mojang.authlib.GameProfile shadow$createFakeProfile(com.mojang.authlib.GameProfile profile);
     @Shadow public abstract void shadow$disconnect(net.minecraft.network.chat.Component reason);
+    @Shadow protected abstract void shadow$placeNewPlayer(final ServerPlayer param0);
 
     private boolean impl$accepted = false;
 
@@ -74,8 +83,9 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
 
     /**
      * @author morph - April 27th, 2021
+     * @author dualspiral - July 17th, 2021
      *
-     * @reason support async ban/whitelist service
+     * @reason support async ban/whitelist service and user->player syncing.
      */
     @Overwrite
     public void handleAcceptedLogin() {
@@ -88,35 +98,93 @@ public abstract class ServerLoginPacketListenerImplMixin implements ServerLoginP
             return;
         }
         this.impl$accepted = true;
+        final PlayerList playerList = this.server.getPlayerList();
         // Sponge end
 
         // Sponge start - completable future
-        ((PlayerListBridge) this.server.getPlayerList()).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.gameProfile).thenAcceptAsync(componentOpt -> {
-        // Sponge end
-            // Sponge start - we handle this later
-            if (componentOpt.isPresent()) {
-                // TODO add should fire logic to disconnect the player and return early
-                ((ConnectionBridge) this.connection).bridge$setKickReason(componentOpt.get());
-            }
-            // Sponge end
-            this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
-            if (this.server.getCompressionThreshold() >= 0 && !this.connection.isMemoryConnection()) {
-                this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), (param0) -> this.connection.setupCompression(this.server.getCompressionThreshold(), true));
-            }
+        ((PlayerListBridge) playerList).bridge$canPlayerLogin(this.connection.getRemoteAddress(), this.gameProfile)
+                .handle((componentOpt, throwable) -> {
+                    if (throwable != null) {
+                        // An error occurred during login checks so we ask to abort.
+                        ((ConnectionBridge) this.connection).bridge$setKickReason(new TextComponent("An error occurred checking ban/whitelist status."));
+                        SpongeCommon.logger().error("An error occurred when checking the ban/whitelist status of {}.", this.gameProfile.getId().toString());
+                        SpongeCommon.logger().error(throwable);
+                    } else if (componentOpt != null) {
+                        // We handle this later
+                        ((ConnectionBridge) this.connection).bridge$setKickReason(componentOpt);
+                    }
 
-            this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
-            final ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
-            if (var1 != null) {
-                this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
-                this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile);
-            } else {
-                // Sponge start - Also send the channel registrations using the minecraft channel, for compatibility
-                final ServerSideConnection connection = (ServerSideConnection) this;
-                ((SpongeChannelManager) Sponge.channelManager()).sendChannelRegistrations(connection);
-                // Sponge end
-                this.server.getPlayerList().placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
-            }
-        }, SpongeCommon.server());
+                    try {
+                        ((SpongeServer) SpongeCommon.server()).userManager().handlePlayerLogin(this.gameProfile);
+                    } catch (final IOException e) {
+                        throw new CompletionException(e);
+                    }
+                    return null;
+                })
+                .handleAsync((ignored, throwable) -> {
+                    if (throwable != null) {
+                        // We're just going to disconnect here, because something went horribly wrong.
+                        if (throwable instanceof CompletionException) {
+                            throw (CompletionException) throwable;
+                        } else {
+                            throw new CompletionException(throwable);
+                        }
+                    }
+                    // Sponge end
+                    this.state = ServerLoginPacketListenerImpl.State.ACCEPTED;
+                    if (this.server.getCompressionThreshold() >= 0 && !this.connection.isMemoryConnection()) {
+                        this.connection.send(new ClientboundLoginCompressionPacket(this.server.getCompressionThreshold()), (param0) -> this.connection.setupCompression(this.server.getCompressionThreshold(), true));
+                    }
+
+                    this.connection.send(new ClientboundGameProfilePacket(this.gameProfile));
+                    final ServerPlayer var1 = this.server.getPlayerList().getPlayer(this.gameProfile.getId());
+                    if (var1 != null) {
+                        this.state = ServerLoginPacketListenerImpl.State.DELAY_ACCEPT;
+                        this.delayedAcceptPlayer = this.server.getPlayerList().getPlayerForLogin(this.gameProfile);
+                    } else {
+                        // Sponge start - Also send the channel registrations using the minecraft channel, for compatibility
+                        final ServerSideConnection connection = (ServerSideConnection) this;
+                        ((SpongeChannelManager) Sponge.channelManager()).sendChannelRegistrations(connection);
+                        // Sponge end
+
+                        try {
+                            this.server.getPlayerList()
+                                    .placeNewPlayer(this.connection, this.server.getPlayerList().getPlayerForLogin(this.gameProfile));
+                        } catch (final Exception e) {
+                            throw new RuntimeException(e);
+                        }
+                    }
+                    return null;
+                }, SpongeCommon.server()).exceptionally(throwable -> {
+                    // Sponge Start
+                    // If a throwable exists, we're just going to disconnect the user, better than leaving them in limbo.
+                    if (throwable != null) {
+                        this.impl$disconnectError(throwable,
+                                this.state == ServerLoginPacketListenerImpl.State.ACCEPTED || this.state == ServerLoginPacketListenerImpl.State.READY_TO_ACCEPT);
+                    }
+                    return null;
+                    // Sponge End
+                });
+    }
+
+    @Redirect(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/network/ServerLoginPacketListenerImpl;placeNewPlayer(Lnet/minecraft/server/level/ServerPlayer;)V"))
+    private void impl$catchErrorWhenTickingNewPlayer(final ServerLoginPacketListenerImpl playerList, final ServerPlayer param0) {
+        try {
+            this.shadow$placeNewPlayer(param0);
+        } catch (final Exception e) {
+            this.impl$disconnectError(e, true);
+        }
+    }
+
+    private void impl$disconnectError(final Throwable throwable, final boolean gameDisconnect) {
+        SpongeCommon.logger().error("Forcibly disconnecting user {} due to an error during login.", this.gameProfile, throwable);
+        final net.minecraft.network.chat.Component message = new TextComponent("Internal Server Error: unable to complete login.");
+        // At this point, the client might be in the GAME state, so we need to send the right packet.
+        if (gameDisconnect) {
+            this.connection.send(new ClientboundDisconnectPacket(message), (param1) -> this.connection.disconnect(message));
+        } else {
+            this.shadow$disconnect(message);
+        }
     }
 
     private void impl$disconnectClient(final Component disconnectMessage) {

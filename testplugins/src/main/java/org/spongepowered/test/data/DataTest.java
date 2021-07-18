@@ -132,7 +132,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
-import java.util.UUID;
 
 @Plugin("datatest")
 public final class DataTest  {
@@ -946,7 +945,7 @@ public final class DataTest  {
 
 //        this.checkOfferData(player, Keys.LAST_DATE_JOINED, Instant.now().minus(1, TemporalUnits.DAYS));
 //        this.checkOfferData(player, Keys.LAST_DATE_PLAYED, Instant.now().minus(1, TemporalUnits.DAYS));
-        final User user = Sponge.server().userManager().find(player.uniqueId()).get();
+        final User user = Sponge.server().userManager().load(player.uniqueId()).join().get();
 //        this.checkOfferData(user, Keys.LAST_DATE_JOINED, Instant.now().minus(1, TemporalUnits.DAYS));
 //        this.checkOfferData(user, Keys.LAST_DATE_PLAYED, Instant.now().minus(1, TemporalUnits.DAYS));
 

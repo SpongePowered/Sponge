@@ -40,7 +40,6 @@ import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
 import static org.objectweb.asm.Opcodes.V1_6;
 
-import com.google.common.collect.Lists;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -54,6 +53,7 @@ import org.spongepowered.api.event.filter.cause.Before;
 import org.spongepowered.api.event.filter.cause.First;
 import org.spongepowered.api.event.filter.cause.Last;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.filter.data.GetValue;
 import org.spongepowered.api.event.filter.data.Has;
 import org.spongepowered.api.event.filter.data.Supports;
 import org.spongepowered.api.event.filter.type.Exclude;
@@ -67,6 +67,7 @@ import org.spongepowered.common.event.filter.delegate.CancellationEventFilterDel
 import org.spongepowered.common.event.filter.delegate.ExcludeSubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FilterDelegate;
 import org.spongepowered.common.event.filter.delegate.FirstCauseFilterSourceDelegate;
+import org.spongepowered.common.event.filter.delegate.GetValueFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.GetterFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.HasDataFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.IncludeSubtypeFilterDelegate;
@@ -76,6 +77,7 @@ import org.spongepowered.common.event.filter.delegate.ParameterFilterSourceDeleg
 import org.spongepowered.common.event.filter.delegate.RootCauseFilterSourceDelegate;
 import org.spongepowered.common.event.filter.delegate.SubtypeFilterDelegate;
 import org.spongepowered.common.event.filter.delegate.SupportsDataFilterDelegate;
+import org.spongepowered.common.event.gen.LoaderClassWriter;
 import org.spongepowered.common.util.generator.GeneratorUtils;
 
 import java.io.File;
@@ -84,7 +86,12 @@ import java.io.IOException;
 import java.lang.annotation.Annotation;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
+import java.util.function.Function;
 
 public class FilterGenerator {
 
@@ -101,13 +108,8 @@ public class FilterGenerator {
         name = name.replace('.', '/');
         Parameter[] params = method.getParameters();
 
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
-        MethodVisitor mv;
-
-        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
-
         SubtypeFilterDelegate sfilter = null;
-        List<FilterDelegate> additional = Lists.newArrayList();
+        final List<FilterDelegate> additional = new ArrayList<>();
         boolean cancellation = false;
         for (Annotation anno : method.getAnnotations()) {
             Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
@@ -127,9 +129,19 @@ public class FilterGenerator {
                 }
             }
         }
-        if (!cancellation && Cancellable.class.isAssignableFrom(method.getParameterTypes()[0])) {
+        if (!cancellation && Cancellable.class.isAssignableFrom(params[0].getType())) {
             additional.add(new CancellationEventFilterDelegate(Tristate.FALSE));
         }
+
+        // we know there are no filters, skip generating a class
+        if (additional.isEmpty() && sfilter == null && params.length == 1) {
+            return null;
+        }
+
+        final ClassWriter cw = new LoaderClassWriter(method.getDeclaringClass().getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        MethodVisitor mv;
+
+        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
 
         if (sfilter != null) {
             sfilter.createFields(cw);
@@ -163,7 +175,7 @@ public class FilterGenerator {
             for (int i = 1; i < params.length; i++) {
                 Parameter param = params[i];
                 ParameterFilterSourceDelegate source = null;
-                List<ParameterFilterDelegate> paramFilters = Lists.newArrayList();
+                List<ParameterFilterDelegate> paramFilters = new ArrayList<>();
                 for (Annotation anno : param.getAnnotations()) {
                     Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
                     if (obj == null) {
@@ -186,7 +198,7 @@ public class FilterGenerator {
                     throw new IllegalStateException(
                             "Cannot have additional parameters filters without an array source (for " + param.getName() + ")");
                 }
-                Tuple<Integer, Integer> localState = source.write(cw, mv, method, param, local);
+                final Tuple<Integer, Integer> localState = source.write(cw, mv, method, i, local, plocals, params);
                 local = localState.first();
                 plocals[i - 1] = localState.second();
 
@@ -252,148 +264,143 @@ public class FilterGenerator {
         return null;
     }
 
-    private static enum SubtypeFilter {
-        INCLUDE(Include.class),
-        EXCLUDE(Exclude.class),
+    private enum SubtypeFilter {
+        INCLUDE(Include.class, IncludeSubtypeFilterDelegate::new),
+        EXCLUDE(Exclude.class, ExcludeSubtypeFilterDelegate::new),
         ;
 
+        private static final Map<Class<? extends Annotation>, SubtypeFilter> BY_CLAZZ;
         private final Class<? extends Annotation> cls;
+        private final Function<Annotation, SubtypeFilterDelegate> factory;
 
-        private SubtypeFilter(Class<? extends Annotation> cls) {
+        @SuppressWarnings("unchecked")
+        <T extends Annotation> SubtypeFilter(final Class<? extends Annotation> cls, final Function<T, SubtypeFilterDelegate> factory) {
             this.cls = cls;
+            this.factory = (Function<Annotation, SubtypeFilterDelegate>) factory;
         }
 
-        public SubtypeFilterDelegate getDelegate(Annotation anno) {
-            if (this == SubtypeFilter.INCLUDE) {
-                return new IncludeSubtypeFilterDelegate((Include) anno);
-            } else if (this == SubtypeFilter.EXCLUDE) {
-                return new ExcludeSubtypeFilterDelegate((Exclude) anno);
-            }
-            throw new UnsupportedOperationException();
+        public SubtypeFilterDelegate getDelegate(final Annotation anno) {
+            return this.factory.apply(anno);
         }
 
-        public static SubtypeFilter valueOf(Class<? extends Annotation> cls) {
-            for (SubtypeFilter value : SubtypeFilter.values()) {
-                if (value.cls.equals(cls)) {
-                    return value;
-                }
+        public static SubtypeFilter valueOf(final Class<? extends Annotation> cls) {
+            return SubtypeFilter.BY_CLAZZ.get(cls);
+        }
+
+        static {
+            final Map<Class<? extends Annotation>, SubtypeFilter> byClazz = new HashMap<>();
+            for (final SubtypeFilter value : SubtypeFilter.values()) {
+                byClazz.put(value.cls, value);
             }
-            return null;
+            BY_CLAZZ = Collections.unmodifiableMap(byClazz);
         }
     }
 
-    private static enum EventTypeFilter {
-        CANCELLATION(IsCancelled.class),
+    private enum EventTypeFilter {
+        CANCELLATION(IsCancelled.class, CancellationEventFilterDelegate::new),
         ;
 
+        private static final Map<Class<? extends Annotation>, EventTypeFilter> BY_CLAZZ;
         private final Class<? extends Annotation> cls;
+        private final Function<Annotation, FilterDelegate> factory;
 
-        private EventTypeFilter(Class<? extends Annotation> cls) {
+        @SuppressWarnings("unchecked")
+        <T extends Annotation> EventTypeFilter(final Class<T> cls, final Function<T, FilterDelegate> factory) {
             this.cls = cls;
+            this.factory = (Function<Annotation, FilterDelegate>) factory;
         }
 
-        public FilterDelegate getDelegate(Annotation anno) {
-            if (this == EventTypeFilter.CANCELLATION) {
-                return new CancellationEventFilterDelegate(((IsCancelled) anno).value());
-            }
-            throw new UnsupportedOperationException();
+        public FilterDelegate getDelegate(final Annotation anno) {
+            return this.factory.apply(anno);
         }
 
         public static EventTypeFilter valueOf(Class<? extends Annotation> cls) {
-            for (EventTypeFilter value : EventTypeFilter.values()) {
-                if (value.cls.equals(cls)) {
-                    return value;
-                }
+            return EventTypeFilter.BY_CLAZZ.get(cls);
+        }
+
+        static {
+           final Map<Class<? extends Annotation>, EventTypeFilter> byClazz = new HashMap<>();
+            for (final EventTypeFilter value : EventTypeFilter.values()) {
+                byClazz.put(value.cls, value);
             }
-            return null;
+            BY_CLAZZ = Collections.unmodifiableMap(byClazz);
         }
     }
 
-    private static enum ParameterSource {
-        CAUSE_FIRST(First.class),
-        CAUSE_LAST(Last.class),
-        CAUSE_BEFORE(Before.class),
-        CAUSE_AFTER(After.class),
-        CAUSE_ALL(All.class),
-        CAUSE_ROOT(Root.class),
-        GETTER(Getter.class),
+    private enum ParameterSource {
+        CAUSE_FIRST(First.class, FirstCauseFilterSourceDelegate::new),
+        CAUSE_LAST(Last.class, LastCauseFilterSourceDelegate::new),
+        CAUSE_BEFORE(Before.class, BeforeCauseFilterSourceDelegate::new),
+        CAUSE_AFTER(After.class, AfterCauseFilterSourceDelegate::new),
+        CAUSE_ALL(All.class, AllCauseFilterSourceDelegate::new),
+        CAUSE_ROOT(Root.class, RootCauseFilterSourceDelegate::new),
+        GETTER(Getter.class, GetterFilterSourceDelegate::new),
+        GET_VALUE(GetValue.class, GetValueFilterSourceDelegate::new),
         ;
 
+        private static final Map<Class<? extends Annotation>, ParameterSource> BY_CLAZZ;
         private final Class<? extends Annotation> cls;
+        private final Function<Annotation, ParameterFilterSourceDelegate> factory;
 
-        private ParameterSource(Class<? extends Annotation> cls) {
+        @SuppressWarnings("unchecked")
+        <T extends Annotation> ParameterSource(final Class<T> cls, final Function<T, ParameterFilterSourceDelegate> factory) {
             this.cls = cls;
+            this.factory = (Function<Annotation, ParameterFilterSourceDelegate>) factory;
         }
 
         public ParameterFilterSourceDelegate getDelegate(Annotation anno) {
-            if (this == ParameterSource.CAUSE_FIRST) {
-                return new FirstCauseFilterSourceDelegate((First) anno);
-            }
-            if (this == ParameterSource.CAUSE_LAST) {
-                return new LastCauseFilterSourceDelegate((Last) anno);
-            }
-            if (this == ParameterSource.CAUSE_BEFORE) {
-                return new BeforeCauseFilterSourceDelegate((Before) anno);
-            }
-            if (this == ParameterSource.CAUSE_AFTER) {
-                return new AfterCauseFilterSourceDelegate((After) anno);
-            }
-            if (this == ParameterSource.CAUSE_ALL) {
-                return new AllCauseFilterSourceDelegate((All) anno);
-            }
-            if (this == ParameterSource.CAUSE_ROOT) {
-                return new RootCauseFilterSourceDelegate((Root) anno);
-            }
-            if (this == ParameterSource.GETTER) {
-                return new GetterFilterSourceDelegate((Getter) anno);
-            }
-            throw new UnsupportedOperationException();
+            return this.factory.apply(anno);
         }
 
-        public static ParameterSource valueOf(Class<? extends Annotation> cls) {
-            for (ParameterSource value : ParameterSource.values()) {
-                if (value.cls.equals(cls)) {
-                    return value;
-                }
+        public static ParameterSource valueOf(final Class<? extends Annotation> cls) {
+            return ParameterSource.BY_CLAZZ.get(cls);
+        }
+
+        static {
+            final Map<Class<? extends Annotation>, ParameterSource> byClazz = new HashMap<>();
+            for (final ParameterSource value : ParameterSource.values()) {
+                byClazz.put(value.cls, value);
             }
-            return null;
+            BY_CLAZZ = Collections.unmodifiableMap(byClazz);
         }
     }
 
-    private static enum ParameterFilter {
-        SUPPORTS(Supports.class),
-        HAS(Has.class),
+    private enum ParameterFilter {
+        SUPPORTS(Supports.class, SupportsDataFilterDelegate::new),
+        HAS(Has.class, HasDataFilterDelegate::new),
         ;
 
+        private static final Map<Class<? extends Annotation>, ParameterFilter> BY_CLAZZ;
         private final Class<? extends Annotation> cls;
+        private final Function<Annotation, ParameterFilterDelegate> factory;
 
-        private ParameterFilter(Class<? extends Annotation> cls) {
+        @SuppressWarnings("unchecked")
+        <T extends Annotation> ParameterFilter(final Class<T> cls, final Function<T, ParameterFilterDelegate> factory) {
             this.cls = cls;
+            this.factory = (Function<Annotation, ParameterFilterDelegate>) factory;
         }
 
-        public ParameterFilterDelegate getDelegate(Annotation anno) {
-            if (this == ParameterFilter.SUPPORTS) {
-                return new SupportsDataFilterDelegate((Supports) anno);
-            }
-            if (this == ParameterFilter.HAS) {
-                return new HasDataFilterDelegate((Has) anno);
-            }
-            throw new UnsupportedOperationException();
+        public ParameterFilterDelegate getDelegate(final Annotation anno) {
+            return this.factory.apply(anno);
         }
 
-        public static ParameterFilter valueOf(Class<? extends Annotation> cls) {
-            for (ParameterFilter value : ParameterFilter.values()) {
-                if (value.cls.equals(cls)) {
-                    return value;
-                }
+        public static ParameterFilter valueOf(final Class<? extends Annotation> cls) {
+            return ParameterFilter.BY_CLAZZ.get(cls);
+        }
+
+        static {
+            final Map<Class<? extends Annotation>, ParameterFilter> byClazz = new HashMap<>();
+            for (final ParameterFilter value : ParameterFilter.values()) {
+                byClazz.put(value.cls, value);
             }
-            return null;
+            BY_CLAZZ = Collections.unmodifiableMap(byClazz);
         }
     }
 
     private static final class Holder {
 
         static final FilterGenerator INSTANCE = new FilterGenerator();
+
     }
 
 }

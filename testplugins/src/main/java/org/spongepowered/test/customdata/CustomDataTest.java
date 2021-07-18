@@ -68,6 +68,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 
 @Plugin("customdatatest")
 public final class CustomDataTest {
@@ -135,11 +136,12 @@ public final class CustomDataTest {
                             break;
                         case USER:
                             // delegate to player
-                            this.customUserData(player.uniqueId(), number);
-                            player.kick(Component.text("Setting User data..."));
-                            final Scheduler scheduler = Sponge.server().scheduler();
-                            scheduler.submit(Task.builder().delay(Ticks.single()).execute(() -> this.customUserData(player.uniqueId(), number)).plugin(this.plugin).build());
-                            scheduler.submit(Task.builder().delay(Ticks.of(2)).execute(() -> this.customUserData(player.uniqueId(), number)).plugin(this.plugin).build());
+                            this.customUserData(player.uniqueId(), number).thenAcceptAsync(v -> {
+                                player.kick(Component.text("Setting User data..."));
+                                final Scheduler scheduler = Sponge.server().scheduler();
+                                scheduler.submit(Task.builder().delay(Ticks.single()).execute(() -> this.customUserData(player.uniqueId(), number).join()).plugin(this.plugin).build());
+                                scheduler.submit(Task.builder().delay(Ticks.of(2)).execute(() -> this.customUserData(player.uniqueId(), number).join()).plugin(this.plugin).build());
+                            }, Sponge.server().scheduler().createExecutor(this.plugin));
                             break;
                         case BLOCK:
                             // try out custom data-stores
@@ -209,12 +211,14 @@ public final class CustomDataTest {
         myValue.ifPresent(integer -> this.plugin.logger().info("CustomData: {}", integer));
     }
 
-    private void customUserData(final UUID playerUUID, final int number) {
-        final Optional<User> user = Sponge.server().userManager().find(playerUUID);
-        if (user.isPresent()) {
-            final Integer integer = user.get().get(this.myDataKey).orElse(0);
-            this.plugin.logger().info("Custom data on user {}: {}", user.get().name(), integer);
-            user.get().offer(this.myDataKey, number);
-        }
+    private CompletableFuture<Void> customUserData(final UUID playerUUID, final int number) {
+        return Sponge.server().userManager().load(playerUUID)
+                .thenAcceptAsync(user -> {
+                    if (user.isPresent()) {
+                        final Integer integer = user.get().get(this.myDataKey).orElse(0);
+                        this.plugin.logger().info("Custom data on user {}: {}", user.get().name(), integer);
+                        user.get().offer(this.myDataKey, number);
+                    }
+                }, Sponge.server().scheduler().createExecutor(this.plugin));
     }
 }

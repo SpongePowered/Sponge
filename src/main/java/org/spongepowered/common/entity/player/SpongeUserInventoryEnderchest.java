@@ -29,9 +29,9 @@ import net.minecraft.world.item.ItemStack;
 
 public class SpongeUserInventoryEnderchest extends PlayerEnderChestContainer {
 
-    private final SpongeUser user;
+    private final SpongeUserData user;
 
-    public SpongeUserInventoryEnderchest(final SpongeUser user) {
+    public SpongeUserInventoryEnderchest(final SpongeUserData user) {
         this.user = user;
     }
 

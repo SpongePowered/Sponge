@@ -46,9 +46,8 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -63,9 +62,9 @@ import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
@@ -116,14 +115,12 @@ public final class TrackingUtil {
         try (final EntityTickContext context = tickContext;
              final Timing entityTiming = ((TimingBridge) entity.getType()).bridge$timings()
         ) {
+            entityTiming.startTiming();
             if (entity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
-                    .ifPresent(context::notifier);
-                ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
-                    .ifPresent(context::creator);
+                ((CreatorTrackedBridge) entity).tracked$getNotifierUUID().ifPresent(context::notifier);
+                ((CreatorTrackedBridge) entity).tracked$getCreatorUUID().ifPresent(context::creator);
             }
             context.buildAndSwitch();
-            entityTiming.startTiming();
             PhaseTracker.LOGGER.trace(TrackingUtil.ENTITY_TICK, () -> "Wrapping Entity Tick: " + entity.toString());
             consumer.accept(entity);
             if (ShouldFire.MOVE_ENTITY_EVENT) {
@@ -172,11 +169,11 @@ public final class TrackingUtil {
 
             if (blockEntity instanceof CreatorTrackedBridge) {
                 // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-                ((CreatorTrackedBridge) blockEntity).tracked$getNotifierReference().ifPresent(phaseContext::notifier);
+                ((CreatorTrackedBridge) blockEntity).tracked$getNotifierUUID().ifPresent(phaseContext::notifier);
                 // Allow the tile entity to validate the owner of itself. As long as the tile entity
                 // chunk is already loaded and activated, and the tile entity has already loaded
                 // the owner of itself.
-                ((CreatorTrackedBridge) blockEntity).tracked$getCreatorReference().ifPresent(phaseContext::creator);
+                ((CreatorTrackedBridge) blockEntity).tracked$getCreatorUUID().ifPresent(phaseContext::creator);
             }
 
             // Finally, switch the context now that we have the owner and notifier
@@ -354,7 +351,7 @@ public final class TrackingUtil {
         final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext(PhaseTracker.SERVER);
         phaseContext.source(source);
 
-        final User user = ((TrackerBlockEventDataBridge) event).bridge$getSourceUser();
+        final UUID user = ((TrackerBlockEventDataBridge) event).bridge$getSourceUserUUID();
         if (user != null) {
             phaseContext.creator = user;
             phaseContext.notifier = user;
@@ -383,14 +380,14 @@ public final class TrackingUtil {
     private TrackingUtil() {
     }
 
-    public static @Nullable User getNotifierOrOwnerFromBlock(final ServerLevel world, final BlockPos blockPos) {
+    public static @Nullable UUID getNotifierOrOwnerFromBlock(final ServerLevel world, final BlockPos blockPos) {
         final LevelChunkBridge mixinChunk = (LevelChunkBridge) world.getChunkAt(blockPos);
-        final User notifier = mixinChunk.bridge$getBlockNotifier(blockPos).orElse(null);
+        final UUID notifier = mixinChunk.bridge$getBlockNotifierUUID(blockPos).orElse(null);
         if (notifier != null) {
             return notifier;
         }
 
-        return mixinChunk.bridge$getBlockCreator(blockPos).orElse(null);
+        return mixinChunk.bridge$getBlockCreatorUUID(blockPos).orElse(null);
     }
 
     public static Supplier<IllegalStateException> throwWithContext(final String s, final PhaseContext<?> phaseContext) {
@@ -427,8 +424,8 @@ public final class TrackingUtil {
         return transactor.processTransactions(context);
     }
 
-    public static void associateTrackerToTarget(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction, final User user) {
-        final BlockSnapshot finalSnapshot = transaction.finalReplacement();
+    public static void associateTrackerToTarget(final BlockChange blockChange, final BlockTransactionReceipt receipt, final UUID uuid) {
+        final BlockSnapshot finalSnapshot = receipt.finalBlock();
         final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
         final BlockPos pos = spongeSnapshot.getBlockPos();
         final Block block = ((net.minecraft.world.level.block.state.BlockState) spongeSnapshot.state()).getBlock();
@@ -437,7 +434,7 @@ public final class TrackingUtil {
             .map(chunk -> (LevelChunkBridge) chunk)
             .ifPresent(spongeChunk -> {
             final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.CREATOR : PlayerTracker.Type.NOTIFIER;
-            spongeChunk.bridge$addTrackedBlockPosition(block, pos, user, trackerType);
+            spongeChunk.bridge$addTrackedBlockPosition(block, pos, uuid, trackerType);
         });
     }
 

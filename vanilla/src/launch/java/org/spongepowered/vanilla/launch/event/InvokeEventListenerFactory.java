@@ -42,11 +42,12 @@ public final class InvokeEventListenerFactory implements AnnotatedEventListener.
 
     @Override
     public AnnotatedEventListener create(Object handle, Method method) throws Exception {
-        EventFilter filter = this.filterFactory.createFilter(method).newInstance();
-        if (filter == null && method.getParameterCount() != 1) {
+        final Class<? extends EventFilter> eventFilter = this.filterFactory.createFilter(method);
+        if (eventFilter == null && method.getParameterCount() != 1) {
             // basic sanity check
             throw new IllegalStateException("Failed to generate EventFilter for non trivial filtering operation.");
         }
+        final EventFilter filter = eventFilter == null ? null : eventFilter.getConstructor().newInstance();
         return new InvokeEventHandler(handle, method, filter);
     }
 

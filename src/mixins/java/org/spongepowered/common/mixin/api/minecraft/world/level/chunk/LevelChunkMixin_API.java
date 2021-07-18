@@ -49,6 +49,7 @@ import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -70,7 +71,7 @@ import java.util.UUID;
 import java.util.stream.Stream;
 
 @Mixin(net.minecraft.world.level.chunk.LevelChunk.class)
-@Implements(@Interface(iface = Chunk.class, prefix = "chunk$"))
+@Implements(@Interface(iface = Chunk.class, prefix = "chunk$", remap = Remap.NONE))
 public abstract class LevelChunkMixin_API implements Chunk {
 
     //@formatter:off

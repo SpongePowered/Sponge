@@ -24,41 +24,28 @@
  */
 package org.spongepowered.common.util;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.util.Angle;
 import org.spongepowered.api.util.orientation.Orientation;
 
 import java.util.Optional;
 
 public final class SpongeOrientation implements Orientation {
 
-    public static final class Factory implements Orientation.Factory {
+    private final Angle angle;
 
-        @Override
-        public Optional<Orientation> fromDegrees(final int degrees) {
-            if (degrees % 45 == 0) {
-                return Optional.of(new SpongeOrientation(degrees % 360));
-            }
-
-            return Optional.empty();
-        }
-    }
-
-    private final int angle;
-
-    public SpongeOrientation(final int angle) {
-        if (angle % 45 != 0) {
-            throw new IllegalArgumentException("The angle should be a multiple of 45 degrees!");
-        }
-        this.angle = angle % 360;
+    public SpongeOrientation(final int angleInDegrees) {
+        this.angle = Angle.fromDegrees(angleInDegrees);
     }
 
     @Override
-    public int angle() {
+    public @NonNull Angle angle() {
         return this.angle;
     }
 
     @Override
     public int hashCode() {
-        return this.angle;
+        return this.angle.hashCode();
     }
 
     @Override
@@ -76,6 +63,6 @@ public final class SpongeOrientation implements Orientation {
 
     @Override
     public String toString() {
-        return getClass().getSimpleName() + "{angle=" + this.angle + "}";
+        return this.getClass().getSimpleName() + "{angle=" + this.angle + "}";
     }
 }

@@ -87,7 +87,9 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Shadow protected abstract void shadow$reapplyPosition();
     @Shadow public abstract double shadow$getEyeY();
     @Shadow public abstract double shadow$getX();
+    @Shadow public abstract double shadow$getY();
     @Shadow public abstract double shadow$getZ();
+    @Shadow public abstract void shadow$remove(Entity.RemovalReason reason);
     @Shadow public abstract float shadow$getXRot();
     @Shadow public abstract float shadow$getYRot();
     //@formatter:on
@@ -95,7 +97,6 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Shadow public abstract float getXRot();
 
     @Shadow public abstract float getYRot();
-
     private boolean tracker$trackedInWorld = false;
     @Nullable private Cause tracker$destructCause;
 
@@ -247,8 +248,12 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     }
 
     @Override
-    public void populateFrameModifier(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
+    public void tracker$populateFrameInTickContext(final CauseStackManager.StackFrame frame, final EntityTickContext context) {
+        this.tracker$populateDeathContextIfNeeded(frame, context);
+    }
 
+    protected void tracker$populateDeathContextIfNeeded(final CauseStackManager.StackFrame frame,
+        final EntityTickContext context) {
     }
 
     @Inject(method = "remove", at = @At(value = "RETURN"))

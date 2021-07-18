@@ -41,8 +41,7 @@ public class BasicPluginState extends PluginPhaseState<BasicPluginContext> {
 
     @Override
     public BasicPluginContext createNewContext(final PhaseTracker tracker) {
-        return new BasicPluginContext(this, tracker)
-            .addCaptures();
+        return new BasicPluginContext(this, tracker);
     }
 
     @Override

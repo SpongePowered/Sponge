@@ -24,22 +24,24 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
-import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.world.BlockChange;
-
-import java.util.function.BiConsumer;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
+import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
+import org.spongepowered.common.world.BlockChange;
+
+import java.util.function.BiConsumer;
 
 abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>> extends TickPhaseState<T> {
 
@@ -49,11 +51,20 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
                 .ifPresent(frame::pushCause)
         );
 
-    abstract LocatableBlock getLocatableBlockSourceFromContext(PhaseContext<?> context);
+    LocatableBlock getLocatableBlockSourceFromContext(final PhaseContext<?> context) {
+        return context.getSource(LocatableBlock.class)
+            .orElseThrow(TrackingUtil.throwWithContext("Expected to be ticking over at a location!", context));
+    }
 
     @Override
     public BiConsumer<CauseStackManager.StackFrame, T> getFrameModifier() {
         return this.LOCATION_MODIFIER;
+    }
+
+
+    @Override
+    public void unwind(final T context) {
+        TrackingUtil.processBlockCaptures(context);
     }
 
     @Override
@@ -66,12 +77,43 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
         });
     }
 
+    /**
+     * Specifically overridden here because some states have defaults and don't check the context.
+     * @param context The context
+     * @return True if block events are to be tracked by the specific type of entity (default is true)
+     */
     @Override
-    public void postBlockTransactionApplication(final BlockChange blockChange,
-        final Transaction<? extends BlockSnapshot> snapshotTransaction, final T context) {
+    public boolean doesBlockEventTracking(final T context) {
+        return context.allowsBlockEvents();
+    }
+
+
+    @Override
+    public void appendNotifierToBlockEvent(
+        T context, TrackedWorldBridge mixinWorldServer, BlockPos pos,
+        TrackerBlockEventDataBridge blockEvent
+    ) {
+        final LocatableBlock source = this.getLocatableBlockSourceFromContext(context);
+        blockEvent.bridge$setTickingLocatable(source);
+    }
+
+
+    @Override
+    public void appendContextPreExplosion(final ExplosionContext explosionContext, final T context) {
+        context.applyOwnerIfAvailable(explosionContext::creator);
+        context.applyNotifierIfAvailable(explosionContext::notifier);
+        final LocatableBlock locatableBlock = this.getLocatableBlockSourceFromContext(context);
+        explosionContext.source(locatableBlock);
+    }
+
+    @Override
+    public void postBlockTransactionApplication(
+        final T context, final BlockChange blockChange,
+        final BlockTransactionReceipt receipt
+    ) {
         // If we do not have a notifier at this point then there is no need to attempt to retrieve one from the chunk
         context.applyNotifierIfAvailable(user -> {
-            final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.original();
+            final SpongeBlockSnapshot original = (SpongeBlockSnapshot) receipt.originalBlock();
             final Block block = (Block) original.state().type();
             final BlockPos changedBlockPos = original.getBlockPos();
             original.getServerWorld().ifPresent(worldServer -> {

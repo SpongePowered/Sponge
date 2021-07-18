@@ -343,9 +343,9 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
             .source(source)
             .command(args)) {
             if (source instanceof ServerPlayer) {
-                final User sourceUser = ((ServerPlayer) source).user();
-                context.creator(sourceUser);
-                context.notifier(sourceUser);
+                final ServerPlayer serverPlayer = (ServerPlayer) source;
+                context.creator(serverPlayer.uniqueId());
+                context.notifier(serverPlayer.uniqueId());
             }
             //if (inventory != null) {
             //    // Enable player inventory capture

@@ -295,7 +295,9 @@ allprojects {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
             options.release.set(16)
-            options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
+            if (project.name != "testplugins" && System.getProperty("idea.sync.active") != null) {
+                options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
+            }
         }
 
         withType(PublishToMavenRepository::class).configureEach {

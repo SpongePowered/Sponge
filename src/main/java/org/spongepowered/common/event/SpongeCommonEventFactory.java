@@ -41,7 +41,6 @@ import net.minecraft.world.MenuProvider;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.EntityDamageSource;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
@@ -58,11 +57,11 @@ import net.minecraft.world.level.saveddata.maps.MapItemSavedData;
 import net.minecraft.world.phys.BlockHitResult;
 import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
-import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.Jukebox;
 import org.spongepowered.api.block.transaction.BlockTransaction;
 import org.spongepowered.api.block.transaction.Operations;
@@ -80,7 +79,6 @@ import org.spongepowered.api.entity.explosive.Explosive;
 import org.spongepowered.api.entity.living.Agent;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -121,11 +119,9 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
@@ -158,6 +154,7 @@ import java.util.HashSet;
 import java.util.List;
 import java.util.Optional;
 import java.util.Set;
+import java.util.UUID;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
@@ -169,98 +166,6 @@ public final class SpongeCommonEventFactory {
     public static int lastSecondaryPacketTick = 0;
     public static int lastPrimaryPacketTick = 0;
     @Nullable public static WeakReference<net.minecraft.server.level.ServerPlayer> lastAnimationPlayer;
-
-    public static void callDropItemDispense(final List<ItemEntity> items, final PhaseContext<?> context) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
-            final ArrayList<Entity> entities = new ArrayList<>();
-            for (final ItemEntity item : items) {
-                entities.add((Entity) item);
-            }
-            final DropItemEvent.Dispense dispense =
-                SpongeEventFactory.createDropItemEventDispense(frame.currentCause(), entities);
-            SpongeCommon.post(dispense);
-            if (!dispense.isCancelled()) {
-                EntityUtil.processEntitySpawnsFromEvent(context, dispense);
-            }
-        }
-    }
-
-    public static void callDropItemDrop(final net.minecraft.server.level.ServerPlayer player, final List<ItemEntity> items,
-            final PhaseContext<?> context) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            final ArrayList<Entity> entities = new ArrayList<>();
-            for (final ItemEntity item : items) {
-                entities.add((Entity) item);
-            }
-            // Creative doesn't inform server of cursor status so there is no way of knowing
-            final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.empty(), ItemStackSnapshot.empty());
-            final DropItemEvent.Dispense dispense =
-                SpongeEventFactory.createClickContainerEventDropOutsideCreative(frame.currentCause(),
-                        ((org.spongepowered.api.item.inventory.Container) player.containerMenu), cursorTransaction, entities,
-                        Optional.empty(), Collections.emptyList());
-            SpongeCommon.post(dispense);
-            if (!dispense.isCancelled()) {
-                EntityUtil.processEntitySpawnsFromEvent(context, dispense);
-            }
-        }
-    }
-
-    public static void callDropItemCustom(final List<Entity> items, final PhaseContext<?> context) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            final DropItemEvent.Custom event =
-                SpongeEventFactory.createDropItemEventCustom(frame.currentCause(), items);
-            SpongeCommon.post(event);
-            if (!event.isCancelled()) {
-                EntityUtil.processEntitySpawnsFromEvent(context, event);
-            }
-        }
-    }
-
-    public static void callDropItemCustom(final List<Entity> items, final PhaseContext<?> context, final Supplier<Optional<User>> supplier) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.currentContext().require(EventContextKeys.SPAWN_TYPE);
-            final DropItemEvent.Custom event = SpongeEventFactory.createDropItemEventCustom(frame.currentCause(), items);
-            SpongeCommon.post(event);
-            if (!event.isCancelled()) {
-                EntityUtil.processEntitySpawnsFromEvent(event, supplier);
-            }
-        }
-    }
-
-    public static void callDropItemClose(final List<Entity> items, final PhaseContext<?> context, final Supplier<Optional<User>> supplier) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.currentContext().require(EventContextKeys.SPAWN_TYPE);
-            final DropItemEvent.Close event = SpongeEventFactory.createDropItemEventClose(frame.currentCause(), items);
-            SpongeCommon.post(event);
-            if (!event.isCancelled()) {
-                EntityUtil.processEntitySpawnsFromEvent(event, supplier);
-            }
-        }
-    }
-
-    public static boolean callSpawnEntitySpawner(final List<Entity> entities, final PhaseContext<?> context) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.WORLD_SPAWNER);
-
-            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(frame.currentCause(), entities);
-            SpongeCommon.post(event);
-            if (!event.isCancelled() && event.entities().size() > 0) {
-                return EntityUtil.processEntitySpawnsFromEvent(context, event);
-            }
-            return false;
-        }
-    }
-
-    public static void callDropItemDestruct(final List<Entity> entities, final PhaseContext<?> context) {
-        final DropItemEvent.Destruct destruct = SpongeEventFactory.createDropItemEventDestruct(PhaseTracker.getCauseStackManager().currentCause(), entities);
-        SpongeCommon.post(destruct);
-        if (!destruct.isCancelled()) {
-            EntityUtil.processEntitySpawnsFromEvent(context, destruct);
-        }
-    }
 
     public static boolean callSpawnEntity(final List<Entity> entities, final PhaseContext<?> context) {
         PhaseTracker.getCauseStackManager().currentContext().require(EventContextKeys.SPAWN_TYPE);
@@ -284,41 +189,23 @@ public final class SpongeCommonEventFactory {
             printer.add("Exception:");
             printer.add(e);
             printer.log(SpongeCommon.logger(), org.apache.logging.log4j.Level.ERROR);
-            for (final Entity entity : entities) {
-                EntityUtil.processEntitySpawn(entity, EntityUtil.ENTITY_CREATOR_FUNCTION.apply(context));
-            }
             return true;
         }
     }
 
-    public static boolean callSpawnEntityCustom(final List<Entity> entities, final PhaseContext<?> context) {
-        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().currentCause(), entities);
-        SpongeCommon.post(event);
-        return event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
-    }
-
     @SuppressWarnings("unchecked")
-    public static <T extends net.minecraft.world.entity.Entity> @Nullable CollideEntityEvent callCollideEntityEvent(
-            final Level world, final net.minecraft.world.entity.@Nullable Entity sourceEntity,
-            final List<T> entities) {
+    public static <T extends net.minecraft.world.entity.Entity> CollideEntityEvent callCollideEntityEvent(
+        final net.minecraft.world.entity.@Nullable Entity sourceEntity,
+        final List<T> entities
+    ) {
 
         final PhaseTracker phaseTracker = PhaseTracker.getInstance();
-        final PhaseContext<?> currentContext = phaseTracker.getPhaseContext();
+        final PhaseContext<@NonNull ?> currentContext = phaseTracker.getPhaseContext();
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             if (sourceEntity != null) {
                 // We only want to push the source entity if it's not the current entity being ticked or "sourced". They will be already pushed.
                 if (currentContext.getSource() != sourceEntity) {
                     frame.pushCause(sourceEntity);
-                }
-            } else {
-                // If there is no source, then... well... find one and push it.
-                final Object source = currentContext.getSource();
-                if (source instanceof LocatableBlock) {
-                    frame.pushCause(source);
-                } else if (source instanceof BlockEntity) {
-                    frame.pushCause(source);
-                } else if (source instanceof Entity) {
-                    frame.pushCause(source);
                 }
             }
             currentContext.addCreatorAndNotifierToCauseStack(frame);
@@ -401,10 +288,9 @@ public final class SpongeCommonEventFactory {
      * @param source The source of event
      * @return The event
      */
-    @SuppressWarnings({"unchecked", "rawtypes"})
     private static ChangeBlockEvent.Pre callChangeBlockEventPre(final ServerLevelBridge worldIn, final ImmutableList<ServerLocation> locations, @Nullable Object source) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            final PhaseContext<?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
+            final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();
             if (source == null) {
                 source = phaseContext.getSource() == null ? worldIn : phaseContext.getSource();
             }
@@ -420,17 +306,8 @@ public final class SpongeCommonEventFactory {
             }
             if (phaseContext.getCreator().isPresent()) {
                 phaseContext.getCreator().ifPresent(creator -> frame.addContext(EventContextKeys.CREATOR, creator));
-            } else if (player instanceof ServerPlayerBridge) {
-                final @Nullable User user = ((ServerPlayerBridge) player).bridge$getUser();
-                if (user != null) {
-                    frame.addContext(EventContextKeys.CREATOR, user);
-                }
-            }
-
-            if (!phaseContext.shouldProvideModifiers()) {
-                phaseContext.getSource(BlockBridge.class).ifPresent(bridge -> {
-                    bridge.bridge$getTickFrameModifier().accept(frame, worldIn);
-                });
+            } else if (player instanceof ServerPlayer) {
+                frame.addContext(EventContextKeys.CREATOR, ((ServerPlayer) player).uniqueId());
             }
 
             phaseContext.applyNotifierIfAvailable(notifier -> frame.addContext(EventContextKeys.NOTIFIER, notifier));
@@ -597,8 +474,8 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.FAKE_PLAYER, (Player) player);
         } else {
             frame.pushCause(player);
-            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayerBridge) player).bridge$getUser());
-            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayerBridge) player).bridge$getUser());
+            frame.addContext(EventContextKeys.CREATOR, player.getUUID());
+            frame.addContext(EventContextKeys.NOTIFIER, player.getUUID());
         }
 
         if (!stack.isEmpty()) {
@@ -681,7 +558,7 @@ public final class SpongeCommonEventFactory {
             final Audience originalChannel) {
 
         final Component originalMessage;
-        Optional<User> sourceCreator = Optional.empty();
+        Optional<UUID> sourceCreator = Optional.empty();
         final boolean messageCancelled = false;
 
         if (source instanceof EntityDamageSource) {
@@ -689,7 +566,7 @@ public final class SpongeCommonEventFactory {
             if (damageSource.getDirectEntity() instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) damageSource.getDirectEntity();
                 if (creatorBridge != null) {
-                    sourceCreator = creatorBridge.tracked$getCreatorReference();
+                    sourceCreator = creatorBridge.tracked$getCreatorUUID();
                 }
             }
         }
@@ -732,7 +609,7 @@ public final class SpongeCommonEventFactory {
 
             if (entity instanceof CreatorTrackedBridge) {
                 final CreatorTrackedBridge spongeEntity = (CreatorTrackedBridge) entity;
-                spongeEntity.tracked$getCreatorReference().ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
+                spongeEntity.tracked$getCreatorUUID().ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
             }
 
             // TODO: Add target side support
@@ -778,7 +655,7 @@ public final class SpongeCommonEventFactory {
             frame.addContext(EventContextKeys.PROJECTILE_SOURCE, projectileSource == null
                     ? UnknownProjectileSource.UNKNOWN
                     : projectileSource);
-            final Optional<User> creator = PhaseTracker.getInstance().getPhaseContext().getCreator();
+            final Optional<UUID> creator = PhaseTracker.getInstance().getPhaseContext().getCreator();
             creator.ifPresent(user -> frame.addContext(EventContextKeys.CREATOR, user));
 
             final ServerLocation impactPoint = ServerLocation.of((ServerWorld) projectile.level, VecHelper.toVector3d(movingObjectPosition.getLocation()));
@@ -1027,7 +904,7 @@ public final class SpongeCommonEventFactory {
      * @return MapInfo if event was not cancelled
      */
     public static Optional<MapInfo> fireCreateMapEvent(final Cause cause) {
-        return fireCreateMapEvent(cause, Collections.emptySet());
+        return SpongeCommonEventFactory.fireCreateMapEvent(cause, Collections.emptySet());
     }
 
     public static Optional<MapInfo> fireCreateMapEvent(final Cause cause, final Set<Value<?>> values) {

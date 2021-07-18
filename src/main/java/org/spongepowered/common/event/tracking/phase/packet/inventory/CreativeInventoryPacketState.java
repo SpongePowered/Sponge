@@ -25,20 +25,27 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
+
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
+
+import java.util.function.Supplier;
 
 public final class CreativeInventoryPacketState extends BasicPacketState {
 
     @Override
-    public void unwind(BasicPacketContext context) {
-        final ServerPlayer player = context.getPacketPlayer();
-//        context.getCapturedItemsSupplier()
-//            .acceptAndClearIfNotEmpty(items -> {
-//                try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-//                    frame.pushCause(player);
-//                    SpongeCommonEventFactory.callDropItemDrop(player, items, context);
-//                }
-//            });
+    public void unwind(final BasicPacketContext context) {
+        TrackingUtil.processBlockCaptures(context);
+    }
+
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final BasicPacketContext context, final Entity entityToSpawn
+    ) {
+        return SpawnTypes.DROPPED_ITEM;
     }
 }

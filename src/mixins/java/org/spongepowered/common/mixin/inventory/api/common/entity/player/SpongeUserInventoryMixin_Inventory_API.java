@@ -29,9 +29,10 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
 import org.spongepowered.api.item.inventory.entity.UserInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.entity.player.SpongeUserData;
 import org.spongepowered.common.entity.player.SpongeUserInventory;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.adapter.impl.comp.EquipmentInventoryAdapter;
@@ -46,7 +47,10 @@ import javax.annotation.Nullable;
 @Mixin(value = SpongeUserInventory.class, remap = false)
 public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInventory, InventoryAdapter {
 
-    @Shadow public SpongeUser user;
+    // @formatter:off
+    @Shadow @Final private SpongeUserData userData;
+    // @formatter:on
+
     @Nullable private PrimaryPlayerInventoryAdapter impl$grid;
     @Nullable private EquipmentInventoryAdapter impl$armor;
     @Nullable private EquipmentInventoryAdapter impl$equipment;
@@ -54,7 +58,7 @@ public abstract class SpongeUserInventoryMixin_Inventory_API implements UserInve
 
     @Override
     public Optional<User> carrier() {
-        return Optional.ofNullable(this.user);
+        return Optional.ofNullable(this.userData.asUser());
     }
 
     @Override

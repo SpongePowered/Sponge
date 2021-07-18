@@ -34,16 +34,27 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
 import net.minecraft.world.level.storage.WritableLevelData;
+import net.minecraft.world.phys.AABB;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
+import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.event.ShouldFire;
+import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
 import javax.annotation.Nullable;
+
+import java.util.List;
 import java.util.Random;
 import java.util.function.Consumer;
+import java.util.function.Predicate;
 
 @Mixin(Level.class)
 public abstract class LevelMixin_Tracker implements WorldBridge {
@@ -81,5 +92,28 @@ public abstract class LevelMixin_Tracker implements WorldBridge {
         tileEntity.tick();
     }
 
+    @SuppressWarnings("InvalidInjectorMethodSignature")
+    @Inject(method = {
+        "getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Ljava/util/List;",
+        "getEntities(Lnet/minecraft/world/level/entity/EntityTypeTest;Lnet/minecraft/world/phys/AABB;Ljava/util/function/Predicate;)Ljava/util/List;",
+    }, at = @At("RETURN"))
+    private void tracker$ThrowCollisionEvent(final @Coerce Object entityIn, final AABB aabb, final Predicate<?> filter, final CallbackInfoReturnable<List<Entity>> cir) {
+        if (this.bridge$isFake() || !PhaseTracker.getInstance().getPhaseContext().allowsEntityCollisionEvents()) {
+            return;
+        }
+        final List<Entity> ret = cir.getReturnValue();
+        if (ret == null || ret.isEmpty()) {
+            return;
+        }
+
+        if (!ShouldFire.COLLIDE_ENTITY_EVENT) {
+            return;
+        }
+
+        final @org.checkerframework.checker.nullness.qual.Nullable Entity entity = entityIn instanceof Entity ? ((Entity) entityIn) : null;
+        if (SpongeCommonEventFactory.callCollideEntityEvent(entity, ret).isCancelled()) {
+            ret.clear();
+        }
+    }
 
 }

@@ -39,11 +39,6 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState<C> implements IPhaseState<C> {
 
     @Override
-    public boolean isTicking() {
-        return true;
-    }
-
-    @Override
     public void unwind(final C phaseContext) { }
 
     @Override
@@ -67,11 +62,6 @@ abstract class TickPhaseState<C extends TickContext<C>> extends PooledPhaseState
     @Override
     public void appendContextPreExplosion(final ExplosionContext explosionContext, final C context) {
 
-    }
-
-    @Override
-    public boolean doesDenyChunkRequests(final C context) {
-        return true;
     }
 
     private final String desc = TrackingUtil.phaseStateToString("Tick", this);

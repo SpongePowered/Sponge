@@ -59,16 +59,6 @@ public class BlockPhaseState extends PooledPhaseState<GeneralizedContext> implem
 
     }
 
-    @Override
-    public boolean doesDenyChunkRequests(final GeneralizedContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean includesDecays() {
-        return true;
-    }
-
     private final String desc = TrackingUtil.phaseStateToString("Block", this);
 
     @Override

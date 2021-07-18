@@ -24,20 +24,24 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.entity.SpawnerBlockEntity;
+
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 
 import java.util.function.BiConsumer;
-import net.minecraft.core.BlockPos;
+import java.util.function.Supplier;
 
 class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTickContext> {
     private final BiConsumer<CauseStackManager.StackFrame, TileEntityTickContext> TILE_ENTITY_MODIFIER =
@@ -49,10 +53,7 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
     @Override
     public TileEntityTickContext createNewContext(final PhaseTracker tracker) {
-        return new TileEntityTickContext(this, tracker)
-                .addEntityCaptures()
-                .addEntityDropCaptures()
-                .addBlockCaptures();
+        return new TileEntityTickContext(this, tracker);
     }
 
     @Override
@@ -67,16 +68,13 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
                 .locatableBlock();
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public void unwind(final TileEntityTickContext context) {
-        final BlockEntity tickingTile = context.getSource(BlockEntity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Not ticking on a TileEntity!", context));
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(tickingTile.locatableBlock());
-            TrackingUtil.processBlockCaptures(context);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.BLOCK_SPAWNING);
-        }
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final TileEntityTickContext context, final Entity entityToSpawn
+    ) {
+        return context.requireSource(net.minecraft.world.level.block.entity.BlockEntity.class) instanceof SpawnerBlockEntity
+            ? SpawnTypes.MOB_SPAWNER
+            : SpawnTypes.BLOCK_SPAWNING;
     }
 
     @Override
@@ -88,25 +86,6 @@ class TileEntityTickPhaseState extends LocationBasedTickPhaseState<TileEntityTic
 
         blockEvent.bridge$setTickingLocatable(tickingTile.locatableBlock());
         blockEvent.bridge$setTileEntity(tickingTile);
-    }
-
-    @Override
-    public void appendContextPreExplosion(final ExplosionContext explosionContext, final TileEntityTickContext context) {
-        context.applyNotifierIfAvailable(explosionContext::notifier);
-        context.applyOwnerIfAvailable(explosionContext::creator);
-        final BlockEntity tickingTile = context.getSource(BlockEntity.class)
-                .orElseThrow(TrackingUtil.throwWithContext("Expected to be processing over a ticking TileEntity!", context));
-        explosionContext.source(tickingTile);
-    }
-
-    @Override
-    public boolean doesCaptureNeighborNotifications(final TileEntityTickContext context) {
-        return context.allowsBulkBlockCaptures();
-    }
-
-    @Override
-    public boolean doesBlockEventTracking(final TileEntityTickContext context) {
-        return context.allowsBlockEvents();
     }
 
 }

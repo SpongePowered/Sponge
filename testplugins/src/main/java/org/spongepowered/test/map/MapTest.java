@@ -48,6 +48,8 @@ import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.action.CreateMapEvent;
+import org.spongepowered.api.event.filter.Getter;
+import org.spongepowered.api.event.filter.data.Supports;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -607,12 +609,12 @@ public class MapTest implements LoadableModule {
         }
 
         @Listener
-        public void onMapCreate(final CreateMapEvent event) {
-            logger.info("ON MAP CREATE EVENT");
-            final MapInfo mapInfo = event.mapInfo();
+        public void onMapCreate(final CreateMapEvent event, @Supports("MAP_CANVAS") @Getter("mapInfo") final MapInfo mapInfo) {
+            this.logger.info("ON MAP CREATE EVENT");
             mapInfo.offer(Keys.MAP_CANVAS, MapCanvas.builder()
                     .paintAll(MapColor.of(MapColorTypes.COLOR_BLUE))
                     .build());
+            // mapInfo.offer(Keys.MAP_LOCKED, true); // to make the color apply even when held by a player
         }
     }
 

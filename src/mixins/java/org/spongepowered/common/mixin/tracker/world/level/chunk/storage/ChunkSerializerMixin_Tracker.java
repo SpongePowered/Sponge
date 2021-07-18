@@ -56,7 +56,7 @@ public abstract class ChunkSerializerMixin_Tracker {
             return;
         }
         final LevelChunkBridge chunk = (LevelChunkBridge) param1;
-        if (!chunk.bridge$getTrackedIntPlayerPositions().isEmpty()) {
+        if (!chunk.bridge$getTrackedShortPlayerPositions().isEmpty() || !chunk.bridge$getTrackedIntPlayerPositions().isEmpty()) {
             final CompoundTag level = (CompoundTag) cir.getReturnValue().get("Level");
             final CompoundTag trackedNbt = new CompoundTag();
             final ListTag positions = new ListTag();

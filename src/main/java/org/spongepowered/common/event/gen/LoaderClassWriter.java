@@ -22,14 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.phase.plugin;
+package org.spongepowered.common.event.gen;
 
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.objectweb.asm.ClassReader;
+import org.objectweb.asm.ClassWriter;
 
-public class ServerTickListenerContext extends ListenerPhaseContext<ServerTickListenerContext> {
+/**
+ * A {@link ClassWriter} that can resolve supertypes
+ * based on a specific class loader.
+ *
+ * <p>This is only needed when frames must be computed for a class.</p>
+ */
+public class LoaderClassWriter extends ClassWriter {
+    private final ClassLoader loader;
 
-    ServerTickListenerContext(final IPhaseState<ServerTickListenerContext> state, final PhaseTracker tracker) {
-        super(state, tracker);
+    public LoaderClassWriter(final ClassLoader loader, final int flags) {
+        super(flags);
+        this.loader = loader;
+    }
+
+    public LoaderClassWriter(final ClassLoader loader, final ClassReader classReader, final int flags) {
+        super(classReader, flags);
+        this.loader = loader;
+    }
+
+    @Override
+    protected ClassLoader getClassLoader() {
+        return this.loader;
     }
 }

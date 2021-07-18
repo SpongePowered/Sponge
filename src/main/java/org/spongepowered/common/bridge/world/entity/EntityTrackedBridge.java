@@ -29,6 +29,6 @@ import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
 public interface EntityTrackedBridge {
 
-    void populateFrameModifier(CauseStackManager.StackFrame frame, EntityTickContext context);
+    void tracker$populateFrameInTickContext(CauseStackManager.StackFrame frame, EntityTickContext context);
 
 }

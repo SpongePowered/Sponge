@@ -29,6 +29,18 @@ import com.google.common.base.Preconditions;
 import com.google.common.collect.ImmutableMap;
 import com.google.common.collect.Maps;
 import com.mojang.authlib.GameProfile;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.nbt.NbtIo;
+import net.minecraft.nbt.NbtUtils;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.util.datafix.DataFixTypes;
+import net.minecraft.util.datafix.DataFixers;
+import net.minecraft.world.entity.EquipmentSlot;
+import net.minecraft.world.inventory.PlayerEnderChestContainer;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.storage.LevelResource;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -49,28 +61,26 @@ import org.spongepowered.api.item.inventory.entity.UserInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
-import org.spongepowered.api.service.permission.PermissionService;
-import org.spongepowered.api.service.permission.Subject;
-import org.spongepowered.api.service.permission.SubjectReference;
+import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.api.util.RespawnLocation;
-import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.accessor.server.MinecraftServerAccessor;
 import org.spongepowered.common.bridge.authlib.GameProfileHolderBridge;
-import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
+import org.spongepowered.common.bridge.server.MinecraftServerBridge;
 import org.spongepowered.common.bridge.world.entity.player.BedLocationHolderBridge;
-import org.spongepowered.common.bridge.permissions.SubjectBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.profile.SpongeGameProfile;
-import org.spongepowered.common.service.server.permission.BridgeSubject;
-import org.spongepowered.common.service.server.permission.SubjectHelper;
+import org.spongepowered.common.user.SpongeUserManager;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.FileUtil;
 import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -78,33 +88,24 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.time.Instant;
+import java.time.format.DateTimeFormatter;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.Set;
 import java.util.UUID;
-import java.util.concurrent.CompletableFuture;
-import java.util.concurrent.ConcurrentHashMap;
 import java.util.function.Supplier;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NbtIo;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.EquipmentSlot;
-import net.minecraft.world.inventory.PlayerEnderChestContainer;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.storage.LevelResource;
-import net.minecraft.world.level.storage.LevelStorageSource;
-
-public final class SpongeUser implements User, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder, BridgeSubject, SubjectBridge,
+/**
+ * Also see SpongeDataHolderMixin
+ */
+public final class SpongeUserData implements Identifiable, DataSerializable, BedLocationHolderBridge, SpongeMutableDataHolder,
         DataCompoundHolder, VanishableBridge, GameProfileHolderBridge {
 
-    public static final Set<SpongeUser> dirtyUsers = ConcurrentHashMap.newKeySet();
-    public static final Set<SpongeUser> initializedUsers = ConcurrentHashMap.newKeySet();
-
-    private final GameProfile profile;
     private final Map<ResourceKey, RespawnLocation> spawnLocations = Maps.newHashMap();
 
     private ResourceKey worldKey = (ResourceKey) (Object) Level.OVERWORLD.location();
@@ -118,24 +119,55 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     private boolean isInvisible;
     private boolean vanishIgnoresCollision;
     private boolean vanishPreventsTargeting;
+    private final GameProfile profile;
 
-    private @Nullable SubjectReference subjectReference;
     private @Nullable SpongeUserInventory inventory; // lazy load when accessing inventory
     private @Nullable PlayerEnderChestContainer enderChest; // lazy load when accessing inventory
-    private @Nullable CompoundTag compound;
+    private CompoundTag compound;
     private boolean isConstructing;
 
-    public SpongeUser(final GameProfile profile) {
+    public static SpongeUserData create(final GameProfile profile) throws IOException {
+        final ServerLevel world = SpongeCommon.server().overworld();
+        if (world == null) {
+            SpongeCommon.logger().warn("Overworld not initialized, cannot create users!");
+            throw new IllegalStateException("Overworld not initialized, cannot create users!");
+        }
+
+        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
+        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(profile.getId().toString() + ".dat").toFile();
+        if (!file.exists()) {
+            return new SpongeUserData(profile, new CompoundTag());
+        }
+
+        try {
+            final CompoundTag compound;
+            try (final FileInputStream in = new FileInputStream(file)) {
+                compound = NbtIo.readCompressed(in);
+            }
+            // See PlayerDataAccess - keep this line up to date.
+            final int version = compound.contains("DataVersion", 3) ? compound.getInt("DataVersion") : -1;
+            NbtUtils.update(DataFixers.getDataFixer(), DataFixTypes.PLAYER, compound, version);
+            return new SpongeUserData(profile, compound);
+        } catch (final IOException e) {
+            SpongeCommon.logger().warn("Unable to load corrupt user file '{}'!",
+                    file.toPath().relativize(Paths.get("")).toString(), e);
+            FileUtil.copyCorruptedFile(file);
+            throw e;
+        }
+    }
+
+    private SpongeUserData(final GameProfile profile, final CompoundTag tag) {
         this.profile = profile;
-        SubjectHelper.applySubject(this);
+        this.compound = tag;
+        this.readCompound(this.compound);
+    }
+
+    public User asUser() {
+        return ((SpongeServer) SpongeCommon.server()).userManager().asUser(this);
     }
 
     private void reset() {
         this.spawnLocations.clear();
-    }
-
-    public boolean isInitialized() {
-        return this.compound != null;
     }
 
     @Override
@@ -147,58 +179,14 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         if (this.isOnline()) {
             return this.player().get();
         }
-        if (!this.isInitialized()) {
-            this.initialize();
-        }
         if (markDirty) {
             this.markDirty();
         }
         return this;
     }
 
-    public void invalidate() {
-        this.compound = null;
-        this.inventory = null;
-        this.enderChest = null;
-
-        ((SpongeDataHolderBridge) (Object) this).bridge$invalidateFailedData();
-        SpongeUser.initializedUsers.remove(this);
-    }
-
-    public void initializeIfRequired() {
-        if (!this.isInitialized()) {
-            this.initialize();
-        }
-    }
-
-    public void initialize() {
-        SpongeUser.initializedUsers.add(this);
-        this.compound = new CompoundTag();
-        final ServerLevel world = SpongeCommon.server().overworld();
-        if (world == null) {
-            return;
-        }
-
-        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
-        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.profile.getId().toString() + ".dat").toFile();
-        if (!file.exists()) {
-            return;
-        }
-
-        try {
-            try (final FileInputStream in = new FileInputStream(file)) {
-                this.readCompound(NbtIo.readCompressed(in));
-            }
-        } catch (final IOException e) {
-            SpongeCommon.logger().warn("Corrupt user file '{}'!", file, e);
-        }
-    }
-
     private UserInventory loadInventory() {
         if (this.inventory == null) {
-            if (!this.isInitialized()) {
-                this.initialize();
-            }
             this.inventory = new SpongeUserInventory(this);
             final ListTag listNBT = this.compound.getList(Constants.Entity.Player.INVENTORY, 10);
             this.inventory.readList(listNBT);
@@ -207,11 +195,8 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         return (UserInventory) this.inventory;
     }
 
-    private SpongeUser loadEnderInventory() {
+    private SpongeUserData loadEnderInventory() {
         if (this.enderChest == null) {
-            if (!this.isInitialized()) {
-                this.initialize();
-            }
             this.enderChest = new SpongeUserInventoryEnderchest(this);
             if (this.compound.contains(Constants.Entity.Player.ENDERCHEST_INVENTORY, 9)) {
                 final ListTag nbttaglist1 = this.compound.getList(Constants.Entity.Player.ENDERCHEST_INVENTORY, 10);
@@ -265,7 +250,6 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         return this.profile.getId();
     }
 
-    @Override
     public String name() {
         return this.profile.getName();
     }
@@ -285,22 +269,18 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
             .set(Constants.Entity.Player.SPAWNS, this.spawnLocations);
     }
 
-    @Override
     public boolean canEquip(final EquipmentType type) {
         return true;
     }
 
-    @Override
     public boolean canEquip(final EquipmentType type, final @Nullable ItemStack equipment) {
         return true;
     }
 
-    @Override
     public Optional<ItemStack> equipped(final EquipmentType type) {
         throw new MissingImplementationException("SpongeUser", "equipped");
     }
 
-    @Override
     public boolean equip(final EquipmentType type, final @Nullable ItemStack equipment) {
         if (this.canEquip(type, equipment)) {
             this.loadInventory();
@@ -310,67 +290,55 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         return false;
     }
 
-    @Override
     public UserInventory inventory() {
         return this.loadInventory();
     }
 
-    @Override
     public EquipmentInventory equipment() {
         return this.inventory().equipment();
     }
 
-    @Override
     public ItemStack itemInHand(final HandType handType) {
         if (handType == HandTypes.MAIN_HAND.get()) {
-            this.equipped(EquipmentTypes.MAIN_HAND).orElseThrow(IllegalStateException::new);
+            this.equipped(EquipmentTypes.MAIN_HAND.get()).orElseThrow(IllegalStateException::new);
         } else if (handType == HandTypes.OFF_HAND.get()) {
-            this.equipped(EquipmentTypes.OFF_HAND).orElseThrow(IllegalStateException::new);
+            this.equipped(EquipmentTypes.OFF_HAND.get()).orElseThrow(IllegalStateException::new);
         }
         throw new IllegalArgumentException("Invalid hand " + handType);
     }
 
-    @Override
     public ItemStack head() {
-        return this.equipped(EquipmentTypes.HEAD).orElseThrow(IllegalStateException::new);
+        return this.equipped(EquipmentTypes.HEAD.get()).orElseThrow(IllegalStateException::new);
     }
 
-    @Override
     public void setHead(final ItemStack helmet) {
-        this.equip(EquipmentTypes.HEAD, helmet);
+        this.equip(EquipmentTypes.HEAD.get(), helmet);
     }
 
-    @Override
     public ItemStack chest() {
-        return this.equipped(EquipmentTypes.CHEST).orElseThrow(IllegalStateException::new);
+        return this.equipped(EquipmentTypes.CHEST.get()).orElseThrow(IllegalStateException::new);
     }
 
-    @Override
     public void setChest(final ItemStack chestplate) {
-        this.equip(EquipmentTypes.CHEST, chestplate);
+        this.equip(EquipmentTypes.CHEST.get(), chestplate);
     }
 
-    @Override
     public ItemStack legs() {
-        return this.equipped(EquipmentTypes.LEGS).orElseThrow(IllegalStateException::new);
+        return this.equipped(EquipmentTypes.LEGS.get()).orElseThrow(IllegalStateException::new);
     }
 
-    @Override
     public void setLegs(final ItemStack leggings) {
-        this.equip(EquipmentTypes.LEGS, leggings);
+        this.equip(EquipmentTypes.LEGS.get(), leggings);
     }
 
-    @Override
     public ItemStack feet() {
-        return this.equipped(EquipmentTypes.FEET).orElseThrow(IllegalStateException::new);
+        return this.equipped(EquipmentTypes.FEET.get()).orElseThrow(IllegalStateException::new);
     }
 
-    @Override
     public void setFeet(final ItemStack boots) {
-        this.equip(EquipmentTypes.FEET, boots);
+        this.equip(EquipmentTypes.FEET.get(), boots);
     }
 
-    @Override
     public void setItemInHand(final HandType handType, final @Nullable ItemStack itemInHand) {
         if (handType == HandTypes.MAIN_HAND.get()) {
             this.setEquippedItem(EquipmentTypes.MAIN_HAND, itemInHand);
@@ -423,34 +391,23 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         if (this.isConstructing) {
             return;
         }
-        if (!this.isInitialized()) {
-            SpongeCommon.logger()
-                    .warn("Unable to mark user data for [{}] as dirty, data is not initialized! Any changes may be lost.",
-                            this.profile.getId());
-        } else {
-            SpongeUser.dirtyUsers.add(this);
-        }
+        ((SpongeServer) SpongeCommon.server()).userManager().markDirty(this);
     }
 
-    public void save() {
-        Preconditions.checkState(this.isInitialized(), "User {} is not initialized", this.profile.getId());
-
-        final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
-        final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.uniqueId() + ".dat").toFile();
-        CompoundTag compound;
-        try {
-            compound = NbtIo.readCompressed(new FileInputStream(file));
-        } catch (final IOException ignored) {
-            // Nevermind
-            compound = new CompoundTag();
-        }
-        this.writeCompound(compound);
-        try (final FileOutputStream out = new FileOutputStream(file)) {
-            NbtIo.writeCompressed(compound, out);
-            SpongeUser.dirtyUsers.remove(this);
-            this.invalidate();
-        } catch (final IOException e) {
-            SpongeCommon.logger().warn("Failed to save user file [{}]!", file, e);
+    public void save() throws IOException {
+        synchronized (this) {
+            final SpongeUserManager userManager = ((SpongeServer) SpongeCommon.server()).userManager();
+            final LevelStorageSource.LevelStorageAccess storageSource = ((MinecraftServerAccessor) Sponge.server()).accessor$storageSource();
+            final File file = storageSource.getLevelPath(LevelResource.PLAYER_DATA_DIR).resolve(this.uniqueId() + ".dat").toFile();
+            this.writeCompound(this.compound);
+            try (final FileOutputStream out = new FileOutputStream(file)) {
+                NbtIo.writeCompressed(this.compound, out);
+                userManager.unmarkDirty(this);
+            } catch (final IOException e) {
+                // We log the message here because the error may be swallowed by a completable future.
+                SpongeCommon.logger().warn("Failed to save user file [{}]!", file, e);
+                throw e;
+            }
         }
     }
 
@@ -464,60 +421,30 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         throw new MissingImplementationException("SpongeUser", "setEquippedItem");
     }
 
-    private net.minecraft.world.item.ItemStack getItemStackFromSlot(final EquipmentSlot slotIn) {
-        this.loadInventory();
-        if (slotIn == EquipmentSlot.MAINHAND) {
-            return this.inventory.getCurrentItem();
-        } else if (slotIn == EquipmentSlot.OFFHAND) {
-            return this.inventory.offHandInventory.get(0);
-        } else {
-            return slotIn.getType() == EquipmentSlot.Type.ARMOR ?
-                    this.inventory.armorInventory.get(slotIn.getIndex()) :
-                    net.minecraft.world.item.ItemStack.EMPTY;
-        }
-    }
-
-    private void setItemStackToSlot(final EquipmentSlot slotIn, final net.minecraft.world.item.ItemStack stack) {
-        this.loadInventory();
-        if (slotIn == EquipmentSlot.MAINHAND) {
-            this.inventory.mainInventory.set(this.inventory.currentItem, stack);
-        } else if (slotIn == EquipmentSlot.OFFHAND) {
-            this.inventory.offHandInventory.set(0, stack);
-        } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
-            this.inventory.armorInventory.set(slotIn.getIndex(), stack);
-        }
-    }
-
-    @Override
     public org.spongepowered.api.profile.GameProfile profile() {
         return SpongeGameProfile.of(this.profile);
     }
 
-    @Override
     public boolean isOnline() {
         return this.player().isPresent();
     }
 
-    @Override
     public Optional<ServerPlayer> player() {
         return Optional.ofNullable((ServerPlayer) SpongeCommon.server().getPlayerList().getPlayer(this.profile.getId()));
     }
 
-    @Override
     public Vector3d position() {
         return this.player()
                 .map(Player::position)
                 .orElseGet(() -> new Vector3d(this.x, this.y, this.z));
     }
 
-    @Override
     public ResourceKey worldKey() {
         final Optional<ServerPlayer> player = this.player();
         return player.map(serverPlayer -> serverPlayer.world().key()).orElseGet(() -> this.worldKey);
 
     }
 
-    @Override
     public boolean setLocation(final ResourceKey key, final Vector3d position) {
         Preconditions.checkNotNull(key);
         Preconditions.checkNotNull(position);
@@ -536,14 +463,12 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         return true;
     }
 
-    @Override
     public Vector3d rotation() {
         return this.player()
                 .map(Entity::rotation)
                 .orElseGet(() -> new Vector3d(this.pitch, this.yaw, 0));
     }
 
-    @Override
     public void setRotation(final Vector3d rotation) {
         Preconditions.checkNotNull(rotation, "Rotation was null!");
         final Optional<ServerPlayer> playerOpt = this.player();
@@ -556,12 +481,6 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         this.yaw = ((float) rotation.y()) % 360.0F;
     }
 
-    @Override
-    public String identifier() {
-        return this.profile.getId().toString();
-    }
-
-    @Override
     public Inventory enderChestInventory() {
         final Optional<ServerPlayer> playerOpt = this.player();
         if (playerOpt.isPresent()) {
@@ -569,40 +488,6 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         }
         this.loadEnderInventory();
         return ((Inventory) this.enderChest);
-    }
-
-    @Override
-    public void bridge$setSubject(final SubjectReference subj) {
-        this.subjectReference = subj;
-    }
-
-    @Override
-    public Optional<SubjectReference> bridge$resolveReferenceOptional() {
-        if (this.subjectReference == null) {
-            SubjectHelper.applySubject(this);
-        }
-        return Optional.ofNullable(this.subjectReference);
-    }
-
-    @Override
-    public Optional<Subject> bridge$resolveOptional() {
-        return this.bridge$resolveReferenceOptional().map(SubjectReference::resolve).map(CompletableFuture::join);
-    }
-
-    @Override
-    public Subject bridge$resolve() {
-        return this.bridge$resolveOptional()
-                .orElseThrow(() -> new IllegalStateException("No subject reference present for user " + this));
-    }
-
-    @Override
-    public String bridge$getSubjectCollectionIdentifier() {
-        return PermissionService.SUBJECTS_USER;
-    }
-
-    @Override
-    public Tristate bridge$permDefault(final String permission) {
-        return Tristate.FALSE;
     }
 
     @Override
@@ -694,7 +579,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
     }
 
     @Override
-    public void data$setCompound(CompoundTag nbt) {
+    public void data$setCompound(final CompoundTag nbt) {
         this.compound = nbt;
     }
 
@@ -711,7 +596,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         if (this.getClass() != obj.getClass()) {
             return false;
         }
-        final SpongeUser other = (SpongeUser) obj;
+        final SpongeUserData other = (SpongeUserData) obj;
         return this.profile.getId().equals(other.profile.getId());
     }
 
@@ -737,7 +622,7 @@ public final class SpongeUser implements User, DataSerializable, BedLocationHold
         return this.player().map(player -> ((net.minecraft.world.entity.Entity) player).isInvulnerable()).orElse(this.invulnerable);
     }
 
-    public void setInvulnerable(boolean invulnerable) {
+    public void setInvulnerable(final boolean invulnerable) {
         final Optional<ServerPlayer> playerOpt = this.player();
         if (playerOpt.isPresent()) {
             ((net.minecraft.world.entity.Entity) playerOpt.get()).setInvulnerable(invulnerable);

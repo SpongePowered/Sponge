@@ -27,10 +27,8 @@ package org.spongepowered.common.data.datasync.entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import java.util.List;
 import java.util.Optional;
 import net.minecraft.world.entity.Entity;
 
@@ -50,12 +48,9 @@ public final class EntityCustomNameVisibleConverter extends DataParameterConvert
     }
 
     @Override
-    public Boolean getValueFromEvent(final Boolean originalValue, final List<Immutable<?>> immutableValues) {
-        for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.key() == Keys.IS_CUSTOM_NAME_VISIBLE) {
-                return (Boolean) immutableValue.get();
-            }
-        }
-        return originalValue;
+    public Boolean getValueFromEvent(final Boolean originalValue, final DataTransactionResult result) {
+        return result.successfulValue(Keys.IS_CUSTOM_NAME_VISIBLE)
+                .map(Value::get)
+                .orElse(originalValue);
     }
 }

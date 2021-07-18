@@ -129,19 +129,11 @@ minecraft {
         // Full development environment
         server("runServer") {
             args("--nogui", "--launchTarget", "sponge_server_dev")
-            jvmArgs(
-                "-Dmixin.debug.verbose=true",
-                "-Dmixin.debug.checks=true",
-                "-Dmixin.debug.export=true",
-            )
+            jvmArgs("-Dmixin.debug.verbose=true", "-Dmixin.debug.checks=true")
         }
         client("runClient") {
             args("--launchTarget", "sponge_client_dev")
-            jvmArgs(
-                "-Dmixin.debug.verbose=true",
-                "-Dmixin.debug.checks=true",
-                "-Dmixin.debug.export=true",
-            )
+            jvmArgs("-Dmixin.debug.verbose=true", "-Dmixin.debug.checks=true")
         }
 
         // Lightweight integration tests

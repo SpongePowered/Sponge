@@ -32,6 +32,7 @@ import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.registry.ValueNotFoundException;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -43,7 +44,7 @@ import java.util.Optional;
 import java.util.stream.Stream;
 
 @Mixin(net.minecraft.core.Registry.class)
-@Implements(@Interface(iface = Registry.class, prefix = "registry$"))
+@Implements(@Interface(iface = Registry.class, prefix = "registry$", remap = Remap.NONE))
 public abstract class RegistryMixin_API<T> implements Registry<T> {
 
     // @formatter:off

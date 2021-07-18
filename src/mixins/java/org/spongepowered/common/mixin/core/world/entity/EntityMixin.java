@@ -1121,12 +1121,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     //If the event is cancelled, well, don't change the underlying value.
                     return;
                 }
-                this.remainingFireTicks = valueChange.endResult().successfulData()
-                    .stream()
-                    .filter(d -> d.key() == Keys.FIRE_TICKS)
-                    .findFirst()
+                this.remainingFireTicks = valueChange.endResult().successfulValue(Keys.FIRE_TICKS)
                     .map(Value::get)
-                    .map(o -> (Ticks) (Object) o)
                     .map(t -> (int) t.ticks())
                     .orElse(0);
             }

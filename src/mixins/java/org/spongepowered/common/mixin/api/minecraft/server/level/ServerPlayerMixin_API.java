@@ -97,16 +97,17 @@ import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
+import org.spongepowered.common.entity.player.SpongeUserView;
 import org.spongepowered.common.entity.player.tab.SpongeTabList;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.mixin.api.minecraft.world.entity.player.PlayerMixin_API;
+import org.spongepowered.common.profile.SpongeGameProfile;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.util.BookUtil;
 import org.spongepowered.common.util.NetworkUtil;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nullable;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.temporal.ChronoUnit;
@@ -118,6 +119,8 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
+
+import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
 public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements ServerPlayer {
@@ -165,7 +168,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public User user() {
-        return ((ServerPlayerBridge) this).bridge$getUser();
+        return new SpongeUserView(this.uuid);
     }
 
     @Override
@@ -178,7 +181,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public GameProfile profile() {
-        return ((ServerPlayerBridge) this).bridge$getUser().profile();
+        return SpongeGameProfile.of(this.shadow$getGameProfile());
     }
 
     @Override
@@ -215,7 +218,7 @@ public abstract class ServerPlayerMixin_API extends PlayerMixin_API implements S
 
     @Override
     public String identifier() {
-        return ((ServerPlayerBridge) this).bridge$getUser().identifier();
+        return this.uuid.toString();
     }
 
     @Override

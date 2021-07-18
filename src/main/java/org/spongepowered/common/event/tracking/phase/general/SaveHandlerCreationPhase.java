@@ -38,8 +38,4 @@ public class SaveHandlerCreationPhase extends PooledPhaseState<SaveHandlerCreati
     public void unwind(SaveHandlerCreationContext phaseContext) {
     }
 
-    @Override
-    public boolean shouldCreateWorldDirectories(SaveHandlerCreationContext phaseContext) {
-        return phaseContext.isCreateFiles();
-    }
 }

@@ -39,7 +39,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.SkinPart;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
@@ -61,8 +60,6 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     int bridge$getViewDistance();
 
-    @Nullable User bridge$getUserObject();
-
     Locale bridge$getLanguage();
 
     void bridge$setLanguage(Locale language);
@@ -83,7 +80,6 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     PlayerOwnBorderListener bridge$getWorldBorderListener();
 
-
     boolean bridge$hasForcedGamemodeOverridePermission();
 
     Scoreboard bridge$getScoreboard();
@@ -93,8 +89,6 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
     Set<SkinPart> bridge$getSkinParts();
 
     void bridge$setSkinParts(final Set<SkinPart> skinParts);
-
-    @Nullable User bridge$getUser();
 
     net.minecraft.network.chat.@Nullable Component bridge$getConnectionMessageToSend();
 
