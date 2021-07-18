@@ -49,15 +49,4 @@ public class InventorySlotTransaction extends InventoryBasedTransaction {
         return Optional.of(this.newTransaction);
     }
 
-    @Override
-    public void restore(PhaseContext<@NonNull ?> context, ChangeInventoryEvent event) {
-        // TODO post processing?
-        if (!this.newTransaction.isValid()) {
-            this.newTransaction.slot().set(this.newTransaction.original().createStack());
-        } else if (this.newTransaction.custom().isPresent()) {
-            this.newTransaction.slot().set(this.newTransaction.finalReplacement().createStack());
-        }
-    }
-
-
 }

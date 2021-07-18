@@ -24,8 +24,6 @@
  */
 package org.spongepowered.common.event.inventory;
 
-import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
-
 import net.kyori.adventure.text.Component;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -46,6 +44,7 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.enchantment.EnchantmentInstance;
 import net.minecraft.world.item.trading.Merchant;
 import net.minecraft.world.level.block.entity.HopperBlockEntity;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
@@ -73,7 +72,11 @@ import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.inventory.util.InventoryUtil;
@@ -112,25 +115,29 @@ public class InventoryEventFactory {
             }
 
             boolean fullTransfer = true;
-            final TrackedInventoryBridge capture = player.inventory;
-            capture.bridge$setCaptureInventory(true);
-            for (final ItemStackSnapshot item : list) {
-                final org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();
-                player.inventory.add(ItemStackUtil.toNative(itemStack));
-                if (!itemStack.isEmpty()) {
-                    fullTransfer = false;
-                    break;
-                }
 
+            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+            final TransactionalCaptureSupplier transactor = context.getTransactor();
+            try (final EffectTransactor ignored = transactor.logPlayerInventoryChange(player, SpongeEventFactory::createChangeInventoryEventPickup)) {
+                for (final ItemStackSnapshot item : list) {
+                    final org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();
+                    player.inventory.add(ItemStackUtil.toNative(itemStack));
+                    if (!itemStack.isEmpty()) {
+                        fullTransfer = false; // Modified pickup items do not fit inventory
+                        break;
+                    }
+                }
             }
-            capture.bridge$setCaptureInventory(false);
+
             if (!fullTransfer) {
+                // TODO pre-cancel event
                 for (final SlotTransaction trans : capture.bridge$getCapturedSlotTransactions()) {
                     trans.slot().set(trans.original().createStack());
                 }
                 return false;
             }
-            if (!InventoryEventFactory.callPlayerChangeInventoryPickupEvent(player, capture)) {
+
+            if (!TrackingUtil.processBlockCaptures(context)) {
                 return false;
             }
             itemToPickup.getItem().setCount(0);
@@ -149,7 +156,7 @@ public class InventoryEventFactory {
                 .createChangeInventoryEventPickup(PhaseTracker.getCauseStackManager().currentCause(), (Inventory) player.containerMenu, transactions);
         SpongeCommon.post(event);
         PhaseTracker.getCauseStackManager().popCause();
-        InventoryEventFactory.applyTransactions(event);
+        PacketPhaseUtil.handleSlotRestore(null, null, event.transactions(), event.isCancelled());
         transactions.clear();
         return !event.isCancelled();
     }
@@ -217,7 +224,7 @@ public class InventoryEventFactory {
         }
         final ChangeInventoryEvent.Pickup event = SpongeEventFactory.createChangeInventoryEventPickup(PhaseTracker.getCauseStackManager().currentCause(), spongeInventory, trans);
         SpongeCommon.post(event);
-        InventoryEventFactory.applyTransactions(event);
+        PacketPhaseUtil.handleSlotRestore(null, null, event.transactions(), event.isCancelled());
         return !event.isCancelled();
     }
 
@@ -238,24 +245,6 @@ public class InventoryEventFactory {
         return trans;
     }
 
-
-
-    private static void applyTransactions(final ChangeInventoryEvent.Pickup event) {
-        if (event.isCancelled()) {
-            for (final SlotTransaction trans : event.transactions()) {
-                trans.slot().set(trans.original().createStack());
-            }
-            return;
-        }
-        for (final SlotTransaction trans : event.transactions()) {
-            if (!trans.isValid()) {
-                trans.slot().set(trans.original().createStack());
-            } else if (trans.custom().isPresent()) {
-                trans.slot().set(trans.finalReplacement().createStack());
-            }
-        }
-    }
-
     public static boolean callInteractContainerOpenEvent(final ServerPlayer player) {
         final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackSnapshot.empty(), newCursor);
@@ -270,9 +259,7 @@ public class InventoryEventFactory {
         // TODO - determine if/how we want to fire inventory events outside of click packet handlers
         //((ContainerBridge) player.openContainer).bridge$setCaptureInventory(true);
         // Custom cursor
-        if (event.cursorTransaction().custom().isPresent()) {
-            handleCustomCursor(player, event.cursorTransaction().finalReplacement());
-        }
+        PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction());
         return true;
     }
 
@@ -576,12 +563,7 @@ public class InventoryEventFactory {
         SpongeCommon.post(event);
 
         PacketPhaseUtil.handleSlotRestore(playerIn, container, event.transactions(), event.isCancelled());
-        if (event.isCancelled() || !event.cursorTransaction().isValid()) {
-            PacketPhaseUtil.handleCustomCursor(playerIn, event.cursorTransaction().original());
-        } else if (event.cursorTransaction().custom().isPresent()) {
-            PacketPhaseUtil.handleCustomCursor(playerIn, event.cursorTransaction().finalReplacement());
-        }
-
+        PacketPhaseUtil.handleCursorRestore(playerIn, event.cursorTransaction());
         return event;
     }
 

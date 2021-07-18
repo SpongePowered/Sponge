@@ -26,27 +26,15 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
-import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
-
-import java.util.List;
 
 public final class SwapHandItemsState extends BasicInventoryPacketState {
 
     @Override
-    public ChangeInventoryEvent.SwapHand createInventoryEvent(InventoryPacketContext context, Cause cause,
-            Inventory inventory, List<SlotTransaction> slotTransactions) {
-        return SpongeEventFactory.createChangeInventoryEventSwapHand(cause, inventory, slotTransactions);
-    }
-
-    @Override
     public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final InventoryPacketContext context) {
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        transactor.logPlayerInventoryChange(playerMP);
+        transactor.logPlayerInventoryChange(playerMP, SpongeEventFactory::createChangeInventoryEventSwapHand);
     }
 
 }

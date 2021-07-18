@@ -278,8 +278,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
     }
 
-    public EffectTransactor logPlayerInventoryChange(final Player player) {
-        final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player);
+    public EffectTransactor logPlayerInventoryChange(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
+        final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player, eventCreator);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
     }

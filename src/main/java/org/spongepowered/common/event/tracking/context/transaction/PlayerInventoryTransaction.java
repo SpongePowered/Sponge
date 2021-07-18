@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.context.transaction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -42,28 +41,37 @@ import java.util.Optional;
 public class PlayerInventoryTransaction extends InventoryBasedTransaction {
 
     private final ServerPlayer player;
+    private EventCreator eventCreator;
 
-    public PlayerInventoryTransaction(final Player player) {
+    public PlayerInventoryTransaction(final Player player, final EventCreator eventCreator) {
         super(((ServerWorld) player.level).key(), (Inventory) player.inventory);
         this.player = (ServerPlayer) player;
+        this.eventCreator = eventCreator;
     }
 
     @Override
     Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions, final PhaseContext<@NonNull ?> context,
             final Cause cause) {
-        // TODO handle event creation for item pickup (see ItemEntityMixin_Inventory)
-        @Nullable final ChangeInventoryEvent event = context.createInventoryEvent(cause, this.inventory, slotTransactions);
-        return Optional.ofNullable(event);
+        final ChangeInventoryEvent event = eventCreator.create(cause, this.inventory, slotTransactions);
+        return Optional.of(event);
     }
 
     @Override
     public void restore(PhaseContext<@NonNull ?> context, ChangeInventoryEvent event) {
-        // TODO post-transaction handling
+        PacketPhaseUtil.handleSlotRestore(player, null, event.transactions(), event.isCancelled());
+    }
+
+    @Override
+    public void postProcessEvent(PhaseContext<@NonNull ?> context, ChangeInventoryEvent event) {
         PacketPhaseUtil.handleSlotRestore(player, null, event.transactions(), event.isCancelled());
     }
 
     @Override
     Optional<SlotTransaction> getSlotTransaction() {
         return Optional.empty();
+    }
+
+    public interface EventCreator {
+        ChangeInventoryEvent create(final Cause cause, final Inventory inventory, final List<SlotTransaction> slotTransactions);
     }
 }

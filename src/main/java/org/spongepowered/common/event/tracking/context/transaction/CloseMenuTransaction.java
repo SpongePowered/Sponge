@@ -88,29 +88,23 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final InteractContainerEvent event) {
+        if (this.clientSource) {
+            // If client closed container we need to reopen it
+            this.reopen(player, this.menu);
+        }
+        PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
+    }
 
-        if (event.isCancelled()) {
-            if (this.clientSource) {
-                // If client closed container we need to reopen it
-                this.reopen(player, this.menu);
-            }
-            // TODO if cancelled remove spawned item
+    @Override
+    public void postProcessEvent(PhaseContext<@NonNull ?> context, InteractContainerEvent event) {
+        // actually close container now
+        if (this.clientSource) {
+            player.doCloseContainer(); // Already closed on client
+        } else {
+            player.closeContainer(); // Also send packet
         }
-
-        // TODO cursor/restore + post-processing
-        if (!event.cursorTransaction().isValid()) {
-            PacketPhaseUtil.handleCustomCursor(this.player, event.cursorTransaction().original());
-        } else if (event.cursorTransaction().custom().isPresent()) {
-            PacketPhaseUtil.handleCustomCursor(this.player, event.cursorTransaction().finalReplacement());
-        }
-        if (!event.isCancelled()) {
-            // actually close container now
-            if (this.clientSource) {
-                player.doCloseContainer(); // Already closed on client
-            } else {
-                player.closeContainer(); // Also send packet
-            }
-        }
+        // And restore cursor if needed
+        PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
     }
 
     @Override

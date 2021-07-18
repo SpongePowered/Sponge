@@ -43,14 +43,10 @@ import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -91,24 +87,13 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final ClickContainerEvent event) {
-        if (event.isCancelled()) {
-            // TODO already handled by ContainerSlotTransaction?
-            ((ServerPlayerBridge) player).bridge$restorePacketItem(InteractionHand.MAIN_HAND);
-            PacketPhaseUtil.handleSlotRestore(player, player.containerMenu, event.transactions(), true);
-        } else {
-            if (event.cursorTransaction().custom().isPresent()) {
-                // Sending packet is not needed because the inventory is closed
-                this.player.inventory.setCarried(ItemStackUtil.fromSnapshotToNative(event.cursorTransaction().finalReplacement()));
-            }
+        ((ServerPlayerBridge) this.player).bridge$restorePacketItem(InteractionHand.MAIN_HAND); // TODO is this needed?
+        this.handleEventResults(this.player, event);
+    }
 
-            PacketState.processSpawnedEntities(player, event); // TODO already handled?
-            // TODO needed? - same for ClickMenuTransaction in DropItemWithHotkeyState
-            for (Entity entity : event.entities()) {
-                if (((EntityBridge) entity).bridge$isConstructing()) {
-                    ((EntityBridge) entity).bridge$fireConstructors();
-                }
-            }
-        }
+    @Override
+    public void postProcessEvent(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
+        this.handleEventResults(this.player, event);
     }
 
     @Override

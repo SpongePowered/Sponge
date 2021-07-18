@@ -3,17 +3,13 @@ package org.spongepowered.common.event.tracking.context.transaction;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.event.tracking.phase.packet.PacketState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -76,29 +72,17 @@ public class ClickMenuTransaction extends ContainerBasedTransaction {
             final ItemStackSnapshot item = this.slot.peek().createSnapshot();
             slotTransactions.add(new SlotTransaction(this.slot, item, item));
         }
-
         return Optional.ofNullable(event);
     }
 
     @Override
     public void restore(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
-        if (!event.cursorTransaction().isValid()) {
-            PacketPhaseUtil.handleCustomCursor(this.player, event.cursorTransaction().original());
-        } else if (event.cursorTransaction().custom().isPresent()) {
-            PacketPhaseUtil.handleCustomCursor(this.player, event.cursorTransaction().finalReplacement());
-        }
+        this.handleEventResults(this.player, event);
+    }
 
-        // TODO post-transaction handling
-        if (!event.isCancelled()) {
-            if (event instanceof SpawnEntityEvent) {
-                PacketState.processSpawnedEntities(player, (SpawnEntityEvent) event);
-            } else if (!capturedItems.isEmpty()) {
-                // TODO if inventory event is NOT SpawnEntity but entities were spawned
-                // we need to call the event separately
-                SpongeCommonEventFactory.callSpawnEntity(capturedItems, context);
-            }
-        }
-
+    @Override
+    public void postProcessEvent(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
+        this.handleEventResults(this.player, event);
     }
 
     @Override

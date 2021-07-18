@@ -2,6 +2,8 @@ package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -10,10 +12,12 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Collections;
@@ -164,6 +168,14 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
         return super.acceptSlotTransaction(newTransaction, menu);
     }
 
+    protected void handleEventResults(Player player, ClickContainerEvent event) {
+        PacketPhaseUtil.handleSlotRestore(player, this.menu, event.transactions(), event.isCancelled());
+        PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction());
+        if (event.isCancelled() && event instanceof SpawnEntityEvent) {
+            ((SpawnEntityEvent) event).entities().forEach(e ->
+                    ((ServerLevel) e.world()).despawn((net.minecraft.world.entity.Entity) e));
+        }
+    }
 
     @Override
     public void addToPrinter(final PrettyPrinter printer) {

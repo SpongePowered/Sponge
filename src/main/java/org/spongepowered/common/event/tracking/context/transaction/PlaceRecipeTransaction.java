@@ -46,7 +46,6 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -105,13 +104,12 @@ public class PlaceRecipeTransaction extends ContainerBasedTransaction {
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final ClickContainerEvent event) {
-        // TODO cancel/post-processing
-        if (event.isCancelled() || !event.cursorTransaction().isValid()) {
-            PacketPhaseUtil.handleCustomCursor(player, event.cursorTransaction().original());
-        } else {
-            PacketPhaseUtil.handleCustomCursor(player, event.cursorTransaction().finalReplacement());
-        }
-        PacketPhaseUtil.handleSlotRestore(player, player.containerMenu, event.transactions(), event.isCancelled());
+        this.handleEventResults(this.player, event);
+    }
+
+    @Override
+    public void postProcessEvent(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
+        this.handleEventResults(this.player, event);
     }
 
     @Override

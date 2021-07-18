@@ -29,6 +29,7 @@ import net.minecraft.world.entity.player.Inventory;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -68,12 +69,10 @@ public abstract class ItemEntityMixin_Inventory {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final boolean added;
-        try (final EffectTransactor ignored = transactor.logPlayerInventoryChange(player)) {
+        try (final EffectTransactor ignored = transactor.logPlayerInventoryChange(player, SpongeEventFactory::createChangeInventoryEventPickup)) {
              added = inventory.add(itemStack);
         }
 
-        // TODO use transactions (we do not have a BasicInventoryPacketState here!)
-        InventoryEventFactory.callPlayerChangeInventoryPickupEvent(player, inv);
         if (TrackingUtil.processBlockCaptures(context)) {
             return false; // if PickupEvent was cancelled return false
         }

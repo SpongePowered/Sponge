@@ -112,7 +112,7 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                     frame.pushCause(playerIn);
                     frame.addContext(EventContextKeys.BLOCK_HIT, ((ServerWorld)(worldIn)).createSnapshot(pos));
                     ((ContainerBridge) playerIn.containerMenu).bridge$setOpenLocation(location);
-                    if (!InventoryEventFactory.callInteractContainerOpenEvent(((ServerPlayer) playerIn))) {
+                    if (!InventoryEventFactory.callInteractContainerOpenEvent(playerIn)) {
                         return InteractionResult.SUCCESS;
                     }
                 }

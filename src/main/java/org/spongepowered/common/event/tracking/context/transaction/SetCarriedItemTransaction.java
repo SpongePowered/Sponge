@@ -55,33 +55,33 @@ public class SetCarriedItemTransaction extends InventoryBasedTransaction {
         this.player = (ServerPlayer) player;
         final PlayerInventory inventory = (PlayerInventory) this.player.inventory;
         this.prevSlotId = this.player.inventory.selected;
-        this.prevSlot = inventory.equipment().slot(prevSlotId).orElse(null);
+        this.prevSlot = inventory.equipment().slot(this.prevSlotId).orElse(null);
         this.newSlot = inventory.equipment().slot(newSlot).orElse(null);
     }
 
     @Override
     Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions, final PhaseContext<@NonNull ?> context,
             final Cause cause) {
-        if (newSlot == null || prevSlot == null) {
+        if (this.newSlot == null || this.prevSlot == null) {
             return Optional.empty();
         }
-        final ChangeInventoryEvent.Held event =
-                SpongeEventFactory.createChangeInventoryEventHeld(cause, newSlot, (Inventory) player.inventory, prevSlot, slotTransactions);
+        final ChangeInventoryEvent.Held event = SpongeEventFactory
+                .createChangeInventoryEventHeld(cause, this.newSlot, (Inventory) this.player.inventory, this.prevSlot, slotTransactions);
         return Optional.of(event);
     }
 
     @Override
-    public void restore(PhaseContext<@NonNull ?> context, ChangeInventoryEvent event) {
+    public void restore(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
+        this.player.connection.send(new ClientboundSetCarriedItemPacket(this.prevSlotId));
+        this.player.inventory.selected = this.prevSlotId;
+        PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
+    }
 
-        if (event.isCancelled()) {
-            player.connection.send(new ClientboundSetCarriedItemPacket(this.prevSlotId));
-            player.inventory.selected = this.prevSlotId;
-        } else {
-            // TODO check if needed:
-            player.resetLastActionTime();
-        }
-        // TODO post-transaction handling
-        PacketPhaseUtil.handleSlotRestore(player, null, event.transactions(), event.isCancelled());
+    @Override
+    public void postProcessEvent(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
+        this.player.resetLastActionTime(); // TODO check if needed
+
+        PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
     }
 
     @Override

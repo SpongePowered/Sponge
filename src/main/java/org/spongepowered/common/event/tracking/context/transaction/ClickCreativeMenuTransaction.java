@@ -35,7 +35,6 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 
@@ -47,7 +46,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
-import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 
@@ -93,22 +91,14 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final ClickContainerEvent event) {
-        if (event.isCancelled()) {
-            if (this.slotNum >= 0 && this.slotNum < this.menu.slots.size()) {
-                PacketPhaseUtil.handleSlotRestore(this.player, this.menu, event.transactions(), event.isCancelled());
-                PacketPhaseUtil.handleCustomCursor(this.player, this.originalCursor);
-            }
-            return;
+        if (this.slotNum >= 0 && this.slotNum < this.menu.slots.size()) {
+            this.handleEventResults(this.player, event);
         }
+    }
 
-        // TODO custom slot/cursor handling:
-        if (PacketPhaseUtil.handleSlotRestore(this.player, this.menu, event.transactions(), event.isCancelled())) {
-            // TODO same as canceling event we do not need to call broadcastChanges like vanilla anymore
-        }
-
-        if (event.cursorTransaction().custom().isPresent()) {
-            PacketPhaseUtil.handleCustomCursor(this.player, event.cursorTransaction().finalReplacement());
-        }
+    @Override
+    public void postProcessEvent(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
+        this.handleEventResults(this.player, event);
     }
 
     @Override

@@ -421,12 +421,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return null;
     }
 
-    default @Nullable ChangeInventoryEvent createInventoryEvent(final C context, final Cause cause, final Inventory inventory,
-            final List<SlotTransaction> slotTransactions
-    ) {
-        return null;
-    }
-
     default void restoreClickContainerEvent(C context, ClickContainerEvent event) {
 
     }
