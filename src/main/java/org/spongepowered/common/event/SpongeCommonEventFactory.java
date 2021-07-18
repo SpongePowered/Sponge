@@ -165,32 +165,6 @@ public final class SpongeCommonEventFactory {
     public static int lastPrimaryPacketTick = 0;
     @Nullable public static WeakReference<net.minecraft.server.level.ServerPlayer> lastAnimationPlayer;
 
-    public static boolean callSpawnEntity(final List<Entity> entities, final PhaseContext<?> context) {
-        PhaseTracker.getCauseStackManager().currentContext().require(EventContextKeys.SPAWN_TYPE);
-        try {
-            final SpawnEntityEvent event = SpongeEventFactory.createSpawnEntityEvent(PhaseTracker.getCauseStackManager().currentCause(), entities);
-            SpongeCommon.post(event);
-            return !event.isCancelled() && EntityUtil.processEntitySpawnsFromEvent(context, event);
-        } catch (final Exception e) {
-            final PrettyPrinter printer = new PrettyPrinter(60).add("Exception trying to create a Spawn Event").centre().hr()
-                .addWrapped(
-                    "Something did not go well trying to create an event or while trying to throw a SpawnEntityEvent. My bet is it's gremlins")
-                .add()
-                .add("At the very least here's some information about what's going to be directly spawned without an event:");
-            printer.add("Entities:");
-            for (final Entity entity : entities) {
-                printer.add(" - " + entity);
-            }
-            printer.add("PhaseContext:");
-            context.printCustom(printer, 4);
-            printer.add();
-            printer.add("Exception:");
-            printer.add(e);
-            printer.log(SpongeCommon.logger(), org.apache.logging.log4j.Level.ERROR);
-            return true;
-        }
-    }
-
     @SuppressWarnings("unchecked")
     public static <T extends net.minecraft.world.entity.Entity> CollideEntityEvent callCollideEntityEvent(
         final net.minecraft.world.entity.@Nullable Entity sourceEntity,

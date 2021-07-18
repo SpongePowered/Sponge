@@ -71,18 +71,6 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     }
 
-
-    protected static void processSpawnedEntities(final net.minecraft.server.level.ServerPlayer player, final SpawnEntityEvent event) {
-        final List<Entity> entities = event.entities();
-        PacketState.processEntities(player, entities);
-    }
-
-    protected static void processEntities(final net.minecraft.server.level.ServerPlayer player, final Collection<Entity> entities) {
-        for (final Entity entity : entities) {
-            EntityUtil.processEntitySpawn(entity, () -> Optional.of(((ServerPlayer) player).uniqueId()), e -> e.level.addFreshEntity(e));
-        }
-    }
-
     @Override
     public BiConsumer<CauseStackManager.StackFrame, P> getFrameModifier() {
         return this.BASIC_PACKET_MODIFIER;

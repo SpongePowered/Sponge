@@ -470,7 +470,7 @@ public final class TrackingUtil {
     public static void setCreatorReference(List<Entity> entities, ServerPlayer player) {
         for (final Entity currentEntity : entities) {
             if (currentEntity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) currentEntity).tracked$setCreatorReference(((org.spongepowered.api.entity.living.player.server.ServerPlayer) player).user());
+                ((CreatorTrackedBridge) currentEntity).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((org.spongepowered.api.entity.living.player.server.ServerPlayer) player).uniqueId());
             } else {
                 currentEntity.offer(Keys.CREATOR, player.getUUID());
             }
