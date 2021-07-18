@@ -118,6 +118,7 @@ minecraft {
         sequenceOf(8, 11, 16).forEach {
             server("runJava${it}Server") {
                 args("--nogui", "--launchTarget", "sponge_server_dev")
+                jvmArgs("-Dmixin.debug.verbose=true", "-Dmixin.debug.checks=true")
                 targetVersion(it)
                 allArgumentProviders += CommandLineArgumentProvider {
                     mixinConfigs.asSequence()
@@ -127,7 +128,7 @@ minecraft {
             }
             client("runJava${it}Client") {
                 args("--launchTarget", "sponge_client_dev")
-                jvmArgs("-Dmixin.debug.export=true", "-Dmixin.debug=true")
+                jvmArgs("-Dmixin.debug.verbose=true", "-Dmixin.debug.checks=true")
                 targetVersion(it)
                 allArgumentProviders += CommandLineArgumentProvider {
                     mixinConfigs.asSequence()
