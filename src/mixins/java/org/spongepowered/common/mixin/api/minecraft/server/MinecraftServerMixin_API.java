@@ -136,7 +136,7 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
     private UsernameCache api$usernameCache;
     private Audience api$broadcastAudience;
     private ServerScoreboard api$scoreboard;
-    private GameProfileManager api$profileManager;
+    private SpongeGameProfileManager api$profileManager;
     private MapStorage api$mapStorage;
     private RegistryHolder api$registryHolder;
     private SpongeUserManager api$userManager;
@@ -347,6 +347,11 @@ public abstract class MinecraftServerMixin_API extends ReentrantBlockableEventLo
             this.api$profileManager = new SpongeGameProfileManager(this);
         }
 
+        return this.api$profileManager;
+    }
+
+    @Override
+    public SpongeGameProfileManager gameProfileManagerIfPresent() {
         return this.api$profileManager;
     }
 

@@ -189,9 +189,9 @@ public final class AsyncScheduler extends SpongeScheduler {
         this.executor.shutdown();
 
         try {
-            if (!this.executor.awaitTermination(10, TimeUnit.SECONDS)) {
+            if (!this.executor.awaitTermination(5, TimeUnit.SECONDS)) {
                 new PrettyPrinter()
-                        .add("Sponge async scheduler failed to shut down in 10 seconds! Tasks that may have been active:")
+                        .add("Sponge async scheduler failed to shut down in 5 seconds! Tasks that may have been active:")
                         .addWithIndices(tasks)
                         .add()
                         .add("We will now attempt immediate shutdown.")

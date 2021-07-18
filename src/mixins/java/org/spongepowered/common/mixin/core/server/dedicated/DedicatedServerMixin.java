@@ -41,6 +41,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.server.players.GameProfileCacheBridge;
 import org.spongepowered.common.mixin.core.server.MinecraftServerMixin;
@@ -66,8 +67,8 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
     }
 
     @Inject(method = "stopServer", at = @At("TAIL"))
-    private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
-        SpongeCommon.game().asyncScheduler().close();
+    private void impl$callStoppedGame(final CallbackInfo ci) {
+        SpongeBootstrap.lifecycle().callStoppedGameEvent();
     }
 
     @Override

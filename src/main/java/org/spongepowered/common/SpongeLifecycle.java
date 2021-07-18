@@ -31,6 +31,7 @@ import com.google.inject.Injector;
 import com.google.inject.Singleton;
 import io.leangen.geantyref.TypeToken;
 import net.minecraft.core.Registry;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Client;
 import org.spongepowered.api.Engine;
 import org.spongepowered.api.Game;
@@ -52,10 +53,12 @@ import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.profile.SpongeGameProfileManager;
 import org.spongepowered.common.registry.SpongeBuilderProvider;
 import org.spongepowered.common.registry.SpongeFactoryProvider;
 import org.spongepowered.common.registry.SpongeRegistries;
 import org.spongepowered.common.registry.SpongeRegistryHolder;
+import org.spongepowered.common.scheduler.AsyncScheduler;
 import org.spongepowered.common.service.SpongeServiceProvider;
 import org.spongepowered.common.service.server.permission.SpongeContextCalculator;
 import org.spongepowered.plugin.PluginContainer;
@@ -199,6 +202,20 @@ public final class SpongeLifecycle {
     public void callStoppingEngineEvent(final Engine engine) {
         this.game.eventManager().post(SpongeEventFactory.createStoppingEngineEvent(PhaseTracker.getCauseStackManager().currentCause(),
                 engine, this.game, (TypeToken<Engine>) TypeToken.get(engine.getClass())));
+        if (engine instanceof SpongeServer) {
+            final @Nullable SpongeGameProfileManager profileManager = ((SpongeServer) engine).gameProfileManagerIfPresent();
+            if (profileManager != null) {
+                profileManager.close();
+            }
+        }
+    }
+
+    public void callStoppedGameEvent() {
+        // Call an event for plugins to shut down any thread pools
+        this.game.eventManager().post(SpongeEventFactory.createStoppedGameEvent(PhaseTracker.getCauseStackManager().currentCause(), this.game));
+
+        // Then shut down our own thread pool
+        ((AsyncScheduler) this.game.asyncScheduler()).close();
     }
 
     private Collection<PluginContainer> filterInternalPlugins(final Collection<PluginContainer> plugins) {
