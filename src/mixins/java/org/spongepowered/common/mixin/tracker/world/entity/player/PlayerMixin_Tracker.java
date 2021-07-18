@@ -151,10 +151,10 @@ public abstract class PlayerMixin_Tracker extends LivingEntityMixin_Tracker {
             final float f1 = this.random.nextFloat() * ((float) Math.PI * 2F);
             itemEntity.setDeltaMovement(-Mth.sin(f1) * f, 0.2F, Mth.cos(f1) * f);
         } else {
-            final float f8 = Mth.sin(this.getXRot() * ((float)Math.PI / 180F));
-            final float f2 = Mth.cos(this.getXRot() * ((float)Math.PI / 180F));
-            final float f3 = Mth.sin(this.getYRot() * ((float)Math.PI / 180F));
-            final float f4 = Mth.cos(this.getYRot() * ((float)Math.PI / 180F));
+            final float f8 = Mth.sin(this.shadow$getXRot() * ((float)Math.PI / 180F));
+            final float f2 = Mth.cos(this.shadow$getXRot() * ((float)Math.PI / 180F));
+            final float f3 = Mth.sin(this.shadow$getYRot() * ((float)Math.PI / 180F));
+            final float f4 = Mth.cos(this.shadow$getYRot() * ((float)Math.PI / 180F));
             final float f5 = this.random.nextFloat() * ((float)Math.PI * 2F);
             final float f6 = 0.02F * this.random.nextFloat();
             itemEntity.setDeltaMovement((double)(-f3 * f2 * 0.3F) + Math.cos(f5) * (double)f6, (-f8 * 0.3F + 0.1F + (this.random.nextFloat() - this.random.nextFloat()) * 0.1F), (double)(f4 * f2 * 0.3F) + Math.sin(f5) * (double)f6);
