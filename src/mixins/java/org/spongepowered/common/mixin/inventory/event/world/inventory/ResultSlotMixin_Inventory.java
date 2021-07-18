@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -45,6 +48,11 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedContaine
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Iterator;
@@ -167,8 +175,30 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         }
 
         final CraftingInventory craftingInventory = (CraftingInventory) craftInv;
-        final CraftItemEvent.Craft event = InventoryEventFactory.callCraftEventPost(thePlayer, craftingInventory,
-                craftedItem, this.impl$lastRecipe, container, capturedTransactions);
+        final CraftItemEvent.Craft event;
+        // TODO use transactions where possible
+        {
+            // Get previous cursor if captured
+            ItemStack previousCursor = ((TrackedContainerBridge) container).bridge$getPreviousCursor();
+            if (previousCursor == null) {
+                previousCursor = thePlayer.inventory.getCarried(); // or get the current one
+            }
+            final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackUtil.snapshotOf(previousCursor), ItemStackUtil.snapshotOf(thePlayer.inventory.getCarried()));
+            final org.spongepowered.api.item.inventory.Slot slot = craftingInventory.result();
+            event = SpongeEventFactory.createCraftItemEventCraft(PhaseTracker.getCauseStackManager().currentCause(),
+                    ContainerUtil.fromNative(container), craftedItem, craftingInventory, cursorTransaction, Optional.ofNullable(impl$lastRecipe), Optional.of(slot), capturedTransactions);
+            SpongeCommon.post(event);
+
+            // handle slot-transactions
+            // TODO prevent capture during restore
+            try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).buildAndSwitch()) {
+                PacketPhaseUtil.handleSlotRestore(thePlayer, container, event.transactions(), event.isCancelled());
+                PacketPhaseUtil.handleCursorRestore(thePlayer, event.cursorTransaction());
+                ((TrackedContainerBridge) container).bridge$detectAndSendChanges(true); // TODO is this needed?
+            }
+
+            capturedTransactions.clear();
+        }
 
         ((TrackedContainerBridge) container).bridge$setLastCraft(event);
         ((TrackedContainerBridge) container).bridge$setFirePreview(true);

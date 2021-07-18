@@ -446,38 +446,6 @@ public class InventoryEventFactory {
         return event;
     }
 
-
-    public static CraftItemEvent.Craft callCraftEventPost(final Player player, final CraftingInventory inventory, final ItemStackSnapshot result,
-            final @Nullable CraftingRecipe recipe, final AbstractContainerMenu container, final List<SlotTransaction> transactions) {
-        // Get previous cursor if captured
-        ItemStack previousCursor = ((TrackedContainerBridge) container).bridge$getPreviousCursor();
-        if (previousCursor == null) {
-            previousCursor = player.inventory.getCarried(); // or get the current one
-        }
-        final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackUtil.snapshotOf(previousCursor), ItemStackUtil.snapshotOf(player.inventory.getCarried()));
-        final org.spongepowered.api.item.inventory.Slot slot = inventory.result();
-        final CraftItemEvent.Craft event = SpongeEventFactory.createCraftItemEventCraft(PhaseTracker.getCauseStackManager().currentCause(),
-                ContainerUtil.fromNative(container), result, inventory, cursorTransaction, Optional.ofNullable(recipe), Optional.of(slot), transactions);
-        SpongeCommon.post(event);
-
-        final boolean capture = container.bridge$capturingInventory();
-        container.bridge$setCaptureInventory(false);
-        // handle slot-transactions
-        PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
-        if (event.isCancelled() || !event.cursorTransaction().isValid() || event.cursorTransaction().custom().isPresent()) {
-            // handle cursor-transaction
-            final ItemStackSnapshot newCursor = event.isCancelled() || event.cursorTransaction().isValid() ? event.cursorTransaction().original() : event.cursorTransaction().finalReplacement();
-            player.inventory.setCarried(ItemStackUtil.fromSnapshotToNative(newCursor));
-            if (player instanceof ServerPlayer) {
-                ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, player.inventory.getCarried()));
-            }
-        }
-
-        transactions.clear();
-        container.bridge$setCaptureInventory(capture);
-        return event;
-    }
-
     public static UpdateAnvilEvent callUpdateAnvilEvent(final AnvilMenu anvil, final ItemStack slot1, final ItemStack slot2, final ItemStack result, final String name, final int levelCost, final int materialCost) {
         final Transaction<ItemStackSnapshot> transaction = new Transaction<>(ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(result));
         final UpdateAnvilEventCost costs = new UpdateAnvilEventCost(levelCost, materialCost);
@@ -486,7 +454,6 @@ public class InventoryEventFactory {
         SpongeCommon.post(event);
         return event;
     }
-
 
     public static ChangeEntityEquipmentEvent callChangeEntityEquipmentEvent(
             final LivingEntity entity, final ItemStackSnapshot before, final ItemStackSnapshot after, final Slot slot) {
