@@ -27,6 +27,7 @@ package org.spongepowered.common.event.tracking.context.transaction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -53,7 +54,7 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
     Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions, final PhaseContext<@NonNull ?> context,
             final Cause cause) {
         final ChangeInventoryEvent event = eventCreator.create(cause, this.inventory, slotTransactions);
-        return Optional.of(event);
+        return Optional.ofNullable(event);
     }
 
     @Override
@@ -72,6 +73,6 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
     }
 
     public interface EventCreator {
-        ChangeInventoryEvent create(final Cause cause, final Inventory inventory, final List<SlotTransaction> slotTransactions);
+        @Nullable ChangeInventoryEvent create(final Cause cause, final Inventory inventory, final List<SlotTransaction> slotTransactions);
     }
 }

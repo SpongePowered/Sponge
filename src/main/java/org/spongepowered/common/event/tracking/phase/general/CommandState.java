@@ -28,6 +28,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.living.player.Player;
@@ -44,8 +45,11 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.world.BlockChange;
 
@@ -99,17 +103,11 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     @Override
     public void unwind(final CommandPhaseContext phaseContext) {
         final Optional<net.minecraft.world.entity.player.Player> playerSource = phaseContext.getSource(net.minecraft.world.entity.player.Player.class);
-        final CauseStackManager csm = PhaseTracker.getCauseStackManager();
         if (playerSource.isPresent()) {
-            // Post event for inventory changes
-            (playerSource.get().inventory).bridge$setCaptureInventory(false);
-            final List<SlotTransaction> list = (playerSource.get().inventory).bridge$getCapturedSlotTransactions();
-            if (!list.isEmpty()) {
-                final ChangeInventoryEvent event = SpongeEventFactory.createChangeInventoryEvent(csm.currentCause(),
-                        ((Inventory) playerSource.get().inventory), list);
-                SpongeCommon.post(event);
-                PacketPhaseUtil.handleSlotRestore(playerSource.get(), null, list, event.isCancelled());
-                list.clear();
+            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+            final TransactionalCaptureSupplier transactor = context.getTransactor();
+            try (final EffectTransactor ignored = transactor.logPlayerInventoryChange(playerSource.get(), (cause, inv, trans) -> trans.isEmpty() ? null : SpongeEventFactory.createChangeInventoryEvent(cause, inv, trans))) {
+
             }
         }
         TrackingUtil.processBlockCaptures(phaseContext);
