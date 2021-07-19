@@ -91,7 +91,7 @@ jobs:
           name: SpongeVanilla Production Jar
       - name: Run SpongeVanilla Test (windows)
         if: "runner.os == 'Windows'"
-        run: java -jar $(gci | Where-Object NameString -Match "-universal.jar") --launchTarget sponge_server_it
+        run: java "-Dmixin.debug.verbose=true" -jar $(gci | Where-Object NameString -Match "-universal.jar") --launchTarget sponge_server_it
       - name: Run SpongeVanilla Test (other)
         if: "runner.os != 'Windows'"
-        run: java -jar *-universal.jar --launchTarget sponge_server_it
+        run: java -Dmixin.debug.verbose=true -jar *-universal.jar --launchTarget sponge_server_it
