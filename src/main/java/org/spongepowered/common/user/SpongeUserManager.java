@@ -260,7 +260,7 @@ public final class SpongeUserManager implements UserManager {
                 currentUser.save();
             }
             // The views will now point at the player.
-            this.userCache.invalidate(currentUser);
+            this.userCache.invalidate(currentUser.uniqueId());
         }
     }
 
