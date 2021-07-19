@@ -70,7 +70,6 @@ import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -93,7 +92,7 @@ import java.util.function.Supplier;
 public class InventoryEventFactory {
 
 
-    public static boolean callPlayerChangeInventoryPickupPreEvent(final Player player, final ItemEntity itemToPickup, final int pickupDelay) {
+    public static boolean callPlayerChangeInventoryPickupPreEvent(final Player player, final ItemEntity itemToPickup) {
         final ItemStack stack = itemToPickup.getItem();
         final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
         causeStackManager.pushCause(player);

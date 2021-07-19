@@ -58,8 +58,10 @@ public abstract class ItemEntityMixin_Inventory {
     )
     private void spongeImpl$ThrowPickupEvent(final Player entityIn, final CallbackInfo ci) {
         // TODO use transactions if possible
-        if (!InventoryEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (ItemEntity) (Object) this, this.pickupDelay)) {
-            ci.cancel();
+        if (this.pickupDelay == 0) {
+            if (!InventoryEventFactory.callPlayerChangeInventoryPickupPreEvent(entityIn, (ItemEntity) (Object) this)) {
+                ci.cancel();
+            }
         }
     }
 
