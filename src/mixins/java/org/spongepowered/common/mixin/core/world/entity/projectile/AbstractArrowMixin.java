@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 import javax.annotation.Nullable;
@@ -73,7 +73,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
      */
     @Inject(method = "onHitBlock", at = @At("HEAD"), cancellable = true)
     private void onProjectileHit(final BlockHitResult hitResult, final CallbackInfo ci) {
-        if (!((WorldBridge) this.level).bridge$isFake() && hitResult.getType() != HitResult.Type.MISS) {
+        if (!((LevelBridge) this.level).bridge$isFake() && hitResult.getType() != HitResult.Type.MISS) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrow) (Object) this,
                     ((ArrowEntity) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
                 this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));
@@ -102,7 +102,7 @@ public abstract class AbstractArrowMixin extends ProjectileMixin {
      */
     @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
     private void onProjectileHit(final EntityHitResult hitResult, final CallbackInfo ci) {
-        if (!((WorldBridge) this.level).bridge$isFake() && hitResult.getType() != HitResult.Type.MISS) {
+        if (!((LevelBridge) this.level).bridge$isFake() && hitResult.getType() != HitResult.Type.MISS) {
             if (SpongeCommonEventFactory.handleCollideImpactEvent((AbstractArrow) (Object) this,
                     ((ArrowEntity) this).get(Keys.SHOOTER).orElse(null), hitResult)) {
                 this.shadow$playSound(SoundEvents.ARROW_HIT, 1.0F, 1.2F / (this.random.nextFloat() * 0.2F + 0.9F));

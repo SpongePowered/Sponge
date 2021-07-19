@@ -88,18 +88,16 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
@@ -241,7 +239,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
     @Override
     public boolean bridge$setLocation(final ServerLocation location) {
-        if (this.removed || ((WorldBridge) location.world()).bridge$isFake()) {
+        if (this.removed || ((LevelBridge) location.world()).bridge$isFake()) {
             return false;
         }
 
@@ -257,7 +255,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.currentCause(),
                         (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getCommandSenderWorld(), location.world(),
                         location.world());
-                if (SpongeCommon.post(event) && ((WorldBridge) event.destinationWorld()).bridge$isFake()) {
+                if (SpongeCommon.post(event) && ((LevelBridge) event.destinationWorld()).bridge$isFake()) {
                     return false;
                 }
 
@@ -1084,7 +1082,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             opcode = Opcodes.PUTFIELD)
     )
     private void impl$ThrowIgniteEventForFire(final Entity entity, final int ticks) {
-        if (!((WorldBridge) this.level).bridge$isFake() && ShouldFire.IGNITE_ENTITY_EVENT &&
+        if (!((LevelBridge) this.level).bridge$isFake() && ShouldFire.IGNITE_ENTITY_EVENT &&
             this.remainingFireTicks < 1 && ticks >= Constants.Entity.MINIMUM_FIRE_TICKS &&
             this.impl$canCallIgniteEntityEvent()) {
 

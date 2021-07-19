@@ -28,7 +28,6 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
@@ -50,7 +49,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
@@ -94,7 +93,7 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
     private void tracker$sanityCheckServerWorldSetBlockState(final BlockPos pos, final BlockState state, final boolean isMoving,
         final CallbackInfoReturnable<BlockState> cir
     ) {
-        if (!((WorldBridge) this.level).bridge$isFake()) {
+        if (!((LevelBridge) this.level).bridge$isFake()) {
             new PrettyPrinter(80).add("Illegal Direct Chunk Access")
                 .hr()
                 .add(new IllegalAccessException("No one should be accessing Chunk.setBlock in a ServerWorld's environment"))
@@ -120,7 +119,7 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
     @NonNull
     public ChunkPipeline bridge$createChunkPipeline(final BlockPos pos, final BlockState newState, final BlockState currentState,
             final SpongeBlockChangeFlag flag, final int limit) {
-        final boolean isFake = ((WorldBridge) this.level).bridge$isFake();
+        final boolean isFake = ((LevelBridge) this.level).bridge$isFake();
         if (isFake) {
             throw new IllegalStateException("Cannot call ChunkBridge.bridge$buildChunkPipeline in non-Server managed worlds");
         }
@@ -248,7 +247,7 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
     private void tracker$ThrowCollisionEvent(final @Coerce Object entityIn, final AABB aabb, final List<Entity> listToFill,
         final Predicate<?> filter, final CallbackInfo ci
     ) {
-        if (((WorldBridge) this.level).bridge$isFake() || !PhaseTracker.getInstance().getPhaseContext().allowsEntityCollisionEvents()) {
+        if (((LevelBridge) this.level).bridge$isFake() || !PhaseTracker.getInstance().getPhaseContext().allowsEntityCollisionEvents()) {
             return;
         }
 

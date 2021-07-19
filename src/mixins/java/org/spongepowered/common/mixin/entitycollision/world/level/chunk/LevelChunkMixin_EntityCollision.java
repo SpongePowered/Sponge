@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
@@ -97,7 +97,7 @@ public abstract class LevelChunkMixin_EntityCollision {
     }
 
     private <T extends Entity> boolean entityCollision$allowEntityCollision(final List<T> entities) {
-        if (((WorldBridge) this.shadow$getLevel()).bridge$isFake()) {
+        if (((LevelBridge) this.shadow$getLevel()).bridge$isFake()) {
             return true;
         }
 

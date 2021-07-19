@@ -63,7 +63,7 @@ import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.phys.AABBAccessor;
 import org.spongepowered.common.bridge.TrackableBridge;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
@@ -216,7 +216,7 @@ public final class EntityActivationRange {
      * @param world The world to perform activation checks in
      */
     public static void activateEntities(final ServerLevel world) {
-        if (((WorldBridge) world).bridge$isFake()) {
+        if (((LevelBridge) world).bridge$isFake()) {
             return;
         }
 

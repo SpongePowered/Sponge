@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 
 import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
@@ -51,7 +51,7 @@ import java.util.Random;
 import java.util.function.Consumer;
 
 @Mixin(Level.class)
-public abstract class LevelMixin_Tracker implements WorldBridge {
+public abstract class LevelMixin_Tracker implements LevelBridge {
 
     // @formatter:off
     @Shadow @Final public Random random;

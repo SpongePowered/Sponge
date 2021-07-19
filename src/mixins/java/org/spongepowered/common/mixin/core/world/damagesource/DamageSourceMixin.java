@@ -41,11 +41,10 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.registry.provider.DamageSourceToTypeProvider;
 import org.spongepowered.common.util.MemoizedSupplier;
 
-import java.util.Objects;
 import java.util.function.Supplier;
 
 import javax.annotation.Nullable;
@@ -55,7 +54,6 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.damagesource.IndirectEntityDamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Explosion;
 
 @Mixin(DamageSource.class)
@@ -97,7 +95,7 @@ public abstract class DamageSourceMixin implements DamageSourceBridge {
             final CallbackInfoReturnable<net.minecraft.world.damagesource.DamageSource> cir) {
         if (explosion != null) {
             final Entity entity = ((ExplosionAccessor) explosion).accessor$source();
-            if (entity != null && !((WorldBridge) ((ExplosionAccessor) explosion).accessor$level()).bridge$isFake()) {
+            if (entity != null && !((LevelBridge) ((ExplosionAccessor) explosion).accessor$level()).bridge$isFake()) {
                 if (explosion.getSourceMob() == null && entity instanceof CreatorTrackedBridge) {
                     // check creator
                     final CreatorTrackedBridge creatorBridge = (CreatorTrackedBridge) entity;

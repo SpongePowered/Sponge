@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world;
+package org.spongepowered.common.bridge.world.level;
 
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -31,7 +31,7 @@ import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.math.vector.Vector3d;
 
-public interface WorldBridge {
+public interface LevelBridge {
 
     /**
      * Gets whether this world is a usable world in the context of using

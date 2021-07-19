@@ -31,14 +31,13 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.network.EngineConnectionTypes;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 
@@ -99,7 +98,7 @@ public final class SpongePacketHandler {
                     }
 
                     final DimensionType dimensionType = SpongeCommon.server().registryAccess().dimensionTypes().get(packet.dimensionLogic);
-                    ((WorldBridge) world).bridge$adjustDimensionLogic(dimensionType);
+                    ((LevelBridge) world).bridge$adjustDimensionLogic(dimensionType);
                 }
         );
     }

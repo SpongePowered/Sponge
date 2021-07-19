@@ -28,7 +28,7 @@ import net.minecraft.server.MinecraftServer;
 import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 
 import javax.annotation.Nullable;
@@ -40,7 +40,7 @@ public abstract class LevelMixin_RealTime implements RealTimeTrackingBridge {
 
     @Override
     public long realTimeBridge$getRealTimeTicks() {
-        if (((WorldBridge) this).bridge$isFake()) {
+        if (((LevelBridge) this).bridge$isFake()) {
             return 1;
         }
         if (this.shadow$getServer() != null) {

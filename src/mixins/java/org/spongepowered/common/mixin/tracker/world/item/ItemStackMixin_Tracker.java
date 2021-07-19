@@ -27,7 +27,7 @@ package org.spongepowered.common.mixin.tracker.world.item;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
@@ -55,7 +55,7 @@ public abstract class ItemStackMixin_Tracker {
         final Item item, final ItemStack stack, final Level level, final BlockState state, final BlockPos pos,
         final LivingEntity player, final Level levelIn, final BlockState stateIn, final BlockPos posIn, final Player playerIn
     ) {
-        final boolean isServerLevel = !((WorldBridge) level).bridge$isFake();
+        final boolean isServerLevel = !((LevelBridge) level).bridge$isFake();
         final PhaseContext<@NonNull ?> context = isServerLevel ? PhaseTracker.SERVER.getPhaseContext() : null;
         try {
             if (isServerLevel) {

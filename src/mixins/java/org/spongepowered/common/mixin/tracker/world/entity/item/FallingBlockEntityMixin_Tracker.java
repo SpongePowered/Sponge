@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -88,7 +88,7 @@ public abstract class FallingBlockEntityMixin_Tracker extends EntityMixin_Tracke
         // So, there's two cases here: either the world is not cared for, or the
         // ChangeBlockEvent is not being listened to. If it's not being listened to,
         // we need to specifically just proceed as normal.
-        if (((WorldBridge) this.level).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT) {
+        if (((LevelBridge) this.level).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT) {
             return;
         }
         // Ideally, at this point we should still be in the EntityTickState and only this block should
