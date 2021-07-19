@@ -28,6 +28,7 @@ import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.core.Filter;
 import org.apache.logging.log4j.core.Logger;
 import org.apache.logging.log4j.core.filter.CompositeFilter;
+import org.apache.logging.log4j.core.filter.DenyAllFilter;
 import org.apache.logging.log4j.core.filter.RegexFilter;
 import org.intellij.lang.annotations.Language;
 import org.spongepowered.asm.mixin.MixinEnvironment;
@@ -62,7 +63,7 @@ public final class MixinLoggerInjector {
             // regex patterns
             MixinLoggerInjector.pattern(".*for final field [^@]+@Mutable.*"),
             // MixinLoggerInjector.pattern("^NESTING not supported.*"), // todo: if we need to
-            new DenyAllFilter(),
+            DenyAllFilter.newBuilder().build(),
         });
         final CaptureAppender appender = CaptureAppender.builder()
             .setName("IntegrationTest-Capture")
