@@ -123,11 +123,11 @@ import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.storage.MapItemSavedDataBridge;
 import org.spongepowered.common.entity.EntityUtil;
@@ -842,7 +842,7 @@ public final class SpongeCommonEventFactory {
         return item;
     }
 
-    public static PlaySoundEvent.@Nullable Broadcast callPlaySoundBroadcastEvent(final CauseStackManager.StackFrame frame, final WorldBridge bridge,
+    public static PlaySoundEvent.@Nullable Broadcast callPlaySoundBroadcastEvent(final CauseStackManager.StackFrame frame, final LevelBridge bridge,
         final BlockPos pos, final int effectID) {
         final Supplier<SoundType> soundType;
         final float volume;
@@ -881,7 +881,7 @@ public final class SpongeCommonEventFactory {
 
     @SuppressWarnings("ConstantConditions")
     public static PlaySoundEvent.AtEntity callPlaySoundAtEntityEvent(final Cause cause, final net.minecraft.world.entity.player.@Nullable Player entity,
-        final WorldBridge worldMixin, final double x, final double y, final double z, final net.minecraft.sounds.SoundSource category,
+        final LevelBridge worldMixin, final double x, final double y, final double z, final net.minecraft.sounds.SoundSource category,
         final SoundEvent name, final float pitch, final float volume) {
         final ServerLocation location = ServerLocation.of((ServerWorld) worldMixin, x, y, z);
         final PlaySoundEvent.AtEntity event = SpongeEventFactory.createPlaySoundEventAtEntity(cause, location,

@@ -31,9 +31,13 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import org.spongepowered.vanilla.applaunch.util.MixinLoggerInjector;
+
+import java.util.Queue;
 
 public class IntegrationTestLaunch extends VanillaLaunch {
     private final boolean isServer;
+    private Queue<String> capturedMessages;
 
     protected IntegrationTestLaunch(final VanillaPluginPlatform pluginPlatform, final boolean isServer) {
         super(pluginPlatform, Stage.DEVELOPMENT);
@@ -52,24 +56,40 @@ public class IntegrationTestLaunch extends VanillaLaunch {
     }
 
     @Override
-    protected void performBootstrap(String[] args) {
+    protected void performBootstrap(final String[] args) {
         this.logger().info("Running integration tests...");
+        // Attach logger capture (kinda janky, but will save us from having to write xml for a one-off situation)
+        // This matches various regexes, configured in MixinLoggerInjector
+        this.capturedMessages = MixinLoggerInjector.captureLogger();
         SpongeBootstrap.perform("integration tests", this::performIntegrationTests);
     }
 
+
     private void performIntegrationTests() {
-        // Prepare Vanilla
-        Bootstrap.bootStrap();
-        Bootstrap.validate();
+        try {
+            // Prepare Vanilla
+            Bootstrap.bootStrap();
+            Bootstrap.validate();
 
-        // Prepare Sponge
-        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
-        lifecycle.establishGlobalRegistries();
-        lifecycle.establishDataProviders();
-        lifecycle.callRegisterDataEvent();
+            // Prepare Sponge
+            final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
+            lifecycle.establishGlobalRegistries();
+            lifecycle.establishDataProviders();
+            lifecycle.callRegisterDataEvent();
 
-        this.logger().info("Performing Mixin audit");
-        Launch.instance().auditMixins();
+            this.logger().info("Performing Mixin audit");
+            Launch.instance().auditMixins();
+        } finally {
+            final Queue<String> capturedMessages = this.capturedMessages;
+            if (capturedMessages.peek() != null) {
+                this.logger().error("Invalid conditions were detected while applying mixins (see MixinLoggerInjector):");
+                String message;
+                while ((message = capturedMessages.poll()) != null) {
+                    this.logger().error("- {}", message);
+                }
+                System.exit(1);
+            }
+        }
 
         this.logger().info("Testing complete, goodbye!");
         SpongeCommon.game().asyncScheduler().close();

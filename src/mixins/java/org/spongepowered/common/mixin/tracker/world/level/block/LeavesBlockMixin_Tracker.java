@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -87,7 +87,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
     public void randomTick(final net.minecraft.world.level.block.state.BlockState state, final net.minecraft.server.level.ServerLevel worldIn, final BlockPos pos, final Random random) {
         if (!state.getValue(LeavesBlockMixin_Tracker.PERSISTENT) && state.getValue(LeavesBlockMixin_Tracker.DISTANCE) == 7) {
             // Sponge Start - PhaseTracker checks and phase entry
-            if (!((WorldBridge) worldIn).bridge$isFake()) {
+            if (!((LevelBridge) worldIn).bridge$isFake()) {
                 try (final PhaseContext<@NonNull ?> context = BlockPhase.State.BLOCK_DECAY.createPhaseContext(PhaseTracker.SERVER)
                         .source(new SpongeLocatableBlockBuilder()
                                 .world((ServerWorld) worldIn)

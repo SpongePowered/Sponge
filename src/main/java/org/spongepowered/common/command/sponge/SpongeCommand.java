@@ -63,7 +63,7 @@ import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformLevelBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.SpongeEventManager;
@@ -721,7 +721,7 @@ public class SpongeCommand {
     // --
 
     protected Component getChunksInfo(final ServerWorld serverWorld) {
-        if (((WorldBridge) serverWorld).bridge$isFake()) {
+        if (((LevelBridge) serverWorld).bridge$isFake()) {
             return Component.text().append(Component.newline(), Component.text(serverWorld.key().asString() + " is a fake world")).build();
         }
         final ServerLevel serverLevel = (ServerLevel) serverWorld;

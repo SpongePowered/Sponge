@@ -57,7 +57,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -188,7 +188,7 @@ public abstract class FishingHookMixin extends EntityMixin {
     @Inject(method = "checkCollision", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/FishingHook;onHit(Lnet/minecraft/world/phys/HitResult;)V"))
     private void impl$callCollideImpactEvent(final CallbackInfo ci, final HitResult hitResult) {
-        if (hitResult.getType() == HitResult.Type.MISS || ((WorldBridge) this.level).bridge$isFake()) {
+        if (hitResult.getType() == HitResult.Type.MISS || ((LevelBridge) this.level).bridge$isFake()) {
             return;
         }
 

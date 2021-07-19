@@ -51,7 +51,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.entity.EntityTrackedBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
@@ -132,7 +132,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
         if (!instance.onSidedThread()) {
             return;
         }
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
@@ -152,7 +152,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
         if (!instance.onSidedThread()) {
             return;
         }
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             return;
         }
         final PhaseContext<@NonNull ?> context = instance.getPhaseContext();
@@ -256,7 +256,7 @@ public abstract class EntityMixin_Tracker implements TrackableBridge, EntityTrac
     @Inject(method = "remove", at = @At(value = "RETURN"))
     private void impl$createDestructionEventOnDeath(final CallbackInfo ci) {
         if (ShouldFire.DESTRUCT_ENTITY_EVENT
-                && !((WorldBridge) this.level).bridge$isFake()) {
+                && !((LevelBridge) this.level).bridge$isFake()) {
 
             if (!((Entity) (Object) this instanceof LivingEntity)) {
                 this.tracker$destructCause = PhaseTracker.getCauseStackManager().currentCause();

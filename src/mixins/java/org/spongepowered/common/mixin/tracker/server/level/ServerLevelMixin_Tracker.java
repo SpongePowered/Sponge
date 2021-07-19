@@ -78,7 +78,7 @@ import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
@@ -593,7 +593,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      * must be true:
      * <ul>
      *     <li>This world instance is managed and verified by Sponge</li>
-     *     <li>This world must {@link WorldBridge#bridge$isFake()} return {@code false}</li>
+     *     <li>This world must {@link LevelBridge#bridge$isFake()} return {@code false}</li>
      *     <li>The {@link PhaseTracker#SERVER}'s {@link PhaseTracker#getSidedThread()} must be {@code ==} {@link Thread#currentThread()}</li
      *     <li>The current {@link IPhaseState} must be allowing to record transactions with an applicable {@link org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier}</li>
      * </ul>

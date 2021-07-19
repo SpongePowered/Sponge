@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.MixinTargetHelper;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.mixin.core.world.level.block.entity.BlockEntityMixin;
 
 @Mixin(BrewingStandBlockEntity.class)
@@ -50,7 +50,7 @@ public abstract class BrewingStandBlockEntityMixin_RealTime extends BlockEntityM
     )
     private static void realTimeImpl$adjustForRealTimeBrewTime(final BrewingStandBlockEntity self, final int modifier) {
         final BrewingStandBlockEntityMixin_RealTime mixinSelf = MixinTargetHelper.cast(self);
-        if (((WorldBridge) mixinSelf.level).bridge$isFake()) {
+        if (((LevelBridge) mixinSelf.level).bridge$isFake()) {
             mixinSelf.brewTime = modifier;
             return;
         }

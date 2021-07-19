@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.entitycollision.CollisionCapabilityBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
@@ -52,7 +52,7 @@ import java.util.List;
 import java.util.function.Predicate;
 
 @Mixin(Level.class)
-public abstract class LevelMixin_EntityCollision implements AutoCloseable, LevelAccessor, WorldBridge {
+public abstract class LevelMixin_EntityCollision implements AutoCloseable, LevelAccessor, LevelBridge {
 
     // @formatter:off
     @Shadow public abstract boolean shadow$isClientSide();

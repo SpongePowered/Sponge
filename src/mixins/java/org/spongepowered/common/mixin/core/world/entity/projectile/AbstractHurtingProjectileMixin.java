@@ -32,7 +32,7 @@ import org.spongepowered.api.entity.projectile.DamagingProjectile;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 
 @Mixin(AbstractHurtingProjectile.class)
@@ -40,7 +40,7 @@ public abstract class AbstractHurtingProjectileMixin extends ProjectileMixin {
 
     @Redirect(method = "tick()V", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/projectile/AbstractHurtingProjectile;onHit(Lnet/minecraft/world/phys/HitResult;)V"))
     private void impl$callCollideImpactEvent(AbstractHurtingProjectile projectile, HitResult result) {
-        if (result.getType() == HitResult.Type.MISS || ((WorldBridge) this.level).bridge$isFake()) {
+        if (result.getType() == HitResult.Type.MISS || ((LevelBridge) this.level).bridge$isFake()) {
             this.shadow$onHit(result);
             return;
         }

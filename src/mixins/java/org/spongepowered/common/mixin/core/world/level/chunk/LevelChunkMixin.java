@@ -40,8 +40,6 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.LevelChunkSection;
 import net.minecraft.world.level.chunk.UpgradeData;
 import net.minecraft.world.level.material.Fluid;
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -52,7 +50,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.CacheKeyBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
@@ -160,7 +158,7 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
 
     @Override
     public void bridge$addTrackedBlockPosition(final Block block, final BlockPos pos, final UUID uuid, final PlayerTracker.Type trackerType) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             return;
         }
         if (!PhaseTracker.getInstance().getPhaseContext().tracksCreatorsAndNotifiers()) {
@@ -200,7 +198,7 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
     }
 
     public Optional<UUID> bridge$trackedUUID(final BlockPos pos, final Function<PlayerTracker, Integer> func) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             return Optional.empty();
         }
 
@@ -239,7 +237,7 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
     }
 
     private void impl$setTrackedUUID(final BlockPos pos, final UUID uuid, final PlayerTracker.Type type, final BiConsumer<PlayerTracker, Integer> consumer) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             return;
         }
         final PrimaryLevelDataBridge worldInfo = (PrimaryLevelDataBridge) this.level.getLevelData();

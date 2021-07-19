@@ -24,12 +24,22 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level;
 
+import net.minecraft.world.level.block.entity.TickingBlockEntity;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.common.bridge.TrackableBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
+
+import javax.annotation.Nullable;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.TickingBlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.material.FluidState;
@@ -44,7 +54,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -57,7 +66,7 @@ import java.util.function.Consumer;
 import java.util.function.Predicate;
 
 @Mixin(Level.class)
-public abstract class LevelMixin_Tracker implements WorldBridge {
+public abstract class LevelMixin_Tracker implements LevelBridge {
 
     // @formatter:off
     @Shadow @Final public Random random;

@@ -27,11 +27,11 @@ package org.spongepowered.common.mixin.core.client.multiplayer;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin;
 
 @Mixin(ClientLevel.class)
-public abstract class ClientLevelMixin extends LevelMixin implements WorldBridge {
+public abstract class ClientLevelMixin extends LevelMixin implements LevelBridge {
 
     @Override
     public void bridge$adjustDimensionLogic(final DimensionType dimensionType) {

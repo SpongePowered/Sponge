@@ -53,7 +53,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.explosives.FusedExplosiveBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -127,7 +127,7 @@ public abstract class FireworkRocketItemMixin {
      * @return True if the event is cancelled and the callback needs to be cancelled
      */
     private boolean impl$throwConstructPreEvent(final Level world, final net.minecraft.world.entity.player.Player player, final ItemStack usedItem) {
-        if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((WorldBridge) world).bridge$isFake()) {
+        if (ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE && !((LevelBridge) world).bridge$isFake()) {
             try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
                 frame.addContext(EventContextKeys.USED_ITEM, ItemStackUtil.snapshotOf(usedItem));
                 frame.addContext(EventContextKeys.PROJECTILE_SOURCE, (ProjectileSource) player);
@@ -194,7 +194,7 @@ public abstract class FireworkRocketItemMixin {
      */
     private boolean impl$throwPrimeEventAndGetCancel(final Level world, final net.minecraft.world.entity.player.Player player, final FireworkRocketEntity rocket,
             final ItemStack usedItem) {
-        if (((WorldBridge) world).bridge$isFake() ) {
+        if (((LevelBridge) world).bridge$isFake() ) {
             return false;
         }
         ((FireworkRocket) rocket).offer(Keys.SHOOTER, (Player) player);

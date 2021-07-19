@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
@@ -130,7 +130,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
 
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))
     private void afterTake(final Player thePlayer, final ItemStack stack, final CallbackInfo ci) {
-        if (((WorldBridge) thePlayer.level).bridge$isFake()) {
+        if (((LevelBridge) thePlayer.level).bridge$isFake()) {
             return;
         }
 

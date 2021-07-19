@@ -42,7 +42,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerGameModeBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -62,7 +62,7 @@ public abstract class ServerGamePacketListenerImplMixin_Tracker {
     @Redirect(method = "tick",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;doTick()V"))
     private void tracker$wrapPlayerTickWithPhase(final ServerPlayer player) {
-        if (((PlatformEntityBridge) player).bridge$isFakePlayer() || ((WorldBridge) player.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) player).bridge$isFakePlayer() || ((LevelBridge) player.level).bridge$isFake()) {
             player.doTick();
             return;
         }

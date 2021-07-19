@@ -26,6 +26,7 @@ package org.spongepowered.common.accessor.network.protocol.game;
 
 import net.minecraft.network.protocol.game.ServerboundMovePlayerPacket;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ServerboundMovePlayerPacket.class)
@@ -33,16 +34,16 @@ public interface ServerboundMovePlayerPacketAccessor {
 
     @Accessor("x") double accessor$x();
 
-    @Accessor("x") void accessor$x(final double x);
+    @Accessor("x") @Mutable void accessor$x(final double x);
 
     @Accessor("y") double accessor$y();
 
-    @Accessor("y") void accessor$y(final double y);
+    @Accessor("y") @Mutable void accessor$y(final double y);
 
     @Accessor("z") double accessor$z();
 
-    @Accessor("z") void accessor$z(final double z);
+    @Accessor("z") @Mutable void accessor$z(final double z);
 
-    @Accessor("hasPos") void accessor$hasPos(final boolean hasPos);
+    @Accessor("hasPos") @Mutable void accessor$hasPos(final boolean hasPos);
 
 }

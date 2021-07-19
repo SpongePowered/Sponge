@@ -45,7 +45,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.util.PrettyPrinter;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhasePrinter;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -107,7 +107,7 @@ public abstract class ChunkMapMixin_Tracker {
     )
     private void tracker$startLoad(final LevelChunk chunk) {
         chunk.runPostLoad();
-        final boolean isFake = ((WorldBridge) chunk.getLevel()).bridge$isFake();
+        final boolean isFake = ((LevelBridge) chunk.getLevel()).bridge$isFake();
         if (isFake) {
             return;
         }
@@ -144,7 +144,7 @@ public abstract class ChunkMapMixin_Tracker {
         require = 1
     )
     private void tracker$endLoad(final ChunkHolder chunkHolder, final ChunkAccess chunk, final CallbackInfoReturnable<ChunkAccess> cir) {
-        if (!((WorldBridge) this.level).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
+        if (!((LevelBridge) this.level).bridge$isFake() && PhaseTracker.SERVER.onSidedThread()) {
             if (PhaseTracker.getInstance().getCurrentState() == GenerationPhase.State.CHUNK_REGENERATING_LOAD_EXISTING) {
                 return;
             }

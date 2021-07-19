@@ -80,7 +80,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
@@ -152,7 +152,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Override
     public boolean bridge$isLoaded() {
-        if (((WorldBridge) this).bridge$isFake()) {
+        if (((LevelBridge) this).bridge$isFake()) {
             return false;
         }
 

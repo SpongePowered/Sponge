@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.mixin.core.world.level.block.entity.BlockEntityMixin;
 
 @Mixin(value = AbstractFurnaceBlockEntity.class, priority = 1001)
@@ -64,7 +64,7 @@ public abstract class AbstractFurnaceBlockEntityMixin_RealTime extends BlockEnti
         )
     )
     private static void realTimeImpl$adjustForRealTimeBurnTime(final AbstractFurnaceBlockEntity entity, final int modifier) {
-        if (((WorldBridge) ((AbstractFurnaceBlockEntityMixin_RealTime) (Object) entity).level).bridge$isFake()) {
+        if (((LevelBridge) ((AbstractFurnaceBlockEntityMixin_RealTime) (Object) entity).level).bridge$isFake()) {
             ((AbstractFurnaceBlockEntityMixin_RealTime) (Object) entity).litTime = modifier;
             return;
         }
@@ -94,7 +94,7 @@ public abstract class AbstractFurnaceBlockEntityMixin_RealTime extends BlockEnti
         )
     )
     private static void realTimeImpl$adjustForRealTimeCookTime(final AbstractFurnaceBlockEntity entity, final int modifier) {
-        if (((WorldBridge) ((AbstractFurnaceBlockEntityMixin_RealTime) (Object) entity).level).bridge$isFake()) {
+        if (((LevelBridge) ((AbstractFurnaceBlockEntityMixin_RealTime) (Object) entity).level).bridge$isFake()) {
             ((AbstractFurnaceBlockEntityMixin_RealTime) (Object) entity).cookingProgress = modifier;
             return;
         }
@@ -121,7 +121,7 @@ public abstract class AbstractFurnaceBlockEntityMixin_RealTime extends BlockEnti
         )
     )
     private static void realTimeImpl$adjustForRealTimeCookTimeCooldown(final AbstractFurnaceBlockEntity entity, final int modifier) {
-        if (((WorldBridge) ((AbstractFurnaceBlockEntityMixin_RealTime) (Object) entity).level).bridge$isFake()) {
+        if (((LevelBridge) ((AbstractFurnaceBlockEntityMixin_RealTime) (Object) entity).level).bridge$isFake()) {
             ((AbstractFurnaceBlockEntityMixin_RealTime) (Object) entity).cookingProgress = modifier;
             return;
         }

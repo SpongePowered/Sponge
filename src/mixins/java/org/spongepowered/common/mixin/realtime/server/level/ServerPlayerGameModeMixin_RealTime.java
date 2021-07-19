@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 
 @Mixin(ServerPlayerGameMode.class)
 public abstract class ServerPlayerGameModeMixin_RealTime {
@@ -62,7 +62,7 @@ public abstract class ServerPlayerGameModeMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeDiggingTime(final ServerPlayerGameMode self, final int modifier) {
-        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((WorldBridge) this.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((LevelBridge) this.level).bridge$isFake()) {
             this.gameTicks = modifier;
             return;
         }

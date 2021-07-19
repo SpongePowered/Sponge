@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 
 @Mixin(ExperienceOrb.class)
 public abstract class ExperienceOrbMixin_RealTime extends EntityMixin_RealTime {
@@ -43,7 +43,7 @@ public abstract class ExperienceOrbMixin_RealTime extends EntityMixin_RealTime {
         method = "tick",
         at = @At(
             value = "FIELD",
-            target = "Lnet/minecraft/world/entity/ExperienceOrb;throwTime:I",
+            target = "Lnet/minecraft/world/entity/ExperienceOrb;age:I",
             opcode = Opcodes.PUTFIELD
         ),
         slice = @Slice(
@@ -58,7 +58,7 @@ public abstract class ExperienceOrbMixin_RealTime extends EntityMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimePickupDelay(final ExperienceOrb self, final int modifier) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             this.age = modifier;
             return;
         }
@@ -85,7 +85,7 @@ public abstract class ExperienceOrbMixin_RealTime extends EntityMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeAge(final ExperienceOrb self, final int modifier) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             this.age = modifier;
             return;
         }

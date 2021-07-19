@@ -26,9 +26,10 @@ package org.spongepowered.common.accessor.network.protocol.handshake;
 
 import net.minecraft.network.protocol.handshake.ClientIntentionPacket;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(ClientIntentionPacket.class)
 public interface ClientIntentionPacketAccessor {
-    @Accessor("hostName") void accessor$hostName(final String hostName);
+    @Accessor("hostName") @Mutable void accessor$hostName(final String hostName);
 }

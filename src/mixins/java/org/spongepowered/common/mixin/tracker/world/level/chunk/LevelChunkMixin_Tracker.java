@@ -50,7 +50,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
@@ -94,7 +94,7 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
     private void tracker$sanityCheckServerWorldSetBlockState(final BlockPos pos, final BlockState state, final boolean isMoving,
         final CallbackInfoReturnable<BlockState> cir
     ) {
-        if (!((WorldBridge) this.level).bridge$isFake()) {
+        if (!((LevelBridge) this.level).bridge$isFake()) {
             new PrettyPrinter(80).add("Illegal Direct Chunk Access")
                 .hr()
                 .add(new IllegalAccessException("No one should be accessing Chunk.setBlock in a ServerWorld's environment"))
@@ -120,7 +120,7 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
     @NonNull
     public ChunkPipeline bridge$createChunkPipeline(final BlockPos pos, final BlockState newState, final BlockState currentState,
             final SpongeBlockChangeFlag flag, final int limit) {
-        final boolean isFake = ((WorldBridge) this.level).bridge$isFake();
+        final boolean isFake = ((LevelBridge) this.level).bridge$isFake();
         if (isFake) {
             throw new IllegalStateException("Cannot call ChunkBridge.bridge$buildChunkPipeline in non-Server managed worlds");
         }
@@ -231,7 +231,6 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
         ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((LevelChunkBridge) this).bridge$getBlockCreatorUUID(tileEntityIn.getBlockPos()).orElse(null));
         ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, null);
     }
-
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "unpackTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/ProtoTickList;copyOut(Lnet/minecraft/world/level/TickList;Ljava/util/function/Function;)V"))

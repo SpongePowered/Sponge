@@ -129,11 +129,9 @@ minecraft {
         // Full development environment
         server("runServer") {
             args("--nogui", "--launchTarget", "sponge_server_dev")
-            jvmArgs("-Dmixin.debug.verbose=true", "-Dmixin.debug.checks=true")
         }
         client("runClient") {
             args("--launchTarget", "sponge_client_dev")
-            jvmArgs("-Dmixin.debug.verbose=true", "-Dmixin.debug.checks=true")
         }
 
         // Lightweight integration tests
@@ -154,12 +152,10 @@ minecraft {
             jvmArgs(
                 "-Dlog4j.configurationFile=log4j2_dev.xml",
                 "-Dmixin.dumpTargetOnFailure=true",
+                "-Dmixin.debug.verbose=true",
+                "-Dmixin.debug.countInjections=true",
+                // "-Dmixin.debug.strict=true"
             )
-            allArgumentProviders += CommandLineArgumentProvider {
-                mixinConfigs.asSequence()
-                        .flatMap { sequenceOf("--mixin.config", it) }
-                        .toList()
-            }
             allJvmArgumentProviders += CommandLineArgumentProvider {
                 // Resolve the Mixin artifact for use as a reload agent
                 val mixinJar = vanillaAppLaunchConfig.get().resolvedConfiguration
@@ -178,6 +174,11 @@ minecraft {
                     "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
                     "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
                 )
+            }
+            allArgumentProviders += CommandLineArgumentProvider {
+                mixinConfigs.asSequence()
+                        .flatMap { sequenceOf("--mixin.config", it) }
+                        .toList()
             }
             mainClass("org.spongepowered.vanilla.applaunch.Main")
             classpath.setFrom(

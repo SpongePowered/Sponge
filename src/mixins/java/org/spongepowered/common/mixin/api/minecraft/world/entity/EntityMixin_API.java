@@ -62,7 +62,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;

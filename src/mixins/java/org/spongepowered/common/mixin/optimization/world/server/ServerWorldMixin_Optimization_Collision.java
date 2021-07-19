@@ -25,7 +25,7 @@
 package org.spongepowered.common.mixin.optimization.world.server;
 
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -43,7 +43,7 @@ public abstract class ServerWorldMixin_Optimization_Collision implements LevelRe
 
     @Override
     public Stream<BlockState> getBlockStatesIfLoaded(final AABB aabb) {
-        if (((WorldBridge) this).bridge$isFake()) {
+        if (((LevelBridge) this).bridge$isFake()) {
             return LevelReaderMixin_Optimization_Collision.super.getBlockStatesIfLoaded(aabb);
         }
         final Optional<ActiveChunkReferantBridge> source = PhaseTracker.getInstance().getPhaseContext().getSource(Entity.class)

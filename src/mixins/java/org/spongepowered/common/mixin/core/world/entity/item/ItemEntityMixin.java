@@ -44,7 +44,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.world.entity.item.ItemEntityBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.data.provider.entity.ItemData;
@@ -82,7 +82,7 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
 
     @ModifyConstant(method = "mergeWithNeighbours", constant = @Constant(doubleValue = Constants.Entity.Item.DEFAULT_ITEM_MERGE_RADIUS))
     private double impl$changeSearchRadiusFromConfig(final double originalRadius) {
-        if (this.level.isClientSide || ((WorldBridge) this.level).bridge$isFake()) {
+        if (this.level.isClientSide || ((LevelBridge) this.level).bridge$isFake()) {
             return originalRadius;
         }
         if (this.impl$cachedRadius == -1) {
