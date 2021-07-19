@@ -72,6 +72,7 @@ import org.spongepowered.api.util.Tristate;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.chat.HoverEvent_ItemStackInfoAccessor;
 import org.spongepowered.common.bridge.adventure.BossBarBridge;
+import org.spongepowered.common.bridge.adventure.ComponentBridge;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
 import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
 import org.spongepowered.common.bridge.world.BossEventBridge;
@@ -84,6 +85,7 @@ import java.util.EnumSet;
 import java.util.List;
 import java.util.Locale;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.Set;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
@@ -173,8 +175,16 @@ public final class SpongeAdventure {
         return new AdventureTextComponent(component, GlobalTranslator.renderer());
     }
 
+    public static Optional<net.minecraft.network.chat.Component> asVanillaOpt(final @Nullable Component component) {
+        return component == null ? Optional.empty() : Optional.of(((ComponentBridge) component).bridge$asVanillaComponent());
+    }
+
     public static Component asAdventure(final net.minecraft.network.chat.Component component) {
         return ((BaseComponentBridge) component).bridge$asAdventureComponent();
+    }
+
+    public static @Nullable Component asAdventure(final Optional<net.minecraft.network.chat.Component> component) {
+        return component.isPresent() ? SpongeAdventure.asAdventure(component.get()) : null;
     }
 
     public static Component asAdventure(final Message message) {

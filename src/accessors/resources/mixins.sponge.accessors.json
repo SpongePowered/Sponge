@@ -27,6 +27,7 @@
         "entity.passive.AbstractChestedHorseEntityAccessor",
         "network.ConnectionAccessor",
         "network.chat.HoverEvent_ItemStackInfoAccessor",
+        "network.chat.NbtComponentAccessor",
         "network.chat.StyleAccessor",
         "network.protocol.game.ClientboundAddPlayerPacketAccessor",
         "network.protocol.game.ServerboundInteractPacketAccessor",
@@ -205,7 +206,7 @@
         "world.scores.ObjectiveAccessor",
         "world.scores.PlayerTeamAccessor",
         "world.scores.ScoreAccessor",
-        "world.scores.ScoreboardAccessor",
+        "world.scores.ScoreboardAccessor"
     ],
     "server": [
         "server.dedicated.DedicatedServerAccessor"

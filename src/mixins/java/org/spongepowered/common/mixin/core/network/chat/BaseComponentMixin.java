@@ -36,6 +36,7 @@ import net.minecraft.network.chat.TextComponent;
 import net.minecraft.network.chat.TranslatableComponent;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.common.accessor.network.chat.NbtComponentAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.network.chat.StyleBridge;
 import org.spongepowered.common.bridge.network.chat.BaseComponentBridge;
@@ -70,18 +71,29 @@ public class BaseComponentMixin implements BaseComponentBridge {
             } else if ((Object) this instanceof ScoreComponent) {
                 final ScoreComponent $this = (ScoreComponent) (Object) this;
                 builder = Component.score().name($this.getName()).objective($this.getObjective());
-            } else if ((Object) this instanceof SelectorComponent) {
-                builder = Component.selector().pattern(((SelectorComponent) (Object) this).getPattern());
-            } else if ((Object) this instanceof NbtComponent) {
-                if ((Object) this instanceof NbtComponent.BlockNbtComponent) {
-                    final NbtComponent.BlockNbtComponent $this = (NbtComponent.BlockNbtComponent) (Object) this;
-                    builder = Component.blockNBT().pos(BlockNBTComponent.Pos.fromString($this.getPos())).nbtPath($this.getNbtPath()).interpret($this.isInterpreting());
-                } else if ((Object) this instanceof NbtComponent.EntityNbtComponent) {
-                    final NbtComponent.EntityNbtComponent $this = (NbtComponent.EntityNbtComponent) (Object) this;
-                    builder = Component.entityNBT().nbtPath($this.getNbtPath()).interpret($this.isInterpreting()).selector($this.getSelector());
-                } else if ((Object) this instanceof NbtComponent.StorageNbtComponent) {
-                    final NbtComponent.StorageNbtComponent $this = (NbtComponent.StorageNbtComponent) (Object) this;
-                    builder = Component.storageNBT().nbtPath($this.getNbtPath()).interpret($this.isInterpreting()).storage(SpongeAdventure.asAdventure($this.getId()));
+            } else if ((Object) this instanceof final SelectorComponent $this) {
+                builder = Component.selector()
+                    .pattern($this.getPattern())
+                    .separator(SpongeAdventure.asAdventure($this.getSeparator()));
+            } else if (this instanceof final NbtComponentAccessor accessor) {
+                if ((Object) this instanceof final NbtComponent.BlockNbtComponent $this) {
+                    builder = Component.blockNBT()
+                        .pos(BlockNBTComponent.Pos.fromString($this.getPos()))
+                        .nbtPath($this.getNbtPath())
+                        .interpret($this.isInterpreting())
+                        .separator(SpongeAdventure.asAdventure(accessor.accessor$separator()));
+                } else if ((Object) this instanceof final NbtComponent.EntityNbtComponent $this) {
+                    builder = Component.entityNBT()
+                        .nbtPath($this.getNbtPath())
+                        .interpret($this.isInterpreting())
+                        .selector($this.getSelector())
+                        .separator(SpongeAdventure.asAdventure(accessor.accessor$separator()));
+                } else if ((Object) this instanceof final NbtComponent.StorageNbtComponent $this) {
+                    builder = Component.storageNBT()
+                        .nbtPath($this.getNbtPath())
+                        .interpret($this.isInterpreting())
+                        .storage(SpongeAdventure.asAdventure($this.getId()))
+                        .separator(SpongeAdventure.asAdventure(accessor.accessor$separator()));
                 }
             } else {
               throw new UnsupportedOperationException();
