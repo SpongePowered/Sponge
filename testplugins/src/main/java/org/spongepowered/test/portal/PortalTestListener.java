@@ -33,14 +33,14 @@ import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 public final class PortalTestListener {
 
     @Listener
-    public void onChangeWorldPre(final ChangeEntityWorldEvent.Pre event) {
+    private void onChangeWorldPre(final ChangeEntityWorldEvent.Pre event) {
         if (PortalTestListener.filter(event)) {
             event.setDestinationWorld(event.originalWorld());
         }
     }
 
     @Listener
-    public void onChangeWorldReposition(final ChangeEntityWorldEvent.Reposition event) {
+    private void onChangeWorldReposition(final ChangeEntityWorldEvent.Reposition event) {
         if (PortalTestListener.filter(event)) {
             event.setDestinationPosition(event.originalPosition().add(100, 0, 100));
         }

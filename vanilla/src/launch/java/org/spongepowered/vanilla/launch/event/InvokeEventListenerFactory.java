@@ -30,24 +30,27 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.common.event.filter.EventFilter;
 import org.spongepowered.common.event.filter.FilterFactory;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Method;
+import java.util.Objects;
 
 public final class InvokeEventListenerFactory implements AnnotatedEventListener.Factory {
 
-    private FilterFactory filterFactory;
+    private final FilterFactory filterFactory;
+    private final MethodHandles.Lookup lookup;
 
-    public InvokeEventListenerFactory(FilterFactory factory) {
+    public InvokeEventListenerFactory(final FilterFactory factory, final MethodHandles.Lookup lookup) {
         this.filterFactory = checkNotNull(factory, "filterFactory");
+        this.lookup = Objects.requireNonNull(lookup, "lookup");
     }
 
     @Override
-    public AnnotatedEventListener create(Object handle, Method method) throws Exception {
-        final Class<? extends EventFilter> eventFilter = this.filterFactory.createFilter(method);
-        if (eventFilter == null && method.getParameterCount() != 1) {
+    public AnnotatedEventListener create(final Object handle, final Method method) throws Exception {
+        final EventFilter filter = this.filterFactory.create(method, MethodHandles.privateLookupIn(method.getDeclaringClass(), this.lookup));
+        if (filter == null && method.getParameterCount() != 1) {
             // basic sanity check
             throw new IllegalStateException("Failed to generate EventFilter for non trivial filtering operation.");
         }
-        final EventFilter filter = eventFilter == null ? null : eventFilter.getConstructor().newInstance();
         return new InvokeEventHandler(handle, method, filter);
     }
 
@@ -56,19 +59,19 @@ public final class InvokeEventListenerFactory implements AnnotatedEventListener.
         private final Method method;
         private final EventFilter filter;
 
-        InvokeEventHandler(Object handle, Method method, EventFilter filter) {
+        InvokeEventHandler(final Object handle, final Method method, final EventFilter filter) {
             super(handle);
             this.method = checkNotNull(method, "method");
             this.filter = filter;
         }
 
         @Override
-        public void handle(Event event) throws Exception {
+        public void handle(final Event event) throws Exception {
             if (this.filter != null) {
-                Object[] filtered = this.filter.filter(event);
+                final Object[] filtered = this.filter.filter(event);
                 if (filtered != null) {
-                    StringBuilder args = new StringBuilder();
-                    for (Object o : filtered) {
+                    final StringBuilder args = new StringBuilder();
+                    for (final Object o : filtered) {
                         args.append(o.getClass().getName()).append(" ");
                     }
                     this.method.invoke(this.handle, filtered);

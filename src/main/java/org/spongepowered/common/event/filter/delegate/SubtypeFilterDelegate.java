@@ -28,7 +28,9 @@ import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.DUP;
 import static org.objectweb.asm.Opcodes.GETFIELD;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
+import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.INVOKESTATIC;
+import static org.objectweb.asm.Opcodes.NEW;
 import static org.objectweb.asm.Opcodes.POP;
 import static org.objectweb.asm.Opcodes.PUTFIELD;
 
@@ -37,6 +39,8 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.FieldVisitor;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
+
+import java.util.HashSet;
 
 public abstract class SubtypeFilterDelegate implements FilterDelegate {
 
@@ -54,8 +58,10 @@ public abstract class SubtypeFilterDelegate implements FilterDelegate {
     public void writeCtor(String name, ClassWriter cw, MethodVisitor mv) {
         // Initialize the class set
         mv.visitVarInsn(ALOAD, 0);
-        mv.visitMethodInsn(INVOKESTATIC, Type.getInternalName(Sets.class), "newHashSet", "()Ljava/util/HashSet;",
-                false);
+        final String internalName = Type.getInternalName(HashSet.class);
+        mv.visitTypeInsn(NEW, internalName);
+        mv.visitInsn(DUP);
+        mv.visitMethodInsn(INVOKESPECIAL, internalName, "<init>", "()V", false);
         mv.visitFieldInsn(PUTFIELD, name, "classes", "Ljava/util/Set;");
 
         mv.visitVarInsn(ALOAD, 0);

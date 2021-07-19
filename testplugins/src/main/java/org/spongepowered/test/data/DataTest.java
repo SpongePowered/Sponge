@@ -144,7 +144,7 @@ public final class DataTest  {
     }
 
     @Listener
-    public void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void onRegisterCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.plugin, Command.builder()
                 .executionRequirements(cc -> cc.first(ServerPlayer.class).isPresent())
                 .executor(context -> {

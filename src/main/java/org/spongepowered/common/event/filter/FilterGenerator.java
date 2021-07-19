@@ -38,8 +38,9 @@ import static org.objectweb.asm.Opcodes.ICONST_1;
 import static org.objectweb.asm.Opcodes.ILOAD;
 import static org.objectweb.asm.Opcodes.INVOKESPECIAL;
 import static org.objectweb.asm.Opcodes.RETURN;
-import static org.objectweb.asm.Opcodes.V1_6;
+import static org.objectweb.asm.Opcodes.V11;
 
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
@@ -84,6 +85,8 @@ import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.lang.annotation.Annotation;
+import java.lang.invoke.MethodHandles;
+import java.lang.invoke.MethodType;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 import java.util.ArrayList;
@@ -96,6 +99,7 @@ import java.util.function.Function;
 public class FilterGenerator {
 
     public static final boolean FILTER_DEBUG = Boolean.parseBoolean(System.getProperty("sponge.filter.debug", "false"));
+    public static final String FILTER_DESCRIPTOR = "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;";
 
     public static FilterGenerator getInstance() {
         return Holder.INSTANCE;
@@ -104,15 +108,36 @@ public class FilterGenerator {
     FilterGenerator() {
     }
 
-    public byte[] generateClass(String name, Method method) {
-        name = name.replace('.', '/');
-        Parameter[] params = method.getParameters();
+    public static @Nullable EventFilter create(final Method method, final MethodHandles.Lookup lookup) throws IllegalAccessException {
+        if (!lookup.hasFullPrivilegeAccess()) {
+            throw new IllegalArgumentException("The provided lookup '" + lookup
+                + "' does not have full privilege access required to create a hidden class");
+        }
+        final Class<?> handle = method.getDeclaringClass();
+        final String name = "Filter_" + method.getName();
+        final byte[] cls = FilterGenerator.getInstance().generateClass(handle, name, method);
+        if (cls == null) {
+            return null;
+        }
+        final MethodHandles.Lookup filter = lookup.defineHiddenClass(cls, true, MethodHandles.Lookup.ClassOption.NESTMATE);
+        try {
+            return (EventFilter) filter.findConstructor(filter.lookupClass(), MethodType.methodType(void.class))
+                .invoke();
+        } catch (final Throwable ex) {
+            throw new IllegalStateException("Generated filter class did not have expected empty constructor!", ex);
+        }
+    }
+
+    public byte[] generateClass(final Class<?> handle, final String localName, final Method method) {
+        final String name = Type.getInternalName(handle) + '_' + localName;
+        final Parameter[] params = method.getParameters();
 
         SubtypeFilterDelegate sfilter = null;
         final List<FilterDelegate> additional = new ArrayList<>();
+
         boolean cancellation = false;
-        for (Annotation anno : method.getAnnotations()) {
-            Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
+        for (final Annotation anno : method.getAnnotations()) {
+            final Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
             if (obj == null) {
                 continue;
             }
@@ -121,8 +146,7 @@ public class FilterGenerator {
                     throw new IllegalStateException("Cannot have both @Include and @Exclude annotations present at once");
                 }
                 sfilter = ((SubtypeFilter) obj).getDelegate(anno);
-            } else if (obj instanceof EventTypeFilter) {
-                EventTypeFilter etf = (EventTypeFilter) obj;
+            } else if (obj instanceof final EventTypeFilter etf) {
                 additional.add(etf.getDelegate(anno));
                 if (etf == EventTypeFilter.CANCELLATION) {
                     cancellation = true;
@@ -141,7 +165,7 @@ public class FilterGenerator {
         final ClassWriter cw = new LoaderClassWriter(method.getDeclaringClass().getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
 
-        cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
+        cw.visit(V11, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, "java/lang/Object", new String[] { Type.getInternalName(EventFilter.class) });
 
         if (sfilter != null) {
             sfilter.createFields(cw);
@@ -159,25 +183,25 @@ public class FilterGenerator {
             mv.visitEnd();
         }
         {
-            mv = cw.visitMethod(ACC_PUBLIC, "filter", "(" + Type.getDescriptor(Event.class) + ")[Ljava/lang/Object;", null, null);
+            mv = cw.visitMethod(ACC_PUBLIC, "filter", FilterGenerator.FILTER_DESCRIPTOR, null, null);
             mv.visitCode();
             // index of the next available local variable
             int local = 2;
             if (sfilter != null) {
                 local = sfilter.write(name, cw, mv, method, local);
             }
-            for (FilterDelegate eventFilter : additional) {
+            for (final FilterDelegate eventFilter : additional) {
                 local = eventFilter.write(name, cw, mv, method, local);
             }
 
             // local var indices of the parameters values
-            int[] plocals = new int[params.length - 1];
+            final int[] plocals = new int[params.length - 1];
             for (int i = 1; i < params.length; i++) {
-                Parameter param = params[i];
+                final Parameter param = params[i];
                 ParameterFilterSourceDelegate source = null;
-                List<ParameterFilterDelegate> paramFilters = new ArrayList<>();
-                for (Annotation anno : param.getAnnotations()) {
-                    Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
+                final List<ParameterFilterDelegate> paramFilters = new ArrayList<>();
+                for (final Annotation anno : param.getAnnotations()) {
+                    final Object obj = FilterGenerator.filterFromAnnotation(anno.annotationType());
                     if (obj == null) {
                         continue;
                     }
@@ -202,7 +226,7 @@ public class FilterGenerator {
                 local = localState.first();
                 plocals[i - 1] = localState.second();
 
-                for (ParameterFilterDelegate paramFilter : paramFilters) {
+                for (final ParameterFilterDelegate paramFilter : paramFilters) {
                     paramFilter.write(cw, mv, method, param, plocals[i - 1]);
                 }
             }
@@ -223,7 +247,7 @@ public class FilterGenerator {
             for (int i = 1; i < params.length; i++) {
                 mv.visitInsn(DUP);
                 mv.visitIntInsn(BIPUSH, i);
-                Type paramType = Type.getType(params[i].getType());
+                final Type paramType = Type.getType(params[i].getType());
                 mv.visitVarInsn(paramType.getOpcode(ILOAD), plocals[i - 1]);
                 GeneratorUtils.visitBoxingMethod(mv, paramType);
                 mv.visitInsn(AASTORE);
@@ -233,17 +257,17 @@ public class FilterGenerator {
             mv.visitEnd();
         }
         cw.visitEnd();
-        byte[] data = cw.toByteArray();
+        final byte[] data = cw.toByteArray();
 
         if (FilterGenerator.FILTER_DEBUG) {
-            File outDir = new File(".sponge.debug.out");
-            File outFile = new File(outDir, name + ".class");
+            final File outDir = new File(".sponge.debug.out");
+            final File outFile = new File(outDir, name + ".class");
             if (!outFile.getParentFile().exists()) {
                 outFile.getParentFile().mkdirs();
             }
-            try (FileOutputStream out = new FileOutputStream(outFile)) {
+            try (final FileOutputStream out = new FileOutputStream(outFile)) {
                 out.write(data);
-            } catch (IOException ignored) {
+            } catch (final IOException ignored) {
                 ignored.printStackTrace();
             }
         }
@@ -251,7 +275,7 @@ public class FilterGenerator {
         return data;
     }
 
-    private static Object filterFromAnnotation(Class<? extends Annotation> cls) {
+    private static Object filterFromAnnotation(final Class<? extends Annotation> cls) {
         Object filter;
         if ((filter = SubtypeFilter.valueOf(cls)) != null)
             return filter;
@@ -314,7 +338,7 @@ public class FilterGenerator {
             return this.factory.apply(anno);
         }
 
-        public static EventTypeFilter valueOf(Class<? extends Annotation> cls) {
+        public static EventTypeFilter valueOf(final Class<? extends Annotation> cls) {
             return EventTypeFilter.BY_CLAZZ.get(cls);
         }
 
@@ -348,7 +372,7 @@ public class FilterGenerator {
             this.factory = (Function<Annotation, ParameterFilterSourceDelegate>) factory;
         }
 
-        public ParameterFilterSourceDelegate getDelegate(Annotation anno) {
+        public ParameterFilterSourceDelegate getDelegate(final Annotation anno) {
             return this.factory.apply(anno);
         }
 

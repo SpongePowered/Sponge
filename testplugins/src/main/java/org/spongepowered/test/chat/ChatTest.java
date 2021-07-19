@@ -83,7 +83,7 @@ public class ChatTest implements LoadableModule {
     }
 
     @Listener
-    public void constructed(final ConstructPluginEvent event) {
+    private void constructed(final ConstructPluginEvent event) {
         // Register localization keys
         final TranslationRegistry lang = TranslationRegistry.create(ResourceKey.of(this.container, "translations"));
         Arrays.asList(Locales.EN_US, new Locale("en", "UD")).forEach(it ->
@@ -98,7 +98,7 @@ public class ChatTest implements LoadableModule {
     }
 
     @Listener
-    public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         // /togglebossbar
         event.register(this.container, Command.builder()
                 .permission("chattest.togglebossbar")
@@ -140,15 +140,15 @@ public class ChatTest implements LoadableModule {
         .build(), "tellresolve");
     }
 
-    public static class Listeners {
+    static class Listeners {
 
         @Listener
-        public void onLogin(final ServerSideConnectionEvent.Join event) {
+        private void onLogin(final ServerSideConnectionEvent.Join event) {
             event.player().sendMessage(Component.translatable("chattest.response"));
         }
 
         @Listener(order = Order.LAST)
-        public void onChat(final PlayerChatEvent event, final @Root ServerPlayer player, @GetValue("HEALTH") final double health) {
+        private void onChat(final PlayerChatEvent event, final @Root ServerPlayer player, @GetValue("HEALTH") final double health) {
             ChatTest.LOGGER.info(Component.translatable("chattest.response.chat",
                                                                               event.message(),
                                                                               player.require(Keys.DISPLAY_NAME)

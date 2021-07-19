@@ -38,13 +38,13 @@ public final class WorldBorderListener {
     }
 
     @Listener
-    public void onPlayerChange(final ChangeWorldBorderEvent.World event) {
+    private void onPlayerChange(final ChangeWorldBorderEvent.World event) {
         this.logger.info("World border changed for world {}",  event.world().key());
         this.logBorder(event);
     }
 
     @Listener
-    public void onPlayerChange(final ChangeWorldBorderEvent.Player event) {
+    private void onPlayerChange(final ChangeWorldBorderEvent.Player event) {
         this.logger.info("World border changed for player {}",  event.player().name());
         this.logBorder(event);
     }

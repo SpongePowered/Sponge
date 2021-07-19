@@ -33,17 +33,21 @@ import org.spongepowered.plugin.PluginEnvironment;
 import org.spongepowered.plugin.jvm.JVMPluginContainer;
 import org.spongepowered.plugin.jvm.JVMPluginLoader;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
+import org.spongepowered.vanilla.launch.event.ModuleAwareJVMPluginContainer;
 
+import java.lang.invoke.MethodHandles;
 import java.util.Optional;
 
 public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginContainer> {
+
+    private static final MethodHandles.Lookup SPONGE_LOOKUP = MethodHandles.lookup();
 
     public JavaPluginLoader() {
     }
 
     @Override
     public Optional<JVMPluginContainer> createPluginContainer(final PluginCandidate<JVMPluginResource> candidate, final PluginEnvironment environment) {
-        return Optional.of(new JVMPluginContainer(candidate));
+        return Optional.of(new ModuleAwareJVMPluginContainer(candidate));
     }
 
     @Override
@@ -51,12 +55,16 @@ public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginContainer> 
         try {
             final String mainClass = container.metadata().mainClass();
             final Class<?> pluginClass = Class.forName(mainClass, true, targetClassLoader);
+            if (container instanceof ModuleAwareJVMPluginContainer modular) {
+                modular.initializeLookup(MethodHandles.privateLookupIn(pluginClass, JavaPluginLoader.SPONGE_LOOKUP));
+            }
+
             final Injector parentInjector = SpongeBootstrap.injector();
             if (parentInjector != null) {
                 final Injector childInjector = parentInjector.createChildInjector(new PluginModule(container, pluginClass));
                 return childInjector.getInstance(pluginClass);
             }
-            return pluginClass.newInstance();
+            return pluginClass.getConstructor().newInstance();
         } catch (final Exception ex) {
             throw new InvalidPluginException("An error occurred creating an instance of plugin '" + container.metadata().id() + "'!", ex);
         }

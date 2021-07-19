@@ -50,25 +50,25 @@ public final class ChunkEventTest implements LoadableModule {
     }
 
 
-    public static class ChunkListener {
+    static class ChunkListener {
         @Listener
-        public void onChunkLoad(ChunkEvent.Load event) {
+        private void onChunkLoad(ChunkEvent.Load event) {
             Sponge.game().systemSubject().sendMessage(Component.text("Load Chunk " + event.targetChunk().chunkPosition() + " in " + event.chunkWorld().asString()));
         }
 
         @Listener
-        public void onChunkSave(ChunkEvent.Save.Pre event) {
+        private void onChunkSave(ChunkEvent.Save.Pre event) {
             event.setCancelled(true);
             Sponge.game().systemSubject().sendMessage(Component.text("Pre Save Chunk " + event.chunkPosition() + " in " + event.chunkWorld().asString()));
         }
 
         @Listener
-        public void onChunkSave(ChunkEvent.Save.Post event) {
+        private void onChunkSave(ChunkEvent.Save.Post event) {
             Sponge.game().systemSubject().sendMessage(Component.text("Post Save Chunk " + event.chunkPosition() + " in " + event.chunkWorld().asString()));
         }
 
         @Listener
-        public void onChunkUnload(ChunkEvent.Unload event) {
+        private void onChunkUnload(ChunkEvent.Unload event) {
             Sponge.game().systemSubject().sendMessage(Component.text("Unload Chunk " + event.chunkPosition() + " in " + event.chunkWorld().asString()));
         }
     }

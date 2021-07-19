@@ -75,9 +75,7 @@ public final class MovementTest implements LoadableModule {
     }
 
     @Listener
-    public void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
-
-
+    private void registerCommands(final RegisterCommandEvent<Command.Parameterized> event) {
         event.register(this.plugin, Command.builder()
             .executor(context -> {
                 this.cancelMovement = !this.cancelMovement;
@@ -98,9 +96,9 @@ public final class MovementTest implements LoadableModule {
         );
     }
 
-    public class RotationEventListener {
+    class RotationEventListener {
         @Listener
-        public void onEntitySpawn(final RotateEntityEvent event) {
+        private void onEntitySpawn(final RotateEntityEvent event) {
             if (!MovementTest.this.printRotationEvents) {
                 return;
             }
@@ -116,9 +114,9 @@ public final class MovementTest implements LoadableModule {
         }
     }
 
-    public class MoveEntityTeleportListener {
+    class MoveEntityTeleportListener {
         @Listener
-        public void onEntitySpawn(final MoveEntityEvent event, final @Root Player player) {
+        private void onEntitySpawn(final MoveEntityEvent event, final @Root Player player) {
             if (!MovementTest.this.teleportOnMove) {
                 return;
             }
@@ -138,9 +136,9 @@ public final class MovementTest implements LoadableModule {
         }
     }
 
-    public class MoveEntityCancellation {
+    class MoveEntityCancellation {
         @Listener
-        public void onEntitySpawn(final MoveEntityEvent event, @Root Player player) {
+        private void onEntitySpawn(final MoveEntityEvent event, @Root final Player player) {
             if (!MovementTest.this.cancelMovement) {
                 return;
             }
@@ -148,9 +146,9 @@ public final class MovementTest implements LoadableModule {
         }
     }
 
-    public class MoveEntityListener {
+    class MoveEntityListener {
         @Listener
-        public void onChangeBlock(final MoveEntityEvent post) {
+        private void onChangeBlock(final MoveEntityEvent post) {
             if (!MovementTest.this.printMoveEntityEvents) {
                 return;
             }

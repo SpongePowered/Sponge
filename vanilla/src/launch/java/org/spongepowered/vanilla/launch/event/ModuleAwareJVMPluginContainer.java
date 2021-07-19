@@ -22,27 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.filter;
+package org.spongepowered.vanilla.launch.event;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.plugin.PluginCandidate;
+import org.spongepowered.plugin.jvm.JVMPluginContainer;
+import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
 
 import java.lang.invoke.MethodHandles;
-import java.lang.reflect.Method;
+import java.util.Objects;
 
-@FunctionalInterface
-public interface FilterFactory {
+/**
+ * A plugin container that provides access to a plugin's Lookup instance.
+ */
+public class ModuleAwareJVMPluginContainer extends JVMPluginContainer {
+
+    private MethodHandles.Lookup lookup;
+
+    public ModuleAwareJVMPluginContainer(final PluginCandidate<JVMPluginResource> candidate) {
+        super(candidate);
+    }
+
+    public ModuleAwareJVMPluginContainer(final PluginCandidate<JVMPluginResource> candidate, final Logger logger) {
+        super(candidate, logger);
+    }
 
     /**
-     * Create a new filter based on the method.
-     *
-     * <p>The provided {@code lookup } must have
-     * {@link MethodHandles.Lookup#hasFullPrivilegeAccess() full privilege access}
-     * to the {@link Method#getDeclaringClass() declaring class} of {@code method}.</p>
-     *
-     * @param method the method to create a filter for
-     * @param lookup the lookup to generate the filter class. Must have
-     * @return a new filter instance, if any filtering is necessary
-     * @throws IllegalAccessException if the provided {@code lookup} does not have full privilege access
+     * {@return A lookup with access to internals of the module containing this plugin}
      */
-    @Nullable EventFilter create(final Method method, final MethodHandles.Lookup lookup) throws IllegalAccessException;
+    MethodHandles.Lookup lookup() {
+        return this.lookup;
+    }
+
+    public void initializeLookup(final MethodHandles.Lookup lookup) {
+        if (this.lookup != null) {
+            throw new RuntimeException(String.format("Attempt made to set the lookup for plugin container '%s' twice!",
+                this.metadata().id()));
+        }
+        this.lookup = Objects.requireNonNull(lookup);
+    }
 }

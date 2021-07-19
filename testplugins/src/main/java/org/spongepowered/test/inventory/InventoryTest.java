@@ -86,7 +86,7 @@ public final class InventoryTest implements LoadableModule {
         }
 
         @Listener
-        public void onInteractContainerOpen(final InteractContainerEvent.Open event) {
+        private void onInteractContainerOpen(final InteractContainerEvent.Open event) {
             final Container container = event.container();
             final Hotbar hotbarFromContain = container.query(Hotbar.class).orElse(null);
             final Hotbar hotbarFromPrimary = container.query(PrimaryPlayerInventory.class).get().query(Hotbar.class).orElse(null);
@@ -114,7 +114,7 @@ public final class InventoryTest implements LoadableModule {
         }
 
         @Listener
-        public void onInteractContainer(final InteractContainerEvent event) {
+        private void onInteractContainer(final InteractContainerEvent event) {
             if (event instanceof EnchantItemEvent) {
                 this.plugin.logger().info("{} [{}] S:{}", event.getClass().getSimpleName(), ((EnchantItemEvent) event).option(),
                         ((EnchantItemEvent) event).seed());
@@ -127,7 +127,7 @@ public final class InventoryTest implements LoadableModule {
         }
 
         @Listener
-        public void onInteract(final ChangeInventoryEvent event) {
+        private void onInteract(final ChangeInventoryEvent event) {
 
             if (event instanceof ClickContainerEvent) {
                 this.plugin.logger().info("{} {}", event.getClass().getSimpleName(), ((ClickContainerEvent) event).container().getClass().getSimpleName());
@@ -145,7 +145,7 @@ public final class InventoryTest implements LoadableModule {
         }
 
         @Listener
-        public void onChangeEquipment(final ChangeEntityEquipmentEvent event) {
+        private void onChangeEquipment(final ChangeEntityEquipmentEvent event) {
             final Slot slot = event.slot();
             final Transaction<ItemStackSnapshot> transaction = event.transaction();
             this.plugin.logger().info("{}: {} {}->{}",
@@ -156,7 +156,7 @@ public final class InventoryTest implements LoadableModule {
         }
 
         @Listener
-        public void onTransfer(final TransferInventoryEvent event) {
+        private void onTransfer(final TransferInventoryEvent event) {
             if (event instanceof TransferInventoryEvent.Post) {
                 this.plugin.logger().info("{} {}=>{}", event.getClass().getSimpleName(), event.sourceInventory().getClass().getSimpleName(), event.targetInventory()
                         .getClass().getSimpleName());
@@ -168,7 +168,7 @@ public final class InventoryTest implements LoadableModule {
         }
 
         @Listener
-        public void onCraft(final CraftItemEvent event) {
+        private void onCraft(final CraftItemEvent event) {
 //            this.plugin.logger().info("{} size: {} recipe: {} ",
 //                    event.getClass().getSimpleName(),
 //                    event.craftingInventory().capacity(),

@@ -76,7 +76,7 @@ public class ProjectileTest implements LoadableModule {
     }
 
     @Listener
-    public void registerCommand(final RegisterCommandEvent<Command.Parameterized> event) {
+    private void registerCommand(final RegisterCommandEvent<Command.Parameterized> event) {
         final Parameter.Value<EntityType<@NonNull ?>> entityTypeParameter =
                 Parameter.registryElement(
                         new TypeToken<EntityType<?>>() {},
@@ -184,7 +184,7 @@ public class ProjectileTest implements LoadableModule {
     }
 
 
-    public static class ProjectileTestListener {
+    static class ProjectileTestListener {
 
         private Queue<EntityType<? extends Projectile>> projectileTypes = new LinkedList<>();
 
@@ -208,7 +208,7 @@ public class ProjectileTest implements LoadableModule {
         }
 
         @Listener
-        public void onClickBlock(final InteractBlockEvent.Secondary event, @First final ServerPlayer player) {
+        private void onClickBlock(final InteractBlockEvent.Secondary event, @First final ServerPlayer player) {
             final Vector3d interactionPoint = event.interactionPoint();
             final ServerWorld world = player.world();
             final EntityType<? extends Projectile> nextType = this.projectileTypes.poll();

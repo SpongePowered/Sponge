@@ -46,7 +46,7 @@ public abstract class AnnotatedEventListener implements SpongeEventListener<Even
 
     public interface Factory {
 
-        AnnotatedEventListener create(Object handle, Method method) throws Exception;
+        AnnotatedEventListener create(Object handle, Method method) throws Throwable;
 
     }
 

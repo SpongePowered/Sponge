@@ -50,7 +50,7 @@ import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.filter.FilterFactory;
-import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.event.filter.FilterGenerator;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.plugin.EventListenerPhaseContext;
@@ -60,6 +60,7 @@ import org.spongepowered.common.util.TypeTokenUtil;
 import org.spongepowered.configurate.util.Types;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.lang.invoke.MethodHandles;
 import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
@@ -82,6 +83,8 @@ import java.util.stream.Stream;
 @Singleton
 public final class VanillaEventManager implements SpongeEventManager {
 
+    private static final MethodHandles.Lookup OWN_LOOKUP = MethodHandles.lookup();
+
     public final ListenerChecker checker;
     private final Object lock;
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent;
@@ -92,13 +95,13 @@ public final class VanillaEventManager implements SpongeEventManager {
      */
     protected final LoadingCache<EventType<?>, RegisteredListener.Cache> handlersCache =
         Caffeine.newBuilder().initialCapacity(150).build(this::bakeHandlers);
-    private final Map<ClassLoader, AnnotatedEventListener.Factory> classLoaders;
+    private final Map<PluginContainer, AnnotatedEventListener.Factory> pluginFactories;
     private final Set<Object> registeredListeners;
 
     public VanillaEventManager() {
         this.lock = new Object();
         this.handlersByEvent = HashMultimap.create();
-        this.classLoaders = new IdentityHashMap<>();
+        this.pluginFactories = new IdentityHashMap<>();
         this.registeredListeners = new ReferenceOpenHashSet<>();
         this.checker = new ListenerChecker(ShouldFire.class);
 
@@ -121,20 +124,17 @@ public final class VanillaEventManager implements SpongeEventManager {
             final ConcurrentHashMap<Class<? extends Event>, RegisteredListener.Cache> newBackingData =
                 new ConcurrentHashMap<>(150, 0.75f, 1);
             cacheData.set(innerCacheValue, newBackingData);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+        } catch (final NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
             SpongeCommon.logger().warn("Failed to set event cache backing array, type was " + this.handlersCache.getClass().getName());
             SpongeCommon.logger().warn("  Caused by: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }
 
-    private static @Nullable String getHandlerErrorOrNull(Method method) {
+    private static @Nullable String getHandlerErrorOrNull(final Method method) {
         final int modifiers = method.getModifiers();
         final List<String> errors = new ArrayList<>();
         if (Modifier.isStatic(modifiers)) {
             errors.add("method must not be static");
-        }
-        if (!Modifier.isPublic(modifiers)) {
-            errors.add("method must be public");
         }
         if (Modifier.isAbstract(modifiers)) {
             errors.add("method must not be abstract");
@@ -209,7 +209,7 @@ public final class VanillaEventManager implements SpongeEventManager {
         boolean changed = false;
 
         synchronized (this.lock) {
-            for (RegisteredListener<?> handler : handlers) {
+            for (final RegisteredListener<?> handler : handlers) {
                 final Class<?> raw = handler.getEventType().getType();
                 if (this.handlersByEvent.put(raw, handler)) {
                     changed = true;
@@ -238,17 +238,18 @@ public final class VanillaEventManager implements SpongeEventManager {
         final Map<Method, String> methodErrors = new HashMap<>();
 
         final Class<?> handle = listenerObject.getClass();
-        final ClassLoader handleLoader = handle.getClassLoader();
 
-        AnnotatedEventListener.Factory handlerFactory = this.classLoaders.get(handleLoader);
-        if (handlerFactory == null) {
-            final DefineableClassLoader classLoader = new DefineableClassLoader(handleLoader);
-            handlerFactory = new ClassEventListenerFactory("org.spongepowered.common.event.listener",
-                new FilterFactory("org.spongepowered.common.event.filters", classLoader), classLoader);
-            this.classLoaders.put(handleLoader, handlerFactory);
-        }
+        final AnnotatedEventListener.Factory handlerFactory = this.pluginFactories.computeIfAbsent(plugin, key -> {
+            final MethodHandles.Lookup lookup;
+            if (key instanceof ModuleAwareJVMPluginContainer modular) {
+                lookup = modular.lookup();
+            } else {
+                lookup = VanillaEventManager.OWN_LOOKUP; // won't provide appropriate module access, but that doesn't matter in a non-modular context
+            }
+            return new ClassEventListenerFactory(FilterGenerator::create, lookup);
+        });
 
-        for (final Method method : handle.getMethods()) {
+        for (final Method method : handle.getDeclaredMethods()) {
             final Listener listener = method.getAnnotation(Listener.class);
             if (listener != null) {
                 final String error = VanillaEventManager.getHandlerErrorOrNull(method);
@@ -257,8 +258,8 @@ public final class VanillaEventManager implements SpongeEventManager {
                     final AnnotatedEventListener handler;
                     try {
                         handler = handlerFactory.create(listenerObject, method);
-                    } catch (final Exception e) {
-                        SpongeCommon.logger().error("Failed to create handler for {} on {}", method, handle, e);
+                    } catch (final Throwable thr) {
+                        SpongeCommon.logger().error("Failed to create handler for {} on {}", method, handle, thr);
                         continue;
                     }
 
@@ -282,7 +283,7 @@ public final class VanillaEventManager implements SpongeEventManager {
             }
         }
 
-        for (Map.Entry<Method, String> method : methodErrors.entrySet()) {
+        for (final Map.Entry<Method, String> method : methodErrors.entrySet()) {
             SpongeCommon.logger().warn("Invalid listener method {} in {}: {}", method.getKey(),
                 method.getKey().getDeclaringClass().getName(), method.getValue());
         }
@@ -416,7 +417,7 @@ public final class VanillaEventManager implements SpongeEventManager {
                 }
                 SpongeCommon.setActivePlugin(handler.getPlugin());
                 handler.handle(event);
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 SpongeCommon.logger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().metadata().id(), e);
             } finally {
                 SpongeCommon.setActivePlugin(null);

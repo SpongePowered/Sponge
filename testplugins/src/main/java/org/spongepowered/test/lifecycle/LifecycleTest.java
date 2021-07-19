@@ -82,9 +82,9 @@ public class LifecycleTest implements LoadableModule {
         }
     }
 
-    public class Listeners {
+    private class Listeners {
         @Listener
-        public void onLifecycle(final LifecycleEvent event) {
+        private void onLifecycle(final LifecycleEvent event) {
             LifecycleTest.this.logger.info(":: Lifecycle {}", () -> {
                 final StringBuilder eventName = new StringBuilder(event.getClass().getSimpleName());
                 Class<?> enclosing = event.getClass().getEnclosingClass();
