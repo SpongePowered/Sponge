@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.network.protocol.game;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.UUID;
@@ -33,18 +34,18 @@ import net.minecraft.network.protocol.game.ClientboundAddPlayerPacket;
 @Mixin(ClientboundAddPlayerPacket.class)
 public interface ClientboundAddPlayerPacketAccessor {
 
-    @Accessor("entityId") void accessor$entityId(final int entityId);
+    @Accessor("entityId") @Mutable void accessor$entityId(final int entityId);
 
-    @Accessor("playerId") void accessor$playerId(final UUID playerId);
+    @Accessor("playerId") @Mutable void accessor$playerId(final UUID playerId);
 
-    @Accessor("x") void accessor$x(final double x);
+    @Accessor("x") @Mutable void accessor$x(final double x);
 
-    @Accessor("y") void accessor$y(final double y);
+    @Accessor("y") @Mutable void accessor$y(final double y);
 
-    @Accessor("z") void accessor$z(final double z);
+    @Accessor("z") @Mutable void accessor$z(final double z);
 
-    @Accessor("yRot") void accessor$yRot(final byte yRot);
+    @Accessor("yRot") @Mutable void accessor$yRot(final byte yRot);
 
-    @Accessor("xRot") void accessor$xRot(final byte xRot);
+    @Accessor("xRot") @Mutable void accessor$xRot(final byte xRot);
 
 }
