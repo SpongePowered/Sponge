@@ -25,16 +25,12 @@
 package org.spongepowered.common.mixin.api.minecraft.world.level;
 
 import net.minecraft.core.BlockPos;
-import net.minecraft.util.Tuple;
 import net.minecraft.world.level.BlockAndTintGetter;
 import net.minecraft.world.level.CollisionGetter;
-import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelReader;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkStatus;
-import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.levelgen.Heightmap;
-import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
@@ -45,24 +41,19 @@ import org.spongepowered.api.world.HeightType;
 import org.spongepowered.api.world.WorldType;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.border.WorldBorder;
-import org.spongepowered.api.world.chunk.ProtoChunk;
+import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.api.world.volume.game.Region;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
-import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
-import org.spongepowered.common.world.volume.buffer.biome.ObjectArrayMutableBiomeBuffer;
-import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
-import org.spongepowered.common.world.volume.buffer.blockentity.ObjectArrayMutableBlockEntityBuffer;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Objects;
 import java.util.Random;
-import java.util.stream.Stream;
 
 @SuppressWarnings({"RedundantTypeArguments", "unchecked", "RedundantCast"})
 @Mixin(LevelReader.class)
@@ -154,8 +145,8 @@ public interface LevelReaderMixin_API<R extends Region<R>> extends Region<R> {
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    default ProtoChunk<@NonNull ?> chunk(final int x, final int y, final int z) {
-        return (ProtoChunk<@NonNull ?>) this.shadow$getChunk(x, z, ChunkStatus.EMPTY, true);
+    default Chunk<@NonNull ?> chunk(final int x, final int y, final int z) {
+        return (Chunk<@NonNull ?>) this.shadow$getChunk(x, z, ChunkStatus.EMPTY, true);
     }
 
     @Override

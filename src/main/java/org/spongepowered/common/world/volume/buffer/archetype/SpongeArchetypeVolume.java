@@ -120,8 +120,8 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         final StreamOptions options
     ) {
 
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final Stream<VolumeElement<ArchetypeVolume, BlockEntityArchetype>> stateStream = this.blockEntities.blockEntityArchetypeStream(min, max, options)
             .toStream()
@@ -148,8 +148,8 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     public VolumeStream<ArchetypeVolume, EntityArchetype> entityArchetypeStream(
         final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final Stream<VolumeElement<ArchetypeVolume, EntityArchetype>> stateStream = this.entities.entityArchetypeStream(min, max, options).toStream()
             .map(element -> VolumeElement.of(this, element::type, element.position()));
@@ -189,8 +189,8 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     @Override
     public VolumeStream<ArchetypeVolume, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final ArrayMutableBlockBuffer buffer;
         if (options.carbonCopy()) {
@@ -241,8 +241,8 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         final Vector3i max,
         final StreamOptions options
     ) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final Stream<VolumeElement<ArchetypeVolume, Biome>> stateStream = this.biomes.biomeStream(min, max, options)
             .toStream()
@@ -271,26 +271,26 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
             .spawnType(spawnContext)
             .source(this)) {
             context.buildAndSwitch();
-            this.blockStateStream(this.blockMin(), this.blockMax(), StreamOptions.lazily())
+            this.blockStateStream(this.min(), this.max(), StreamOptions.lazily())
                 .apply(VolumeCollectors.of(
                     target,
                     VolumePositionTranslators.relativeTo(placement),
                     VolumeApplicators.applyBlocks(BlockChangeFlags.DEFAULT_PLACEMENT)
                 ));
 
-            this.biomeStream(this.blockMin(), this.blockMax(), StreamOptions.lazily())
+            this.biomeStream(this.min(), this.max(), StreamOptions.lazily())
                 .apply(VolumeCollectors.of(
                     target,
                     VolumePositionTranslators.relativeTo(placement),
                     VolumeApplicators.applyBiomes()
                 ));
-            this.blockEntityArchetypeStream(this.blockMin(), this.blockMax(), StreamOptions.lazily())
+            this.blockEntityArchetypeStream(this.min(), this.max(), StreamOptions.lazily())
                 .apply(VolumeCollectors.of(
                     target,
                     VolumePositionTranslators.relativeTo(placement),
                     VolumeApplicators.applyBlockEntityArchetype()
                 ));
-            this.entityArchetypeStream(this.blockMin(), this.blockMax(), StreamOptions.lazily())
+            this.entityArchetypeStream(this.min(), this.max(), StreamOptions.lazily())
                 .apply(VolumeCollectors.of(
                     target,
                     VolumePositionTranslators.relativeTo(placement),

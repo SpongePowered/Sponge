@@ -405,12 +405,12 @@ public class SchematicTranslator implements DataTranslator<Schematic> {
 
     @Override
     public DataView addTo(final Schematic schematic, final DataView data) {
-        final int xMin = schematic.blockMin().x();
-        final int yMin = schematic.blockMin().y();
-        final int zMin = schematic.blockMin().z();
-        final int width = schematic.blockSize().x();
-        final int height = schematic.blockSize().y();
-        final int length = schematic.blockSize().z();
+        final int xMin = schematic.min().x();
+        final int yMin = schematic.min().y();
+        final int zMin = schematic.min().z();
+        final int width = schematic.size().x();
+        final int height = schematic.size().y();
+        final int length = schematic.size().z();
         if (width > Constants.Sponge.Schematic.MAX_SIZE || height > Constants.Sponge.Schematic.MAX_SIZE || length > Constants.Sponge.Schematic.MAX_SIZE) {
             throw new IllegalArgumentException(String.format(
                 "Schematic is larger than maximum allowable size (found: (%d, %d, %d) max: (%d, %<d, %<d)", width,

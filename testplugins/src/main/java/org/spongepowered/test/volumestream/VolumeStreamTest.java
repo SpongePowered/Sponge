@@ -373,7 +373,7 @@ public final class VolumeStreamTest implements LoadableModule {
                         throw new CommandException(Component.text("Load a clipboard first before trying to rotate it"));
                     }
                     final ArchetypeVolume newClipboard = data.clipboard.transform(Transformation.builder()
-                        .origin(data.clipboard.blockMin().toDouble().add(data.clipboard.blockSize().toDouble().div(2)))
+                        .origin(data.clipboard.min().toDouble().add(data.clipboard.size().toDouble().div(2)))
                         .rotate(desiredRotation)
                         .build());
                     src.sendMessage(Identity.nil(), Component.text("Rotated clipboard " + desiredRotation.angle().degrees() + " degrees"));

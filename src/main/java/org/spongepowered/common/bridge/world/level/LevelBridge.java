@@ -26,10 +26,14 @@ package org.spongepowered.common.bridge.world.level;
 
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.dimension.DimensionType;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.math.vector.Vector3d;
+
+import java.util.function.Predicate;
 
 public interface LevelBridge {
 
@@ -50,5 +54,11 @@ public interface LevelBridge {
 
     void bridge$adjustDimensionLogic(DimensionType dimensionType);
 
+    <E extends org.spongepowered.api.entity.Entity> E bridge$createEntity(
+            final DataContainer dataContainer,
+            final @Nullable Vector3d position,
+            final @Nullable Predicate<Vector3d> positionCheck);
+
     <E extends Entity> E bridge$createEntity(EntityType<E> type, Vector3d position, boolean naturally);
+
 }

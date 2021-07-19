@@ -119,8 +119,8 @@ public final class SchematicUpdater2_to_3 implements DataContentUpdater {
             int biomeJ= 0;
             int bVal = 0;
             int varIntLength = 0;
-            final int yMin = biomeBuffer.blockMin().y();
-            final int yMax = biomeBuffer.blockMax().y();
+            final int yMin = biomeBuffer.min().y();
+            final int yMax = biomeBuffer.max().y();
 
             while (biomeJ < biomes.length) {
                 bVal = 0;
@@ -149,8 +149,8 @@ public final class SchematicUpdater2_to_3 implements DataContentUpdater {
                 biomeIndex++;
             }
             try (final ByteArrayOutputStream buffer = new ByteArrayOutputStream(width * height * length)) {
-                final int xMin = biomeBuffer.blockMin().x();
-                final int zMin = biomeBuffer.blockMin().z();
+                final int xMin = biomeBuffer.min().x();
+                final int zMin = biomeBuffer.min().z();
                 for (int y = 0; y < height; y++) {
                     final int y0 = yMin + y;
                     for (int z = 0; z < length; z++) {

@@ -81,7 +81,7 @@ public final class SpongeTeleportHelper implements TeleportHelper {
         int worldBorderMaxZ = GenericMath.floor(worldBorder.getCenterZ() + radius);
 
         // Get the World and get the maximum Y value.
-        int worldMaxY = worldLocation.world().blockMax().y();
+        int worldMaxY = worldLocation.world().max().y();
 
         Vector3i vectorLocation = worldLocation.blockPosition();
 

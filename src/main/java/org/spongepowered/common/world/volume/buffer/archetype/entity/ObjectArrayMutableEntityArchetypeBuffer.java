@@ -79,7 +79,7 @@ public class ObjectArrayMutableEntityArchetypeBuffer extends AbstractVolumeBuffe
     public VolumeStream<EntityArchetypeVolume.Mutable, EntityArchetype> entityArchetypeStream(final Vector3i min, final Vector3i max,
         final StreamOptions options
     ) {
-        VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
         final Stream<Tuple<Vector3d, EntityArchetype>> entryStream;
         if (options.carbonCopy()) {
             entryStream = new ArrayList<>(this.entities).stream();
@@ -100,12 +100,12 @@ public class ObjectArrayMutableEntityArchetypeBuffer extends AbstractVolumeBuffe
 
     @Override
     public void addEntity(final EntityArchetypeEntry entry) {
-        if (!this.containsBlock(Objects.requireNonNull(entry, "EntityArchetype cannot be null").position().toInt())) {
+        if (!this.contains(Objects.requireNonNull(entry, "EntityArchetype cannot be null").position().toInt())) {
             final String message = String.format(
                 "EntityArchetype position is out of bounds: Found %s but is outside bounds (%s, %s)",
                 entry.position(),
-                this.blockMin(),
-                this.blockMax()
+                this.min(),
+                this.max()
             );
             throw new IllegalArgumentException(message);
         }

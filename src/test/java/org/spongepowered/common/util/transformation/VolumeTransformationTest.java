@@ -242,7 +242,7 @@ public final class VolumeTransformationTest {
         final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(relativeMin, size, holder);
 
         final StubbedRegistry<BlockType> blockRegistry = (StubbedRegistry<BlockType>) RegistryTypes.BLOCK_TYPE.get();
-        final Vector3i volMax = volume.blockMax().add(Vector3i.ONE);
+        final Vector3i volMax = volume.max().add(Vector3i.ONE);
         IntStream.range(relativeMin.x(), volMax.x()).forEach(x -> IntStream.range(relativeMin.z(), volMax.z())
             .forEach(z -> IntStream.range(relativeMin.y(), volMax.y())
                 .forEach(y -> {
@@ -261,8 +261,8 @@ public final class VolumeTransformationTest {
         final int rotationCount, final StubRotations wanted
     ) {
         final SpongeArchetypeVolume volume = VolumeTransformationTest.fillVolume(min, max, origin);
-        final Vector3i size = volume.blockSize();
-        final Vector3i relativeMin = volume.blockMin();
+        final Vector3i size = volume.size();
+        final Vector3i relativeMin = volume.min();
 
         final Vector3d center = volume.logicalCenter();
 
@@ -318,7 +318,7 @@ public final class VolumeTransformationTest {
         }
         // At this point, we should have an abstract referent volume at least
 
-        rotated.blockStateStream(rotated.blockMin(), rotated.blockMax(), StreamOptions.lazily())
+        rotated.blockStateStream(rotated.min(), rotated.max(), StreamOptions.lazily())
             .forEach((rotatedRef, type, x, y, z) -> {
                 final Vector3d transformedPos = new Vector3d(x, y, z);
                 // We have this offset in the stream, so we have to undo it here.

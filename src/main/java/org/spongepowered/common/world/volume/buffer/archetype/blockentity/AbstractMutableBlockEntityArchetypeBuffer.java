@@ -55,7 +55,7 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer extends Abstract
     }
 
     protected AbstractMutableBlockEntityArchetypeBuffer(final ArrayMutableBlockBuffer buffer) {
-        super(buffer.blockMin(), buffer.blockSize());
+        super(buffer.min(), buffer.size());
         this.blockBuffer = buffer;
     }
 
@@ -102,8 +102,8 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer extends Abstract
     @Override
     public VolumeStream<BlockEntityArchetypeVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
         final StreamOptions options) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final ArrayMutableBlockBuffer buffer;
         if (options.carbonCopy()) {

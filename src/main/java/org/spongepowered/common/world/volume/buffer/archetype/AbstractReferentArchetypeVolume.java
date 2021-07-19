@@ -50,7 +50,6 @@ import org.spongepowered.common.util.MemoizedSupplier;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
-import org.spongepowered.math.vector.Vector4d;
 
 import java.util.Collection;
 import java.util.Map;
@@ -109,7 +108,7 @@ public class AbstractReferentArchetypeVolume<A extends ArchetypeVolume> implemen
     }
 
     protected Vector3i transformBlockSize(final BiFunction<Vector3i, Vector3i, Vector3i> minmax) {
-        return this.applyReference(a -> this.transformBlockSizes(a.blockMin(), a.blockMax(), minmax));
+        return this.applyReference(a -> this.transformBlockSizes(a.min(), a.max(), minmax));
     }
 
     protected Vector3d transformStreamBlockPosition(final Vector3d blockPosition) {
@@ -120,24 +119,24 @@ public class AbstractReferentArchetypeVolume<A extends ArchetypeVolume> implemen
     }
 
     @Override
-    public Vector3i blockMin() {
+    public Vector3i min() {
         return this.transformBlockSize(Vector3i::min);
     }
 
     @Override
-    public Vector3i blockMax() {
+    public Vector3i max() {
         return this.transformBlockSize(Vector3i::max);
     }
 
     @Override
-    public Vector3i blockSize() {
-        return this.applyReference(ArchetypeVolume::blockSize);
+    public Vector3i size() {
+        return this.applyReference(ArchetypeVolume::size);
     }
 
     @Override
-    public boolean containsBlock(final int x, final int y, final int z) {
+    public boolean contains(final int x, final int y, final int z) {
         final Vector3i transformed = this.inverseTransform(x, y, z);
-        return this.applyReference(a -> a.containsBlock(transformed.x(), transformed.y(), transformed.z()));
+        return this.applyReference(a -> a.contains(transformed.x(), transformed.y(), transformed.z()));
     }
 
     @Override
@@ -330,8 +329,8 @@ public class AbstractReferentArchetypeVolume<A extends ArchetypeVolume> implemen
         final StreamCreator<A, T> streamCreator,
         final VolumeStreamUtils.TriFunction<VolumeElement<ArchetypeVolume, T>, Supplier<Rotation>, Supplier<Mirror>, T> elementTransform
     ) {
-        final Vector3i transformedMin = this.blockMin();
-        final Vector3i transformedMax = this.blockMax();
+        final Vector3i transformedMin = this.min();
+        final Vector3i transformedMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, transformedMin, transformedMax, options);
         final Vector3i minDiff = min.sub(transformedMin);
         final Vector3i maxDiff = transformedMax.sub(max);
@@ -340,7 +339,7 @@ public class AbstractReferentArchetypeVolume<A extends ArchetypeVolume> implemen
         final Supplier<Mirror> mirror = xMirror
             ? Mirrors.FRONT_BACK
             : zMirror ? Mirrors.LEFT_RIGHT : Mirrors.NONE;
-        return this.applyReference(a -> streamCreator.createStream(a, a.blockMin().add(minDiff), a.blockMax().sub(maxDiff), options))
+        return this.applyReference(a -> streamCreator.createStream(a, a.min().add(minDiff), a.max().sub(maxDiff), options))
             .transform(e -> VolumeElement.of(
                 this,
                 elementTransform.apply(e, this.transformation::rotation, mirror),

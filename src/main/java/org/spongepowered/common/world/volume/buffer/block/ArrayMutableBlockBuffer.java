@@ -191,8 +191,8 @@ public class ArrayMutableBlockBuffer extends AbstractBlockBuffer implements Bloc
 
     @Override
     public VolumeStream<BlockVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final ArrayMutableBlockBuffer buffer;
         if (options.carbonCopy()) {

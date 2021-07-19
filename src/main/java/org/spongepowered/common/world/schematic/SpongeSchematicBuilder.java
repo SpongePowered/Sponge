@@ -27,7 +27,6 @@ package org.spongepowered.common.world.schematic;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
-import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
@@ -36,14 +35,12 @@ import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 import org.spongepowered.api.world.schematic.Schematic;
-import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolumeCreator;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeVolume;
 import org.spongepowered.api.world.volume.block.BlockVolume;
 import org.spongepowered.api.world.volume.block.entity.BlockEntityVolume;
-import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.data.MemoryDataContainer;
 import org.spongepowered.common.world.volume.buffer.archetype.SpongeArchetypeVolume;
 import org.spongepowered.math.vector.Vector3d;
@@ -150,8 +147,8 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
     public Schematic build() throws IllegalArgumentException {
         if (this.volume instanceof SpongeArchetypeVolume) {
             final SpongeArchetypeVolume archetypeVolume = (SpongeArchetypeVolume) this.volume;
-            final Vector3i start = archetypeVolume.blockMin();
-            final Vector3i blockSize = archetypeVolume.blockSize();
+            final Vector3i start = archetypeVolume.min();
+            final Vector3i blockSize = archetypeVolume.size();
             return new SpongeSchematic(start, blockSize, archetypeVolume, this.metadata == null ? new MemoryDataContainer() : this.metadata);
         }
         throw new IllegalThreadStateException("Unimplemented");

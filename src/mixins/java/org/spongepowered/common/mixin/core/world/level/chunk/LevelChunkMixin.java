@@ -83,9 +83,9 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
     @Shadow private boolean loaded;
     @Shadow private boolean unsaved;
 
-    @Shadow @Nullable public abstract BlockEntity getBlockEntity(BlockPos pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType p_177424_2_);
-
-    @Shadow public abstract BlockState getBlockState(BlockPos pos);
+    @Shadow @Nullable public abstract BlockEntity shadow$getBlockEntity(BlockPos pos, net.minecraft.world.level.chunk.LevelChunk.EntityCreationType p_177424_2_);
+    @Shadow public abstract BlockState shadow$getBlockState(BlockPos pos);
+    @Shadow public abstract void shadow$addEntity(net.minecraft.world.entity.Entity param0);
     // @formatter:on
 
     private long impl$scheduledForUnload = -1; // delay chunk unloads
@@ -350,6 +350,17 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
     @Override
     public long bridge$getCacheKey() {
         return this.impl$cacheKey;
+    }
+
+    @Override
+    public boolean bridge$spawnEntity(final org.spongepowered.api.entity.Entity entity) {
+        final net.minecraft.world.entity.Entity mcEntity = (net.minecraft.world.entity.Entity) entity;
+        final BlockPos blockPos = mcEntity.blockPosition();
+        if (this.chunkPos.x == blockPos.getX() >> 4 && this.chunkPos.z == blockPos.getZ() >> 4) {
+            this.shadow$addEntity(mcEntity);
+            return true;
+        }
+        return false;
     }
 
 }

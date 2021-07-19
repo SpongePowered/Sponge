@@ -24,7 +24,9 @@
  */
 package org.spongepowered.common.entity;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.entity.living.player.User;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
@@ -35,6 +37,7 @@ import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.math.vector.Vector3d;
 
@@ -55,11 +58,17 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.biome.BiomeManager;
 import net.minecraft.world.level.storage.LevelData;
 
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
 import java.util.function.Consumer;
 import java.util.function.Function;
+import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Stream;
 
@@ -186,6 +195,27 @@ public final class EntityUtil {
         // Allowed to call force spawn directly since we've applied creator and custom item logic already
         spawner.accept((Entity) entity);
         return true;
+    }
+
+    public static Collection<org.spongepowered.api.entity.Entity> spawnEntities(
+            final Iterable<? extends org.spongepowered.api.entity.Entity> entities,
+            final Predicate<org.spongepowered.api.entity.Entity> selector,
+            final Consumer<Entity> spawning) {
+
+        final List<org.spongepowered.api.entity.Entity> entitiesToSpawn = new ArrayList<>();
+        for (final org.spongepowered.api.entity.Entity e : entities) {
+            if (selector.test(e)) {
+                entitiesToSpawn.add(e);
+            }
+        }
+        final SpawnEntityEvent.Custom event = SpongeEventFactory.createSpawnEntityEventCustom(PhaseTracker.getCauseStackManager().currentCause(), entitiesToSpawn);
+        if (Sponge.eventManager().post(event)) {
+            return Collections.emptyList();
+        }
+        for (final org.spongepowered.api.entity.Entity entity : event.entities()) {
+            EntityUtil.processEntitySpawn(entity, Optional::empty, spawning);
+        }
+        return Collections.unmodifiableCollection(new ArrayList<>(event.entities()));
     }
 
     /**

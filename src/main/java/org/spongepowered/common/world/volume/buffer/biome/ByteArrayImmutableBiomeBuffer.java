@@ -115,8 +115,8 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     @Override
     public VolumeStream<Immutable, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
 
         final Stream<VolumeElement<Immutable, Biome>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)

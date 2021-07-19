@@ -27,6 +27,7 @@ package org.spongepowered.common.mixin.api.minecraft.server.level;
 import net.minecraft.server.level.ChunkMap;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.util.Ticks;
+import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.server.Ticket;
 import org.spongepowered.api.world.server.TicketType;
@@ -34,10 +35,12 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.server.ChunkMapBridge;
+import org.spongepowered.common.util.MissingImplementationException;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.server.ChunkManager {
@@ -47,8 +50,7 @@ public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.s
     // @formatter:on
 
     @Override
-    @NonNull
-    public ServerWorld world() {
+    public @NonNull ServerWorld world() {
         return (ServerWorld) this.level;
     }
 
@@ -58,14 +60,13 @@ public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.s
     }
 
     @Override
-    @NonNull
-    public Ticks timeLeft(final @NonNull Ticket<?> ticket) {
+    public @NonNull Ticks timeLeft(final @NonNull Ticket<?> ticket) {
         return ((ChunkMapBridge) this).bridge$distanceManager().bridge$timeLeft(ticket);
     }
 
     @Override
-    @NonNull
-    public <T> Optional<Ticket<T>> requestTicket(final TicketType<T> type, final Vector3i chunkPosition, final T value, final int radius) {
+    public <T> @NonNull Optional<Ticket<T>> requestTicket(final @NonNull TicketType<T> type, final @NonNull Vector3i chunkPosition,
+            final @NonNull T value, final int radius) {
         if (!(type instanceof net.minecraft.server.level.TicketType)) {
             throw new IllegalArgumentException("TicketType must be a Minecraft TicketType");
         }
@@ -87,9 +88,15 @@ public abstract class ChunkMapMixin_API implements org.spongepowered.api.world.s
     }
 
     @Override
-    @NonNull
-    public <T> Collection<Ticket<T>> findTickets(final @NonNull TicketType<T> type) {
+    public <T> @NonNull Collection<Ticket<T>> findTickets(final @NonNull TicketType<T> type) {
         return ((ChunkMapBridge) this).bridge$distanceManager().bridge$tickets(type);
+    }
+
+    @Override
+    public @NonNull CompletableFuture<Boolean> regenerateChunk(final int cx, final int cy, final int cz, final @NonNull ChunkRegenerateFlag flag) {
+        final CompletableFuture<Boolean> cf = new CompletableFuture<>();
+        cf.completeExceptionally(new MissingImplementationException("ServerWorld", "regenerateChunk"));
+        return cf;
     }
 
 }

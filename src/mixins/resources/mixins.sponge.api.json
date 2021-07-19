@@ -47,6 +47,7 @@
         "minecraft.server.level.ServerPlayerMixin_API",
         "minecraft.server.level.TicketMixin_API",
         "minecraft.server.level.TicketTypeMixin_API",
+        "minecraft.server.level.WorldGenRegionMixin_API",
         "minecraft.server.network.ServerGamePacketListenerImplMixin_API",
         "minecraft.server.network.ServerLoginPacketListenerImplMixin_API",
         "minecraft.server.players.BanListEntryMixin_API",

@@ -99,7 +99,7 @@ public class MutableMapBlockEntityArchetypeBuffer extends AbstractMutableBlockEn
     public VolumeStream<BlockEntityArchetypeVolume.Mutable, BlockEntityArchetype> blockEntityArchetypeStream(final Vector3i min,
         final Vector3i max, final StreamOptions options
     ) {
-        VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
         final Stream<Map.Entry<Vector3i, BlockEntityArchetype>> entryStream;
         if (options.carbonCopy()) {
             final Map<Vector3i, BlockEntityArchetype> copy = new HashMap<>();

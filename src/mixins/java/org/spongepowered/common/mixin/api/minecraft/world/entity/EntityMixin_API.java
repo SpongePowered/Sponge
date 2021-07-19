@@ -268,7 +268,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public DataContainer toContainer() {
-        final Transform transform = this.transform();
         final CompoundTag compound = new CompoundTag();
         this.shadow$saveAsPassenger(compound);
         final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(compound);
@@ -277,19 +276,19 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 .set(Constants.Entity.CLASS, this.getClass().getName())
                 .set(Queries.WORLD_KEY, ((org.spongepowered.api.world.server.ServerWorld) this.world()).key().formatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
-                .set(Queries.POSITION_X, transform.position().x())
-                .set(Queries.POSITION_Y, transform.position().y())
-                .set(Queries.POSITION_Z, transform.position().z())
+                .set(Queries.POSITION_X, this.position().x())
+                .set(Queries.POSITION_Y, this.position().y())
+                .set(Queries.POSITION_Z, this.position().z())
                 .container()
                 .createView(Constants.Entity.ROTATION)
-                .set(Queries.POSITION_X, transform.rotation().x())
-                .set(Queries.POSITION_Y, transform.rotation().y())
-                .set(Queries.POSITION_Z, transform.rotation().z())
+                .set(Queries.POSITION_X, this.rotation().x())
+                .set(Queries.POSITION_Y, this.rotation().y())
+                .set(Queries.POSITION_Z, this.rotation().z())
                 .container()
                 .createView(Constants.Entity.SCALE)
-                .set(Queries.POSITION_X, transform.scale().x())
-                .set(Queries.POSITION_Y, transform.scale().y())
-                .set(Queries.POSITION_Z, transform.scale().z())
+                .set(Queries.POSITION_X, this.scale().x())
+                .set(Queries.POSITION_Y, this.scale().y())
+                .set(Queries.POSITION_Z, this.scale().z())
                 .container()
                 .set(Constants.Entity.TYPE, Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) this.type()))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);

@@ -138,7 +138,7 @@ public final class ChunkManagerTest implements LoadableModule {
 
         @Listener
         public void onChunkLoad(final ChunkEvent.Load event) {
-            this.logger.info("Chunk load: {}, {}", event.chunkWorld(), event.chunkPosition());
+            this.logger.info("Chunk load: {}, {}", event.worldKey(), event.chunkPosition());
         }
 
     }
