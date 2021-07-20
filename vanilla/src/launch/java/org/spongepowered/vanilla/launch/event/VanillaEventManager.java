@@ -322,7 +322,7 @@ public final class VanillaEventManager implements SpongeEventManager {
     @Override
     public <T extends Event> void registerListener(final PluginContainer plugin, final Class<T> eventClass, final Order order,
         final boolean beforeModifications, final EventListener<? super T> listener) {
-        this.registerListener(plugin, TypeToken.get(eventClass), order, false, listener);
+        this.registerListener(plugin, TypeToken.get(eventClass), order, beforeModifications, listener);
     }
 
     @Override
