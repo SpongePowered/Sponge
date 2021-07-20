@@ -97,7 +97,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         return this.impl$shiftCraft;
     }
 
-
     @Nullable private CraftItemEvent.Craft impl$lastCraft = null;
 
     @Override
@@ -132,13 +131,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Override
     public boolean bridge$firePreview() {
         return this.impl$firePreview;
-    }
-
-    private List<SlotTransaction> impl$capturedCraftPreviewTransactions = new ArrayList<>();
-
-    @Override
-    public List<SlotTransaction> bridge$getPreviewTransactions() {
-        return this.impl$capturedCraftPreviewTransactions;
     }
 
     // Detects if a mod overrides detectAndSendChanges
@@ -193,16 +185,9 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // Captures the SlotTransaction for later event
     @Inject(method = "setItem", at = @At(value = "HEAD") )
     private void impl$addTransaction(final int slotId, final ItemStack itemstack, final CallbackInfo ci) {
-        if (PhaseTracker.SERVER.onSidedThread()) {
-            final Slot slot = this.shadow$getSlot(slotId);
-            if (slot != null) {
-                final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(slot.getItem());
-                final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(itemstack);
-                final org.spongepowered.api.item.inventory.Slot adapter = this.inventoryAdapter$getSlot(slotId).get();
-                final SlotTransaction slotTransaction = new SlotTransaction(adapter, originalItem, newItem);
-                final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
-                phaseContext.getTransactor().logContainerSlotTransaction(phaseContext, slotTransaction, (AbstractContainerMenu) (Object) this);
-            }
+        final Slot slot = this.shadow$getSlot(slotId);
+        if (slot != null) {
+            this.impl$capture(slotId, itemstack, slot.getItem());
         }
     }
 
@@ -548,30 +533,15 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         }
     }
 
-    private void impl$capture(final Integer index, final ItemStack itemstack, final ItemStack itemstack1) {
+    private void impl$capture(final Integer index, final ItemStack newStack, final ItemStack oldStack) {
         if (PhaseTracker.SERVER.onSidedThread() && !PhaseTracker.SERVER.getPhaseContext().isRestoring()) {
-            final ItemStackSnapshot originalItem = ItemStackUtil.snapshotOf(itemstack1);
-            final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(itemstack);
-
-            final org.spongepowered.api.item.inventory.Slot adapter;
+            final ItemStackSnapshot oldItem = ItemStackUtil.snapshotOf(oldStack);
+            final ItemStackSnapshot newItem = ItemStackUtil.snapshotOf(newStack);
             try {
-                adapter = this.inventoryAdapter$getSlot(index).get();
-                SlotTransaction newTransaction = new SlotTransaction(adapter, originalItem, newItem);
-                final List<SlotTransaction> previewTransactions = this.bridge$getPreviewTransactions();
-                if (this.bridge$isShiftCrafting()) {
-                    previewTransactions.add(newTransaction);
-                } else {
-                    if (!previewTransactions.isEmpty()) { // Check if Preview transaction is this transaction
-                        final SlotTransaction previewTransaction = previewTransactions.get(0);
-                        if (previewTransaction.slot().equals(newTransaction.slot())) {
-                            newTransaction = null;
-                        }
-                    }
-                    if (newTransaction != null) {
-                        final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
-                        phaseContext.getTransactor().logContainerSlotTransaction(phaseContext, newTransaction, (AbstractContainerMenu) (Object) this);
-                    }
-                }
+                final org.spongepowered.api.item.inventory.Slot adapter = this.inventoryAdapter$getSlot(index).get();
+                final SlotTransaction newTransaction = new SlotTransaction(adapter, oldItem, newItem);
+                final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
+                phaseContext.getTransactor().logContainerSlotTransaction(phaseContext, newTransaction, (AbstractContainerMenu) (Object) this);
             } catch (final IndexOutOfBoundsException e) {
                 SpongeCommon.logger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
             }

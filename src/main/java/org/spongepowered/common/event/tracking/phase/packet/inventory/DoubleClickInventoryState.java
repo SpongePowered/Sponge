@@ -79,11 +79,4 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
         super.populateContext(playerMP, packet, context);
         ((TrackedContainerBridge) playerMP.containerMenu).bridge$setFirePreview(false);
     }
-
-    @Override
-    public void unwind(final InventoryPacketContext context) {
-        DragInventoryStopState.unwindCraftPreview(context);
-        super.unwind(context);
-    }
-
 }

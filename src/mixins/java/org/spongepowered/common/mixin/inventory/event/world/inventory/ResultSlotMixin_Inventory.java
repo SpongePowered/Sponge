@@ -24,42 +24,6 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.query.QueryTypes;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.inventory.InventoryEventFactory;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.inventory.util.ContainerUtil;
-import org.spongepowered.common.item.util.ItemStackUtil;
-
-import java.util.Iterator;
-import java.util.List;
-import java.util.Optional;
-
-import javax.annotation.Nullable;
 import net.minecraft.core.NonNullList;
 import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -72,6 +36,29 @@ import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.item.crafting.RecipeManager;
 import net.minecraft.world.item.crafting.RecipeType;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
+import org.spongepowered.api.item.inventory.query.QueryTypes;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+
+import javax.annotation.Nullable;
 
 @Mixin(ResultSlot.class)
 public abstract class ResultSlotMixin_Inventory extends Slot {
@@ -140,9 +127,6 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         if (((LevelBridge) thePlayer.level).bridge$isFake()) {
             return;
         }
-        ((TrackedContainerBridge) thePlayer.containerMenu).bridge$detectAndSendChanges(true);
-
-        thePlayer.containerMenu.bridge$setCaptureInventory(false);
 
         final AbstractContainerMenu container = thePlayer.containerMenu;
         final Inventory craftInv = ((Inventory) container).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
@@ -151,77 +135,15 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
             return;
         }
 
-        // retain only last slot-transactions on output slot
-        SlotTransaction first = null;
-        final List<SlotTransaction> capturedTransactions = container.bridge$getCapturedSlotTransactions();
-        for (final Iterator<SlotTransaction> iterator = capturedTransactions.iterator(); iterator.hasNext(); ) {
-            final SlotTransaction trans = iterator.next();
-            Optional<Integer> slotIndex = trans.slot().get(Keys.SLOT_INDEX);
-            if (slotIndex.isPresent() && slotIndex.get() == 0) {
-                iterator.remove();
-                if (first == null) {
-                    first = trans;
-                }
-            }
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+
+        try (final EffectTransactor ignored = transactor.logCrafting(thePlayer, this.impl$craftedStack, (CraftingInventory) craftInv,
+                ((TrackedContainerBridge) container).bridge$getPreviousCursor(), this.craftSlots, this.impl$lastRecipe)) {
+            ((TrackedContainerBridge) thePlayer.containerMenu).bridge$detectAndSendChanges(true);
         }
 
-        final ItemStackSnapshot craftedItem;
-        // if we got a transaction on the crafting-slot use this
-        if (first != null) {
-            capturedTransactions.add(first);
-            craftedItem = first.original().copy();
-        } else {
-            craftedItem = ItemStackUtil.snapshotOf(this.impl$craftedStack);
-        }
-
-        final CraftingInventory craftingInventory = (CraftingInventory) craftInv;
-        final CraftItemEvent.Craft event;
-        // TODO use transactions where possible
-        {
-            // Get previous cursor if captured
-            ItemStack previousCursor = ((TrackedContainerBridge) container).bridge$getPreviousCursor();
-            if (previousCursor == null) {
-                previousCursor = thePlayer.inventory.getCarried(); // or get the current one
-            }
-            final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(ItemStackUtil.snapshotOf(previousCursor), ItemStackUtil.snapshotOf(thePlayer.inventory.getCarried()));
-            final org.spongepowered.api.item.inventory.Slot slot = craftingInventory.result();
-            event = SpongeEventFactory.createCraftItemEventCraft(PhaseTracker.getCauseStackManager().currentCause(),
-                    ContainerUtil.fromNative(container), craftedItem, craftingInventory, cursorTransaction, Optional.ofNullable(impl$lastRecipe), Optional.of(slot), capturedTransactions);
-            SpongeCommon.post(event);
-
-            // handle slot-transactions
-            // TODO prevent capture during restore
-            try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).buildAndSwitch()) {
-                PacketPhaseUtil.handleSlotRestore(thePlayer, container, event.transactions(), event.isCancelled());
-                PacketPhaseUtil.handleCursorRestore(thePlayer, event.cursorTransaction());
-                ((TrackedContainerBridge) container).bridge$detectAndSendChanges(true); // TODO is this needed?
-            }
-
-            capturedTransactions.clear();
-        }
-
-        ((TrackedContainerBridge) container).bridge$setLastCraft(event);
-        ((TrackedContainerBridge) container).bridge$setFirePreview(true);
+        TrackingUtil.processBlockCaptures(context); // TODO only process crafting?
         this.impl$craftedStack = null;
-        thePlayer.containerMenu.bridge$setCaptureInventory(true);
-
-        final List<SlotTransaction> previewTransactions = ((TrackedContainerBridge) container).bridge$getPreviewTransactions();
-        if (this.craftSlots.isEmpty()) {
-            return; // CraftMatrix is empty and/or no transaction present. Do not fire Preview.
-        }
-
-        final SlotTransaction last;
-        if (previewTransactions.isEmpty()) {
-            last = new SlotTransaction(craftingInventory.result(), ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(this.getItem()));
-            previewTransactions.add(last);
-        } else {
-            last = previewTransactions.get(0);
-        }
-
-        Optional<net.minecraft.world.item.crafting.CraftingRecipe> newRecipe = thePlayer.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots, thePlayer.level);
-
-        InventoryEventFactory.callCraftEventPre(thePlayer, craftingInventory, last, (CraftingRecipe) newRecipe.orElse(null), container, previewTransactions);
-        previewTransactions.clear();
-
     }
 }

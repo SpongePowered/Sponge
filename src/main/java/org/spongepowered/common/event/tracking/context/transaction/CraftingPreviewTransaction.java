@@ -27,13 +27,16 @@ package org.spongepowered.common.event.tracking.context.transaction;
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.RecipeType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -48,21 +51,18 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.List;
 import java.util.Optional;
 
-public class PlaceRecipeTransaction extends ContainerBasedTransaction {
+public class CraftingPreviewTransaction extends ContainerBasedTransaction {
 
     private final ServerPlayer player;
-    private final ItemStackSnapshot originalCursor;
-    private boolean shift;
-    private Recipe<?> recipe;
     private CraftingInventory craftingInventory;
+    private CraftingContainer craftingContainer;
 
-    public PlaceRecipeTransaction(final ServerPlayer player, final boolean shift, final Recipe<?> recipe, CraftingInventory craftingInventory) {
+    public CraftingPreviewTransaction(
+            final Player player, final CraftingInventory craftingInventory, final CraftingContainer craftingContainer) {
         super(((ServerWorld) player.level).key(), player.containerMenu);
-        this.player = player;
-        this.originalCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
-        this.shift = shift;
-        this.recipe = recipe;
+        this.player = (ServerPlayer) player;
         this.craftingInventory = craftingInventory;
+        this.craftingContainer = craftingContainer;
     }
 
     @Override
@@ -71,31 +71,35 @@ public class PlaceRecipeTransaction extends ContainerBasedTransaction {
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {
-        final SlotTransaction preview = this.getPreviewTransaction(this.craftingInventory.result(), slotTransactions);
-        final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.originalCursor, ItemStackUtil.snapshotOf(this.player.inventory.getCarried()));
-        ClickContainerEvent.Recipe event;
-        if (this.shift) {
-            event = SpongeEventFactory.createClickContainerEventRecipeAll(cause, (Container) this.menu,
-                    this.craftingInventory, cursorTransaction, preview, Optional.of((CraftingRecipe) this.recipe), Optional.empty(), slotTransactions);
-        } else {
-            event = SpongeEventFactory.createClickContainerEventRecipeSingle(cause, (Container) this.menu,
-                    this.craftingInventory, cursorTransaction, preview, Optional.of((CraftingRecipe) this.recipe), Optional.empty(), slotTransactions);
+        if (this.craftingContainer.isEmpty()) {
+            return Optional.empty(); // CraftMatrix is empty and/or no transaction present. Do not fire Preview.
         }
+
+        final SlotTransaction preview = this.getPreviewTransaction(this.craftingInventory.result(), slotTransactions);
+        final ItemStackSnapshot cursorITem = ItemStackUtil.snapshotOf(this.player.inventory.getCarried());
+        final Transaction<ItemStackSnapshot> cursor = new Transaction<>(cursorITem, cursorITem);
+        Optional<CraftingRecipe> recipe = this.player.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftingContainer, this.player.level).map(CraftingRecipe.class::cast);
+
+        final CraftItemEvent.Preview event = SpongeEventFactory
+                .createCraftItemEventPreview(cause, (Container) this.menu, this.craftingInventory, cursor, preview, recipe, Optional.empty(), slotTransactions);
         return Optional.of(event);
     }
 
     @Override
-    public void restore(final PhaseContext<@NonNull ?> context, final ClickContainerEvent event) {
-        this.handleEventResults(this.player, event);
+    public void restore(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
+        this.postProcessEvent(context, event);
     }
 
     @Override
     public void postProcessEvent(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
         this.handleEventResults(this.player, event);
+
     }
 
     @Override
-    boolean isContainerEventAllowed(final PhaseContext<@Nullable ?> context) {
+    boolean isContainerEventAllowed(
+        final PhaseContext<@Nullable ?> context
+    ) {
         if (!(context instanceof InventoryPacketContext)) {
             return false;
         }

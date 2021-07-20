@@ -37,6 +37,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import net.minecraft.world.level.Level;
@@ -56,7 +57,9 @@ import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
@@ -314,10 +317,24 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
     }
 
-    public EffectTransactor logPlaceRecipe(boolean shift, Recipe<?> recipe, ServerPlayer player, Inventory craftInv) {
+    public EffectTransactor logPlaceRecipe(final boolean shift, final Recipe<?> recipe, final ServerPlayer player, final CraftingInventory craftInv) {
         final PlaceRecipeTransaction transaction = new PlaceRecipeTransaction(player, shift, recipe, craftInv);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+    }
+
+    public EffectTransactor logCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,
+            @Nullable final ItemStack prevCursor, final CraftingContainer craftSlots, final CraftingRecipe lastRecipe) {
+        final CraftingTransaction transaction = new CraftingTransaction(player, craftedStack, craftInv, prevCursor, craftSlots, lastRecipe);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
+    }
+
+    public EffectTransactor logCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory,
+            final CraftingContainer craftSlots) {
+        final CraftingPreviewTransaction transaction = new CraftingPreviewTransaction(player, craftingInventory, craftSlots);
+        this.logTransaction(transaction);
+        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
     }
 
     public void logInventorySlotTransaction(
@@ -708,6 +725,5 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             this.effect = null;
         }
     }
-
 
 }

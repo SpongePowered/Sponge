@@ -1,14 +1,45 @@
+/*
+ * This file is part of Sponge, licensed under the MIT License (MIT).
+ *
+ * Copyright (c) SpongePowered <https://www.spongepowered.org>
+ * Copyright (c) contributors
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in
+ * all copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
+ * THE SOFTWARE.
+ */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.crafting.RecipeType;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
+import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.server.ServerWorld;
+import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -22,6 +53,7 @@ import net.minecraft.world.inventory.ClickType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -55,6 +87,24 @@ public class ClickMenuTransaction extends ContainerBasedTransaction {
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {
+        // Search for crafting preview slot changes
+        for (net.minecraft.world.inventory.Slot slot : this.player.containerMenu.slots) {
+            if (slot.container instanceof CraftingContainer) {
+                final CraftingContainer mcCraftInv = ((CraftingContainer) slot.container);
+                final Optional<net.minecraft.world.item.crafting.CraftingRecipe> recipe = this.player.getServer().getRecipeManager().getRecipeFor(
+                        RecipeType.CRAFTING, mcCraftInv, this.player.level);
+                final CraftingInventory craftInv = ((Inventory) player.containerMenu).query(CraftingInventory.class).get();
+                final List<SlotTransaction> previewTransactions = new ArrayList<>(slotTransactions);
+
+
+//                final CraftItemEvent.Preview previewEvent = InventoryEventFactory.callCraftEventPreview(player, craftInv,
+//                        ((CraftingRecipe) recipe.orElse(null)), player.containerMenu, previewTransactions);
+
+                // TODO adjust slotTransaction list
+                break;
+            }
+        }
+
         if (slotTransactions.isEmpty()  && this.slotNum >= 0 && this.slot != null && entities.isEmpty()) {
             // No SlotTransaction was captured. So we add the clicked slot as a transaction
             final ItemStackSnapshot item = this.slot.peek().createSnapshot();

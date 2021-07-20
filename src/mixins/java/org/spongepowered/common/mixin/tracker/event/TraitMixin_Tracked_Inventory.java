@@ -40,21 +40,10 @@ import java.util.List;
 public abstract class TraitMixin_Tracked_Inventory implements TrackedInventoryBridge {
 
     private List<SlotTransaction> impl$capturedTransactions = new ArrayList<>();
-    private boolean impl$doCapture = false;
 
     @Override
     public List<SlotTransaction> bridge$getCapturedSlotTransactions() {
         return this.impl$capturedTransactions;
-    }
-
-    @Override
-    public void bridge$setCaptureInventory(final boolean doCapture) {
-        this.impl$doCapture = doCapture;
-    }
-
-    @Override
-    public boolean bridge$capturingInventory() {
-        return this.impl$doCapture;
     }
 
 }

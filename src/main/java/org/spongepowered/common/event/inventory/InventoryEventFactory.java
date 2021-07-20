@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.inventory;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
@@ -53,7 +52,6 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.event.item.inventory.UpdateAnvilEvent;
@@ -62,11 +60,9 @@ import org.spongepowered.api.item.enchantment.Enchantment;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.inventory.type.CarriedInventory;
 import org.spongepowered.api.item.inventory.type.ViewableInventory;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
@@ -130,9 +126,9 @@ public class InventoryEventFactory {
 
             if (!fullTransfer) {
                 // TODO pre-cancel event
-                for (final SlotTransaction trans : capture.bridge$getCapturedSlotTransactions()) {
-                    trans.slot().set(trans.original().createStack());
-                }
+//                for (final SlotTransaction trans : capture.bridge$getCapturedSlotTransactions()) {
+//                    trans.slot().set(trans.original().createStack());
+//                }
                 return false;
             }
 
@@ -143,23 +139,6 @@ public class InventoryEventFactory {
         }
         return true;
     }
-
-
-    public static boolean callPlayerChangeInventoryPickupEvent(final Player player, final TrackedInventoryBridge inventory) {
-        final List<SlotTransaction> transactions = inventory.bridge$getCapturedSlotTransactions();
-        if (transactions.isEmpty()) {
-            return true;
-        }
-        PhaseTracker.getCauseStackManager().pushCause(player);
-        final ChangeInventoryEvent.Pickup event = SpongeEventFactory
-                .createChangeInventoryEventPickup(PhaseTracker.getCauseStackManager().currentCause(), (Inventory) player.containerMenu, transactions);
-        SpongeCommon.post(event);
-        PhaseTracker.getCauseStackManager().popCause();
-        PacketPhaseUtil.handleSlotRestore(null, null, event.transactions(), event.isCancelled());
-        transactions.clear();
-        return !event.isCancelled();
-    }
-
 
     public static ItemStack callInventoryPickupEvent(final Container inventory, final ItemEntity item, final ItemStack stack) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -423,26 +402,6 @@ public class InventoryEventFactory {
             captureIn.bridge$getCapturedSlotTransactions().add(new SlotTransaction(slot.get(), original, replacement));
         }
         return remaining;
-    }
-
-    public static CraftItemEvent.Preview callCraftEventPre(final Player player, final CraftingInventory inventory,
-            final SlotTransaction previewTransaction, final @Nullable CraftingRecipe recipe, final AbstractContainerMenu container, final List<SlotTransaction> transactions) {
-        final CraftItemEvent.Preview event = SpongeEventFactory
-                .createCraftItemEventPreview(PhaseTracker.getCauseStackManager().currentCause(), inventory, (Inventory) container, previewTransaction, Optional.ofNullable(recipe), transactions);
-        SpongeCommon.post(event);
-        PacketPhaseUtil.handleSlotRestore(player, container, new ArrayList<>(transactions), event.isCancelled());
-        if (player instanceof ServerPlayer) {
-            if (event.preview().custom().isPresent() || event.isCancelled() || !event.preview().isValid()) {
-                ItemStackSnapshot stack = event.preview().finalReplacement();
-                if (event.isCancelled() || !event.preview().isValid()) {
-                    stack = event.preview().original();
-                }
-                // Resend modified output
-                ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(0, 0, ItemStackUtil.fromSnapshotToNative(stack)));
-            }
-
-        }
-        return event;
     }
 
     public static UpdateAnvilEvent callUpdateAnvilEvent(final AnvilMenu anvil, final ItemStack slot1, final ItemStack slot2, final ItemStack result, final String name, final int levelCost, final int materialCost) {

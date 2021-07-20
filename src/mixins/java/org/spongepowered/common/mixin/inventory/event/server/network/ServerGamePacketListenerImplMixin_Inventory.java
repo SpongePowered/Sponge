@@ -145,7 +145,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             return;
         }
 
-        try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, recipe, player, craftInv)) {
+        try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, recipe, player, (CraftingInventory) craftInv)) {
             recipeBookMenu.handlePlacement(shift, recipe, player);
             ((TrackedContainerBridge) player.containerMenu).bridge$detectAndSendChanges(true);
             ((TrackedContainerBridge) player.containerMenu).bridge$setFirePreview(true);
