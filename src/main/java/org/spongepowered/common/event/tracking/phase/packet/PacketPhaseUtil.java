@@ -24,28 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import org.spongepowered.api.data.Transaction;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.accessor.entity.passive.AbstractChestedHorseEntityAccessor;
-import org.spongepowered.common.accessor.network.protocol.game.ServerboundMovePlayerPacketAccessor;
-import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.accessor.world.entity.animal.PigAccessor;
-import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
-import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
-import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
-import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
-import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
-import org.spongepowered.common.item.util.ItemStackUtil;
-
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.PacketListener;
 import net.minecraft.network.protocol.Packet;
@@ -77,6 +55,7 @@ import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.phys.AABB;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;

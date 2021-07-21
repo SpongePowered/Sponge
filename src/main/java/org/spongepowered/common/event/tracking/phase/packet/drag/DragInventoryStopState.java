@@ -24,10 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.drag;
 
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.level.ServerPlayer;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.util.Constants;
 
 public abstract class DragInventoryStopState extends NamedInventoryState {
@@ -35,12 +31,5 @@ public abstract class DragInventoryStopState extends NamedInventoryState {
     public DragInventoryStopState(String name, int buttonId) {
         super(name, Constants.Networking.MODE_DRAG | buttonId | Constants.Networking.DRAG_STATUS_STOPPED | Constants.Networking.CLICK_OUTSIDE_WINDOW, Constants.Networking.MASK_DRAG);
     }
-
-    @Override
-    public void populateContext(ServerPlayer playerMP, Packet<?> packet, InventoryPacketContext context) {
-        super.populateContext(playerMP, packet, context);
-        ((TrackedContainerBridge) playerMP.containerMenu).bridge$setFirePreview(false);
-    }
-
 
 }

@@ -45,7 +45,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -82,8 +81,8 @@ public abstract class CraftingMenuMixin_Inventory {
             final ItemStackSnapshot repl = ItemStackUtil.snapshotOf(itemStack);
             final Slot slot = ((InventoryAdapter) player.containerMenu).inventoryAdapter$getSlot(0).get();
             transactor.logContainerSlotTransaction(context, new SlotTransaction(slot, orig, repl), player.containerMenu);
+//            TrackingUtil.processBlockCaptures(context); // TODO only crafting preview
         }
-        TrackingUtil.processBlockCaptures(context); // TODO only crafting preview
     }
 
 

@@ -72,6 +72,7 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {
+        // TODO events double fire?
         if (slotTransactions.isEmpty() && this.slotNum >= 0 && this.slot != null) {
             // No SlotTransaction was captured. So we add the clicked slot as a transaction with the creative stack
             final ItemStackSnapshot item = this.slot.peek().createSnapshot();

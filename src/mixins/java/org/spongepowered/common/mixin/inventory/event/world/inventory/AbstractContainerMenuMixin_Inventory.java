@@ -40,12 +40,12 @@ import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
 import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
 import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
@@ -305,25 +305,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         return result;
     }
 
-    @Redirect(
-        method = "clicked",
-        at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;doClick(IILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/item/ItemStack;"))
-    private ItemStack inventory$wrapDoClickWithTransaction(
-        final AbstractContainerMenu menu, final int slotId, final int dragType,
-        final ClickType clickType,
-        final Player player
-    ) {
-        if (((WorldBridge) player.level).bridge$isFake()) {
-            return this.shadow$doClick(slotId, dragType, clickType, player);
-        }
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
-        try (final EffectTransactor ignored = transactor.logClickContainer(menu, slotId, dragType, clickType, player)) {
-            return this.shadow$doClick(slotId, dragType, clickType, player);
-        }
-    }
-
     // Called dropping the item ; PART 2/2
     // Restores the slot if needed
     @Nullable
@@ -432,6 +413,27 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
         }
     }
+
+    @Redirect(
+            method = "clicked",
+            at = @At(value = "INVOKE",
+                    target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;doClick(IILnet/minecraft/world/inventory/ClickType;Lnet/minecraft/world/entity/player/Player;)Lnet/minecraft/world/item/ItemStack;"))
+    private ItemStack inventory$wrapDoClickWithTransaction(
+            final AbstractContainerMenu menu, final int slotId, final int dragType,
+            final ClickType clickType,
+            final Player player
+    ) {
+        if (((LevelBridge) player.level).bridge$isFake()) {
+            return this.shadow$doClick(slotId, dragType, clickType, player);
+        }
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (final EffectTransactor ignored = transactor.logClickContainer(menu, slotId, dragType, clickType, player)) {
+            return this.shadow$doClick(slotId, dragType, clickType, player);
+        }
+    }
+
+
 
     // detectAndSendChanges
 

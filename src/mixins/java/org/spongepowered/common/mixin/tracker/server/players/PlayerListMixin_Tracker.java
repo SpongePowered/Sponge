@@ -33,6 +33,8 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 import org.spongepowered.common.event.tracking.phase.player.PlayerPhase;
+import org.spongepowered.common.event.tracking.phase.tick.PlayerTickContext;
+import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 
 @Mixin(PlayerList.class)
 public class PlayerListMixin_Tracker {
@@ -49,4 +51,12 @@ public class PlayerListMixin_Tracker {
         }
     }
 
+    @Redirect(method = "placeNewPlayer",
+              at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;initMenu()V"))
+    private void tracker$onInitMenu(final ServerPlayer player) {
+        try (final PlayerTickContext context = TickPhase.Tick.PLAYER.createPhaseContext(PhaseTracker.SERVER).source(player)) {
+            context.buildAndSwitch();
+            player.initMenu();
+        }
+    }
 }

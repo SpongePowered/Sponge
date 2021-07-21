@@ -132,15 +132,20 @@ public final class InventoryTest implements LoadableModule {
             if (event instanceof ClickContainerEvent) {
                 this.plugin.logger().info("{} {}", event.getClass().getSimpleName(), ((ClickContainerEvent) event).container().getClass().getSimpleName());
                 final Transaction<ItemStackSnapshot> cursor = ((ClickContainerEvent) event).cursorTransaction();
-                this.plugin.logger().info("  Cursor: {}x{}->{}x{}", cursor.original().type(), cursor.original().quantity(),
-                        cursor.finalReplacement().type(), cursor.finalReplacement().quantity());
+                this.plugin.logger().info("  Cursor: {}x{}->{}x{}", cursor.original().type().key(RegistryTypes.ITEM_TYPE), cursor.original().quantity(),
+                        cursor.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), cursor.finalReplacement().quantity());
+                if (event instanceof CraftItemEvent.Preview) {
+                    final SlotTransaction preview = ((CraftItemEvent.Preview) event).preview();
+                    this.plugin.logger().info("  Preview: {}x{}->{}x{}", preview.original().type().key(RegistryTypes.ITEM_TYPE), preview.original().quantity(),
+                            preview.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), preview.finalReplacement().quantity());
+                }
             } else {
                 this.plugin.logger().info("{} {}", event.getClass().getSimpleName(), event.inventory().getClass().getSimpleName());
             }
             for (final SlotTransaction slotTrans : event.transactions()) {
                 final Optional<Integer> integer = slotTrans.slot().get(Keys.SLOT_INDEX);
-                this.plugin.logger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.original().type(), slotTrans.original().quantity(),
-                        slotTrans.finalReplacement().type(), slotTrans.finalReplacement().quantity(), integer.get());
+                this.plugin.logger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.original().type().key(RegistryTypes.ITEM_TYPE), slotTrans.original().quantity(),
+                        slotTrans.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), slotTrans.finalReplacement().quantity(), integer.get());
             }
         }
 
@@ -148,7 +153,7 @@ public final class InventoryTest implements LoadableModule {
         public void onChangeEquipment(final ChangeEntityEquipmentEvent event) {
             final Slot slot = event.slot();
             final Transaction<ItemStackSnapshot> transaction = event.transaction();
-            this.plugin.logger().info("{}: {} {}->{}",
+            this.plugin.logger().info("Equipment: {}: {} {}->{}",
                     event.entity().type().key(RegistryTypes.ENTITY_TYPE),
                     slot.get(Keys.EQUIPMENT_TYPE).get().key(RegistryTypes.EQUIPMENT_TYPE),
                     transaction.original().type().key(RegistryTypes.ITEM_TYPE),

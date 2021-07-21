@@ -105,23 +105,13 @@ public class ClickMenuTransaction extends ContainerBasedTransaction {
             }
         }
 
-        if (slotTransactions.isEmpty()  && this.slotNum >= 0 && this.slot != null && entities.isEmpty()) {
-            // No SlotTransaction was captured. So we add the clicked slot as a transaction
-            final ItemStackSnapshot item = this.slot.peek().createSnapshot();
-            slotTransactions.add(new SlotTransaction(this.slot, item, item));
-        }
+        // TODO ClickContainerEvent.Double is missing transactions - they are in the side-effect?
+
         final ItemStackSnapshot resultingCursor = ItemStackUtil.snapshotOf(this.player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.cursor, resultingCursor);
         final @Nullable ClickContainerEvent event = context.createContainerEvent(cause, this.player, (Container) this.menu,
             cursorTransaction, slotTransactions, entities, this.buttonNum, this.slot);
 
-        // The client sends several packets all at once for drag events we only care about the last one.
-        // Therefore, we never add any 'fake' transactions, as the final packet has everything we want.
-        // TODO - investigate whether this is still needed:
-        if (event != null && this.slot != null && !(event instanceof ClickContainerEvent.Drag)) {
-            final ItemStackSnapshot item = this.slot.peek().createSnapshot();
-            slotTransactions.add(new SlotTransaction(this.slot, item, item));
-        }
         return Optional.ofNullable(event);
     }
 

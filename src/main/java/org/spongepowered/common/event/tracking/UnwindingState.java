@@ -24,6 +24,8 @@
  */
 package org.spongepowered.common.event.tracking;
 
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -32,6 +34,9 @@ import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.Block;
+
+import java.util.Optional;
+import java.util.function.Supplier;
 
 public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> {
 
@@ -80,6 +85,15 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }
+    }
+
+    @Override
+    public Supplier<ServerLevel> attemptWorldKey(UnwindingPhaseContext context) {
+        final Optional<Entity> source = context.getSource(Entity.class);
+        if (source.isPresent()) {
+            return () -> (ServerLevel) source.get().level;
+        }
+        return IPhaseState.super.attemptWorldKey(context);
     }
 
     private final String desc = TrackingUtil.phaseStateToString("General", this);
