@@ -42,6 +42,7 @@ import org.spongepowered.api.command.selector.Selector;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.datapack.DataPackType;
+import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -106,6 +107,7 @@ import org.spongepowered.common.data.manipulator.ImmutableDataManipulatorFactory
 import org.spongepowered.common.data.manipulator.MutableDataManipulatorFactory;
 import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.datapack.SpongeDataPackType;
+import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.util.SpongeItemStackComparatorFactory;
@@ -248,7 +250,8 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(DisplaySlot.Factory.class, new SpongeDisplaySlotFactory())
                 .registerFactory(Weather.Factory.class, new SpongeWeather.FactoryImpl())
                 .registerFactory(NodeTree.Factory.class, new SpongeNodeTree.FactoryImpl())
-                .registerFactory(TagTemplate.Factory.class, new SpongeTagTemplateFactory());
+                .registerFactory(TagTemplate.Factory.class, new SpongeTagTemplateFactory())
+                .registerFactory(EventListenerRegistration.Factory.class, new SpongeEventListenerRegistration.FactoryImpl())
         ;
     }
 }
