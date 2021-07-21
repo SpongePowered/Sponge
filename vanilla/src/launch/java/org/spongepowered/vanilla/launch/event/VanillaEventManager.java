@@ -32,7 +32,6 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Multimap;
 import com.google.inject.Singleton;
 import io.leangen.geantyref.GenericTypeReflector;
-import io.leangen.geantyref.TypeToken;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Engine;
@@ -40,6 +39,8 @@ import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventListener;
+import org.spongepowered.api.event.EventListenerRegistration;
+import org.spongepowered.api.event.EventManager;
 import org.spongepowered.api.event.GenericEvent;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
@@ -155,11 +156,6 @@ public final class VanillaEventManager implements SpongeEventManager {
         return String.join(", ", errors);
     }
 
-    private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventClass,
-        final Listener listener, final EventListener<? super T> handler) {
-        return VanillaEventManager.createRegistration(plugin, eventClass, listener.order(), listener.beforeModifications(), handler);
-    }
-
     @SuppressWarnings({"unchecked", "rawtypes"})
     private static <T extends Event> RegisteredListener<T> createRegistration(final PluginContainer plugin, final Type eventType,
         final Order order, final boolean beforeModifications, final EventListener<? super T> handler) {
@@ -201,10 +197,6 @@ public final class VanillaEventManager implements SpongeEventManager {
         return new RegisteredListener.Cache(handlers);
     }
 
-    private void register(final RegisteredListener<? extends Event> handler) {
-        this.register(Collections.singletonList(handler));
-    }
-
     private void register(final List<RegisteredListener<? extends Event>> handlers) {
         boolean changed = false;
 
@@ -215,6 +207,22 @@ public final class VanillaEventManager implements SpongeEventManager {
                     changed = true;
                     this.checker.registerListenerFor(raw);
                 }
+            }
+        }
+
+        if (changed) {
+            this.handlersCache.invalidateAll();
+        }
+    }
+
+    private void register(final RegisteredListener<? extends Event> handler) {
+        boolean changed = false;
+
+        synchronized (this.lock) {
+            final Class<?> raw = handler.getEventType().getType();
+            if (this.handlersByEvent.put(raw, handler)) {
+                changed = true;
+                this.checker.registerListenerFor(raw);
             }
         }
 
@@ -262,7 +270,8 @@ public final class VanillaEventManager implements SpongeEventManager {
                         continue;
                     }
 
-                    handlers.add(VanillaEventManager.createRegistration(plugin, eventType, listener, handler));
+                    handlers.add(VanillaEventManager.createRegistration(plugin, eventType, listener.order(), listener.beforeModifications(),
+                            handler));
                 } else {
                     methodErrors.put(method, error);
                 }
@@ -292,43 +301,18 @@ public final class VanillaEventManager implements SpongeEventManager {
     }
 
     @Override
-    public void registerListeners(final PluginContainer plugin, final Object listener) {
+    public <E extends Event> EventManager registerListener(final EventListenerRegistration<E> registration) {
+        Objects.requireNonNull(registration, "registration");
+        final RegisteredListener<E> handler = VanillaEventManager.createRegistration(registration.plugin(),
+                registration.eventType(), registration.order(), registration.beforeModifications(), registration.listener());
+        this.register(handler);
+        return this;
+    }
+
+    @Override
+    public VanillaEventManager registerListeners(final PluginContainer plugin, final Object listener) {
         this.registerListener(plugin, listener);
-    }
-
-    @Override
-    public <T extends Event> void registerListener(final PluginContainer plugin, final Class<T> eventClass, final EventListener<? super T> listener) {
-        this.registerListener(plugin, eventClass, Order.DEFAULT, listener);
-    }
-
-    @Override
-    public <T extends Event> void registerListener(final PluginContainer plugin, final TypeToken<T> eventType,
-        final EventListener<? super T> listener) {
-        this.registerListener(plugin, eventType, Order.DEFAULT, listener);
-    }
-
-    @Override
-    public <T extends Event> void registerListener(final PluginContainer plugin, final Class<T> eventClass, final Order order,
-        final EventListener<? super T> listener) {
-        this.registerListener(plugin, eventClass, order, false, listener);
-    }
-
-    @Override
-    public <T extends Event> void registerListener(final PluginContainer plugin, final TypeToken<T> eventType, final Order order,
-        final EventListener<? super T> listener) {
-        this.registerListener(plugin, eventType, order, false, listener);
-    }
-
-    @Override
-    public <T extends Event> void registerListener(final PluginContainer plugin, final Class<T> eventClass, final Order order,
-        final boolean beforeModifications, final EventListener<? super T> listener) {
-        this.registerListener(plugin, TypeToken.get(eventClass), order, beforeModifications, listener);
-    }
-
-    @Override
-    public <T extends Event> void registerListener(final PluginContainer plugin, final TypeToken<T> eventType, final Order order,
-        final boolean beforeModifications, final EventListener<? super T> listener) {
-        this.register(VanillaEventManager.createRegistration(plugin, eventType.getType(), order, beforeModifications, listener));
+        return this;
     }
 
     private void unregister(final Predicate<RegisteredListener<?>> unregister) {
@@ -353,15 +337,14 @@ public final class VanillaEventManager implements SpongeEventManager {
     }
 
     @Override
-    public void unregisterListeners(final Object listener) {
-        Objects.requireNonNull(listener, "listener");
-        this.unregister(handler -> listener.equals(handler.getHandle()));
-    }
+    public VanillaEventManager unregisterListeners(final Object obj) {
+        if (obj instanceof PluginContainer) {
+            this.unregister(handler -> obj.equals(handler.getPlugin()));
+        } else {
+            this.unregister(handler -> Objects.requireNonNull(obj, "obj").equals(handler.getHandle()));
+        }
 
-    @Override
-    public void unregisterPluginListeners(final PluginContainer plugin) {
-        Objects.requireNonNull(plugin, "plugin");
-        this.unregister(handler -> plugin.equals(handler.getPlugin()));
+        return this;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})
