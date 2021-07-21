@@ -187,7 +187,7 @@ public final class SpongeTransformation implements Transformation {
                 this.origin.equals(((SpongeTransformation) transformation).origin) ? this.origin : Vector3d.ZERO,
                 // We left multiply, as the supplied transformation goes second.
                 spongeTransformation.transformation.mul(this.transformation),
-                spongeTransformation.transformation.mul(this.directionTransformation),
+                spongeTransformation.directionTransformation.mul(this.directionTransformation),
                 this.performRounding,
                 rotation,
                 // These two lines resolve the mirroring of the result. flipx and flipz are after rotation
