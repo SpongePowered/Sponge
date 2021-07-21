@@ -1097,7 +1097,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     return;
                 }
                 final DataTransactionResult transaction = DataTransactionResult.builder()
-                    .replace(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, Ticks.of(this.remainingFireTicks)))
+                    .replace(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, Ticks.of(Math.max(this.remainingFireTicks, 0))))
                     .success(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, Ticks.of(event.fireTicks())))
                     .result(DataTransactionResult.Type.SUCCESS)
                     .build();
