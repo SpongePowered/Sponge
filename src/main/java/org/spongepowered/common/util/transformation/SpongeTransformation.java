@@ -176,7 +176,7 @@ public final class SpongeTransformation implements Transformation {
     public @NonNull Transformation then(final @NonNull Transformation transformation) {
         Objects.requireNonNull(transformation, "transformation");
         if (!(transformation instanceof SpongeTransformation)) {
-            throw new IllegalArgumentException("Transformation must of type SpongeTransformation");
+            throw new IllegalArgumentException("Transformation must be of type SpongeTransformation");
         }
         final SpongeTransformation spongeTransformation = (SpongeTransformation) transformation;
         final Rotation rotation = this.rotation.and(spongeTransformation.rotation);
