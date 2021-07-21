@@ -124,8 +124,7 @@ public final class SpongeTransformation implements Transformation {
 
     @Override
     public boolean initialMirror(final @NonNull Axis axis) {
-        final boolean isRightAngle = this.rotation == Rotations.CLOCKWISE_90.get() || this.rotation == Rotations.COUNTERCLOCKWISE_90.get();
-        if (isRightAngle) {
+        if (this.flipMirror(this.rotation)) {
             if (Objects.requireNonNull(axis, "axis") == Axis.X) {
                 return this.flipz;
             } else if (axis == Axis.Z) {
@@ -140,21 +139,17 @@ public final class SpongeTransformation implements Transformation {
     @Override
     public @NonNull Transformation inverse() {
         final Rotation inverseRotation;
-        final boolean flipMirror;
         if (this.rotation == Rotations.CLOCKWISE_90.get()) {
             inverseRotation = Rotations.COUNTERCLOCKWISE_90.get();
-            flipMirror = true;
         } else if (this.rotation == Rotations.COUNTERCLOCKWISE_90.get()) {
             inverseRotation = Rotations.CLOCKWISE_90.get();
-            flipMirror = true;
         } else {
             inverseRotation = this.rotation;
-            flipMirror = false;
         }
 
         final boolean inverseFlipX;
         final boolean inverseFlipZ;
-        if (flipMirror && (this.flipz != this.flipx)) {
+        if (this.flipMirror(inverseRotation)) {
             inverseFlipX = this.flipz;
             inverseFlipZ = this.flipx;
         } else {
@@ -173,8 +168,51 @@ public final class SpongeTransformation implements Transformation {
     }
 
     @Override
-    public Builder toBuilder() {
+    public @NonNull Builder toBuilder() {
         return new SpongeTransformationBuilder(this);
+    }
+
+    @Override
+    public @NonNull Transformation then(final @NonNull Transformation transformation) {
+        Objects.requireNonNull(transformation, "transformation");
+        if (!(transformation instanceof SpongeTransformation)) {
+            throw new IllegalArgumentException("Transformation must of type SpongeTransformation");
+        }
+        final SpongeTransformation spongeTransformation = (SpongeTransformation) transformation;
+        final Rotation rotation = this.rotation.and(spongeTransformation.rotation);
+        final boolean flipMirror = this.flipMirror(rotation);
+        return new SpongeTransformation(
+                // If the origins are the same, carry it through, else assume zero, we just treat it as
+                // ad-hoc translations at this point.
+                this.origin.equals(((SpongeTransformation) transformation).origin) ? this.origin : Vector3d.ZERO,
+                // We left multiply, as the supplied transformation goes second.
+                spongeTransformation.transformation.mul(this.transformation),
+                spongeTransformation.transformation.mul(this.directionTransformation),
+                this.performRounding,
+                rotation,
+                // These two lines resolve the mirroring of the result. flipx and flipz are after rotation
+                // flips, so we need to decide whether after the next rotation they should flip around.
+                // That's what flipMirror(Rotation) did - if true then we know there must be a flip
+                // and that only one mirror was active.
+                //
+                // The first bracketed term resolves the mirroring after full rotation but before any
+                // mirroring from the second transformation - XOR is used here to ensure that the
+                // mirroring is flipped - if we mirrored on x, and we flip, x will be false, same with
+                // z.
+                //
+                // We then XOR with flipx and flipz on the second transformation - if both flip flags
+                // are on they cancel out (mirror x then x again will give original scaling), but if
+                // one is on, we have a mirror.
+                (this.flipx ^ flipMirror) ^ spongeTransformation.flipx,
+                (this.flipz ^ flipMirror) ^ spongeTransformation.flipz
+        );
+    }
+
+    private boolean flipMirror(final Rotation rotation) {
+        if (this.flipz != this.flipx) {
+            return rotation == Rotations.CLOCKWISE_90.get() || rotation == Rotations.COUNTERCLOCKWISE_90.get();
+        }
+        return false;
     }
 
 }
