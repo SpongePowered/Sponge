@@ -622,7 +622,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     from = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Player;getExitPortal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Z)Ljava/util/Optional;"),
                     to = @At(value = "FIELD", opcode = Opcodes.GETFIELD, target = "Lnet/minecraft/server/level/ServerPlayer;level:Lnet/minecraft/world/level/Level;")
             ),
-            at = @At(value = "INVOKE", target = "Ljava/util/Optional;isPresent()Z"))
+            at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Optional;isPresent()Z"))
     private boolean impl$dontCreatePortalIfItsAlreadyBeenAttempted(final Optional<?> optional) {
         // This prevents a second attempt at a portal creation if the portal
         // creation attempt due to a reposition event failed (this would put it
@@ -736,7 +736,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         this.shadow$getCombatTracker().recheckStatus();
     }
 
-    @Redirect(method = "restoreFrom",
+    @Redirect(method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/level/GameRules;getBoolean(Lnet/minecraft/world/level/GameRules$Key;)Z"))
     private boolean tracker$useKeepFromBridge(final GameRules gameRules, final GameRules.Key<?> key,
@@ -751,7 +751,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         return keep;
     }
 
-    @Inject(method = "restoreFrom", at = @At("HEAD"))
+    @Inject(method = "restoreFrom(Lnet/minecraft/server/level/ServerPlayer;Z)V", at = @At("HEAD"))
     private void impl$copyDataOnRespawn(final net.minecraft.server.level.ServerPlayer oldPlayer, final boolean respawnFromEnd, final CallbackInfo ci) {
         // Copy Sponge data
         if (oldPlayer instanceof DataCompoundHolder) {

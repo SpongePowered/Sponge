@@ -340,7 +340,7 @@ public abstract class ServerScoreboardMixin extends Scoreboard implements Server
         this.bridge$sendToPlayers(packet);
     }
 
-    @Redirect(method = "removePlayerFromTeam",
+    @Redirect(method = "removePlayerFromTeam(Ljava/lang/String;Lnet/minecraft/world/scores/PlayerTeam;)V",
         at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/PlayerList;broadcastAll(Lnet/minecraft/network/protocol/Packet;)V"))
     private void impl$updatePlayersOnPlayerRemoval(final PlayerList manager, final Packet<?> packet) {
         this.bridge$sendToPlayers(packet);
