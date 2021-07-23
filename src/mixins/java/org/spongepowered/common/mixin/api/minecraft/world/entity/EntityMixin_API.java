@@ -352,7 +352,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
         values.add(this.requireValue(Keys.AGE).asImmutable());
         values.add(this.requireValue(Keys.BASE_SIZE).asImmutable());
-        values.add(this.requireValue(Keys.BASE_VEHICLE).asImmutable());
         values.add(this.requireValue(Keys.DISPLAY_NAME).asImmutable());
         values.add(this.requireValue(Keys.EYE_HEIGHT).asImmutable());
         values.add(this.requireValue(Keys.EYE_POSITION).asImmutable());
@@ -381,6 +380,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         values.add(this.requireValue(Keys.VANISH_PREVENTS_TARGETING).asImmutable());
         values.add(this.requireValue(Keys.VELOCITY).asImmutable());
 
+        this.getValue(Keys.BASE_VEHICLE).map(Value::asImmutable).ifPresent(values::add);
         this.getValue(Keys.CREATOR).map(Value::asImmutable).ifPresent(values::add);
         this.getValue(Keys.CUSTOM_NAME).map(Value::asImmutable).ifPresent(values::add);
         this.getValue(Keys.FIRE_TICKS).map(Value::asImmutable).ifPresent(values::add);
