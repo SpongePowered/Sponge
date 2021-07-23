@@ -38,7 +38,7 @@ public abstract class ArrowMixin_API extends AbstractArrowMixin_API implements A
     protected Set<Value.Immutable<?>> api$getVanillaValues() {
         final Set<Value.Immutable<?>> values = super.api$getVanillaValues();
 
-        this.getValue(Keys.POTION_EFFECTS).map(Value::asImmutable).ifPresent(values::add);
+        values.add(this.requireValue(Keys.POTION_EFFECTS).asImmutable());
 
         return values;
     }
