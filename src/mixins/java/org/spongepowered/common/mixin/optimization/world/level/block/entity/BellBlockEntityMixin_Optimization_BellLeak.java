@@ -26,23 +26,26 @@ package org.spongepowered.common.mixin.optimization.world.level.block.entity;
 
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.level.block.entity.BellBlockEntity;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.mixin.core.world.level.block.entity.BlockEntityMixin;
 
 import java.util.List;
 
 @Mixin(BellBlockEntity.class)
-public abstract class BellBlockEntityMixin_Optimization_BellLeak {
+public abstract class BellBlockEntityMixin_Optimization_BellLeak extends BlockEntityMixin {
 
     @Shadow private List<LivingEntity> nearbyEntities;
+    @Shadow private long lastRingTimestamp;
 
-    @Inject(method = "tick", at = @At(value = "FIELD", target = "Lnet/minecraft/world/level/block/entity/BellBlockEntity;resonating:Z", opcode = Opcodes.PUTFIELD, ordinal = 2))
+    @Inject(method = "tick", at = @At(value = "HEAD"))
     private void impl$onStopResonating(final CallbackInfo ci) {
-        this.nearbyEntities.clear();
+        if (this.nearbyEntities != null && this.level.getGameTime() > this.lastRingTimestamp + 60L) {
+            this.nearbyEntities = null;
+        }
     }
 
 }
