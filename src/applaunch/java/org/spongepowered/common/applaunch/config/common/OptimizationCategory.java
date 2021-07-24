@@ -52,6 +52,10 @@ public final class OptimizationCategory {
     public final EigenRedstoneCategory eigenRedstone = new EigenRedstoneCategory();
 
     @Setting(value = "bell-leak-fix")
+    @Comment("Bells will store references of nearby entities when rang.\n"
+            + "The entity list is never cleared, thus leaking memory until\n"
+            + "the chunk is unloaded. This provides an option to\n"
+            + "clear the list when the bell stop resonating.")
     private boolean bellLeak = true;
 
     @Setting("faster-thread-checks")
