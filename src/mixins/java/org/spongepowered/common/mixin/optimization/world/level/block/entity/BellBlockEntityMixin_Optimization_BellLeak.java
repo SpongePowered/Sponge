@@ -36,7 +36,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import java.util.List;
 
 @Mixin(BellBlockEntity.class)
-public abstract class BellBlockEntityMixin_Leak {
+public abstract class BellBlockEntityMixin_Optimization_BellLeak {
 
     @Shadow private List<LivingEntity> nearbyEntities;
 
