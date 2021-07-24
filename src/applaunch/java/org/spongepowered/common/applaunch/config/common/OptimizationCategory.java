@@ -54,8 +54,9 @@ public final class OptimizationCategory {
     @Setting(value = "bell-leak-fix")
     @Comment("Bells will store references of nearby entities when rang.\n"
             + "The entity list is never cleared, thus leaking memory until\n"
-            + "the chunk is unloaded. This provides an option to\n"
-            + "clear the list when the bell stop resonating.")
+            + "the chunk is unloaded. Since the entity list is reused if the\n"
+            + "bell is rang again within 60 ticks, this provides an option to\n"
+            + "clear the list if it is not needed anymore.")
     private boolean bellLeak = true;
 
     @Setting("faster-thread-checks")
