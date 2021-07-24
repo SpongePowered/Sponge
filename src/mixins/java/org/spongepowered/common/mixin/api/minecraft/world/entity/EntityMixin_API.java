@@ -87,7 +87,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     @Shadow public float yRot;
     @Shadow public float xRot;
     @Shadow public boolean removed;
-    @Final @Shadow protected Random random;
+    @Shadow @Final protected Random random;
     @Shadow public int tickCount;
     @Shadow protected UUID uuid;
     @Shadow @Final private net.minecraft.world.entity.EntityType<?> type;
@@ -170,22 +170,23 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         if (!PhaseTracker.SERVER.onSidedThread()) {
             return false;
         }
-        Preconditions.checkNotNull(transform, "The transform cannot be null!");
-        final Vector3d position = transform.position();
-        ((EntityBridge) this).bridge$setPosition(transform.position());
-        this.setRotation(transform.rotation());
-        this.setScale(transform.scale());
-        if (!((LevelBridge) this.shadow$getCommandSenderWorld()).bridge$isFake()) {
-            ((ServerLevel) this.shadow$getCommandSenderWorld()).updateChunkPos((Entity) (Object) this);
+        Objects.requireNonNull(transform, "The transform cannot be null!");
+        if (((EntityBridge) this).bridge$setPosition(transform.position())) {
+            this.setRotation(transform.rotation());
+            this.setScale(transform.scale());
+            if (!((LevelBridge) this.shadow$getCommandSenderWorld()).bridge$isFake()) {
+                ((ServerLevel) this.shadow$getCommandSenderWorld()).updateChunkPos((Entity) (Object) this);
+            }
+            return true;
         }
 
-        return true;
+        return false;
     }
 
     @Override
     public boolean transferToWorld(final org.spongepowered.api.world.server.ServerWorld world, final Vector3d position) {
-        Preconditions.checkNotNull(world, "World was null!");
-        Preconditions.checkNotNull(position, "Position was null!");
+        Objects.requireNonNull(world, "World was null!");
+        Objects.requireNonNull(position, "Position was null!");
         return this.setLocation(ServerLocation.of(world, position));
     }
 
@@ -194,16 +195,16 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         return new Vector3d(this.xRot, this.yRot, 0);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void setRotation(final Vector3d rotation) {
-        Preconditions.checkNotNull(rotation, "Rotation was null!");
+        Objects.requireNonNull(rotation, "Rotation was null!");
         if (this.isRemoved()) {
             return;
         }
-        if (((Entity) (Object) this) instanceof ServerPlayer && ((ServerPlayer) (Entity) (Object) this).connection != null) {
+        if (((Entity) (Object) this) instanceof ServerPlayer && ((ServerPlayer) (Object) this).connection != null) {
             // Force an update, this also set the rotation in this entity
-            ((ServerPlayer) (Entity) (Object) this).connection.teleport(this.position().x(), this.position().y(),
+            ((ServerPlayer) (Object) this).connection.teleport(this.position().x(), this.position().y(),
                     this.position().z(), (float) rotation.y(), (float) rotation.x(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class));
         } else {
             if (!this.shadow$getCommandSenderWorld().isClientSide) { // We can't set the rotation update on client worlds.

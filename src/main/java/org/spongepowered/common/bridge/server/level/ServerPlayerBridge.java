@@ -29,6 +29,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.network.Connection;
 import net.minecraft.network.protocol.game.ClientboundRespawnPacket;
 import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
@@ -43,6 +44,7 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.common.bridge.network.ConnectionBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
+import org.spongepowered.math.vector.Vector3d;
 
 import java.util.Locale;
 import java.util.Set;
@@ -107,7 +109,5 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
     }
 
     boolean bridge$kick(final Component message);
-
-    Entity bridge$performGameWinLogic();
 
 }

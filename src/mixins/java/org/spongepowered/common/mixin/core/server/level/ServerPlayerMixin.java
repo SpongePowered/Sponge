@@ -214,74 +214,26 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    public boolean bridge$setLocation(final ServerLocation location) {
-        if (this.removed) {
-            return false;
+    protected final boolean impl$setLocation(final boolean isChangeOfWorld, final ServerLevel originalDestination,
+            final ServerLevel destinationWorld, final Vector3d destinationPosition) {
+
+        final net.minecraft.server.level.ServerPlayer player = ((net.minecraft.server.level.ServerPlayer) (Object) this);
+        player.stopRiding();
+        if (player.isSleeping()) {
+            player.stopSleepInBed(true, true);
         }
 
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(SpongeCommon.activePlugin());
-            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+        final ChunkPos chunkPos = VecHelper.toChunkPos(Sponge.server().chunkLayout().forceToChunk(destinationPosition.toInt()));
+        destinationWorld.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, player.getId());
 
-            ServerLevel destinationWorld = (net.minecraft.server.level.ServerLevel) location.world();
-
-            Vector3d toPosition = location.position();
-
-            if (this.shadow$getLevel() != destinationWorld) {
-                final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.currentCause(),
-                        (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getLevel(),
-                        location.world(), location.world());
-                if (SpongeCommon.post(event)) {
-                    return false;
-                }
-
-                final ChangeEntityWorldEvent.Reposition repositionEvent =
-                        SpongeEventFactory.createChangeEntityWorldEventReposition(frame.currentCause(),
-                                (org.spongepowered.api.entity.Entity) this, (org.spongepowered.api.world.server.ServerWorld) this.shadow$getLevel(),
-                                VecHelper.toVector3d(this.shadow$position()), location.position(), event.originalDestinationWorld(),
-                                location.position(), event.destinationWorld());
-
-                if (SpongeCommon.post(repositionEvent)) {
-                    return false;
-                }
-
-                destinationWorld = (net.minecraft.server.level.ServerLevel) event.destinationWorld();
-
-                toPosition = repositionEvent.destinationPosition();
-            } else {
-                if (ShouldFire.MOVE_ENTITY_EVENT) {
-                    final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
-                            (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
-                            location.position(), location.position());
-                    if (SpongeCommon.post(event)) {
-                        return false;
-                    }
-
-                    toPosition = event.destinationPosition();
-                }
-            }
-
-            ((net.minecraft.server.level.ServerPlayer) (Object) this).stopRiding();
-
-            if (((net.minecraft.server.level.ServerPlayer) (Object) this).isSleeping()) {
-                ((net.minecraft.server.level.ServerPlayer) (Object) this).stopSleepInBed(true, true);
-            }
-
-            final ChunkPos chunkPos = new ChunkPos((int) toPosition.x() >> 4, (int) toPosition.z() >> 4);
-            destinationWorld.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((net.minecraft.server.level.ServerPlayer) (Object) this).getId());
-
-            if (this.shadow$getLevel() != destinationWorld) {
-                this.shadow$absMoveTo(toPosition.x(), toPosition.y(), toPosition.z(), this.yRot, this.xRot);
-
-                EntityUtil.performPostChangePlayerWorldLogic((net.minecraft.server.level.ServerPlayer) (Object) this, this.shadow$getLevel(),
-                        (net.minecraft.server.level.ServerLevel) location.world(), destinationWorld, false);
-            } else {
-                this.connection.teleport(toPosition.x(), toPosition.y(), toPosition.z(), this.yRot, this.xRot,
-                        new HashSet<>());
-                this.connection.resetPosition();
-            }
+        if (isChangeOfWorld) {
+            this.shadow$absMoveTo(destinationPosition.x(), destinationPosition.y(), destinationPosition.z(), this.yRot, this.xRot);
+            EntityUtil.performPostChangePlayerWorldLogic(player, this.shadow$getLevel(), destinationWorld, destinationWorld, false);
+        } else {
+            this.connection.teleport(destinationPosition.x(), destinationPosition.y(), destinationPosition.z(), this.yRot, this.xRot,
+                    new HashSet<>());
+            this.connection.resetPosition();
         }
-
         return true;
     }
 
@@ -439,19 +391,13 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             }
 
             if (world == player.level) {
-                if (ShouldFire.MOVE_ENTITY_EVENT) {
-                    final MoveEntityEvent posEvent = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
-                            (org.spongepowered.api.entity.Entity) player, VecHelper.toVector3d(player.position()),
-                            new Vector3d(x, y, z), new Vector3d(x, y, z));
-
-                    if (SpongeCommon.post(posEvent)) {
-                        return;
-                    }
-
-                    actualX = posEvent.destinationPosition().x();
-                    actualY = posEvent.destinationPosition().y();
-                    actualZ = posEvent.destinationPosition().z();
+                final @Nullable Vector3d destination = this.impl$fireMoveEvent(PhaseTracker.SERVER, new Vector3d(x, y, z));
+                if (destination == null) {
+                    return;
                 }
+                actualX = destination.x();
+                actualY = destination.y();
+                actualZ = destination.z();
 
                 if (ShouldFire.ROTATE_ENTITY_EVENT) {
                     final RotateEntityEvent rotateEvent = SpongeEventFactory.createRotateEntityEvent(frame.currentCause(),
@@ -519,13 +465,13 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    public void bridge$setPlayerChangingDimensions() {
+    protected final void impl$setChangingDimension() {
         this.isChangingDimension = true;
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Entity bridge$performGameWinLogic() {
+    protected final Entity impl$performGameWinLogic() {
         this.shadow$unRide();
         this.shadow$getLevel().removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this);
         if (!this.wonGame) {
@@ -538,12 +484,12 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    public void bridge$playerPrepareForPortalTeleport(final ServerLevel currentWorld, final ServerLevel targetWorld) {
-        final LevelData iworldinfo = targetWorld.getLevelData();
+    protected final void impl$prepareForPortalTeleport(final ServerLevel currentWorld, final ServerLevel targetWorld) {
+        final LevelData levelData = targetWorld.getLevelData();
         this.connection.send(new ClientboundRespawnPacket(targetWorld.dimensionType(), targetWorld.dimension(),
                 BiomeManager.obfuscateSeed(targetWorld.getSeed()), this.gameMode.getGameModeForPlayer(),
                 this.gameMode.getPreviousGameModeForPlayer(), targetWorld.isDebug(), targetWorld.isFlat(), true));
-        this.connection.send(new ClientboundChangeDifficultyPacket(iworldinfo.getDifficulty(), iworldinfo.isDifficultyLocked()));
+        this.connection.send(new ClientboundChangeDifficultyPacket(levelData.getDifficulty(), levelData.isDifficultyLocked()));
         final PlayerList playerlist = this.server.getPlayerList();
         playerlist.sendPlayerPermissionLevel((net.minecraft.server.level.ServerPlayer) (Object) this);
         currentWorld.removePlayerImmediately((net.minecraft.server.level.ServerPlayer) (Object) this);
@@ -552,7 +498,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void bridge$validateEntityAfterTeleport(final Entity e, final PlatformTeleporter platformTeleporter) {
+    protected final void impl$validateEntityAfterTeleport(final Entity e, final PlatformTeleporter platformTeleporter) {
         if (e != (Object) this) {
             throw new IllegalArgumentException(String.format("Teleporter %s "
                     + "did not return the expected player entity: got %s, expected PlayerEntity %s", platformTeleporter, e, this));
@@ -561,7 +507,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public Entity bridge$portalRepositioning(final boolean createEndPlatform,
+    protected final Entity impl$portalRepositioning(final boolean createEndPlatform,
             final ServerLevel serverworld,
             final ServerLevel targetWorld,
             final PortalInfo portalinfo) {
@@ -590,7 +536,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    public void bridge$postPortalForceChangeTasks(final Entity entity, final net.minecraft.server.level.ServerLevel targetWorld,
+    protected final void impl$postPortalForceChangeTasks(final Entity entity, final net.minecraft.server.level.ServerLevel targetWorld,
             final boolean isNetherPortal) {
         // Standard vanilla processing
         this.gameMode.setLevel(targetWorld);
@@ -871,7 +817,7 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
                     final Cause currentCause = Sponge.server().causeStackManager().currentCause();
                     final BlockSnapshot snapshot = ((ServerWorld) this.level).createSnapshot(param0.getX(), param0.getY(), param0.getZ());
                     if (Sponge.eventManager().post(SpongeEventFactory.createSleepingEventFailed(currentCause, snapshot, (Living) this))) {
-                        Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
+                        final Either<Player.BedSleepingProblem, Unit> var5 = super.shadow$startSleepInBed(param0).ifRight((param0x) -> {
                             this.shadow$awardStat(Stats.SLEEP_IN_BED);
                             CriteriaTriggers.SLEPT_IN_BED.trigger((net.minecraft.server.level.ServerPlayer) (Object) this);
                         });
