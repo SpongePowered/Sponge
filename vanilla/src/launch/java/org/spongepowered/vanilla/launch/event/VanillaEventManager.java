@@ -304,7 +304,7 @@ public final class VanillaEventManager implements SpongeEventManager {
     public <E extends Event> EventManager registerListener(final EventListenerRegistration<E> registration) {
         Objects.requireNonNull(registration, "registration");
         final RegisteredListener<E> handler = VanillaEventManager.createRegistration(registration.plugin(),
-                registration.eventType().getType(), registration.order(), registration.beforeModifications(), registration.listener());
+                registration.eventType(), registration.order(), registration.beforeModifications(), registration.listener());
         this.register(handler);
         return this;
     }

@@ -31,17 +31,18 @@ import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.plugin.PluginContainer;
 
+import java.lang.reflect.Type;
 import java.util.Objects;
 
-public final class SpongeEventListenerRegistration<E extends Event> implements EventListenerRegistration<E> {
+public final class SpongeEventListenerRegistration<T extends Event> implements EventListenerRegistration<T> {
 
-    private final TypeToken<E> eventType;
+    private final Type eventType;
     private final PluginContainer plugin;
     private final Order order;
     private final boolean beforeModifications;
-    private final EventListener<? super E> listener;
+    private final EventListener<? super T> listener;
 
-    private SpongeEventListenerRegistration(final BuilderImpl<E> builder) {
+    private SpongeEventListenerRegistration(final BuilderImpl<T> builder) {
         this.eventType = builder.eventType;
         this.plugin = builder.plugin;
         this.order = builder.order;
@@ -50,7 +51,7 @@ public final class SpongeEventListenerRegistration<E extends Event> implements E
     }
 
     @Override
-    public TypeToken<E> eventType() {
+    public Type eventType() {
         return this.eventType;
     }
 
@@ -70,56 +71,56 @@ public final class SpongeEventListenerRegistration<E extends Event> implements E
     }
 
     @Override
-    public EventListener<? super E> listener() {
+    public EventListener<? super T> listener() {
         return this.listener;
     }
 
     public static final class FactoryImpl implements EventListenerRegistration.Factory {
 
         @Override
-        public <E extends Event> Builder<E> builder(final TypeToken<E> eventType) {
+        public <T extends Event> Builder<T> builder(final TypeToken<T> eventType) {
             return new BuilderImpl<>(Objects.requireNonNull(eventType, "eventType"));
         }
     }
 
-    public static final class BuilderImpl<E extends Event> implements EventListenerRegistration.Builder<E> {
+    public static final class BuilderImpl<T extends Event> implements EventListenerRegistration.Builder<T> {
 
-        final TypeToken<E> eventType;
+        final Type eventType;
         PluginContainer plugin;
         Order order;
         boolean beforeModifications;
-        EventListener<? super E> listener;
+        EventListener<? super T> listener;
 
-        private BuilderImpl(final TypeToken<E> eventType) {
-            this.eventType = eventType;
+        private BuilderImpl(final TypeToken<T> eventType) {
+            this.eventType = eventType.getType();
         }
 
         @Override
-        public Builder<E> plugin(final PluginContainer plugin) {
+        public Builder<T> plugin(final PluginContainer plugin) {
             this.plugin = Objects.requireNonNull(plugin, "plugin");
             return this;
         }
 
         @Override
-        public Builder<E> order(final Order order) {
+        public Builder<T> order(final Order order) {
             this.order = order;
             return this;
         }
 
         @Override
-        public Builder<E> beforeModifications(final boolean beforeModifications) {
+        public Builder<T> beforeModifications(final boolean beforeModifications) {
             this.beforeModifications = beforeModifications;
             return this;
         }
 
         @Override
-        public Builder<E> listener(final EventListener<? super E> listener) {
+        public Builder<T> listener(final EventListener<? super T> listener) {
             this.listener = Objects.requireNonNull(listener, "listener");
             return this;
         }
 
         @Override
-        public Builder<E> reset() {
+        public Builder<T> reset() {
             this.plugin = null;
             this.order = Order.DEFAULT;
             this.beforeModifications = false;
@@ -128,7 +129,7 @@ public final class SpongeEventListenerRegistration<E extends Event> implements E
         }
 
         @Override
-        public EventListenerRegistration<E> build() {
+        public EventListenerRegistration<T> build() {
             Objects.requireNonNull(this.plugin, "plugin");
             Objects.requireNonNull(this.listener, "listener");
 
