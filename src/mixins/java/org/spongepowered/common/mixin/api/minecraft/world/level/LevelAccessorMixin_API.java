@@ -63,19 +63,18 @@ import java.util.UUID;
 
 @Mixin(LevelAccessor.class)
 @Implements(@Interface(iface = WorldLike.class, prefix = "worldLike$", remap = Remap.NONE))
-public interface LevelAccessorMixin_API {
+public interface LevelAccessorMixin_API<P extends WorldLike<P>> extends WorldLike<P> {
 
     //@formatter:off
     @Shadow boolean shadow$hasChunk(int p_217354_1_, int p_217354_2_);
     @Shadow Random shadow$getRandom();
     @Shadow LevelData shadow$getLevelData();
-    @Shadow ChunkSource shadow$getChunkSource();
     //@formatter:on
 
     // MutableBiomeVolume
 
     @SuppressWarnings({"ConstantConditions"})
-    default boolean worldLike$setBiome(final int x, final int y, final int z, final org.spongepowered.api.world.biome.Biome biome) {
+    default boolean setBiome(final int x, final int y, final int z, final org.spongepowered.api.world.biome.Biome biome) {
         Objects.requireNonNull(biome, "biome");
 
         final ChunkAccess iChunk = ((LevelReader) this).getChunk(new BlockPos(x, y, z));
@@ -88,29 +87,29 @@ public interface LevelAccessorMixin_API {
 
     // Volume
 
-    default Vector3i worldLike$blockMin() {
+    default Vector3i min() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of LevelAccessor that isn't part of Sponge API: " + this.getClass());
     }
 
-    default Vector3i worldLike$blockMax() {
+    default Vector3i max() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of LevelAccessor that isn't part of Sponge API: " + this.getClass());
     }
 
-    default Vector3i worldLike$blockSize() {
+    default Vector3i size() {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of LevelAccessor that isn't part of Sponge API: " + this.getClass());
     }
 
-    default boolean worldLike$containsBlock(final int x, final int y, final int z) {
+    default boolean contains(final int x, final int y, final int z) {
         return this.shadow$hasChunk(x >> 4, z >> 4);
     }
 
-    default boolean worldLike$isAreaAvailable(final int x, final int y, final int z) {
+    default boolean isAreaAvailable(final int x, final int y, final int z) {
         return this.shadow$hasChunk(x >> 4, z >> 4);
     }
 
     // EntityVolume
 
-    default Optional<Entity> worldLike$entity(final UUID uuid) {
+    default Optional<Entity> entity(final UUID uuid) {
         throw new UnsupportedOperationException("Unfortunately, you've found an extended class of LevelAccessor that isn't part of Sponge API: " + this.getClass());
     }
 
@@ -123,22 +122,22 @@ public interface LevelAccessorMixin_API {
 
     // WorldLike
 
-    default Difficulty worldLike$difficulty() {
+    default Difficulty difficulty() {
         return (Difficulty) (Object) this.shadow$getLevelData().getDifficulty();
     }
 
-    default Collection<Entity> worldLike$spawnEntities(final Iterable<? extends Entity> entities) {
+    default Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
         Objects.requireNonNull(entities, "entities");
         return EntityUtil.spawnEntities(entities, x -> true, e -> e.level.addFreshEntity(e));
     }
 
-    default boolean worldLike$spawnEntity(final Entity entity) {
+    default boolean spawnEntity(final Entity entity) {
         return ((LevelAccessor) this).addFreshEntity((net.minecraft.world.entity.Entity) Objects.requireNonNull(entity, "entity"));
     }
 
     // MutableBlockVolume
 
-    default boolean worldLike$setBlock(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState blockState,
+    default boolean setBlock(final int x, final int y, final int z, final org.spongepowered.api.block.BlockState blockState,
             final BlockChangeFlag flag) {
         Objects.requireNonNull(blockState, "blockState");
         Objects.requireNonNull(flag, "flag");
