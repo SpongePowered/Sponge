@@ -22,26 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.client.main;
+package org.spongepowered.forge.applaunch.loading.moddiscovery.library;
 
-import net.minecraft.client.main.Main;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.plugin.PluginPlatform;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.forge.launch.ForgeLaunch;
+import net.minecraftforge.forgespi.locating.IModFile;
+import net.minecraftforge.forgespi.locating.IModLocator;
+import net.minecraftforge.forgespi.locating.ModFileFactory;
 
-@Mixin(Main.class)
-public abstract class MainMixin_Forge {
+import java.nio.file.Path;
 
-    @Inject(method = "<clinit>", at = @At("RETURN"))
-    private static void forge$initLaunch(final CallbackInfo ci) {
-        final PluginPlatform pluginPlatform = AppLaunch.pluginPlatform();
-        final ForgeLaunch launch = new ForgeLaunch(pluginPlatform);
-        Launch.setInstance(launch);
+public final class LibraryModFileFactory implements ModFileFactory {
+
+    public static final LibraryModFileFactory INSTANCE = new LibraryModFileFactory();
+
+    @Override
+    public IModFile build(final Path path, final IModLocator locator, final ModFileInfoParser parser) {
+        return new LibraryModFile(path, locator, parser);
     }
-
 }

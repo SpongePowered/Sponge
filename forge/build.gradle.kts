@@ -35,6 +35,7 @@ loom {
         configureEach {
             if (JavaVersion.current().isJava11Compatible) {
                 vmArgs(
+                        "-Dfabric.log.level=debug",
                         "--add-exports=java.base/sun.security.util=ALL-UNNAMED", // ModLauncher
                         "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
                 )

@@ -22,50 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.fml;
+package org.spongepowered.forge.applaunch.loading.moddiscovery.library;
 
-import net.minecraftforge.fml.ModContainer;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.metadata.PluginMetadata;
+import net.minecraftforge.forgespi.language.IModFileInfo;
+import net.minecraftforge.forgespi.locating.IModFile;
+import net.minecraftforge.forgespi.locating.ModFileFactory;
 
-import java.io.InputStream;
-import java.net.URL;
-import java.nio.file.Path;
-import java.util.Optional;
+/**
+ * This isn't completely needed but removes a silly warning FML does when a LIBRARY does
+ * not contain a mods.toml. Why???
+ */
+public final class LibraryModFileInfoParser implements ModFileFactory.ModFileInfoParser {
 
-@Mixin(ModContainer.class)
-public abstract class ModContainerMixin_Forge_SPI implements PluginContainer {
+    public static final LibraryModFileInfoParser INSTANCE = new LibraryModFileInfoParser();
 
     @Override
-    public PluginMetadata metadata() {
-        // TODO IModInfo -> PluginMetadata
+    public IModFileInfo build(final IModFile file) {
         return null;
-    }
-
-    @Override
-    public Path path() {
-        return null;
-    }
-
-    @Override
-    public Logger logger() {
-        return null;
-    }
-
-    @Override
-    public Object instance() {
-        return null;
-    }
-
-    @Override
-    public Optional<URL> locateResource(URL relative) {
-        return Optional.empty();
-    }
-
-    @Override
-    public Optional<InputStream> openResource(URL relative) {
-        return PluginContainer.super.openResource(relative);
     }
 }

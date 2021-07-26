@@ -22,21 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.discovery;
+package org.spongepowered.forge.applaunch.loading.moddiscovery;
 
+import cpw.mods.gross.Java9ClassLoaderUtil;
+import cpw.mods.modlauncher.Launcher;
+import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileLocator;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.forgespi.locating.IModFile;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.AppLaunch;
+import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileFactory;
+import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileInfoParser;
+import org.spongepowered.forge.applaunch.plugin.ForgePluginPlatform;
 
+import java.net.URI;
 import java.net.URISyntaxException;
+import java.net.URL;
 import java.nio.file.Path;
 import java.nio.file.Paths;
-import java.util.Collections;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.function.Consumer;
 
-public class AddSpongeBackToClasspathModLocator extends AbstractJarFileLocator {
+public final class ForgeBootstrap extends AbstractJarFileLocator {
     private static final Path INVALID_PATH = Paths.get("This", "Path", "Should", "Never", "Exist", "Because", "That", "Would", "Be", "Stupid", "CON", "AUX", "/dev/null"); // via ModDiscoverer, thanks :)
 
     // Paths that will not be loaded through the TCL
@@ -47,44 +58,79 @@ public class AddSpongeBackToClasspathModLocator extends AbstractJarFileLocator {
         "org/spongepowered/forge/launch/plugin/"
     };
 
+    private final Logger logger = LogManager.getLogger();
+
     @Override
     public List<IModFile> scanMods() {
+        // Add SpongeForge itself back as a Mod since FML dictates that any jars that have locators are *not* mods
+        // TODO I think the actual fix here is to ship the locator code as a jar in jar...
+        final List<IModFile> jars = new ArrayList<>();
+
         try {
             final ModFile file = ModFile.newFMLInstance(Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI()), this);
             this.modJars.compute(file, (mf, fs) -> this.createFileSystem(mf));
-            return Collections.singletonList(file);
+            jars.add(file);
         } catch (final URISyntaxException ex) {
             throw new RuntimeException(ex);
         }
+
+        // Add Sponge-specific libraries
+        if (!FMLEnvironment.production) {
+            for (final URL url : Java9ClassLoaderUtil.getSystemClassPathURLs()) {
+                try {
+                    final URI uri = url.toURI();
+                    final Path path = Paths.get(uri);
+                    if (this.isLibrary(path)) {
+                        final IModFile file = LibraryModFileFactory.INSTANCE.build(path, this, LibraryModFileInfoParser.INSTANCE);
+                        this.modJars.compute(file, (mf, fs) -> this.createFileSystem(mf));
+                        jars.add(file);
+                    }
+                } catch (final Exception ignore) {
+                }
+            }
+        } else {
+            // TODO We need to pull down our specific libraries (ala SV's installer), put into /libraries, then inject them into the TCL
+        }
+
+        return jars;
     }
 
     @Override
     public String name() {
-        return "sponge-injector";
+        return "spongeforge";
     }
 
     @Override
-    public Path findPath(final IModFile modFile, final String... path) {
-        final Path ret = super.findPath(modFile, path);
-        if (this.isExcluded(ret)) {
-            return AddSpongeBackToClasspathModLocator.INVALID_PATH;
-        } else {
-            return ret;
+    public Path findPath(IModFile modFile, String... path) {
+        final Path foundPath = super.findPath(modFile, path);
+        if (this.isTCLExcluded(foundPath)) {
+            return ForgeBootstrap.INVALID_PATH;
         }
+
+        return foundPath;
     }
 
     @Override
     public void scanFile(final IModFile file, final Consumer<Path> pathConsumer) {
         super.scanFile(file, path -> {
-            if (!this.isExcluded(path)) {
+            if (this.isTCLExcluded(path)) {
+                this.logger.error("Excluded: {}", path.getFileName().toString());
+            } else {
                 pathConsumer.accept(path);
             }
         });
     }
 
-    private boolean isExcluded(final Path excluded) {
+    @Override
+    public void initArguments(final Map<String, ?> arguments) {
+        final ForgePluginPlatform platform = new ForgePluginPlatform(Launcher.INSTANCE.environment());
+        AppLaunch.setPluginPlatform(platform);
+        platform.init();
+    }
+
+    private boolean isTCLExcluded(final Path excluded) {
         final String path = excluded.toString();
-        for (final String test : AddSpongeBackToClasspathModLocator.EXCLUDED_PATHS) {
+        for (final String test : ForgeBootstrap.EXCLUDED_PATHS) {
             if (path.startsWith(test)) {
                 return true;
             }
@@ -92,7 +138,11 @@ public class AddSpongeBackToClasspathModLocator extends AbstractJarFileLocator {
         return false;
     }
 
-    @Override
-    public void initArguments(final Map<String, ?> arguments) {
+    /**
+     * This is so bad...
+     */
+    private boolean isLibrary(final Path path) {
+        final String completePath = path.toString();
+        return completePath.contains("kyori");
     }
 }
