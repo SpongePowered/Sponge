@@ -22,26 +22,34 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.client.main;
+package org.spongepowered.forge;
 
-import net.minecraft.client.main.Main;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.common.applaunch.plugin.PluginPlatform;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.forge.launch.ForgeLaunch;
+import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 
-@Mixin(Main.class)
-public abstract class MainMixin_Forge {
+@Mod("spongeforge")
+public final class SpongeForge {
 
-    @Inject(method = "<clinit>", at = @At("RETURN"))
-    private static void forge$initLaunch(final CallbackInfo ci) {
-        final PluginPlatform pluginPlatform = AppLaunch.pluginPlatform();
-        final ForgeLaunch launch = new ForgeLaunch(pluginPlatform);
-        Launch.setInstance(launch);
+    private static final Logger LOGGER = LogManager.getLogger();
+
+    public SpongeForge() {
+        final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        // modBus: add all FML events with it
+        modBus.addListener(this::commonSetup);
+
+        // annotation events, for non-FML things
+        MinecraftForge.EVENT_BUS.register(this);
+    }
+
+    private void commonSetup(final FMLCommonSetupEvent event) {
+        // common setup
+        SpongeForge.LOGGER.info("Setting up SpongeForge");
     }
 
 }

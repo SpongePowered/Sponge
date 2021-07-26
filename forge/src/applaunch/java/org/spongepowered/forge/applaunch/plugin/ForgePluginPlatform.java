@@ -29,28 +29,27 @@ import cpw.mods.modlauncher.api.IEnvironment;
 import net.minecraftforge.fml.loading.FMLPaths;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
-public final class ForgeAppPluginPlatform implements PluginPlatform {
+public final class ForgePluginPlatform implements PluginPlatform {
 
     private final Environment environment;
     private final Logger logger;
     private final List<Path> pluginDirectories;
 
-    public ForgeAppPluginPlatform(final Environment environment) {
+    public ForgePluginPlatform(final Environment environment) {
         this.environment = environment;
         this.logger = LogManager.getLogger("App Launch");
         this.pluginDirectories = new ArrayList<>();
 
         this.pluginDirectories.add(FMLPaths.MODSDIR.get());
-
-        final String s = this.getClass().getClassLoader().toString();
-        // TODO We do not have all the arguments passed to Forge from CLI...How do we correctly handle knowing the plugins directory??
     }
 
     @Override
@@ -80,11 +79,15 @@ public final class ForgeAppPluginPlatform implements PluginPlatform {
 
     @Override
     public List<Path> pluginDirectories() {
-        return this.pluginDirectories;
+        return Collections.unmodifiableList(this.pluginDirectories);
     }
 
     @Override
     public void setPluginDirectories(final List<Path> pluginDirectories) {
         // NOOP
+    }
+
+    public void init() {
+        this.pluginDirectories.add(Paths.get(SpongeConfigs.getCommon().get().general.pluginsDir.getParsed()));
     }
 }
