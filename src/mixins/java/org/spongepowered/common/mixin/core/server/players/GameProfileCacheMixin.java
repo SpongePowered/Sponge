@@ -55,9 +55,11 @@ import net.minecraft.server.players.GameProfileCache;
 @Mixin(GameProfileCache.class)
 public abstract class GameProfileCacheMixin implements GameProfileCacheBridge {
 
+    // @formatter:off
     @Shadow public void shadow$add(final com.mojang.authlib.GameProfile profile) {}
     @Shadow @Final private Map<UUID, GameProfileCache_GameProfileInfoAccessor> profilesByUUID;
     @Shadow @Final private Map<String, GameProfileCache_GameProfileInfoAccessor> profilesByName;
+    // @formatter:on
 
     private boolean impl$canSave = false;
 
