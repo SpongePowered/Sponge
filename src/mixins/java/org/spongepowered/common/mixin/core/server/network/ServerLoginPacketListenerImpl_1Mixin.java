@@ -37,7 +37,7 @@ import org.spongepowered.common.bridge.server.network.ServerLoginPacketListenerI
 @Mixin(targets = "net/minecraft/server/network/ServerLoginPacketListenerImpl$1")
 public abstract class ServerLoginPacketListenerImpl_1Mixin extends Thread {
 
-    @Shadow(aliases = {"this$0"}, remap = false)
+    @Shadow(aliases = {"this$0", "field_14176"}, remap = false)
     @Final
     private ServerLoginPacketListenerImpl handler;
 

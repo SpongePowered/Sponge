@@ -1,0 +1,51 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration status="warn">
+  <Properties>
+    <Property name="sponge.exceptionFormat">StyleMapName=Spock Name=reset,red NameMessageSeparator=red Message=red StackTraceElement.ClassName=red StackTraceElement.ClassMethodSeparator=red,faint StackTraceElement.MethodName=yellow StackTraceElement.NativeMethod=yellow</Property>
+    <Property name="sponge.exceptionFiltered">jdk.internal,sun.reflect</Property>
+  </Properties>
+  <Appenders>
+    <TerminalConsole name="SysOut" ignoreExceptions="false">
+      <PatternLayout>
+        <!-- In production, filter stack trace elements from JDK internals -->
+        <LoggerNamePatternSelector
+                defaultPattern="[%d{HH:mm:ss}] [%t/%highlight{%level}] [%c{1.3}%notEmpty{/%markerSimpleName}]: %highlightError{%msg%n%xEx{filters(${sponge.exceptionFiltered})}{ansi(${sponge.exceptionFormat})}}">
+          <!-- Use a simplified pattern for Vanilla log messages -->
+          <PatternMatch key="net.minecraft.,com.mojang."
+                        pattern="[%d{HH:mm:ss}] [%t/%highlight{%level}]: %highlightError{%msg%n%xEx{filters(${sponge.exceptionFiltered})}{ansi(${sponge.exceptionFormat})}}"/>
+        </LoggerNamePatternSelector>
+      </PatternLayout>
+    </TerminalConsole>
+    <RollingRandomAccessFile name="File" fileName="logs/latest.log" filePattern="logs/%d{yyyy-MM-dd}-%i.log.gz" immediateFlush="false">
+      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level]: %msg%n"/>
+      <Policies>
+        <TimeBasedTriggeringPolicy/>
+        <OnStartupTriggeringPolicy/>
+      </Policies>
+    </RollingRandomAccessFile>
+    <RollingRandomAccessFile name="DebugFile" fileName="logs/debug.log" filePattern="logs/debug-%i.log.gz" immediateFlush="false">
+      <PatternLayout pattern="[%d{ddMMMyyyy HH:mm:ss}] [%t/%level] [%c{1.3}/%markerSimpleName]: %msg%n"/>
+      <Policies>
+        <OnStartupTriggeringPolicy/>
+        <SizeBasedTriggeringPolicy size="200MB"/>
+      </Policies>
+      <DefaultRolloverStrategy max="5" fileIndex="min"/>
+    </RollingRandomAccessFile>
+  </Appenders>
+  <Loggers>
+    <!-- Log Vanilla loggers at INFO to suppress some debug messages -->
+    <Logger name="net.minecraft" level="INFO"/>
+    <Logger name="com.mojang" level="INFO"/>
+
+    <Root level="DEBUG">
+      <AppenderRef ref="SysOut" level="INFO"/>
+      <AppenderRef ref="File" level="INFO"/>
+      <AppenderRef ref="DebugFile" level="DEBUG"/>
+    </Root>
+  </Loggers>
+  <filters>
+    <MarkerFilter marker="LAUNCHPLUGIN" onMatch="DENY" onMismatch="NEUTRAL"/>
+    <MarkerFilter marker="PACKET_SENT" onMatch="DENY" onMismatch="NEUTRAL"/>
+    <MarkerFilter marker="PACKET_RECEIVED" onMatch="DENY" onMismatch="NEUTRAL"/>
+  </filters>
+</Configuration>

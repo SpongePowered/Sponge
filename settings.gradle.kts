@@ -2,9 +2,14 @@ import org.spongepowered.gradle.vanilla.repository.MinecraftRepositoryExtension
 
 pluginManagement {
     repositories {
+        mavenLocal()
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
+        maven("https://maven.fabricmc.net/") {
+            name = "Fabric"
+        }
+        gradlePluginPortal()
     }
 
     plugins {
@@ -16,11 +21,14 @@ pluginManagement {
         id("implementation-structure")
         id("org.jetbrains.gradle.plugin.idea-ext") version "1.0"
         id("com.github.ben-manes.versions") version "0.39.0"
+        id("fabric-loom") version "0.9-SNAPSHOT"
+        id("com.github.logicfan.gradle.shadow.json-transformer") version "1.0.1"
     }
 }
 
 plugins {
     id("org.spongepowered.gradle.vanilla")
+    id("fabric-loom")
 }
 
 dependencyResolutionManagement {
@@ -29,6 +37,7 @@ dependencyResolutionManagement {
         maven("https://repo.spongepowered.org/repository/maven-public/") {
             name = "sponge"
         }
+        mavenLocal()
     }
 }
 
@@ -49,6 +58,9 @@ includeBuild("SpongeAPI") {
 include(":SpongeVanilla")
 project(":SpongeVanilla").projectDir = file("vanilla")
 include("generator")
+
+include(":SpongeFabric")
+project(":SpongeFabric").projectDir = file("fabric")
 
 val testPlugins = file("testplugins.settings.gradle.kts")
 if (testPlugins.exists()) {

@@ -1,0 +1,16 @@
+{
+    "required": true,
+    "parent": "mixins.sponge.parent.json",
+    "package": "org.spongepowered.fabric.mixin.api",
+    "priority": 1300,
+    "server": [],
+    "mixins": [
+        "minecraft.server.MinecraftServerMixin_Vanilla_API"
+    ],
+    "client": [
+        "minecraft.client.MinecraftMixin_Vanilla_API"
+    ],
+    "overwrites": {
+        "conformVisibility": true
+    }
+}

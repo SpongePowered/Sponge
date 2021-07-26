@@ -230,8 +230,8 @@ allprojects {
         resolutionStrategy.dependencySubstitution {
             // https://github.com/zml2008/guice/tree/backport/5.0.1
             substitute(module("com.google.inject:guice:5.0.1"))
-                    .because("We need to run against Guava 21")
-                    .using(module("ca.stellardrift.guice-backport:guice:5.0.1"))
+                .because("We need to run against Guava 21")
+                .using(module("ca.stellardrift.guice-backport:guice:5.0.1"))
         }
     }
 
@@ -363,8 +363,8 @@ tasks {
         archiveClassifier.set("dev")
         manifest {
             attributes(mapOf(
-                    "Access-Widener" to "common.accesswidener",
-                    "Multi-Release" to true
+                "Access-Widener" to "common.accesswidener",
+                "Multi-Release" to true
             ))
             from(commonManifest)
         }
