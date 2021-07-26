@@ -22,53 +22,26 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.plugin;
+package org.spongepowered.forge.applaunch.loading.moddiscovery.library;
 
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.applaunch.plugin.PluginPlatform;
+import net.minecraftforge.fml.loading.moddiscovery.ModFile;
+import net.minecraftforge.forgespi.locating.IModLocator;
+import net.minecraftforge.forgespi.locating.ModFileFactory;
 
 import java.nio.file.Path;
-import java.util.List;
 
-public final class ForgePluginPlatform implements PluginPlatform {
+/**
+ * TODO This class will still print warnings due to lack of manifest entries but is a stopgap
+*       until we decide to roll out own implementation
+ */
+public final class LibraryModFile extends ModFile {
 
-    @Override
-    public String version() {
-        return null;
+    public LibraryModFile(final Path file, final IModLocator locator, final ModFileFactory.ModFileInfoParser parser) {
+        super(file, locator, parser);
     }
 
     @Override
-    public void setVersion(String version) {
-
-    }
-
-    @Override
-    public Logger logger() {
-        return null;
-    }
-
-    @Override
-    public boolean vanilla() {
-        return false;
-    }
-
-    @Override
-    public Path baseDirectory() {
-        return null;
-    }
-
-    @Override
-    public void setBaseDirectory(Path baseDirectory) {
-
-    }
-
-    @Override
-    public List<Path> pluginDirectories() {
-        return null;
-    }
-
-    @Override
-    public void setPluginDirectories(List<Path> pluginDirectories) {
-
+    public Type getType() {
+        return Type.LIBRARY;
     }
 }

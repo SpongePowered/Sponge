@@ -22,34 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge;
+package org.spongepowered.forge.mixin.core.fml;
 
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import net.minecraftforge.fml.ModContainer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.plugin.PluginContainer;
 
-@Mod("spongeforge")
-public class SpongeForgeMod {
-
-    private static final Logger LOGGER = LogManager.getLogger();
-
-    public SpongeForgeMod() {
-        final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-
-        // modBus: add all FML events with it
-        modBus.addListener(this::commonSetup);
-
-        // annotation events, for non-FML things
-        MinecraftForge.EVENT_BUS.register(this);
-    }
-
-    private void commonSetup(final FMLCommonSetupEvent event) {
-        // common setup
-        SpongeForgeMod.LOGGER.info("Setting up SpongeForge");
-    }
-
+@Mixin(ModContainer.class)
+public abstract class ModContainerMixin_Forge implements PluginContainer {
 }
