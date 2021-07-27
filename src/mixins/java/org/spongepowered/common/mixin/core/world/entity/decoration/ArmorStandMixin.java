@@ -56,7 +56,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
      * The return value is set to false if the entity should not be completely
      * destroyed.
      */
-    private void fireDestroyDamageEvent(final DamageSource source, final CallbackInfoReturnable<Boolean> cir) {
+    private void impl$fireDestroyDamageEvent(final DamageSource source, final CallbackInfoReturnable<Boolean> cir) {
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             DamageEventUtil.generateCauseFor(source, frame);
             final DamageEntityEvent event = SpongeEventFactory.createDamageEntityEvent(frame.currentCause(),
@@ -75,8 +75,8 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
             slice = @Slice(from = @At(value = "FIELD", target = "Lnet/minecraft/world/damagesource/DamageSource;OUT_OF_WORLD:Lnet/minecraft/world/damagesource/DamageSource;")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;remove()V", ordinal = 0),
             cancellable = true)
-    private void fireDamageEventOutOfWorld(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        this.fireDestroyDamageEvent(source, cir);
+    private void impl$fireDamageEventOutOfWorld(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+        this.impl$fireDestroyDamageEvent(source, cir);
     }
 
     @Inject(method = "hurt",
@@ -87,7 +87,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
                 target = "Lnet/minecraft/world/entity/decoration/ArmorStand;causeDamage(Lnet/minecraft/world/damagesource/DamageSource;F)V"),
             cancellable = true)
     private void impl$fireDamageEventExplosion(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        this.fireDestroyDamageEvent(source, cir);
+        this.impl$fireDestroyDamageEvent(source, cir);
     }
 
     @Redirect(method = "hurt", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;causeDamage(Lnet/minecraft/world/damagesource/DamageSource;F)V"))
@@ -104,8 +104,8 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
 
     @Inject(method = "hurt", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSource;isCreativePlayer()Z")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;playBrokenSound()V"), cancellable = true)
-    private void fireDamageEventCreativePunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        this.fireDestroyDamageEvent(source, cir);
+    private void impl$fireDamageEventCreativePunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+        this.impl$fireDestroyDamageEvent(source, cir);
     }
 
     @Inject(method = "hurt",
@@ -113,7 +113,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
                     from = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;lastHit:J", opcode = Opcodes.GETFIELD)),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V"),
             cancellable = true)
-    private void fireDamageEventFirstPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    private void impl$fireDamageEventFirstPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         // While this doesn't technically "damage" the armor stand, it feels
         // like damage in other respects, so fire an event.
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -131,8 +131,8 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
             target = "Lnet/minecraft/world/entity/decoration/ArmorStand;brokenByPlayer(Lnet/minecraft/world/damagesource/DamageSource;)V"
         ),
         cancellable = true)
-    private void fireDamageEventSecondPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
-        this.fireDestroyDamageEvent(source, cir);
+    private void impl$fireDamageEventSecondPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+        this.impl$fireDestroyDamageEvent(source, cir);
     }
 
     /**
