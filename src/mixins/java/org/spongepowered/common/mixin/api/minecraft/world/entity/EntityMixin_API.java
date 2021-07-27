@@ -60,24 +60,25 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.VanishableBridge;
-import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
+import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.EnumSet;
 import java.util.HashSet;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.Random;
 import java.util.Set;
 import java.util.UUID;
 import java.util.function.UnaryOperator;
-
-import javax.annotation.Nullable;
 
 @Mixin(net.minecraft.world.entity.Entity.class)
 @Implements(@Interface(iface = org.spongepowered.api.entity.Entity.class, prefix = "entity$", remap = Remap.NONE))
@@ -86,7 +87,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     // @formatter:off
     @Shadow public float yRot;
     @Shadow public float xRot;
-    @Final @Shadow protected Random random;
+    @Shadow @Final protected Random random;
     @Shadow public int tickCount;
     @Shadow protected UUID uuid;
     @Shadow @Final private net.minecraft.world.entity.EntityType<?> type;
@@ -125,6 +126,11 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
+    public boolean setPosition(final Vector3d position) {
+        return ((EntityBridge) this).bridge$setPosition(Objects.requireNonNull(position, "The position was null!"));
+    }
+
+    @Override
     public World<?, ?> world() {
         return (World<?, ?>) this.level;
     }
@@ -135,13 +141,12 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
     }
 
     @Override
-    public boolean setLocation(ServerLocation location) {
-        Preconditions.checkNotNull(location, "The location was null!");
-        return ((EntityBridge) this).bridge$setLocation(location);
+    public boolean setLocation(final ServerLocation location) {
+        return ((EntityBridge) this).bridge$setLocation(Objects.requireNonNull(location, "The location was null!"));
     }
 
     @Override
-    public boolean setLocationAndRotation(ServerLocation location, Vector3d rotation) {
+    public boolean setLocationAndRotation(final ServerLocation location, final Vector3d rotation) {
         if (this.setLocation(location)) {
             this.setRotation(rotation);
             return true;
@@ -169,19 +174,21 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         if (!PhaseTracker.SERVER.onSidedThread()) {
             return false;
         }
-        Preconditions.checkNotNull(transform, "The transform cannot be null!");
-        final Vector3d position = transform.position();
-        this.shadow$setPos(position.x(), position.y(), position.z());
-        this.setRotation(transform.rotation());
-        this.setScale(transform.scale());
 
-        return true;
+        Objects.requireNonNull(transform, "The transform cannot be null!");
+        if (((EntityBridge) this).bridge$setPosition(transform.position())) {
+            this.setRotation(transform.rotation());
+            this.setScale(transform.scale());
+            return true;
+        }
+
+        return false;
     }
 
     @Override
     public boolean transferToWorld(final org.spongepowered.api.world.server.ServerWorld world, final Vector3d position) {
-        Preconditions.checkNotNull(world, "World was null!");
-        Preconditions.checkNotNull(position, "Position was null!");
+        Objects.requireNonNull(world, "World was null!");
+        Objects.requireNonNull(position, "Position was null!");
         return this.setLocation(ServerLocation.of(world, position));
     }
 
@@ -190,16 +197,16 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
         return new Vector3d(this.xRot, this.yRot, 0);
     }
 
-    @SuppressWarnings({"unchecked", "rawtypes"})
+    @SuppressWarnings("ConstantConditions")
     @Override
     public void setRotation(final Vector3d rotation) {
-        Preconditions.checkNotNull(rotation, "Rotation was null!");
+        Objects.requireNonNull(rotation, "Rotation was null!");
         if (this.isRemoved()) {
             return;
         }
-        if (((Entity) (Object) this) instanceof ServerPlayer && ((ServerPlayer) (Entity) (Object) this).connection != null) {
+        if (((Entity) (Object) this) instanceof ServerPlayer && ((ServerPlayer) (Object) this).connection != null) {
             // Force an update, this also set the rotation in this entity
-            ((ServerPlayer) (Entity) (Object) this).connection.teleport(this.position().x(), this.position().y(),
+            ((ServerPlayer) (Object) this).connection.teleport(this.position().x(), this.position().y(),
                     this.position().z(), (float) rotation.y(), (float) rotation.x(), EnumSet.noneOf(ClientboundPlayerPositionPacket.RelativeArgument.class));
         } else {
             if (!this.shadow$getCommandSenderWorld().isClientSide) { // We can't set the rotation update on client worlds.
@@ -268,7 +275,6 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public DataContainer toContainer() {
-        final Transform transform = this.transform();
         final CompoundTag compound = new CompoundTag();
         this.shadow$saveAsPassenger(compound);
         final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(compound);
@@ -277,19 +283,19 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
                 .set(Constants.Entity.CLASS, this.getClass().getName())
                 .set(Queries.WORLD_KEY, ((org.spongepowered.api.world.server.ServerWorld) this.world()).key().formatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
-                .set(Queries.POSITION_X, transform.position().x())
-                .set(Queries.POSITION_Y, transform.position().y())
-                .set(Queries.POSITION_Z, transform.position().z())
+                .set(Queries.POSITION_X, this.position().x())
+                .set(Queries.POSITION_Y, this.position().y())
+                .set(Queries.POSITION_Z, this.position().z())
                 .container()
                 .createView(Constants.Entity.ROTATION)
-                .set(Queries.POSITION_X, transform.rotation().x())
-                .set(Queries.POSITION_Y, transform.rotation().y())
-                .set(Queries.POSITION_Z, transform.rotation().z())
+                .set(Queries.POSITION_X, this.rotation().x())
+                .set(Queries.POSITION_Y, this.rotation().y())
+                .set(Queries.POSITION_Z, this.rotation().z())
                 .container()
                 .createView(Constants.Entity.SCALE)
-                .set(Queries.POSITION_X, transform.scale().x())
-                .set(Queries.POSITION_Y, transform.scale().y())
-                .set(Queries.POSITION_Z, transform.scale().z())
+                .set(Queries.POSITION_X, this.scale().x())
+                .set(Queries.POSITION_Y, this.scale().y())
+                .set(Queries.POSITION_Z, this.scale().z())
                 .container()
                 .set(Constants.Entity.TYPE, Registry.ENTITY_TYPE.getKey((net.minecraft.world.entity.EntityType<?>) this.type()))
                 .set(Constants.Sponge.UNSAFE_NBT, unsafeNbt);
@@ -334,7 +340,7 @@ public abstract class EntityMixin_API implements org.spongepowered.api.entity.En
 
     @Override
     public EntityArchetype createArchetype() {
-        return EntityArchetype.builder().from(this).build();
+        return SpongeEntityArchetypeBuilder.pooled().from(this).build();
     }
 
     @Override

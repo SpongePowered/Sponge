@@ -32,6 +32,7 @@ import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Arrays;
@@ -112,10 +113,10 @@ public final class ObjectArrayImmutableBiomeBuffer extends AbstractBiomeBuffer i
     public VolumeStream<Immutable, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
         VolumeStreamUtils.validateStreamArgs(min, max, options);
-        final Stream<VolumeElement<Immutable, Biome>> stateStream = IntStream.range(this.blockMin().x(), this.blockMax().x() + 1)
-            .mapToObj(x -> IntStream.range(this.blockMin().z(), this.blockMax().z() + 1)
-                .mapToObj(z -> IntStream.range(this.blockMin().y(), this.blockMax().y() + 1)
-                    .mapToObj(y -> VolumeElement.<Immutable, Biome>of(this, () -> this.biomes[this.getIndex(x, y, z)], new Vector3i(x, y, z)))
+        final Stream<VolumeElement<Immutable, Biome>> stateStream = IntStream.range(this.min().x(), this.max().x() + 1)
+            .mapToObj(x -> IntStream.range(this.min().z(), this.max().z() + 1)
+                .mapToObj(z -> IntStream.range(this.min().y(), this.max().y() + 1)
+                    .mapToObj(y -> VolumeElement.<Immutable, Biome>of(this, () -> this.biomes[this.getIndex(x, y, z)], new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

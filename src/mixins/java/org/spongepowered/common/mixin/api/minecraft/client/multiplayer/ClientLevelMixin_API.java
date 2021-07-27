@@ -24,14 +24,33 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.client.multiplayer;
 
+import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
+import net.minecraft.client.player.AbstractClientPlayer;
+import net.minecraft.world.level.entity.LevelEntityGetter;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.entity.living.player.client.ClientPlayer;
 import org.spongepowered.api.world.storage.ChunkLayout;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
+
+import java.util.ArrayList;
+import java.util.Collection;
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Mixin(ClientLevel.class)
 public abstract class ClientLevelMixin_API implements org.spongepowered.api.world.client.ClientWorld {
+
+    // @formatter:off
+    @Shadow @Final private List<AbstractClientPlayer> players;
+
+    @Shadow protected abstract LevelEntityGetter<net.minecraft.world.entity.Entity> shadow$getEntities();
+    // @formatter:on
 
     @Override
     public boolean isLoaded() {
@@ -41,5 +60,17 @@ public abstract class ClientLevelMixin_API implements org.spongepowered.api.worl
     @Override
     public ChunkLayout chunkLayout() {
         return SpongeChunkLayout.INSTANCE;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public Optional<Entity> entity(final UUID uuid) {
+        return (Optional) Optional.ofNullable(this.shadow$getEntities().get(uuid));
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public Collection<? extends ClientPlayer> players() {
+        return (Collection) new ArrayList<>(this.players);
     }
 }

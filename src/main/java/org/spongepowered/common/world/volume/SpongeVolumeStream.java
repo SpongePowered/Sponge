@@ -25,6 +25,8 @@
 package org.spongepowered.common.world.volume;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.world.volume.MutableVolume;
 import org.spongepowered.api.world.volume.Volume;
 import org.spongepowered.api.world.volume.stream.VolumeCollector;
@@ -32,6 +34,7 @@ import org.spongepowered.api.world.volume.stream.VolumeConsumer;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeFlatMapper;
 import org.spongepowered.api.world.volume.stream.VolumeMapper;
+import org.spongepowered.api.world.volume.stream.VolumePositionTranslator;
 import org.spongepowered.api.world.volume.stream.VolumePredicate;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -116,6 +119,14 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
     }
 
     @Override
+    public VolumeStream<V, T> transform(final VolumePositionTranslator<V, T> transformer) {
+        return new SpongeVolumeStream<>(
+            this.stream.map(transformer::apply),
+            this.volumeSupplier
+        );
+    }
+
+    @Override
     public <Out> VolumeStream<V, Out> map(final Function<VolumeElement<V, T>, ? extends Out> mapper) {
         return new SpongeVolumeStream<>(this.stream.map(element -> VolumeElement.of(
             this.volume(),
@@ -195,8 +206,17 @@ public class SpongeVolumeStream<V extends Volume, T> implements VolumeStream<V, 
 
     @Override
     public <W extends MutableVolume> void apply(final VolumeCollector<W, T, ?> collector) {
-        try (final PhaseContext<@NonNull ?> context = PluginPhase.State.BLOCK_WORKER.createPhaseContext(PhaseTracker.SERVER)) {
-            context.buildAndSwitch();
+        final PhaseTracker instance = PhaseTracker.getInstance();
+        try (final @Nullable PhaseContext<@NonNull ?> context = instance.getPhaseContext().isApplyingStreams()
+            ? null
+            : PluginPhase.State.VOLUME_STREAM_APPLICATION
+                .createPhaseContext(instance)
+                .setVolumeStream(this)
+                .spawnType(() -> PhaseTracker.getCauseStackManager().context(EventContextKeys.SPAWN_TYPE).orElse(null))
+        ) {
+            if (context != null) {
+                context.buildAndSwitch();
+            }
             this.stream.forEach(element -> {
                 final W targetVolume = collector.target().get();
                 final VolumeElement<W, T> transformed = collector.positionTransform().apply(VolumeElement.of(

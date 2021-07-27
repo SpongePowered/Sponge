@@ -511,7 +511,7 @@ public abstract class ServerGamePacketListenerImplMixin implements ConnectionHol
         }
     }
 
-    @Redirect(method = "updateSignText", at = @At(value = "INVOKE", target = "Ljava/util/List;size()I"))
+    @Redirect(method = "updateSignText", at = @At(value = "INVOKE", remap = false, target = "Ljava/util/List;size()I"))
     private int impl$callChangeSignEvent(final List<TextFilter.FilteredText> list, final ServerboundSignUpdatePacket p_244542_1_, final List<String> p_244542_2_) {
         final SignBlockEntity blockEntity = (SignBlockEntity) this.player.level.getBlockEntity(p_244542_1_.getPos());
         final ListValue<Component> originalLinesValue = ((Sign) blockEntity).getValue(Keys.SIGN_LINES)

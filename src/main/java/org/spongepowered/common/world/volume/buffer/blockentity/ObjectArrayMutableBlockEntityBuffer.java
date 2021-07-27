@@ -24,8 +24,10 @@
  */
 package org.spongepowered.common.world.volume.buffer.blockentity;
 
+import net.minecraft.core.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.world.volume.block.entity.BlockEntityVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
@@ -37,9 +39,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Optional;
 import java.util.stream.Stream;
-import net.minecraft.core.BlockPos;
 
-public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEntityBuffer<ObjectArrayMutableBlockEntityBuffer> {
+public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEntityBuffer {
 
     private final ArrayList<BlockEntity> blockEntities;
 
@@ -64,12 +65,12 @@ public class ObjectArrayMutableBlockEntityBuffer extends AbstractMutableBlockEnt
 
 
     @Override
-    public VolumeStream<ObjectArrayMutableBlockEntityBuffer, BlockEntity> blockEntityStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<BlockEntityVolume.Mutable, BlockEntity> blockEntityStream(final Vector3i min, final Vector3i max,
             final StreamOptions options) {
-        VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
 
-        final Stream<VolumeElement<ObjectArrayMutableBlockEntityBuffer, BlockEntity>> blockEntityStream = this.blockEntities.stream()
-            .map(be -> VolumeElement.of(this, be, be.blockPosition()));
+        final Stream<VolumeElement<BlockEntityVolume.Mutable, BlockEntity>> blockEntityStream = this.blockEntities.stream()
+            .map(be -> VolumeElement.of(this, be, be.blockPosition().toDouble()));
         return new SpongeVolumeStream<>(blockEntityStream, () -> this);
     }
 

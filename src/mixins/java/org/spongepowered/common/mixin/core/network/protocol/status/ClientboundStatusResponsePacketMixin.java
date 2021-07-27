@@ -37,7 +37,7 @@ import java.lang.reflect.Type;
 public abstract class ClientboundStatusResponsePacketMixin {
 
    @SuppressWarnings("UnresolvedMixinReference")
-   @Redirect(method = "<clinit>", at = @At(value = "INVOKE", target = "Lcom/google/gson/GsonBuilder;registerTypeAdapter(Ljava/lang/reflect/Type;Ljava/lang/Object;)Lcom/google/gson/GsonBuilder;", ordinal = 0))
+   @Redirect(method = "<clinit>", at = @At(value = "INVOKE", remap = false, target = "Lcom/google/gson/GsonBuilder;registerTypeAdapter(Ljava/lang/reflect/Type;Ljava/lang/Object;)Lcom/google/gson/GsonBuilder;", ordinal = 0))
    private static GsonBuilder impl$injectAdventureSerializers(final GsonBuilder instance, final Type type, final Object adapter) {
       return GsonComponentSerializer.gson().populator().apply(instance.registerTypeAdapter(type, adapter));
    }

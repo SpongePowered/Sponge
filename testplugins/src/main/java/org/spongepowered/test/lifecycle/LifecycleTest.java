@@ -74,7 +74,7 @@ public class LifecycleTest implements LoadableModule {
     @Override
     public void disable(final CommandContext ctx) {
         if (this.registered) {
-            this.game.eventManager().unregisterPluginListeners(this.container);
+            this.game.eventManager().unregisterListeners(this.container);
             this.registered = false;
             ctx.sendMessage(Identity.nil(), Component.text("Successfully unregistered lifecycle listener"));
         } else {

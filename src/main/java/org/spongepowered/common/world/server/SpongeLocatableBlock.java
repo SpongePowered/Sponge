@@ -97,7 +97,7 @@ public final class SpongeLocatableBlock implements LocatableBlock {
 
     @Override
     public DataContainer toContainer() {
-        return DataContainer.createNew()
+        return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED)
                 .set(Queries.CONTENT_VERSION, 1)
                 .set(Queries.WORLD_KEY, this.world)
                 .set(Queries.POSITION_X, this.position.x())

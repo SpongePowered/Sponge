@@ -26,12 +26,18 @@ package org.spongepowered.common.block.entity;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.block.entity.BlockEntityType;
 import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataView;
+import org.spongepowered.api.data.persistence.Queries;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
@@ -47,10 +53,6 @@ import org.spongepowered.common.util.VecHelper;
 
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.Block;
 
 public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEntityType, BlockSnapshot, BlockEntity> implements
         org.spongepowered.api.block.entity.BlockEntityArchetype {
@@ -79,7 +81,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     public DataContainer blockEntityData() {
-        return NBTTranslator.INSTANCE.translateFrom(this.data);
+        return NBTTranslator.INSTANCE.translateFrom(this.compound);
     }
 
     @Override
@@ -94,7 +96,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
             ((org.spongepowered.api.world.World) minecraftWorld).setBlock(blockpos.getX(), blockpos.getY(), blockpos.getZ(), this.blockState,
                     BlockChangeFlags.ALL);
         }
-        final CompoundTag compound = this.data.copy();
+        final CompoundTag compound = this.compound.copy();
 
         final net.minecraft.world.level.block.entity.@Nullable BlockEntity tileEntity = minecraftWorld.getBlockEntity(blockpos);
         if (tileEntity == null) {
@@ -112,7 +114,7 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     public BlockSnapshot toSnapshot(final ServerLocation location) {
         final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
         return builder.blockState(this.blockState)
-            .addUnsafeCompound(this.data.copy())
+            .addUnsafeCompound(this.compound.copy())
             .world(location.worldKey())
             .position(location.blockPosition())
             .build();
@@ -125,7 +127,8 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     public DataContainer toContainer() {
-        return DataContainer.createNew()
+        return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED)
+                .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_TYPE, this.type)
                 .set(Constants.Sponge.BlockEntityArchetype.BLOCK_STATE, this.blockState)
                 .set(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_DATA, this.blockEntityData())
@@ -143,10 +146,10 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
     }
 
     @Override
-    public org.spongepowered.api.block.entity.BlockEntityArchetype copy() {
-        final SpongeBlockEntityArchetypeBuilder builder = new SpongeBlockEntityArchetypeBuilder();
+    public SpongeBlockEntityArchetype copy() {
+        final SpongeBlockEntityArchetypeBuilder builder = SpongeBlockEntityArchetypeBuilder.pooled();
         builder.type = this.type;
-        builder.data = NBTTranslator.INSTANCE.translate(this.data);
+        builder.data = NBTTranslator.INSTANCE.translate(this.compound);
         builder.blockState = this.blockState;
         return builder.build();
     }
@@ -178,6 +181,6 @@ public final class SpongeBlockEntityArchetype extends AbstractArchetype<BlockEnt
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("type", this.type).add("state", this.blockState).add("data", this.data).toString();
+        return MoreObjects.toStringHelper(this).add("type", this.type).add("state", this.blockState).add("data", this.compound).toString();
     }
 }

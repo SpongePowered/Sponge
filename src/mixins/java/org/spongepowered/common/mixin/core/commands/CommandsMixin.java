@@ -121,7 +121,7 @@ public abstract class CommandsMixin implements CommandsBridge {
     @Redirect(method = "fillUsableCommands",
             slice = @Slice(
                     from = @At("HEAD"),
-                    to = @At(value = "INVOKE", target = "Ljava/util/Iterator;hasNext()Z")
+                    to = @At(value = "INVOKE", remap = false, target = "Ljava/util/Iterator;hasNext()Z")
             ),
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;getChildren()Ljava/util/Collection;", remap = false))
     private Collection<CommandNode<CommandSourceStack>> impl$handleHiddenChildrenAndEnsureUnsortedLoop(final CommandNode<CommandSourceStack> commandNode) {
@@ -262,7 +262,7 @@ public abstract class CommandsMixin implements CommandsBridge {
     }
 
     @Redirect(method = "fillUsableCommands", at = @At(value = "INVOKE",
-            target = "Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;suggests(Lcom/mojang/brigadier/suggestion/SuggestionProvider;)Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;"), remap = false)
+            target = "Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;suggests(Lcom/mojang/brigadier/suggestion/SuggestionProvider;)Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;", remap = false))
     private RequiredArgumentBuilder<SharedSuggestionProvider, ?> impl$dontAskServerIfSiblingAlreadyDoes(
             final RequiredArgumentBuilder<SharedSuggestionProvider, ?> requiredArgumentBuilder,
             final SuggestionProvider<SharedSuggestionProvider> provider,

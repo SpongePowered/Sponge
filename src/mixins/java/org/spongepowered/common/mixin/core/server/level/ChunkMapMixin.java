@@ -24,23 +24,27 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import com.mojang.datafixers.util.Either;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ChunkHolder;
 import net.minecraft.server.level.ChunkMap;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ThreadedLevelLightEngine;
 import net.minecraft.world.entity.ai.village.poi.PoiManager;
 import net.minecraft.world.level.ChunkPos;
 import net.minecraft.world.level.chunk.ChunkAccess;
+import net.minecraft.world.level.chunk.ChunkGenerator;
 import net.minecraft.world.level.chunk.ChunkStatus;
 import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.chunk.storage.ChunkSerializer;
+import net.minecraft.world.level.levelgen.structure.templatesystem.StructureManager;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.world.chunk.ChunkEvent;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.SerializationBehavior;
-import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -59,13 +63,19 @@ import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.DirectionUtil;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3i;
+
+import java.util.List;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.Executor;
+import java.util.function.Function;
 
 @Mixin(ChunkMap.class)
 public abstract class ChunkMapMixin implements ChunkMapBridge {
 
     // @formatter:off
-    @Shadow @Final private ServerLevel level;
+    @Shadow @Final ServerLevel level;
     // @formatter:on
 
     public DistanceManagerBridge bridge$distanceManager() {
@@ -137,16 +147,38 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
 
     @Redirect(method = "*",
             at = @At(value = "INVOKE",
-                    target = "Lnet/minecraft/server/level/ChunkHolder;replaceProtoChunk(Lnet/minecraft/world/level/chunk/ImposterProtoChunk;)V")
+                    target = "net/minecraft/world/level/chunk/ChunkStatus.generate (Ljava/util/concurrent/Executor;"
+                            + "Lnet/minecraft/server/level/ServerLevel;"
+                            + "Lnet/minecraft/world/level/chunk/ChunkGenerator;"
+                            + "Lnet/minecraft/world/level/levelgen/structure/templatesystem/StructureManager;"
+                            + "Lnet/minecraft/server/level/ThreadedLevelLightEngine;Ljava/util/function/Function;Ljava/util/List;)"
+                            + "Ljava/util/concurrent/CompletableFuture;")
     )
-    private void impl$onReplaceProto(final ChunkHolder holder, final ImposterProtoChunk chunk) {
-        holder.replaceProtoChunk(chunk);
+    private CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> impl$attachEventToCompletedGeneration(final ChunkStatus status,
+            final Executor param0,
+            final ServerLevel param1,
+            final ChunkGenerator param2,
+            final StructureManager param3,
+            final ThreadedLevelLightEngine param4,
+            final Function<ChunkAccess, CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> param5,
+            final List<ChunkAccess> param6) {
+        final Function<ChunkAccess, CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>>> postProcessor;
         if (ShouldFire.CHUNK_EVENT_GENERATED) {
-            final Vector3i chunkPos = new Vector3i(chunk.getPos().x, 0, chunk.getPos().z);
-            final ChunkEvent.Generated event = SpongeEventFactory.createChunkEventGenerated(PhaseTracker.getInstance().currentCause(), chunkPos,
-                    (ResourceKey) (Object) this.level.dimension().location());
-            SpongeCommon.post(event);
+            postProcessor = chunkAccess -> {
+                final CompletableFuture<Either<ChunkAccess, ChunkHolder.ChunkLoadingFailure>> result = param5.apply(chunkAccess);
+                result.thenAcceptAsync(either -> either.left().ifPresent(r -> {
+                    final Vector3i chunkPos = VecHelper.toVector3i(r.getPos());
+                    final ChunkEvent.Generated event = SpongeEventFactory.createChunkEventGenerated(
+                            PhaseTracker.getInstance().currentCause(), chunkPos,
+                            (ResourceKey) (Object) this.level.dimension().location());
+                    SpongeCommon.post(event);
+                }), SpongeCommon.server());
+                return result;
+            };
+        } else {
+            postProcessor = param5;
         }
+        return status.generate(param0, param1, param2, param3, param4, postProcessor, param6);
     }
 
     @Inject(method = "save", at = @At(value = "RETURN"))
@@ -162,11 +194,11 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
 
     @Inject(method = "save", at = @At(value = "HEAD"), cancellable = true)
     private void impl$onSave(final ChunkAccess var1, final CallbackInfoReturnable<Boolean> cir) {
-        if (var1 instanceof Chunk) {
+        if (var1 instanceof WorldChunk) {
             if (ShouldFire.CHUNK_EVENT_SAVE_PRE) {
                 final Vector3i chunkPos = new Vector3i(var1.getPos().x, 0, var1.getPos().z);
                 final ChunkEvent.Save.Pre postSave = SpongeEventFactory.createChunkEventSavePre(PhaseTracker.getInstance().currentCause(),
-                        chunkPos, (ResourceKey) (Object) this.level.dimension().location(), ((Chunk) var1));
+                        chunkPos, ((WorldChunk) var1), (ResourceKey) (Object) this.level.dimension().location());
                 SpongeCommon.post(postSave);
                 if (postSave.isCancelled()) {
                     cir.setReturnValue(false);
@@ -179,7 +211,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
     @Redirect(method = "*",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;setLoaded(Z)V"),
             slice = @Slice(
-                    from = @At(value = "INVOKE", target = "Lit/unimi/dsi/fastutil/longs/LongSet;add(J)Z"),
+                    from = @At(value = "INVOKE", remap = false, target = "Lit/unimi/dsi/fastutil/longs/LongSet;add(J)Z"),
                     to = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/LevelChunk;registerAllBlockEntitiesAfterLevelLoad()V")
             )
     )
@@ -188,7 +220,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         final Vector3i chunkPos = new Vector3i(levelChunk.getPos().x, 0, levelChunk.getPos().z);
         if (ShouldFire.CHUNK_EVENT_LOAD) {
             final ChunkEvent.Load loadEvent = SpongeEventFactory.createChunkEventLoad(PhaseTracker.getInstance().currentCause(),
-                    chunkPos, (ResourceKey) (Object) this.level.dimension().location(), ((Chunk) levelChunk));
+                    chunkPos, ((WorldChunk) levelChunk), (ResourceKey) (Object) this.level.dimension().location());
             SpongeCommon.post(loadEvent);
         }
 

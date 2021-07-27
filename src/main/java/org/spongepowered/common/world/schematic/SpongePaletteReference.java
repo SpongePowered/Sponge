@@ -27,8 +27,9 @@ package org.spongepowered.common.world.schematic;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.world.schematic.PaletteReference;
 
-public final class SpongePaletteReference<T, R> implements PaletteReference<T, R> {
+import java.util.Objects;
 
+public final class SpongePaletteReference<T, R> implements PaletteReference<T, R> {
 
     private final RegistryType<R> registry;
     private final String value;
@@ -48,4 +49,22 @@ public final class SpongePaletteReference<T, R> implements PaletteReference<T, R
     public String value() {
         return this.value;
     }
+
+    @Override
+    public boolean equals(final Object o) {
+        if (this == o) {
+            return true;
+        }
+        if (o == null || this.getClass() != o.getClass()) {
+            return false;
+        }
+        final SpongePaletteReference<?, ?> that = (SpongePaletteReference<?, ?>) o;
+        return this.registry.equals(that.registry) && this.value.equals(that.value);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(this.registry, this.value);
+    }
+
 }

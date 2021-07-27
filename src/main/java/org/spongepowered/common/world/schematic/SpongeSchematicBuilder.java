@@ -24,8 +24,11 @@
  */
 package org.spongepowered.common.world.schematic;
 
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
+import org.spongepowered.api.data.persistence.DataContainer;
+import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.world.biome.Biome;
@@ -38,15 +41,17 @@ import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeVolume;
 import org.spongepowered.api.world.volume.block.BlockVolume;
 import org.spongepowered.api.world.volume.block.entity.BlockEntityVolume;
+import org.spongepowered.common.data.MemoryDataContainer;
 import org.spongepowered.common.world.volume.buffer.archetype.SpongeArchetypeVolume;
 import org.spongepowered.math.vector.Vector3d;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
 
-@SuppressWarnings("deprecation")
 public class SpongeSchematicBuilder implements Schematic.Builder {
 
-    private SpongeArchetypeVolume volume;
+    private ArchetypeVolume volume;
+    private @MonotonicNonNull DataContainer metadata;
 
     @Override
     public Schematic.Builder from(final Schematic value) {
@@ -75,7 +80,8 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
 
     @Override
     public Schematic.Builder volume(final ArchetypeVolume volume) {
-        return null;
+        this.volume = volume;
+        return this;
     }
 
     @Override
@@ -130,11 +136,21 @@ public class SpongeSchematicBuilder implements Schematic.Builder {
 
     @Override
     public Schematic.Builder metaValue(final String key, final Object value) {
-        return null;
+        if (this.metadata == null) {
+            this.metadata = new MemoryDataContainer();
+        }
+        this.metadata.set(DataQuery.of(key), value);
+        return this;
     }
 
     @Override
     public Schematic build() throws IllegalArgumentException {
-        return null;
+        if (this.volume instanceof SpongeArchetypeVolume) {
+            final SpongeArchetypeVolume archetypeVolume = (SpongeArchetypeVolume) this.volume;
+            final Vector3i start = archetypeVolume.min();
+            final Vector3i blockSize = archetypeVolume.size();
+            return new SpongeSchematic(start, blockSize, archetypeVolume, this.metadata == null ? new MemoryDataContainer() : this.metadata);
+        }
+        throw new IllegalThreadStateException("Unimplemented");
     }
 }

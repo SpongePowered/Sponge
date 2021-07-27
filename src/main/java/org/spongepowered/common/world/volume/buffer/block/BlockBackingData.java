@@ -131,7 +131,7 @@ public interface BlockBackingData {
             this.bits = bits;
 
             this.maxValue = (1 << bits) - 1;
-            this.longArray = new long[Mth.roundToward(size * bits, Long.SIZE) / Long.SIZE];
+            this.longArray = new long[PackedBackingData.roundUp(size * bits, Long.SIZE) / Long.SIZE];
         }
 
         private PackedBackingData(final int size, final int bits, final long[] array) {
@@ -139,6 +139,13 @@ public interface BlockBackingData {
             this.bits = bits;
             this.maxValue = (1 << bits) - 1;
             this.longArray = array;
+        }
+
+        private static int roundUp(final int number, final int interval) {
+            if (number == 0) {
+                return interval;
+            }
+            return Mth.roundToward(number, interval);
         }
 
         @Override

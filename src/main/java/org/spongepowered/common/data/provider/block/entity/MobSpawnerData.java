@@ -46,6 +46,7 @@ import org.spongepowered.common.accessor.world.level.BaseSpawnerAccessor;
 import org.spongepowered.common.accessor.world.level.block.entity.SpawnerBlockEntityAccessor;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
+import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.SpongeTicks;
 
@@ -101,7 +102,7 @@ public final class MobSpawnerData {
 
         final CompoundTag data = logic.accessor$nextSpawnData().getTag();
 
-        final EntityArchetype archetype = EntityArchetype.builder()
+        final EntityArchetype archetype = SpongeEntityArchetypeBuilder.pooled()
                 .type(type)
                 .entityData(NBTTranslator.INSTANCE.translateFrom(data))
                 .build();
@@ -130,7 +131,7 @@ public final class MobSpawnerData {
             final EntityType<?> type =
                     Registry.ENTITY_TYPE.getOptional(new ResourceLocation(resourceLocation)).map(EntityType.class::cast).orElse(EntityTypes.PIG.get());
 
-            final EntityArchetype archetype = EntityArchetype.builder()
+            final EntityArchetype archetype = SpongeEntityArchetypeBuilder.pooled()
                     .type(type)
                     .entityData(NBTTranslator.INSTANCE.translateFrom(nbt))
                     .build();

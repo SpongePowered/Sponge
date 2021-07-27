@@ -74,7 +74,6 @@ import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.IgniteEntityEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.util.Ticks;
-import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.portal.Portal;
 import org.spongepowered.api.world.portal.PortalTypes;
 import org.spongepowered.api.world.server.ServerLocation;
@@ -96,7 +95,6 @@ import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
@@ -151,6 +149,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public double xo;
     @Shadow public double yo;
     @Shadow public double zo;
+    @Shadow private int remainingFireTicks;
 
     @Shadow protected abstract void shadow$unsetRemoved();
     @Shadow public abstract void shadow$setRemoved(Entity.RemovalReason reason);
@@ -173,6 +172,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow public abstract EntityType<?> shadow$getType();
     @Shadow public abstract boolean shadow$isInWater();
     @Shadow public abstract boolean shadow$isPassenger();
+    @Shadow public abstract void shadow$teleportToWithTicket(double x, double y, double z);
     @Shadow public abstract void shadow$teleportTo(double x, double y, double z);
     @Shadow public abstract void shadow$doEnchantDamageEffects(LivingEntity entityLivingBaseIn, Entity entityIn);
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
@@ -212,7 +212,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract boolean shadow$fireImmune();
 
     @Shadow protected String stringUUID;
-    @Shadow private int remainingFireTicks;
     // @formatter:on
 
     private boolean impl$isConstructing = true;
@@ -247,6 +246,23 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     }
 
     @Override
+    public boolean bridge$setPosition(final Vector3d position) {
+        if (this.shadow$isRemoved()) {
+            return false;
+        }
+
+        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+            final Vector3d destinationPosition = this.impl$fireMoveEvent(PhaseTracker.SERVER, position);
+            if (destinationPosition == null) {
+                return false;
+            }
+            final ServerLevel level = (ServerLevel) this.level;
+            return this.impl$setLocation(false, level, level, destinationPosition);
+        }
+    }
+
+    @Override
     public boolean bridge$setLocation(final ServerLocation location) {
         if (this.shadow$isRemoved() || ((LevelBridge) location.world()).bridge$isFake()) {
             return false;
@@ -256,11 +272,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             frame.pushCause(SpongeCommon.activePlugin());
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
-            final net.minecraft.world.phys.Vec3 originalPosition = this.shadow$position();
+            final net.minecraft.server.level.ServerLevel originalDestinationWorld = (net.minecraft.server.level.ServerLevel) location.world();
+            final net.minecraft.server.level.ServerLevel destinationWorld;
+            final @org.checkerframework.checker.nullness.qual.Nullable Vector3d destinationPosition;
 
-            net.minecraft.server.level.ServerLevel destinationWorld = (net.minecraft.server.level.ServerLevel) location.world();
-
-            if (this.shadow$getCommandSenderWorld() != destinationWorld) {
+            final boolean isChangeOfWorld = this.shadow$getCommandSenderWorld() != originalDestinationWorld;
+            if (isChangeOfWorld) {
                 final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.currentCause(),
                         (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getCommandSenderWorld(), location.world(),
                         location.world());
@@ -268,44 +285,29 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     return false;
                 }
 
+                destinationWorld = (ServerLevel) event.destinationWorld();
                 final ChangeEntityWorldEvent.Reposition repositionEvent =
-                        SpongeEventFactory.createChangeEntityWorldEventReposition(frame.currentCause(),
-                                (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getCommandSenderWorld(),
-                                VecHelper.toVector3d(this.shadow$position()), location.position(), event.originalDestinationWorld(),
-                                location.position(), event.destinationWorld());
-
-                if (SpongeCommon.post(repositionEvent)) {
+                        this.bridge$fireRepositionEvent(event.originalDestinationWorld(), event.destinationWorld(), location.position());
+                if (repositionEvent.isCancelled()) {
                     return false;
                 }
-
-                destinationWorld = (net.minecraft.server.level.ServerLevel) event.destinationWorld();
-
-                this.shadow$setPos(repositionEvent.destinationPosition().x(),
-                        repositionEvent.destinationPosition().y(), repositionEvent.destinationPosition().z());
+                destinationPosition = repositionEvent.destinationPosition();
             } else {
-                final Vector3d destination;
-                if (ShouldFire.MOVE_ENTITY_EVENT) {
-                    final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(frame.currentCause(),
-                            (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
-                            location.position(), location.position());
-                    if (SpongeCommon.post(event)) {
-                        return false;
-                    }
-                    destination = event.destinationPosition();
-                } else {
-                    destination = location.position();
+                destinationWorld = (ServerLevel) this.level;
+                destinationPosition = this.impl$fireMoveEvent(PhaseTracker.SERVER, location.position());
+                if (destinationPosition == null) {
+                    return false;
                 }
-                this.shadow$setPos(destination.x(), destination.y(), destination.z());
             }
 
-            if (!destinationWorld.getChunkSource().hasChunk((int) this.shadow$getX() >> 4, (int) this.shadow$getZ() >> 4)) {
-                // Roll back the position
-                this.shadow$setPos(originalPosition.x, originalPosition.y, originalPosition.z);
-                return false;
-            }
+            return this.impl$setLocation(isChangeOfWorld, originalDestinationWorld, destinationWorld, destinationPosition);
+        }
+    }
 
-            ((Entity) (Object) this).unRide();
-
+    protected boolean impl$setLocation(final boolean isChangeOfWorld, final ServerLevel originalDestinationWorld, final ServerLevel destinationWorld,
+            final Vector3d destinationPosition) {
+        ((Entity) (Object) this).unRide();
+        if (isChangeOfWorld) {
             final net.minecraft.server.level.ServerLevel originalWorld = (net.minecraft.server.level.ServerLevel) this.shadow$getCommandSenderWorld();
             ((PlatformServerLevelBridge) this.shadow$getCommandSenderWorld()).bridge$removeEntity((Entity) (Object) this, Entity.RemovalReason.CHANGED_DIMENSION, true);
             this.bridge$revive();
@@ -315,12 +317,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
 
             originalWorld.resetEmptyTime();
             destinationWorld.resetEmptyTime();
-
-            final ChunkPos chunkPos = new ChunkPos((int) this.shadow$getX() >> 4, (int) this.shadow$getZ() >> 4);
-            destinationWorld.getChunkSource().addRegionTicket(TicketType.POST_TELEPORT, chunkPos, 1, ((Entity) (Object) this).getId());
         }
 
-        return true;
+        return this.impl$teleportToWithTicket(destinationPosition.x(), destinationPosition.y(), destinationPosition.z(), false);
     }
 
     @Override
@@ -433,12 +432,6 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return this.shadow$createCommandSourceStack();
     }
 
-    @Override
-    public void bridge$setTransform(final Transform transform) {
-        this.shadow$setPos(transform.position().x(), transform.position().y(), transform.position().z());
-        this.shadow$setRot((float) transform.yaw(), (float) transform.pitch());
-    }
-
     @Redirect(method = "findDimensionEntryPoint", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/world/entity/Entity;getExitPortal(Lnet/minecraft/server/level/ServerLevel;Lnet/minecraft/core/BlockPos;Z)Ljava/util/Optional;"))
     private Optional<BlockUtil.FoundRectangle> impl$redirectGetExitPortal(
@@ -488,8 +481,10 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return new SpongePortalInfo(var1, var2, var3, var4, portal);
     }
 
-    @Override
-    public Entity bridge$portalRepositioning(final boolean createEndPlatform,
+    /*
+     * Used in bridge$changeDimension
+     */
+    protected Entity impl$portalRepositioning(final boolean createEndPlatform,
             final net.minecraft.server.level.ServerLevel serverworld,
             final net.minecraft.server.level.ServerLevel targetWorld,
             final PortalInfo portalinfo) {
@@ -507,14 +502,23 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         return entity;
     }
 
-    @Override
-    public void bridge$postPortalForceChangeTasks(final Entity entity, final net.minecraft.server.level.ServerLevel targetWorld,
+    /*
+     * Used in bridge$changeDimension
+     */
+    protected void impl$postPortalForceChangeTasks(final Entity entity, final net.minecraft.server.level.ServerLevel targetWorld,
             final boolean isVanilla) {
         this.shadow$removeAfterChangingDimensions();
         this.level.getProfiler().pop();
         ((net.minecraft.server.level.ServerLevel) this.level).resetEmptyTime();
         targetWorld.resetEmptyTime();
         this.level.getProfiler().pop();
+    }
+
+    /*
+     * Used in classes that add to the changeDimension behaviour
+     */
+    protected @org.checkerframework.checker.nullness.qual.Nullable Entity impl$postProcessChangeDimension(final Entity entity) {
+        return entity;
     }
 
     /**
@@ -560,12 +564,12 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             final Vector3d currentPosition = VecHelper.toVector3d(this.shadow$position());
 
             // If a player, set the fact they are changing dimensions
-            this.bridge$setPlayerChangingDimensions();
+            this.impl$setChangingDimension();
 
             final net.minecraft.server.level.ServerLevel serverworld = (net.minecraft.server.level.ServerLevel) this.level;
             final ResourceKey<Level> registrykey = serverworld.dimension();
             if (isPlayer && registrykey == Level.END && targetWorld.dimension() == Level.OVERWORLD && platformTeleporter.isVanilla()) { // avoids modded dimensions
-                return ((ServerPlayerBridge) this).bridge$performGameWinLogic();
+                return this.impl$postProcessChangeDimension(this.impl$performGameWinLogic());
             } else {
                 // Sponge Start: Redirect the find portal call to the teleporter.
 
@@ -578,7 +582,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                         frame.addContext(EventContextKeys.PORTAL, ((SpongePortalInfo) portalinfo).portal());
                     }
                     // Only start teleporting if we have somewhere to go.
-                    this.bridge$playerPrepareForPortalTeleport(serverworld, targetWorld);
+                    this.impl$prepareForPortalTeleport(serverworld, targetWorld);
                     try {
                         // Sponge Start: wrap the teleportation logic within a function to allow for modification
                         // of the teleporter
@@ -586,9 +590,9 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                         final Entity transportedEntity =
                                 platformTeleporter.performTeleport((Entity) (Object) this, serverworld, targetWorld, this.xRot,
                                         createEndPlatform -> this
-                                                .bridge$portalRepositioning(createEndPlatform, serverworld, targetWorld, portalinfo));
+                                                .impl$portalRepositioning(createEndPlatform, serverworld, targetWorld, portalinfo));
                         // Make sure the right object was returned
-                        this.bridge$validateEntityAfterTeleport(transportedEntity, platformTeleporter);
+                        this.impl$validateEntityAfterTeleport(transportedEntity, platformTeleporter);
 
                         // If we need to reposition: well... reposition.
                         // Downside: portals won't come with us, but with how it's implemented in Forge,
@@ -627,14 +631,14 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                             }
                         }
 
-                        this.bridge$postPortalForceChangeTasks(transportedEntity, targetWorld, platformTeleporter.getPortalType() instanceof NetherPortalType);
+                        this.impl$postPortalForceChangeTasks(transportedEntity, targetWorld, platformTeleporter.getPortalType() instanceof NetherPortalType);
                         // Call post event
                         PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost((Entity) (Object) this, serverworld, targetWorld);
                     } catch (final RuntimeException e) {
                         // nothing throws a checked exception in this block, but we want to catch unchecked stuff and try to recover
                         // just in case a mod does something less than clever.
                         if ((Object) this instanceof ServerPlayer) {
-                            this.bridge$postPortalForceChangeTasks((Entity) (Object) this, (net.minecraft.server.level.ServerLevel) this.level, false);
+                            this.impl$postPortalForceChangeTasks((Entity) (Object) this, (net.minecraft.server.level.ServerLevel) this.level, false);
                         }
                         throw e;
                     }
@@ -645,13 +649,30 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 }
             }
 
-            return (Entity) (Object) this;
+            return this.impl$postProcessChangeDimension((Entity) (Object) this);
         } finally {
             // Reset for the next attempt.
             this.impl$shouldFireRepositionEvent = true;
             this.impl$originalDestinationWorld = null;
             this.impl$customPortal = false;
         }
+    }
+
+
+    protected void impl$setChangingDimension() {
+        // intentional no-op
+    }
+
+    protected void impl$prepareForPortalTeleport(final ServerLevel currentWorld, final ServerLevel targetWorld) {
+        // intentional no-op
+    }
+
+    protected void impl$validateEntityAfterTeleport(final Entity e, final PlatformTeleporter teleporter) {
+        // intentional no-op
+    }
+
+    protected Entity impl$performGameWinLogic() {
+        return (Entity) (Object) this;
     }
 
     /**
@@ -747,36 +768,26 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     /**
      * @author Zidane
      * @reason This is a catch-all method to ensure MoveEntityEvent is fired with
-     *         useful information
+     *         useful information. We redirect to impl$teleportToWithTicket to
+     *         be able to return whether or not a teleport happened.
      */
     @Overwrite
     public final void teleportToWithTicket(final double x, final double y, final double z) {
+        this.impl$teleportToWithTicket(x, y, z, true);
+    }
+
+    /*
+     * (non-Javadoc)
+     *
+     * This is a modified version of teleportToWithTicket, treat this as an overwrite
+     * see above.
+     */
+    public final boolean impl$teleportToWithTicket(final double x, final double y, final double z, final boolean fireMoveEvent) {
         if (this.level instanceof net.minecraft.server.level.ServerLevel) {
             // Sponge start
-            final PhaseTracker server = PhaseTracker.SERVER;
             final Vector3d destinationPosition;
-            boolean hasMovementContext = true;
-            if (ShouldFire.MOVE_ENTITY_EVENT) {
-                if (!server.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE)) {
-                    hasMovementContext = false;
-                    server.pushCause(SpongeCommon.activePlugin());
-                    server.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
-                }
-
-                final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(server.currentCause(),
-                        (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()), new Vector3d(x, y, z),
-                        new Vector3d(x, y, z));
-
-                if (!hasMovementContext) {
-                    server.popCause();
-                    server.removeContext(EventContextKeys.MOVEMENT_TYPE);
-                }
-
-                if (SpongeCommon.post(event)) {
-                    return;
-                }
-
-                destinationPosition = event.destinationPosition();
+            if (ShouldFire.MOVE_ENTITY_EVENT && fireMoveEvent) {
+                destinationPosition = this.impl$fireMoveEvent(PhaseTracker.SERVER, new Vector3d(x, y, z));
             } else {
                 destinationPosition = new Vector3d(x, y, z);
             }
@@ -786,7 +797,36 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     this.shadow$getId());
             this.level.getChunk(chunkpos.x, chunkpos.z);
             this.shadow$teleportTo(destinationPosition.x(), destinationPosition.y(), destinationPosition.z());
+            // Sponge: return success
+            return true;
         }
+        // Sponge: return failure
+        return false;
+    }
+
+    protected final @org.checkerframework.checker.nullness.qual.Nullable Vector3d impl$fireMoveEvent(
+            final PhaseTracker phaseTracker, final Vector3d originalDestinationPosition) {
+        final boolean hasMovementContext = phaseTracker.currentContext().containsKey(EventContextKeys.MOVEMENT_TYPE);
+        if (!hasMovementContext) {
+            phaseTracker.pushCause(SpongeCommon.activePlugin());
+            phaseTracker.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
+        }
+
+        final MoveEntityEvent event = SpongeEventFactory.createMoveEntityEvent(phaseTracker.currentCause(),
+                (org.spongepowered.api.entity.Entity) this, VecHelper.toVector3d(this.shadow$position()),
+                originalDestinationPosition,
+                originalDestinationPosition);
+
+        if (!hasMovementContext) {
+            phaseTracker.popCause();
+            phaseTracker.removeContext(EventContextKeys.MOVEMENT_TYPE);
+        }
+
+        if (SpongeCommon.post(event)) {
+            return null;
+        }
+
+        return event.destinationPosition();
     }
 
     @Inject(method = "startRiding(Lnet/minecraft/world/entity/Entity;Z)Z",
@@ -1105,7 +1145,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                     return;
                 }
                 final DataTransactionResult transaction = DataTransactionResult.builder()
-                    .replace(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, Ticks.of(this.remainingFireTicks)))
+                    .replace(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, Ticks.of(Math.max(this.remainingFireTicks, 0))))
                     .success(new ImmutableSpongeValue<>(Keys.FIRE_TICKS, Ticks.of(event.fireTicks())))
                     .result(DataTransactionResult.Type.SUCCESS)
                     .build();

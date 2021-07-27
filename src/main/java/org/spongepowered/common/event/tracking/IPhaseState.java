@@ -42,7 +42,6 @@ import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.block.transaction.Operation;
-import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -392,5 +391,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         final TickNextTickData<?> entry
     ) {
 
+    }
+
+    default boolean isApplyingStreams() {
+        return false;
     }
 }

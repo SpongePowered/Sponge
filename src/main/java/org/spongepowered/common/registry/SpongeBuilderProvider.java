@@ -35,6 +35,7 @@ import org.spongepowered.api.advancement.criteria.trigger.FilteredTrigger;
 import org.spongepowered.api.advancement.criteria.trigger.Trigger;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
+import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.Parameter;
@@ -106,6 +107,7 @@ import org.spongepowered.api.scoreboard.Team;
 import org.spongepowered.api.scoreboard.objective.Objective;
 import org.spongepowered.api.service.ban.Ban;
 import org.spongepowered.api.util.ResettableBuilder;
+import org.spongepowered.api.util.transformation.Transformation;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.WorldTypeEffect;
 import org.spongepowered.api.world.WorldTypeTemplate;
@@ -121,6 +123,7 @@ import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.api.world.schematic.PaletteType;
+import org.spongepowered.api.world.schematic.Schematic;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.common.advancement.SpongeAdvancementBuilder;
@@ -132,6 +135,7 @@ import org.spongepowered.common.advancement.criterion.SpongeScoreCriterionBuilde
 import org.spongepowered.common.ban.SpongeBanBuilder;
 import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
+import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.command.SpongeParameterizedCommandBuilder;
 import org.spongepowered.common.command.parameter.SpongeParameterKeyBuilder;
 import org.spongepowered.common.command.parameter.flag.SpongeFlagBuilder;
@@ -201,6 +205,7 @@ import org.spongepowered.common.scheduler.SpongeTaskBuilder;
 import org.spongepowered.common.scoreboard.SpongeObjective;
 import org.spongepowered.common.scoreboard.builder.SpongeScoreboardBuilder;
 import org.spongepowered.common.scoreboard.builder.SpongeTeamBuilder;
+import org.spongepowered.common.util.transformation.SpongeTransformationBuilder;
 import org.spongepowered.common.world.SpongeExplosionBuilder;
 import org.spongepowered.common.world.SpongeWorldTypeEffect;
 import org.spongepowered.common.world.biome.provider.SpongeCheckerboardBiomeConfig;
@@ -214,6 +219,7 @@ import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConf
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
 import org.spongepowered.common.world.generation.config.structure.SpongeStructureGenerationConfigBuilder;
 import org.spongepowered.common.world.schematic.SpongePaletteTypeBuilder;
+import org.spongepowered.common.world.schematic.SpongeSchematicBuilder;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 import org.spongepowered.common.world.server.SpongeWorldTemplate;
 import org.spongepowered.common.world.server.SpongeWorldTypeTemplate;
@@ -292,9 +298,9 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(TabListEntry.Builder.class, TabListEntryBuilder::new)
                 .register(TradeOfferGenerator.Builder.class, SpongeTradeOfferGenerator.Builder::new)
                 .register(ItemStackGenerator.Builder.class, SpongeItemStackGenerator.Builder::new)
-                .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::new)
-                //            .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::new)
-                //            .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
+                .register(EntityArchetype.Builder.class, SpongeEntityArchetypeBuilder::unpooled)
+                .register(BlockEntityArchetype.Builder.class, SpongeBlockEntityArchetypeBuilder::unpooled)
+                .register(Schematic.Builder.class, SpongeSchematicBuilder::new)
                 .register(Inventory.Builder.class, SpongeInventoryBuilder::new)
                 .register(ViewableInventory.Builder.class, SpongeViewableInventoryBuilder::new)
                 .register(InventoryTransactionResult.Builder.class, InventoryTransactionResultImpl.Builder::new)
@@ -355,6 +361,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(MapColor.Builder.class, SpongeMapColorBuilder::new)
                 .register(MapDecoration.Builder.class, SpongeMapDecorationBuilder::new)
                 .register(MapCanvas.Builder.class, SpongeMapCanvasBuilder::new)
+                .register(Transformation.Builder.class, SpongeTransformationBuilder::new)
         ;
     }
 }

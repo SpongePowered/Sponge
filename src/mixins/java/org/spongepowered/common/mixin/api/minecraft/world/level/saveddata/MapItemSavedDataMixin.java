@@ -176,6 +176,7 @@ public abstract class MapItemSavedDataMixin extends SavedData implements MapItem
     @Redirect(method = "addDecoration",
             at = @At(
                     value = "INVOKE",
+                    remap = false,
                     target = "Ljava/util/Map;put(Ljava/lang/Object;Ljava/lang/Object;)Ljava/lang/Object;"),
             allow = 1)
     public Object impl$setKeyOnValue(final Map map, final Object key, final Object value) {

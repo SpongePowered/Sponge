@@ -36,6 +36,7 @@ import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Arrays;
@@ -47,7 +48,7 @@ import java.util.stream.Stream;
 /**
  * Mutable biome volume backed by a byte array.
  */
-public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements BiomeVolume.Mutable<ByteArrayMutableBiomeBuffer> {
+public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements BiomeVolume.Mutable {
 
     private final byte[] biomes;
     private final Palette.Mutable<Biome, Biome> palette;
@@ -76,9 +77,7 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
 
         final byte biomeId = this.biomes[this.getIndex(x, y, z)];
         return this.palette.get(biomeId & 255, Sponge.server().registries())
-            .orElseGet(Sponge.server().registries()
-                .registry(RegistryTypes.BIOME)
-                .value(Biomes.OCEAN)
+            .orElseGet(() -> Biomes.OCEAN.get(Sponge.server().registries())
             );
     }
 
@@ -106,13 +105,13 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
     }
 
     @Override
-    public VolumeStream<ByteArrayMutableBiomeBuffer, Biome> biomeStream(
+    public VolumeStream<BiomeVolume.Mutable, Biome> biomeStream(
         final Vector3i min,
         final Vector3i max,
         final StreamOptions options
     ) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final byte[] biomes;
         if (options.carbonCopy()) {
@@ -120,17 +119,17 @@ public final class ByteArrayMutableBiomeBuffer extends AbstractBiomeBuffer imple
         } else {
             biomes = this.biomes;
         }
-        final Stream<VolumeElement<ByteArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
-            .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
-                .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
-                    .mapToObj(y -> VolumeElement.of(this, () -> {
+        final Stream<VolumeElement<BiomeVolume.Mutable, Biome>> stateStream = IntStream.range(min.x(), max.x() + 1)
+            .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
+                .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
+                    .mapToObj(y -> VolumeElement.of((BiomeVolume.Mutable) this, () -> {
                         final byte biomeId = biomes[this.getIndex(x, y, z)];
                         return this.palette.get(biomeId & 255, Sponge.server().registries())
                             .orElseGet(() -> Sponge.server().registries()
                                 .registry(RegistryTypes.BIOME)
                                 .value(Biomes.OCEAN)
                             );
-                    }, new Vector3i(x, y, z)))
+                    }, new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

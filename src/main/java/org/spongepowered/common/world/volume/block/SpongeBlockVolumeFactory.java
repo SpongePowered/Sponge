@@ -43,7 +43,7 @@ import org.spongepowered.math.vector.Vector3i;
 public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
 
     @Override
-    public BlockVolume.Mutable<@NonNull ?> empty(
+    public BlockVolume.Mutable empty(
         final Palette<BlockState, BlockType> palette,
         final RegistryReference<BlockType> defaultState,
         final Vector3i min,
@@ -53,7 +53,7 @@ public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
     }
 
     @Override
-    public BlockVolume.Mutable<@NonNull ?> copyFromRange(
+    public BlockVolume.Mutable copyFromRange(
         final BlockVolume.Streamable<@NonNull ?> existing, final Vector3i newMin, final Vector3i newMax
     ) {
         final ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(newMin, newMax.sub(newMin));
@@ -63,10 +63,10 @@ public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
     }
 
     @Override
-    public BlockVolume.Mutable<@NonNull ?> copy(final BlockVolume.Streamable<@NonNull ?> existing
+    public BlockVolume.Mutable copy(final BlockVolume.Streamable<@NonNull ?> existing
     ) {
-        final ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(existing.blockMin(), existing.blockSize());
-        existing.blockStateStream(existing.blockMin(), existing.blockMax(), StreamOptions.lazily())
+        final ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(existing.min(), existing.size());
+        existing.blockStateStream(existing.min(), existing.max(), StreamOptions.lazily())
             .apply(VolumeCollectors.of(buffer, VolumePositionTranslators.identity(), VolumeApplicators.applyBlocks()));
         return buffer;
     }
@@ -78,10 +78,10 @@ public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
             return this.createImmutableFromBufferData((ArrayMutableBlockBuffer) existing);
         }
         final ArrayMutableBlockBuffer buffer = new ArrayMutableBlockBuffer(
-            existing.blockMin(),
-            existing.blockSize()
+            existing.min(),
+            existing.size()
         );
-        existing.blockStateStream(existing.blockMin(), existing.blockMax(), StreamOptions.lazily())
+        existing.blockStateStream(existing.min(), existing.max(), StreamOptions.lazily())
             .apply(VolumeCollectors.of(buffer, VolumePositionTranslators.identity(), VolumeApplicators.applyBlocks()));
         return this.createImmutableFromBufferData(buffer);
     }
@@ -89,7 +89,7 @@ public class SpongeBlockVolumeFactory implements BlockVolumeFactory {
     private ArrayImmutableBlockBuffer createImmutableFromBufferData(final ArrayMutableBlockBuffer arrayBuffer) {
         final BlockBackingData data = arrayBuffer.getCopiedBackingData();
         final Palette.Immutable<BlockState, BlockType> immutablePalette = arrayBuffer.getPalette().asImmutable();
-        return new ArrayImmutableBlockBuffer(immutablePalette, arrayBuffer.blockMin(), arrayBuffer.blockSize(), data);
+        return new ArrayImmutableBlockBuffer(immutablePalette, arrayBuffer.min(), arrayBuffer.size(), data);
     }
 
     @Override

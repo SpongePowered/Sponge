@@ -70,7 +70,7 @@ public abstract class LightningBoltMixin extends EntityMixin {
     }
 
     private boolean impl$strikeBlockAndAddSnapshot(final net.minecraft.world.level.Level world, final BlockPos pos, final BlockState blockState) {
-        if (!this.impl$effect && ((World) world).containsBlock(pos.getX(), pos.getY(), pos.getZ())) {
+        if (!this.impl$effect && ((World) world).contains(pos.getX(), pos.getY(), pos.getZ())) {
             final Vector3i pos3i = VecHelper.toVector3i(pos);
             final Transaction<BlockSnapshot> transaction = new Transaction<>(
                 SpongeBlockSnapshotBuilder.pooled()

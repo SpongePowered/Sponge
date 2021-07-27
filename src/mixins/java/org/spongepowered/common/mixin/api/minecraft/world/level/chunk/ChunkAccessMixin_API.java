@@ -30,20 +30,22 @@ import net.minecraft.world.level.chunk.ChunkStatus;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.chunk.ChunkState;
-import org.spongepowered.api.world.chunk.ProtoChunk;
+import org.spongepowered.api.world.chunk.Chunk;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.util.ChunkUtil;
+import org.spongepowered.common.accessor.world.level.chunk.ChunkBiomeContainerAccessor;
+import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
 import javax.annotation.Nullable;
 
 @Mixin(ChunkAccess.class)
-public interface ChunkAccessMixin_API<P extends ProtoChunk<P>> extends ProtoChunk<P> {
+public interface ChunkAccessMixin_API<P extends Chunk<P>> extends Chunk<P> {
 
     // @formatter:on
     @Shadow ChunkStatus shadow$getStatus();
     @Shadow @Nullable ChunkBiomeContainer shadow$getBiomes();
     @Shadow void shadow$addEntity(net.minecraft.world.entity.Entity entity);
+    @Shadow void shadow$setUnsaved(boolean var1);
     // @formatter:off
 
     @Override
@@ -63,7 +65,7 @@ public interface ChunkAccessMixin_API<P extends ProtoChunk<P>> extends ProtoChun
 
     @Override
     default boolean setBiome(final int x, final int y, final int z, final Biome biome) {
-        return ChunkUtil.setBiome(this.shadow$getBiomes(), x, y, z, biome);
+        return VolumeStreamUtils.setBiomeOnNativeChunk(x, y, z, biome, () -> (ChunkBiomeContainerAccessor) this.shadow$getBiomes(), () -> this.shadow$setUnsaved(true));
     }
 
 }

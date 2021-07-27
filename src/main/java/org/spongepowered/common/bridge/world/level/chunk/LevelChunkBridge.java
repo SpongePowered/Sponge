@@ -25,6 +25,7 @@
 package org.spongepowered.common.bridge.world.level.chunk;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.util.Direction;
 import org.spongepowered.common.entity.PlayerTracker;
 
@@ -86,4 +87,7 @@ public interface LevelChunkBridge {
     boolean bridge$isActive();
 
     LevelChunk[] bridge$getNeighborArray();
+
+    boolean bridge$spawnEntity(Entity entity);
+
 }

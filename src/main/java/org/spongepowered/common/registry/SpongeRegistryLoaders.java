@@ -726,6 +726,10 @@ public final class SpongeRegistryLoaders {
                     (string, registry) -> BlockStateSerializerDeserializer.deserialize(string),
                     (registry, blockState) -> BlockStateSerializerDeserializer.serialize(blockState)
             ));
+            l.add(PaletteTypes.BLOCK_ENTITY_PALETTE, k -> new SpongePaletteType<>(
+                (string, registry) -> registry.findValue(ResourceKey.resolve(string)),
+                (registry, blockEntityType) -> registry.valueKey(blockEntityType).toString()
+            ));
         });
     }
 

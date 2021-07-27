@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -33,7 +33,7 @@ import org.spongepowered.common.util.PrettyPrinter;
 
 public class ChunkLoadContext extends GenerationContext<ChunkLoadContext> {
 
-    private @Nullable Chunk chunk;
+    private @Nullable WorldChunk chunk;
 
     public ChunkLoadContext(final IPhaseState<ChunkLoadContext> state, final PhaseTracker tracker) {
         super(state, tracker);
@@ -47,11 +47,11 @@ public class ChunkLoadContext extends GenerationContext<ChunkLoadContext> {
 
     @SuppressWarnings("unchecked")
     public ChunkLoadContext chunk(final net.minecraft.world.level.chunk.LevelChunk chunk) {
-        this.chunk = (Chunk) chunk;
+        this.chunk = (WorldChunk) chunk;
         return this;
     }
 
-    public final Chunk getChunk() {
+    public final WorldChunk getChunk() {
         return this.chunk;
     }
 

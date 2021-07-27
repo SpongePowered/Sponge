@@ -337,6 +337,7 @@ public abstract class PlayerListMixin implements PlayerListBridge {
         ),
         at = @At(
             value = "INVOKE",
+            remap = false,
             target = "Ljava/lang/String;equalsIgnoreCase(Ljava/lang/String;)Z"
         )
     )

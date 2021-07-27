@@ -117,7 +117,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
 
     @Inject(method = "hurt", slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/world/damagesource/DamageSource;isCreativePlayer()Z")),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;playBrokenSound()V"), cancellable = true)
-    private void fireDamageEventCreativePunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    private void impl$fireDamageEventCreativePunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         this.impl$fireDestroyDamageEvent(source, cir);
     }
 
@@ -126,7 +126,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
                     from = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/decoration/ArmorStand;lastHit:J", opcode = Opcodes.GETFIELD)),
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;broadcastEntityEvent(Lnet/minecraft/world/entity/Entity;B)V"),
             cancellable = true)
-    private void fireDamageEventFirstPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    private void impl$fireDamageEventFirstPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         // While this doesn't technically "damage" the armor stand, it feels
         // like damage in other respects, so fire an event.
         try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
@@ -144,7 +144,7 @@ public abstract class ArmorStandMixin extends LivingEntityMixin {
             target = "Lnet/minecraft/world/entity/decoration/ArmorStand;brokenByPlayer(Lnet/minecraft/world/damagesource/DamageSource;)V"
         ),
         cancellable = true)
-    private void fireDamageEventSecondPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
+    private void impl$fireDamageEventSecondPunch(final DamageSource source, final float amount, final CallbackInfoReturnable<Boolean> cir) {
         this.impl$fireDestroyDamageEvent(source, cir);
     }
 

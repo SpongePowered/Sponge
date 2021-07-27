@@ -58,7 +58,7 @@ import java.util.stream.IntStream;
 import java.util.stream.Stream;
 import java.util.stream.StreamSupport;
 
-public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implements EntityVolume.Mutable<ObjectArrayMutableEntityBuffer> {
+public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implements EntityVolume.Mutable {
     // This is our backing block buffer
     private final ArrayMutableBlockBuffer blockBuffer;
     private final List<Entity> entities;
@@ -98,19 +98,19 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableEntityBuffer, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<EntityVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
         final StreamOptions options
     ) {
-        final Stream<VolumeElement<ObjectArrayMutableEntityBuffer, BlockState>> stateStream = IntStream.range(
-            this.blockMin().x(),
-            this.blockMax().x() + 1
+        final Stream<VolumeElement<EntityVolume.Mutable, BlockState>> stateStream = IntStream.range(
+            this.min().x(),
+            this.max().x() + 1
         )
-            .mapToObj(x -> IntStream.range(this.blockMin().z(), this.blockMax().z() + 1)
-                .mapToObj(z -> IntStream.range(this.blockMin().y(), this.blockMax().y() + 1)
+            .mapToObj(x -> IntStream.range(this.min().z(), this.max().z() + 1)
+                .mapToObj(z -> IntStream.range(this.min().y(), this.max().y() + 1)
                     .mapToObj(y -> VolumeElement.of(
-                        this,
+                        (EntityVolume.Mutable) this,
                         () -> this.blockBuffer.block(x, y, z),
-                        new Vector3i(x, y, z)
+                        new Vector3d(x, y, z)
                     ))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
@@ -153,8 +153,8 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
         if (entity == null) {
             throw new IllegalArgumentException("Entity cannot be null!");
         }
-        if (!this.containsBlock(entity.position().toInt())) {
-            throw new IllegalArgumentException(String.format("Entity is out of bounds! {min: %s, max: %s} does not contain %s", this.blockMin(), this.blockMax(), entity.position()));
+        if (!this.contains(entity.position().toInt())) {
+            throw new IllegalArgumentException(String.format("Entity is out of bounds! {min: %s, max: %s} does not contain %s", this.min(), this.max(), entity.position()));
         }
         return this.entities.add(entity);
     }
@@ -190,10 +190,10 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
     ) {
         Objects.requireNonNull(entityClass);
         Objects.requireNonNull(box);
-        if (!this.containsBlock(box.min().toInt())) {
+        if (!this.contains(box.min().toInt())) {
             throw new IllegalArgumentException("Box is larger than volume allowed");
         }
-        if (!this.containsBlock(box.max().toInt())) {
+        if (!this.contains(box.max().toInt())) {
             throw new IllegalArgumentException("Box is larger than volume allowed!");
         }
         Stream<T> tStream = this.entities.stream()
@@ -212,10 +212,10 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
     public Collection<? extends Entity> entities(final AABB box, final Predicate<? super Entity> filter) {
         Objects.requireNonNull(filter, "Filter cannot be null");
         Objects.requireNonNull(box, "Bounding box cannot be null");
-        if (!this.containsBlock(box.min().toInt())) {
+        if (!this.contains(box.min().toInt())) {
             throw new IllegalArgumentException("Box is larger than volume allowed");
         }
-        if (!this.containsBlock(box.max().toInt())) {
+        if (!this.contains(box.max().toInt())) {
             throw new IllegalArgumentException("Box is larger than volume allowed!");
         }
         return this.entities.stream()
@@ -225,12 +225,12 @@ public class ObjectArrayMutableEntityBuffer extends AbstractBlockBuffer implemen
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableEntityBuffer, Entity> entityStream(final Vector3i min, final Vector3i max, final StreamOptions options
+    public VolumeStream<EntityVolume.Mutable, Entity> entityStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
         // Normally, we'd be able to shadow-copy, but we can't copy entities, and we're only using a list, so we can iterate only on the list.
-        final Stream<VolumeElement<ObjectArrayMutableEntityBuffer, Entity>> backingStream = this.entities.stream()
-            .map(entity -> VolumeElement.of(this, entity, entity.blockPosition()));
+        final Stream<VolumeElement<EntityVolume.Mutable, Entity>> backingStream = this.entities.stream()
+            .map(entity -> VolumeElement.of(this, entity, entity.position()));
         return new SpongeVolumeStream<>(backingStream, () -> this);
     }
 

@@ -81,7 +81,7 @@ public abstract class LivingEntityMixin_Inventory {
     }
 
     @Inject(method = "handleEquipmentChanges",
-            at = @At(value = "INVOKE", target = "Ljava/util/Map;forEach(Ljava/util/function/BiConsumer;)V"))
+            at = @At(value = "INVOKE", remap = false, target = "Ljava/util/Map;forEach(Ljava/util/function/BiConsumer;)V"))
     private void inventory$onHandleEquipmentChanges(Map<EquipmentSlot, ItemStack> map, CallbackInfo ci) {
         if ((Object) this instanceof Player && ((Entity) (Object) this).tickCount == 1) {
             // Ignore Equipment on player spawn/respawn

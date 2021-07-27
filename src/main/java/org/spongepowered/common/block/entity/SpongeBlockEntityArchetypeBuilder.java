@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.block.entity;
 
+import net.minecraft.nbt.CompoundTag;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockState;
@@ -42,22 +43,39 @@ import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.util.Constants;
 
+import java.util.Deque;
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.nbt.CompoundTag;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder<BlockEntityArchetype> implements BlockEntityArchetype.Builder {
+
+    private static final Deque<SpongeBlockEntityArchetypeBuilder> pool = new ConcurrentLinkedDeque<>();
+
+    public static SpongeBlockEntityArchetypeBuilder unpooled() {
+        return new SpongeBlockEntityArchetypeBuilder(false);
+    }
+
+    public static SpongeBlockEntityArchetypeBuilder pooled() {
+        final @Nullable SpongeBlockEntityArchetypeBuilder builder = SpongeBlockEntityArchetypeBuilder.pool.pollFirst();
+        if (builder != null) {
+            return builder.reset();
+        }
+        return new SpongeBlockEntityArchetypeBuilder(true);
+    }
 
     @MonotonicNonNull BlockState blockState;
     @MonotonicNonNull BlockEntityType type;
     @Nullable DataContainer data;
+    private final boolean pooled;
 
-    public SpongeBlockEntityArchetypeBuilder() {
+    SpongeBlockEntityArchetypeBuilder(final boolean pooled) {
         super(BlockEntityArchetype.class, Constants.Sponge.BlockEntityArchetype.BASE_VERSION);
+        this.pooled = pooled;
     }
 
     @Override
-    public BlockEntityArchetype.Builder reset() {
+    public SpongeBlockEntityArchetypeBuilder reset() {
         this.blockState = null;
         this.type = null;
         this.data = null;
@@ -114,9 +132,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y);
         compound.remove(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z);
-        final String tileId = compound.getString(Constants.Item.BLOCK_ENTITY_ID);
-        compound.remove("id");
-        compound.putString(Constants.Sponge.BlockEntityArchetype.TILE_ENTITY_ID, tileId);
+        compound.remove(Constants.Item.BLOCK_ENTITY_ID);
         this.data = NBTTranslator.INSTANCE.translate(compound);
         this.blockState = blockEntity.block();
         this.type = blockEntity.type();
@@ -131,7 +147,7 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
     }
 
     @Override
-    public BlockEntityArchetype build() {
+    public SpongeBlockEntityArchetype build() {
         if (this.blockState == null) {
             throw new IllegalStateException("BlockState cannot be null!");
         }
@@ -141,12 +157,17 @@ public final class SpongeBlockEntityArchetypeBuilder extends AbstractDataBuilder
         if (this.data == null) {
             this.data = DataContainer.createNew();
         }
-        return new SpongeBlockEntityArchetype(this);
+        final SpongeBlockEntityArchetype archetype = new SpongeBlockEntityArchetype(this);
+        if (this.pooled) {
+            this.reset();
+            SpongeBlockEntityArchetypeBuilder.pool.push(this);
+        }
+        return archetype;
     }
 
     @Override
     protected Optional<BlockEntityArchetype> buildContent(final DataView container) throws InvalidDataException {
-        final SpongeBlockEntityArchetypeBuilder builder = new SpongeBlockEntityArchetypeBuilder();
+        final SpongeBlockEntityArchetypeBuilder builder = SpongeBlockEntityArchetypeBuilder.pooled();
         if (container.contains(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_TYPE, Constants.Sponge.BlockEntityArchetype.BLOCK_STATE)) {
             builder.blockEntity(container.getRegistryValue(Constants.Sponge.BlockEntityArchetype.BLOCK_ENTITY_TYPE,
                 RegistryTypes.BLOCK_ENTITY_TYPE)
