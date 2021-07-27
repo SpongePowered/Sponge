@@ -75,6 +75,7 @@ import org.spongepowered.api.world.biome.provider.BiomeProvider;
 import org.spongepowered.api.world.biome.provider.MultiNoiseBiomeConfig;
 import org.spongepowered.api.world.biome.provider.multinoise.MultiNoiseConfig;
 import org.spongepowered.api.world.generation.ChunkGenerator;
+import org.spongepowered.api.world.generation.config.FlatGeneratorConfig;
 import org.spongepowered.api.world.generation.config.NoiseGeneratorConfig;
 import org.spongepowered.api.world.generation.config.flat.LayerConfig;
 import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
@@ -135,6 +136,7 @@ import org.spongepowered.common.world.biome.SpongeBiomeProviderFactory;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.biome.provider.multinoise.SpongeMultiNoiseConfigFactory;
 import org.spongepowered.common.world.generation.SpongeChunkGeneratorFactory;
+import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfig;
 import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
 import org.spongepowered.common.world.generation.config.flat.SpongeLayerConfigFactory;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
@@ -252,6 +254,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(NodeTree.Factory.class, new SpongeNodeTree.FactoryImpl())
                 .registerFactory(TagTemplate.Factory.class, new SpongeTagTemplateFactory())
                 .registerFactory(EventListenerRegistration.Factory.class, new SpongeEventListenerRegistration.FactoryImpl())
+                .registerFactory(FlatGeneratorConfig.Factory.class, new SpongeFlatGeneratorConfig.FactoryImpl())
         ;
     }
 }

@@ -214,7 +214,7 @@ import org.spongepowered.common.world.biome.provider.SpongeLayeredBiomeConfg;
 import org.spongepowered.common.world.biome.provider.SpongeMultiNoiseBiomeConfig;
 import org.spongepowered.common.world.border.SpongeWorldBorderBuilder;
 import org.spongepowered.common.world.generation.SpongeWorldGenerationConfigMutableBuilder;
-import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfigBuilder;
+import org.spongepowered.common.world.generation.config.SpongeFlatGeneratorConfig;
 import org.spongepowered.common.world.generation.config.SpongeNoiseGeneratorConfig;
 import org.spongepowered.common.world.generation.config.noise.SpongeNoiseConfig;
 import org.spongepowered.common.world.generation.config.structure.SpongeStructureGenerationConfigBuilder;
@@ -352,7 +352,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(WorldTemplate.Builder.class, SpongeWorldTemplate.BuilderImpl::new)
                 .register(NoiseConfig.Builder.class, SpongeNoiseConfig.BuilderImpl::new)
                 .register(StructureGenerationConfig.Builder.class, SpongeStructureGenerationConfigBuilder::new)
-                .register(FlatGeneratorConfig.Builder.class, SpongeFlatGeneratorConfigBuilder::new)
+                .register(FlatGeneratorConfig.Builder.class, SpongeFlatGeneratorConfig.BuilderImpl::new)
                 .register(NoiseGeneratorConfig.Builder.class, SpongeNoiseGeneratorConfig.BuilderImpl::new)
                 .register(CheckerboardBiomeConfig.Builder.class, SpongeCheckerboardBiomeConfig.BuilderImpl::new)
                 .register(EndStyleBiomeConfig.Builder.class, SpongeEndStyleBiomeConfig.BuilderImpl::new)

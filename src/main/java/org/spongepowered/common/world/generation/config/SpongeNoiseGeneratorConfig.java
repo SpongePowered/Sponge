@@ -44,6 +44,10 @@ public final class SpongeNoiseGeneratorConfig {
         public BlockState defaultBlock, defaultFluid;
         public int bedrockRoofY, bedrockFloorY, seaLevel;
 
+        public BuilderImpl() {
+            this.reset();
+        }
+
         @Override
         public NoiseGeneratorConfig.Builder structureConfig(final StructureGenerationConfig config) {
             this.structureConfig = Objects.requireNonNull(config, "config");
