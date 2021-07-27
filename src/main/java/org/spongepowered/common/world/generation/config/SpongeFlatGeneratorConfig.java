@@ -108,7 +108,6 @@ public final class SpongeFlatGeneratorConfig {
             this.structureConfig = null;
             this.biome = null;
             this.layers.clear();
-            this.biome = Biomes.PLAINS;
             this.performDecoration = false;
             this.populateLakes = true;
             return this;
