@@ -183,11 +183,6 @@ public abstract class ItemEntityMixin extends EntityMixin implements ItemEntityB
         return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate;
     }
 
-    @ModifyConstant(method = "tick", constant = @Constant(intValue = 6000))
-    private int impl$tickUseDespawnRateFromConfig(final int originalValue) {
-        return SpongeGameConfigs.getForWorld(this.level).get().entity.item.despawnRate;
-    }
-
     @Inject(method = "tryToMerge", cancellable = true,
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/item/ItemEntity;merge(Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/entity/item/ItemEntity;Lnet/minecraft/world/item/ItemStack;)V"))
     private void impl$merge(final ItemEntity param0, final CallbackInfo ci) {
