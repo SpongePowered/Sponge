@@ -158,16 +158,16 @@ public final class ArmorStandData {
                             ((ArmorStandAccessor) h).accessor$disabledSlots(disabledSlots);
                         })
                     .create(Keys.LEFT_ARM_ROTATION)
-                        .get(h -> VecHelper.toVector3d(h.getLeftArmPose()))
+                        .get(h -> VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$leftArmPose()))
                         .set((h, v) -> h.setLeftArmPose(VecHelper.toRotation(v)))
                     .create(Keys.LEFT_LEG_ROTATION)
-                        .get(h -> VecHelper.toVector3d(h.getLeftLegPose()))
+                        .get(h -> VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$leftLegPose()))
                         .set((h, v) -> h.setLeftLegPose(VecHelper.toRotation(v)))
                     .create(Keys.RIGHT_ARM_ROTATION)
-                        .get(h -> VecHelper.toVector3d(h.getRightArmPose()))
+                        .get(h -> VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$rightArmPose()))
                         .set((h, v) -> h.setRightArmPose(VecHelper.toRotation(v)))
                     .create(Keys.RIGHT_LEG_ROTATION)
-                        .get(h -> VecHelper.toVector3d(h.getRightLegPose()))
+                        .get(h -> VecHelper.toVector3d(((ArmorStandAccessor) h).accessor$rightLegPose()))
                         .set((h, v) -> h.setRightLegPose(VecHelper.toRotation(v)));
     }
     // @formatter:on
