@@ -426,11 +426,6 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     }
 
     @Override
-    public boolean spawnEntity(final Entity entity) {
-        return ((LevelChunkBridge) this.shadow$getChunkAt(((net.minecraft.world.entity.Entity) entity).blockPosition())).bridge$spawnEntity(entity);
-    }
-
-    @Override
     public Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
         final List<org.spongepowered.api.entity.Entity> entityList = new ArrayList<>();
         for (final org.spongepowered.api.entity.Entity entity : entities) {

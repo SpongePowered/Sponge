@@ -357,7 +357,11 @@ public abstract class LevelChunkMixin implements LevelChunkBridge, CacheKeyBridg
         final net.minecraft.world.entity.Entity mcEntity = (net.minecraft.world.entity.Entity) entity;
         final BlockPos blockPos = mcEntity.blockPosition();
         if (this.chunkPos.x == blockPos.getX() >> 4 && this.chunkPos.z == blockPos.getZ() >> 4) {
-            this.shadow$addEntity(mcEntity);
+            // Calling addEntity on the chunk only adds them to storage,
+            // we need to redirect this to add to the world.
+            //
+            // See https://github.com/SpongePowered/Sponge/issues/3488
+            this.level.addFreshEntity(mcEntity);
             return true;
         }
         return false;
