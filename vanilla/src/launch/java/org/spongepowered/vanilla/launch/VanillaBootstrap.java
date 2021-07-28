@@ -22,50 +22,43 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common;
+package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Injector;
 import com.google.inject.Stage;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
+import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
+import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
-public final class SpongeBootstrap {
-
-    private static Injector injector;
-    private static SpongeLifecycle lifecycle;
+public final class VanillaBootstrap {
 
     public static void perform(final String engineName, final Runnable engineStart) {
         final Stage stage = SpongeGuice.getInjectorStage(Launch.instance().injectionStage());
         SpongeCommon.logger().debug("Creating injector in stage '{}'", stage);
         final Injector bootstrapInjector = Launch.instance().createInjector();
-        SpongeBootstrap.injector = bootstrapInjector;
-        SpongeBootstrap.lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);
-        SpongeBootstrap.lifecycle.establishFactories();
-        SpongeBootstrap.lifecycle.establishBuilders();
-        SpongeBootstrap.lifecycle.initTimings();
-        Launch.instance().performLifecycle();
-        SpongeBootstrap.lifecycle.registerPluginListeners();
-        SpongeBootstrap.lifecycle.callConstructEvent();
-        SpongeBootstrap.lifecycle.callRegisterFactoryEvent();
-        SpongeBootstrap.lifecycle.callRegisterBuilderEvent();
-        SpongeBootstrap.lifecycle.callRegisterChannelEvent();
-        SpongeBootstrap.lifecycle.establishGameServices();
-        SpongeBootstrap.lifecycle.establishDataKeyListeners();
+        final SpongeLifecycle lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);
+        Launch.instance().setLifecycle(lifecycle);
+        lifecycle.establishFactories();
+        lifecycle.establishBuilders();
+        lifecycle.initTimings();
+        ((VanillaPluginManager) Launch.instance().pluginManager()).loadPlugins((VanillaPluginPlatform) Launch.instance().pluginPlatform());
+        lifecycle.registerPluginListeners();
+        lifecycle.callConstructEvent();
+        lifecycle.callRegisterFactoryEvent();
+        lifecycle.callRegisterBuilderEvent();
+        lifecycle.callRegisterChannelEvent();
+        lifecycle.establishGameServices();
+        lifecycle.establishDataKeyListeners();
 
         SpongePacketHandler.init((SpongeChannelManager) Sponge.channelManager());
 
         Launch.instance().logger().info("Loading Minecraft {}, please wait...", engineName);
         engineStart.run();
-    }
-
-    public static Injector injector() {
-        return SpongeBootstrap.injector;
-    }
-
-    public static SpongeLifecycle lifecycle() {
-        return SpongeBootstrap.lifecycle;
     }
 }

@@ -41,10 +41,10 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.bridge.server.MinecraftServerBridge;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.VanillaServer;
 import org.spongepowered.vanilla.mixin.core.server.MinecraftServerMixin_Vanilla;
 
@@ -65,7 +65,7 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin
 
     @Inject(method = "initServer", at = @At("HEAD"))
     private void vanilla$runEngineStartLifecycle(final CallbackInfoReturnable<Boolean> cir) {
-        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.establishServerServices();
 
         lifecycle.establishServerFeatures();
@@ -76,8 +76,7 @@ public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin
 
     @Inject(method = "initServer", at = @At("RETURN"))
     private void vanilla$callStartedEngineAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
-        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
-        lifecycle.callStartedEngineEvent(this);
+        Launch.instance().lifecycle().callStartedEngineEvent(this);
     }
 
     @Override

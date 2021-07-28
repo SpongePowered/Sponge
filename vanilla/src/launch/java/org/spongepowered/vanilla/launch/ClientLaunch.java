@@ -26,7 +26,6 @@ package org.spongepowered.vanilla.launch;
 
 import com.google.inject.Stage;
 import net.minecraft.client.main.Main;
-import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 
@@ -49,6 +48,6 @@ public final class ClientLaunch extends VanillaLaunch {
 
     @Override
     protected void performBootstrap(final String[] args) {
-        SpongeBootstrap.perform("Client", () -> Main.main(args));
+        VanillaBootstrap.perform("Client", () -> Main.main(args));
     }
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.core.server;
 
 import com.mojang.serialization.DynamicOps;
-import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.RegistryReadOps;
 import net.minecraft.server.Main;
@@ -40,12 +39,10 @@ import net.minecraft.world.level.storage.PrimaryLevelData;
 import org.spongepowered.api.datapack.DataPackTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeBootstrap;
-import org.spongepowered.common.SpongeLifecycle;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
@@ -74,7 +71,7 @@ public abstract class MainMixin {
     @Redirect(method = "main", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
     private static Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
-        final SpongeLifecycle lifecycle = SpongeBootstrap.lifecycle();
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.establishGlobalRegistries();
         lifecycle.establishDataProviders();
         lifecycle.callRegisterDataEvent();
@@ -84,7 +81,7 @@ public abstract class MainMixin {
 
     @Redirect(method = "main", at = @At(value = "NEW", target = "net/minecraft/world/level/storage/PrimaryLevelData"))
     private static PrimaryLevelData impl$setIsNewLevel(final LevelSettings settings, final WorldGenSettings generationSettings, final
-            Lifecycle lifecycle) {
+            com.mojang.serialization.Lifecycle lifecycle) {
         BootstrapProperties.setIsNewLevel(true);
         return new PrimaryLevelData(settings, generationSettings, lifecycle);
     }

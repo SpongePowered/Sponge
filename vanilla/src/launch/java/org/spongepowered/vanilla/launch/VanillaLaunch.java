@@ -68,11 +68,6 @@ public abstract class VanillaLaunch extends Launch {
     }
 
     @Override
-    public final void performLifecycle() {
-        this.pluginManager().loadPlugins(this.pluginPlatform());
-    }
-
-    @Override
     public final PluginContainer platformPlugin() {
         if (this.vanillaPlugin == null) {
             this.vanillaPlugin = this.pluginManager().plugin("spongevanilla").orElse(null);

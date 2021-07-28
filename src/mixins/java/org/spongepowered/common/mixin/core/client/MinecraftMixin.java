@@ -45,13 +45,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
@@ -101,7 +101,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 
     @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
     private void impl$callStoppedGame(final CallbackInfo ci) {
-        SpongeBootstrap.lifecycle().callStoppedGameEvent();
+        Launch.instance().lifecycle().callStoppedGameEvent();
     }
 
     @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$RegistryHolder;)Lnet/minecraft/resources/RegistryReadOps;"))
@@ -141,7 +141,7 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     @Redirect(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
     private Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
-        SpongeBootstrap.lifecycle().callRegisterDataPackValueEvent(datapackDir);
+        Launch.instance().lifecycle().callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
     }
 }
