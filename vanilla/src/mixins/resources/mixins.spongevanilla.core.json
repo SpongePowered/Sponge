@@ -33,6 +33,7 @@
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
         "world.entity.item.ItemEntityMixin_Vanilla",
         "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla",
+        "world.entity.vehicle.BoatMixin_Vanilla",
         "world.level.LevelMixin_Vanilla"
     ],
     "overwrites": {
