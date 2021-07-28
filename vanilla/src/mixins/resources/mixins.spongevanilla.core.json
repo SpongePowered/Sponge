@@ -25,6 +25,7 @@
         "entity.player.EntityMixin_Vanilla",
         "server.BootstrapMixin_Vanilla",
         "server.MinecraftServerMixin_Vanilla",
+        "server.level.ServerLevelMixin_Timings_Vanilla",
         "server.level.ServerLevelMixin_Vanilla",
         "server.level.ServerPlayerMixin_Vanilla",
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.level;
 
+import co.aikar.timings.sponge.TimingHistory;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
@@ -35,7 +36,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.mixin.core.world.level.LevelMixin_Timings;
-import co.aikar.timings.sponge.TimingHistory;
 
 import java.util.function.BooleanSupplier;
 
@@ -77,11 +77,6 @@ public abstract class ServerLevelMixin_Timings extends LevelMixin_Timings implem
 
     @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;removeFromChunk(Lnet/minecraft/world/entity/Entity;)V"))
     protected void impl$startEntityRemovalTimings(BooleanSupplier var1, CallbackInfo ci) {
-        this.bridge$getTimingsHandler().entityRemoval.startTiming();
-    }
-
-    @Inject(method = "tick", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerLevel;onEntityRemoved(Lnet/minecraft/world/entity/Entity;)V", shift = At.Shift.AFTER))
-    protected void impl$stopEntityRemovalTimings(BooleanSupplier var1, CallbackInfo ci) {
         this.bridge$getTimingsHandler().entityRemoval.startTiming();
     }
 
