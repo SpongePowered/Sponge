@@ -143,6 +143,6 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
      */
     private boolean isLibrary(final Path path) {
         final String completePath = path.toString();
-        return completePath.contains("kyori");
+        return completePath.contains("kyori") || completePath.contains("SpongeAPI");
     }
 }
