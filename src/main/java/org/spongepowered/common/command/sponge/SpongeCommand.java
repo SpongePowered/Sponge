@@ -60,7 +60,6 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformLevelBridge;
@@ -734,7 +733,7 @@ public class SpongeCommand {
                 Component.newline(),
                 this.key("Removed Entities:"), this.value(entitiesToRemove),
                 Component.newline(),
-                this.key("Removed Block Entities: "), this.value(((LevelAccessor) serverWorld).accessor$blockEntitiesToUnload().size())
+                this.key("Removed Block Entities: "), this.value(((LevelBridge) serverLevel).blockEntitiesToUnload().size())
         );
     }
 
