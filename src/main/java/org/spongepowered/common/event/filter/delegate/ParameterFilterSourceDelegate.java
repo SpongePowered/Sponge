@@ -26,12 +26,15 @@ package org.spongepowered.common.event.filter.delegate;
 
 import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.MethodVisitor;
+import org.objectweb.asm.Type;
 import org.spongepowered.api.util.Tuple;
 
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
+import java.util.Optional;
 
 public interface ParameterFilterSourceDelegate {
+    Type OPTIONAL = Type.getType(Optional.class);
 
     Tuple<Integer, Integer> write(
         ClassWriter cw, MethodVisitor mv, Method method, int paramIdx, int local, final int[] plocals, final Parameter[] params

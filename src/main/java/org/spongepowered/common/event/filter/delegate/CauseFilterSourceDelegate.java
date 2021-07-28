@@ -39,6 +39,7 @@ import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 public abstract class CauseFilterSourceDelegate implements ParameterFilterSourceDelegate {
+    protected static final Type CAUSE = Type.getType(Cause.class);
 
     @Override
     public Tuple<Integer, Integer> write(
@@ -47,7 +48,7 @@ public abstract class CauseFilterSourceDelegate implements ParameterFilterSource
         // Get the cause
         mv.visitVarInsn(ALOAD, 1);
         mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(Event.class), "cause",
-                "()" + Type.getDescriptor(Cause.class), true);
+                "()" + CauseFilterSourceDelegate.CAUSE.getDescriptor(), true);
         final Parameter param = params[paramIdx];
 
         final Class<?> targetType = param.getType();
