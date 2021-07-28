@@ -22,11 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.block.entity;
+package org.spongepowered.common.bridge.world.entity;
 
-public interface BlockEntityTypeBridge {
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 
-    boolean bridge$canTick();
+public interface TrackableEntityBridge {
 
-    boolean bridge$setCanTick(boolean canTick);
+    void tracker$populateFrameInTickContext(CauseStackManager.StackFrame frame, EntityTickContext context);
+
 }

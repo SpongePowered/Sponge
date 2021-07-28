@@ -59,7 +59,7 @@ import java.util.List;
 import java.util.function.Supplier;
 
 @Mixin(DispenserBlock.class)
-public class DispenserBlockMixin_Tracker {
+public abstract class DispenserBlockMixin_Tracker {
     private Supplier<ItemStack> tracker$originalItem = () -> ItemStack.EMPTY;
     private PhaseContext<?> tracker$context = PhaseContext.empty();
 

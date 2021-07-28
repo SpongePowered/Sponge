@@ -53,7 +53,7 @@ import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
@@ -275,7 +275,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     }
 
     public void logBlockEvent(final BlockState state, final TrackedWorldBridge serverWorld, final BlockPos pos,
-        final TrackerBlockEventDataBridge blockEvent
+        final TrackableBlockEventDataBridge blockEvent
     ) {
         final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
         final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");

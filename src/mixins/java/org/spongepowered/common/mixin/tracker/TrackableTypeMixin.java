@@ -25,12 +25,13 @@
 package org.spongepowered.common.mixin.tracker;
 
 import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.TrackableBridge;
 
-@Mixin({EntityType.class, BlockEntityType.class})
-public abstract class TypedTrackerMixin implements TrackableBridge {
+@Mixin({Block.class, EntityType.class, BlockEntityType.class})
+public abstract class TrackableTypeMixin implements TrackableBridge {
 
     private boolean tracker$allowsBlockBulkCaptures = true;
     private boolean tracker$allowsBlockEventCreation = true;
@@ -38,18 +39,8 @@ public abstract class TypedTrackerMixin implements TrackableBridge {
     private boolean tracker$allowsEntityEventCreation = true;
 
     @Override
-    public boolean bridge$isWorldTracked() {
-        return false;
-    }
-
-    @Override
-    public void bridge$setWorldTracked(final boolean tracked) {
-
-    }
-
-    @Override
     public boolean bridge$shouldTick() {
-        return true; // TODO - determine if some entity types should maybe not tick, could be an optimizatoin.
+        return true;
     }
 
     @Override

@@ -41,7 +41,7 @@ import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.accessor.world.entity.decoration.ItemFrameAccessor;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import org.spongepowered.common.bridge.world.entity.EntityTrackedBridge;
+import org.spongepowered.common.bridge.world.entity.TrackableEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
@@ -60,7 +60,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
         super.getFrameModifier().andThen((frame, context) -> {
             final Entity tickingEntity = context.getSource(Entity.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Not ticking on an Entity!", context));
-            ((EntityTrackedBridge) tickingEntity).tracker$populateFrameInTickContext(frame, context);
+            ((TrackableEntityBridge) tickingEntity).tracker$populateFrameInTickContext(frame, context);
             frame.pushCause(tickingEntity); // Push the entity last
         });
 

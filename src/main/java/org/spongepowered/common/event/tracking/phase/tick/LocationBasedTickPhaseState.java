@@ -33,7 +33,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -91,7 +91,7 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     @Override
     public void appendNotifierToBlockEvent(
         T context, TrackedWorldBridge mixinWorldServer, BlockPos pos,
-        TrackerBlockEventDataBridge blockEvent
+        TrackableBlockEventDataBridge blockEvent
     ) {
         final LocatableBlock source = this.getLocatableBlockSourceFromContext(context);
         blockEvent.bridge$setTickingLocatable(source);

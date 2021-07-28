@@ -22,12 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.block;
+package org.spongepowered.common.config.tracker;
 
-public interface TrackedBlockBridge {
+public interface TrackerCategory {
 
-    boolean bridge$overridesNeighborNotificationLogic();
+    boolean autoPopulate();
 
-    boolean bridge$hasEntityInsideLogic();
-
+    NamespacedCategory namespacedOrCreate(String namespace);
 }

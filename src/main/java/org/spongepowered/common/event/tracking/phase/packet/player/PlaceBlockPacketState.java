@@ -39,7 +39,7 @@ import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -100,7 +100,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
 
     @Override
     public void appendNotifierToBlockEvent(final BasicPacketContext context,
-        final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
+        final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackableBlockEventDataBridge blockEvent
     ) {
         final Player player = PhaseTracker.getCauseStackManager().currentCause().first(Player.class).get();
         final BlockState state = ((ServerWorld) mixinWorldServer).block(pos.getX(), pos.getY(), pos.getZ());

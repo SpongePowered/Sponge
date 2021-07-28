@@ -29,19 +29,12 @@ import net.minecraft.world.entity.TamableAnimal;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.Keys;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.profile.SpongeGameProfileManager;
 
-import java.lang.ref.WeakReference;
 import java.util.Optional;
 import java.util.UUID;
 

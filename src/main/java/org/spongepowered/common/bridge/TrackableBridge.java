@@ -33,18 +33,23 @@ public interface TrackableBridge {
      * Gets whether this entity has been added to a World's tracked entity lists
      * @return True if this entity is being tracked in a world's chunk lists.
      */
-    boolean bridge$isWorldTracked();
+    default boolean bridge$isWorldTracked() {
+        return false;
+    }
 
     /**
      * Sets an entity to be tracked or untracked. Specifically used in
-     * {@link net.minecraft.server.level.ServerLevel#add(Entity)} and
+     * Level#add(Entity) and
      * {@link net.minecraft.server.level.ServerLevel#onEntityRemoved(Entity)}
      *
      * @param tracked Tracked
      */
-    void bridge$setWorldTracked(boolean tracked);
+    default void bridge$setWorldTracked(boolean tracked) {
+    }
 
-    boolean bridge$shouldTick();
+    default boolean bridge$shouldTick() {
+        return true;
+    }
 
     boolean bridge$allowsBlockBulkCaptures();
 
@@ -65,9 +70,7 @@ public interface TrackableBridge {
     /**
      * Tells this trackable to refresh it's tracker states.
      * Usually these states are only needing to be refreshed
-     * when the {@link TrackerConfig} is being changed, but some
-     * trackable types have that information tracked through
-     * their parent type (such as {@code org.spongepowered.common.mixin.core.entity.EntityTypeMixin}.
+     * when the {@link TrackerConfig}.
      */
     default void bridge$refreshTrackerStates() {
     }

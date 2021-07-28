@@ -30,7 +30,7 @@ import org.spongepowered.api.world.LocatableBlock;
 
 import java.util.UUID;
 
-public interface TrackerBlockEventDataBridge {
+public interface TrackableBlockEventDataBridge {
 
     @Nullable LocatableBlock bridge$getTickingLocatable();
 

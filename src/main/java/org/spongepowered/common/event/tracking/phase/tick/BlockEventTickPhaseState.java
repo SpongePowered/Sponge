@@ -35,7 +35,7 @@ import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -49,7 +49,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, BlockEventTickContext> FRAME_MODIFIER =
             super.getFrameModifier().andThen((frame, context) -> {
-                final TrackerBlockEventDataBridge blockEventData = context.getSource(TrackerBlockEventDataBridge.class).orElse(null);
+                final TrackableBlockEventDataBridge blockEventData = context.getSource(TrackableBlockEventDataBridge.class).orElse(null);
                 if (blockEventData != null) {
                     if (blockEventData.bridge$getTileEntity() != null) {
                         frame.pushCause(blockEventData.bridge$getTileEntity());

@@ -22,12 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.block.entity;
+package org.spongepowered.common.bridge.world.level.block;
 
-public interface TrackableBlockEntityBridge {
+public interface TrackableBlockBridge {
 
-    boolean bridge$isCaptured();
+    boolean bridge$overridesNeighborNotificationLogic();
 
-    void bridge$setCaptured(boolean captured);
+    boolean bridge$hasEntityInsideLogic();
 
 }

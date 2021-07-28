@@ -5,7 +5,7 @@
     "mixinPriority": 1102,
     "mixins": [
         "CreatorTrackedMixin_Tracker",
-        "TypedTrackerMixin",
+        "TrackableTypeMixin",
         "event.TraitMixin_Tracked_Inventory",
         "network.protocol.PacketUtilsMixin_Tracker",
         "server.MinecraftServerMixin_Tracker",
@@ -38,7 +38,10 @@
         "world.level.block.entity.BlockEntityMixin_Tracker",
         "world.level.chunk.LevelChunkMixin_Tracker",
         "world.level.chunk.storage.ChunkSerializerMixin_Tracker",
-        "world.level.dimension.end.EndDragonFightMixin_Tracker"
+        "world.level.dimension.end.EndDragonFightMixin_Tracker",
+        "world.entity.EntityTypeMixin_Tracker",
+        "world.level.block.entity.BlockEntityTypeMixin_Tracker",
+        "world.level.block.BlocksMixin_Tracker"
     ],
     "injectors": {
         "maxShiftBy": 3

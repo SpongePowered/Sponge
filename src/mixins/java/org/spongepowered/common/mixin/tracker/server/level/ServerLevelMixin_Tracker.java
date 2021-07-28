@@ -79,8 +79,8 @@ import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
-import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
@@ -154,7 +154,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
     @Inject(method = "onEntityRemoved", at = @At("TAIL"))
     private void tracker$setEntityUntrackedInWorld(final net.minecraft.world.entity.Entity entityIn, final CallbackInfo ci) {
-        if (!this.bridge$isFake() || ((TrackableBridge) entityIn).bridge$isWorldTracked()) {
+        if (!this.bridge$isFake()) {
             ((TrackableBridge) entityIn).bridge$setWorldTracked(false);
         }
     }
@@ -310,14 +310,14 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     ) {
         final PhaseContext<@NonNull ?> currentContext = PhaseTracker.getInstance().getPhaseContext();
         final BlockEventData blockEventData = (BlockEventData) data;
-        final TrackerBlockEventDataBridge blockEvent = (TrackerBlockEventDataBridge) blockEventData;
+        final TrackableBlockEventDataBridge blockEvent = (TrackableBlockEventDataBridge) blockEventData;
         // Short circuit phase states who do not track during block events
         if (currentContext.ignoresBlockEvent()) {
             return list.add(blockEventData);
         }
 
         final BlockState state = this.shadow$getBlockState(pos);
-        if (((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
+        if (((TrackableBridge) blockIn).bridge$allowsBlockEventCreation()) {
             blockEvent.bridge$setSourceUserUUID(currentContext.getActiveUserUUID());
             if (((BlockStateBridge) state).bridge$hasTileEntity()) {
                 blockEvent.bridge$setTileEntity((BlockEntity) this.shadow$getBlockEntity(pos));
@@ -334,7 +334,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
 
         // Short circuit any additional handling. We've associated enough with the BlockEvent to
         // allow tracking to take place for other/future phases
-        if (!((BlockBridge) blockIn).bridge$shouldFireBlockEvents()) {
+        if (!((TrackableBridge) blockIn).bridge$allowsBlockEventCreation()) {
             return list.add((BlockEventData) data);
         }
         // In pursuant with our block updates management, we chose to
@@ -763,7 +763,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
         final LevelChunk targetChunk = this.shadow$getChunkAt(immutableTarget);
         final BlockState targetBlockState = targetChunk.getBlockState(immutableTarget);
         // Sponge - Shortcircuit if the block has no neighbor logic
-        if (!((TrackedBlockBridge) targetBlockState.getBlock()).bridge$overridesNeighborNotificationLogic()) {
+        if (!((TrackableBlockBridge) targetBlockState.getBlock()).bridge$overridesNeighborNotificationLogic()) {
             return;
         }
         // Sponge End

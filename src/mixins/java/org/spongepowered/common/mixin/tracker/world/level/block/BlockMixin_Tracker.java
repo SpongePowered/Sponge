@@ -25,12 +25,14 @@
 package org.spongepowered.common.mixin.tracker.world.level.block;
 
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Registry;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,20 +40,22 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
+import org.spongepowered.common.bridge.RegistryBackedTrackableBridge;
+import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
+import org.spongepowered.common.config.SpongeGameConfigs;
+import org.spongepowered.common.config.tracker.TrackerCategory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.util.ReflectionUtil;
 
 @Mixin(Block.class)
-public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
+public abstract class BlockMixin_Tracker implements TrackableBlockBridge, RegistryBackedTrackableBridge<Block> {
 
     private final boolean tracker$hasNeighborLogicOverridden = ReflectionUtil.isNeighborChangedDeclared(this.getClass());
     private final boolean tracker$hasEntityInsideLogicOverridden = ReflectionUtil.isEntityInsideDeclared(this.getClass());
 
     @Nullable private static EffectTransactor tracker$effectTransactorForDrops = null;
-
 
     @Override
     public boolean bridge$overridesNeighborNotificationLogic() {
@@ -155,5 +159,20 @@ public abstract class BlockMixin_Tracker implements TrackedBlockBridge {
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
         context.getTransactor().completeBlockDrops(BlockMixin_Tracker.tracker$effectTransactorForDrops);
+    }
+
+    @Override
+    public TrackerCategory bridge$trackerCategory() {
+        return SpongeGameConfigs.getTracker().get().block;
+    }
+
+    @Override
+    public Registry<Block> bridge$trackerRegistryBacking() {
+        return Registry.BLOCK;
+    }
+
+    @Override
+    public void bridge$saveTrackerConfig() {
+        SpongeGameConfigs.getTracker().save();
     }
 }

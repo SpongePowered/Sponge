@@ -44,16 +44,9 @@ import org.spongepowered.common.util.ReflectionUtil;
 public abstract class BlockMixin implements BlockBridge, TrackableBridge, TimingBridge {
 
     private final boolean impl$isVanilla = this.getClass().getName().startsWith("net.minecraft.");
-    private boolean impl$hasCollideLogic = ReflectionUtil.isStepOnDeclared(this.getClass());
-    private boolean impl$hasCollideWithStateLogic = ReflectionUtil.isEntityInsideDeclared(this.getClass());
-    // Used to determine if this block needs to be handled in WorldServer#addBlockEvent
-    private boolean impl$shouldFireBlockEvents = true;
+    private final boolean impl$hasCollideLogic = ReflectionUtil.isStepOnDeclared(this.getClass());
+    private final boolean impl$hasCollideWithStateLogic = ReflectionUtil.isEntityInsideDeclared(this.getClass());
     @Nullable private Timing impl$timing;
-    // Used by tracker config
-    private boolean impl$allowsBlockBulkCapture = true;
-    private boolean impl$allowsEntityBulkCapture = true;
-    private boolean impl$allowsBlockEventCreation = true;
-    private boolean impl$allowsEntityEventCreation = true;
 
     /**
      * We captured the dye color when creating the Block.Properties.
@@ -116,91 +109,4 @@ public abstract class BlockMixin implements BlockBridge, TrackableBridge, Timing
         }
         return this.impl$timing;
     }
-
-    @Override
-    public boolean bridge$allowsBlockBulkCaptures() {
-        return this.impl$allowsBlockBulkCapture;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityBulkCaptures() {
-        return this.impl$allowsEntityBulkCapture;
-    }
-
-    @Override
-    public boolean bridge$allowsBlockEventCreation() {
-        return this.impl$allowsBlockEventCreation;
-    }
-
-    @Override
-    public boolean bridge$allowsEntityEventCreation() {
-        return this.impl$allowsEntityEventCreation;
-    }
-
-    @Override
-    public void bridge$refreshTrackerStates() {
-        // not needed
-    }
-
-    /**
-     * Used to determine if this block should fire
-     * sponge events during WorldServer#addBlockEvent.
-     */
-    @Override
-    public boolean bridge$shouldFireBlockEvents() {
-        return this.impl$shouldFireBlockEvents;
-    }
-
-    /*
-    @SuppressWarnings("ConstantConditions")
-    @Override
-    public void bridge$initializeTrackerState() {
-        final ConfigHandle<TrackerConfig> trackerConfigAdapter = SpongeConfigs.getTracker();
-        final BlockTrackerCategory blockTrackerCat = trackerConfigAdapter.get().getBlockTracker();
-        final ResourceLocation key = Registry.BLOCK.getKey((Block) (Object) this);
-        final String modId = key.getNamespace();
-        final String name = key.getPath();
-
-        BlockTrackerModCategory blockTrackerModCat = blockTrackerCat.getModMappings().get(modId);
-
-        if (blockTrackerModCat == null) {
-            blockTrackerModCat = new BlockTrackerModCategory();
-            blockTrackerCat.getModMappings().put(modId, blockTrackerModCat);
-        }
-
-        // Determine if this block needs to be handled during WorldServer#addBlockEvent
-        if ((Block) (Object) this instanceof SpawnerBlock || (Block) (Object) this instanceof EnderChestBlock
-            || (Block) (Object) this instanceof ChestBlock || (Block) (Object) this instanceof ShulkerBoxBlock
-            || (Block) (Object) this instanceof EndGatewayBlock || (Block) (Object) this instanceof BeaconBlock) {
-            this.impl$shouldFireBlockEvents = false;
-        }
-        // Determine which blocks can avoid executing un-needed event logic
-        // This will allow us to avoid running event logic for blocks that do nothing such as grass collisions
-        // -- blood
-        // @author gabizou - October 9th, 2018
-        // @reason Due to early class initialization and object instantiation, a lot of the reflection access
-        // logic can be delayed until actual type registration with sponge. This will at the very least allow
-        // mod type registrations to go through without getting the overall cost of reflection during object construction.
-
-        if (!blockTrackerModCat.isEnabled()) {
-            this.impl$allowsBlockBulkCapture = false;
-            this.impl$allowsEntityBulkCapture = false;
-            this.impl$allowsBlockEventCreation = false;
-            this.impl$allowsEntityEventCreation = false;
-            blockTrackerModCat.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> this.impl$allowsBlockBulkCapture);
-            blockTrackerModCat.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> this.impl$allowsEntityBulkCapture);
-            blockTrackerModCat.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> this.impl$allowsBlockEventCreation);
-            blockTrackerModCat.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> this.impl$allowsEntityEventCreation);
-        } else {
-            this.impl$allowsBlockBulkCapture = blockTrackerModCat.getBlockBulkCaptureMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> true);
-            this.impl$allowsEntityBulkCapture = blockTrackerModCat.getEntityBulkCaptureMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> true);
-            this.impl$allowsBlockEventCreation = blockTrackerModCat.getBlockEventCreationMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> true);
-            this.impl$allowsEntityEventCreation = blockTrackerModCat.getEntityEventCreationMap().computeIfAbsent(name.toLowerCase(Locale.ENGLISH), k -> true);
-        }
-
-        if (blockTrackerCat.autoPopulateData()) {
-            trackerConfigAdapter.save();
-        }
-    }
-     */
 }

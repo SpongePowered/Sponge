@@ -67,7 +67,7 @@ import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
 import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
-import org.spongepowered.common.bridge.world.level.block.TrackedBlockBridge;
+import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -215,7 +215,7 @@ public final class PacketPhaseUtil {
                                     for(int z = min.getZ(); z <= max.getZ(); ++z) {
                                         pos.set(x, y, z);
                                         final Block block = packetPlayer.level.getBlockState(pos).getBlock();
-                                        if (((TrackedBlockBridge) block).bridge$hasEntityInsideLogic()) {
+                                        if (((TrackableBlockBridge) block).bridge$hasEntityInsideLogic()) {
                                             ignoreMovementCapture = false;
                                         }
                                     }
