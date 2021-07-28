@@ -7,6 +7,7 @@
     "priority": 1301,
     "mixins": [
         "fml.ModContainerMixin_Forge",
+        "server.MainMixin_Forge",
         "server.level.ServerLevelMixin_Timings_Forge",
         "world.entity.item.ItemEntityMixin_Forge",
         "world.level.LevelMixin_Forge"
