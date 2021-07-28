@@ -10,6 +10,7 @@
         "server.MainMixin_Forge",
         "server.level.ServerLevelMixin_Timings_Forge",
         "world.entity.item.ItemEntityMixin_Forge",
+        "world.entity.vehicle.BoatMixin_Forge",
         "world.level.LevelMixin_Forge"
     ],
     "client": [
