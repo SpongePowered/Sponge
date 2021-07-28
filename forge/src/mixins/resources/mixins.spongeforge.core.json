@@ -6,7 +6,9 @@
     "compatibilityLevel": "JAVA_8",
     "priority": 1301,
     "mixins": [
-        "fml.ModContainerMixin_Forge"
+        "fml.ModContainerMixin_Forge",
+        "world.entity.item.ItemEntityMixin_Forge",
+        "world.level.LevelMixin_Forge"
     ],
     "client": [
         "client.main.MainMixin_Forge"
