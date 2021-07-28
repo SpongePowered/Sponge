@@ -18,7 +18,7 @@ public abstract class LevelMixin_Vanilla implements LevelBridge {
     // @formatter:on
 
     @Override
-    public Collection<BlockEntity> blockEntitiesToUnload() {
+    public Collection<BlockEntity> bridge$blockEntitiesToUnload() {
         return this.blockEntitiesToUnload;
     }
 }

@@ -733,7 +733,7 @@ public class SpongeCommand {
                 Component.newline(),
                 this.key("Removed Entities:"), this.value(entitiesToRemove),
                 Component.newline(),
-                this.key("Removed Block Entities: "), this.value(((LevelBridge) serverLevel).blockEntitiesToUnload().size())
+                this.key("Removed Block Entities: "), this.value(((LevelBridge) serverLevel).bridge$blockEntitiesToUnload().size())
         );
     }
 

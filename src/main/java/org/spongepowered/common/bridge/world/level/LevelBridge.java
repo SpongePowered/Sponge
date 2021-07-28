@@ -69,5 +69,5 @@ public interface LevelBridge {
      * <p>In Vanilla, this is actually a {@link java.util.List}. In Forge, this is a {@link java.util.Set}</p>
      * @return the entities
      */
-    Collection<BlockEntity> blockEntitiesToUnload();
+    Collection<BlockEntity> bridge$blockEntitiesToUnload();
 }
