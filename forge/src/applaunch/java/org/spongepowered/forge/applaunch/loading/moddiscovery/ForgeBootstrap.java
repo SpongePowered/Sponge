@@ -54,8 +54,7 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
     // does this even make sense?
     private static final String[] EXCLUDED_PATHS = {
         "org/spongepowered/common/applaunch/",
-        "org/spongepowered/forge/applaunch/",
-        "org/spongepowered/forge/launch/plugin/"
+        "org/spongepowered/forge/applaunch/"
     };
 
     private final Logger logger = LogManager.getLogger();
