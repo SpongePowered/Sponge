@@ -56,7 +56,6 @@ import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
-import org.spongepowered.api.command.CommandResults;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandManager;
@@ -83,6 +82,7 @@ import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.registrar.BrigadierCommandRegistrar;
 import org.spongepowered.common.command.registrar.SpongeParameterizedCommandRegistrar;
 import org.spongepowered.common.command.registrar.tree.builder.RootCommandTreeNode;
+import org.spongepowered.common.command.result.SpongeCommandResult;
 import org.spongepowered.common.command.sponge.SpongeCommand;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.lifecycle.RegisterCommandEventImpl;
@@ -115,6 +115,7 @@ import java.util.stream.Collectors;
 
 public final class SpongeCommandManager implements CommandManager.Mutable {
 
+    private static final CommandResult UNKNOWN_ERROR = new SpongeCommandResult(false, 0, null);
     private static final boolean ALWAYS_PRINT_STACKTRACES = System.getProperty("sponge.command.alwaysPrintStacktraces") != null;
 
     private final Game game;
@@ -322,7 +323,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                 false
         );
         if (this.game.eventManager().post(preEvent)) {
-            return preEvent.result().orElse(CommandResults.UNKNOWN_ERROR);
+            return preEvent.result().orElse(SpongeCommandManager.UNKNOWN_ERROR);
         }
         command = preEvent.command();
         args = preEvent.arguments();
