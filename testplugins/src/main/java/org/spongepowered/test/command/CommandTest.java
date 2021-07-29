@@ -359,6 +359,13 @@ public final class CommandTest {
                         .build(),
                     "testmessage"
                 );
+        event.register(this.plugin, Command.builder().addParameter(CommonParameters.BOOLEAN).executor(ctx -> {
+            if (ctx.requireOne(CommonParameters.BOOLEAN)) {
+                // custom error
+                return CommandResult.error(Component.text("custom error"));
+            }
+            return CommandResult.builder().error(null).build();
+        }).build(), "errormessage");
 
         final Command.Builder builder = Command.builder();
 

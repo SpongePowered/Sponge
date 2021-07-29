@@ -42,6 +42,7 @@ import net.kyori.adventure.audience.Audience;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.event.HoverEvent;
+import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.util.ComponentMessageThrowable;
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.commands.SharedSuggestionProvider;
@@ -55,6 +56,7 @@ import org.spongepowered.api.command.Command.Parameterized;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.CommandResults;
 import org.spongepowered.api.command.exception.CommandException;
 import org.spongepowered.api.command.manager.CommandFailedRegistrationException;
 import org.spongepowered.api.command.manager.CommandManager;
@@ -62,7 +64,6 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.registrar.CommandRegistrar;
 import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.api.command.registrar.tree.CommandTreeNode;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -321,7 +322,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                 false
         );
         if (this.game.eventManager().post(preEvent)) {
-            return preEvent.result().orElse(CommandResult.empty());
+            return preEvent.result().orElse(CommandResults.UNKNOWN_ERROR);
         }
         command = preEvent.command();
         args = preEvent.arguments();
@@ -354,8 +355,8 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
             try {
                 result = mapping.registrar().process(cause, mapping, command, args);
             } catch (final CommandException exception) {
-                final CommandResult errorResult = CommandResult.builder().result(0).error(
-                    exception.componentMessage()).build();
+                final CommandResult errorResult = CommandResult.builder().result(0)
+                        .error(exception.componentMessage()).build();
                 this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
                 if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
                     this.prettyPrintThrowableError(exception, command, args, cause);
@@ -395,7 +396,15 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
             }
 
             this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, result);
-            result.errorMessage().ifPresent(x -> cause.sendMessage(Identity.nil(), x));
+            if (!result.isSuccess()) {
+                cause.sendMessage(Identity.nil(), result.errorMessage()
+                        .map(x -> x.colorIfAbsent(NamedTextColor.RED))
+                        .orElseGet(() ->
+                    Component.text()
+                            .content(String.format("An empty error result was returned while executing the command \"%s\"", arguments))
+                            .color(NamedTextColor.RED)
+                            .build()));
+            }
             return result;
         }
     }

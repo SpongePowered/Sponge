@@ -502,8 +502,7 @@ public class SpongeCommand {
                 .addChild(Command.builder()
                         .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
-                                return CommandResult.empty();
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
                             }
                             Timings.reset();
                             context.sendMessage(Identity.nil(), Component.text("Timings reset"));
@@ -513,8 +512,7 @@ public class SpongeCommand {
                 .addChild(Command.builder()
                         .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
-                                return CommandResult.empty();
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
                             }
                             Timings.generateReport(context.cause().audience());
                             return CommandResult.success();
@@ -537,8 +535,7 @@ public class SpongeCommand {
                 .addChild(Command.builder()
                         .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
-                                return CommandResult.empty();
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
                             }
                             Timings.setVerboseTimingsEnabled(true);
                             context.sendMessage(Identity.nil(), Component.text("Enabled Verbose Timings"));
@@ -548,8 +545,7 @@ public class SpongeCommand {
                 .addChild(Command.builder()
                         .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
-                                return CommandResult.empty();
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
                             }
                             Timings.setVerboseTimingsEnabled(false);
                             context.sendMessage(Identity.nil(), Component.text("Disabled Verbose Timings"));
@@ -559,8 +555,7 @@ public class SpongeCommand {
                 .addChild(Command.builder()
                         .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
-                                return CommandResult.empty();
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
                             }
                             context.sendMessage(Identity.nil(), Component.text("Timings cost: " + SpongeTimingsFactory.getCost()));
                             return CommandResult.success();
