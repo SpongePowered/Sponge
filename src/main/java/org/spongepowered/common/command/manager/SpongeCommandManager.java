@@ -328,11 +328,8 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
 
         final SpongeCommandMapping mapping = this.commandMappings.get(command.toLowerCase());
         if (mapping == null) {
-            // no command.
-            // TextColors.RED,
             throw new CommandException(Component.text("Unknown command. Type /help for a list of commands."));
         }
-        // For when the phase tracker comes back online
         final Object source = cause.cause().root();
 
         final CommandResult result;
@@ -341,7 +338,8 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
         try (final CommandPhaseContext context = GeneralPhase.State.COMMAND
             .createPhaseContext(PhaseTracker.getInstance())
             .source(source)
-            .command(args)) {
+            .command(args)
+            .commandMapping(mapping)) {
             if (source instanceof ServerPlayer) {
                 final ServerPlayer serverPlayer = (ServerPlayer) source;
                 context.creator(serverPlayer.uniqueId());
@@ -490,6 +488,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
                     return Collections.emptyList();
                 }
 
+                frame.pushCause(mapping);
                 return mapping.registrar().complete(CommandCause.create(), mapping, command, splitArg[1]);
             }
 
