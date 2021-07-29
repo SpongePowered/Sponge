@@ -143,7 +143,7 @@ public final class SpongeUserManager implements UserManager {
     @Override
     public CompletableFuture<Optional<User>> load(final String lastKnownName) {
         Objects.requireNonNull(lastKnownName, "lastKnownName");
-        if (lastKnownName.isEmpty() || lastKnownName.length() <= 16) {
+        if (lastKnownName.isEmpty() || lastKnownName.length() > 16) {
             throw new IllegalArgumentException(String.format("Invalid username %s", lastKnownName));
         }
         final com.mojang.authlib.@Nullable GameProfile mcProfile =
