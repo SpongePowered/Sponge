@@ -94,12 +94,18 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     @Nullable WeakReference<ServerLevel> world;
     @MonotonicNonNull public BlockChange blockChange; // used for post event
 
-    SpongeBlockSnapshot(final BuilderImpl builder) {
+    SpongeBlockSnapshot(final BuilderImpl builder, final boolean copyCompound) {
         this.blockState = Objects.requireNonNull(builder.blockState);
         this.worldKey = Objects.requireNonNull(builder.worldKey);
         this.pos = Objects.requireNonNull(builder.coordinates);
         this.blockPos = VecHelper.toBlockPos(this.pos);
-        this.compound = builder.compound;
+        if (copyCompound) {
+            // defensive copy as the builder may further be modified
+            this.compound = builder.compound == null ? null : builder.compound.copy();
+        } else {
+            // pooled builder has been reset so this won't be modified.
+            this.compound = builder.compound;
+        }
         this.changeFlag = builder.flag;
         this.world = builder.worldRef;
         builder.worldRef = null;
@@ -151,7 +157,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public BlockSnapshot withLocation(final ServerLocation location) {
-        throw new UnsupportedOperationException("Not implemented yet, please fix when this is called");
+        return SpongeBlockSnapshot.BuilderImpl.pooled().from(this).position(location.blockPosition()).world(location.worldKey()).build();
     }
 
     @Override
@@ -196,7 +202,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
                         if (te != null) {
                             world.getChunk(pos).setBlockEntity(pos, te);
                         }
-                    } catch (Exception e) {
+                    } catch (final Exception e) {
                         // Seriously? The mod should be broken then.
                         final PrettyPrinter printer = new PrettyPrinter(60).add("Unable to restore").centre().hr()
                             .add("A mod is not correctly deserializing a TileEntity that is being restored. ")
@@ -207,7 +213,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
                         printer.add();
                         try {
                             printer.addWrapped(80, "%s : %s", "This compound", this.compound);
-                        } catch (Throwable error) {
+                        } catch (final Throwable error) {
                             printer.addWrapped(
                                 80,
                                 "Unable to get the string of this compound. Printing out some of the entries to better assist"
@@ -327,7 +333,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     @Override
-    public BlockSnapshot data$withDataContainer(DataContainer container) {
+    public BlockSnapshot data$withDataContainer(final DataContainer container) {
         final BuilderImpl builder = this.createBuilder();
         builder.compound = NBTTranslator.INSTANCE.translate(container);;
         return builder.build();
@@ -339,7 +345,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     }
 
     @Override
-    public void data$setCompound(CompoundTag nbt) {
+    public void data$setCompound(final CompoundTag nbt) {
         // do nothing this is immutable
     }
 
@@ -521,7 +527,13 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
             this.blockState = snapshot.state();
             this.worldKey = snapshot.world();
             this.worldRef = snapshot.world;
-            this.compound = snapshot.compound;
+            if (snapshot.compound != null) {
+                // make a copy so that any changes to this compound in the builder
+                // (position) won't accidently be reflected in the original snapshot.
+                this.compound = snapshot.compound.copy();
+            } else {
+                this.compound = null;
+            }
             this.coordinates = snapshot.position();
             this.flag = snapshot.getChangeFlag();
             return this;
@@ -571,7 +583,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         @Override
         public @NonNull SpongeBlockSnapshot build() {
             Objects.requireNonNull(this.blockState, "BlockState cannot be null!");
-            final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this);
+            final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this, !this.pooled);
             this.reset();
             if (this.pooled) {
                 BuilderImpl.pool.push(this);
