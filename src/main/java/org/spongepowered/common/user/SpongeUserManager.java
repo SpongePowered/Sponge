@@ -106,7 +106,7 @@ public final class SpongeUserManager implements UserManager {
         return this.fetchUser(uniqueId, false)
                 .thenApply(x -> {
                     if (x != null) {
-                        return Optional.of(new SpongeUserView(uniqueId));
+                        return Optional.of(SpongeUserView.create(uniqueId));
                     }
                     return Optional.empty();
                 });
@@ -120,11 +120,11 @@ public final class SpongeUserManager implements UserManager {
     private CompletableFuture<@Nullable User> fetchUser(final UUID uniqueId, final boolean always) {
         final UUID uuidToUse = this.ensureNonEmptyUUID(uniqueId);
         if (this.server.getPlayerList().getPlayer(uniqueId) != null) {
-            return CompletableFuture.completedFuture(new SpongeUserView(uniqueId));
+            return CompletableFuture.completedFuture(SpongeUserView.create(uniqueId));
         }
         final @Nullable SpongeUserData currentUser = this.userCache.getIfPresent(uuidToUse);
         if (currentUser != null) {
-            return CompletableFuture.completedFuture(new SpongeUserView(uuidToUse));
+            return CompletableFuture.completedFuture(SpongeUserView.create(uuidToUse));
         }
         return CompletableFuture.supplyAsync(() -> {
             if (always || this.knownUUIDs.contains(uuidToUse)) {
@@ -134,7 +134,7 @@ public final class SpongeUserManager implements UserManager {
                 } catch (final IOException e) {
                     throw new CompletionException(e);
                 }
-                return new SpongeUserView(uuidToUse);
+                return SpongeUserView.create(uuidToUse);
             }
             return null;
         }, this.executorService);
@@ -161,7 +161,7 @@ public final class SpongeUserManager implements UserManager {
         return this.fetchUser(this.ensureNonEmptyUUID(profile.uniqueId()), false)
                 .thenApply(x -> {
                     if (x != null) {
-                        return Optional.of(new SpongeUserView(profile.uniqueId()));
+                        return Optional.of(SpongeUserView.create(profile.uniqueId()));
                     }
                     return Optional.empty();
                 });
@@ -445,7 +445,7 @@ public final class SpongeUserManager implements UserManager {
 
     public @Nullable User asUser(final SpongeUserData spongeUserData) {
         if (this.userCache.getIfPresent(spongeUserData.uniqueId()) == spongeUserData) {
-            return new SpongeUserView(spongeUserData.uniqueId());
+            return SpongeUserView.create(spongeUserData.uniqueId());
         }
         return null;
     }
