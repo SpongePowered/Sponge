@@ -56,11 +56,6 @@ tasks {
         manifest.from(commonManifest)
         from(accessors.map { it.output })
     }
-    val launchJar by registering(Jar::class) {
-        archiveClassifier.set("launch")
-        manifest.from(commonManifest)
-        from(launch.map { it.output })
-    }
     val applaunchJar by registering(Jar::class) {
         archiveClassifier.set("applaunch")
         manifest.from(commonManifest)
@@ -97,10 +92,16 @@ val mixinsConfig by configurations.register("mixins") {
     extendsFrom(applaunchConfig)
     extendsFrom(launchConfig)
 }
+val main by sourceSets.getting {
+    project.dependencies {
+        mixinsConfig(this@getting.output)
+    }
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(launchConfig)
+    }
+}
 
 // create the sourcesets
-val main by sourceSets
-
 val applaunch by sourceSets.registering {
     spongeImpl.applyNamedDependencyOnOutput(project, this, main, project, main.implementationConfigurationName)
     project.dependencies {
@@ -110,29 +111,15 @@ val applaunch by sourceSets.registering {
         extendsFrom(applaunchConfig)
     }
 }
-val launch by sourceSets.registering {
-    spongeImpl.applyNamedDependencyOnOutput(project, applaunch.get(), this, project, this.implementationConfigurationName)
-    project.dependencies {
-        mixinsConfig(this@registering.output)
-    }
-    project.dependencies {
-        implementation(this@registering.output)
-    }
 
-    configurations.named(implementationConfigurationName) {
-        extendsFrom(launchConfig)
-    }
-}
 
 val accessors by sourceSets.registering {
-    spongeImpl.applyNamedDependencyOnOutput(project, launch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, this, main, project, main.implementationConfigurationName)
     configurations.named(implementationConfigurationName) {
         extendsFrom(accessorsConfig)
     }
 }
 val mixins by sourceSets.registering {
-    spongeImpl.applyNamedDependencyOnOutput(project, launch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, applaunch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, accessors.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, main, this, project, this.implementationConfigurationName)
@@ -356,7 +343,6 @@ tasks {
     val sourceJar by existing
     val mixinsJar by existing
     val accessorsJar by existing
-    val launchJar by existing
     val applaunchJar by existing
     shadowJar {
         mergeServiceFiles()
@@ -372,7 +358,6 @@ tasks {
         from(sourceJar)
         from(mixinsJar)
         from(accessorsJar)
-        from(launchJar)
         from(applaunchJar)
         dependencies {
             include(project(":"))
@@ -387,10 +372,8 @@ publishing {
             artifact(tasks["sourceJar"])
             artifact(tasks["mixinsJar"])
             artifact(tasks["accessorsJar"])
-            artifact(tasks["launchJar"])
             artifact(tasks["applaunchJar"])
             artifact(tasks["applaunchSourceJar"])
-            artifact(tasks["launchSourceJar"])
             artifact(tasks["mixinsSourceJar"])
             artifact(tasks["accessorsSourceJar"])
             pom {
