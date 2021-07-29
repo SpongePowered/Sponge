@@ -83,6 +83,7 @@ import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
 import org.spongepowered.api.world.generation.config.noise.SlideConfig;
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
 import org.spongepowered.api.world.generation.config.structure.SpacedStructureConfig;
+import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.biome.BiomeSampler;
 import org.spongepowered.api.world.WorldTypeEffect;
@@ -144,6 +145,7 @@ import org.spongepowered.common.world.generation.config.noise.SpongeSamplingConf
 import org.spongepowered.common.world.generation.config.noise.SpongeSlideConfigFactory;
 import org.spongepowered.common.world.generation.config.structure.SpongeSeparatedStructureConfigFactory;
 import org.spongepowered.common.world.generation.config.structure.SpongeSpacedStructureConfigFactory;
+import org.spongepowered.common.world.generation.config.structure.SpongeStructureGenerationConfig;
 import org.spongepowered.common.world.server.SpongeServerLocation;
 import org.spongepowered.common.world.schematic.SpongePaletteReferenceFactory;
 import org.spongepowered.common.world.volume.archetype.entity.SpongeEntityArchetypeEntryFactory;
@@ -255,6 +257,7 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(TagTemplate.Factory.class, new SpongeTagTemplateFactory())
                 .registerFactory(EventListenerRegistration.Factory.class, new SpongeEventListenerRegistration.FactoryImpl())
                 .registerFactory(FlatGeneratorConfig.Factory.class, new SpongeFlatGeneratorConfig.FactoryImpl())
+                .registerFactory(StructureGenerationConfig.Factory.class, new SpongeStructureGenerationConfig.FactoryImpl())
         ;
     }
 }
