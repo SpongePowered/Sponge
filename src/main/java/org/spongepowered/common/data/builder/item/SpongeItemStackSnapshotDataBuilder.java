@@ -37,7 +37,7 @@ import org.spongepowered.api.item.ItemTypes;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.common.data.persistence.NBTTranslator;
-import org.spongepowered.common.item.SpongeItemStackBuilder;
+import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.util.Constants;
 
@@ -64,7 +64,7 @@ public final class SpongeItemStackSnapshotDataBuilder extends AbstractDataBuilde
             final @Nullable CompoundTag compound;
             if (container.contains(Constants.Sponge.UNSAFE_NBT)) {
                 compound = NBTTranslator.INSTANCE.translate(container.getView(Constants.Sponge.UNSAFE_NBT).get());
-                SpongeItemStackBuilder.fixEnchantmentData(itemType, compound);
+                SpongeItemStack.BuilderImpl.fixEnchantmentData(itemType, compound);
             } else {
                 compound = null;
             }

@@ -248,7 +248,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         snapshot.blockChange = BlockChange.MODIFY;
 
-        return new ReplaceTileEntity(proposed, existing, snapshot);
+        return new ReplaceBlockEntity(proposed, existing, snapshot);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -359,7 +359,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    private RemoveTileEntity createTileRemovalTransaction(final BlockEntity tileentity,
+    private RemoveBlockEntity createTileRemovalTransaction(final BlockEntity tileentity,
         final Supplier<ServerLevel> worldSupplier
     ) {
         final BlockState currentState = tileentity.getBlockState();
@@ -374,7 +374,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         snapshot.blockChange = BlockChange.MODIFY;
 
-        return new RemoveTileEntity(tileentity, snapshot);
+        return new RemoveBlockEntity(tileentity, snapshot);
     }
 
     private AddTileEntity createTileAdditionTransaction(final BlockEntity tileentity,

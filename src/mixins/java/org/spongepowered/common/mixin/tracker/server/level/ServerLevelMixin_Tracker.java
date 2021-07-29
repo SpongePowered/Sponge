@@ -71,10 +71,8 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.block.BlockBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TickNextTickDataBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
@@ -95,7 +93,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
-import org.spongepowered.common.event.tracking.context.transaction.RemoveTileEntity;
+import org.spongepowered.common.event.tracking.context.transaction.RemoveBlockEntity;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToLoadedListInWorldEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToTickableListEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.AddTileEntityToWorldWhileProcessingEffect;
@@ -575,7 +573,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
     public SpongeBlockSnapshot bridge$createSnapshot(final net.minecraft.world.level.block.state.BlockState state, final BlockPos pos,
         final BlockChangeFlag updateFlag
     ) {
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
+        final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled();
         builder.reset();
         builder.blockState(state)
             .world((ServerLevel) (Object) this)
@@ -622,7 +620,7 @@ public abstract class ServerLevelMixin_Tracker extends LevelMixin_Tracker implem
      * </ul>
      * After which, we may be able to appropriately associate the {@link net.minecraft.world.level.block.entity.BlockEntity}
      * being removed with either an existing {@link ChangeBlock},
-     * or generate a new {@link RemoveTileEntity} transaction
+     * or generate a new {@link RemoveBlockEntity} transaction
      * that would otherwise be able to associate with either the current {@link IPhaseState} or a parent {@link GameTransaction}
      * if this call is the result of a {@link org.spongepowered.common.event.tracking.context.transaction.effect.ProcessingSideEffect}..
      *

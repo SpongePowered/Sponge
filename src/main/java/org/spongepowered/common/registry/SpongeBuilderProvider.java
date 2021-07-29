@@ -133,7 +133,7 @@ import org.spongepowered.common.advancement.SpongeTriggerBuilder;
 import org.spongepowered.common.advancement.criterion.SpongeCriterionBuilder;
 import org.spongepowered.common.advancement.criterion.SpongeScoreCriterionBuilder;
 import org.spongepowered.common.ban.SpongeBanBuilder;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.block.SpongeBlockStateBuilder;
 import org.spongepowered.common.block.entity.SpongeBlockEntityArchetypeBuilder;
 import org.spongepowered.common.command.SpongeParameterizedCommandBuilder;
@@ -182,7 +182,7 @@ import org.spongepowered.common.inventory.SpongeInventoryBuilder;
 import org.spongepowered.common.inventory.custom.SpongeViewableInventoryBuilder;
 import org.spongepowered.common.inventory.query.SpongeQueryBuilder;
 import org.spongepowered.common.item.SpongeFireworkEffectBuilder;
-import org.spongepowered.common.item.SpongeItemStackBuilder;
+import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.item.enchantment.SpongeEnchantmentBuilder;
 import org.spongepowered.common.item.enchantment.SpongeRandomEnchantmentListBuilder;
 import org.spongepowered.common.item.generation.SpongeItemStackGenerator;
@@ -259,11 +259,14 @@ public final class SpongeBuilderProvider implements BuilderProvider {
         this.builders.put(builderClass, supplier);
         return this;
     }
-    
+
+    /**
+     * Order matters, be careful...
+     */
     public void registerDefaultBuilders() {
         this
                 .register(ResourceKey.Builder.class, SpongeResourceKeyBuilder::new)
-                .register(ItemStack.Builder.class, SpongeItemStackBuilder::new)
+                .register(ItemStack.Builder.class, SpongeItemStack.BuilderImpl::new)
                 .register(TradeOffer.Builder.class, SpongeTradeOfferBuilder::new)
                 .register(FireworkEffect.Builder.class, SpongeFireworkEffectBuilder::new)
                 .register(PotionEffect.Builder.class, SpongePotionBuilder::new)
@@ -278,7 +281,7 @@ public final class SpongeBuilderProvider implements BuilderProvider {
                 .register(BlockDamageSource.Builder.class, SpongeBlockDamageSourceBuilder::new)
                 .register(Explosion.Builder.class, SpongeExplosionBuilder::new)
                 .register(BlockState.Builder.class, SpongeBlockStateBuilder::new)
-                .register(BlockSnapshot.Builder.class, SpongeBlockSnapshotBuilder::unpooled)
+                .register(BlockSnapshot.Builder.class, SpongeBlockSnapshot.BuilderImpl::unpooled)
                 .register(EntitySnapshot.Builder.class, SpongeEntitySnapshotBuilder::new)
                 .register(ParticleEffect.Builder.class, SpongeParticleEffectBuilder::new)
                 .register(RandomWalkingGoal.Builder.class, SpongeRandomWalkingGoalBuilder::new)

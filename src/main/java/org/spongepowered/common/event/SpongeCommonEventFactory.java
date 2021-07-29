@@ -84,7 +84,6 @@ import org.spongepowered.api.world.storage.WorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
@@ -369,8 +368,8 @@ public final class SpongeCommonEventFactory {
             final WorldProperties world = ((ServerWorld) worldIn).properties();
             final Vector3i position = new Vector3i(pos.getX(), pos.getY(), pos.getZ());
 
-            final SpongeBlockSnapshot from = SpongeBlockSnapshotBuilder.pooled().blockState(fromState).world((ServerLevel) worldIn).position(position).build();
-            final SpongeBlockSnapshot to = SpongeBlockSnapshotBuilder.pooled().blockState(toState).world((ServerLevel) worldIn).position(position).build();
+            final SpongeBlockSnapshot from = SpongeBlockSnapshot.BuilderImpl.pooled().blockState(fromState).world((ServerLevel) worldIn).position(position).build();
+            final SpongeBlockSnapshot to = SpongeBlockSnapshot.BuilderImpl.pooled().blockState(toState).world((ServerLevel) worldIn).position(position).build();
             final BlockTransaction transaction = new BlockTransaction(from, to, Operations.LIQUID_SPREAD.get());
             final ChangeBlockEvent event = SpongeEventFactory.createChangeBlockEventAll(frame.currentCause(),
                 Collections.singletonList(transaction), ((ServerWorld) worldIn));

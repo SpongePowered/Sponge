@@ -56,7 +56,6 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
@@ -465,7 +464,8 @@ public final class TrackingUtil {
         });
     }
 
-    public static void addTileEntityToBuilder(final net.minecraft.world.level.block.entity.BlockEntity existing, final SpongeBlockSnapshotBuilder builder) {
+    public static void addTileEntityToBuilder(final net.minecraft.world.level.block.entity.BlockEntity existing,
+        final SpongeBlockSnapshot.BuilderImpl builder) {
         // TODO - gather custom data.
         final CompoundTag compound = new CompoundTag();
         try {
@@ -502,7 +502,7 @@ public final class TrackingUtil {
         final Supplier<Optional<UUID>> creatorSupplier,
         final Supplier<Optional<UUID>> notifierSupplier
     ) {
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
+        final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled();
         builder.reset();
         builder.blockState(state)
                 .world(worldSupplier.get())

@@ -34,6 +34,7 @@ import org.spongepowered.api.advancement.criteria.AndCriterion;
 import org.spongepowered.api.advancement.criteria.OrCriterion;
 import org.spongepowered.api.adventure.Audiences;
 import org.spongepowered.api.adventure.SpongeComponents;
+import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.CommandResult;
@@ -46,6 +47,7 @@ import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.datapack.DataPackType;
 import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.cause.entity.damage.source.DamageSource;
+import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackComparators;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.network.channel.ChannelExceptionHandler;
@@ -100,6 +102,7 @@ import org.spongepowered.common.advancement.criterion.SpongeAndCriterion;
 import org.spongepowered.common.advancement.criterion.SpongeOrCriterion;
 import org.spongepowered.common.adventure.AudiencesFactory;
 import org.spongepowered.common.adventure.SpongeAdventure;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.command.SpongeCommandCompletionFactory;
 import org.spongepowered.common.command.manager.SpongeCommandCauseFactory;
 import org.spongepowered.common.command.parameter.SpongeParameterFactory;
@@ -113,6 +116,7 @@ import org.spongepowered.common.data.value.SpongeValueFactory;
 import org.spongepowered.common.datapack.SpongeDataPackType;
 import org.spongepowered.common.event.SpongeEventListenerRegistration;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
+import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.item.SpongeItemStackSnapshot;
 import org.spongepowered.common.item.util.SpongeItemStackComparatorFactory;
 import org.spongepowered.common.network.channel.SpongeChannelExceptionHandlerFactory;
@@ -191,6 +195,9 @@ public final class SpongeFactoryProvider implements FactoryProvider {
         return this;
     }
 
+    /**
+     * Order matters, be careful...
+     */
     public void registerDefaultFactories() {
         this
                 .registerFactory(ResourceKey.Factory.class, new SpongeResourceKeyFactory())
@@ -259,6 +266,8 @@ public final class SpongeFactoryProvider implements FactoryProvider {
                 .registerFactory(FlatGeneratorConfig.Factory.class, new SpongeFlatGeneratorConfig.FactoryImpl())
                 .registerFactory(StructureGenerationConfig.Factory.class, new SpongeStructureGenerationConfig.FactoryImpl())
                 .registerFactory(CommandResult.Factory.class, new SpongeCommandResultFactory())
+                .registerFactory(ItemStack.Factory.class, new SpongeItemStack.FactoryImpl())
+                .registerFactory(BlockSnapshot.Factory.class, new SpongeBlockSnapshot.FactoryImpl())
         ;
     }
 }

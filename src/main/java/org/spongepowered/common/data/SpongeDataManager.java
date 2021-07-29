@@ -71,7 +71,7 @@ import org.spongepowered.common.data.provider.CustomDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.item.SpongeItemStackBuilder;
+import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.map.canvas.SpongeMapCanvasDataBuilder;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationDataBuilder;
 import org.spongepowered.common.profile.SpongeGameProfileDataBuilder;
@@ -333,7 +333,7 @@ public final class SpongeDataManager implements DataManager {
     }
 
     public void registerDefaultBuilders() {
-        this.registerBuilder(ItemStack.class, new SpongeItemStackBuilder());
+        this.registerBuilder(ItemStack.class, new SpongeItemStack.BuilderImpl());
         this.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotDataBuilder());
         this.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());
         this.registerBuilder(EntityArchetype.class, SpongeEntityArchetypeBuilder.unpooled());

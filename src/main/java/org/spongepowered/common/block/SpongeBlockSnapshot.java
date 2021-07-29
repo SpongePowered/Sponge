@@ -27,6 +27,7 @@ package org.spongepowered.common.block;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Blocks;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -39,12 +40,18 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.DataManipulator;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.persistence.AbstractDataBuilder;
 import org.spongepowered.api.data.persistence.DataContainer;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
 import org.spongepowered.api.data.persistence.Queries;
+import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.server.ServerLocation;
+import org.spongepowered.api.world.server.storage.ServerWorldProperties;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
@@ -57,6 +64,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DataUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
@@ -65,11 +73,13 @@ import org.spongepowered.math.vector.Vector3i;
 
 import java.lang.ref.WeakReference;
 import java.util.Arrays;
+import java.util.Deque;
 import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.UUID;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 @DefaultQualifier(NonNull.class)
 public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutableDataHolder<BlockSnapshot>, DataContainerHolder.Immutable<BlockSnapshot>, DataCompoundHolder {
@@ -84,7 +94,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
     @Nullable WeakReference<ServerLevel> world;
     @MonotonicNonNull public BlockChange blockChange; // used for post event
 
-    SpongeBlockSnapshot(final SpongeBlockSnapshotBuilder builder) {
+    SpongeBlockSnapshot(final BuilderImpl builder) {
         this.blockState = Objects.requireNonNull(builder.blockState);
         this.worldKey = Objects.requireNonNull(builder.worldKey);
         this.pos = Objects.requireNonNull(builder.coordinates);
@@ -93,6 +103,15 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         this.changeFlag = builder.flag;
         this.world = builder.worldRef;
         builder.worldRef = null;
+    }
+
+    SpongeBlockSnapshot() {
+        this.blockState = (BlockState) Blocks.AIR.defaultBlockState();
+        this.worldKey = Constants.World.INVALID_WORLD_KEY;
+        this.pos = Vector3i.ZERO;
+        this.blockPos = BlockPos.ZERO;
+        this.compound = null;
+        this.changeFlag = null;
     }
 
     @Override
@@ -111,7 +130,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public BlockSnapshot withContainer(final DataContainer container) {
-        return SpongeBlockSnapshotBuilder.pooled().build(container).get();
+        return BuilderImpl.pooled().build(container).get();
     }
 
     @Override
@@ -234,12 +253,12 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public BlockSnapshot withRawData(final DataView container) throws InvalidDataException {
-        return SpongeBlockSnapshotBuilder.pooled().buildContent(container).orElseThrow(InvalidDataException::new);
+        return BuilderImpl.pooled().buildContent(container).orElseThrow(InvalidDataException::new);
     }
 
     @Override
     public boolean validateRawData(final DataView container) {
-        return SpongeBlockSnapshotBuilder.pooled().buildContent(container).isPresent();
+        return BuilderImpl.pooled().buildContent(container).isPresent();
     }
 
     @Override
@@ -284,8 +303,8 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
         return this.compound == null ? Optional.empty() : Optional.of(this.compound.copy());
     }
 
-    public SpongeBlockSnapshotBuilder createBuilder() {
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
+    public BuilderImpl createBuilder() {
+        final BuilderImpl builder = BuilderImpl.pooled();
         builder.blockState(this.blockState)
                .position(this.pos);
         if (this.world != null && this.world.get() != null) {
@@ -309,7 +328,7 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
 
     @Override
     public BlockSnapshot data$withDataContainer(DataContainer container) {
-        final SpongeBlockSnapshotBuilder builder = this.createBuilder();
+        final BuilderImpl builder = this.createBuilder();
         builder.compound = NBTTranslator.INSTANCE.translate(container);;
         return builder.build();
     }
@@ -377,5 +396,252 @@ public final class SpongeBlockSnapshot implements BlockSnapshot, SpongeImmutable
             .add("position=" + this.blockPos)
             .add("blockState=" + this.blockState)
             .toString();
+    }
+
+    public static final class BuilderImpl extends AbstractDataBuilder<@NonNull BlockSnapshot> implements BlockSnapshot.Builder {
+        private static final Deque<BuilderImpl> pool = new ConcurrentLinkedDeque<>();
+
+        public static BuilderImpl unpooled() {
+            return new BuilderImpl(false);
+        }
+
+        public static BuilderImpl pooled() {
+            final BuilderImpl builder = BuilderImpl.pool.pollFirst();
+            if (builder != null) {
+                return builder.reset();
+            }
+            return new BuilderImpl(true);
+        }
+
+        BlockState blockState;
+        ResourceKey worldKey;
+        @Nullable UUID creatorUniqueId;
+        @Nullable UUID notifierUniqueId;
+        Vector3i coordinates;
+        @Nullable List<DataManipulator.Immutable> manipulators;
+        @Nullable CompoundTag compound;
+        SpongeBlockChangeFlag flag = (SpongeBlockChangeFlag) BlockChangeFlags.ALL;
+        @Nullable WeakReference<ServerLevel> worldRef;
+        private final boolean pooled;
+
+
+        private BuilderImpl(final boolean pooled) {
+            super(BlockSnapshot.class, 1);
+            this.pooled = pooled;
+        }
+
+        @Override
+        public @NonNull BuilderImpl world(final @NonNull ServerWorldProperties worldProperties) {
+            this.worldKey = Objects.requireNonNull(worldProperties).key();
+            return this;
+        }
+
+        public BuilderImpl world(final ResourceKey key) {
+            this.worldKey = Objects.requireNonNull(key);
+            return this;
+        }
+
+        public BuilderImpl world(final ServerLevel world) {
+            this.worldKey = ((org.spongepowered.api.world.server.ServerWorld) Objects.requireNonNull(world)).key();
+            this.worldRef = new WeakReference<>(world);
+            return this;
+        }
+
+        @Override
+        public @NonNull BuilderImpl blockState(final @NonNull BlockState blockState) {
+            this.blockState = Objects.requireNonNull(blockState);
+            return this;
+        }
+
+        public BuilderImpl blockState(final net.minecraft.world.level.block.state.BlockState blockState) {
+            this.blockState = Objects.requireNonNull((BlockState) blockState);
+            return this;
+        }
+
+
+        @Override
+        public @NonNull BuilderImpl position(final @NonNull Vector3i position) {
+            this.coordinates = Objects.requireNonNull(position);
+            if (this.compound != null) {
+                this.compound.putInt(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_X, position.x());
+                this.compound.putInt(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Y, position.y());
+                this.compound.putInt(Constants.Sponge.BlockSnapshot.TILE_ENTITY_POSITION_Z, position.z());
+            }
+            return this;
+        }
+
+        @Override
+        public BlockSnapshot.@NonNull Builder from(final @NonNull ServerLocation location) {
+            return this.from(location.createSnapshot());
+        }
+
+        @Override
+        public @NonNull BuilderImpl creator(final UUID uuid) {
+            this.creatorUniqueId = Objects.requireNonNull(uuid);
+            return this;
+        }
+
+        @Override
+        public @NonNull BuilderImpl notifier(final UUID uuid) {
+            this.notifierUniqueId = Objects.requireNonNull(uuid);
+            return this;
+        }
+
+        @Override
+        public <V> BlockSnapshot.@NonNull Builder add(final @NonNull Key<@NonNull ? extends Value<V>> key, final @NonNull V value) {
+            Objects.requireNonNull(key);
+            Objects.requireNonNull(value);
+
+            this.blockState = this.blockState.with(key, value)
+                .orElseThrow(() -> new IllegalArgumentException(String.format("Key %s is not supported for block state %s",
+                    key.key().asString(),
+                    this.blockState.toString())));
+            return this;
+        }
+
+        @Override
+        public @NonNull BuilderImpl from(final BlockSnapshot holder) {
+            Objects.requireNonNull(holder);
+
+            this.blockState = holder.state();
+            this.worldKey = holder.world();
+            if (holder.creator().isPresent()) {
+                this.creatorUniqueId = holder.creator().get();
+            }
+            if (holder.notifier().isPresent()) {
+                this.notifierUniqueId = holder.notifier().get();
+            }
+            this.coordinates = holder.position();
+            return this;
+        }
+
+        public BuilderImpl from(final SpongeBlockSnapshot snapshot) {
+            Objects.requireNonNull(snapshot);
+
+            this.blockState = snapshot.state();
+            this.worldKey = snapshot.world();
+            this.worldRef = snapshot.world;
+            this.compound = snapshot.compound;
+            this.coordinates = snapshot.position();
+            this.flag = snapshot.getChangeFlag();
+            return this;
+        }
+
+        public BlockState getBlockState() {
+            return this.blockState;
+        }
+
+        public ResourceKey getWorldKey() {
+            return this.worldKey;
+        }
+
+        public @Nullable UUID getCreatorUniqueId() {
+            return this.creatorUniqueId;
+        }
+
+        public Vector3i getCoordinates() {
+            return this.coordinates;
+        }
+
+        public @Nullable List<DataManipulator.Immutable> getManipulators() {
+            return this.manipulators;
+        }
+
+        public @Nullable CompoundTag getCompound() {
+            return this.compound;
+        }
+
+        public SpongeBlockChangeFlag getFlag() {
+            return this.flag;
+        }
+
+        @Override
+        public @NonNull BuilderImpl reset() {
+            this.blockState = (BlockState) Blocks.AIR.defaultBlockState();
+            this.worldKey = Constants.World.INVALID_WORLD_KEY;
+            this.creatorUniqueId = null;
+            this.notifierUniqueId = null;
+            this.coordinates = null;
+            this.manipulators = null;
+            this.compound = null;
+            this.flag = null;
+            return this;
+        }
+
+        @Override
+        public @NonNull SpongeBlockSnapshot build() {
+            Objects.requireNonNull(this.blockState, "BlockState cannot be null!");
+            final SpongeBlockSnapshot spongeBlockSnapshot = new SpongeBlockSnapshot(this);
+            this.reset();
+            if (this.pooled) {
+                BuilderImpl.pool.push(this);
+            }
+            return spongeBlockSnapshot;
+        }
+
+        @Override
+        protected @NonNull Optional<BlockSnapshot> buildContent(final DataView container) throws InvalidDataException {
+
+            if (!container.contains(Constants.Block.BLOCK_STATE, Constants.Sponge.SNAPSHOT_WORLD_POSITION)) {
+                return Optional.empty();
+            }
+
+            // if we have no world-key check if we can find by uuid
+            if (!container.contains(Queries.WORLD_KEY)) {
+                if (!container.contains(Constants.Sponge.BlockSnapshot.WORLD_UUID)) {
+                    return Optional.empty();
+                }
+                final UUID uuid = UUID.fromString(container.getString(Constants.Sponge.BlockSnapshot.WORLD_UUID).get());
+                Sponge.server().worldManager().worldKey(uuid).ifPresent(worldKey -> container.set(Queries.WORLD_KEY, worldKey));
+            }
+
+            DataUtil.checkDataExists(container, Constants.Block.BLOCK_STATE);
+            DataUtil.checkDataExists(container, Queries.WORLD_KEY);
+            final BuilderImpl builder = BuilderImpl.pooled();
+            final ResourceKey worldKey = container.getResourceKey(Queries.WORLD_KEY).get();
+            final Vector3i coordinate = DataUtil.getPosition3i(container);
+            final Optional<String> creatorUuid = container.getString(Queries.CREATOR_ID);
+            final Optional<String> notifierUuid = container.getString(Queries.NOTIFIER_ID);
+
+            final BlockState blockState = container.getSerializable(Constants.Block.BLOCK_STATE, BlockState.class).get();
+
+            builder.blockState(blockState).world(worldKey).position(coordinate);
+
+            creatorUuid.ifPresent(s -> builder.creator(UUID.fromString(s)));
+            notifierUuid.ifPresent(s -> builder.notifier(UUID.fromString(s)));
+            container.getView(Constants.Sponge.UNSAFE_NBT)
+                .map(dataView -> NBTTranslator.INSTANCE.translate(dataView))
+                .ifPresent(builder::addUnsafeCompound);
+            return Optional.of(builder.build());
+        }
+
+        public BuilderImpl addUnsafeCompound(final CompoundTag compound) {
+            Objects.requireNonNull(compound);
+
+            this.compound = compound.copy();
+            return this;
+        }
+
+        public BuilderImpl flag(final BlockChangeFlag flag) {
+            this.flag = (SpongeBlockChangeFlag) flag;
+            return this;
+        }
+
+        public BuilderImpl tileEntity(final BlockEntity added) {
+            this.compound = null;
+            final CompoundTag tag = new CompoundTag();
+            added.save(tag);
+            this.compound = tag;
+            return this;
+        }
+    }
+
+    public static final class FactoryImpl implements Factory {
+        private static final SpongeBlockSnapshot EMPTY = new SpongeBlockSnapshot();
+
+        @Override
+        public BlockSnapshot empty() {
+            return FactoryImpl.EMPTY;
+        }
     }
 }

@@ -34,7 +34,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -82,7 +81,7 @@ public class GrowablePhaseContext extends PhaseContext<GrowablePhaseContext> {
         checkState(this.usedItem != null, "ItemUsed is null");
         checkState(this.priorContext != null, "Prior context is null");
         checkState(this.world != null, "World is null");
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
+        final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled()
             .world(((ServerLevel) this.world))
             .position(VecHelper.toVector3i(this.pos))
             .blockState(this.blockState)

@@ -39,7 +39,6 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.NotifyNeighborBlockEvent;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.block.SpongeNotificationTicket;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
@@ -90,7 +89,7 @@ final class NeighborNotification extends GameTransaction<NotifyNeighborBlockEven
             return locatableBlock;
         };
         this.targetSnapshot = () -> {
-            final SpongeBlockSnapshotBuilder pooled = SpongeBlockSnapshotBuilder.pooled();
+            final SpongeBlockSnapshot.BuilderImpl pooled = SpongeBlockSnapshot.BuilderImpl.pooled();
             pooled.world(this.serverWorld.get())
                 .position(new Vector3i(notifyPos.getX(), notifyPos.getY(), notifyPos.getZ()))
                 .blockState(notifyState);

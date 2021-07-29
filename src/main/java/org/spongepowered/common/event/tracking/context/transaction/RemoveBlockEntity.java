@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -32,41 +33,25 @@ import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.util.PrettyPrinter;
+import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 
 @DefaultQualifier(NonNull.class)
-public final class ReplaceTileEntity extends BlockEventBasedTransaction {
+public final class RemoveBlockEntity extends BlockEventBasedTransaction {
 
-    final BlockEntity added;
-    final @Nullable BlockEntity removed;
-    final SpongeBlockSnapshot removedSnapshot;
+    final BlockEntity removed;
+    final SpongeBlockSnapshot tileSnapshot;
 
-    ReplaceTileEntity(final BlockEntity added, final @Nullable BlockEntity removed,
-        final SpongeBlockSnapshot attachedSnapshot
-    ) {
+    RemoveBlockEntity(final BlockEntity removed, final SpongeBlockSnapshot attachedSnapshot) {
         super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.state(), attachedSnapshot.world());
-        this.added = added;
         this.removed = removed;
-        this.removedSnapshot = attachedSnapshot;
-    }
-
-    @Override
-    public boolean acceptTileAddition(final BlockEntity tileEntity) {
-        if (this.added == tileEntity) {
-            return true;
-        }
-        return super.acceptTileAddition(tileEntity);
-    }
-
-    @Override
-    public void restore() {
-        this.removedSnapshot.restore(true, BlockChangeFlags.NONE);
+        this.tileSnapshot = attachedSnapshot;
     }
 
     @Override
@@ -78,35 +63,39 @@ public final class ReplaceTileEntity extends BlockEventBasedTransaction {
 
     @Override
     public void addToPrinter(final PrettyPrinter printer) {
-        printer.add("ReplaceTileEntity")
-            .add(" %s : %s", "Position", this.affectedPosition)
-            .add(" %s : %s", "Added", this.added)
-            .add(" %s : %s", "Removed", this.removed == null ? "null" : this.removed)
+        printer.add("RemoveTileEntity")
+            .add(" %s : %s", this.affectedPosition, ((BlockEntityBridge) this.removed).bridge$getPrettyPrinterString())
+            .add(" %s : %s", this.affectedPosition, this.originalState)
         ;
     }
 
     @Override
+    public void restore() {
+        this.tileSnapshot.restore(true, BlockChangeFlags.NONE);
+    }
+
+    @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
-        return SpongeBlockSnapshotBuilder.pooled()
-            .from(this.removedSnapshot)
-            .tileEntity(this.added)
+        return SpongeBlockSnapshot.BuilderImpl.pooled()
+            .world((ServerLevel) this.removed.getLevel())
+            .position(new Vector3i(this.affectedPosition.getX(), this.affectedPosition.getY(), this.affectedPosition.getZ()))
+            .blockState(this.originalState)
             .build()
             ;
     }
 
     @Override
     protected SpongeBlockSnapshot getOriginalSnapshot() {
-        return this.removedSnapshot;
+        return this.tileSnapshot;
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ReplaceTileEntity.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", RemoveBlockEntity.class.getSimpleName() + "[", "]")
             .add("affectedPosition=" + this.affectedPosition)
             .add("originalState=" + this.originalState)
             .add("worldKey=" + this.worldKey)
             .add("cancelled=" + this.cancelled)
-            .add("added=" + this.added)
             .add("removed=" + this.removed)
             .toString();
     }
