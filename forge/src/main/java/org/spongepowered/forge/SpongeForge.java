@@ -31,11 +31,15 @@ import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.launch.Launch;
+import org.spongepowered.plugin.PluginContainer;
 
-@Mod("spongeforge")
+import java.util.Optional;
+
+@Mod(Constants.MOD_ID)
 public final class SpongeForge {
 
-    private static final Logger LOGGER = LogManager.getLogger();
+    private static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID);
 
     public SpongeForge() {
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
@@ -50,6 +54,11 @@ public final class SpongeForge {
     private void commonSetup(final FMLCommonSetupEvent event) {
         // common setup
         SpongeForge.LOGGER.info("Setting up SpongeForge");
+
+        final Optional<PluginContainer> pluginContainer = Launch.instance().pluginManager().fromInstance(this);
+        final PluginContainer pluginContainer1 = pluginContainer.get();
+
+        // TODO Add attributes for HumanEntity to relevant event
     }
 
 }

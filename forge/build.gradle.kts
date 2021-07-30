@@ -82,6 +82,14 @@ val forgeLaunch by sourceSets.register("launch") {
         extendsFrom(forgeAppLaunchConfig.get())
     }
 }
+val forgeAccessors by sourceSets.register("accessors") {
+    spongeImpl.applyNamedDependencyOnOutput(commonProject, mixins.get(), this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(project, this, forgeLaunch, project, forgeLaunch.implementationConfigurationName)
+
+    configurations.named(implementationConfigurationName) {
+        extendsFrom(forgeAppLaunchConfig.get())
+    }
+}
 val forgeMixins by sourceSets.register("mixins") {
     // implementation (compile) dependencies
     spongeImpl.applyNamedDependencyOnOutput(commonProject, mixins.get(), this, project, this.implementationConfigurationName)
@@ -90,6 +98,7 @@ val forgeMixins by sourceSets.register("mixins") {
     spongeImpl.applyNamedDependencyOnOutput(commonProject, applaunch.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(commonProject, main.get(), this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, forgeMain, this, project, this.implementationConfigurationName)
+    spongeImpl.applyNamedDependencyOnOutput(project, forgeAccessors, this, project, this.implementationConfigurationName)
     spongeImpl.applyNamedDependencyOnOutput(project, forgeLaunch, this, project, this.implementationConfigurationName)
 }
 val forgeAppLaunch by sourceSets.register("applaunch") {
@@ -208,7 +217,10 @@ tasks {
         // from(sourceSets.main.map {it.output })
         from(forgeAppLaunch.output)
         from(forgeLaunch.output)
+        from(forgeAccessors.output)
         from(forgeMixins.output)
+
+        duplicatesStrategy = DuplicatesStrategy.WARN
     }
     val forgeAppLaunchJar by registering(Jar::class) {
         archiveClassifier.set("applaunch")
@@ -219,6 +231,11 @@ tasks {
         archiveClassifier.set("launch")
         manifest.from(forgeManifest)
         from(forgeLaunch.output)
+    }
+    val forgeAccessorsJar by registering(Jar::class) {
+        archiveClassifier.set("accessors")
+        manifest.from(forgeManifest)
+        from(forgeAccessors.output)
     }
     val forgeMixinsJar by registering(Jar::class) {
         archiveClassifier.set("mixins")
