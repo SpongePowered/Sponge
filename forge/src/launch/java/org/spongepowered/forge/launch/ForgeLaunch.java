@@ -36,6 +36,7 @@ import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
+import org.spongepowered.forge.launch.inject.SpongeForgeModule;
 import org.spongepowered.forge.launch.plugin.ForgePluginManager;
 import org.spongepowered.plugin.PluginContainer;
 
@@ -70,14 +71,10 @@ public final class ForgeLaunch extends Launch {
     public Injector createInjector() {
         final List<Module> modules = Lists.newArrayList(
                 new SpongeModule(),
-                new SpongeCommonModule()
+                new SpongeCommonModule(),
+                new SpongeForgeModule()
         );
         return Guice.createInjector(this.injectionStage(), modules);
-    }
-
-    @Override
-    public void performLifecycle() {
-
     }
 
     @Override

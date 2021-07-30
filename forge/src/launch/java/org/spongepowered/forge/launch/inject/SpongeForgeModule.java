@@ -22,35 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.plugin;
+package org.spongepowered.forge.launch.inject;
 
-import com.google.inject.Singleton;
-import net.minecraftforge.fml.ModList;
-import org.spongepowered.common.launch.plugin.SpongePluginManager;
-import org.spongepowered.forge.accessor.fml.ModListAccessor;
-import org.spongepowered.plugin.PluginContainer;
+import com.google.inject.AbstractModule;
+import org.spongepowered.api.Platform;
+import org.spongepowered.api.event.EventManager;
+import org.spongepowered.forge.launch.ForgePlatform;
+import org.spongepowered.forge.launch.event.ForgeEventManager;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
-
-@Singleton
-@SuppressWarnings("unchecked")
-public final class ForgePluginManager implements SpongePluginManager {
+public final class SpongeForgeModule extends AbstractModule {
 
     @Override
-    public Optional<PluginContainer> fromInstance(final Object instance) {
-        return (Optional<PluginContainer>) (Object) ModList.get().getModContainerByObject(Objects.requireNonNull(instance, "instance"));
-    }
-
-    @Override
-    public Optional<PluginContainer> plugin(final String id) {
-        return (Optional<PluginContainer>) (Object) ModList.get().getModContainerById(Objects.requireNonNull(id, "id"));
-    }
-
-    @Override
-    public Collection<PluginContainer> plugins() {
-        return Collections.unmodifiableCollection((Collection<PluginContainer>) (Object) ((ModListAccessor) ModList.get()).accessor$mods());
+    protected void configure() {
+        this.bind(Platform.class).to(ForgePlatform.class);
+        this.bind(EventManager.class).to(ForgeEventManager.class);
     }
 }
