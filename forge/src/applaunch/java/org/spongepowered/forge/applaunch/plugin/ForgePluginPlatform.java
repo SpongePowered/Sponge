@@ -46,7 +46,7 @@ public final class ForgePluginPlatform implements PluginPlatform {
 
     public ForgePluginPlatform(final Environment environment) {
         this.environment = environment;
-        this.logger = LogManager.getLogger("App Launch");
+        this.logger = LogManager.getLogger("plugin");
         this.pluginDirectories = new ArrayList<>();
 
         this.pluginDirectories.add(FMLPaths.MODSDIR.get());

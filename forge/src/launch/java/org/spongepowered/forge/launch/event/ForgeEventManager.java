@@ -22,35 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.plugin;
+package org.spongepowered.forge.launch.event;
 
-import com.google.inject.Singleton;
-import net.minecraftforge.fml.ModList;
-import org.spongepowered.common.launch.plugin.SpongePluginManager;
-import org.spongepowered.forge.accessor.fml.ModListAccessor;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.EventListenerRegistration;
+import org.spongepowered.api.event.EventManager;
+import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.Collection;
-import java.util.Collections;
-import java.util.Objects;
-import java.util.Optional;
-
-@Singleton
-@SuppressWarnings("unchecked")
-public final class ForgePluginManager implements SpongePluginManager {
+public final class ForgeEventManager implements SpongeEventManager {
 
     @Override
-    public Optional<PluginContainer> fromInstance(final Object instance) {
-        return (Optional<PluginContainer>) (Object) ModList.get().getModContainerByObject(Objects.requireNonNull(instance, "instance"));
+    public <E extends Event> EventManager registerListener(final EventListenerRegistration<E> registration) {
+        return null;
     }
 
     @Override
-    public Optional<PluginContainer> plugin(final String id) {
-        return (Optional<PluginContainer>) (Object) ModList.get().getModContainerById(Objects.requireNonNull(id, "id"));
+    public EventManager registerListeners(final PluginContainer plugin, final Object obj) {
+        return null;
     }
 
     @Override
-    public Collection<PluginContainer> plugins() {
-        return Collections.unmodifiableCollection((Collection<PluginContainer>) (Object) ((ModListAccessor) ModList.get()).accessor$mods());
+    public EventManager unregisterListeners(final Object obj) {
+        return null;
+    }
+
+    @Override
+    public boolean post(final Event event) {
+        return false;
+    }
+
+    @Override
+    public boolean postToPlugin(final Event event, final PluginContainer plugin) {
+        return false;
     }
 }
