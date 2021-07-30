@@ -103,7 +103,6 @@
         "world.entity.GrieferBridgeMixin",
         "world.entity.LivingEntityMixin",
         "world.entity.MobMixin",
-        "world.entity.ai.attributes.DefaultAttributesMixin",
         "world.entity.ai.goal.BreakDoorGoalMixin",
         "world.entity.ai.goal.BreedGoalMixin",
         "world.entity.ai.goal.EatBlockGoalMixin",

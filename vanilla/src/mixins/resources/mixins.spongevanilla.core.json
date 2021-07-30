@@ -34,7 +34,8 @@
         "world.entity.item.ItemEntityMixin_Vanilla",
         "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla",
         "world.entity.vehicle.BoatMixin_Vanilla",
-        "world.level.LevelMixin_Vanilla"
+        "world.level.LevelMixin_Vanilla",
+        "world.entity.ai.attributes.DefaultAttributesMixin"
     ],
     "overwrites": {
         "conformVisibility": true

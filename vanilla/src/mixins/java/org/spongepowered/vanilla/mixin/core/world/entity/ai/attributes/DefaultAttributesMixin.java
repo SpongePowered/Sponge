@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.ai.attributes;
+package org.spongepowered.vanilla.mixin.core.world.entity.ai.attributes;
 
 import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.entity.LivingEntity;
@@ -35,13 +35,13 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 
 @Mixin(DefaultAttributes.class)
-public class DefaultAttributesMixin {
+public abstract class DefaultAttributesMixin {
     @Inject(
         method = "getSupplier",
         at = @At("HEAD"),
         cancellable = true
     )
-    private static void impl$humanGetSupplier(final EntityType<? extends LivingEntity> type, final CallbackInfoReturnable<AttributeSupplier> cir) {
+    private static void vanilla$humanGetSupplier(final EntityType<? extends LivingEntity> type, final CallbackInfoReturnable<AttributeSupplier> cir) {
         if (type == HumanEntity.TYPE) {
             cir.setReturnValue(HumanEntity.ATTRIBUTES);
         }
@@ -52,7 +52,7 @@ public class DefaultAttributesMixin {
         at = @At("HEAD"),
         cancellable = true
     )
-    private static void impl$humanHasSupplier(final EntityType<?> type, final CallbackInfoReturnable<Boolean> cir) {
+    private static void vanilla$humanHasSupplier(final EntityType<?> type, final CallbackInfoReturnable<Boolean> cir) {
         if (type == HumanEntity.TYPE) {
             cir.setReturnValue(true);
         }
