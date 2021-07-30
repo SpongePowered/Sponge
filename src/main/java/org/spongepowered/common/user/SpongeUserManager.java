@@ -184,7 +184,10 @@ public final class SpongeUserManager implements UserManager {
             if (dataFile != null) {
                 try {
                     if (Files.deleteIfExists(dataFile)) {
-                        this.dirtyUsers.remove(this.userCache.getIfPresent(uuid));
+                        final @Nullable SpongeUserData data = this.userCache.getIfPresent(uuid);
+                        if (data != null) {
+                            this.dirtyUsers.remove(data);
+                        }
                         this.userCache.invalidate(uuid);
                     }
                 } catch (final SecurityException | IOException e) {
