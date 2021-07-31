@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
 
-@Mixin(ModList.class)
+@Mixin(value = ModList.class, remap = false)
 public interface ModListAccessor {
 
     @Accessor("mods") List<ModContainer> accessor$mods();

@@ -22,29 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch;
+package org.spongepowered.forge;
 
-import com.google.inject.Inject;
-import com.google.inject.Singleton;
-import org.spongepowered.api.MinecraftVersion;
-import org.spongepowered.common.SpongePlatform;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
+import net.minecraftforge.fml.WorldPersistenceHooks;
 
-import java.util.Map;
+public final class SpongeLevelDataPersistence implements WorldPersistenceHooks.WorldPersistenceHook {
 
-@Singleton
-public final class ForgePlatform extends SpongePlatform {
+    public static final SpongeLevelDataPersistence INSTANCE = new SpongeLevelDataPersistence();
 
-    @Inject
-    public ForgePlatform(final MinecraftVersion minecraftVersion) {
-        super(minecraftVersion);
+    /**
+     * This is actually the tag name, no idea why they call this modid...
+     * @return The tag name
+     */
+    @Override
+    public String getModId() {
+        return "SpongeData";
     }
 
     @Override
-    public Map<String, Object> asMap() {
-        if (this.platformMap.isEmpty()) {
-            this.createPlatformMetadata();
-        }
+    public CompoundTag getDataForWriting(LevelStorageSource.LevelStorageAccess arg, WorldData arg2) {
+        return new CompoundTag();
+    }
 
-        return this.platformMap;
+    @Override
+    public void readData(LevelStorageSource.LevelStorageAccess arg, WorldData arg2, CompoundTag arg3) {
     }
 }
