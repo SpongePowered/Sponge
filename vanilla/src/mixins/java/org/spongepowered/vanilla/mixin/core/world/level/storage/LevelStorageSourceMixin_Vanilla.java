@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.storage;
+package org.spongepowered.vanilla.mixin.core.world.level.storage;
 
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
@@ -44,7 +44,7 @@ import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridg
 import org.spongepowered.common.util.Constants;
 
 @Mixin(LevelStorageSource.class)
-public abstract class LevelStorageSourceMixin {
+public abstract class LevelStorageSourceMixin_Vanilla {
 
     private static Dynamic<Tag> impl$spongeLevelData;
 
@@ -67,7 +67,7 @@ public abstract class LevelStorageSourceMixin {
     )
     private static CompoundTag impl$createSpongeLevelData(final CompoundTag compoundNBT, final String path, final DynamicOps<Tag> ops,
             final DataPackConfig p_237270_1s) {
-        LevelStorageSourceMixin.impl$spongeLevelData = new Dynamic<>(ops, compoundNBT.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA));
+        LevelStorageSourceMixin_Vanilla.impl$spongeLevelData = new Dynamic<>(ops, compoundNBT.getCompound(Constants.Sponge.Data.V2.SPONGE_DATA));
         return compoundNBT.getCompound(path);
     }
 
@@ -94,9 +94,9 @@ public abstract class LevelStorageSourceMixin {
         final PrimaryLevelData levelData = PrimaryLevelData.parse(p_237369_0_, p_237369_1_, p_237369_2_, p_237369_3_, p_237369_4_, p_237369_5_,
                 p_237369_6_, p_237369_7_);
 
-        ((PrimaryLevelDataBridge) levelData).bridge$readSpongeLevelData(LevelStorageSourceMixin.impl$spongeLevelData);
+        ((PrimaryLevelDataBridge) levelData).bridge$readSpongeLevelData(LevelStorageSourceMixin_Vanilla.impl$spongeLevelData);
 
-        LevelStorageSourceMixin.impl$spongeLevelData = null;
+        LevelStorageSourceMixin_Vanilla.impl$spongeLevelData = null;
         return levelData;
     }
 }

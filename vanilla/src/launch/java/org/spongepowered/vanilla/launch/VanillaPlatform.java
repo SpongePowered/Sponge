@@ -28,10 +28,7 @@ import com.google.inject.Inject;
 import com.google.inject.Singleton;
 import org.spongepowered.api.MinecraftVersion;
 import org.spongepowered.common.SpongePlatform;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.plugin.PluginContainer;
 
-import java.util.HashMap;
 import java.util.Map;
 
 @Singleton
@@ -41,22 +38,11 @@ public final class VanillaPlatform extends SpongePlatform {
     public VanillaPlatform(final MinecraftVersion minecraftVersion) {
         super(minecraftVersion);
 
-        final PluginContainer apiPlugin = Launch.instance().apiPlugin();
-        final PluginContainer platformPlugin = Launch.instance().platformPlugin();
-
-        final PluginContainer common = Launch.instance().commonPlugin();
-        this.platformMap.put("Type", this.type());
-        this.platformMap.put("ApiName", apiPlugin.metadata().name());
-        this.platformMap.put("ApiVersion", apiPlugin.metadata().version());
-        this.platformMap.put("CommonName", common.metadata().name());
-        this.platformMap.put("CommonVersion", common.metadata().version());
-        this.platformMap.put("ImplementationName", platformPlugin.metadata().name());
-        this.platformMap.put("ImplementationVersion", platformPlugin.metadata().version());
-        this.platformMap.put("MinecraftVersion", this.minecraftVersion());
+        this.createPlatformMetadata();
     }
 
     @Override
-    public final Map<String, Object> asMap() {
+    public Map<String, Object> asMap() {
         return this.platformMap;
     }
 }

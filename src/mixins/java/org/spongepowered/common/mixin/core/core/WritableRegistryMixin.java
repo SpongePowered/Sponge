@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.core;
+package org.spongepowered.common.mixin.core.core;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.WritableRegistry;
@@ -31,26 +31,26 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.registry.RegistryEntry;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 import org.spongepowered.common.bridge.core.RegistryBridge;
+import org.spongepowered.common.bridge.core.WritableRegistryBridge;
 
 @Mixin(WritableRegistry.class)
-public abstract class WritableRegistryMixin_Vanilla<T> extends RegistryMixin_Vanilla<T> implements WritableRegistryBridge<T> {
+public abstract class WritableRegistryMixin<T> extends RegistryMixin<T> implements WritableRegistryBridge<T>, RegistryBridge<T> {
 
     // @formatter:off
     @Shadow public abstract <V extends T> V shadow$register(ResourceKey<T> p_218381_1_, V p_218381_2_, Lifecycle p_218381_3_);
     // @formatter:on
 
-    private boolean vanilla$isDynamic = true;
+    private boolean impl$isDynamic = true;
 
     @Override
     public boolean bridge$isDynamic() {
-        return this.vanilla$isDynamic;
+        return this.impl$isDynamic;
     }
 
     @Override
     public void bridge$setDynamic(final boolean isDynamic) {
-        this.vanilla$isDynamic = isDynamic;
+        this.impl$isDynamic = isDynamic;
     }
 
     @Nullable

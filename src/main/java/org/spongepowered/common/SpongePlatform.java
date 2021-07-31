@@ -34,10 +34,9 @@ import org.spongepowered.plugin.PluginContainer;
 import java.util.HashMap;
 import java.util.Map;
 
-public abstract class SpongePlatform implements Platform{
+public abstract class SpongePlatform implements Platform {
 
     private final MinecraftVersion minecraftVersion;
-
     protected final Map<String, Object> platformMap = new HashMap<String, Object>() {
 
         private static final long serialVersionUID = 7022397614988467398L;
@@ -91,13 +90,28 @@ public abstract class SpongePlatform implements Platform{
         return this.minecraftVersion;
     }
 
+    protected void createPlatformMetadata() {
+        final PluginContainer apiPlugin = Launch.instance().apiPlugin();
+        final PluginContainer commonPlugin = Launch.instance().commonPlugin();
+        final PluginContainer platformPlugin = Launch.instance().platformPlugin();
+
+        this.platformMap.put("Type", this.type());
+        this.platformMap.put("APIName", apiPlugin.metadata().name());
+        this.platformMap.put("APIVersion", apiPlugin.metadata().version());
+        this.platformMap.put("CommonName", commonPlugin.metadata().name());
+        this.platformMap.put("CommonVersion", commonPlugin.metadata().version());
+        this.platformMap.put("PlatformName", platformPlugin.metadata().name());
+        this.platformMap.put("PlatformVersion", platformPlugin.metadata().version());
+        this.platformMap.put("MinecraftVersion", this.minecraftVersion());
+    }
+
     @Override
     public final String toString() {
         return MoreObjects.toStringHelper(this)
                 .add("type", this.type())
                 .add("executionType", this.executionType())
                 .add("api", Launch.instance().apiPlugin().metadata().id())
-                .add("implementation", Launch.instance().platformPlugin().metadata().id())
+                .add("platform", Launch.instance().platformPlugin().metadata().id())
                 .add("minecraftVersion", this.minecraftVersion())
                 .toString();
     }

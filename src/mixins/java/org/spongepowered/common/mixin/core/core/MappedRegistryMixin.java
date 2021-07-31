@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.core;
+package org.spongepowered.common.mixin.core.core;
 
 import com.mojang.serialization.Lifecycle;
 import net.minecraft.core.MappedRegistry;
@@ -37,15 +37,15 @@ import org.spongepowered.common.registry.SpongeRegistryEntry;
 import org.spongepowered.common.registry.SpongeRegistryType;
 
 @Mixin(MappedRegistry.class)
-public abstract class MappedRegistryMixin_Vanilla<T> extends WritableRegistryMixin_Vanilla<T> {
+public abstract class MappedRegistryMixin<T> extends WritableRegistryMixin<T> {
 
     @Inject(method = "registerMapping(ILnet/minecraft/resources/ResourceKey;Ljava/lang/Object;Lcom/mojang/serialization/Lifecycle;Z)Ljava/lang/Object;", at = @At("TAIL"))
-    private void vanilla$cacheRegistryEntry(final int p_243537_1_, final net.minecraft.resources.ResourceKey<T> p_243537_2_, final T p_243537_3_, final Lifecycle p_243537_4_, final boolean p_243537_5_,
-                                            final CallbackInfoReturnable<T> cir) {
+    private void impl$cacheRegistryEntry(final int p_243537_1_, final net.minecraft.resources.ResourceKey<T> p_243537_2_, final T p_243537_3_,
+            final Lifecycle p_243537_4_, final boolean p_243537_5_, final CallbackInfoReturnable<T> cir) {
 
-        final net.minecraft.resources.ResourceKey<? extends Registry<T>> registryKey = this.shadow$key();
-        final ResourceKey root = (ResourceKey) (Object) ((ResourceKeyAccessor) registryKey).accessor$registryName();
-        final ResourceKey location = (ResourceKey) (Object) registryKey.location();
+        final net.minecraft.resources.ResourceKey<? extends Registry<T>> resourceKey = this.shadow$key();
+        final ResourceKey root = (ResourceKey) (Object) ((ResourceKeyAccessor<T>) resourceKey).accessor$registryName();
+        final ResourceKey location = (ResourceKey) (Object) resourceKey.location();
         this.bridge$register(new SpongeRegistryEntry<>(new SpongeRegistryType<>(root, location),
                 (ResourceKey) (Object) p_243537_2_.location(), p_243537_3_));
     }

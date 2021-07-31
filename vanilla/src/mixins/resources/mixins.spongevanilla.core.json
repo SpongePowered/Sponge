@@ -18,9 +18,6 @@
     "mixins": [
         "CrashReportMixin_Vanilla",
         "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
-        "core.MappedRegistryMixin_Vanilla",
-        "core.RegistryMixin_Vanilla",
-        "core.WritableRegistryMixin_Vanilla",
         "entity.item.minecart.EnderPearlEntityMixin_Vanilla",
         "entity.player.EntityMixin_Vanilla",
         "server.BootstrapMixin_Vanilla",
@@ -31,11 +28,12 @@
         "server.network.ServerGamePacketListenerImplMixin_Vanilla",
         "server.network.ServerLoginPacketListenerImpl_1Mixin_Vanilla",
         "server.network.ServerLoginPacketListenerImplMixin_Vanilla",
+        "world.entity.ai.attributes.DefaultAttributesMixin",
         "world.entity.item.ItemEntityMixin_Vanilla",
         "world.entity.vehicle.AbstractMinecartContainerMixin_Vanilla",
         "world.entity.vehicle.BoatMixin_Vanilla",
         "world.level.LevelMixin_Vanilla",
-        "world.entity.ai.attributes.DefaultAttributesMixin"
+        "world.level.storage.LevelStorageSourceMixin_Vanilla"
     ],
     "overwrites": {
         "conformVisibility": true
