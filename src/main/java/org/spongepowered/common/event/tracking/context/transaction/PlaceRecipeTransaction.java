@@ -25,7 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.item.crafting.Recipe;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -99,13 +99,7 @@ public class PlaceRecipeTransaction extends ContainerBasedTransaction {
         if (!(context instanceof InventoryPacketContext)) {
             return false;
         }
-        final int containerId = ((InventoryPacketContext) context).<ServerboundContainerClickPacket>getPacket().getContainerId();
+        final int containerId = ((InventoryPacketContext) context).<ServerboundPlaceRecipePacket>getPacket().getContainerId();
         return containerId != this.player.containerMenu.containerId;
     }
-
-    @Override
-    Optional<SlotTransaction> getSlotTransaction() {
-        return Optional.empty();
-    }
-
 }

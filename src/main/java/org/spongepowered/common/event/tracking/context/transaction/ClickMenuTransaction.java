@@ -53,7 +53,6 @@ import net.minecraft.world.inventory.ClickType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 
-import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 
@@ -87,26 +86,6 @@ public class ClickMenuTransaction extends ContainerBasedTransaction {
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {
-        // Search for crafting preview slot changes
-        for (net.minecraft.world.inventory.Slot slot : this.player.containerMenu.slots) {
-            if (slot.container instanceof CraftingContainer) {
-                final CraftingContainer mcCraftInv = ((CraftingContainer) slot.container);
-                final Optional<net.minecraft.world.item.crafting.CraftingRecipe> recipe = this.player.getServer().getRecipeManager().getRecipeFor(
-                        RecipeType.CRAFTING, mcCraftInv, this.player.level);
-                final CraftingInventory craftInv = ((Inventory) player.containerMenu).query(CraftingInventory.class).get();
-                final List<SlotTransaction> previewTransactions = new ArrayList<>(slotTransactions);
-
-
-//                final CraftItemEvent.Preview previewEvent = InventoryEventFactory.callCraftEventPreview(player, craftInv,
-//                        ((CraftingRecipe) recipe.orElse(null)), player.containerMenu, previewTransactions);
-
-                // TODO adjust slotTransaction list
-                break;
-            }
-        }
-
-        // TODO ClickContainerEvent.Double is missing transactions - they are in the side-effect?
-
         final ItemStackSnapshot resultingCursor = ItemStackUtil.snapshotOf(this.player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.cursor, resultingCursor);
         final @Nullable ClickContainerEvent event = context.createContainerEvent(cause, this.player, (Container) this.menu,
@@ -135,10 +114,4 @@ public class ClickMenuTransaction extends ContainerBasedTransaction {
         final int containerId = ((InventoryPacketContext) context).<ServerboundContainerClickPacket>getPacket().getContainerId();
         return containerId != this.player.containerMenu.containerId;
     }
-
-    @Override
-    Optional<SlotTransaction> getSlotTransaction() {
-        return Optional.empty();
-    }
-
 }

@@ -48,6 +48,7 @@ import org.spongepowered.common.bridge.world.inventory.container.TrackedContaine
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
@@ -109,30 +110,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         return this.impl$lastCraft;
     }
 
-    @Nullable private ItemStack impl$previousCursor = ItemStack.EMPTY;
-
-    @Override
-    public void bridge$setPreviousCursor(@Nullable final ItemStack stack) {
-        this.impl$previousCursor = stack;
-    }
-
-    @Override
-    public ItemStack bridge$getPreviousCursor() {
-        return this.impl$previousCursor;
-    }
-
-    private boolean impl$firePreview = true;
-
-    @Override
-    public void bridge$setFirePreview(final boolean firePreview) {
-        this.impl$firePreview = firePreview;
-    }
-
-    @Override
-    public boolean bridge$firePreview() {
-        return this.impl$firePreview;
-    }
-
     // Detects if a mod overrides detectAndSendChanges
     private boolean impl$captureSuccess = false;
 
@@ -178,18 +155,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     }
 
     // Injects/Redirects -------------------------------------------------------------------------
-
-    @Shadow public abstract Slot shadow$getSlot(int slotId);
-
-    // Called when changing a Slot while in creative mode
-    // Captures the SlotTransaction for later event
-    @Inject(method = "setItem", at = @At(value = "HEAD") )
-    private void impl$addTransaction(final int slotId, final ItemStack itemstack, final CallbackInfo ci) {
-        final Slot slot = this.shadow$getSlot(slotId);
-        if (slot != null) {
-            this.impl$capture(slotId, itemstack, slot.getItem());
-        }
-    }
 
     @Inject(method = "removed", at = @At(value = "HEAD"))
     private void onOnContainerClosed(final Player player, final CallbackInfo ci) {
@@ -326,26 +291,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         return entityItem;
     }
 
-    // ClickType.PICKUP ; pick up item on cursor -------------------------
-
-    // Called when adding items to the cursor (pickup with item on cursor)
-    // Captures the previous cursor for later use
-    @Inject(method = "doClick",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;grow(I)V", ordinal = 1))
-    private void beforeOnTakeClickWithItem(
-            final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<Integer> cir) {
-        this.bridge$setPreviousCursor(player.inventory.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
-    }
-
-    // Called when setting the cursor item (pickup with empty cursor)
-    // Captures the previous cursor for later use
-    @Inject(method = "doClick",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/player/Inventory;setCarried(Lnet/minecraft/world/item/ItemStack;)V", ordinal = 3))
-    private void beforeOnTakeClick(
-            final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<Integer> cir) {
-        this.bridge$setPreviousCursor(player.inventory.getCarried().copy()); // capture previous cursor for CraftItemEvent.Craft
-    }
-
     // ClickType.THROW (for Crafting) -------------------------
     // Called when taking items out of a slot (only crafting-output slots relevant here)
     // When it is crafting check if it was cancelled and prevent item drop
@@ -381,14 +326,19 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         this.bridge$setLastCraft(null);
         this.bridge$setShiftCrafting(true);
         ItemStack result = thisContainer.quickMoveStack(player, slotId);
+
+        this.bridge$detectAndSendChanges(true);
+
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        TrackingUtil.processBlockCaptures(context); // ClickContainerEvent -> CraftEvent -> PreviewEvent
+        this.bridge$setShiftCrafting(false);
+
         final CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
         if (lastCraft != null) {
             if (lastCraft.isCancelled()) {
                 result = ItemStack.EMPTY; // Return empty to stop shift-crafting
             }
         }
-
-        this.bridge$setShiftCrafting(false);
 
         return result;
     }
@@ -398,7 +348,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     private void impl$onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<ItemStack> cir) {
         // Reset variables needed for CraftItemEvent.Craft
         this.bridge$setLastCraft(null);
-        this.bridge$setPreviousCursor(null);
 
         // TODO check if when canceling crafting etc. the client is getting informed correctly already - maybe this is not needed
         // previously from CraftingContainerMixin

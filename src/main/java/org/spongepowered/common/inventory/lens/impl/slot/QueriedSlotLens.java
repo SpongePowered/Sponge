@@ -24,52 +24,26 @@
  */
 package org.spongepowered.common.inventory.lens.impl.slot;
 
-import net.minecraft.world.item.ItemStack;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.Key;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.common.inventory.adapter.impl.slots.SlotAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
-import org.spongepowered.common.inventory.lens.impl.AbstractLens;
 import org.spongepowered.common.inventory.lens.slots.SlotLens;
 
-import java.util.List;
+import java.util.HashMap;
+import java.util.Map;
 
-public abstract class DelegatingSlotLens extends AbstractLens implements SlotLens {
+public class QueriedSlotLens extends DelegatingSlotLens {
 
-    protected final SlotLens delegate;
-
-    public DelegatingSlotLens(SlotLens lens, Class<? extends Inventory> adapter) {
-        super(0, 1, adapter);
-        this.addSpanningChild(lens);
-        this.delegate = lens;
+    public QueriedSlotLens(SlotLens lens, Map<Key<?>, Object> data) {
+        super(lens, SlotAdapter.class);
+        this.handleMap.computeIfAbsent(lens, l -> new HashMap<>()).putAll(data);
     }
 
     @Override
-    public int getOrdinal(Fabric fabric) {
-        return this.delegate.getOrdinal(fabric);
+    public Slot getAdapter(Fabric fabric, Inventory parent) {
+        return this.delegate.getAdapter(fabric, new SlotAdapter(fabric, this, parent));
     }
 
-    @Override
-    public ItemStack getStack(Fabric fabric) {
-        return this.delegate.getStack(fabric);
-    }
-
-    @Override
-    public boolean setStack(Fabric fabric, ItemStack stack) {
-        return this.delegate.setStack(fabric, stack);
-    }
-
-    @Override
-    public String toString(int deep) {
-        return "[Delegate-" + this.delegate + "]";
-    }
-
-    @Override
-    public List<SlotLens> getSlots(Fabric fabric) {
-        return this.delegate.getSlots(fabric);
-    }
-
-    @Override
-    public @Nullable SlotLens getSlotLens(Fabric fabric, int ordinal) {
-        return this.delegate.getSlotLens(fabric, ordinal);
-    }
 }

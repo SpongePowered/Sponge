@@ -53,7 +53,7 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
     @Override
     Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions, final PhaseContext<@NonNull ?> context,
             final Cause cause) {
-        final ChangeInventoryEvent event = eventCreator.create(cause, this.inventory, slotTransactions);
+        final ChangeInventoryEvent event = this.eventCreator.create(cause, this.inventory, slotTransactions);
         return Optional.ofNullable(event);
     }
 
@@ -65,11 +65,6 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
     @Override
     public void postProcessEvent(PhaseContext<@NonNull ?> context, ChangeInventoryEvent event) {
         PacketPhaseUtil.handleSlotRestore(player, null, event.transactions(), event.isCancelled());
-    }
-
-    @Override
-    Optional<SlotTransaction> getSlotTransaction() {
-        return Optional.empty();
     }
 
     public interface EventCreator {

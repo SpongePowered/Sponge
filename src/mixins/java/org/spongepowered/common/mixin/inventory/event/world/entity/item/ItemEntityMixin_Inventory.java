@@ -75,7 +75,7 @@ public abstract class ItemEntityMixin_Inventory {
              added = inventory.add(itemStack);
         }
 
-        if (TrackingUtil.processBlockCaptures(context)) {
+        if (!TrackingUtil.processBlockCaptures(context)) {
             return false; // if PickupEvent was cancelled return false
         }
         return added;

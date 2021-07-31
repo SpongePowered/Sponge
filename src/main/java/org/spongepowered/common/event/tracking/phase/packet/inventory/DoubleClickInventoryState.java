@@ -73,10 +73,4 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
             Optional.ofNullable(slot), slotTransactions);
     }
 
-    @Override
-    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet,
-        final InventoryPacketContext context) {
-        super.populateContext(playerMP, packet, context);
-        ((TrackedContainerBridge) playerMP.containerMenu).bridge$setFirePreview(false);
-    }
 }

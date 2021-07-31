@@ -47,4 +47,9 @@ public final class CreativeInventoryPacketState extends BasicPacketState {
     ) {
         return SpawnTypes.DROPPED_ITEM;
     }
+
+    @Override
+    public boolean doesContainerCaptureEntitySpawn(BasicPacketContext context, Entity entityIn) {
+        return true;
+    }
 }

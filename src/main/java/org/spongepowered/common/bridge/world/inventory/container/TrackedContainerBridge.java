@@ -41,12 +41,6 @@ public interface TrackedContainerBridge {
 
     void bridge$setPreviousCursor(net.minecraft.world.item.ItemStack stack);
 
-    net.minecraft.world.item.ItemStack bridge$getPreviousCursor();
-
-    // whether to fire preview event when changes on the crafting grid happened
-    void bridge$setFirePreview(boolean firePreview);
-    boolean bridge$firePreview();
-
     boolean bridge$capturePossible();
 
     void bridge$setCapturePossible();

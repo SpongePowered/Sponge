@@ -39,6 +39,7 @@ import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.event.item.inventory.DropItemEvent;
 import org.spongepowered.api.event.item.inventory.EnchantItemEvent;
 import org.spongepowered.api.event.item.inventory.TransferInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
@@ -52,6 +53,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.Hotbar;
 import org.spongepowered.api.item.inventory.entity.PrimaryPlayerInventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.menu.ClickType;
 import org.spongepowered.api.item.inventory.menu.InventoryMenu;
 import org.spongepowered.api.item.inventory.menu.handler.SlotClickHandler;
@@ -139,13 +141,22 @@ public final class InventoryTest implements LoadableModule {
                     this.plugin.logger().info("  Preview: {}x{}->{}x{}", preview.original().type().key(RegistryTypes.ITEM_TYPE), preview.original().quantity(),
                             preview.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), preview.finalReplacement().quantity());
                 }
+                if (event instanceof CraftItemEvent.Craft) {
+                    final ItemStackSnapshot craft = ((CraftItemEvent.Craft) event).crafted();
+                    this.plugin.logger().info("  Craft: {}x{}", craft.type().key(RegistryTypes.ITEM_TYPE), craft.quantity());
+                }
+                if (event instanceof DropItemEvent.Dispense) {
+                    this.plugin.logger().info("  Dropping: {} entities", ((DropItemEvent.Dispense) event).entities().size());
+                }
             } else {
                 this.plugin.logger().info("{} {}", event.getClass().getSimpleName(), event.inventory().getClass().getSimpleName());
             }
             for (final SlotTransaction slotTrans : event.transactions()) {
-                final Optional<Integer> integer = slotTrans.slot().get(Keys.SLOT_INDEX);
+                final Optional<Integer> idx = slotTrans.slot().get(Keys.SLOT_INDEX);
+                final Optional<EquipmentType> equipmentType = slotTrans.slot().get(Keys.EQUIPMENT_TYPE);
+                final String slot = idx.map(String::valueOf).orElse(equipmentType.map(t -> t.key(RegistryTypes.EQUIPMENT_TYPE).asString()).orElse("?"));
                 this.plugin.logger().info("  SlotTr: {}x{}->{}x{}[{}]", slotTrans.original().type().key(RegistryTypes.ITEM_TYPE), slotTrans.original().quantity(),
-                        slotTrans.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), slotTrans.finalReplacement().quantity(), integer.get());
+                        slotTrans.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), slotTrans.finalReplacement().quantity(), slot);
             }
         }
 

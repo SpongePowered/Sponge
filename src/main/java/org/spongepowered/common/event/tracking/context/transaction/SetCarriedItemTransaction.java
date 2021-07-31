@@ -84,8 +84,4 @@ public class SetCarriedItemTransaction extends InventoryBasedTransaction {
         PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
     }
 
-    @Override
-    Optional<SlotTransaction> getSlotTransaction() {
-        return Optional.empty();
-    }
 }

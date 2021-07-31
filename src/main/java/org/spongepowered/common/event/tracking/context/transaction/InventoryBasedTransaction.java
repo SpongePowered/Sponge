@@ -25,10 +25,10 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -38,6 +38,8 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
@@ -46,6 +48,8 @@ import java.util.stream.Collectors;
 abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventoryEvent> {
 
     final Inventory inventory;
+    @MonotonicNonNull private List<SlotTransaction> acceptedTransactions;
+    protected boolean used = false;
 
     protected InventoryBasedTransaction(
         final ResourceKey worldKey,
@@ -54,7 +58,6 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
         super(TransactionTypes.CHANGE_INVENTORY_EVENT.get(), worldKey);
         this.inventory = inventory;
     }
-
 
     @Override
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
@@ -72,15 +75,18 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
     ) {
         final ImmutableList<InventoryBasedTransaction> containerBasedTransactions = gameTransactions.stream()
             .filter(tx -> tx instanceof InventoryBasedTransaction)
-            .map(tx -> (InventoryBasedTransaction) tx).collect(ImmutableList.toImmutableList());
+            .map(tx -> (InventoryBasedTransaction) tx)
+            .filter(tx -> !tx.used)
+            .collect(ImmutableList.toImmutableList());
 
         final List<SlotTransaction> slotTransactions = containerBasedTransactions
             .stream()
-            .map(InventoryBasedTransaction::getSlotTransaction)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
+            .map(InventoryBasedTransaction::getSlotTransactions)
+            .flatMap(List::stream)
             .collect(Collectors.toList());
-
+        for (InventoryBasedTransaction transaction : containerBasedTransactions) {
+            transaction.used = true;
+        }
         return containerBasedTransactions.stream()
             .map(t -> t.createInventoryEvent(slotTransactions, context, currentCause))
             .filter(Optional::isPresent)
@@ -88,7 +94,9 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
             .findFirst();
     }
 
-    abstract Optional<SlotTransaction> getSlotTransaction();
+    List<SlotTransaction> getSlotTransactions() {
+        return this.acceptedTransactions == null ? Collections.emptyList() : this.acceptedTransactions;
+    }
 
     Optional<ChangeInventoryEvent> createInventoryEvent(
         final List<SlotTransaction> slotTransactions,
@@ -120,8 +128,8 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
             if (!transaction.isValid()) {
                 cancelledAny = true;
                 for (final GameTransaction<ChangeInventoryEvent> gameTransaction : gameTransactions) {
-                    ((InventoryBasedTransaction) gameTransaction).getSlotTransaction()
-                        .ifPresent(tx -> {
+                    ((InventoryBasedTransaction) gameTransaction).getSlotTransactions()
+                        .forEach(tx -> {
                             if (tx == transaction) {
                                 gameTransaction.markCancelled();
                             }
@@ -133,13 +141,15 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
     }
 
     @Override
-    public boolean acceptSlotTransaction(
-        final SlotTransaction newTransaction, final Object inventory
-    ) {
-        if (inventory instanceof Inventory) {
-            // TODO
+    public boolean acceptSlotTransaction(final SlotTransaction newTransaction, final Object inventory) {
+        if (this.inventory == inventory) {
+            if (this.acceptedTransactions == null) {
+                this.acceptedTransactions = new ArrayList<>();
+            }
+            this.acceptedTransactions.add(newTransaction);
+            return true;
         }
-        return super.acceptSlotTransaction(newTransaction, inventory);
+        return false;
     }
 
 

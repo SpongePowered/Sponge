@@ -114,6 +114,15 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     }
 
     @Override
+    public Supplier<ServerLevel> attemptWorldKey(CommandPhaseContext context) {
+        final Optional<net.minecraft.world.entity.player.Player> playerSource = context.getSource(net.minecraft.world.entity.player.Player.class);
+        if (playerSource.isPresent()) {
+            return () -> (ServerLevel) playerSource.get().level;
+        }
+        return super.attemptWorldKey(context);
+    }
+
+    @Override
     public Supplier<SpawnType> getSpawnTypeForTransaction(
         final CommandPhaseContext context, final Entity entityToSpawn
     ) {

@@ -37,6 +37,7 @@ import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -46,6 +47,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
@@ -69,30 +71,31 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         final ItemStack itemstack = packetIn.getItem();
 
         // TODO handle vanilla sending a bunch of creative events (previously ignoring events within 100ms)
-        try (final EffectTransactor ignored = transactor.logCreativeClickContainer(packetIn.getSlotNum(),
-                ItemStackUtil.snapshotOf(itemstack), this.player)) {
-            ((TrackedContainerBridge) this.player.containerMenu).bridge$detectAndSendChanges(true); // capture changes
+        try (final EffectTransactor ignored = transactor.logCreativeClickContainer(packetIn.getSlotNum(), ItemStackUtil.snapshotOf(itemstack), this.player)) {
         }
-
-        if (!TrackingUtil.processBlockCaptures(context)) {
-            inventoryMenu.broadcastChanges(); // only broadcast if not canceled/custom result
-        }
+        inventoryMenu.broadcastChanges();
     }
 
     @Redirect(method = "handleSetCreativeModeSlot",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;drop(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/world/entity/item/ItemEntity;"))
-    private ItemEntity impl$onBroadcastCreativeActionResult(final ServerPlayer serverPlayer, final ItemStack param0, final boolean param1) {
-        // TODO creative drop is not handled - maybe this needs a new sub-event in API?
-        return serverPlayer.drop(param0, param1);
+    private ItemEntity impl$onBroadcastCreativeActionResult(final ServerPlayer serverPlayer, final ItemStack stack, final boolean param1) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (final EffectTransactor ignored = transactor.logCreativeClickContainer(-1, ItemStackUtil.snapshotOf(stack), this.player)) {
+            return serverPlayer.drop(stack, param1);
+        }
     }
 
-    @Redirect(method = "handleSetCarriedItem",
-            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundSetCarriedItemPacket;getSlot()I"))
-    private int impl$onHandleSetCarriedItem(final ServerboundSetCarriedItemPacket packet) {
+    // Before setting this.player.inventory.selected
+    @Inject(method = "handleSetCarriedItem",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/network/protocol/game/ServerboundSetCarriedItemPacket;getSlot()I"),
+            slice = @Slice(from = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;stopUsingItem()V"))
+    )
+    private void impl$onHandleSetCarriedItem(final ServerboundSetCarriedItemPacket packet, final CallbackInfo ci) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final int slotIdx = packet.getSlot();
-        try (final EffectTransactor ignored = transactor.logPlayerCarriedItem(player, slotIdx)) {
+        try (final EffectTransactor ignored = transactor.logPlayerCarriedItem(this.player, slotIdx)) {
             final PlayerInventory inventory = (PlayerInventory) this.player.inventory;
             inventory.equipment().slot(this.player.inventory.selected).ifPresent(slot -> {
                 final ItemStack item = ItemStackUtil.toNative(slot.peek());
@@ -103,7 +106,6 @@ public class ServerGamePacketListenerImplMixin_Inventory {
                 transactor.logInventorySlotTransaction(context, slot, item, item, inventory);
             });
         }
-        return slotIdx;
         // TrackingUtil.processBlockCaptures called by SwitchHotbarScrollState
     }
 
@@ -136,8 +138,6 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
 
-        ((TrackedContainerBridge) player.containerMenu).bridge$setFirePreview(false);
-
         final Inventory craftInv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(craftInv instanceof CraftingInventory)) {
             recipeBookMenu.handlePlacement(shift, recipe, player);
@@ -148,7 +148,6 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, recipe, player, (CraftingInventory) craftInv)) {
             recipeBookMenu.handlePlacement(shift, recipe, player);
             ((TrackedContainerBridge) player.containerMenu).bridge$detectAndSendChanges(true);
-            ((TrackedContainerBridge) player.containerMenu).bridge$setFirePreview(true);
         }
     }
 

@@ -63,7 +63,7 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
         this.slotNum = slotNum;
         this.creativeStack = creativeStack;
         this.originalCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
-        this.slot = ((InventoryAdapter) menu).inventoryAdapter$getSlot(slotNum).orElse(null);
+        this.slot = slotNum >= 0 ? ((InventoryAdapter) menu).inventoryAdapter$getSlot(slotNum).orElse(null) : null;
     }
 
     @Override
@@ -72,29 +72,28 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {
-        // TODO events double fire?
         if (slotTransactions.isEmpty() && this.slotNum >= 0 && this.slot != null) {
             // No SlotTransaction was captured. So we add the clicked slot as a transaction with the creative stack
             final ItemStackSnapshot item = this.slot.peek().createSnapshot();
             slotTransactions.add(new SlotTransaction(this.slot, item, this.creativeStack));
         }
 
-        if (!entities.isEmpty()) {
-            System.err.println("Entities are being captured but not being processed");
-        }
-
         // Creative doesn't inform server of cursor status so there is no way of knowing what the final stack is
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.originalCursor, ItemStackSnapshot.empty());
-        final ClickContainerEvent.Creative event = SpongeEventFactory.createClickContainerEventCreative(cause, (Container) this.menu,
+        final ClickContainerEvent.Creative event;
+        if (entities.isEmpty()) {
+            event= SpongeEventFactory.createClickContainerEventCreativeSet(cause, (Container) this.menu,
                         cursorTransaction, Optional.ofNullable(this.slot), slotTransactions);
+        } else {
+            event= SpongeEventFactory.createClickContainerEventCreativeDrop(cause, (Container) this.menu,
+                    cursorTransaction, entities, Optional.ofNullable(this.slot), slotTransactions);
+        }
         return Optional.of(event);
     }
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final ClickContainerEvent event) {
-        if (this.slotNum >= 0 && this.slotNum < this.menu.slots.size()) {
-            this.handleEventResults(this.player, event);
-        }
+        this.handleEventResults(this.player, event);
     }
 
     @Override
@@ -109,11 +108,6 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
         }
         final int containerId = ((InventoryPacketContext) context).<ServerboundContainerClickPacket>getPacket().getContainerId();
         return containerId != this.player.containerMenu.containerId;
-    }
-
-    @Override
-    Optional<SlotTransaction> getSlotTransaction() {
-        return Optional.empty();
     }
 
 }

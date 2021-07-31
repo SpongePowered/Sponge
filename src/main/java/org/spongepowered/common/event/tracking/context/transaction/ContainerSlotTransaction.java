@@ -29,7 +29,8 @@ import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
 
-import java.util.Optional;
+import java.util.Collections;
+import java.util.List;
 import java.util.function.Supplier;
 
 public class ContainerSlotTransaction extends ContainerBasedTransaction {
@@ -42,8 +43,12 @@ public class ContainerSlotTransaction extends ContainerBasedTransaction {
     }
 
     @Override
-    Optional<SlotTransaction> getSlotTransaction() {
-        return Optional.of(this.transactoin);
+    List<SlotTransaction> getSlotTransactions() {
+        return Collections.singletonList(this.transactoin);
     }
 
+    @Override
+    public boolean acceptSlotTransaction(SlotTransaction newTransaction, Object menu) {
+        return false;
+    }
 }

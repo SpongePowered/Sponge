@@ -25,12 +25,15 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
@@ -39,6 +42,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -63,6 +67,7 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
         this.dropAll = dropAll;
         this.originalCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         this.slot = ((PlayerInventory) player.inventory).equipment().slot(EquipmentTypes.MAIN_HAND).orElse(null);
+        final Optional<EquipmentType> equipmentType = this.slot.get(Keys.EQUIPMENT_TYPE);
     }
 
     @Override
@@ -71,8 +76,7 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {
-        if (slotTransactions.isEmpty() && this.slot != null) {
-            // No SlotTransaction was captured. So we add the main hand slot as a transaction
+        if (this.slot != null) {
             final ItemStackSnapshot item = this.slot.peek().createSnapshot();
             slotTransactions.add(new SlotTransaction(this.slot, item, item));
         }
@@ -101,13 +105,15 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
         if (!(context instanceof InventoryPacketContext)) {
             return false;
         }
-        final int containerId = ((InventoryPacketContext) context).<ServerboundContainerClickPacket>getPacket().getContainerId();
-        return containerId != this.player.containerMenu.containerId;
-    }
-
-    @Override
-    Optional<SlotTransaction> getSlotTransaction() {
-        return Optional.empty();
+        final Packet<?> packet = ((InventoryPacketContext) context).getPacket();
+        if (packet instanceof ServerboundContainerClickPacket) {
+            final int containerId = ((InventoryPacketContext) context).<ServerboundContainerClickPacket>getPacket().getContainerId();
+            return containerId != this.player.containerMenu.containerId;
+        }
+        if (packet instanceof ServerboundPlayerActionPacket) {
+            return context.getSource(ServerPlayer.class).map(p -> p == this.player).orElse(false);
+        }
+        return false;
     }
 
 }

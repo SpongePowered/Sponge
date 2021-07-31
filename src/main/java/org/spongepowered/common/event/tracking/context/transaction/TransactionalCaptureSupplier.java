@@ -62,6 +62,7 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -323,18 +324,20 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
     }
 
-    public EffectTransactor logCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,
-            @Nullable final ItemStack prevCursor, final CraftingContainer craftSlots, final CraftingRecipe lastRecipe) {
-        final CraftingTransaction transaction = new CraftingTransaction(player, craftedStack, craftInv, prevCursor, craftSlots, lastRecipe);
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
+    public void logCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,
+            @Nullable final CraftingRecipe lastRecipe) {
+        if (this.tail != null && this.tail.acceptCrafting(player, craftedStack, craftInv, lastRecipe)) {
+            return;
+        }
+        throw new IllegalStateException("Crafting must be nested in another event");
     }
 
-    public EffectTransactor logCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory,
+    public void logCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory,
             final CraftingContainer craftSlots) {
-        final CraftingPreviewTransaction transaction = new CraftingPreviewTransaction(player, craftingInventory, craftSlots);
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
+        if (this.tail != null && this.tail.acceptCraftingPreview(player, craftingInventory, craftSlots)) {
+            return;
+        }
+        throw new IllegalStateException("Preview must be nested in another event");
     }
 
     public void logInventorySlotTransaction(
@@ -349,6 +352,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final InventorySlotTransaction transaction = new InventorySlotTransaction(
                 worldSupplier, inventory, newTransaction);
         this.logTransaction(transaction);
+        // TODO /give command
+        // TODO PlaceBlockPacketState unwind
+        SpongeCommon.logger().warn("Logged inventory slot transaction was not accepted by any InventoryBasedTransaction", new Exception("dummy"));
     }
 
     private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable BlockEntity existing,

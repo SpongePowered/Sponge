@@ -50,12 +50,9 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 
 import javax.annotation.Nullable;
@@ -72,7 +69,7 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         super(inventoryIn, index, xPosition, yPosition);
     }
 
-    @Nullable private CraftingRecipe impl$lastRecipe;
+    @Nullable private CraftingRecipe impl$onTakeRecipe;
     @Nullable private ItemStack impl$craftedStack;
     private int impl$craftedStackQuantity;
 
@@ -85,21 +82,16 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
     }
 
     @Inject(method = "checkTakeAchievements", at = @At("HEAD"))
-    private void onCraftingHead(final ItemStack itemStack, final CallbackInfo ci) {
+    private void impl$beforeCrafting(final ItemStack itemStack, final CallbackInfo ci) {
         this.impl$craftedStackQuantity = this.removeCount; // Remember for shift-crafting
     }
 
     @Inject(method = "onTake", at = @At("HEAD"))
-    private void beforeTake(final Player thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
-        if (this.impl$lastRecipe == null || !((Recipe) this.impl$lastRecipe).matches(this.craftSlots, thePlayer.level)) {
-            this.impl$lastRecipe = ((CraftingRecipe) thePlayer.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots,
+    private void impl$beforeTake(final Player thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
+        if (this.impl$onTakeRecipe == null || !((Recipe) this.impl$onTakeRecipe).matches(this.craftSlots, thePlayer.level)) {
+            this.impl$onTakeRecipe = ((CraftingRecipe) thePlayer.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftSlots,
                     thePlayer.level).orElse(null));
         }
-        if (((TrackedContainerBridge) thePlayer.containerMenu).bridge$isShiftCrafting()) {
-            ((TrackedContainerBridge) thePlayer.containerMenu).bridge$detectAndSendChanges(true);
-            ((TrackedContainerBridge) thePlayer.containerMenu).bridge$setShiftCrafting(false);
-        }
-        ((TrackedContainerBridge) thePlayer.containerMenu).bridge$setFirePreview(false);
 
         // When shift-crafting the crafted item was reduced to quantity 0
         // Grow the stack to copy it
@@ -115,15 +107,15 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
     }
 
     @Redirect(method = "onTake", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/crafting/RecipeManager;getRemainingItemsFor(Lnet/minecraft/world/item/crafting/RecipeType;Lnet/minecraft/world/Container;Lnet/minecraft/world/level/Level;)Lnet/minecraft/core/NonNullList;"))
-    private <C extends Container, T extends Recipe<C>> NonNullList<ItemStack> onGetRemainingItems(final RecipeManager recipeManager, final RecipeType<T> recipeTypeIn, final C inventoryIn, final net.minecraft.world.level.Level worldIn) {
-        if (this.impl$lastRecipe == null) {
+    private <C extends Container, T extends Recipe<C>> NonNullList<ItemStack> impl$onGetRemainingItems(final RecipeManager recipeManager, final RecipeType<T> recipeTypeIn, final C inventoryIn, final net.minecraft.world.level.Level worldIn) {
+        if (this.impl$onTakeRecipe == null) {
             return NonNullList.withSize(inventoryIn.getContainerSize(), ItemStack.EMPTY);
         }
         return worldIn.getRecipeManager().getRemainingItemsFor(recipeTypeIn, inventoryIn, worldIn);
     }
 
     @Inject(method = "onTake", cancellable = true, at = @At("RETURN"))
-    private void afterTake(final Player thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
+    private void impl$afterTake(final Player thePlayer, final ItemStack stack, final CallbackInfoReturnable<ItemStack> cir) {
         if (((LevelBridge) thePlayer.level).bridge$isFake()) {
             return;
         }
@@ -138,12 +130,8 @@ public abstract class ResultSlotMixin_Inventory extends Slot {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
 
-        try (final EffectTransactor ignored = transactor.logCrafting(thePlayer, this.impl$craftedStack, (CraftingInventory) craftInv,
-                ((TrackedContainerBridge) container).bridge$getPreviousCursor(), this.craftSlots, this.impl$lastRecipe)) {
-            ((TrackedContainerBridge) thePlayer.containerMenu).bridge$detectAndSendChanges(true);
-        }
+        transactor.logCrafting(thePlayer, this.impl$craftedStack, (CraftingInventory) craftInv, this.impl$onTakeRecipe);
 
-        TrackingUtil.processBlockCaptures(context); // TODO only process crafting?
         this.impl$craftedStack = null;
     }
 }

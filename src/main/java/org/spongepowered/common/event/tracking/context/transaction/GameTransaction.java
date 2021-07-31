@@ -25,7 +25,11 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -35,7 +39,9 @@ import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -195,4 +201,13 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
     public boolean acceptEntitySpawn(final PhaseContext<@NonNull ?> current, final Entity entityIn) {
         return false;
     }
+
+    public boolean acceptCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory, final CraftingContainer craftSlots) {
+        return false;
+    }
+
+    public boolean acceptCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv, @Nullable final CraftingRecipe lastRecipe) {
+        return false;
+    }
+
 }

@@ -58,31 +58,18 @@ public abstract class CraftingMenuMixin_Inventory {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/ResultContainer;setItem(ILnet/minecraft/world/item/ItemStack;)V"))
     private static void beforeSlotChangedCraftingGrid(final ResultContainer resultContainer, final int slotId, final ItemStack itemStack,
             final int param0, final Level param1, final Player player, final CraftingContainer craftingContainer, final ResultContainer resultcontainer) {
+        resultContainer.setItem(slotId, itemStack);
 
         final Inventory inv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(inv instanceof CraftingInventory)) {
             SpongeCommon.logger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + player.containerMenu.getClass().getName());
-            resultContainer.setItem(slotId, itemStack);
-            return;
-        }
-        final TrackedContainerBridge container = (TrackedContainerBridge) player.containerMenu;
-        if (!container.bridge$firePreview()) { // TODO isRestoring?
-            resultContainer.setItem(slotId, itemStack);
             return;
         }
 
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
 
-        try (final EffectTransactor ignored = transactor.logCraftingPreview((ServerPlayer) player, (CraftingInventory) inv, craftingContainer)) {
-            resultContainer.setItem(slotId, itemStack);
-
-            final ItemStackSnapshot orig = ItemStackUtil.snapshotOf(resultcontainer.getItem(0));
-            final ItemStackSnapshot repl = ItemStackUtil.snapshotOf(itemStack);
-            final Slot slot = ((InventoryAdapter) player.containerMenu).inventoryAdapter$getSlot(0).get();
-            transactor.logContainerSlotTransaction(context, new SlotTransaction(slot, orig, repl), player.containerMenu);
-//            TrackingUtil.processBlockCaptures(context); // TODO only crafting preview
-        }
+        transactor.logCraftingPreview((ServerPlayer) player, (CraftingInventory) inv, craftingContainer);
     }
 
 

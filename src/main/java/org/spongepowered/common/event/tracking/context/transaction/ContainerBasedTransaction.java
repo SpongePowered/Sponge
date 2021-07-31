@@ -31,6 +31,9 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.CraftingContainer;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.item.crafting.RecipeType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -38,18 +41,28 @@ import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
+import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingOutput;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
+import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 
+import java.util.ArrayList;
 import java.util.Collections;
 import java.util.LinkedList;
 import java.util.List;
@@ -63,6 +76,14 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
 
     final AbstractContainerMenu menu;
     @MonotonicNonNull List<net.minecraft.world.entity.Entity> entities;
+    @MonotonicNonNull private List<SlotTransaction> acceptedTransactions;
+    // Crafting Preview
+    @MonotonicNonNull private CraftingInventory craftingInventory;
+    @MonotonicNonNull private CraftingContainer craftingContainer;
+    // Crafting Event
+    @Nullable private ItemStack craftedStack;
+    @Nullable private CraftingRecipe onTakeRecipe;
+    protected boolean used = false;
 
     protected ContainerBasedTransaction(
         final ResourceKey worldKey,
@@ -102,11 +123,13 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
     ) {
         final ImmutableList<ContainerBasedTransaction> containerBasedTransactions = gameTransactions.stream()
             .filter(tx -> tx instanceof ContainerBasedTransaction)
-            .map(tx -> (ContainerBasedTransaction) tx).collect(ImmutableList.toImmutableList());
+            .map(tx -> (ContainerBasedTransaction) tx)
+            .filter(tx -> !tx.used).collect(ImmutableList.toImmutableList());
         if (containerBasedTransactions.stream().map(c -> c.isContainerEventAllowed(context))
             .filter(b -> !b)
             .findAny()
             .orElse(false)) {
+            SpongeCommon.logger().warn("No event will be fired for existing ContainerBasedTransactions: {}", containerBasedTransactions.size());
             return Optional.empty();
         }
         // todo - detect !((TrackedContainerBridge) this.menu).isCapturePossible
@@ -121,10 +144,42 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
 
         final List<SlotTransaction> slotTransactions = containerBasedTransactions
             .stream()
-            .map(ContainerBasedTransaction::getSlotTransaction)
-            .filter(Optional::isPresent)
-            .map(Optional::get)
+            .map(ContainerBasedTransaction::getSlotTransactions)
+            .flatMap(List::stream)
             .collect(Collectors.toList());
+
+        // TODO Deduplicate transactions needed?
+//        final Map<Slot, List<SlotTransaction>> collected = slotTransactions.stream().collect(Collectors.groupingBy(SlotTransaction::slot));
+//        slotTransactions.clear();
+//        collected.values().forEach(list -> {
+//            final SlotTransaction first = list.get(0);
+//            if (list.size() > 1) {
+//                final ItemStackSnapshot last = list.get(list.size() - 1).defaultReplacement();
+//                slotTransactions.add(new SlotTransaction(first.slot(), first.original(), last));
+//            } else {
+//                slotTransactions.add(first);
+//            }
+//        });
+
+        if (this.craftingInventory != null) { // Event with Preview transaction on crafting inventory?
+            Slot slot = this.craftingInventory.result();
+            @Nullable SlotTransaction preview = this.findPreviewTransaction(this.craftingInventory.result(), slotTransactions);
+            final ItemStackSnapshot previewItem = ItemStackUtil.snapshotOf(this.craftingInventory.peek());
+            if (preview != null) {
+                slot = preview.slot();
+                // Check if preview transaction is correct
+                if (!preview.defaultReplacement().equals(previewItem)) {
+                    slotTransactions.remove(preview);
+                    slotTransactions.add(new SlotTransaction(slot, preview.original(), previewItem));
+                }
+            } else {
+                slotTransactions.add(new SlotTransaction(slot, previewItem, previewItem));
+            }
+        }
+
+        for (ContainerBasedTransaction transaction : containerBasedTransactions) {
+            transaction.used = true;
+        }
 
         return containerBasedTransactions.stream()
             .map(t -> t.createInventoryEvent(slotTransactions, entities, context, currentCause))
@@ -132,8 +187,6 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
             .map(Optional::get)
             .findFirst();
     }
-
-    abstract Optional<SlotTransaction> getSlotTransaction();
 
     @SuppressWarnings({"unchecked", "rawtypes"})
     List<Entity> getEntitiesSpawned() {
@@ -179,8 +232,8 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
             if (!transaction.isValid()) {
                 cancelledAny = true;
                 for (final GameTransaction<ClickContainerEvent> gameTransaction : gameTransactions) {
-                    ((ContainerBasedTransaction) gameTransaction).getSlotTransaction()
-                        .ifPresent(tx -> {
+                    ((ContainerBasedTransaction) gameTransaction).getSlotTransactions()
+                        .forEach(tx -> {
                             if (tx == transaction) {
                                 gameTransaction.markCancelled();
                             }
@@ -191,16 +244,6 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
         return cancelledAny;
     }
 
-    @Override
-    public boolean acceptSlotTransaction(
-        final SlotTransaction newTransaction, final Object menu
-    ) {
-        if (menu instanceof AbstractContainerMenu) {
-            // TODO
-        }
-        return super.acceptSlotTransaction(newTransaction, menu);
-    }
-
     protected void handleEventResults(Player player, ClickContainerEvent event) {
         PacketPhaseUtil.handleSlotRestore(player, this.menu, event.transactions(), event.isCancelled());
         PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction());
@@ -209,30 +252,86 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
                     ((ServerLevel) e.world()).despawn((net.minecraft.world.entity.Entity) e));
         }
 
-        if (player instanceof ServerPlayer && event instanceof CraftItemEvent.Preview) {
-            final SlotTransaction preview = ((CraftItemEvent.Preview) event).preview();
-            // Resend modified output if needed
-            if (!preview.isValid()) {
-                ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(0, 0,
-                        ItemStackUtil.fromSnapshotToNative(((CraftItemEvent.Preview) event).preview().original())));
-            } else if (preview.custom().isPresent()) {
-                ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(0, 0,
-                        ItemStackUtil.fromSnapshotToNative(((CraftItemEvent.Preview) event).preview().finalReplacement())));
+        // If this is not a crafting event try to call crafting events
+        if (!event.isCancelled()) {
+            if (!(event instanceof CraftItemEvent.Craft) && !(event instanceof CraftItemEvent.Preview)) {
+                this.handleCrafting(player, event);
+                this.handleCraftingPreview(player, event);
+            }
+        }
+    }
+
+    private void handleCrafting(Player player, ClickContainerEvent event) {
+        if (this.craftedStack != null && this.craftingInventory != null) {
+            if (this.acceptedTransactions != null) {
+                this.acceptedTransactions.clear();
+            }
+            // TODO push event to cause?
+            ItemStackSnapshot craftedItem = null;
+            for (SlotTransaction transaction : event.transactions()) {
+                if (transaction.slot().equals(this.craftingInventory.result())) {
+                    // Use transaction on slot if possible
+                    craftedItem = transaction.original();
+                    break;
+                }
+            }
+            // shift-crafting wont have it because the crafted item only changes on the last shift-craft
+            if (craftedItem == null) {
+                craftedItem = ItemStackUtil.snapshotOf(this.craftedStack);
+            }
+
+            final CraftItemEvent.Craft craftEvent =
+                    SpongeEventFactory.createCraftItemEventCraft(PhaseTracker.getCauseStackManager().currentCause(),
+                            ContainerUtil.fromNative(this.menu), craftedItem, this.craftingInventory, event.cursorTransaction(),
+                            Optional.ofNullable(this.onTakeRecipe), Optional.of(this.craftingInventory.result()), event.transactions());
+            SpongeCommon.post(craftEvent);
+            this.handleEventResults(player, craftEvent);
+            ((TrackedContainerBridge) this.menu).bridge$setLastCraft(craftEvent);
+        }
+    }
+
+    private void handleCraftingPreview(Player player, ClickContainerEvent event) {
+        if (this.craftingInventory != null) {
+            // TODO push event to cause?
+            // TODO prevent event when there is no preview?
+            final SlotTransaction previewTransaction = this.getPreviewTransaction(this.craftingInventory.result(), event.transactions());
+            Optional<CraftingRecipe> recipe = player.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftingContainer, player.level).map(CraftingRecipe.class::cast);
+            final CraftItemEvent.Preview previewEvent = SpongeEventFactory
+                    .createCraftItemEventPreview(event.cause(), (Container) this.menu, this.craftingInventory, event.cursorTransaction(), previewTransaction, recipe, Optional.empty(), event
+                            .transactions());
+            SpongeCommon.post(previewEvent);
+            this.handleEventResults(player, previewEvent);
+
+            if (player instanceof ServerPlayer && previewEvent instanceof CraftItemEvent.Preview) {
+                final SlotTransaction preview = previewEvent.preview();
+                // Resend modified output if needed
+                if (!preview.isValid()) {
+                    ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(0, 0,
+                            ItemStackUtil.fromSnapshotToNative(previewEvent.preview().original())));
+                } else if (preview.custom().isPresent()) {
+                    ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(0, 0,
+                            ItemStackUtil.fromSnapshotToNative(previewEvent.preview().finalReplacement())));
+                }
             }
         }
     }
 
     protected SlotTransaction getPreviewTransaction(final CraftingOutput result, final List<SlotTransaction> slotTransactions) {
-        SlotTransaction preview = null;
-        for (SlotTransaction slotTransaction : slotTransactions) {
-            if (result.equals(slotTransaction.slot())) {
-                preview = slotTransaction; // get last transaction
-            }
-        }
+        @Nullable SlotTransaction preview = this.findPreviewTransaction(result, slotTransactions);
         if (preview == null) {
-            return new SlotTransaction(result, ItemStackSnapshot.empty(), ItemStackUtil.snapshotOf(result.peek()));
+            final ItemStackSnapshot previewItem = ItemStackUtil.snapshotOf(result.peek());
+            return new SlotTransaction(result, previewItem, previewItem);
         }
         return preview;
+    }
+
+    private @Nullable SlotTransaction findPreviewTransaction(CraftingOutput result, List<SlotTransaction> slotTransactions) {
+        for (SlotTransaction slotTransaction : slotTransactions) {
+            if (result.viewedSlot().equals(slotTransaction.slot().viewedSlot())) {
+                return slotTransaction; // get last transaction
+            }
+        }
+        return null;
     }
 
     @Override
@@ -240,4 +339,42 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
 
     }
 
+    List<SlotTransaction> getSlotTransactions() {
+        return this.acceptedTransactions == null ? Collections.emptyList() : this.acceptedTransactions;
+    }
+
+    @Override
+    public boolean acceptSlotTransaction(final SlotTransaction newTransaction, final Object menu) {
+        if (this.menu == menu) {
+            if (this.acceptedTransactions == null) {
+                this.acceptedTransactions = new ArrayList<>();
+            }
+            this.acceptedTransactions.add(newTransaction);
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean acceptCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory, final CraftingContainer craftSlots) {
+        if (this.menu == player.containerMenu) {
+            this.craftingInventory = craftingInventory;
+            this.craftingContainer = craftSlots;
+            return true;
+        }
+        return false;
+    }
+
+    @Override
+    public boolean acceptCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftingInventory,
+            @Nullable final CraftingRecipe onTakeRecipe) {
+        if (this.menu == player.containerMenu) {
+            this.used = false;
+            this.craftedStack = craftedStack;
+            this.craftingInventory = craftingInventory;
+            this.onTakeRecipe = onTakeRecipe;
+            return true;
+        }
+        return false;
+    }
 }
