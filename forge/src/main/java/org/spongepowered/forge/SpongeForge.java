@@ -26,6 +26,7 @@ package org.spongepowered.forge;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.fml.WorldPersistenceHooks;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
@@ -42,6 +43,8 @@ public final class SpongeForge {
     private static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID);
 
     public SpongeForge() {
+        WorldPersistenceHooks.addHook(SpongeLevelDataPersistence.INSTANCE);
+
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         // modBus: add all FML events with it
@@ -60,5 +63,4 @@ public final class SpongeForge {
 
         // TODO Add attributes for HumanEntity to relevant event
     }
-
 }
