@@ -33,6 +33,8 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
@@ -41,6 +43,7 @@ import org.spongepowered.common.util.PrettyPrinter;
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
@@ -87,6 +90,19 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
         for (InventoryBasedTransaction transaction : containerBasedTransactions) {
             transaction.used = true;
         }
+
+        final Map<Slot, List<SlotTransaction>> collected = slotTransactions.stream().collect(Collectors.groupingBy(SlotTransaction::slot));
+        slotTransactions.clear();
+        collected.values().forEach(list -> {
+            final SlotTransaction first = list.get(0);
+            if (list.size() > 1) {
+                final ItemStackSnapshot last = list.get(list.size() - 1).defaultReplacement();
+                slotTransactions.add(new SlotTransaction(first.slot(), first.original(), last));
+            } else {
+                slotTransactions.add(first);
+            }
+        });
+
         return containerBasedTransactions.stream()
             .map(t -> t.createInventoryEvent(slotTransactions, context, currentCause))
             .filter(Optional::isPresent)

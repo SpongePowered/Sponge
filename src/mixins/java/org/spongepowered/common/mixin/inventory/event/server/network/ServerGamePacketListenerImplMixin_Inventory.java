@@ -37,7 +37,6 @@ import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -53,7 +52,6 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -99,11 +97,11 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             final PlayerInventory inventory = (PlayerInventory) this.player.inventory;
             inventory.equipment().slot(this.player.inventory.selected).ifPresent(slot -> {
                 final ItemStack item = ItemStackUtil.toNative(slot.peek());
-                transactor.logInventorySlotTransaction(context, slot, item, item, inventory);
+                transactor.logPlayerInventorySlotTransaction(this.player, context, slot, item, item, inventory);
             });
             inventory.equipment().slot(slotIdx).ifPresent(slot -> {
                 final ItemStack item = ItemStackUtil.toNative(slot.peek());
-                transactor.logInventorySlotTransaction(context, slot, item, item, inventory);
+                transactor.logPlayerInventorySlotTransaction(this.player, context, slot, item, item, inventory);
             });
         }
         // TrackingUtil.processBlockCaptures called by SwitchHotbarScrollState

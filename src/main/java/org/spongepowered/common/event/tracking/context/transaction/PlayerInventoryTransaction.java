@@ -53,6 +53,9 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
     @Override
     Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions, final PhaseContext<@NonNull ?> context,
             final Cause cause) {
+        if (slotTransactions.isEmpty()) {
+            return Optional.empty();
+        }
         final ChangeInventoryEvent event = this.eventCreator.create(cause, this.inventory, slotTransactions);
         return Optional.ofNullable(event);
     }

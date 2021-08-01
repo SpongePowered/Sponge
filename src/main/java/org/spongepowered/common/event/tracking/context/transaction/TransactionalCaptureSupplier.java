@@ -54,6 +54,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -63,7 +64,6 @@ import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
@@ -73,8 +73,8 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
-import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
@@ -281,10 +281,15 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
-    public EffectTransactor logPlayerInventoryChange(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
+    public EffectTransactor logPlayerInventoryChangeWithEffect(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
         final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player, eventCreator);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+    }
+
+    public void logPlayerInventoryChange(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
+        final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player, eventCreator);
+        this.logTransaction(transaction);
     }
 
     public EffectTransactor logPlayerCarriedItem(final Player player, final int newSlot) {
@@ -339,22 +344,25 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         throw new IllegalStateException("Preview must be nested in another event");
     }
 
-    public void logInventorySlotTransaction(
-            final PhaseContext<@NonNull ?> phaseContext, final Slot slot, ItemStack orig, ItemStack newStack,
-            final Inventory inventory
+    public void logPlayerInventorySlotTransaction(
+            final Player player, final PhaseContext<@NonNull ?> phaseContext, final Slot slot, final ItemStack orig,
+            final ItemStack newStack, final Inventory inventory
     ) {
         final SlotTransaction newTransaction = new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(newStack));
         if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, inventory)) {
             return;
         }
-        final Supplier<ResourceKey> worldSupplier = phaseContext.attemptWorldKey();
-        final InventorySlotTransaction transaction = new InventorySlotTransaction(
-                worldSupplier, inventory, newTransaction);
-        this.logTransaction(transaction);
-        // TODO /give command
+
+        // Add a generic ChangeInventoryEvent for this player
+        // e.g. /give command
         // TODO PlaceBlockPacketState unwind
-        // TODO Dispenser equip
-        SpongeCommon.logger().warn("Logged inventory slot transaction was not accepted by any InventoryBasedTransaction", new Exception("dummy"));
+        // Dispenser equip
+        // TODO eating?
+        this.logPlayerInventoryChange(player, (c, inv, trans) -> trans.isEmpty() ? null : SpongeEventFactory.createChangeInventoryEvent(c, inv, trans));
+        if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, inventory)) {
+            return;
+        }
+        throw new IllegalStateException("Player inventory slot transaction was not accepted!");
     }
 
     private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable BlockEntity existing,

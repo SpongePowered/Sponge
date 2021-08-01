@@ -34,7 +34,7 @@ public final class SwapHandItemsState extends BasicInventoryPacketState {
     @Override
     public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final InventoryPacketContext context) {
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        transactor.logPlayerInventoryChange(playerMP, SpongeEventFactory::createChangeInventoryEventSwapHand);
+        transactor.logPlayerInventoryChangeWithEffect(playerMP, SpongeEventFactory::createChangeInventoryEventSwapHand);
     }
 
 }

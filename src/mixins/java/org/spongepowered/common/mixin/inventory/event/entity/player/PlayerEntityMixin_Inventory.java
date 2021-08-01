@@ -34,6 +34,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -61,15 +62,15 @@ public class PlayerEntityMixin_Inventory {
         if (slotIn == EquipmentSlot.MAINHAND) {
             final ItemStack orig = this.inventory.items.get(this.inventory.selected);
             final Slot slot = inventory.primary().hotbar().slot(this.inventory.selected).get();
-            phaseContext.getTransactor().logInventorySlotTransaction(phaseContext, slot, orig, stack, inventory);
+            phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, orig, stack, inventory);
         } else if (slotIn == EquipmentSlot.OFFHAND) {
             final ItemStack orig = this.inventory.offhand.get(0);
             final Slot slot = inventory.offhand();
-            phaseContext.getTransactor().logInventorySlotTransaction(phaseContext, slot, orig, stack, inventory);
+            phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, orig, stack, inventory);
         } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
             final ItemStack orig = this.inventory.armor.get(slotIn.getIndex());
-            final Slot slot = inventory.equipment().slot(slotIn.getIndex()).get();
-            phaseContext.getTransactor().logInventorySlotTransaction(phaseContext, slot, orig, stack, inventory);
+            final Slot slot = inventory.equipment().slot((EquipmentType) (Object) slotIn).get();
+            phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, orig, stack, inventory);
         }
     }
 

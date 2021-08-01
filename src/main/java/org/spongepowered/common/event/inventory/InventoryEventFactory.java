@@ -108,7 +108,7 @@ public class InventoryEventFactory {
 
             final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
             final TransactionalCaptureSupplier transactor = context.getTransactor();
-            try (final EffectTransactor ignored = transactor.logPlayerInventoryChange(player, SpongeEventFactory::createChangeInventoryEventPickup)) {
+            try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, SpongeEventFactory::createChangeInventoryEventPickup)) {
                 for (final ItemStackSnapshot item : list) {
                     final org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();
                     player.inventory.add(ItemStackUtil.toNative(itemStack));

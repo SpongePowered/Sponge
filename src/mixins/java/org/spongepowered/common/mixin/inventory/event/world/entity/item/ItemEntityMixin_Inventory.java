@@ -70,7 +70,7 @@ public abstract class ItemEntityMixin_Inventory {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final boolean added;
-        try (final EffectTransactor ignored = transactor.logPlayerInventoryChange(player, SpongeEventFactory::createChangeInventoryEventPickup)) {
+        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, SpongeEventFactory::createChangeInventoryEventPickup)) {
              added = inventory.add(itemStack);
         }
 

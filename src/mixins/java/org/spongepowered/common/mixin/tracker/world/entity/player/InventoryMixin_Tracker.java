@@ -24,11 +24,13 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity.player;
 
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
@@ -44,6 +46,7 @@ public abstract class InventoryMixin_Tracker {
 
     @Shadow public abstract ItemStack shadow$getItem(int index);
     @Shadow protected abstract int shadow$addResource(int p_191973_1_, ItemStack p_191973_2_);
+    @Shadow @Final public Player player;
 
     private Slot impl$getSpongeSlotByIndex(int index) {
         final int hotbarSize = net.minecraft.world.entity.player.Inventory.getSelectionSize();
@@ -60,7 +63,7 @@ public abstract class InventoryMixin_Tracker {
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         // Capture "damaged" items picked up
         final Slot slot = this.impl$getSpongeSlotByIndex(index);
-        transactor.logInventorySlotTransaction(context, slot, ItemStack.EMPTY, stack, (Inventory) this);
+        transactor.logPlayerInventorySlotTransaction(this.player, context, slot, ItemStack.EMPTY, stack, (Inventory) this);
     }
 
     @Redirect(method = "addResource(Lnet/minecraft/world/item/ItemStack;)I", at = @At(value = "INVOKE", target =
@@ -73,7 +76,7 @@ public abstract class InventoryMixin_Tracker {
         final Slot slot = index == 40 ? ((PlayerInventory) this).offhand() : this.impl$getSpongeSlotByIndex(index);
         final ItemStack original = this.shadow$getItem(index).copy();
         final int result = this.shadow$addResource(index, stack);
-        transactor.logInventorySlotTransaction(context, slot, original, this.shadow$getItem(index), (Inventory) this);
+        transactor.logPlayerInventorySlotTransaction(this.player, context, slot, original, this.shadow$getItem(index), (Inventory) this);
         return result;
     }
 }

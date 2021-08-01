@@ -28,22 +28,17 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
-import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.Optional;
@@ -94,14 +89,6 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
 
     @Override
     public void unwind(final CommandPhaseContext phaseContext) {
-        final Optional<net.minecraft.world.entity.player.Player> playerSource = phaseContext.getSource(net.minecraft.world.entity.player.Player.class);
-        if (playerSource.isPresent()) {
-            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-            final TransactionalCaptureSupplier transactor = context.getTransactor();
-            try (final EffectTransactor ignored = transactor.logPlayerInventoryChange(playerSource.get(), (cause, inv, trans) -> trans.isEmpty() ? null : SpongeEventFactory.createChangeInventoryEvent(cause, inv, trans))) {
-
-            }
-        }
         TrackingUtil.processBlockCaptures(phaseContext);
     }
 

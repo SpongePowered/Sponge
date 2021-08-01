@@ -143,9 +143,8 @@ public final class InventoryTest implements LoadableModule {
 
         @Listener
         public void onInteract(final ChangeInventoryEvent event) {
-
+            this.plugin.logger().info("{} {} {}", event.getClass().getSimpleName(), event.inventory().getClass().getSimpleName(), event.cause());
             if (event instanceof ClickContainerEvent) {
-                this.plugin.logger().info("{} {}", event.getClass().getSimpleName(), ((ClickContainerEvent) event).container().getClass().getSimpleName());
                 final Transaction<ItemStackSnapshot> cursor = ((ClickContainerEvent) event).cursorTransaction();
                 this.plugin.logger().info("  Cursor: {}x{}->{}x{}", cursor.original().type().key(RegistryTypes.ITEM_TYPE), cursor.original().quantity(),
                         cursor.finalReplacement().type().key(RegistryTypes.ITEM_TYPE), cursor.finalReplacement().quantity());
@@ -161,8 +160,6 @@ public final class InventoryTest implements LoadableModule {
                 if (event instanceof DropItemEvent.Dispense) {
                     this.plugin.logger().info("  Dropping: {} entities", ((DropItemEvent.Dispense) event).entities().size());
                 }
-            } else {
-                this.plugin.logger().info("{} {}", event.getClass().getSimpleName(), event.inventory().getClass().getSimpleName());
             }
             for (final SlotTransaction slotTrans : event.transactions()) {
                 final Optional<Integer> idx = slotTrans.slot().get(Keys.SLOT_INDEX);
