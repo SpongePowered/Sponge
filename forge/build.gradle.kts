@@ -40,6 +40,7 @@ loom {
                         "--add-opens=java.base/java.util.jar=ALL-UNNAMED" // ModLauncher
                 )
             }
+            programArgs("--access_widener.config", "common.accesswidener")
             runDir(project.projectDir.resolve("run").toRelativeString(project.rootDir))
         }
     }
@@ -166,6 +167,9 @@ dependencies {
         exclude(group = "org.spongepowered", module = "configurate-core")
         exclude(group = "org.checkerframework", module = "checker-qual")
     }
+    appLaunch("net.fabricmc:access-widener:1.0.2") {
+        exclude(group = "org.apache.logging.log4j")
+    }
 
     val libraries = forgeLibrariesConfig.name
     libraries("org.spongepowered:timings:$timingsVersion")
@@ -193,7 +197,7 @@ val forgeManifest = the<JavaPluginConvention>().manifest {
 val mixinConfigs = spongeImpl.mixinConfigurations
 val mods = loom.unmappedModCollection
 tasks.withType(net.fabricmc.loom.task.AbstractRunTask::class) {
-    setClasspath(files(mods, sourceSets.main.get().runtimeClasspath))
+    setClasspath(files(mods, sourceSets.main.get().runtimeClasspath, forgeAppLaunch.runtimeClasspath))
     argumentProviders += CommandLineArgumentProvider {
         mixinConfigs.asSequence()
                 // .filter { it != "mixins.sponge.core.json" }
