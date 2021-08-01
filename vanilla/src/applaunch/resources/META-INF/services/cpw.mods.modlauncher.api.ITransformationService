@@ -1,1 +1,2 @@
 org.spongepowered.vanilla.applaunch.plugin.VanillaPlatformService
+org.spongepowered.vanilla.applaunch.service.AccessWidenerTransformationService

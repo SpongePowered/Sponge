@@ -33,13 +33,12 @@ import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.launch.MixinLaunchPlugin;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
-import org.spongepowered.vanilla.applaunch.Main;
-import org.spongepowered.vanilla.applaunch.service.AccessWidenerLaunchService;
+import org.spongepowered.vanilla.applaunch.service.AccessWidenerTransformationService;
 import org.spongepowered.vanilla.installer.Constants;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -72,7 +71,7 @@ public final class VanillaPlatformService implements ITransformationService {
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
         VanillaPlatformService.pluginPlatform.locatePluginResources();
         VanillaPlatformService.pluginPlatform.createPluginCandidates();
-        final ILaunchPluginService accessWidener = environment.findLaunchPlugin(AccessWidenerLaunchService.NAME).orElse(null);
+        final AccessWidenerTransformationService accessWidener = environment.getProperty(AccessWidenerTransformationService.INSTANCE.get()).orElse(null);
         final ILaunchPluginService mixin = environment.findLaunchPlugin(MixinLaunchPlugin.NAME).orElse(null);
 
 
@@ -95,10 +94,21 @@ public final class VanillaPlatformService implements ITransformationService {
                             final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.ACCESS_WIDENER);
                             if (atFiles != null) {
                                 for (final String atFile : atFiles.split(",")) {
-                                    if (!atFile.endsWith(".accesswidener")) {
+                                    if (!atFile.endsWith(AccessWidenerTransformationService.ACCESS_WIDENER_EXTENSION)) {
                                         continue;
                                     }
-                                    accessWidener.offerResource(((JVMPluginResource) resource).fileSystem().getPath(atFile), atFile);
+                                    try {
+                                        accessWidener.offerResource(
+                                            ((JVMPluginResource) resource).fileSystem().getPath(atFile).toUri().toURL(),
+                                            atFile
+                                        );
+                                    } catch (final MalformedURLException ex) {
+                                        VanillaPlatformService.pluginPlatform.logger().warn(
+                                            "Failed to read declared access widener {}, from {}:",
+                                            atFile,
+                                            resource.locator()
+                                        );
+                                    }
                                 }
                             }
                         }
