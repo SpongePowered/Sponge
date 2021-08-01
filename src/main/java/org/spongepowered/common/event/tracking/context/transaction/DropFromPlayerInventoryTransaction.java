@@ -29,11 +29,9 @@ import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundPlayerActionPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
@@ -42,11 +40,9 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
-import org.spongepowered.api.item.inventory.equipment.EquipmentType;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -57,7 +53,7 @@ import java.util.Optional;
 public class DropFromPlayerInventoryTransaction extends ContainerBasedTransaction {
 
     private final ServerPlayer player;
-    private boolean dropAll;
+    private final boolean dropAll;
     private final @Nullable Slot slot;
     private final ItemStackSnapshot originalCursor;
 
@@ -67,7 +63,6 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
         this.dropAll = dropAll;
         this.originalCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         this.slot = ((PlayerInventory) player.inventory).equipment().slot(EquipmentTypes.MAIN_HAND).orElse(null);
-        final Optional<EquipmentType> equipmentType = this.slot.get(Keys.EQUIPMENT_TYPE);
     }
 
     @Override
@@ -91,7 +86,6 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final ClickContainerEvent event) {
-        ((ServerPlayerBridge) this.player).bridge$restorePacketItem(InteractionHand.MAIN_HAND); // TODO is this needed?
         this.handleEventResults(this.player, event);
     }
 

@@ -79,8 +79,6 @@ public class SetCarriedItemTransaction extends InventoryBasedTransaction {
 
     @Override
     public void postProcessEvent(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
-        this.player.resetLastActionTime(); // TODO check if needed
-
         PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
     }
 

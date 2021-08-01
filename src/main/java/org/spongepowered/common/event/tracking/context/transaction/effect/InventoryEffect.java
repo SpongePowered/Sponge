@@ -30,15 +30,15 @@ import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import net.minecraft.world.level.block.state.BlockState;
 
-public final class ClickContainerEffect implements ProcessingSideEffect {
+public final class InventoryEffect implements ProcessingSideEffect {
 
     private static final class Holder {
-        static final ClickContainerEffect INSTANCE = new ClickContainerEffect();
+        static final InventoryEffect INSTANCE = new InventoryEffect();
     }
-    public static ClickContainerEffect getInstance() {
+    public static InventoryEffect getInstance() {
         return Holder.INSTANCE;
     }
-    ClickContainerEffect() {}
+    InventoryEffect() {}
 
     @Override
     public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,

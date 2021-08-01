@@ -74,10 +74,6 @@ public interface ServerPlayerBridge extends ServerPlayerEntityHealthScaleBridge 
 
     void bridge$setScoreboardOnRespawn(Scoreboard scoreboard);
 
-    void bridge$restorePacketItem(InteractionHand hand);
-
-    void bridge$setPacketItem(ItemStack itemstack);
-
     void bridge$refreshExp();
 
     PlayerOwnBorderListener bridge$getWorldBorderListener();

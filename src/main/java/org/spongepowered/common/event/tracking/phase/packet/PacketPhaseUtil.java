@@ -264,14 +264,7 @@ public final class PacketPhaseUtil {
                     try (final PhaseContext<?> packetContext = context) {
                         packetContext.buildAndSwitch();
                         packetIn.handle(netHandler);
-
                     }
-
-                    if (packetIn instanceof ServerboundClientCommandPacket) {
-                        // update the reference of player
-                        packetPlayer = ((ServerGamePacketListenerImpl) netHandler).player;
-                    }
-                    ((ServerPlayerBridge) packetPlayer).bridge$setPacketItem(ItemStack.EMPTY);
                 }
             }
         } else { // client

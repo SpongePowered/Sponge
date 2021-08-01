@@ -90,15 +90,12 @@ public class InventoryEventFactory {
 
     public static boolean callPlayerChangeInventoryPickupPreEvent(final Player player, final ItemEntity itemToPickup) {
         final ItemStack stack = itemToPickup.getItem();
-        final CauseStackManager causeStackManager = PhaseTracker.getCauseStackManager();
-        causeStackManager.pushCause(player);
         final ItemStackSnapshot snapshot = ItemStackUtil.snapshotOf(stack);
         final ChangeInventoryEvent.Pickup.Pre event =
                 SpongeEventFactory.createChangeInventoryEventPickupPre(
-                    causeStackManager.currentCause(),
+                        PhaseTracker.getCauseStackManager().currentCause(),
                         Optional.empty(), Collections.singletonList(snapshot), ((Inventory) player.inventory), (Item) itemToPickup, snapshot);
         SpongeCommon.post(event);
-        causeStackManager.popCause();
         if (event.isCancelled()) {
             return false;
         }
@@ -109,8 +106,6 @@ public class InventoryEventFactory {
                 return false;
             }
 
-            boolean fullTransfer = true;
-
             final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
             final TransactionalCaptureSupplier transactor = context.getTransactor();
             try (final EffectTransactor ignored = transactor.logPlayerInventoryChange(player, SpongeEventFactory::createChangeInventoryEventPickup)) {
@@ -118,18 +113,11 @@ public class InventoryEventFactory {
                     final org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();
                     player.inventory.add(ItemStackUtil.toNative(itemStack));
                     if (!itemStack.isEmpty()) {
-                        fullTransfer = false; // Modified pickup items do not fit inventory
-                        break;
+                        // Modified pickup items do not fit inventory - pre-cancel ChangeInventoryEvent.Pickup
+                        ignored.parent.markCancelled();
+                        return false;
                     }
                 }
-            }
-
-            if (!fullTransfer) {
-                // TODO pre-cancel event
-//                for (final SlotTransaction trans : capture.bridge$getCapturedSlotTransactions()) {
-//                    trans.slot().set(trans.original().createStack());
-//                }
-                return false;
             }
 
             if (!TrackingUtil.processBlockCaptures(context)) {
@@ -234,8 +222,6 @@ public class InventoryEventFactory {
             player.closeContainer();
             return false;
         }
-        // TODO - determine if/how we want to fire inventory events outside of click packet handlers
-        //((ContainerBridge) player.openContainer).bridge$setCaptureInventory(true);
         // Custom cursor
         PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction());
         return true;

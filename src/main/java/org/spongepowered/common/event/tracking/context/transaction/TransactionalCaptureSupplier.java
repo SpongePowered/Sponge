@@ -72,7 +72,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
-import org.spongepowered.common.event.tracking.context.transaction.effect.ClickContainerEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
@@ -270,58 +270,56 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     public EffectTransactor logClickContainer(
         final AbstractContainerMenu menu, final int slotNum, final int buttonNum, final ClickType clickType, final Player player
     ) {
-        final @Nullable Slot slot;
-        if (buttonNum >= 0) { // We have a valid slot
+        @Nullable Slot slot = null;
+        if (buttonNum >= 0) { // Try to get valid slot - might not be present e.g. for drag-events
             slot = ((InventoryAdapter) menu).inventoryAdapter$getSlot(slotNum).orElse(null);
-        } else {
-            slot = null; // TODO slot for ClickContainerEvent.Drag?
         }
         final ClickMenuTransaction transaction = new ClickMenuTransaction(
             player, menu, slotNum, buttonNum, clickType, slot, ItemStackUtil.snapshotOf(player.inventory.getCarried()));
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
     public EffectTransactor logPlayerInventoryChange(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
         final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player, eventCreator);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
     public EffectTransactor logPlayerCarriedItem(final Player player, final int newSlot) {
         final SetCarriedItemTransaction transaction = new SetCarriedItemTransaction(player, newSlot);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
     public EffectTransactor logCreativeClickContainer(final int slotNum, final ItemStackSnapshot creativeStack, final Player player) {
         final ClickCreativeMenuTransaction transaction = new ClickCreativeMenuTransaction(player, slotNum, creativeStack);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
     public EffectTransactor logDropFromPlayerInventory(final Player player, final boolean dropAll) {
         final DropFromPlayerInventoryTransaction transaction = new DropFromPlayerInventoryTransaction(player, dropAll);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
     public EffectTransactor logOpenInventory(final Player player) {
         final OpenMenuTransaction transaction = new OpenMenuTransaction(player);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
     public EffectTransactor logCloseInventory(final Player player, final boolean clientSource) {
         final CloseMenuTransaction transaction = new CloseMenuTransaction(player, clientSource);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance())); // TODO?
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
     public EffectTransactor logPlaceRecipe(final boolean shift, final Recipe<?> recipe, final ServerPlayer player, final CraftingInventory craftInv) {
         final PlaceRecipeTransaction transaction = new PlaceRecipeTransaction(player, shift, recipe, craftInv);
         this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(ClickContainerEffect.getInstance()));
+        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
     public void logCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,

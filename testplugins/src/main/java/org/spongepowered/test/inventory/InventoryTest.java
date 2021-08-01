@@ -67,6 +67,7 @@ import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.Plugin;
 import org.spongepowered.test.LoadableModule;
 
+import java.util.ArrayList;
 import java.util.Optional;
 
 @Plugin("inventorytest")
@@ -125,6 +126,18 @@ public final class InventoryTest implements LoadableModule {
             final String title = component.map(c -> PlainTextComponentSerializer.plainText().serialize(c)).orElse("No Title");
             if (title.equals("Foobar")) {
                 InventoryTest.doFancyStuff(event.cause().first(Player.class).get());
+            }
+        }
+
+        @Listener
+        public void beforePickup(final ChangeInventoryEvent.Pickup.Pre event) {
+            if (event.originalStack().type().isAnyOf(ItemTypes.BEDROCK)) {
+                final ItemStackSnapshot stack = ItemStack.of(ItemTypes.COBBLESTONE, 64).createSnapshot();
+                final ArrayList<ItemStackSnapshot> items = new ArrayList<>();
+                event.setCustom(items);
+                for (int i = 0; i < 100; i++) {
+                    items.add(stack);
+                }
             }
         }
 

@@ -132,7 +132,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
             SpongeCommon.logger().warn("No event will be fired for existing ContainerBasedTransactions: {}", containerBasedTransactions.size());
             return Optional.empty();
         }
-        // todo - detect !((TrackedContainerBridge) this.menu).isCapturePossible
+        // TODO for SpongeForge - detect !((TrackedContainerBridge) this.menu).isCapturePossible
 //        if (ContainerBasedTransaction.containersFailedCapture.add(this.menu.getClass())) {
 //            SpongeCommon.logger()
 //                .warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + this.menu.getClass());
