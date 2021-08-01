@@ -49,6 +49,7 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
@@ -261,7 +262,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, abstractContainerMenu)) {
             return;
         }
-        final Supplier<ServerLevel> worldSupplier = phaseContext.attemptWorldKey();
+        final Supplier<ResourceKey> worldSupplier = phaseContext.attemptWorldKey();
         final ContainerSlotTransaction transaction = new ContainerSlotTransaction(
             worldSupplier, abstractContainerMenu, newTransaction);
         this.logTransaction(transaction);
@@ -346,12 +347,13 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, inventory)) {
             return;
         }
-        final Supplier<ServerLevel> worldSupplier = phaseContext.attemptWorldKey();
+        final Supplier<ResourceKey> worldSupplier = phaseContext.attemptWorldKey();
         final InventorySlotTransaction transaction = new InventorySlotTransaction(
                 worldSupplier, inventory, newTransaction);
         this.logTransaction(transaction);
         // TODO /give command
         // TODO PlaceBlockPacketState unwind
+        // TODO Dispenser equip
         SpongeCommon.logger().warn("Logged inventory slot transaction was not accepted by any InventoryBasedTransaction", new Exception("dummy"));
     }
 

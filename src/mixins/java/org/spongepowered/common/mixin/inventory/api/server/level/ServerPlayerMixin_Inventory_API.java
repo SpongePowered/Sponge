@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.inventory.api.server.level;
 
 import net.kyori.adventure.text.Component;
-import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -34,6 +33,7 @@ import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.mixin.inventory.api.world.entity.player.PlayerMixin_Inventory_API;
@@ -70,7 +70,6 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
         if (((ContainerBridge) openContainer).bridge$isInUse()) {
             throw new UnsupportedOperationException("This player is currently modifying an open container. Closing it must be delayed!");
         }
-        final AbstractContainerMenu previousContainer = this.containerMenu;
         // Create Close_Window to capture item drops
         final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
         try (final PhaseContext<?> ctx = PacketPhase.General.CLOSE_WINDOW.createPhaseContext(PhaseTracker.SERVER)
@@ -81,10 +80,12 @@ public abstract class ServerPlayerMixin_Inventory_API extends PlayerMixin_Invent
             try (final EffectTransactor ignored = ctx.getTransactor().logCloseInventory(player, true)) {
                 this.containerMenu.removed(player); // Drop & capture cursor item
             }
+
+            if (!TrackingUtil.processBlockCaptures(ctx)) {
+                return false;
+            }
         }
-        // TODO how to check if event was cancelled if not calling directly?
-        // This will NOT work for the players inventory:
-        return previousContainer != this.containerMenu;
+        return true;
     }
 
 }

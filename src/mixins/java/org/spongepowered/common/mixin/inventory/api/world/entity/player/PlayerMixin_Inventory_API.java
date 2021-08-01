@@ -25,7 +25,6 @@
 package org.spongepowered.common.mixin.inventory.api.world.entity.player;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.PlayerEnderChestContainer;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -43,8 +42,6 @@ public abstract class PlayerMixin_Inventory_API implements Player, InventoryBrid
     @Shadow public AbstractContainerMenu containerMenu;
 
     @Shadow public abstract PlayerEnderChestContainer shadow$getEnderChestInventory();
-
-    @Shadow @Final public InventoryMenu inventoryMenu;
 
     @Override
     public org.spongepowered.api.item.inventory.entity.PlayerInventory inventory() {

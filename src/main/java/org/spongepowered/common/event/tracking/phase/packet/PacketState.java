@@ -24,38 +24,24 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import org.spongepowered.api.entity.Entity;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.LevelChunk;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
-import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.world.volume.VolumeStreamUtils;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.TickNextTickData;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.chunk.LevelChunk;
-
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.TickNextTickData;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.chunk.LevelChunk;
-
-import java.util.Collection;
-import java.util.List;
-import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
@@ -111,8 +97,9 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
     }
 
     @Override
-    public Supplier<ServerLevel> attemptWorldKey(final P context) {
-        return VolumeStreamUtils.createWeaklyReferencedSupplier(context.packetPlayer.getLevel(), "ServerLevel by Player packet");
+    public Supplier<ResourceKey> attemptWorldKey(final P context) {
+        final ResourceLocation worldKey = context.packetPlayer.getLevel().dimension().location();
+        return () -> (ResourceKey) (Object) worldKey;
     }
 
     public void populateContext(final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet, final P context) {

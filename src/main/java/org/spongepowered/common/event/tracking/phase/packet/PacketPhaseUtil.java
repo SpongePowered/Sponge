@@ -67,7 +67,6 @@ import org.spongepowered.common.accessor.world.entity.animal.PigAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.SheepAccessor;
 import org.spongepowered.common.accessor.world.entity.animal.WolfAccessor;
 import org.spongepowered.common.accessor.world.inventory.SlotAccessor;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.bridge.world.level.block.TrackableBlockBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -246,7 +245,6 @@ public final class PacketPhaseUtil {
                 if (ignoreMovementCapture || (packetIn instanceof ServerboundClientInformationPacket)) {
                     packetIn.handle(netHandler);
                 } else {
-                    final ItemStackSnapshot cursor = ItemStackUtil.snapshotOf(packetPlayer.inventory.getCarried());
                     final IPhaseState<? extends PacketContext<?>> packetState = PacketPhase.getInstance().getStateForPacket(packetIn);
                     // At the very least make an unknown packet state case.
                     final PacketContext<?> context = packetState.createPhaseContext(PhaseTracker.SERVER);
@@ -254,8 +252,7 @@ public final class PacketPhaseUtil {
                         context
                             .source(packetPlayer)
                             .packetPlayer(packetPlayer)
-                            .packet(packetIn)
-                            .cursor(cursor);
+                            .packet(packetIn);
 
                         PacketPhase.getInstance().populateContext(packetIn, packetPlayer, packetState, context);
                         context.creator(((ServerPlayer) packetPlayer).uniqueId());

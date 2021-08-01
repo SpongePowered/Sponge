@@ -120,9 +120,6 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
         return (P) this;
     }
 
-    public ItemStackSnapshot getCursor() {
-        return ItemStackSnapshot.empty();
-    }
     public P setBulkBlockCaptures(final boolean captures) {
         this.allowsBulkBlockCaptures = captures;
         return (P) this;

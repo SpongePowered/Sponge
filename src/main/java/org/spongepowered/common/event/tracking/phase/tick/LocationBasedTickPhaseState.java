@@ -26,9 +26,11 @@ package org.spongepowered.common.event.tracking.phase.tick;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.world.LocatableBlock;
@@ -102,13 +104,10 @@ abstract class LocationBasedTickPhaseState<T extends LocationBasedTickContext<T>
     }
 
     @Override
-    public Supplier<ServerLevel> attemptWorldKey(final T context) {
+    public Supplier<ResourceKey> attemptWorldKey(final T context) {
         return MemoizedSupplier.memoize(() -> {
             final World<@NonNull ?, @NonNull ?> world = this.getLocatableBlockSourceFromContext(context).world();
-            if (!(world instanceof ServerLevel)) {
-                throw new IllegalStateException("Attempting a world key on a non-server world!");
-            }
-            return (ServerLevel) world;
+            return (ResourceKey) (Object) ((Level) world).dimension().location();
         });
     }
 

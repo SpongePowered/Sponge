@@ -30,6 +30,7 @@ import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.decoration.HangingEntity;
 import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.phys.AABB;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.ExperienceOrb;
@@ -101,7 +102,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
     }
 
     @Override
-    public Supplier<ServerLevel> attemptWorldKey(
+    public Supplier<ResourceKey> attemptWorldKey(
         EntityTickContext context
     ) {
         final net.minecraft.world.entity.Entity entity = context.getSource(net.minecraft.world.entity.Entity.class)
@@ -112,7 +113,7 @@ class EntityTickPhaseState extends TickPhaseState<EntityTickContext> {
                 throw new IllegalStateException("attempting a world key on the client???");
             };
         }
-        return () -> ((ServerLevel) entity.level);
+        return () -> (ResourceKey) (Object) entity.level.dimension().location();
     }
 
     @Override

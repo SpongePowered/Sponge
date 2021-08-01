@@ -24,7 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
-import net.minecraft.server.level.ServerLevel;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
@@ -67,13 +67,11 @@ class PlayerTickPhaseState extends TickPhaseState<PlayerTickContext> {
     }
 
     @Override
-    public Supplier<ServerLevel> attemptWorldKey(
-        PlayerTickContext context
-    ) {
+    public Supplier<ResourceKey> attemptWorldKey(final PlayerTickContext context) {
         final ServerPlayer entity = context.getSource(ServerPlayer.class)
             .orElseThrow(
                 () -> new IllegalStateException("Expected to be ticking a Player, but we're not ticking a player"));
-        return () -> (ServerLevel) entity.world();
+        return () -> entity.world().key();
     }
 
 }

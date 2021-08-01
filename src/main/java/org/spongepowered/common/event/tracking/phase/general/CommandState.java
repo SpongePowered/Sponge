@@ -30,19 +30,13 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.entity.living.player.Player;
-import org.spongepowered.api.entity.living.player.User;
-import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -50,10 +44,8 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -114,10 +106,10 @@ final class CommandState extends GeneralState<CommandPhaseContext> {
     }
 
     @Override
-    public Supplier<ServerLevel> attemptWorldKey(CommandPhaseContext context) {
+    public Supplier<ResourceKey> attemptWorldKey(CommandPhaseContext context) {
         final Optional<net.minecraft.world.entity.player.Player> playerSource = context.getSource(net.minecraft.world.entity.player.Player.class);
         if (playerSource.isPresent()) {
-            return () -> (ServerLevel) playerSource.get().level;
+            return () -> (ResourceKey) (Object) playerSource.get().level.dimension().location();
         }
         return super.attemptWorldKey(context);
     }

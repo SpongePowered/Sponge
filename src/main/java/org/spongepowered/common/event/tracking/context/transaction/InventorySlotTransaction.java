@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import net.minecraft.server.level.ServerLevel;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,8 +36,8 @@ public class InventorySlotTransaction extends InventoryBasedTransaction {
 
     private final SlotTransaction newTransaction;
 
-    public InventorySlotTransaction(final Supplier<ServerLevel> worldSupplier, final Inventory inventory, final SlotTransaction newTransaction) {
-        super(((ServerWorld) worldSupplier.get()).key(), inventory);
+    public InventorySlotTransaction(final Supplier<ResourceKey> worldSupplier, final Inventory inventory, final SlotTransaction newTransaction) {
+        super(worldSupplier.get(), inventory);
         this.newTransaction = newTransaction;
     }
 

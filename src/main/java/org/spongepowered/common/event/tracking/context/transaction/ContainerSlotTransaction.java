@@ -24,10 +24,9 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.server.ServerWorld;
 
 import java.util.Collections;
 import java.util.List;
@@ -37,8 +36,8 @@ public class ContainerSlotTransaction extends ContainerBasedTransaction {
 
     private final SlotTransaction transactoin;
 
-    public ContainerSlotTransaction(final Supplier<ServerLevel> worldSupplier, final AbstractContainerMenu menu, final SlotTransaction newTransaction) {
-        super(((ServerWorld) worldSupplier.get()).key(), menu);
+    public ContainerSlotTransaction(final Supplier<ResourceKey> worldSupplier, final AbstractContainerMenu menu, final SlotTransaction newTransaction) {
+        super(worldSupplier.get(), menu);
         this.transactoin = newTransaction;
     }
 

@@ -39,6 +39,7 @@ import net.minecraft.world.level.storage.loot.LootContext;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
+import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.block.transaction.Operation;
@@ -50,10 +51,8 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
@@ -405,7 +404,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    default Supplier<ServerLevel> attemptWorldKey(final C context) {
+    default Supplier<ResourceKey> attemptWorldKey(final C context) {
         return () -> {
             throw new IllegalStateException("Unable to provide a ServerLevel");
         };

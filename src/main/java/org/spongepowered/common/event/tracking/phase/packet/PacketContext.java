@@ -40,11 +40,9 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     @SuppressWarnings("NullableProblems") protected net.minecraft.server.level.ServerPlayer packetPlayer; // Set by packetPlayer(EntityPlayerMP)
     @Nullable Packet<?> packet;
-    private ItemStackSnapshot cursor = ItemStackSnapshot.empty();
     private ItemStack itemUsed = ItemStack.empty();
     private ItemStackSnapshot itemUsedSnapshot = ItemStackSnapshot.empty();
     private @Nullable HandType handUsed;
-    private boolean ignoreCreative;
     private boolean interactItemChanged;
 
     protected PacketContext(final PacketState<P> state, final PhaseTracker tracker) {
@@ -61,16 +59,6 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return (P) this;
     }
 
-    public P cursor(final ItemStackSnapshot snapshot) {
-        this.cursor = snapshot;
-        return (P) this;
-    }
-
-    public P ignoreCreative(final boolean creative) {
-        this.ignoreCreative = creative;
-        return (P) this;
-    }
-
     public net.minecraft.server.level.ServerPlayer getPacketPlayer() {
         return this.packetPlayer;
     }
@@ -82,14 +70,6 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
 
     public <K extends Packet<?>> K getPacket() {
         return (K) this.packet;
-    }
-
-    public ItemStackSnapshot getCursor() {
-        return this.cursor;
-    }
-
-    public boolean getIgnoringCreative() {
-        return this.ignoreCreative;
     }
 
     public P itemUsed(final ItemStack stack) {
@@ -130,7 +110,6 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         return super.printCustom(printer, indent)
             .add(s + "- %s: %s", "PacketPlayer", this.packetPlayer)
             .add(s + "- %s: %s", "Packet", this.packet)
-            .add(s + "- %s: %s", "IgnoreCreative", this.ignoreCreative)
             .add(s + "- %s: %s", "ItemStackUsed", this.itemUsed);
 
     }
@@ -140,11 +119,9 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         super.reset();
         this.packetPlayer = null;
         this.packet = null;
-        this.cursor = ItemStackSnapshot.empty();
         this.itemUsed = ItemStack.empty();
         this.itemUsedSnapshot = ItemStackSnapshot.empty();
         this.handUsed = null;
-        this.ignoreCreative = false;
         this.interactItemChanged = false;
     }
 }

@@ -65,8 +65,6 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
             event = SpongeEventFactory.createClickContainerEventDropFull(cause,
                 openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
         }
-        // TODO the nature of how this event is handled prevents the cause information being preserved through
-        // the event call, somehow should not release this frame until after the event is posted
         return event;
 
     }
