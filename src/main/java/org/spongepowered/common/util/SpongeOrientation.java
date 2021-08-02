@@ -24,18 +24,45 @@
  */
 package org.spongepowered.common.util;
 
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.util.Angle;
 import org.spongepowered.api.util.orientation.Orientation;
+
+import java.util.Optional;
 
 public final class SpongeOrientation implements Orientation {
 
-    private final int angle;
+    private final Angle angle;
 
-    public SpongeOrientation(final int angle) {
-        this.angle = angle;
+    public SpongeOrientation(final int angleInDegrees) {
+        this.angle = Angle.fromDegrees(angleInDegrees);
     }
 
     @Override
-    public int angle() {
+    public @NonNull Angle angle() {
         return this.angle;
+    }
+
+    @Override
+    public int hashCode() {
+        return this.angle.hashCode();
+    }
+
+    @Override
+    public boolean equals(final Object obj) {
+        if (obj == this) {
+            return true;
+        }
+
+        if (!(obj instanceof SpongeOrientation)) {
+            return false;
+        }
+
+        return ((SpongeOrientation) obj).angle == this.angle;
+    }
+
+    @Override
+    public String toString() {
+        return this.getClass().getSimpleName() + "{angle=" + this.angle + "}";
     }
 }

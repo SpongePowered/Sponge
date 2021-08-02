@@ -32,7 +32,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 @ConfigSerializable
-public final class BlockEntityTrackerCategory {
+public final class BlockEntityTrackerCategory implements TrackerCategory {
 
     @Setting("auto-populate")
     @Comment("If 'true', newly discovered block entities will be added to this config with default settings.")
@@ -40,29 +40,15 @@ public final class BlockEntityTrackerCategory {
 
     @Setting
     @Comment("Per-mod block entity id mappings for controlling tracking behavior")
-    public final Map<String, ModSubCategory> mods = new HashMap<>();
+    public final Map<String, NamespacedCategory> mods = new HashMap<>();
 
-    @ConfigSerializable
-    public static final class ModSubCategory {
+    @Override
+    public boolean autoPopulate() {
+        return this.autoPopulate;
+    }
 
-        @Setting
-        @Comment("If 'false', all tracking for this mod will be disabled.")
-        public boolean enabled = true;
-
-        @Setting(TrackerConfig.BLOCK_BULK_CAPTURE)
-        @Comment("Set to true to perform block bulk capturing during block entity ticks. (Default: true)")
-        public Map<String, Boolean> blockBulkCapture = new HashMap<>();
-
-        @Setting(TrackerConfig.BLOCK_EVENT_CREATION)
-        @Comment("Set to true to create and fire block events during block entity ticks. (Default: true)")
-        public Map<String, Boolean> blockEventCreation = new HashMap<>();
-
-        @Setting(TrackerConfig.ENTITY_BULK_CAPTURE)
-        @Comment("Set to true to perform entity bulk capturing during block entity ticks. (Default: true)")
-        public Map<String, Boolean> entityBulkCapture = new HashMap<>();
-
-        @Setting(TrackerConfig.ENTITY_EVENT_CREATION)
-        @Comment("Set to true to create and fire entity events during block entity ticks. (Default: true)")
-        public Map<String, Boolean> entityEventCreation = new HashMap<>();
+    @Override
+    public NamespacedCategory namespacedOrCreate(final String namespace) {
+        return this.mods.computeIfAbsent(namespace, k -> new NamespacedCategory());
     }
 }

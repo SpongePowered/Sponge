@@ -37,7 +37,9 @@ import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
+import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.entity.living.player.Player;
+import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
@@ -96,9 +98,41 @@ public final class MovementTest implements LoadableModule {
             })
             .build(), "toggleTeleportOnMove"
         );
+        event.register(this.plugin, Command.builder()
+            .addParameter(CommonParameters.POSITION)
+            .executor(context -> {
+                if (context.cause().root() instanceof ServerPlayer) {
+                    final ServerPlayer serverPlayer = (ServerPlayer) context.cause().root();
+                    final boolean success = serverPlayer.setPosition(context.requireOne(CommonParameters.POSITION));
+                    if (success) {
+                        context.sendMessage(Identity.nil(), Component.text("Successfully changed position"));
+                        return CommandResult.success();
+                    } else {
+                        return CommandResult.error(Component.text("Could not change position."));
+                    }
+                } else {
+                    return CommandResult.error(Component.text("You must be a player to set your position."));
+                }
+            }).build(), "setpos");
+        event.register(this.plugin, Command.builder()
+            .addParameter(CommonParameters.LOCATION_ONLINE_ONLY)
+            .executor(context -> {
+                if (context.cause().root() instanceof ServerPlayer) {
+                    final ServerPlayer serverPlayer = (ServerPlayer) context.cause().root();
+                    final boolean success = serverPlayer.setLocation(context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY));
+                    if (success) {
+                        context.sendMessage(Identity.nil(), Component.text("Successfully changed location"));
+                        return CommandResult.success();
+                    } else {
+                        return CommandResult.error(Component.text("Could not change location."));
+                    }
+                } else {
+                    return CommandResult.error(Component.text("You must be a player to set your location."));
+                }
+            }).build(), "setlocation");
     }
 
-    public class RotationEventListener {
+    public final class RotationEventListener {
         @Listener
         public void onEntitySpawn(final RotateEntityEvent event) {
             if (!MovementTest.this.printRotationEvents) {
@@ -116,7 +150,7 @@ public final class MovementTest implements LoadableModule {
         }
     }
 
-    public class MoveEntityTeleportListener {
+    public final class MoveEntityTeleportListener {
         @Listener
         public void onEntitySpawn(final MoveEntityEvent event, final @Root Player player) {
             if (!MovementTest.this.teleportOnMove) {
@@ -157,6 +191,8 @@ public final class MovementTest implements LoadableModule {
             final Logger pluginLogger = MovementTest.this.plugin.logger();
             pluginLogger.log(Level.INFO, MovementTest.marker, "/*************");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/* MoveEntityEvent");
+            pluginLogger.log(Level.INFO, MovementTest.marker, "/");
+            pluginLogger.log(Level.INFO, MovementTest.marker, "/* Event Impl: " + post.getClass().getSimpleName());
             pluginLogger.log(Level.INFO, MovementTest.marker, "/");
             pluginLogger.log(Level.INFO, MovementTest.marker, "/ Cause:");
             for (final Object o : post.cause()) {

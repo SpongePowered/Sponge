@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.world.entity.player;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.network.chat.Component;
 import net.minecraft.world.entity.player.Abilities;
 import net.minecraft.world.entity.player.Inventory;
@@ -46,6 +47,7 @@ public abstract class PlayerMixin_API extends LivingEntityMixin_API implements P
     @Shadow public abstract ItemCooldowns shadow$getCooldowns();
     @Shadow public abstract Component shadow$getDisplayName();
     @Shadow public abstract Component shadow$getName();
+    @Shadow public abstract GameProfile shadow$getGameProfile();
     // @formatter:on
 
     public final boolean impl$isFake = ((PlatformEntityBridge) this).bridge$isFakePlayer();

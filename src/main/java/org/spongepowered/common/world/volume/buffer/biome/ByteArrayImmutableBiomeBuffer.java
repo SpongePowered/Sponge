@@ -36,6 +36,7 @@ import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Arrays;
@@ -114,8 +115,8 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
     @Override
     public VolumeStream<Immutable, Biome> biomeStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
 
         final Stream<VolumeElement<Immutable, Biome>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
@@ -128,7 +129,7 @@ public final class ByteArrayImmutableBiomeBuffer extends AbstractBiomeBuffer imp
                                 .registry(RegistryTypes.BIOME)
                                 .value(Biomes.OCEAN)
                             );
-                    }, new Vector3i(x, y, z)))
+                    }, new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

@@ -25,11 +25,9 @@
 package org.spongepowered.common.launch.plugin;
 
 import org.spongepowered.api.plugin.PluginManager;
-import org.spongepowered.plugin.PluginContainer;
 
+/**
+ * This marker is required to handle injection in the core Sponge module
+ */
 public interface SpongePluginManager extends PluginManager {
-
-    void addPlugin(PluginContainer plugin);
-
-    void addDummyPlugin(DummyPluginContainer plugin);
 }

@@ -32,10 +32,10 @@ import java.util.List;
 
 public class EntityCollisionPlugin extends AbstractMixinConfigPlugin {
 
-    private List<String> mixins = new ArrayList<>();
+    private final List<String> mixins = new ArrayList<>();
 
     @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
         return SpongeConfigs.getCommon().get().modules.entityCollision;
     }
 

@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.bridge.server;
 
+import co.aikar.timings.sponge.ServerTimingsHandler;
 import com.google.inject.Injector;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
@@ -31,6 +32,7 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.resourcepack.ResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
+import org.spongepowered.common.user.SpongeUserManager;
 
 public interface MinecraftServerBridge {
 
@@ -43,4 +45,9 @@ public interface MinecraftServerBridge {
     void bridge$setDifficulty(ServerLevel world, Difficulty newDifficulty, boolean forceDifficulty);
 
     boolean bridge$performAutosaveChecks();
+
+    ServerTimingsHandler bridge$timingsHandler();
+
+    SpongeUserManager bridge$userManager();
+
 }

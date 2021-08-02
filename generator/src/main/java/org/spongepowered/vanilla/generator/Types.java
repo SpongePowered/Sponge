@@ -63,6 +63,8 @@ final class Types {
 
     public static final ClassName REGISTRY_TYPES = ClassName.get(Context.BASE_PACKAGE + ".registry", "RegistryTypes");
 
+    public static final ClassName TAG = ClassName.get(Context.BASE_PACKAGE + ".tag", "Tag");
+
 
     private Types() {
     }

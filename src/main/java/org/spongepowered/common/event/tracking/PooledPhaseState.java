@@ -55,7 +55,7 @@ public abstract class PooledPhaseState<C extends PhaseContext<C>> implements IPh
                 return cached;
             }
         }
-        final C peek = tracker.getContextPoolFor(this).pollFirst();
+        final @Nullable C peek = tracker.getContextPoolFor(this).pollFirst();
         if (peek != null) {
             if (tracker == PhaseTracker.SERVER) {
                 this.serverCached = peek;

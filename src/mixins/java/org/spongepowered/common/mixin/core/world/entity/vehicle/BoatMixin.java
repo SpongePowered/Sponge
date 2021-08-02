@@ -25,14 +25,10 @@
 package org.spongepowered.common.mixin.core.world.entity.vehicle;
 
 import net.minecraft.world.entity.vehicle.Boat;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.Blocks;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.world.entity.vehicle.BoatBridge;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
@@ -49,11 +45,6 @@ public abstract class BoatMixin extends EntityMixin implements BoatBridge {
     @ModifyConstant(method = "floatBoat", constant = @Constant(floatValue = Constants.Entity.Boat.DEFAULT_MAX_SPEED))
     private float impl$getMaximumWaterMotion(final float originalSpeed) {
         return this.impl$maxSpeed;
-    }
-
-    @Redirect(method = "getGroundFriction", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/block/Block;getFriction()F"))
-    private float impl$getBlockSlipperinessIfBoatIsNotOverridingMovingOnLand(final Block block) {
-        return this.impl$moveOnLand ? Blocks.ICE.getFriction() : block.getFriction();
     }
 
     @Override

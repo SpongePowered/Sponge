@@ -34,6 +34,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.network.channel.ChannelBuf;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -49,7 +50,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 
 @Mixin(FriendlyByteBuf.class)
-@Implements(@Interface(iface = ChannelBuf.class, prefix = "cbuf$"))
+@Implements(@Interface(iface = ChannelBuf.class, prefix = "cbuf$", remap = Remap.NONE))
 public abstract class FriendlyByteBufMixin_API extends ByteBuf {
 
     // @formatter:off

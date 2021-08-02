@@ -31,6 +31,7 @@ public final class PluginPhase {
     public static final class State {
 
         public static final BlockWorkerPhaseState BLOCK_WORKER = new BlockWorkerPhaseState();
+        public static final IPhaseState<VolumeStreamApplicationState.Context> VOLUME_STREAM_APPLICATION = new VolumeStreamApplicationState();
         public static final IPhaseState<BasicPluginContext> CUSTOM_SPAWN = new BasicPluginState();
         public static final IPhaseState<BasicPluginContext> SCHEDULED_TASK = new ScheduledTaskPhaseState();
         public static final IPhaseState<DelayedTaskPhaseState.Context> DELAYED_TASK = new DelayedTaskPhaseState();
@@ -43,11 +44,6 @@ public final class PluginPhase {
     public static final class Listener {
 
         public static final IPhaseState<EventListenerPhaseContext> GENERAL_LISTENER = new EventListenerPhaseState();
-        public static final IPhaseState<WorldTickListenerContext> PRE_WORLD_TICK_LISTENER = new WorldTickListenerState("PreWorldTickState");
-        public static final IPhaseState<WorldTickListenerContext> POST_WORLD_TICK_LISTENER = new WorldTickListenerState("PostWorldTickState");
-        public static final IPhaseState<ServerTickListenerContext> PRE_SERVER_TICK_LISTENER = new ServerTickListenerState("PreServerTickState");
-        public static final IPhaseState<ServerTickListenerContext> POST_SERVER_TICK_LISTENER = new ServerTickListenerState("PostServerTickState");
-        public static final IPhaseState<EventListenerPhaseContext> EVENT_BUS = new EventListenerPhaseState();
 
         private Listener() {
         }

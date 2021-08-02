@@ -25,13 +25,16 @@
 package org.spongepowered.common.command.sponge;
 
 import co.aikar.timings.Timings;
+import co.aikar.timings.sponge.SpongeTimingsFactory;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.LinearComponents;
 import net.kyori.adventure.text.TextComponent;
 import net.kyori.adventure.text.event.ClickEvent;
+import net.kyori.adventure.text.event.HoverEvent;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.Style;
+import net.kyori.adventure.text.format.TextColor;
 import net.kyori.adventure.text.format.TextDecoration;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.Mth;
@@ -47,19 +50,23 @@ import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.CommonParameters;
 import org.spongepowered.api.command.parameter.Parameter;
+import org.spongepowered.api.data.Keys;
+import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.lifecycle.RefreshGameEvent;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.util.blockray.RayTrace;
+import org.spongepowered.api.world.LocatableBlock;
+import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.accessor.world.level.LevelAccessor;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformLevelBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
-import co.aikar.timings.sponge.SpongeTimingsFactory;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginContributor;
 import org.spongepowered.plugin.metadata.PluginMetadata;
@@ -76,6 +83,8 @@ import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.concurrent.CompletableFuture;
 import java.util.stream.Collectors;
 
 import javax.management.MBeanServer;
@@ -87,6 +96,15 @@ public class SpongeCommand {
     protected static final Component INDENT_COMPONENT = Component.text(SpongeCommand.INDENT);
     protected static final Component LONG_INDENT_COMPONENT = Component.text(SpongeCommand.LONG_INDENT);
     protected static final DecimalFormat THREE_DECIMAL_DIGITS_FORMATTER = new DecimalFormat("########0.000");
+
+    protected static final TextColor GREEN = TextColor.color(0x42C742);
+    protected static final TextColor MINT = TextColor.color(0x69A877);
+    protected static final TextColor LIGHT_BLUE = TextColor.color(0x5EB3DA);
+    protected static final TextColor YELLOW = TextColor.color(0xDEDE00);
+    protected static final TextColor ORANGE = TextColor.color(0xE36504);
+    protected static final TextColor RED = TextColor.color(0xC74242);
+
+    private static final Component EMPTY = Component.text("Empty", TextColor.color(SpongeCommand.RED));
 
     private final Parameter.Key<PluginContainer> pluginContainerKey = Parameter.key("plugin", PluginContainer.class);
     private final Parameter.Key<CommandMapping> commandMappingKey = Parameter.key("command", CommandMapping.class);
@@ -185,6 +203,8 @@ public class SpongeCommand {
             .addChild(reloadWorldCommand, "world")
             .build();
 
+        final Command.Parameterized infoCommand = this.infoSubcommand();
+
 
         // /sponge
         final Command.Builder commandBuilder = Command.builder()
@@ -198,7 +218,9 @@ public class SpongeCommand {
                 .addChild(tpsCommand, "tps")
                 .addChild(versionCommand, "version")
                 .addChild(whichCommand, "which")
-                .addChild(reloadCommand, "reload");
+                .addChild(reloadCommand, "reload")
+                .addChild(infoCommand, "info")
+            ;
 
         this.additionalActions(commandBuilder);
         return commandBuilder.build();
@@ -248,6 +270,121 @@ public class SpongeCommand {
         SpongeCommon.logger().info("Starting Mixin Audit");
         Launch.instance().auditMixins();
         return CommandResult.success();
+    }
+
+    private CompletableFuture<Component> userIdToComponent(final @Nullable UUID uuid) {
+        if (uuid != null) {
+            return Sponge.server().userManager().load(uuid).handleAsync((userOptional, throwable) -> {
+                if (throwable != null) {
+                    return SpongeCommand.EMPTY;
+                }
+                return userOptional.map(user ->
+                        user.require(Keys.DISPLAY_NAME)
+                            .color(TextColor.color(SpongeCommand.LIGHT_BLUE))
+                            .hoverEvent(HoverEvent.showText(Component.text(user.uniqueId().toString())))).orElse(SpongeCommand.EMPTY);
+            }, SpongeCommon.server());
+        }
+        return CompletableFuture.completedFuture(SpongeCommand.EMPTY);
+    }
+
+    private Command.Parameterized infoSubcommand() {
+        final Command.Parameterized blockInfoAtCommand = Command.builder()
+            .addParameter(CommonParameters.LOCATION_ONLINE_ONLY)
+            .executor(context -> {
+                final ServerLocation serverLocation = context.requireOne(CommonParameters.LOCATION_ONLINE_ONLY);
+                final CompletableFuture<Component> creator = this.userIdToComponent(serverLocation.get(Keys.CREATOR).orElse(null));
+                final CompletableFuture<Component> notifier = this.userIdToComponent(serverLocation.get(Keys.NOTIFIER).orElse(null));
+                CompletableFuture.allOf(creator, notifier).thenAcceptAsync(x ->
+                        context.sendMessage(Identity.nil(), Component.text()
+                            .content("Block Info: ")
+                            .color(TextColor.color(SpongeCommand.GREEN))
+                            .append(Component.text(serverLocation.blockPosition().toString())
+                                    .hoverEvent(ItemStack.builder().fromBlockState(serverLocation.block()).build().createSnapshot())
+                            )
+                            .append(Component.newline())
+                            .append(Component.text("Creator: ", TextColor.color(SpongeCommand.MINT)))
+                            .append(creator.join())
+                            .append(Component.newline())
+                            .append(Component.text("Notifier: ", TextColor.color(SpongeCommand.MINT)))
+                            .append(notifier.join())
+                            .build()), SpongeCommon.server());
+                return CommandResult.success();
+            })
+            .build();
+
+        final Command.Parameterized blockInfoLookingAt = Command.builder()
+            .executor(context -> {
+                if (!(context.cause().root() instanceof Player)) {
+                    return CommandResult.error(Component.text("Player required", TextColor.color(SpongeCommand.RED)));
+                }
+                final Player player = (Player) context.cause().root();
+                return RayTrace.block()
+                    .sourceEyePosition(player)
+                    .direction(player)
+                    .select(RayTrace.nonAir())
+                    .limit(10)
+                    .execute()
+                    .map(result -> {
+                        final LocatableBlock locatableBlock = result.selectedObject();
+                        final CompletableFuture<Component> creator = this.userIdToComponent(locatableBlock.world()
+                                .get(locatableBlock.blockPosition(), Keys.CREATOR).orElse(null));
+                        final CompletableFuture<Component> notifier = this.userIdToComponent(locatableBlock.world()
+                                .get(locatableBlock.blockPosition(), Keys.CREATOR).orElse(null));
+                        CompletableFuture.allOf(creator, notifier).thenAcceptAsync(x ->
+                                context.sendMessage(Identity.nil(), Component.text()
+                                    .content("Block Info: ")
+                                    .color(TextColor.color(SpongeCommand.GREEN))
+                                    .append(Component.text(locatableBlock.blockPosition().toString())
+                                            .hoverEvent(ItemStack.builder().fromBlockState(locatableBlock.blockState()).build().createSnapshot())
+                                    )
+                                    .append(Component.newline())
+                                    .append(Component.text("Creator: ", TextColor.color(SpongeCommand.MINT)))
+                                    .append(creator.join())
+                                    .append(Component.newline())
+                                    .append(Component.text("Notifier: ", TextColor.color(SpongeCommand.MINT)))
+                                    .append(notifier.join())
+                                    .build()), SpongeCommon.server());
+                        return CommandResult.success();
+                    }).orElseGet(() -> CommandResult.error(Component.text("Failed to find any block in range", NamedTextColor.RED)));
+            })
+            .build();
+        final Command.Parameterized entityLookingAt = Command.builder()
+            .executor(context -> {
+                if (!(context.cause().root() instanceof Player)) {
+                    return CommandResult.error(Component.text("Player required", TextColor.color(SpongeCommand.RED)));
+                }
+                final Player player = (Player) context.cause().root();
+                return RayTrace.entity()
+                    .sourceEyePosition(player)
+                    .direction(player)
+                    .limit(10)
+                    .execute()
+                    .map(result -> {
+                        final org.spongepowered.api.entity.Entity entity = result.selectedObject();
+                        final CompletableFuture<Component> creator = this.userIdToComponent(entity.get(Keys.CREATOR).orElse(null));
+                        final CompletableFuture<Component> notifier = this.userIdToComponent(entity.get(Keys.NOTIFIER).orElse(null));
+                        CompletableFuture.allOf(creator, notifier).thenAcceptAsync(x ->
+                                context.sendMessage(Identity.nil(), Component.text()
+                                    .content("Entity Info: ")
+                                    .color(TextColor.color(SpongeCommand.GREEN))
+                                    .append(entity.type().asComponent().hoverEvent(entity))
+                                    .append(Component.newline())
+                                    .append(Component.text("Creator: ", TextColor.color(SpongeCommand.MINT)))
+                                    .append(creator.join())
+                                    .append(Component.newline())
+                                    .append(Component.text("Notifier: ", TextColor.color(SpongeCommand.MINT)))
+                                    .append(notifier.join())
+                                    .build()), SpongeCommon.server());
+                        return CommandResult.success();
+                    }).orElseGet(() -> CommandResult.error(Component.text("Failed to find any block in range", NamedTextColor.RED)));
+            })
+            .build();
+        return Command.builder()
+            .addChild(blockInfoAtCommand, "blockAt")
+            .addChild(blockInfoLookingAt, "block")
+            .addChild(entityLookingAt, "entity")
+            .permission("sponge.command.info")
+            .build();
     }
 
     private Command.Parameterized chunksSubcommand() {
@@ -365,8 +502,7 @@ public class SpongeCommand {
                 .addChild(Command.builder()
                         .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
-                                return CommandResult.empty();
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
                             }
                             Timings.reset();
                             context.sendMessage(Identity.nil(), Component.text("Timings reset"));
@@ -376,8 +512,7 @@ public class SpongeCommand {
                 .addChild(Command.builder()
                         .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
-                                return CommandResult.empty();
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
                             }
                             Timings.generateReport(context.cause().audience());
                             return CommandResult.success();
@@ -400,8 +535,7 @@ public class SpongeCommand {
                 .addChild(Command.builder()
                         .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
-                                return CommandResult.empty();
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
                             }
                             Timings.setVerboseTimingsEnabled(true);
                             context.sendMessage(Identity.nil(), Component.text("Enabled Verbose Timings"));
@@ -411,8 +545,7 @@ public class SpongeCommand {
                 .addChild(Command.builder()
                         .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
-                                return CommandResult.empty();
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
                             }
                             Timings.setVerboseTimingsEnabled(false);
                             context.sendMessage(Identity.nil(), Component.text("Disabled Verbose Timings"));
@@ -422,8 +555,7 @@ public class SpongeCommand {
                 .addChild(Command.builder()
                         .executor(context -> {
                             if (!Timings.isTimingsEnabled()) {
-                                context.sendMessage(Identity.nil(), Component.text("Please enable timings by typing /sponge timings on"));
-                                return CommandResult.empty();
+                                return CommandResult.error(Component.text("Please enable timings by typing /sponge timings on"));
                             }
                             context.sendMessage(Identity.nil(), Component.text("Timings cost: " + SpongeTimingsFactory.getCost()));
                             return CommandResult.success();
@@ -434,25 +566,24 @@ public class SpongeCommand {
 
     private @NonNull CommandResult tpsExecutor(final CommandContext context) {
         if (SpongeCommon.game().isServerAvailable()) {
-
             final List<Component> tps = new ArrayList<>();
             for (final ServerWorld world : Sponge.server().worldManager().worlds()) {
                 final TextComponent.Builder builder =
-                        Component.text()
-                                .content("World [")
-                                .append(Component.text(world.key().asString(), NamedTextColor.DARK_GREEN))
-                                .append(Component.text("] - TPS: "));
+                  Component.text()
+                    .append(Component.text(world.key().asString(), TextColor.color(0xC9C9C9)))
+                    .append(Component.text(": "));
                 tps.add(this.appendTickTime(((PlatformLevelBridge) world).bridge$recentTickTimes(), builder).build());
             }
 
-            tps.add(this.appendTickTime(SpongeCommon.server().tickTimes, Component.text().content("Overall TPS: ")).build());
+            tps.add(Component.newline());
+            tps.add(this.appendTickTime(SpongeCommon.server().tickTimes, Component.text().content("Overall: ")).build());
             SpongeCommon.game().serviceProvider()
-                    .paginationService()
-                    .builder()
-                    .contents(tps)
-                    .title(Component.text("Server TPS", NamedTextColor.WHITE))
-                    .padding(Component.text("-", NamedTextColor.WHITE))
-                    .sendTo(context.cause().audience());
+              .paginationService()
+              .builder()
+              .contents(tps)
+              .title(Component.text("Ticks Per Second (TPS)", NamedTextColor.WHITE))
+              .padding(Component.text("-", NamedTextColor.WHITE))
+              .sendTo(context.cause().audience());
         } else {
             context.sendMessage(Identity.nil(), Component.text("Server is not running."));
         }
@@ -462,10 +593,26 @@ public class SpongeCommand {
 
     private TextComponent.Builder appendTickTime(final long[] tickTimes, final TextComponent.Builder builder) {
         final double averageTickTime = Mth.average(tickTimes) * 1.0E-6D;
-        builder.append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(Math.min(1000.0 / (averageTickTime), 20)), NamedTextColor.LIGHT_PURPLE))
-                .append(Component.text(", Mean: "))
-                .append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime) + "ms", NamedTextColor.RED));
+        final double tps = Math.min(1000.0 / (averageTickTime), 20);
+        builder.append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(tps), this.tpsColor(tps)))
+          .append(Component.text(" (", NamedTextColor.GRAY)
+            .append(Component.text(SpongeCommand.THREE_DECIMAL_DIGITS_FORMATTER.format(averageTickTime), NamedTextColor.GRAY)
+              .append(Component.text("ms avg"))
+              .append(Component.text(")"))))
+        ;
         return builder;
+    }
+
+    private TextColor tpsColor(final double tps) {
+        if (tps >= 18) {
+            return SpongeCommand.GREEN;
+        } else if (tps >= 15) {
+            return SpongeCommand.YELLOW;
+        } else if (tps >= 10) {
+            return SpongeCommand.ORANGE;
+        } else {
+            return SpongeCommand.RED;
+        }
     }
 
     private @NonNull CommandResult versionExecutor(final CommandContext context) {
@@ -567,7 +714,7 @@ public class SpongeCommand {
     // --
 
     protected Component getChunksInfo(final ServerWorld serverWorld) {
-        if (((WorldBridge) serverWorld).bridge$isFake()) {
+        if (((LevelBridge) serverWorld).bridge$isFake()) {
             return Component.text().append(Component.newline(), Component.text(serverWorld.key().asString() + " is a fake world")).build();
         }
         final ServerLevel serverLevel = (ServerLevel) serverWorld;
@@ -581,7 +728,7 @@ public class SpongeCommand {
                 Component.newline(),
                 this.key("Removed Entities:"), this.value(entitiesToRemove),
                 Component.newline(),
-                this.key("Removed Block Entities: "), this.value(((LevelAccessor) serverWorld).accessor$blockEntitiesToUnload().size())
+                this.key("Removed Block Entities: "), this.value(((LevelBridge) serverLevel).bridge$blockEntitiesToUnload().size())
         );
     }
 

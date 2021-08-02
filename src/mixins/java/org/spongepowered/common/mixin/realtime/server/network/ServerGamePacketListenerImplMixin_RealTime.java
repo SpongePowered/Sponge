@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 
 @Mixin(ServerGamePacketListenerImpl.class)
 public abstract class ServerGamePacketListenerImplMixin_RealTime {
@@ -55,7 +55,7 @@ public abstract class ServerGamePacketListenerImplMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeChatSpamCheck(final ServerGamePacketListenerImpl self, final int modifier) {
-        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((WorldBridge) this.player.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((LevelBridge) this.player.level).bridge$isFake()) {
             this.chatSpamTickCount = modifier;
             return;
         }
@@ -72,7 +72,7 @@ public abstract class ServerGamePacketListenerImplMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeDropSpamCheck(final ServerGamePacketListenerImpl self, final int modifier) {
-        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((WorldBridge) this.player.level).bridge$isFake()) {
+        if (((PlatformEntityBridge) this.player).bridge$isFakePlayer() || ((LevelBridge) this.player.level).bridge$isFake()) {
             this.dropSpamTickCount = modifier;
             return;
         }

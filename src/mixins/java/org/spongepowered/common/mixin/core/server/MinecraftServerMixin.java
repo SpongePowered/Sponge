@@ -25,11 +25,18 @@
 package org.spongepowered.common.mixin.core.server;
 
 import co.aikar.timings.Timing;
+import co.aikar.timings.sponge.ServerTimingsHandler;
 import com.google.inject.Injector;
+import com.mojang.authlib.GameProfileRepository;
+import com.mojang.authlib.minecraft.MinecraftSessionService;
+import com.mojang.datafixers.DataFixer;
 import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.core.RegistryAccess;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.ServerResources;
 import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
 import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.server.players.PlayerList;
@@ -38,6 +45,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.storage.LevelResource;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.PrimaryLevelData;
+import net.minecraft.world.level.storage.WorldData;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.api.Game;
 import org.spongepowered.api.Sponge;
@@ -76,8 +84,10 @@ import co.aikar.timings.sponge.SpongeTimings;
 import co.aikar.timings.sponge.TimingsManager;
 import org.spongepowered.common.resourcepack.SpongeResourcePack;
 import org.spongepowered.common.service.server.SpongeServerScopedServiceProvider;
+import org.spongepowered.common.user.SpongeUserManager;
 
 import java.io.IOException;
+import java.net.Proxy;
 import java.net.URISyntaxException;
 import java.util.Collection;
 import java.util.Map;
@@ -107,8 +117,9 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     @Shadow public abstract PackRepository shadow$getPackRepository();
     // @formatter:on
 
-    @Nullable private SpongeServerScopedServiceProvider impl$serviceProvider;
-    @Nullable private ResourcePack impl$resourcePack;
+    private @Nullable SpongeServerScopedServiceProvider impl$serviceProvider;
+    private @Nullable ResourcePack impl$resourcePack;
+    private @Nullable ServerTimingsHandler impl$timingsHandler;
 
     @Override
     public Subject subject() {
@@ -116,8 +127,10 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @Inject(method = "spin", at = @At("TAIL"), locals = LocalCapture.CAPTURE_FAILEXCEPTION)
-    private static void impl$setThreadOnServerPhaseTracker(Function<Thread, MinecraftServer> p_240784_0_, final CallbackInfoReturnable<MinecraftServerMixin> cir,
-            AtomicReference<MinecraftServer> atomicReference, Thread thread) {
+    private static void impl$setThreadOnServerPhaseTracker(final Function<Thread, MinecraftServer> p_240784_0_,
+                                                           final CallbackInfoReturnable<MinecraftServerMixin> cir,
+                                                           final AtomicReference<MinecraftServer> atomicReference,
+                                                           final Thread thread) {
         try {
             PhaseTracker.SERVER.setThread(thread);
         } catch (final IllegalAccessException e) {
@@ -167,18 +180,6 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
         frame.pushCause(Sponge.systemSubject());
     }
 
-    // We want to save the username cache json, as we normally bypass it.
-    @Inject(method = "saveAllChunks", at = @At("RETURN"))
-    private void impl$saveUsernameCacheOnSave(
-            final boolean suppressLog,
-            final boolean flush,
-            final boolean forced,
-            final CallbackInfoReturnable<Boolean> cir) {
-        ((GameProfileCacheBridge) this.profileCache).bridge$setCanSave(true);
-        this.profileCache.save();
-        ((GameProfileCacheBridge) this.profileCache).bridge$setCanSave(false);
-    }
-
     /**
      * @author Zidane
      * @reason Apply our branding
@@ -203,7 +204,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             final LevelStorageSource.LevelStorageAccess levelSave = ((ServerLevelBridge) entry.getValue()).bridge$getLevelSave();
             try {
                 levelSave.close();
-            } catch (IOException e) {
+            } catch (final IOException e) {
                 LOGGER.error("Failed to unlock level {}", levelSave.getLevelId(), e);
             }
         }
@@ -223,7 +224,7 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             this.shadow$getPlayerList().saveAll();
         }
 
-        try (Timing timing = SpongeTimings.worldSaveTimer.startTiming()) {
+        try (final Timing timing = this.bridge$timingsHandler().save.startTiming()) {
             this.saveAllChunks(true, false, false);
         }
 
@@ -300,6 +301,13 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
             }
         }
 
+        // Save the usercache.json file every 10 minutes or if forced to
+        if (isForced || this.tickCount % 6000 == 0) {
+            // We want to save the username cache json, as we normally bypass it.
+            ((GameProfileCacheBridge) this.profileCache).bridge$setCanSave(true);
+            this.profileCache.save();
+            ((GameProfileCacheBridge) this.profileCache).bridge$setCanSave(false);
+        }
         return true;
     }
 
@@ -331,6 +339,15 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @Override
+    public ServerTimingsHandler bridge$timingsHandler() {
+        if (this.impl$timingsHandler == null) {
+            this.impl$timingsHandler = new ServerTimingsHandler((MinecraftServer) (Object) this);
+        }
+
+        return this.impl$timingsHandler;
+    }
+
+    @Override
     public void bridge$initServices(final Game game, final Injector injector) {
         if (this.impl$serviceProvider == null) {
             this.impl$serviceProvider = new SpongeServerScopedServiceProvider(this, game, injector);
@@ -344,13 +361,13 @@ public abstract class MinecraftServerMixin implements SpongeServer, MinecraftSer
     }
 
     @Inject(method = "reloadResources", at = @At(value = "HEAD"))
-    public void impl$reloadResources(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+    public void impl$reloadResources(final Collection<String> datapacksToLoad, final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
         SpongeDataPackManager.INSTANCE.callRegisterDataPackValueEvents(this.storageSource.getLevelPath(LevelResource.DATAPACK_DIR), datapacksToLoad);
         this.shadow$getPackRepository().reload();
     }
 
     @Inject(method = "reloadResources", at = @At(value = "RETURN"))
-    public void impl$serializeDelayedDataPack(Collection<String> datapacksToLoad, CallbackInfoReturnable<CompletableFuture<Void>> cir) {
+    public void impl$serializeDelayedDataPack(final Collection<String> datapacksToLoad, final CallbackInfoReturnable<CompletableFuture<Void>> cir) {
         cir.getReturnValue().thenAccept(v -> {
             SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
         });

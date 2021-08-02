@@ -46,12 +46,6 @@ public final class SpongeCommandSyntaxException extends CommandSyntaxException {
         this.commandContext = commandContext;
     }
 
-    public SpongeCommandSyntaxException(final CommandException exception, final SpongeCommandContext commandContext, final String command, final int cursor) {
-        super(new SimpleCommandExceptionType(SpongeAdventure.asVanilla(exception.componentMessage())), SpongeAdventure.asVanilla(exception.componentMessage()), command, cursor);
-        this.innerException = exception;
-        this.commandContext = commandContext;
-    }
-
     @Override
     public synchronized Throwable fillInStackTrace() {
         // Don't gather stacktrace, we are just wrapping the existing exception

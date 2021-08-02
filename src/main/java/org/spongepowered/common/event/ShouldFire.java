@@ -123,4 +123,6 @@ public final class ShouldFire {
     public static boolean CHUNK_EVENT_GENERATED = false;
     public static boolean CHUNK_EVENT_UNLOAD = false;
 
+    public static boolean CHANGE_DATA_HOLDER_EVENT_VALUE_CHANGE = false;
+
 }

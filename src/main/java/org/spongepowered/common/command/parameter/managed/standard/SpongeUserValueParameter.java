@@ -36,7 +36,6 @@ import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.command.CommandCompletion;
 import org.spongepowered.api.command.exception.ArgumentParseException;
 import org.spongepowered.api.command.parameter.ArgumentReader;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.profile.GameProfile;
 import org.spongepowered.api.user.UserManager;
@@ -50,7 +49,7 @@ import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
-public final class SpongeUserValueParameter extends ResourceKeyedArgumentValueParser<User> {
+public final class SpongeUserValueParameter extends ResourceKeyedArgumentValueParser<UUID> {
 
     private final EntityArgument selectorArgumentType = EntityArgument.player();
 
@@ -67,7 +66,7 @@ public final class SpongeUserValueParameter extends ResourceKeyedArgumentValuePa
     }
 
     @Override
-    public @NonNull Optional<? extends User> parseValue(
+    public @NonNull Optional<? extends UUID> parseValue(
             final @NonNull CommandCause cause, final ArgumentReader.@NonNull Mutable reader)
             throws ArgumentParseException {
         final String peek = reader.peekString();
@@ -76,24 +75,27 @@ public final class SpongeUserValueParameter extends ResourceKeyedArgumentValuePa
                 final ServerPlayer entity =
                         (ServerPlayer) (this.selectorArgumentType.parse((StringReader) reader)
                                 .findSingleEntity(((CommandSourceStack) cause)));
-                return Optional.of(entity.user());
+                return Optional.of(entity.uniqueId());
             } catch (final CommandSyntaxException e) {
                 throw reader.createException(Component.text(e.getContext()));
             }
         }
 
         final UserManager userManager = SpongeCommon.game().server().userManager();
-        Optional<User> user;
         try {
             final UUID uuid = UUID.fromString(reader.parseString());
-            user = userManager.find(uuid);
-        } catch (final Exception e) {
-            // if no UUID, get the name. We've already advanced the reader at this point.
-            user = userManager.find(peek);
+            if (userManager.exists(uuid)) {
+                return Optional.of(uuid);
+            }
+        } catch (final Exception ignored) {
         }
 
-        if (user.isPresent()) {
-            return user;
+        // if no UUID, get the name. We've already advanced the reader at this point.
+        final Optional<UUID> result = Sponge.server().gameProfileManager().cache().findByName(peek)
+                .map(GameProfile::uuid)
+                .filter(userManager::exists);
+        if (result.isPresent()) {
+            return result;
         }
 
         throw reader.createException(Component.text("Could not find user with user name \"" + peek + "\""));

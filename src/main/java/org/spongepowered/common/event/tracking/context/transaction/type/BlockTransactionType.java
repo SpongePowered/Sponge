@@ -29,7 +29,6 @@ import com.google.common.collect.LinkedListMultimap;
 import com.google.common.collect.ListMultimap;
 import com.google.common.collect.Multimap;
 import net.minecraft.core.BlockPos;
-import org.apache.logging.log4j.Marker;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.block.transaction.BlockTransaction;
@@ -57,7 +56,10 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
     }
 
     @Override
-    protected void consumeEventsAndMarker(final Collection<? extends ChangeBlockEvent.All> changeBlockEvents, final Marker marker) {
+    protected void consumeEventsAndMarker(
+        PhaseContext<@NonNull ?> context,
+        final Collection<? extends ChangeBlockEvent.All> changeBlockEvents
+    ) {
 
         final Multimap<ResourceKey, ChangeBlockEvent.All> eventsByWorld = LinkedListMultimap.create();
         changeBlockEvents.forEach(event -> eventsByWorld.put(event.world().key(), event));
@@ -87,7 +89,6 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
             if (positions.isEmpty()) {
                 return;
             }
-            final PhaseContext<@NonNull ?> context = PhaseTracker.getInstance().getPhaseContext();
             final ImmutableList<BlockTransactionReceipt> transactions = positions.asMap()
                 .values()
                 .stream()
@@ -99,8 +100,9 @@ public final class BlockTransactionType extends TransactionType<ChangeBlockEvent
                     }
                     final SpongeBlockSnapshot original = snapshots.get(0);
                     final SpongeBlockSnapshot result = snapshots.get(snapshots.size() - 1);
-                    final Operation operation = context.getBlockOperation(original, original.blockChange);
+                    final Operation operation = context.getBlockOperation(original, result);
                     final BlockTransactionReceipt eventTransaction = new BlockTransactionReceipt(original, result, operation);
+                    context.postBlockTransactionApplication(original.blockChange, eventTransaction);
                     return Optional.of(eventTransaction);
                 })
                 .filter(Optional::isPresent)

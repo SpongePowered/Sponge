@@ -24,8 +24,10 @@
  */
 package org.spongepowered.vanilla.mixin.core.entity.player;
 
+import net.minecraft.world.level.Level;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.world.portal.PlatformTeleporter;
 import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
@@ -36,6 +38,10 @@ import net.minecraft.world.entity.Entity;
 @Mixin(Entity.class)
 public abstract class EntityMixin_Vanilla implements EntityBridge {
 
+    // @formatter:off
+    @Shadow public Level level;
+    // @formatter:on
+    
     /**
      * @author dualspiral - 19th December 2020 - 1.16.4
      * @reason Overwrite to redirect call to

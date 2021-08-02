@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.activation.ActivationCapabilityBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.storage.PrimaryLevelDataBridge;
 import org.spongepowered.common.mixin.plugin.entityactivation.EntityActivationRange;
 
@@ -56,7 +56,7 @@ public abstract class EntityMixin_EntityActivation implements ActivationCapabili
 
     @Inject(method = "<init>", at = @At("RETURN"))
     private void entityActivation$initActivationRanges(EntityType<?> type, Level world, CallbackInfo ci) {
-        if (world != null && !((WorldBridge) world).bridge$isFake() && ((PrimaryLevelDataBridge) ((LevelAccessor) world).getLevelData()).bridge$valid()) {
+        if (world != null && !((LevelBridge) world).bridge$isFake() && ((PrimaryLevelDataBridge) ((LevelAccessor) world).getLevelData()).bridge$valid()) {
             EntityActivationRange.initializeEntityActivationState((Entity) (Object) this);
         }
     }

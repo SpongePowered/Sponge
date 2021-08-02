@@ -59,7 +59,6 @@ public final class SpongeCommonModule extends AbstractModule {
     @Override
     protected void configure() {
         this.bind(Game.class).to(SpongeGame.class);
-        this.bind(Platform.class).to(SpongePlatform.class);
         this.bind(MinecraftVersion.class).toInstance(SpongeCommon.minecraftVersion());
         this.bind(AssetManager.class).to(SpongeAssetManager.class);
         this.bind(ChannelManager.class).toInstance(new SpongeChannelManager(ChannelBufferAllocator.POOLED));

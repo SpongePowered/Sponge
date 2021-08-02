@@ -32,6 +32,12 @@ import com.mojang.brigadier.suggestion.SuggestionProvider;
 import com.mojang.brigadier.tree.ArgumentCommandNode;
 import com.mojang.brigadier.tree.CommandNode;
 import com.mojang.brigadier.tree.RootCommandNode;
+import net.minecraft.commands.CommandSourceStack;
+import net.minecraft.commands.Commands;
+import net.minecraft.commands.SharedSuggestionProvider;
+import net.minecraft.commands.synchronization.SuggestionProviders;
+import net.minecraft.server.commands.AdvancementCommands;
+import net.minecraft.server.level.ServerPlayer;
 import org.spongepowered.api.command.CommandCause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
@@ -43,7 +49,6 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.bridge.commands.CommandSourceStackBridge;
 import org.spongepowered.common.bridge.commands.CommandsBridge;
 import org.spongepowered.common.bridge.commands.arguments.CompletionsArgumentTypeBridge;
@@ -63,12 +68,6 @@ import java.util.IdentityHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.WeakHashMap;
-import net.minecraft.commands.CommandSourceStack;
-import net.minecraft.commands.Commands;
-import net.minecraft.commands.SharedSuggestionProvider;
-import net.minecraft.commands.synchronization.SuggestionProviders;
-import net.minecraft.server.commands.AdvancementCommands;
-import net.minecraft.server.level.ServerPlayer;
 
 @Mixin(Commands.class)
 public abstract class CommandsMixin implements CommandsBridge {
@@ -95,7 +94,8 @@ public abstract class CommandsMixin implements CommandsBridge {
             remap = false
     ))
     private CommandDispatcher<CommandSourceStack> impl$useSpongeDispatcher() {
-        final SpongeCommandManager manager = SpongeBootstrap.lifecycle().createCommandManager();
+        final SpongeCommandManager manager = Launch.instance().lifecycle().platformInjector().getInstance(SpongeCommandManager.class);
+        manager.init();
         this.impl$commandManager = manager;
         return new DelegatingCommandDispatcher(manager.getBrigadierRegistrar());
     }
@@ -121,7 +121,7 @@ public abstract class CommandsMixin implements CommandsBridge {
     @Redirect(method = "fillUsableCommands",
             slice = @Slice(
                     from = @At("HEAD"),
-                    to = @At(value = "INVOKE", target = "Ljava/util/Iterator;hasNext()Z")
+                    to = @At(value = "INVOKE", remap = false, target = "Ljava/util/Iterator;hasNext()Z")
             ),
             at = @At(value = "INVOKE", target = "Lcom/mojang/brigadier/tree/CommandNode;getChildren()Ljava/util/Collection;", remap = false))
     private Collection<CommandNode<CommandSourceStack>> impl$handleHiddenChildrenAndEnsureUnsortedLoop(final CommandNode<CommandSourceStack> commandNode) {
@@ -262,7 +262,7 @@ public abstract class CommandsMixin implements CommandsBridge {
     }
 
     @Redirect(method = "fillUsableCommands", at = @At(value = "INVOKE",
-            target = "Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;suggests(Lcom/mojang/brigadier/suggestion/SuggestionProvider;)Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;"), remap = false)
+            target = "Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;suggests(Lcom/mojang/brigadier/suggestion/SuggestionProvider;)Lcom/mojang/brigadier/builder/RequiredArgumentBuilder;", remap = false))
     private RequiredArgumentBuilder<SharedSuggestionProvider, ?> impl$dontAskServerIfSiblingAlreadyDoes(
             final RequiredArgumentBuilder<SharedSuggestionProvider, ?> requiredArgumentBuilder,
             final SuggestionProvider<SharedSuggestionProvider> provider,

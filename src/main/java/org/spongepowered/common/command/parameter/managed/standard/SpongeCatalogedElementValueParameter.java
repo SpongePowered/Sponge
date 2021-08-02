@@ -36,6 +36,8 @@ import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.Parameter;
 import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.registry.RegistryHolder;
+import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.brigadier.argument.AbstractArgumentParser;
 import org.spongepowered.common.util.Constants;
@@ -50,29 +52,35 @@ import java.util.stream.Collectors;
 public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgumentParser<T> {
 
     private final List<String> prefixes;
-    private final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction;
+    private final List<Function<CommandContext, @Nullable RegistryHolder>> registryHolderFunctions;
+    private final RegistryType<? extends T> registryType;
 
     public SpongeCatalogedElementValueParameter(final List<String> prefixes,
-            final Function<CommandContext, @Nullable ? extends Registry<? extends T>> registryFunction) {
+            final List<Function<CommandContext, @Nullable RegistryHolder>> registryFunctions,
+            final RegistryType<? extends T> registryType) {
         this.prefixes = prefixes;
-        this.registryFunction = registryFunction;
+        this.registryHolderFunctions = registryFunctions;
+        this.registryType = registryType;
     }
 
     @Override
     public @NonNull Optional<? extends T> parseValue(final Parameter.@NonNull Key<? super T> parameterKey,
                                           final ArgumentReader.@NonNull Mutable reader,
                                           final CommandContext.@NonNull Builder context) throws ArgumentParseException {
-        final Registry<? extends T> registry = this.registryFunction.apply(context);
-        if (registry == null) {
-            throw reader.createException(Component.text("The registry associated with this parameter is not currently active."));
+        final List<Registry<? extends T>> registry = this.registryHolderFunctions.stream()
+                .map(x -> this.retrieveRegistry(x, context))
+                .filter(Objects::nonNull)
+                .collect(Collectors.toList());
+        if (registry.isEmpty()) {
+            throw reader.createException(Component.text("No registries associated with this parameter are active."));
         }
         final ArgumentReader.Immutable snapshot = reader.immutable();
         try {
             final ResourceKey resourceKey = reader.parseResourceKey();
-            final Optional<? extends T> result = registry.findValue(resourceKey);
+            final Optional<? extends T> result = this.selectValue(registry, resourceKey);
             if (!result.isPresent()) {
                 throw reader.createException(
-                        Component.text("Registry " + registry.type().location().asString() + " does not contain the ID " + resourceKey.asString()));
+                        Component.text("None of the selected registries contain the ID " + resourceKey.asString()));
             }
             return result;
         } catch (final ArgumentParseException ex) {
@@ -83,7 +91,7 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
             reader.setState(snapshot);
             final String check = reader.parseUnquotedString();
             for (final String prefix : this.prefixes) {
-                final Optional<? extends T> result = registry.findValue(ResourceKey.of(prefix, check));
+                final Optional<? extends T> result = this.selectValue(registry, ResourceKey.of(prefix, check));
                 if (result.isPresent()) {
                     return result;
                 }
@@ -91,18 +99,17 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
 
             final String ids = this.prefixes.stream().map(x -> x + ":" + check).collect(Collectors.joining(", "));
             throw reader.createException(
-                    Component.text("Registry " + registry.type().location().asString() + " does not contain any of the following IDs: " + ids));
+                    Component.text("None of the selected registries contain any of the following IDs: " + ids));
         }
     }
 
     @Override
-    public List<CommandCompletion> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
-        final Registry<? extends T> registry = this.registryFunction.apply(context);
-        if (registry == null) {
-            return Collections.emptyList();
-        }
+    public @NonNull List<CommandCompletion> complete(final @NonNull CommandContext context, final @NonNull String currentInput) {
         final String lowerCase = currentInput.toLowerCase();
-        return registry.streamEntries()
+        return this.registryHolderFunctions.stream()
+                .map(x -> this.retrieveRegistry(x, context))
+                .filter(Objects::nonNull)
+                .flatMap(Registry::streamEntries)
                 .map(RegistryEntry::key)
                 .map(x -> {
                     if (x.asString().startsWith(lowerCase)) {
@@ -120,5 +127,21 @@ public final class SpongeCatalogedElementValueParameter<T> extends AbstractArgum
     @Override
     public List<ArgumentType<?>> getClientCompletionArgumentType() {
         return Collections.singletonList(Constants.Command.RESOURCE_LOCATION_TYPE);
+    }
+
+    private Optional<? extends T> selectValue(final List<Registry<? extends T>> registry, final ResourceKey resourceKey) {
+        return registry.stream()
+                .map(x -> x.findValue(resourceKey).orElse(null))
+                .filter(Objects::nonNull)
+                .findFirst();
+    }
+
+    private @Nullable Registry<? extends T> retrieveRegistry(
+            final Function<CommandContext, @Nullable RegistryHolder> func, final CommandContext context) {
+        final RegistryHolder holder = func.apply(context);
+        if (holder != null) {
+            return holder.findRegistry(this.registryType).orElse(null);
+        }
+        return null;
     }
 }

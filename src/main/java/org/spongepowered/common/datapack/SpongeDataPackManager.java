@@ -61,6 +61,7 @@ public final class SpongeDataPackManager {
         this.callRegisterDataPackValueEvents(dataPacksDirectory, new ArrayList<>());
     }
 
+    @SuppressWarnings("unchecked")
     public void callRegisterDataPackValueEvents(final Path dataPacksDirectory, final Collection<String> dataPacksToLoad) {
         SpongeIngredient.clearCache();
         IngredientResultUtil.clearCache();
@@ -69,6 +70,7 @@ public final class SpongeDataPackManager {
         this.serialize(DataPackTypes.RECIPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.RECIPE), false);
         this.serialize(DataPackTypes.WORLD_TYPE, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD_TYPE), false);
         this.serialize(DataPackTypes.WORLD, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.WORLD), true);
+        this.serialize(DataPackTypes.TAG, dataPacksDirectory, dataPacksToLoad, this.callRegisterDataPackValueEvent(DataPackTypes.TAG), false);
     }
 
     private <T extends DataPackSerializable> List<T> callRegisterDataPackValueEvent(final DataPackType<T> type) {
@@ -86,7 +88,8 @@ public final class SpongeDataPackManager {
 
     @SuppressWarnings("unchecked")
     public <T extends DataPackSerializable> void serialize(final DataPackType<T> type, final Path dataPacksDirectory,
-        final Collection<String> dataPacksToLoad, final List<T> serializables, boolean delayed) {
+                                                           final Collection<String> dataPacksToLoad,
+                                                           final List<T> serializables, final boolean delayed) {
         if (serializables.isEmpty()) {
             return;
         }
@@ -107,8 +110,8 @@ public final class SpongeDataPackManager {
         this.serializePack(dataPacksDirectory, dataPacksToLoad, implType, serialized, serializables.size());
     }
 
-    private void serializePack(Path dataPacksDirectory, Collection<String> dataPacksToLoad, SpongeDataPackType implType,
-            List<DataPackSerializedObject> serialized, int count) {
+    private void serializePack(final Path dataPacksDirectory, final Collection<String> dataPacksToLoad, final SpongeDataPackType implType,
+                               final List<DataPackSerializedObject> serialized, final int count) {
         // When reloading we must update the dataPacksToLoad
         try {
             if (implType.getPackSerializer().serialize(implType, dataPacksDirectory, serialized, count)) {

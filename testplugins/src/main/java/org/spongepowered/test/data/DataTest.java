@@ -166,6 +166,9 @@ public final class DataTest  {
 
         world.setWeather(WeatherTypes.CLEAR.get());
 
+        this.checkOfferData(location, Keys.CREATOR, player.uniqueId());
+        this.checkOfferData(location, Keys.NOTIFIER, player.uniqueId());
+
         this.checkOfferData(player, Keys.ABSORPTION, 0.0);
         this.checkOfferData(player, Keys.ABSORPTION, 10.0);
         this.checkOfferData(player, Keys.ABSORPTION, 20.0);
@@ -379,8 +382,6 @@ public final class DataTest  {
         world.setBlock(blockPos, BlockTypes.END_GATEWAY.get().defaultState());
         this.checkGetData(world.blockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.zero());
         this.checkOfferData(world.blockEntity(blockPos).get(), Keys.COOLDOWN, Ticks.of(15));
-
-        // TODO Keys.CREATOR
 
         this.checkGetData(illusioner, Keys.CURRENT_SPELL, SpellTypes.NONE.get());
         this.checkOfferData(illusioner, Keys.CURRENT_SPELL, SpellTypes.BLINDNESS.get());
@@ -657,6 +658,12 @@ public final class DataTest  {
         this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.NONE.get());
         this.checkOfferData(horse, Keys.HORSE_COLOR, HorseColors.WHITE.get());
         this.checkOfferData(horse, Keys.HORSE_STYLE, HorseStyles.BLACK_DOTS.get());
+
+        final ItemStack snowball = ItemStack.of(ItemTypes.SNOWBALL, 16);
+        this.checkGetData(snowball, Keys.INACCURACY, 1.0);
+        this.checkOfferData(snowball, Keys.INACCURACY, 10.0);
+        snowball.offer(Keys.CUSTOM_NAME, Component.text("I am very inaccurate :)", NamedTextColor.RED));
+        player.inventory().offer(snowball);
 
         this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, true);
         this.checkOfferData(itemEntity, Keys.INFINITE_DESPAWN_DELAY, false);
@@ -944,7 +951,7 @@ public final class DataTest  {
 
 //        this.checkOfferData(player, Keys.LAST_DATE_JOINED, Instant.now().minus(1, TemporalUnits.DAYS));
 //        this.checkOfferData(player, Keys.LAST_DATE_PLAYED, Instant.now().minus(1, TemporalUnits.DAYS));
-        final User user = Sponge.server().userManager().find(player.uniqueId()).get();
+        final User user = Sponge.server().userManager().load(player.uniqueId()).join().get();
 //        this.checkOfferData(user, Keys.LAST_DATE_JOINED, Instant.now().minus(1, TemporalUnits.DAYS));
 //        this.checkOfferData(user, Keys.LAST_DATE_PLAYED, Instant.now().minus(1, TemporalUnits.DAYS));
 

@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.level.biome;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
@@ -36,5 +37,5 @@ public interface BiomeSourceAccessor {
 
     @Accessor("possibleBiomes") List<Biome> accessor$possibleBiomes();
 
-    @Accessor("possibleBiomes") void accessor$possibleBiomes(List<Biome> possibleBiomes);
+    @Accessor("possibleBiomes") @Mutable void accessor$possibleBiomes(List<Biome> possibleBiomes);
 }

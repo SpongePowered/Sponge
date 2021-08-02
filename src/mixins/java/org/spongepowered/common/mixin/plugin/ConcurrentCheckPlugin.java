@@ -29,7 +29,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 public final class ConcurrentCheckPlugin extends AbstractMixinConfigPlugin {
 
     @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
         if ("org.spongepowered.common.mixin.concurrentcheck.util.ClassInheritanceMultiMapMixin_ConcurrentCheck".equals(mixinClassName)) {
             return SpongeConfigs.getCommon().get().debug.concurrentEntityChecks;
         }

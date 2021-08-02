@@ -30,6 +30,7 @@ import org.spongepowered.api.world.generation.config.structure.SpacedStructureCo
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -45,7 +46,7 @@ import net.minecraft.world.level.levelgen.feature.configurations.StrongholdConfi
 import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatureConfiguration;
 
 @Mixin(StructureSettings.class)
-@Implements(@Interface(iface = StructureGenerationConfig.class, prefix = "structureGenerationConfig$"))
+@Implements(@Interface(iface = StructureGenerationConfig.class, prefix = "structureGenerationConfig$", remap = Remap.NONE))
 public abstract class StructureSettingsMixin_API implements StructureGenerationConfig {
 
     // @formatter:off

@@ -28,16 +28,17 @@ import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.LevelSettings;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 @Mixin(LevelSettings.class)
 public interface LevelSettingsAccessor {
 
-    @Accessor("hardcore") void accessor$hardcode(boolean hardcode);
+    @Accessor("hardcore") @Mutable void accessor$hardcode(boolean hardcode);
 
-    @Accessor("allowCommands") void accessor$allowCommands(boolean allowCommands);
+    @Accessor("allowCommands") @Mutable void accessor$allowCommands(boolean allowCommands);
 
-    @Accessor("difficulty") void accessor$difficulty(Difficulty difficulty);
+    @Accessor("difficulty") @Mutable void accessor$difficulty(Difficulty difficulty);
 
-    @Accessor("gameType") void accessor$gameType(GameType gameType);
+    @Accessor("gameType") @Mutable void accessor$gameType(GameType gameType);
 }

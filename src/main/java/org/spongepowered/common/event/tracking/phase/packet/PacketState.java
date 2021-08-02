@@ -24,31 +24,27 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.TickNextTickData;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.chunk.LevelChunk;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.EntityUtil;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 
-import java.util.ArrayList;
+import net.minecraft.core.BlockPos;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.TickNextTickData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.chunk.LevelChunk;
+
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
@@ -75,7 +71,7 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
 
     protected static void processEntities(final net.minecraft.server.level.ServerPlayer player, final Collection<Entity> entities) {
         for (final Entity entity : entities) {
-            EntityUtil.processEntitySpawn(entity, () -> Optional.of(((ServerPlayer)player).user()));
+            EntityUtil.processEntitySpawn(entity, () -> Optional.of(((ServerPlayer) player).uniqueId()), e -> e.level.addFreshEntity(e));
         }
     }
 
@@ -126,39 +122,6 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         return false;
     }
 
-
-    public boolean shouldCaptureEntity() {
-        return false;
-    }
-
-
-    /**
-     * Defaulted method for packet phase states to spawn an entity directly.
-     * This should be overridden by all packet phase states that are handling spawns
-     * customarily with contexts and such. Captured entities are handled in
-     * their respective {@link PacketState#unwind(PhaseContext)}s.
-     *
-     * @param context
-     * @param entity
-     * @return True if the entity was spawned
-     */
-    public boolean spawnEntity(final P context, final Entity entity) {
-        final Player player = context.getSource(Player.class)
-                        .orElseThrow(TrackingUtil.throwWithContext("Expected to be capturing a player", context));
-        final ArrayList<Entity> entities = new ArrayList<>(1);
-        entities.add(entity);
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, this.getEntitySpawnType(context));
-            frame.addContext(EventContextKeys.CREATOR, ((ServerPlayer)player).user());
-            frame.addContext(EventContextKeys.NOTIFIER, ((ServerPlayer)player).user());
-            return SpongeCommonEventFactory.callSpawnEntity(entities, context);
-        }
-    }
-
-    public SpawnType getEntitySpawnType(final P context) {
-        return SpawnTypes.PLACEMENT.get();
-    }
 
     private final String desc = TrackingUtil.phaseStateToString("Packet", this);
 

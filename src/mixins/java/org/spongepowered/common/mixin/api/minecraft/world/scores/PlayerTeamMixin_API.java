@@ -34,6 +34,7 @@ import org.spongepowered.api.scoreboard.Visibility;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Mutable;
@@ -48,7 +49,7 @@ import java.util.stream.Collectors;
 import javax.annotation.Nullable;
 
 @Mixin(PlayerTeam.class)
-@Implements(@Interface(iface = Team.class, prefix = "team$"))
+@Implements(@Interface(iface = Team.class, prefix = "team$", remap = Remap.NONE))
 public abstract class PlayerTeamMixin_API implements Team {
 
     // @formatter:off

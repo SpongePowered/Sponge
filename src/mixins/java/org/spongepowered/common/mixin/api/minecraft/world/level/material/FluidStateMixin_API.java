@@ -30,12 +30,13 @@ import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.fluid.FluidType;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(net.minecraft.world.level.material.FluidState.class)
-@Implements(@Interface(iface = FluidState.class, prefix = "fluidState$"))
+@Implements(@Interface(iface = FluidState.class, prefix = "fluidState$", remap = Remap.NONE))
 public abstract class FluidStateMixin_API implements FluidState {
 
     // @formatter:off

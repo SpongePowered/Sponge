@@ -88,8 +88,14 @@ public class UncachedGameProfileProvider implements GameProfileProvider {
 
     private CompletableFuture<@Nullable CachedProfile> requestProfile(final UUID uniqueId) {
         return this.submit(() -> {
-            final com.mojang.authlib.GameProfile mcProfile = SpongeCommon.server().getSessionService().fillProfileProperties(
+            final com.mojang.authlib.GameProfile mcProfile;
+
+            if (SpongeGameProfileManager.canLookup(uniqueId)) { // only attempt to resolve profiles for online mode clients
+                mcProfile = SpongeCommon.server().getSessionService().fillProfileProperties(
                     new com.mojang.authlib.GameProfile(uniqueId, ""), true);
+            } else {
+                mcProfile = null;
+            }
             if (mcProfile == null) {
                 return null;
             }

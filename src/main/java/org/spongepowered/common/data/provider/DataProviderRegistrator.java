@@ -251,7 +251,7 @@ public class DataProviderRegistrator {
 
         final Key<? extends Value<E>> key;
         private @Nullable BiFunction<H, E, Value<E>> constructValue;
-        private @Nullable Function<H, E> get;
+        private @Nullable Function<H, @Nullable E> get;
         private @Nullable BiFunction<H, E, Boolean> setAnd;
         private @Nullable BiConsumer<H, E> set;
         private @Nullable Function<H, Boolean> deleteAnd;
@@ -270,7 +270,7 @@ public class DataProviderRegistrator {
             return (R) this;
         }
 
-        public R get(final Function<H, E> get) {
+        public R get(final Function<H, @Nullable E> get) {
             this.get = get;
             return (R) this;
         }

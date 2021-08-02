@@ -50,7 +50,8 @@ public class FilterFactory {
     }
 
     public Class<? extends EventFilter> createFilter(Method method) throws Exception {
-        return this.cache.get(method);
+        final Class<? extends EventFilter> clazz = this.cache.get(method);
+        return clazz == EventFilter.class ? null : clazz;
     }
 
     Class<? extends EventFilter> createClass(Method method) {
@@ -59,6 +60,9 @@ public class FilterFactory {
         String name = this.targetPackage + eventClass.getSimpleName() + "Filter_" + handle.getSimpleName() + '_'
                 + method.getName() + this.id.incrementAndGet();
         byte[] cls = FilterGenerator.getInstance().generateClass(name, method);
+        if (cls == null) {
+            return EventFilter.class; // cache does not permit nulls
+        }
         return this.classLoader.defineClass(name, cls);
     }
 

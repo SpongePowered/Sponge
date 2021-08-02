@@ -24,12 +24,12 @@
  */
 package org.spongepowered.common.accessor.world.level;
 
+import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.entity.BlockEntity;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.gen.Accessor;
 
 import java.util.List;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.block.entity.BlockEntity;
 
 @Mixin(Level.class)
 public interface LevelAccessor {
@@ -37,6 +37,4 @@ public interface LevelAccessor {
     @Accessor("pendingBlockEntities") List<BlockEntity> accessor$pendingBlockEntities();
 
     @Accessor("updatingBlockEntities") boolean accessor$updatingBlockEntities();
-
-    @Accessor("blockEntitiesToUnload") List<BlockEntity> accessor$blockEntitiesToUnload();
 }

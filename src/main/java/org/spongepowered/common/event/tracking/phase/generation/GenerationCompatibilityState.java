@@ -34,8 +34,6 @@ final class GenerationCompatibilityState extends GeneralGenerationPhaseState<Gen
 
     @Override
     public GenerationCompatibileContext createNewContext(final PhaseTracker tracker) {
-        return new GenerationCompatibileContext(this, tracker)
-            .addBlockCaptures()
-            .addEntityCaptures();
+        return new GenerationCompatibileContext(this, tracker);
     }
 }

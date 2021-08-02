@@ -50,12 +50,12 @@ public class SpongeUserBanList extends UserBanList {
 
     @Override
     protected boolean contains(final com.mojang.authlib.GameProfile profile) {
-        return Sponge.server().serviceProvider().banService().banFor(SpongeGameProfile.of(profile)).join().isPresent();
+        return Sponge.server().serviceProvider().banService().find(SpongeGameProfile.of(profile)).join().isPresent();
     }
 
     @Override
     public UserBanListEntry get(final com.mojang.authlib.GameProfile profile) {
-        final Optional<Ban.Profile> ban = Sponge.server().serviceProvider().banService().banFor(SpongeGameProfile.of(profile)).join();
+        final Optional<Ban.Profile> ban = Sponge.server().serviceProvider().banService().find(SpongeGameProfile.of(profile)).join();
         return ban.map(x -> {
             if (x instanceof UserBanListEntry) {
                 return (UserBanListEntry) x;
@@ -82,7 +82,7 @@ public class SpongeUserBanList extends UserBanList {
 
     @Override
     public void add(final UserBanListEntry entry) {
-        Sponge.server().serviceProvider().banService().addBan((Ban) entry).join();
+        Sponge.server().serviceProvider().banService().add((Ban) entry).join();
     }
 
     @Override

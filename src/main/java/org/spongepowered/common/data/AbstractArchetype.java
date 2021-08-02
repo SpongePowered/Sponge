@@ -28,11 +28,8 @@ import static com.google.common.base.Preconditions.checkNotNull;
 
 import com.google.common.base.MoreObjects;
 import com.google.common.collect.ImmutableList;
-import org.spongepowered.api.data.DataProvider;
-import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.persistence.InvalidDataException;
-import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.world.Archetype;
 import org.spongepowered.api.world.LocatableSnapshot;
 import org.spongepowered.common.data.holder.SpongeMutableDataHolder;
@@ -42,7 +39,6 @@ import org.spongepowered.common.data.nbt.validation.ValidationType;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.data.provider.DataProviderLookup;
 
-import java.util.Collection;
 import java.util.Objects;
 import net.minecraft.nbt.CompoundTag;
 
@@ -50,11 +46,11 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
         SpongeMutableDataHolder {
 
     protected final T type;
-    protected CompoundTag data;
+    protected CompoundTag compound;
 
-    protected AbstractArchetype(final T type, final CompoundTag data) {
+    protected AbstractArchetype(final T type, final CompoundTag compound) {
         this.type = type;
-        this.data = data;
+        this.compound = compound;
     }
 
     public abstract DataProviderLookup getLookup();
@@ -71,7 +67,7 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
         }
         final AbstractArchetype<?, ?, ?> that = (AbstractArchetype<?, ?, ?>) o;
         return this.type.equals(that.type) &&
-                this.data.equals(that.data);
+                this.compound.equals(that.compound);
     }
 
     @Override
@@ -80,7 +76,7 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
         final CompoundTag copy = NBTTranslator.INSTANCE.translate(container);
         final boolean valid = this.getValidator().validate(copy);
         if (valid) {
-            this.data = copy;
+            this.compound = copy;
         } else {
             throw new InvalidDataException("Invalid data for " + this.getValidationType());
         }
@@ -99,15 +95,15 @@ public abstract class AbstractArchetype<T, S extends LocatableSnapshot<S>, E> im
 
     @Override
     public int hashCode() {
-        return Objects.hash(this.type, this.data);
+        return Objects.hash(this.type, this.compound);
     }
 
     @Override
     public String toString() {
-        return MoreObjects.toStringHelper(this).add("type", this.type).add("data", this.data).toString();
+        return MoreObjects.toStringHelper(this).add("type", this.type).add("data", this.compound).toString();
     }
 
     public CompoundTag getCompound() {
-        return this.data;
+        return this.compound;
     }
 }

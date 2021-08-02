@@ -77,10 +77,10 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.ResourceKeyBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.border.WorldBorderBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
@@ -152,7 +152,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
 
     @Override
     public boolean bridge$isLoaded() {
-        if (((WorldBridge) this).bridge$isFake()) {
+        if (((LevelBridge) this).bridge$isFake()) {
             return false;
         }
 
@@ -263,7 +263,7 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         if (!this.hasChunk(x >> 4, z >> 4)) {
             return BlockSnapshot.empty();
         }
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
+        final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled();
         builder.world((ServerLevel) (Object) this).position(new Vector3i(x, y, z));
         final net.minecraft.world.level.chunk.LevelChunk chunk = this.shadow$getChunkAt(pos);
         final net.minecraft.world.level.block.state.BlockState state = chunk.getBlockState(pos);

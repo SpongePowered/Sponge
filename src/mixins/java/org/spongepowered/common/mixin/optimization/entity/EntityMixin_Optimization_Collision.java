@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 
@@ -75,7 +75,7 @@ public abstract class EntityMixin_Optimization_Collision {
         at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;hasChunksAt(IIIIII)Z"))
     private boolean activeCollision$IgnoreAreaIsLoaded(final Level world, final int xStart, final int yStart, final int zStart,
             final int xEnd, final int yEnd, final int zEnd) {
-        if (((WorldBridge) world).bridge$isFake()) {
+        if (((LevelBridge) world).bridge$isFake()) {
             return world.hasChunksAt(xStart, yStart, zStart, xEnd, yEnd, zEnd);
         }
         return true;

@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.Surrogate;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.math.vector.Vector3d;
@@ -91,7 +91,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
     )
     private void impl$ThrowForPreEvent(final Level worldIn, final Player playerIn, final InteractionHand handIn,
         final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, final ItemStack used, final HitResult rayTraceResult, @Nullable final BlockPos targetPos) {
-        if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+        if (targetPos != null && !((LevelBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
                     SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                             ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
@@ -109,7 +109,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
     @Surrogate
     private void impl$ThrowForPreEvent(final Level worldIn, final Player playerIn, final InteractionHand handIn,
         final CallbackInfoReturnable<InteractionResultHolder<ItemStack>> cir, final ItemStack used, @Nullable final BlockPos targetPos) {
-        if (targetPos != null && !((WorldBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
+        if (targetPos != null && !((LevelBridge) worldIn).bridge$isFake() && ShouldFire.CONSTRUCT_ENTITY_EVENT_PRE) {
             final ConstructEntityEvent.Pre event =
                     SpongeEventFactory.createConstructEntityEventPre(PhaseTracker.getCauseStackManager().currentCause(),
                             ServerLocation.of((ServerWorld) worldIn, playerIn.getX(), playerIn.getY() + (double) (playerIn.getDimensions(playerIn
@@ -122,7 +122,7 @@ public abstract class EnderEyeItemMixin extends ItemMixin {
 
     @Redirect(method = "use", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/Level;addFreshEntity(Lnet/minecraft/world/entity/Entity;)Z"))
     private boolean impl$setShooter(final Level world, final Entity entity, final Level p_77659_1_, final Player p_77659_2_) {
-        if (((WorldBridge) world).bridge$isFake()) {
+        if (((LevelBridge) world).bridge$isFake()) {
             return world.addFreshEntity(entity);
         }
 

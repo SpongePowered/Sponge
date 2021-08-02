@@ -37,8 +37,6 @@ public class InteractionPacketContext extends PacketContext<InteractionPacketCon
 
     InteractionPacketContext(PacketState<InteractionPacketContext> state, PhaseTracker tracker) {
         super(state, tracker);
-        this.addCaptures();
-        this.addEntityDropCaptures();
     }
 
     @Override

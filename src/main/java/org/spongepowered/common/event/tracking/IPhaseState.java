@@ -40,6 +40,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.block.BlockSnapshot;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.block.transaction.Operation;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
@@ -49,42 +50,34 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.util.Tuple;
 import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.SerializationBehavior;
 import org.spongepowered.api.world.World;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.server.TickTaskBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.phase.general.ExplosionContext;
-import org.spongepowered.common.event.tracking.phase.generation.GenerationPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 import org.spongepowered.common.event.tracking.phase.tick.TickPhase;
 import org.spongepowered.common.world.BlockChange;
 
 import java.util.ArrayDeque;
-import java.util.List;
-import java.util.Random;
 import java.util.function.BiConsumer;
-import java.util.function.Predicate;
 import java.util.function.Supplier;
 import java.util.stream.Collectors;
 
 /**
  * A literal phase state of which the {@link World} is currently running
  * in. As these should be enums, there's no data that should be stored on
- * this state. It can have control flow with {@link #isNotReEntrant()}
- * where preventing switching to another state is possible (likely points out
- * either errors or runaway states not being unwound).
+ * this state.
  */
 @DefaultQualifier(NonNull.class)
 public interface IPhaseState<C extends PhaseContext<C>> {
@@ -125,18 +118,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     /**
-     * Gets whether this phase is expected to potentially re-enter itself, in some cases where
-     * other operations tend to cause extra operations being performed. Examples include but are
-     * not limited to: World Generation, {@link GenerationPhase.State#TERRAIN_GENERATION} or
-     * {@link GenerationPhase.State#POPULATOR_RUNNING}. If thi
-     *
-     * @return True if this phase is potentially expected to re-enter on itself
-     */
-    default boolean isNotReEntrant() {
-        return true;
-    }
-
-    /**
      * Gets whether this state is considered an interaction, specifically to determine
      * whether a pre-block event check can be performed prior to actual block modifications
      * are done and potentially "captured" as a result. This is specific to allow mod compatibility
@@ -146,51 +127,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * @return Whether this state is considered a player caused interaction or not
      */
     default boolean isInteraction() {
-        return false;
-    }
-
-    /**
-     * Gets whether this state is considered a "ticking" state. Specifically such that when
-     * {@link LevelChunk#getEntitiesWithinAABBForEntity(Entity, AxisAlignedBB, List, Predicate)} is used,
-     * we are not filtering any of the lists, whereas if this state is a ticking state, it will
-     * filter the proposed list of entities to supply any potentially captured entities.
-     *
-     * @return Whether this state is a ticking state or not
-     */
-    default boolean isTicking() {
-        return false;
-    }
-
-    /**
-     * Gets whether this state is considered a "world generation" state. Usually world generation
-     * is a common flag to say "hey, don't bother capturing anything". So, as it would be expected,
-     * block changes, entity spawns, and whatnot are not tracked in any way during generation
-     * states.
-     *
-     * @return Whether this state is a world generation state or not
-     */
-    default boolean isWorldGeneration() {
-        return false;
-    }
-
-    /**
-     * If this returns {@link true}, block decays will be processed in this
-     * phase state. If this returns {@link false}, block decays will be
-     * processed in a separate phase state.
-     *
-     * @return Whether this phase should track decays
-     */
-    default boolean includesDecays() {
-        return false;
-    }
-
-    /**
-     * Specifically designed to allow certain registries use the event listener hooks to prevent unnecessary off-threaded
-     * checks and allows for registries to restrict additional registrations ouside of events.
-     *
-     * @return True if this is an event listener state
-     */
-    default boolean isEvent() {
         return false;
     }
 
@@ -215,13 +151,14 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Performs any necessary custom logic after the provided {@link BlockSnapshot}
      * {@link Transaction} has taken place.
-     *
-     * @param blockChange The block change performed
-     * @param snapshotTransaction The transaction of the old and new snapshots
      * @param context The context for information
+     * @param blockChange The block change performed
+     * @param receipt The transaction of the old and new snapshots
      */
-    default void postBlockTransactionApplication(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> snapshotTransaction,
-        final C context) { }
+    default void postBlockTransactionApplication(
+        final C context, final BlockChange blockChange,
+        final BlockTransactionReceipt receipt
+    ) { }
 
     /**
      * Specifically gets whether this state ignores any attempts at storing
@@ -251,18 +188,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return true;
     }
 
-    /**
-     * Whether this state can deny chunk load/generation requests. Certain states can allow them
-     * and certain others can deny them. Usually the denials are coming from states like ticks
-     * where we are not intending to allow chunks to be loaded due to possible generation and
-     * runaway chunk loading.
-     *
-     * @return Whether this state denies chunk requests, usually false
-     */
-    default boolean doesDenyChunkRequests(final C context) {
-        return false;
-    }
-
     default boolean doesBlockEventTracking(final C context) {
         return true;
     }
@@ -273,85 +198,17 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      *
      * @return Whether this state should fire entity collision events
      */
-    default boolean isCollision() {
+    default boolean allowsEntityCollisionEvents() {
         return false;
     }
 
     /**
-     * Gets whether this state will ignore {@link net.minecraft.world.level.Level#addBlockEvent(BlockPos, Block, int, int)}
+     * Gets whether this state will ignore {@link net.minecraft.world.level.Level#blockEvent(BlockPos, Block, int, int)}
      * additions when potentially performing notification updates etc. Usually true for world generation.
      *
      * @return False if block events are to be processed in some way by the state
      */
     default boolean ignoresBlockEvent() {
-        return false;
-    }
-
-    /**
-     * Gets whether this state will already consider any captures or extra processing for a
-     * {@link Block#tick(BlockState, ServerLevel, BlockPos, Random)}. Again usually
-     * considered for world generation or post states or block restorations.
-     *
-     * @param context The phase data currently present
-     * @return True if it's going to be ignored
-     */
-    default boolean ignoresBlockUpdateTick(final C context) {
-        return false;
-    }
-
-    /**
-     * Gets whether this state will need to perform any extra processing for
-     * scheduled block updates, specifically linking the block update event to
-     * the world, the state and possibly context. Usually only necessary for
-     * post states so that no extra processing takes place.
-     *
-     * @return False if scheduled block updates are normally processed
-     */
-    default boolean ignoresScheduledUpdates() {
-        return false;
-    }
-
-    /**
-     * Gets whether this state is already capturing block tick changes, specifically in
-     * that some states (like post) will be smart enough to capture multiple changes for
-     * multiple block positions without the need to enter new phases. Currently gone unused
-     * since some refactor.
-     * // TODO - clean up usage? Find out where this came from and why it was used
-     *
-     * @param context
-     * @return
-     */
-    default boolean alreadyCapturingBlockTicks(final C context) {
-        return false;
-    }
-
-    /**
-     * Gets whether this state is already capturing custom entity spawns from plugins.
-     * Examples include listener states, post states, or explosion states.
-     *
-     * @return True if entity spawns are already expected to be processed
-     */
-    default boolean alreadyCapturingEntitySpawns() {
-        return false;
-    }
-
-    /**
-     * Gets whether this state is already expecting to capture or process changes from
-     * entity ticks. Usually only used for Post states.
-     *
-     * @return True if entity tick processing is already handled in this state
-     */
-    default boolean alreadyCapturingEntityTicks() {
-        return false;
-    }
-
-    /**
-     * Gets whether this state is already expecting to capture or process changes from
-     * tile entity ticks. Used in Post states. (this avoids re-entering new phases during post processing)
-     *
-     * @return True if entity tick processing is already handled in this state
-     */
-    default boolean alreadyCapturingTileTicks() {
         return false;
     }
 
@@ -364,18 +221,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      */
     default boolean requiresPost() {
         return true;
-    }
-
-
-    /**
-     * Gets whether this state is going to complete itself for plugin provided
-     * changes. Used for BlockWorkers.
-     * TODO - Investigate whether we can enable listener phase states to handle
-     * this as well.
-     * @return True if this state does not need a custom block worker state for plugin changes
-     */
-    default boolean handlesOwnStateCompletion() {
-        return false;
     }
 
     /**
@@ -419,8 +264,8 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         final LevelChunk chunk = world.getChunkAt(pos);
         final LevelChunkBridge mixinChunk = (LevelChunkBridge) chunk;
         if (chunk != null && !chunk.isEmpty()) {
-            mixinChunk.bridge$getBlockCreator(pos).ifPresent(phaseContext::creator);
-            mixinChunk.bridge$getBlockNotifier(pos).ifPresent(phaseContext::notifier);
+            mixinChunk.bridge$getBlockCreatorUUID(pos).ifPresent(phaseContext::creator);
+            mixinChunk.bridge$getBlockNotifierUUID(pos).ifPresent(phaseContext::notifier);
         }
     }
 
@@ -428,7 +273,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
      * Appends any additional information to the block tick context from this context.
      */
     default void appendNotifierToBlockEvent(final C context,
-        final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackerBlockEventDataBridge blockEvent
+        final TrackedWorldBridge mixinWorldServer, final BlockPos pos, final TrackableBlockEventDataBridge blockEvent
     ) {
 
     }
@@ -436,12 +281,12 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     /**
      * Attempts to capture the player using the item stack in this state. Some states do not care for
      * this information. Usually packets do care and some scheduled tasks.
-     *
-     * @param itemStack
-     * @param playerIn
+     *  @param playerIn
      * @param context
      */
-    default void capturePlayerUsingStackToBreakBlock(final ItemStack itemStack, final @Nullable ServerPlayer playerIn, final C context) {
+    default void capturePlayerUsingStackToBreakBlock(
+        final @Nullable ServerPlayer playerIn, final C context
+    ) {
 
     }
 
@@ -462,10 +307,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return true;
     }
 
-    default boolean isRegeneration() {
-        return false;
-    }
-
     /**
      * Specifically captures a block change by {@link org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier#logBlockChange(SpongeBlockSnapshot, BlockState, BlockChangeFlag)}
      * such that the change of a {@link BlockState} will be appropriately logged, along with any changes of tile entities being removed
@@ -481,16 +322,15 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return changeBlock;
     }
 
-    default boolean doesCaptureNeighborNotifications(final C context) {
-        return false;
-    }
-
-    default BlockChange associateBlockChangeWithSnapshot(final C phaseContext, final BlockState newState, final Block newBlock,
-        final BlockState currentState, final SpongeBlockSnapshot snapshot,
-        final Block originalBlock) {
+    default BlockChange associateBlockChangeWithSnapshot(
+        final C phaseContext, final BlockState newState,
+        final BlockState currentState
+    ) {
+        final Block newBlock = newState.getBlock();
+        final Block currentBlock = currentState.getBlock();
         if (newBlock == Blocks.AIR) {
             return BlockChange.BREAK;
-        } else if (newBlock != originalBlock && !TrackingUtil.forceModify(originalBlock, newBlock)) {
+        } else if (newBlock != currentBlock && !TrackingUtil.forceModify(currentBlock, newBlock)) {
             return BlockChange.PLACE;
         }
         return BlockChange.MODIFY;
@@ -515,34 +355,6 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return false;
     }
 
-    /**
-     * When false, prevents directories from being created during the creation
-     * of an {@link net.minecraft.world.chunk.storage.AnvilSaveHandler}. Used
-     * for {@link SerializationBehavior#NONE}.
-     *
-     * @param phaseContext The appropriate phase context
-     * @return True if directories can be created; false otherwise
-     */
-    default boolean shouldCreateWorldDirectories(final C phaseContext) {
-        return true;
-    }
-
-    default boolean isConvertingMaps() {
-        return false;
-    }
-    default boolean allowsGettingQueuedRemovedTiles() {
-        return false;
-    }
-
-    /**
-     * Allows phases to be notified when an entity successfully teleports
-     * between dimensions.
-     *
-     * @param phaseContext The appropriate phase context
-     */
-    default void markTeleported(final C phaseContext) {
-    }
-
     default Supplier<SpawnType> getSpawnTypeForTransaction(final C context, final Entity entityToSpawn) {
         if (entityToSpawn instanceof ItemEntity) {
             return SpawnTypes.DROPPED_ITEM;
@@ -562,16 +374,14 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         );
     }
 
-    default boolean recordsEntitySpawns(final C context) {
-        return true;
-    }
-
     default void populateLootContext(final C phaseContext, final LootContext.Builder lootBuilder) {
 
     }
 
-    default Operation getBlockOperation(final SpongeBlockSnapshot original, final BlockChange blockChange) {
-        return blockChange.toOperation();
+    default Operation getBlockOperation(
+        final C phaseContext, final SpongeBlockSnapshot original, final SpongeBlockSnapshot result
+    ) {
+        return this.associateBlockChangeWithSnapshot(phaseContext, result.nativeState(), original.nativeState()).toOperation();
     }
 
     default void foldContextForThread(final C context, final TickTaskBridge returnValue) {
@@ -581,5 +391,9 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         final TickNextTickData<?> entry
     ) {
 
+    }
+
+    default boolean isApplyingStreams() {
+        return false;
     }
 }

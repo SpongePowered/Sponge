@@ -26,9 +26,11 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -39,23 +41,25 @@ import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
+import java.util.function.Supplier;
+
 public final class CloseWindowState extends BasicPacketState {
 
     @Override
-    public void populateContext(ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final BasicPacketContext context) {
         context.openContainer(playerMP.containerMenu);
     }
 
     @Override
-    public void unwind(BasicPacketContext context) {
+    public void unwind(final BasicPacketContext context) {
         final ServerPlayer player = context.getSource(ServerPlayer.class).get();
         final AbstractContainerMenu container = context.getOpenContainer();
-        ItemStackSnapshot lastCursor = context.getCursor();
-        ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
+        final ItemStackSnapshot lastCursor = context.getCursor();
+        final ItemStackSnapshot newCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         final CauseStackManager stackManager = PhaseTracker.getCauseStackManager();
         if (lastCursor != null) {
             stackManager.pushCause(player);
-            InteractContainerEvent.Close event =
+            final InteractContainerEvent.Close event =
                     SpongeCommonEventFactory.callInteractInventoryCloseEvent(container, player, lastCursor, newCursor, true);
             if (event.isCancelled()) {
                 stackManager.popCause();
@@ -68,24 +72,14 @@ public final class CloseWindowState extends BasicPacketState {
             return;
         }
 
-        try (CauseStackManager.StackFrame frame = stackManager.pushCauseFrame()) {
-            frame.pushCause(player);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
-            // items
-//            context.getCapturedItemsSupplier().acceptAndClearIfNotEmpty(items -> {
-//                final List<Entity> entities = items
-//                    .stream()
-//                    .map(entity -> (Entity) entity)
-//                    .collect(Collectors.toList());
-//                if (!entities.isEmpty()) {
-//                    SpongeCommonEventFactory.callDropItemClose(entities, context, () -> Optional.of(((ServerPlayer) player).user()));
-//                }
-//            });
-        }
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
         TrackingUtil.processBlockCaptures(context);
 
     }
 
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final BasicPacketContext context, final Entity entityToSpawn
+    ) {
+        return SpawnTypes.DROPPED_ITEM;
+    }
 }

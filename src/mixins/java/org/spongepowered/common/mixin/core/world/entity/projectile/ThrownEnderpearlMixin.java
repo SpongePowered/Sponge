@@ -94,9 +94,7 @@ public abstract class ThrownEnderpearlMixin extends ThrowableProjectileMixin {
 
     @Override
     @Nullable
-    public Entity bridge$changeDimension(final ServerLevel dimensionIn, final PlatformTeleporter teleporter) {
-        final Entity entity = super.bridge$changeDimension(dimensionIn, teleporter);
-
+    public Entity impl$postProcessChangeDimension(final Entity entity) {
         if (entity instanceof ThrownEnderpearl) {
             // We actually teleported so...
             this.shadow$setOwner(null);

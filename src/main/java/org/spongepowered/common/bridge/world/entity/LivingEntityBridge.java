@@ -33,10 +33,6 @@ public interface LivingEntityBridge {
 
     boolean bridge$damageEntity(DamageSource damageSource, float damage);
 
-    int bridge$getMaxAir();
-
-    void bridge$setMaxAir(int max);
-
     default int bridge$getExperiencePointsOnDeath(LivingEntity entity, Player attackingPlayer) {
         return ((LivingEntityAccessor) entity).invoker$getExperienceReward(attackingPlayer);
     }

@@ -26,6 +26,7 @@ package org.spongepowered.common.accessor.world.damagesource;
 
 import net.minecraft.world.damagesource.DamageSource;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
@@ -40,7 +41,7 @@ public interface DamageSourceAccessor {
 
     @Accessor("exhaustion") void accessor$exhaustion(final float exhaustion);
 
-    @Accessor("msgId") void accessor$msgId(final String msgId);
+    @Accessor("msgId") @Mutable void accessor$msgId(final String msgId);
 
     @Invoker("bypassArmor") DamageSource invoker$bypassArmor();
 

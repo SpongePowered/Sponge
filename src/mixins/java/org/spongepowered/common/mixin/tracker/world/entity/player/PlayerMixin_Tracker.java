@@ -35,7 +35,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -89,7 +89,7 @@ public abstract class PlayerMixin_Tracker extends LivingEntityMixin_Tracker {
             return null;
         }
         // Sponge Start - redirect to our handling to capture and throw events.
-        if (!((WorldBridge) this.level).bridge$isFake()) {
+        if (!((LevelBridge) this.level).bridge$isFake()) {
             ((PlayerBridge) this).bridge$shouldRestoreInventory(false);
             final Player player = (Player) (PlayerBridge) this;
 

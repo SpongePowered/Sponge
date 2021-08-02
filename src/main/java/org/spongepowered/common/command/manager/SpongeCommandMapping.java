@@ -71,4 +71,14 @@ public final class SpongeCommandMapping implements CommandMapping {
         return this.registrar;
     }
 
+    @Override
+    public String toString() {
+        return "SpongeCommandMapping{" +
+                "alias='" + alias + '\'' +
+                ", allAliases=" + allAliases +
+                ", container=" + container +
+                ", registrar=" + registrar +
+                '}';
+    }
+
 }

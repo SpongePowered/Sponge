@@ -24,15 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.HandTypes;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.world.World;
-import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
@@ -41,14 +39,27 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundInteractPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.ExperienceOrb;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.item.ItemEntity;
+import org.checkerframework.checker.nullness.qual.Nullable;
+
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 public final class AttackEntityPacketState extends BasicPacketState {
 
-    private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>
+    private final BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>
         ATTACK_MODIFIER = super.getFrameModifier().andThen((frame, ctx) -> {
         frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
         frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
+        final ServerboundInteractPacket useEntityPacket = ctx.getPacket();
+        final ServerPlayer player = ctx.getPacketPlayer();
+        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.level);
+        if (entity != null) {
+            frame.pushCause(entity);
+        }
+        frame.pushCause(player);
     });
 
     @Override
@@ -57,7 +68,7 @@ public final class AttackEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean isPacketIgnored(Packet<?> packetIn, ServerPlayer packetPlayer) {
+    public boolean isPacketIgnored(final Packet<?> packetIn, final ServerPlayer packetPlayer) {
         final ServerboundInteractPacket useEntityPacket = (ServerboundInteractPacket) packetIn;
         // There are cases where a player is interacting with an entity that
         // doesn't exist on the server.
@@ -66,32 +77,37 @@ public final class AttackEntityPacketState extends BasicPacketState {
     }
 
     @Override
-    public void populateContext(ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(final ServerPlayer playerMP, final Packet<?> packet, final BasicPacketContext context) {
         context.itemUsed(ItemStackUtil.cloneDefensive(playerMP.getMainHandItem()))
             .handUsed(HandTypes.MAIN_HAND.get());
     }
 
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final BasicPacketContext context, final net.minecraft.world.entity.Entity entityToSpawn
+    ) {
+        final ServerboundInteractPacket useEntityPacket = context.getPacket();
+        final ServerPlayer player = context.getPacketPlayer();
+        final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.level);
+        if (entity != null && (entity.removed || entity instanceof LivingEntity && ((LivingEntity) entity).isDeadOrDying())) {
+            return entityToSpawn instanceof ExperienceOrb ? SpawnTypes.EXPERIENCE : SpawnTypes.DROPPED_ITEM;
+        }
+        if (entityToSpawn instanceof ItemEntity) {
+            return SpawnTypes.DROPPED_ITEM;
+        }
+        return super.getSpawnTypeForTransaction(context, entityToSpawn);
+    }
 
     @Override
-    public void unwind(BasicPacketContext context) {
-        final ServerPlayer player = context.getPacketPlayer();
-        final ServerboundInteractPacket useEntityPacket = context.getPacket();
-        final net.minecraft.world.entity.Entity entity = useEntityPacket.getTarget(player.level);
-        if (entity == null) {
-            // Something happened?
-            return;
-        }
-        final World spongeWorld = (World) player.level;
-        if (entity instanceof CreatorTrackedBridge) {
-            // TODO Minecraft 1.14 - How can attacking an Entity mean you created it??
-            ((CreatorTrackedBridge) entity).tracked$setCreatorReference(((ServerPlayerBridge) player).bridge$getUser());
-        } else {
-            ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
-        }
-
-        // TODO - Determine if we need to pass the supplier or perform some parameterized
-        //  process if not empty method on the capture object.
-        TrackingUtil.processBlockCaptures(context);
+    public void unwind(final BasicPacketContext context) {
+        if (!TrackingUtil.processBlockCaptures(context)) {
+            final ServerboundInteractPacket useEntityPacket = context.getPacket();
+            final ServerPlayer player = context.getPacketPlayer();
+            final net.minecraft.world.entity.@Nullable Entity entity = useEntityPacket.getTarget(player.level);
+            if (entity instanceof Entity) {
+                ((Entity) entity).offer(Keys.NOTIFIER, player.getUUID());
+            }
+        };
     }
 
 }

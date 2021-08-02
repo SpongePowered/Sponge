@@ -32,12 +32,13 @@ import org.spongepowered.api.world.generation.config.noise.NoiseConfig;
 import org.spongepowered.api.world.generation.config.structure.StructureGenerationConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(NoiseGeneratorSettings.class)
-@Implements(@Interface(iface = NoiseGeneratorConfig.class, prefix = "noiseGeneratorConfig$"))
+@Implements(@Interface(iface = NoiseGeneratorConfig.class, prefix = "noiseGeneratorConfig$", remap = Remap.NONE))
 public abstract class NoiseGeneratorSettingsMixin_API implements NoiseGeneratorConfig {
 
     // @formatter:off

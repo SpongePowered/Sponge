@@ -40,31 +40,14 @@ import java.util.concurrent.TimeUnit;
 public final class SpongeTimingsFactory implements TimingsFactory {
 
     private final int MAX_HISTORY_FRAMES = 12;
-    public final Timing NULL_HANDLER = new NullTimingHandler();
+    private final boolean moduleEnabled;
     private boolean timingsEnabled = false;
     private boolean verboseEnabled = true;
     private int historyInterval = -1;
     private int historyLength = -1;
-    private final boolean moduleEnabled;
 
     public SpongeTimingsFactory() {
         this.moduleEnabled = SpongeConfigs.getCommon().get().modules.timings;
-    }
-
-    public TimingsFactory init() {
-        final TimingsCategory category = SpongeConfigs.getCommon().get().timings;
-        TimingsManager.privacy = category.serverNamePrivacy;
-        TimingsManager.hiddenConfigs.addAll(category.hiddenConfigEntries);
-        this.setVerboseTimingsEnabled(category.verbose);
-        this.setTimingsEnabled(this.moduleEnabled && category.enabled);
-        this.setHistoryInterval(category.historyInterval);
-        this.setHistoryLength(category.historyLength);
-
-        SpongeCommon.logger().debug("Sponge Timings: " + this.timingsEnabled +
-                                    " - Verbose: " + this.verboseEnabled +
-                                    " - Interval: " + SpongeTimingsFactory.timeSummary(this.historyInterval / 20) +
-                                    " - Length: " + SpongeTimingsFactory.timeSummary(this.historyLength / 20));
-        return this;
     }
 
     private static String timeSummary(int seconds) {
@@ -78,6 +61,46 @@ public final class SpongeTimingsFactory implements TimingsFactory {
             time += TimeUnit.SECONDS.toMinutes(seconds) + "m";
         }
         return time;
+    }
+
+    public static long getCost() {
+        return TimingsExport.getCost();
+    }
+
+    public static TimingHandler ofSafe(String name) {
+        return SpongeTimingsFactory.ofSafe(null, name, null);
+    }
+
+    public static Timing ofSafe(PluginContainer plugin, String name) {
+        return SpongeTimingsFactory.ofSafe(plugin.metadata().name().orElse(plugin.metadata().id()), name);
+    }
+
+    public static TimingHandler ofSafe(String name, Timing groupHandler) {
+        return SpongeTimingsFactory.ofSafe(null, name, groupHandler);
+    }
+
+    public static TimingHandler ofSafe(String groupName, String name) {
+        return TimingsManager.getHandler(groupName, name, null, false);
+    }
+
+    public static TimingHandler ofSafe(String groupName, String name, Timing groupHandler) {
+        return TimingsManager.getHandler(groupName, name, groupHandler, false);
+    }
+
+    public TimingsFactory init() {
+        final TimingsCategory category = SpongeConfigs.getCommon().get().timings;
+        TimingsManager.privacy = category.serverNamePrivacy;
+        TimingsManager.hiddenConfigs.addAll(category.hiddenConfigEntries);
+        this.setVerboseTimingsEnabled(category.verbose);
+        this.setTimingsEnabled(this.moduleEnabled && category.enabled);
+        this.setHistoryInterval(category.historyInterval);
+        this.setHistoryLength(category.historyLength);
+
+        SpongeCommon.logger().debug("Sponge Timings: " + this.timingsEnabled +
+                " - Verbose: " + this.verboseEnabled +
+                " - Interval: " + SpongeTimingsFactory.timeSummary(this.historyInterval / 20) +
+                " - Length: " + SpongeTimingsFactory.timeSummary(this.historyLength / 20));
+        return this;
     }
 
     @Override
@@ -164,30 +187,6 @@ public final class SpongeTimingsFactory implements TimingsFactory {
     @Override
     public void generateReport(Audience channel) {
         TimingsExport.requestingReport.add(channel);
-    }
-
-    public static long getCost() {
-        return TimingsExport.getCost();
-    }
-
-    public static TimingHandler ofSafe(String name) {
-        return SpongeTimingsFactory.ofSafe(null, name, null);
-    }
-
-    public static Timing ofSafe(PluginContainer plugin, String name) {
-        return SpongeTimingsFactory.ofSafe(plugin != null ? plugin.metadata().name().orElse(plugin.metadata().id()) : "Minecraft - Invalid Plugin", name);
-    }
-
-    public static TimingHandler ofSafe(String name, Timing groupHandler) {
-        return SpongeTimingsFactory.ofSafe(null, name, groupHandler);
-    }
-
-    public static TimingHandler ofSafe(String groupName, String name) {
-        return TimingsManager.getHandler(groupName, name, null, false);
-    }
-
-    public static TimingHandler ofSafe(String groupName, String name, Timing groupHandler) {
-        return TimingsManager.getHandler(groupName, name, groupHandler, false);
     }
 
 }

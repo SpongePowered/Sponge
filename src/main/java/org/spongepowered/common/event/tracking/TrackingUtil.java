@@ -28,6 +28,16 @@ import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
 import co.aikar.timings.Timing;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.BlockEventData;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.RedstoneLampBlock;
+import net.minecraft.world.level.block.RedstoneTorchBlock;
+import net.minecraft.world.level.block.RepeaterBlock;
+import net.minecraft.world.level.block.entity.TickableBlockEntity;
+import net.minecraft.world.level.material.FluidState;
 import org.apache.logging.log4j.Level;
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
@@ -36,9 +46,9 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.entity.BlockEntity;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.TickBlockEvent;
 import org.spongepowered.api.world.BlockChangeFlag;
@@ -46,13 +56,12 @@ import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.TimingBridge;
 import org.spongepowered.common.bridge.TrackableBridge;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
-import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.block.entity.BlockEntityBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
@@ -71,16 +80,6 @@ import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 import org.spongepowered.common.world.server.SpongeLocatableBlockBuilder;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.BlockEventData;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.RedstoneLampBlock;
-import net.minecraft.world.level.block.RedstoneTorchBlock;
-import net.minecraft.world.level.block.RepeaterBlock;
-import net.minecraft.world.level.block.entity.TickableBlockEntity;
-import net.minecraft.world.level.material.FluidState;
 import java.util.Optional;
 import java.util.Random;
 import java.util.UUID;
@@ -125,13 +124,11 @@ public final class TrackingUtil {
 
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
         try (final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
+             final Timing entityTiming = ((TimingBridge) entity.getType()).bridge$timings()
         ) {
             if (entity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
-                    .ifPresent(context::notifier);
-                ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
-                    .ifPresent(context::creator);
+                ((CreatorTrackedBridge) entity).tracked$getNotifierUUID().ifPresent(context::notifier);
+                ((CreatorTrackedBridge) entity).tracked$getCreatorUUID().ifPresent(context::creator);
             }
             context.buildAndSwitch();
             entityTiming.startTiming();
@@ -157,14 +154,12 @@ public final class TrackingUtil {
         final EntityTickContext tickContext = TickPhase.Tick.ENTITY.createPhaseContext(PhaseTracker.SERVER).source(entity);
         try (
              final EntityTickContext context = tickContext;
-             final Timing entityTiming = ((TimingBridge) entity).bridge$getTimingsHandler()
+             final Timing entityTiming = ((TimingBridge) entity.getType()).bridge$timings()
              ) {
             entityTiming.startTiming();
             if (entity instanceof CreatorTrackedBridge) {
-                ((CreatorTrackedBridge) entity).tracked$getNotifierReference()
-                    .ifPresent(context::notifier);
-                ((CreatorTrackedBridge) entity).tracked$getCreatorReference()
-                    .ifPresent(context::creator);
+                ((CreatorTrackedBridge) entity).tracked$getNotifierUUID().ifPresent(context::notifier);
+                ((CreatorTrackedBridge) entity).tracked$getCreatorUUID().ifPresent(context::creator);
             }
             context.buildAndSwitch();
             entity.rideTick();
@@ -199,17 +194,17 @@ public final class TrackingUtil {
 
             if (tile instanceof CreatorTrackedBridge) {
                 // Add notifier and owner so we don't have to perform lookups during the phases and other processing
-                ((CreatorTrackedBridge) tile).tracked$getNotifierReference().ifPresent(phaseContext::notifier);
+                ((CreatorTrackedBridge) tile).tracked$getNotifierUUID().ifPresent(phaseContext::notifier);
                 // Allow the tile entity to validate the owner of itself. As long as the tile entity
                 // chunk is already loaded and activated, and the tile entity has already loaded
                 // the owner of itself.
-                ((CreatorTrackedBridge) tile).tracked$getCreatorReference().ifPresent(phaseContext::creator);
+                ((CreatorTrackedBridge) tile).tracked$getCreatorUUID().ifPresent(phaseContext::creator);
             }
 
             // Finally, switch the context now that we have the owner and notifier
             phaseContext.buildAndSwitch();
 
-            try (final Timing timing = ((TimingBridge) tileEntity).bridge$getTimingsHandler().startTiming()) {
+            try (final Timing timing = ((TimingBridge) tileEntity.getType()).bridge$timings().startTiming()) {
                 tile.tick();
             }
         } catch (final Exception e) {
@@ -245,7 +240,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
 
         try (final PhaseContext<@NonNull ?> context = phaseContext;
-             final Timing timing = ((TimingBridge) block.getBlock()).bridge$getTimingsHandler()) {
+             final Timing timing = ((TimingBridge) block.getBlock()).bridge$timings()) {
             timing.startTiming();
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.BLOCK_TICK, () -> "Wrapping Block Tick: " + block.toString());
@@ -283,7 +278,7 @@ public final class TrackingUtil {
         // Now actually switch to the new phase
 
         try (final PhaseContext<?> context = phaseContext;
-            final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$getTimingsHandler()) {
+            final Timing timing = ((TimingBridge) blockState.getBlock()).bridge$timings()) {
             timing.startTiming();
             context.buildAndSwitch();
             PhaseTracker.LOGGER.trace(TrackingUtil.FLUID_TICK, () -> "Wrapping Fluid Tick: " + fluidState.toString());
@@ -373,7 +368,7 @@ public final class TrackingUtil {
     public static boolean fireMinecraftBlockEvent(final ServerLevel worldIn, final BlockEventData event,
         final net.minecraft.world.level.block.state.BlockState currentState
     ) {
-        final TrackerBlockEventDataBridge blockEvent = (TrackerBlockEventDataBridge) event;
+        final TrackableBlockEventDataBridge blockEvent = (TrackableBlockEventDataBridge) event;
         final @Nullable Object source = blockEvent.bridge$getTileEntity() != null ? blockEvent.bridge$getTileEntity() : blockEvent.bridge$getTickingLocatable();
         if (source == null) {
             // No source present which means we are ignoring the phase state
@@ -382,7 +377,7 @@ public final class TrackingUtil {
         final BlockEventTickContext phaseContext = TickPhase.Tick.BLOCK_EVENT.createPhaseContext(PhaseTracker.SERVER);
         phaseContext.source(source);
 
-        final User user = ((TrackerBlockEventDataBridge) event).bridge$getSourceUser();
+        final UUID user = ((TrackableBlockEventDataBridge) event).bridge$getSourceUserUUID();
         if (user != null) {
             phaseContext.creator = user;
             phaseContext.notifier = user;
@@ -411,14 +406,14 @@ public final class TrackingUtil {
     private TrackingUtil() {
     }
 
-    public static @Nullable User getNotifierOrOwnerFromBlock(final ServerLevel world, final BlockPos blockPos) {
+    public static @Nullable UUID getNotifierOrOwnerFromBlock(final ServerLevel world, final BlockPos blockPos) {
         final LevelChunkBridge mixinChunk = (LevelChunkBridge) world.getChunkAt(blockPos);
-        final User notifier = mixinChunk.bridge$getBlockNotifier(blockPos).orElse(null);
+        final UUID notifier = mixinChunk.bridge$getBlockNotifierUUID(blockPos).orElse(null);
         if (notifier != null) {
             return notifier;
         }
 
-        return mixinChunk.bridge$getBlockCreator(blockPos).orElse(null);
+        return mixinChunk.bridge$getBlockCreatorUUID(blockPos).orElse(null);
     }
 
     public static Supplier<IllegalStateException> throwWithContext(final String s, final PhaseContext<?> phaseContext) {
@@ -455,8 +450,8 @@ public final class TrackingUtil {
         return transactor.processTransactions(context);
     }
 
-    public static void associateTrackerToTarget(final BlockChange blockChange, final Transaction<? extends BlockSnapshot> transaction, final User user) {
-        final BlockSnapshot finalSnapshot = transaction.finalReplacement();
+    public static void associateTrackerToTarget(final BlockChange blockChange, final BlockTransactionReceipt receipt, final UUID uuid) {
+        final BlockSnapshot finalSnapshot = receipt.finalBlock();
         final SpongeBlockSnapshot spongeSnapshot = (SpongeBlockSnapshot) finalSnapshot;
         final BlockPos pos = spongeSnapshot.getBlockPos();
         final Block block = ((net.minecraft.world.level.block.state.BlockState) spongeSnapshot.state()).getBlock();
@@ -465,11 +460,12 @@ public final class TrackingUtil {
             .map(chunk -> (LevelChunkBridge) chunk)
             .ifPresent(spongeChunk -> {
             final PlayerTracker.Type trackerType = blockChange == BlockChange.PLACE ? PlayerTracker.Type.CREATOR : PlayerTracker.Type.NOTIFIER;
-            spongeChunk.bridge$addTrackedBlockPosition(block, pos, user, trackerType);
+            spongeChunk.bridge$addTrackedBlockPosition(block, pos, uuid, trackerType);
         });
     }
 
-    public static void addTileEntityToBuilder(final net.minecraft.world.level.block.entity.BlockEntity existing, final SpongeBlockSnapshotBuilder builder) {
+    public static void addTileEntityToBuilder(final net.minecraft.world.level.block.entity.BlockEntity existing,
+        final SpongeBlockSnapshot.BuilderImpl builder) {
         // TODO - gather custom data.
         final CompoundTag compound = new CompoundTag();
         try {
@@ -506,7 +502,7 @@ public final class TrackingUtil {
         final Supplier<Optional<UUID>> creatorSupplier,
         final Supplier<Optional<UUID>> notifierSupplier
     ) {
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled();
+        final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled();
         builder.reset();
         builder.blockState(state)
                 .world(worldSupplier.get())

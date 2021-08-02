@@ -44,7 +44,7 @@ import java.util.function.Predicate;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
-public class ObjectArrayMutableEntityArchetypeBuffer extends AbstractVolumeBuffer implements EntityArchetypeVolume.Mutable<ObjectArrayMutableEntityArchetypeBuffer> {
+public class ObjectArrayMutableEntityArchetypeBuffer extends AbstractVolumeBuffer implements EntityArchetypeVolume.Mutable {
 
     private final ArrayList<Tuple<Vector3d, EntityArchetype>> entities;
 
@@ -61,6 +61,13 @@ public class ObjectArrayMutableEntityArchetypeBuffer extends AbstractVolumeBuffe
     }
 
     @Override
+    public Collection<EntityArchetypeEntry> entityArchetypesByPosition() {
+        return this.entities.stream()
+            .map(tuple -> EntityArchetypeEntry.of(tuple.second(), tuple.first()))
+            .collect(Collectors.toList());
+    }
+
+    @Override
     public Collection<EntityArchetype> entityArchetypes(final Predicate<EntityArchetype> filter) {
         return this.entities.stream()
             .map(Tuple::second)
@@ -69,19 +76,19 @@ public class ObjectArrayMutableEntityArchetypeBuffer extends AbstractVolumeBuffe
     }
 
     @Override
-    public VolumeStream<ObjectArrayMutableEntityArchetypeBuffer, EntityArchetype> entityArchetypeStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<EntityArchetypeVolume.Mutable, EntityArchetype> entityArchetypeStream(final Vector3i min, final Vector3i max,
         final StreamOptions options
     ) {
-        VolumeStreamUtils.validateStreamArgs(min, max, this.blockMin(), this.blockMax(), options);
+        VolumeStreamUtils.validateStreamArgs(min, max, this.min(), this.max(), options);
         final Stream<Tuple<Vector3d, EntityArchetype>> entryStream;
         if (options.carbonCopy()) {
             entryStream = new ArrayList<>(this.entities).stream();
         } else {
             entryStream = this.entities.stream();
         }
-        final Stream<VolumeElement<ObjectArrayMutableEntityArchetypeBuffer, EntityArchetype>> archetypeStream = entryStream
+        final Stream<VolumeElement<EntityArchetypeVolume.Mutable, EntityArchetype>> archetypeStream = entryStream
             .filter(VolumeStreamUtils.entityArchetypePositionFilter(min, max))
-            .map(tuple -> VolumeElement.of(this, tuple.second(), tuple.first().toInt()));
+            .map(tuple -> VolumeElement.of(this, tuple.second(), tuple.first()));
         return new SpongeVolumeStream<>(archetypeStream, () -> this);
     }
 
@@ -93,12 +100,12 @@ public class ObjectArrayMutableEntityArchetypeBuffer extends AbstractVolumeBuffe
 
     @Override
     public void addEntity(final EntityArchetypeEntry entry) {
-        if (!this.containsBlock(Objects.requireNonNull(entry, "EntityArchetype cannot be null").position().toInt())) {
+        if (!this.contains(Objects.requireNonNull(entry, "EntityArchetype cannot be null").position().toInt())) {
             final String message = String.format(
                 "EntityArchetype position is out of bounds: Found %s but is outside bounds (%s, %s)",
                 entry.position(),
-                this.blockMin(),
-                this.blockMax()
+                this.min(),
+                this.max()
             );
             throw new IllegalArgumentException(message);
         }

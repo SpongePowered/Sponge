@@ -26,8 +26,10 @@ package org.spongepowered.common.event.tracking.context.transaction.type;
 
 import org.apache.logging.log4j.Marker;
 import org.apache.logging.log4j.MarkerManager;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Event;
+import org.spongepowered.common.event.tracking.PhaseContext;
 
 import java.util.Collection;
 import java.util.Objects;
@@ -84,11 +86,16 @@ public abstract class TransactionType<E extends Event> {
         return Objects.hash(this.isPrimary, this.name);
     }
 
-    public void createAndProcessPostEvents(final Collection<? extends E> events) {
-        this.consumeEventsAndMarker(events, this.marker);
+    public void createAndProcessPostEvents(
+        PhaseContext<@NonNull ?> context,
+        final Collection<? extends E> events
+    ) {
+        this.consumeEventsAndMarker(context, events);
     }
 
-    protected void consumeEventsAndMarker(final Collection<? extends E> events, final Marker marker) {
+    protected void consumeEventsAndMarker(
+        PhaseContext<@NonNull ?> context, final Collection<? extends E> events
+    ) {
 
     }
 }

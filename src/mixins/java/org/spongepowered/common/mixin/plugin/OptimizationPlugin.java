@@ -36,14 +36,14 @@ import java.util.function.Function;
 public class OptimizationPlugin extends AbstractMixinConfigPlugin {
 
     @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
         final CommonConfig globalConfig = SpongeConfigs.getCommon().get();
         if (globalConfig.modules.optimizations) {
             final Function<OptimizationCategory, Boolean> optimizationCategoryBooleanFunction = OptimizationPlugin.mixinEnabledMappings.get(mixinClassName);
             if (optimizationCategoryBooleanFunction == null) {
                 new PrettyPrinter(50).add("Could not find function for optimization patch").centre().hr()
-                        .add("Missing function for class: " + mixinClassName)
-                        .trace();
+                    .add("Missing function for class: " + mixinClassName)
+                    .trace();
                 return false;
             }
             return optimizationCategoryBooleanFunction.apply(globalConfig.optimizations);

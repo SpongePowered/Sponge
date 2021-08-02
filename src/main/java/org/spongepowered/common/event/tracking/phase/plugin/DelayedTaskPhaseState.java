@@ -50,8 +50,7 @@ class DelayedTaskPhaseState extends PluginPhaseState<DelayedTaskPhaseState.Conte
 
     @Override
     public Context createNewContext(final PhaseTracker tracker) {
-        return new Context(this, tracker)
-            .addCaptures();
+        return new Context(this, tracker);
     }
 
     @Override

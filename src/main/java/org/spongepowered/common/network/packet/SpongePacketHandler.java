@@ -24,25 +24,26 @@
  */
 package org.spongepowered.common.network.packet;
 
+import com.mojang.authlib.GameProfile;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.multiplayer.ClientLevel;
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.network.ClientSideConnection;
 import org.spongepowered.api.network.EngineConnectionTypes;
 import org.spongepowered.api.network.channel.packet.PacketChannel;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 
 import java.util.Objects;
 import java.util.Optional;
+import java.util.UUID;
 
 @SuppressWarnings("OptionalUsedAsFieldOrParameterType")
 public final class SpongePacketHandler {
@@ -65,8 +66,8 @@ public final class SpongePacketHandler {
                     }
 
                     final LevelChunkBridge levelChunkBridge = (LevelChunkBridge) sender.level.getChunkAt(pos);
-                    final Optional<User> owner = levelChunkBridge.bridge$getBlockCreator(pos);
-                    final Optional<User> notifier = levelChunkBridge.bridge$getBlockNotifier(pos);
+                    final Optional<UUID> owner = levelChunkBridge.bridge$getBlockCreatorUUID(pos);
+                    final Optional<UUID> notifier = levelChunkBridge.bridge$getBlockNotifierUUID(pos);
 
                     response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });
@@ -84,8 +85,8 @@ public final class SpongePacketHandler {
                     }
 
                     final CreatorTrackedBridge creatorTrackedBridge = (CreatorTrackedBridge) entity;
-                    final Optional<User> owner = creatorTrackedBridge.tracked$getCreatorReference();
-                    final Optional<User> notifier = creatorTrackedBridge.tracked$getNotifierReference();
+                    final Optional<UUID> owner = creatorTrackedBridge.tracked$getCreatorUUID();
+                    final Optional<UUID> notifier = creatorTrackedBridge.tracked$getNotifierUUID();
 
                     response.success(SpongePacketHandler.createTrackerDataResponse(owner, notifier));
                 });
@@ -97,17 +98,23 @@ public final class SpongePacketHandler {
                     }
 
                     final DimensionType dimensionType = SpongeCommon.server().registryAccess().dimensionTypes().get(packet.dimensionLogic);
-                    ((WorldBridge) world).bridge$adjustDimensionLogic(dimensionType);
+                    ((LevelBridge) world).bridge$adjustDimensionLogic(dimensionType);
                 }
         );
     }
 
     private static TrackerDataResponsePacket createTrackerDataResponse(
-            final Optional<User> owner,
-            final Optional<User> notifier
+            final Optional<UUID> owner,
+            final Optional<UUID> notifier
     ) {
-        final String ownerName = owner.map(User::name).orElse("");
-        final String notifierName = notifier.map(User::name).orElse("");
+        final String ownerName = owner.map(x -> SpongeCommon.server().getProfileCache().get(x))
+                .filter(Objects::nonNull)
+                .map(GameProfile::getName)
+                .orElse("");
+        final String notifierName = notifier.map(x -> SpongeCommon.server().getProfileCache().get(x))
+                .filter(Objects::nonNull)
+                .map(GameProfile::getName)
+                .orElse("");
         return new TrackerDataResponsePacket(ownerName, notifierName);
     }
 

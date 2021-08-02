@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
@@ -58,8 +58,7 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
     private boolean tracker$switchContextForDecay(final net.minecraft.server.level.ServerLevel serverWorld, final BlockPos pos,
             final net.minecraft.world.level.block.state.BlockState newState, final int flags) {
         final PhaseTracker instance = PhaseTracker.getInstance();
-        final PhaseContext<@NonNull ?> currentContext = instance.getPhaseContext();
-        try (final PhaseContext<@NonNull ?> context = currentContext.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(instance)
+        try (final PhaseContext<@NonNull ?> context = BlockPhase.State.BLOCK_DECAY.createPhaseContext(instance)
                                            .source(new SpongeLocatableBlockBuilder()
                                                .world((ServerWorld) serverWorld)
                                                .position(pos.getX(), pos.getY(), pos.getZ())
@@ -88,17 +87,14 @@ public abstract class LeavesBlockMixin_Tracker extends BlockMixin_Tracker {
     public void randomTick(final net.minecraft.world.level.block.state.BlockState state, final net.minecraft.server.level.ServerLevel worldIn, final BlockPos pos, final Random random) {
         if (!state.getValue(LeavesBlockMixin_Tracker.PERSISTENT) && state.getValue(LeavesBlockMixin_Tracker.DISTANCE) == 7) {
             // Sponge Start - PhaseTracker checks and phase entry
-            if (!((WorldBridge) worldIn).bridge$isFake()) {
-                final PhaseContext<@NonNull ?> peek = PhaseTracker.getInstance().getPhaseContext();
-                try (final PhaseContext<@NonNull ?> context = peek.includesDecays() ? null : BlockPhase.State.BLOCK_DECAY.createPhaseContext(PhaseTracker.SERVER)
+            if (!((LevelBridge) worldIn).bridge$isFake()) {
+                try (final PhaseContext<@NonNull ?> context = BlockPhase.State.BLOCK_DECAY.createPhaseContext(PhaseTracker.SERVER)
                         .source(new SpongeLocatableBlockBuilder()
                                 .world((ServerWorld) worldIn)
                                 .position(pos.getX(), pos.getY(), pos.getZ())
                                 .state((BlockState) state)
                                 .build())) {
-                    if (context != null) {
-                        context.buildAndSwitch();
-                    }
+                    context.buildAndSwitch();
                     Block.dropResources(state, worldIn, pos);
                     worldIn.removeBlock(pos, false);
                 }

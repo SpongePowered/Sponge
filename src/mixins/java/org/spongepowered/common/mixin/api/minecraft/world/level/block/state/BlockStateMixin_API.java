@@ -38,7 +38,7 @@ import org.spongepowered.api.util.Direction;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.block.BlockStateSerializerDeserializer;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.util.Constants;
 
@@ -67,7 +67,7 @@ public abstract class BlockStateMixin_API extends BlockBehaviour_BlockStateBaseM
 
     @Override
     public BlockSnapshot snapshotFor(final ServerLocation location) {
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
+        final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled()
                 .blockState((net.minecraft.world.level.block.state.BlockState) (Object) this)
                 .position(location.blockPosition())
                 .world((ServerLevel) location.world());

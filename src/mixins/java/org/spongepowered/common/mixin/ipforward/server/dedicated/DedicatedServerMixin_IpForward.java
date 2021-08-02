@@ -40,7 +40,7 @@ public class DedicatedServerMixin_IpForward {
 
     @Shadow @Final private static Logger LOGGER;
 
-    @Inject(method = "initServer", at = @At(value = "INVOKE_STRING", target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;)V",
+    @Inject(method = "initServer", at = @At(value = "INVOKE_STRING", remap = false, target = "Lorg/apache/logging/log4j/Logger;warn(Ljava/lang/String;)V",
                                             args = "ldc=**** SERVER IS RUNNING IN OFFLINE/INSECURE MODE!"))
     private void ipForward$logEnabled(final CallbackInfoReturnable<Boolean> ci) {
         final IpForwardingCategory.Mode mode = SpongeConfigs.getCommon().get().ipForwarding.mode;

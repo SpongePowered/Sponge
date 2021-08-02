@@ -78,7 +78,7 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
 
     public Timing getTimingsHandler() {
         if (this.listenerTimer == null) {
-            this.listenerTimer = SpongeTimings.getPluginTimings(this.plugin, this.getHandle().getClass().getSimpleName());
+            this.listenerTimer = SpongeTimings.pluginTimings(this.plugin, this.getHandle().getClass().getSimpleName());
         }
         return this.listenerTimer;
     }

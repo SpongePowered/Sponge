@@ -28,12 +28,13 @@ import net.minecraft.world.level.levelgen.NoiseSamplingSettings;
 import org.spongepowered.api.world.generation.config.noise.SamplingConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(NoiseSamplingSettings.class)
-@Implements(@Interface(iface = SamplingConfig.class, prefix = "samplingConfig$"))
+@Implements(@Interface(iface = SamplingConfig.class, prefix = "samplingConfig$", remap = Remap.NONE))
 public abstract class NoiseSamplingSettingsMixin_API implements SamplingConfig {
 
     // @formatter:off

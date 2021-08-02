@@ -34,7 +34,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.mixin.core.world.entity.EntityMixin;
 
@@ -43,7 +43,7 @@ public abstract class LlamaSpitMixin extends EntityMixin {
 
     @Inject(method = "onHitEntity", at = @At("HEAD"), cancellable = true)
     private void impl$onHitCollideEvent(final EntityHitResult hitResult, final CallbackInfo ci) {
-        if (((WorldBridge) this.level).bridge$isFake() || hitResult.getType() == HitResult.Type.MISS) {
+        if (((LevelBridge) this.level).bridge$isFake() || hitResult.getType() == HitResult.Type.MISS) {
             return;
         }
 
@@ -56,7 +56,7 @@ public abstract class LlamaSpitMixin extends EntityMixin {
 
     @Inject(method = "onHitBlock", at = @At("HEAD"), cancellable = true)
     private void impl$onHitCollideEvent(final BlockHitResult hitResult, final CallbackInfo ci) {
-        if (((WorldBridge) this.level).bridge$isFake() || hitResult.getType() == HitResult.Type.MISS) {
+        if (((LevelBridge) this.level).bridge$isFake() || hitResult.getType() == HitResult.Type.MISS) {
             return;
         }
 

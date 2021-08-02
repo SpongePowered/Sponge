@@ -27,12 +27,15 @@ package org.spongepowered.common.event.tracking.phase.block;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
+import net.minecraft.world.entity.Entity;
+
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 final class BlockDropItemsPhaseState extends BlockPhaseState {
 
@@ -41,7 +44,6 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
             final BlockSnapshot blockSnapshot = ctx.getSource(BlockSnapshot.class)
                 .orElseThrow(TrackingUtil.throwWithContext("Could not find a block dropping items!", ctx));
             frame.pushCause(blockSnapshot);
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DROPPED_ITEM);
         });
 
     BlockDropItemsPhaseState() {
@@ -52,14 +54,15 @@ final class BlockDropItemsPhaseState extends BlockPhaseState {
         return this.BLOCK_DROP_MODIFIER;
     }
 
+
     @Override
-    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
-        return super.createNewContext(tracker)
-                .addBlockCaptures()
-                .addEntityCaptures();
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final GeneralizedContext context, final Entity entityToSpawn
+    ) {
+        return SpawnTypes.DROPPED_ITEM;
     }
 
-    @SuppressWarnings({"unchecked", "Duplicates", "RedundantCast"})
+    @SuppressWarnings({"Duplicates"})
     @Override
     public void unwind(final GeneralizedContext context) {
         TrackingUtil.processBlockCaptures(context);

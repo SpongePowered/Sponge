@@ -25,7 +25,10 @@
 package org.spongepowered.common.world.volume.buffer.biome;
 
 
+import net.minecraft.core.BlockPos;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.registry.Registry;
+import org.spongepowered.api.registry.RegistryKey;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.biome.Biomes;
 import org.spongepowered.api.world.volume.biome.BiomeVolume;
@@ -34,6 +37,7 @@ import org.spongepowered.api.world.volume.stream.VolumeElement;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Arrays;
@@ -41,7 +45,6 @@ import java.util.Objects;
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
-import net.minecraft.core.BlockPos;
 
 /**
  * Mutable view of a {@link net.minecraft.world.level.biome.Biome} array.
@@ -51,33 +54,25 @@ import net.minecraft.core.BlockPos;
  * example for a contract specified by Minecraft) this implementation becomes
  * more efficient.</p>
  */
-public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements BiomeVolume.Mutable<ObjectArrayMutableBiomeBuffer> {
+public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer implements BiomeVolume.Modifiable<ObjectArrayMutableBiomeBuffer> {
 
-    private final Biome[] biomes;
+    private final RegistryKey<Biome>[] biomes;
+    private final Registry<Biome> registry;
 
-    public ObjectArrayMutableBiomeBuffer(final Vector3i start, final Vector3i size) {
+    @SuppressWarnings("unchecked")
+    public ObjectArrayMutableBiomeBuffer(final Vector3i start, final Vector3i size, final Registry<Biome> biomeRegistry) {
         super(start, size);
-        this.biomes = new Biome[size.x() * size.y() * size.z()];
+        this.biomes = new RegistryKey[size.x() * size.y() * size.z()];
+        this.registry = biomeRegistry;
+        // for now, biomes are still global to the world/gen register, but we're passing in a registry 
         Arrays.fill(this.biomes, Biomes.OCEAN);
-    }
-
-    /**
-     * Creates a new instance.
-     *
-     * @param biomes The biome array. The array is not copied, so changes made
-     * by this object will write through.
-     * @param start The start position
-     * @param size The size
-     */
-    public ObjectArrayMutableBiomeBuffer(final Biome[] biomes, final Vector3i start, final Vector3i size) {
-        super(start, size);
-        this.biomes = biomes;
     }
 
     @Override
     public Biome biome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        return this.biomes[this.getIndex(x, y, z)];
+        final RegistryKey<Biome> key = this.biomes[this.getIndex(x, y, z)];
+        return this.registry.value(key);
     }
 
     /**
@@ -92,16 +87,20 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
     @SuppressWarnings("ConstantConditions")
     public net.minecraft.world.level.biome.Biome getNativeBiome(final int x, final int y, final int z) {
         this.checkRange(x, y, z);
-        final Biome type = this.biomes[this.getIndex(x, y, z)];
-        return (net.minecraft.world.level.biome.Biome) (Object) type;
+        final RegistryKey<Biome> key = this.biomes[this.getIndex(x, y, z)];
+        return this.registry.value(key);
     }
 
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         Objects.requireNonNull(biome, "biome");
         this.checkRange(x, y, z);
-        this.biomes[this.getIndex(x, y, z)] = biome;
-        return true;
+        return this.registry.findValueKey(biome)
+            .map(key -> {
+                this.biomes[this.getIndex(x, y, z)] =  RegistryKey.of(this.registry.type(), key);
+                return true;
+            }).orElse(false)
+       ;
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -109,8 +108,11 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         Objects.requireNonNull(biome, "biome");
         Objects.requireNonNull(pos, "pos");
         this.checkRange(pos.getX(), pos.getY(), pos.getZ());
-        this.biomes[this.getIndex(pos.getX(), pos.getY(), pos.getZ())] = (Biome) (Object) biome;
-        return true;
+        return this.registry.findValueKey((Biome) (Object) biome)
+            .map(key -> {
+                this.biomes[this.getIndex(pos.getX(), pos.getY(), pos.getZ())] =  RegistryKey.of(this.registry.type(), key);
+                return true;
+            }).orElse(false);
     }
 
     @Override
@@ -141,10 +143,10 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         final Vector3i max,
         final StreamOptions options
     ) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
-        final Biome[] buffer;
+        final RegistryKey<Biome>[] buffer;
         if (options.carbonCopy()) {
             buffer = Arrays.copyOf(this.biomes, this.biomes.length);
         } else {
@@ -153,7 +155,11 @@ public final class ObjectArrayMutableBiomeBuffer extends AbstractBiomeBuffer imp
         final Stream<VolumeElement<ObjectArrayMutableBiomeBuffer, Biome>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
             .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
                 .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
-                    .mapToObj(y -> VolumeElement.of(this, () -> buffer[this.getIndex(x, y, z)], new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.of(this, () ->  {
+                        final RegistryKey<Biome> key = buffer[this.getIndex(x, y, z)];
+                        final Biome biome = this.registry.value(key);
+                        return biome;
+                    }, new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);

@@ -29,12 +29,13 @@ import org.spongepowered.api.world.generation.config.WorldGenerationConfig;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(WorldGenSettings.class)
-@Implements(@Interface(iface = WorldGenerationConfig.class, prefix = "worldGenerationConfig$"))
+@Implements(@Interface(iface = WorldGenerationConfig.class, prefix = "worldGenerationConfig$", remap = Remap.NONE))
 public abstract class WorldGenSettingsMixin_API implements WorldGenerationConfig.Mutable {
 
     // @formatter:off

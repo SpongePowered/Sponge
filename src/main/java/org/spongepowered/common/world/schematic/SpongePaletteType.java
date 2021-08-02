@@ -25,8 +25,6 @@
 package org.spongepowered.common.world.schematic;
 
 import org.spongepowered.api.registry.Registry;
-import org.spongepowered.api.registry.RegistryHolder;
-import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteType;
 
@@ -47,8 +45,8 @@ public class SpongePaletteType<T, R> implements PaletteType<T, R> {
     }
 
     @Override
-    public Palette<T, R> create(final RegistryHolder holder, final RegistryType<R> registryType) {
-        return new MutableBimapPalette<>(this, holder.registry(registryType), registryType);
+    public Palette<T, R> create(final Registry<R> registryType) {
+        return new MutableBimapPalette<>(this, registryType);
     }
 
     @Override

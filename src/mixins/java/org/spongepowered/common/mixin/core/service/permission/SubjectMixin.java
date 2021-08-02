@@ -29,6 +29,7 @@ import org.spongepowered.api.service.permission.Subject;
 import org.spongepowered.api.service.permission.SubjectReference;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+import org.spongepowered.common.entity.player.SpongeUserView;
 import org.spongepowered.common.service.server.permission.SubjectHelper;
 
 import java.util.Optional;
@@ -42,7 +43,7 @@ import net.minecraft.world.level.block.entity.CommandBlockEntity;
  * Mixin to provide a common implementation of subject that refers to the
  * installed permissions service for a subject.
  */
-@Mixin(value = {ServerPlayer.class, CommandBlockEntity.class, MinecartCommandBlock.class, RconConsoleSource.class})
+@Mixin(value = {ServerPlayer.class, CommandBlockEntity.class, MinecartCommandBlock.class, RconConsoleSource.class, SpongeUserView.class})
 public abstract class SubjectMixin implements SubjectBridge {
 
     @Nullable
@@ -56,7 +57,7 @@ public abstract class SubjectMixin implements SubjectBridge {
     @Override
     public Optional<SubjectReference> bridge$resolveReferenceOptional() {
         if (this.impl$subjectReference == null) {
-            SubjectHelper.applySubject(this);
+            SubjectHelper.applySubject(this, this.bridge$getSubjectCollectionIdentifier());
         }
         return Optional.ofNullable(this.impl$subjectReference);
     }

@@ -36,6 +36,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.CustomNameableBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
 import org.spongepowered.common.util.VecHelper;
 
@@ -96,7 +97,15 @@ public final class ServerLocationData {
                         })
                         .set((h, v) -> (((CustomNameableBridge)h.blockEntity().get())).bridge$setCustomDisplayName(SpongeAdventure.asVanilla(v)))
                         .delete(h -> (((CustomNameableBridge)h.blockEntity().get())).bridge$setCustomDisplayName(null))
-                        .supports(h -> h.blockEntity().isPresent() && h.blockEntity().get() instanceof NameableBlockEntity);
+                        .supports(h -> h.blockEntity().isPresent() && h.blockEntity().get() instanceof NameableBlockEntity)
+                    .create(Keys.CREATOR)
+                        .get(h -> ((LevelChunkBridge)h.world().chunk(h.chunkPosition())).bridge$getBlockCreatorUUID(VecHelper.toBlockPos(h.blockPosition())).orElse(null))
+                        .set((h, v) -> ((LevelChunkBridge)h.world().chunk(h.chunkPosition())).bridge$setBlockCreator(VecHelper.toBlockPos(h.blockPosition()), v))
+                        .delete(h -> ((LevelChunkBridge)h.world().chunk(h.chunkPosition())).bridge$setBlockCreator(VecHelper.toBlockPos(h.blockPosition()), null))
+                    .create(Keys.NOTIFIER)
+                        .get(h -> ((LevelChunkBridge)h.world().chunk(h.chunkPosition())).bridge$getBlockNotifierUUID(VecHelper.toBlockPos(h.blockPosition())).orElse(null))
+                        .set((h, v) -> ((LevelChunkBridge)h.world().chunk(h.chunkPosition())).bridge$setBlockNotifier(VecHelper.toBlockPos(h.blockPosition()), v))
+                        .delete(h -> ((LevelChunkBridge)h.world().chunk(h.chunkPosition())).bridge$setBlockNotifier(VecHelper.toBlockPos(h.blockPosition()), null))
                     ;
     }
     // @formatter:on

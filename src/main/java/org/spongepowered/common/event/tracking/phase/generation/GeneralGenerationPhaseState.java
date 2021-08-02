@@ -25,15 +25,12 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import com.google.common.base.Objects;
-import com.google.common.collect.ImmutableSet;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PooledPhaseState;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.tick.LocationBasedTickContext;
 
-import java.util.HashSet;
-import java.util.Set;
 import net.minecraft.core.BlockPos;
 import net.minecraft.server.level.ServerLevel;
 
@@ -45,8 +42,6 @@ import net.minecraft.server.level.ServerLevel;
 @SuppressWarnings("rawtypes")
 abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> extends PooledPhaseState<G> implements IPhaseState<G> {
 
-    private Set<IPhaseState<?>> compatibleStates = new HashSet<>();
-    private boolean isBaked = false;
     private final String id;
     private final String desc;
 
@@ -55,51 +50,13 @@ abstract class GeneralGenerationPhaseState<G extends GenerationContext<G>> exten
         this.desc = TrackingUtil.phaseStateToString("Generation", id, this);
     }
 
-    final GeneralGenerationPhaseState addCompatibleState(final IPhaseState<?> state) {
-        if (this.isBaked) {
-            throw new IllegalStateException("This state is already baked! " + this.id);
-        }
-        this.compatibleStates.add(state);
-        return this;
-    }
-
-    final GeneralGenerationPhaseState bake() {
-        if (this.isBaked) {
-            throw new IllegalStateException("This state is already baked! " + this.id);
-        }
-        this.compatibleStates = ImmutableSet.copyOf(this.compatibleStates);
-        this.isBaked = true;
-        return this;
-    }
-
-
     @Override
     public boolean requiresPost() {
         return false;
     }
 
     @Override
-    public final boolean isNotReEntrant() {
-        return false;
-    }
-
-    @Override
     public boolean ignoresBlockEvent() {
-        return true;
-    }
-
-    @Override
-    public boolean ignoresBlockUpdateTick(final G context) {
-        return true;
-    }
-
-    @Override
-    public boolean isWorldGeneration() {
-        return true;
-    }
-
-    @Override
-    public boolean includesDecays() {
         return true;
     }
 

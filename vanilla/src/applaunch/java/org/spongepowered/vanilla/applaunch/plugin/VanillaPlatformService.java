@@ -33,13 +33,12 @@ import cpw.mods.modlauncher.serviceapi.ILaunchPluginService;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.launch.MixinLaunchPlugin;
 import org.spongepowered.common.applaunch.AppLaunch;
-import org.spongepowered.plugin.PluginKeys;
 import org.spongepowered.plugin.PluginResource;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResource;
-import org.spongepowered.vanilla.applaunch.Main;
-import org.spongepowered.vanilla.applaunch.service.AccessWidenerLaunchService;
+import org.spongepowered.vanilla.applaunch.service.AccessWidenerTransformationService;
 import org.spongepowered.vanilla.installer.Constants;
 
+import java.net.MalformedURLException;
 import java.net.URISyntaxException;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -72,21 +71,21 @@ public final class VanillaPlatformService implements ITransformationService {
     public List<Map.Entry<String, Path>> runScan(final IEnvironment environment) {
         VanillaPlatformService.pluginPlatform.locatePluginResources();
         VanillaPlatformService.pluginPlatform.createPluginCandidates();
-        final ILaunchPluginService accessWidener = environment.findLaunchPlugin(AccessWidenerLaunchService.NAME).orElse(null);
+        final AccessWidenerTransformationService accessWidener = environment.getProperty(AccessWidenerTransformationService.INSTANCE.get()).orElse(null);
         final ILaunchPluginService mixin = environment.findLaunchPlugin(MixinLaunchPlugin.NAME).orElse(null);
 
 
         final List<Map.Entry<String, Path>> launchResources = new ArrayList<>();
 
-        for (final Map.Entry<String, List<PluginResource>> resourcesEntry : VanillaPlatformService.pluginPlatform.getResources().entrySet()) {
-            final List<PluginResource> resources = resourcesEntry.getValue();
+        for (final Map.Entry<String, Set<PluginResource>> resourcesEntry : VanillaPlatformService.pluginPlatform.getResources().entrySet()) {
+            final Set<PluginResource> resources = resourcesEntry.getValue();
             for (final PluginResource resource : resources) {
 
                 // Handle Access Transformers
                 if ((accessWidener != null || mixin != null) && resource instanceof JVMPluginResource) {
                     if (mixin != null) {
                         // Offer jar to the Mixin service
-                        mixin.offerResource(resource.path(), resource.path().getFileName().toString());
+                        mixin.offerResource(((JVMPluginResource) resource).path(), ((JVMPluginResource) resource).path().getFileName().toString());
                     }
 
                     // Offer jar to the AW service
@@ -95,33 +94,45 @@ public final class VanillaPlatformService implements ITransformationService {
                             final String atFiles = manifest.getMainAttributes().getValue(Constants.ManifestAttributes.ACCESS_WIDENER);
                             if (atFiles != null) {
                                 for (final String atFile : atFiles.split(",")) {
-                                    if (!atFile.endsWith(".accesswidener")) {
+                                    if (!atFile.endsWith(AccessWidenerTransformationService.ACCESS_WIDENER_EXTENSION)) {
                                         continue;
                                     }
-                                    accessWidener.offerResource(resource.fileSystem().getPath(atFile), atFile);
+                                    try {
+                                        accessWidener.offerResource(
+                                            ((JVMPluginResource) resource).fileSystem().getPath(atFile).toUri().toURL(),
+                                            atFile
+                                        );
+                                    } catch (final MalformedURLException ex) {
+                                        VanillaPlatformService.pluginPlatform.logger().warn(
+                                            "Failed to read declared access widener {}, from {}:",
+                                            atFile,
+                                            resource.locator()
+                                        );
+                                    }
                                 }
                             }
                         }
                         if (mixin != null && manifest.getMainAttributes().getValue(org.spongepowered.asm.util.Constants.ManifestAttributes.MIXINCONFIGS) != null) {
-                            if (!VanillaPlatformService.isSponge(resource)) {
+                            if (!VanillaPlatformService.isSponge((JVMPluginResource) resource)) {
                                 VanillaPlatformService.pluginPlatform.logger().warn(
                                     "Plugin from {} uses Mixins to modify the Minecraft Server. If something breaks, remove it before reporting the "
-                                        + "problem to Sponge!", resource.path()
+                                        + "problem to Sponge!", ((JVMPluginResource) resource).path()
                                 );
                             }
                         }
                     });
-                }
 
-                final Map.Entry<String, Path> entry = Maps.immutableEntry(resource.path().getFileName().toString(), resource.path());
-                launchResources.add(entry);
+                    final Map.Entry<String, Path> entry = Maps.immutableEntry(((JVMPluginResource) resource).path().getFileName().toString(),
+                        ((JVMPluginResource) resource).path());
+                    launchResources.add(entry);
+                }
             }
         }
 
         return launchResources;
     }
 
-    private static boolean isSponge(final PluginResource resource) {
+    private static boolean isSponge(final JVMPluginResource resource) {
         try {
             return resource.path().toUri().equals(VanillaPlatformService.class.getProtectionDomain().getCodeSource().getLocation().toURI());
         } catch (final URISyntaxException ex) {

@@ -29,21 +29,20 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
+import java.net.URI;
+import java.net.URISyntaxException;
 import java.net.URL;
-import java.nio.file.Path;
 import java.util.Objects;
 import java.util.Optional;
 
 public final class DummyPluginContainer implements PluginContainer {
 
     private final PluginMetadata metadata;
-    private final Path path;
     private final Logger logger;
     private final Object instance;
 
-    public DummyPluginContainer(final PluginMetadata metadata, final Path path, final Logger logger, final Object instance) {
+    public DummyPluginContainer(final PluginMetadata metadata, final Logger logger, final Object instance) {
         this.metadata = metadata;
-        this.path = path;
         this.logger = logger;
         this.instance = instance;
     }
@@ -51,11 +50,6 @@ public final class DummyPluginContainer implements PluginContainer {
     @Override
     public PluginMetadata metadata() {
         return this.metadata;
-    }
-
-    @Override
-    public Path path() {
-        return this.path;
     }
 
     @Override
@@ -69,10 +63,17 @@ public final class DummyPluginContainer implements PluginContainer {
     }
 
     @Override
-    public Optional<URL> locateResource(final URL relative) {
-        final ClassLoader classLoader = this.instance().getClass().getClassLoader();
+    public Optional<URI> locateResource(final URI relative) {
+        final ClassLoader classLoader = this.getClass().getClassLoader();
         final URL resolved = classLoader.getResource(relative.getPath());
-        return Optional.ofNullable(resolved);
+        try {
+            if (resolved == null) {
+                return Optional.empty();
+            }
+            return Optional.of(resolved.toURI());
+        } catch (final URISyntaxException ignored) {
+            return Optional.empty();
+        }
     }
 
     @Override
@@ -97,7 +98,6 @@ public final class DummyPluginContainer implements PluginContainer {
     public String toString() {
         return MoreObjects.toStringHelper(this)
             .addValue(this.metadata)
-            .add("path", this.path)
             .toString();
     }
 }

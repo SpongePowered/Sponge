@@ -24,6 +24,10 @@
  */
 package org.spongepowered.common.entity;
 
+import net.minecraft.nbt.CompoundTag;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.data.DataManipulator;
 import org.spongepowered.api.data.Key;
@@ -36,93 +40,123 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.registry.RegistryTypes;
-import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.data.nbt.validation.DelegateDataValidator;
 import org.spongepowered.common.data.nbt.validation.ValidationTypes;
+import org.spongepowered.common.data.persistence.NBTTranslator;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.math.vector.Vector3d;
 
+import java.util.Deque;
 import java.util.Objects;
 import java.util.Optional;
-import net.minecraft.nbt.CompoundTag;
+import java.util.concurrent.ConcurrentLinkedDeque;
 
 public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArchetype> implements EntityArchetype.Builder {
 
-    EntityType entityType = null;
-    DataContainer entityData;
-    CompoundTag compound;
-    DataManipulator.Mutable manipulator;
+    private static final Deque<SpongeEntityArchetypeBuilder> pool = new ConcurrentLinkedDeque<>();
 
-    public SpongeEntityArchetypeBuilder() {
+    public static SpongeEntityArchetypeBuilder unpooled() {
+        return new SpongeEntityArchetypeBuilder(false);
+    }
+
+    public static SpongeEntityArchetypeBuilder pooled() {
+        final @Nullable SpongeEntityArchetypeBuilder builder = SpongeEntityArchetypeBuilder.pool.pollFirst();
+        if (builder != null) {
+            return builder.reset();
+        }
+        return new SpongeEntityArchetypeBuilder(true);
+    }
+
+    @MonotonicNonNull EntityType<@NonNull ?> entityType = null;
+    @Nullable CompoundTag compound;
+    DataManipulator.@Nullable Mutable manipulator;
+    @Nullable Vector3d position;
+    private final boolean pooled;
+
+    private SpongeEntityArchetypeBuilder(final boolean pooled) {
         super(EntityArchetype.class, Constants.Sponge.EntityArchetype.BASE_VERSION);
+        this.pooled = pooled;
     }
 
     @Override
-    public EntityArchetype.Builder reset() {
+    public SpongeEntityArchetypeBuilder reset() {
         this.entityType = null;
-        this.entityData = null;
         this.manipulator = null;
+        this.compound = null;
+        this.position = null;
         return this;
     }
 
     @Override
     public EntityArchetype.Builder from(final EntityArchetype value) {
         this.entityType = value.type();
-        this.entityData = value.entityData();
+        this.compound = NBTTranslator.INSTANCE.translate(value.entityData());
+        SpongeEntityArchetypeBuilder.stripCompound(this.compound);
+        // TODO Copy over the pending manipulator data?
         this.manipulator = null;
         return this;
     }
 
     @Override
     protected Optional<EntityArchetype> buildContent(final DataView container) throws InvalidDataException {
-        final SpongeEntityArchetypeBuilder builder = new SpongeEntityArchetypeBuilder();
+        final SpongeEntityArchetypeBuilder builder = SpongeEntityArchetypeBuilder.pooled();
         if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_TYPE)) {
-            builder.type(container.getRegistryValue(Constants.Sponge.EntityArchetype.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE, Sponge.game().registries())
-                    .orElseThrow(() -> new InvalidDataException("Could not deserialize an EntityType!")));
+            builder.type(container.getRegistryValue(Constants.Sponge.EntityArchetype.ENTITY_TYPE, RegistryTypes.ENTITY_TYPE,
+                Sponge.game().registries()).orElseThrow(() -> new InvalidDataException("Could not deserialize an EntityType!")));
         } else {
             throw new InvalidDataException("Missing the EntityType! Cannot re-construct an EntityArchetype!");
         }
 
         if (container.contains(Constants.Sponge.EntityArchetype.ENTITY_DATA)) {
             builder.entityData(container.getView(Constants.Sponge.EntityArchetype.ENTITY_DATA)
-                    .orElseThrow(() -> new InvalidDataException("No DataView found for the TileEntity data tag!"))
-            );
+                    .orElseThrow(() -> new InvalidDataException("No DataView found for the 'EntityData' data tag!")));
         }
         return Optional.of(builder.build());
     }
 
     @Override
-    public EntityArchetype.Builder type(final EntityType type) {
-        Objects.requireNonNull(type, "EntityType cannot be null!");
-        if (this.entityType != type) {
-            this.entityData = null;
+    public EntityArchetype.Builder type(final EntityType<@NonNull ?> type) {
+        if (this.entityType != Objects.requireNonNull(type, "EntityType cannot be null!")) {
+            // TODO Type changed, should we also clear the pending manipulator data?
+            this.compound = null;
         }
         this.entityType = type;
         return this;
     }
 
+    @SuppressWarnings({"rawtypes", "EqualsBetweenInconvertibleTypes"})
     @Override
     public EntityArchetype.Builder from(final Entity entity) {
-        Objects.requireNonNull(entity, "Cannot build an EntityArchetype for a null entity!");
-        this.entityType = Objects.requireNonNull(entity.type(), "Entity is returning a null EntityType!");
-        final net.minecraft.world.entity.Entity minecraftEntity = (net.minecraft.world.entity.Entity) entity;
+        final EntityType<@NonNull ?> entityType = Objects.requireNonNull(
+            Objects.requireNonNull(entity, "Cannot build an EntityArchetype for a null entity!").type(),
+            "Entity is returning a null EntityType!"
+        );
+        if (!((net.minecraft.world.entity.EntityType) entityType).canSerialize() && entityType != HumanEntity.TYPE) {
+            throw new IllegalArgumentException("Attempting to archetype a non-serializable entity: " + entity);
+        }
+        this.entityType = entityType;
         final CompoundTag compound = new CompoundTag();
-        minecraftEntity.saveAsPassenger(compound);
-        compound.putString(Constants.Sponge.EntityArchetype.ENTITY_ID, ((EntityAccessor) minecraftEntity).invoker$getEncodeId());
-        compound.remove(Constants.UUID);
-        compound.remove(Constants.UUID_MOST);
-        compound.remove(Constants.UUID_LEAST);
+        net.minecraft.world.entity.Entity mcEntity = (net.minecraft.world.entity.Entity) entity;
+        if (entityType == HumanEntity.TYPE) {
+            mcEntity.saveWithoutId(compound);
+        } else {
+            mcEntity.saveAsPassenger(compound);
+        }
+        this.position = new Vector3d(mcEntity.getX(), mcEntity.getY(), mcEntity.getZ());
+        SpongeEntityArchetypeBuilder.stripCompound(compound);
         compound.putBoolean(Constants.Sponge.EntityArchetype.REQUIRES_EXTRA_INITIAL_SPAWN, true);
+        this.position = entity.position();
         this.compound = compound;
         return this;
     }
 
     @Override
     public EntityArchetype.Builder entityData(final DataView view) {
-        Objects.requireNonNull(view, "Provided DataView cannot be null!");
-        final DataContainer copy = view.copy();
-        new DelegateDataValidator(SpongeEntityArchetype.VALIDATORS, ValidationTypes.ENTITY.get()).validate(copy);
-        this.entityData = copy;
-        this.compound = null;
+        final DataContainer container = Objects.requireNonNull(view, "Provided DataView cannot be null!").copy();
+        new DelegateDataValidator(SpongeEntityArchetype.VALIDATORS, ValidationTypes.ENTITY.get()).validate(container);
+        this.compound = NBTTranslator.INSTANCE.translate(container);
+        SpongeEntityArchetypeBuilder.stripCompound(this.compound);
         return this;
     }
 
@@ -131,20 +165,28 @@ public class SpongeEntityArchetypeBuilder extends AbstractDataBuilder<EntityArch
         if (this.manipulator == null) {
             this.manipulator = DataManipulator.mutableOf();
         }
-        this.manipulator.set(key, value);
+        this.manipulator.set(Objects.requireNonNull(key, "Key cannot be null!"), Objects.requireNonNull(value, "Value cannot be null!"));
         return this;
     }
 
     @Override
     public EntityArchetype build() {
-        Objects.requireNonNull(this.entityType);
-        if (this.entityData != null) {
-            this.entityData.remove(Constants.Entity.Player.UUID);
-        }
+        Objects.requireNonNull(this.entityType, "Entity type cannot be nulL!");
         final SpongeEntityArchetype archetype = new SpongeEntityArchetype(this);
         if (this.manipulator != null) {
             archetype.copyFrom(this.manipulator);
         }
+        if (this.pooled) {
+            this.reset();
+            SpongeEntityArchetypeBuilder.pool.push(this);
+        }
         return archetype;
+    }
+
+    protected static void stripCompound(final CompoundTag compound) {
+        compound.remove(Constants.UUID);
+        compound.remove(Constants.UUID_MOST);
+        compound.remove(Constants.UUID_LEAST);
+        compound.remove(Constants.Entity.ENTITY_POSITION);
     }
 }

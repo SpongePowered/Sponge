@@ -25,6 +25,7 @@
 package org.spongepowered.common.event.tracking.phase.general;
 
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
 import org.spongepowered.common.event.tracking.IPhaseState;
@@ -34,9 +35,10 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext> {
 
     @Nullable String command;
+    @Nullable CommandMapping commandMapping;
     private @Nullable TrackedInventoryBridge inventory;
 
-    CommandPhaseContext(final IPhaseState<CommandPhaseContext> state, PhaseTracker tracker) {
+    CommandPhaseContext(final IPhaseState<CommandPhaseContext> state, final PhaseTracker tracker) {
         super(state, tracker);
     }
 
@@ -49,6 +51,7 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
     protected void reset() {
         super.reset();
         this.command = null;
+        this.commandMapping = null;
         this.inventory = null;
     }
 
@@ -57,11 +60,17 @@ public class CommandPhaseContext extends GeneralPhaseContext<CommandPhaseContext
         return this;
     }
 
+    public CommandPhaseContext commandMapping(final CommandMapping mapping) {
+        this.commandMapping = mapping;
+        return this;
+    }
+
     @Override
     public PrettyPrinter printCustom(final PrettyPrinter printer, final int indent) {
         final String s = String.format("%1$" + indent + "s", "");
         super.printCustom(printer, indent)
-            .add(s + "- %s: %s", "Command", this.command == null ? "empty command" : this.command);
+            .add(s + "- %s: %s", "Command", this.command == null ? "empty command" : this.command)
+            .add(s + "- %s: %s", "Command Mapping", this.commandMapping == null ? "no mapping" : this.commandMapping.toString());
         if (this.inventory != null) {
             printer.add(s + "-%s: %s", "Inventory", this.inventory.bridge$getCapturedSlotTransactions());
         }

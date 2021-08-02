@@ -41,5 +41,6 @@ public interface BlockEntityBridge {
      * A forge compatibility method assigned for {@link net.minecraft.world.level.block.entity.BlockEntity}
      * when said tile entity gets added to a {@link net.minecraft.world.level.Level}.
      */
-    default void bridge$onLoad() { }
+    default void bridge$onLoad() {
+    }
 }

@@ -35,6 +35,7 @@ import org.spongepowered.asm.mixin.MixinEnvironment;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.PluginContainer;
+
 import java.util.ArrayList;
 import java.util.List;
 
@@ -44,15 +45,14 @@ public abstract class Launch {
     private static final String ID = "sponge";
 
     protected final PluginPlatform pluginPlatform;
-    protected final SpongePluginManager pluginManager;
     private final Logger logger;
     private final List<PluginContainer> launcherPlugins;
     private PluginContainer minecraftPlugin, apiPlugin, commonPlugin;
+    private Lifecycle lifecycle;
 
-    protected Launch(final PluginPlatform pluginPlatform, final SpongePluginManager pluginManager) {
-        this.logger = LogManager.getLogger("Launch");
+    protected Launch(final PluginPlatform pluginPlatform) {
+        this.logger = LogManager.getLogger("launch");
         this.pluginPlatform = pluginPlatform;
-        this.pluginManager = pluginManager;
         this.launcherPlugins = new ArrayList<>();
     }
 
@@ -75,16 +75,28 @@ public abstract class Launch {
 
     public abstract boolean dedicatedServer();
 
+    public abstract SpongePluginManager pluginManager();
+
+    public Lifecycle lifecycle() {
+        if (this.lifecycle == null) {
+            throw new RuntimeException("The lifecycle has not been set during launch! Too early?");
+        }
+        return this.lifecycle;
+    }
+
+    public void setLifecycle(final Lifecycle lifecycle) {
+        if (this.lifecycle != null) {
+            throw new RuntimeException("Attempt made to re-set lifecycle instance twice!");
+        }
+        this.lifecycle = lifecycle;
+    }
+
     public final Logger logger() {
         return this.logger;
     }
 
     public PluginPlatform pluginPlatform() {
         return this.pluginPlatform;
-    }
-
-    public SpongePluginManager pluginManager() {
-        return this.pluginManager;
     }
 
     public abstract Stage injectionStage();
@@ -95,7 +107,7 @@ public abstract class Launch {
 
     public final PluginContainer minecraftPlugin() {
         if (this.minecraftPlugin == null) {
-            this.minecraftPlugin = this.pluginManager.plugin(PluginManager.MINECRAFT_PLUGIN_ID).orElse(null);
+            this.minecraftPlugin = this.pluginManager().plugin(PluginManager.MINECRAFT_PLUGIN_ID).orElse(null);
 
             if (this.minecraftPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing Minecraft, this is a serious issue!");
@@ -107,7 +119,7 @@ public abstract class Launch {
 
     public final PluginContainer apiPlugin() {
         if (this.apiPlugin == null) {
-            this.apiPlugin = this.pluginManager.plugin(Platform.API_ID).orElse(null);
+            this.apiPlugin = this.pluginManager().plugin(Platform.API_ID).orElse(null);
 
             if (this.apiPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing SpongeAPI, this is a serious issue!");
@@ -119,7 +131,7 @@ public abstract class Launch {
 
     public final PluginContainer commonPlugin() {
         if (this.commonPlugin == null) {
-            this.commonPlugin = this.pluginManager.plugin(PluginManager.SPONGE_PLUGIN_ID).orElse(null);
+            this.commonPlugin = this.pluginManager().plugin(PluginManager.SPONGE_PLUGIN_ID).orElse(null);
 
             if (this.commonPlugin == null) {
                 throw new RuntimeException("Could not find the plugin representing Sponge, this is a serious issue!");
@@ -142,17 +154,9 @@ public abstract class Launch {
         return this.launcherPlugins;
     }
 
-    protected void onLaunch() {
-        this.createPlatformPlugins(this.pluginPlatform);
-    }
-
-    protected abstract void createPlatformPlugins(final PluginPlatform platform);
-
     public final void auditMixins() {
         MixinEnvironment.getCurrentEnvironment().audit();
     }
 
     public abstract Injector createInjector();
-
-    public abstract void performBootstrap();
 }

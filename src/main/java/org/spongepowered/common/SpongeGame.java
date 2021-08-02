@@ -98,6 +98,7 @@ public final class SpongeGame implements Game {
         this.serviceProvider = serviceProvider;
 
         this.asyncScheduler = new AsyncScheduler();
+        //this.registryHolder = new SpongeRegistryHolder();
     }
 
     @Override

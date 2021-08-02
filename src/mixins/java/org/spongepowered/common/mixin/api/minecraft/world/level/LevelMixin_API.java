@@ -44,6 +44,7 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.ChunkAccess;
 import net.minecraft.world.level.chunk.ChunkSource;
 import net.minecraft.world.level.chunk.ChunkStatus;
+import net.minecraft.world.level.chunk.ImposterProtoChunk;
 import net.minecraft.world.level.chunk.LevelChunk;
 import net.minecraft.world.level.storage.LevelData;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -56,12 +57,15 @@ import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.entity.EntityType;
 import org.spongepowered.api.entity.living.player.Player;
 import org.spongepowered.api.service.context.Context;
+import org.spongepowered.api.util.AABB;
 import org.spongepowered.api.world.HeightTypes;
 import org.spongepowered.api.world.Location;
-import org.spongepowered.api.world.ProtoWorld;
+import org.spongepowered.api.world.WorldLike;
 import org.spongepowered.api.world.World;
-import org.spongepowered.api.world.chunk.Chunk;
+import org.spongepowered.api.world.biome.Biome;
+import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
+import org.spongepowered.api.world.volume.biome.BiomeVolume;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
 import org.spongepowered.api.world.volume.stream.VolumeApplicators;
 import org.spongepowered.api.world.volume.stream.VolumeCollectors;
@@ -71,12 +75,15 @@ import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.server.level.ChunkMapAccessor;
+import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.effect.particle.SpongeParticleHelper;
 import org.spongepowered.common.effect.record.SpongeMusicDisc;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.util.MissingImplementationException;
+import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.storage.SpongeChunkLayout;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.archetype.SpongeArchetypeVolume;
@@ -109,6 +116,14 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     @Shadow public abstract void shadow$setBlockEntity(BlockPos pos, @javax.annotation.Nullable net.minecraft.world.level.block.entity.BlockEntity tileEntityIn);
     @Shadow public abstract void shadow$removeBlockEntity(BlockPos pos);
     @Shadow public abstract ResourceKey<net.minecraft.world.level.Level> shadow$dimension();
+    @Shadow public abstract LevelChunk shadow$getChunkAt(BlockPos param0);
+    @Shadow public abstract List<net.minecraft.world.entity.Entity> shadow$getEntities(
+            @org.jetbrains.annotations.Nullable net.minecraft.world.entity.Entity param0,
+            net.minecraft.world.phys.AABB param1,
+            @org.jetbrains.annotations.Nullable Predicate<? super net.minecraft.world.entity.Entity> param2);
+    @Shadow public abstract <T extends net.minecraft.world.entity.Entity> List<T> shadow$getEntitiesOfClass(Class<? extends T> param0,
+            net.minecraft.world.phys.AABB param1,
+            @org.jetbrains.annotations.Nullable Predicate<? super T> param2);
     // @formatter:on
 
     private Context impl$context;
@@ -121,12 +136,19 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     }
 
     @Override
-    public Chunk chunk(final int cx, final int cy, final int cz) {
-        return (Chunk) ((net.minecraft.world.level.Level) (Object) this).getChunk(cx >> 4, cz >> 4, ChunkStatus.EMPTY, true);
+    public WorldChunk chunk(final int cx, final int cy, final int cz) {
+        final ChunkAccess chunk = ((Level) (Object) this).getChunk(cx, cz, ChunkStatus.EMPTY, true);
+        if (chunk instanceof WorldChunk) {
+            return (WorldChunk) chunk;
+        }
+        if (chunk instanceof ImposterProtoChunk) {
+            return (WorldChunk) ((ImposterProtoChunk) chunk).getWrapped();
+        }
+        throw new IllegalStateException("Chunk is a Proto-Chunk"); // TODO this may return a ProtoChunk
     }
 
     @Override
-    public Optional<Chunk> loadChunk(final int cx, final int cy, final int cz, final boolean shouldGenerate) {
+    public Optional<WorldChunk> loadChunk(final int cx, final int cy, final int cz, final boolean shouldGenerate) {
         if (!SpongeChunkLayout.INSTANCE.isValidChunk(cx, cy, cz)) {
             return Optional.empty();
         }
@@ -134,20 +156,20 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
         // If we aren't generating, return the chunk
         if (!shouldGenerate) {
             // TODO correct ChunkStatus?
-            return Optional.ofNullable((Chunk) chunkProvider.getChunk(cx, cz, ChunkStatus.EMPTY, true));
+            return Optional.ofNullable((WorldChunk) chunkProvider.getChunk(cx, cz, ChunkStatus.EMPTY, true));
         }
         // TODO correct ChunkStatus?
-        return Optional.ofNullable((Chunk) chunkProvider.getChunk(cx, cz, ChunkStatus.FULL, true));
+        return Optional.ofNullable((WorldChunk) chunkProvider.getChunk(cx, cz, ChunkStatus.FULL, true));
     }
 
     @Override
-    public Iterable<Chunk> loadedChunks() {
+    public Iterable<WorldChunk> loadedChunks() {
         final ChunkSource chunkProvider = ((LevelAccessor) this).getChunkSource();
         if (chunkProvider instanceof ServerChunkCache) {
             final ChunkMapAccessor chunkManager = (ChunkMapAccessor) ((ServerChunkCache) chunkProvider).chunkMap;
-            final List<Chunk> chunks = new ArrayList<>();
+            final List<WorldChunk> chunks = new ArrayList<>();
             chunkManager.invoker$getChunks().forEach(holder -> {
-                final Chunk chunk = (Chunk) holder.getTickingChunk();
+                final WorldChunk chunk = (WorldChunk) holder.getTickingChunk();
                 if (chunk != null) {
                     chunks.add(chunk);
                 }
@@ -167,17 +189,17 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
     // Volume
 
     @Override
-    public Vector3i blockMin() {
+    public Vector3i min() {
         return Constants.World.BLOCK_MIN;
     }
 
     @Override
-    public Vector3i blockMax() {
+    public Vector3i max() {
         return Constants.World.BIOME_MAX;
     }
 
     @Override
-    public Vector3i blockSize() {
+    public Vector3i size() {
         return Constants.World.BLOCK_SIZE;
     }
 
@@ -272,30 +294,31 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
 
     @Override
     public <E extends org.spongepowered.api.entity.Entity> E createEntity(final EntityType<E> type, final Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        return ((WorldBridge) this).bridge$createEntity(Objects.requireNonNull(type, "type"), Objects.requireNonNull(position, "position"), false);
+        return ((LevelBridge) this).bridge$createEntity(Objects.requireNonNull(type, "type"), Objects.requireNonNull(position, "position"), false);
     }
 
     @Override
     public <E extends org.spongepowered.api.entity.Entity> E createEntityNaturally(final EntityType<E> type, final Vector3d position) throws IllegalArgumentException, IllegalStateException {
-        return ((WorldBridge) this).bridge$createEntity(Objects.requireNonNull(type, "type"), Objects.requireNonNull(position, "position"), true);
+        return ((LevelBridge) this).bridge$createEntity(Objects.requireNonNull(type, "type"), Objects.requireNonNull(position, "position"), true);
     }
 
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> createEntity(final DataContainer container) {
-        throw new MissingImplementationException("World", "createEntity(container)");
+    public Optional<Entity> createEntity(final DataContainer container) {
+        return ((LevelBridge) this).bridge$createEntity(container, null, null);
     }
 
     @Override
-    public Optional<org.spongepowered.api.entity.Entity> createEntity(final DataContainer container, final Vector3d position) {
-        throw new MissingImplementationException("World", "createEntity(container, position)");
+    public Optional<Entity> createEntity(final DataContainer container, final Vector3d position) {
+        return Optional.ofNullable(((LevelBridge) this).bridge$createEntity(container, position, null));
     }
 
     @Override
     public ArchetypeVolume createArchetypeVolume(final Vector3i min, final Vector3i max, final Vector3i origin) {
         final Vector3i rawVolMin = Objects.requireNonNull(min, "min").min(Objects.requireNonNull(max, "max"));
-        final Vector3i adjustedVolMin = rawVolMin.sub(Objects.requireNonNull(origin, "origin"));
         final Vector3i volMax = max.max(min);
-        final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(adjustedVolMin, volMax.sub(rawVolMin).add(1, 1, 1), this.registries());
+        final Vector3i size = volMax.sub(rawVolMin).add(1, 1, 1);
+        final Vector3i relativeMin = rawVolMin.sub(Objects.requireNonNull(origin, "origin"));
+        final SpongeArchetypeVolume volume = new SpongeArchetypeVolume(relativeMin, size, this.registries());
 
         this.blockStateStream(min, max, StreamOptions.lazily())
             .apply(VolumeCollectors.of(
@@ -320,6 +343,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             ));
 
         this.entityStream(min, max, StreamOptions.lazily())
+            .filter((world, entity, x, y, z) -> ((EntityAccessor) entity.get()).invoker$getEncodeId() != null || entity.get().type() == HumanEntity.TYPE)
             .map((world, entity, x, y, z) -> entity.get().createArchetype())
             .apply(VolumeCollectors.of(
                 volume,
@@ -380,7 +404,7 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             (entityUuid, world) -> {
                 final net.minecraft.world.entity.@Nullable Entity entity = shouldCarbonCopy
                     ? (net.minecraft.world.entity.Entity) backingVolume.entity(entityUuid).orElse(null)
-                    : (net.minecraft.world.entity.Entity) ((ProtoWorld) world).entity(entityUuid).orElse(null);
+                    : (net.minecraft.world.entity.Entity) ((WorldLike) world).entity(entityUuid).orElse(null);
                 if (entity == null) {
                     return null;
                 }
@@ -388,4 +412,40 @@ public abstract class LevelMixin_API<W extends World<W, L>, L extends Location<W
             }
         );
     }
+
+    @SuppressWarnings("rawtypes")
+    @Override
+    public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
+        if (!((Level) (Object) this).hasChunk(x << 4, z << 4)) {
+            return false;
+        }
+        final LevelChunk levelChunk = this.shadow$getChunkAt(new BlockPos(x, y, z));
+        // technically we don't like to forward to the api, but this
+        // is implemented by LevelChunkMixin_API
+        return ((BiomeVolume.Modifiable) levelChunk).setBiome(x, y, z, biome);
+    }
+
+    @Override
+    public Collection<Entity> spawnEntities(final Iterable<? extends Entity> entities) {
+        final List<org.spongepowered.api.entity.Entity> entityList = new ArrayList<>();
+        for (final org.spongepowered.api.entity.Entity entity : entities) {
+            if (this.spawnEntity(entity)) {
+                entityList.add(entity);
+            }
+        }
+        return entityList;
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public <T extends Entity> Collection<? extends T> entities(final Class<? extends T> entityClass, final AABB box, @Nullable final Predicate<? super T> filter) {
+        return (List) this.shadow$getEntitiesOfClass((Class) entityClass, VecHelper.toMinecraftAABB(box), (Predicate) filter);
+    }
+
+    @SuppressWarnings({"unchecked", "rawtypes"})
+    @Override
+    public Collection<? extends Entity> entities(final AABB box, final Predicate<? super Entity> filter) {
+        return (List) this.shadow$getEntities(null, VecHelper.toMinecraftAABB(box), (Predicate) filter);
+    }
+
 }

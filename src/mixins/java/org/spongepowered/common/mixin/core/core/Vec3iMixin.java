@@ -32,9 +32,11 @@ import org.spongepowered.common.bridge.core.Vec3iBridge;
 @Mixin(Vec3i.class)
 public abstract class Vec3iMixin implements Vec3iBridge {
 
+    // @formatter:off
     @Shadow private int x;
     @Shadow private int y;
     @Shadow private int z;
+    // @formatter:on
 
     @Override
     public boolean bridge$isValidPosition() {

@@ -24,29 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.Cancellable;
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.cause.entity.SpawnType;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
-import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
-import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
-import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
-import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
-
 import com.google.common.collect.ImmutableList;
 import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.core.BlockPos;
@@ -65,6 +42,28 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.Cancellable;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.world.BlockChangeFlag;
+import org.spongepowered.api.world.BlockChangeFlags;
+import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
+import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.world.TrackedWorldBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
+import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
+import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.world.BlockChange;
+import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.lang.ref.WeakReference;
 import java.util.Iterator;
@@ -124,7 +123,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             .orElse(Objects.requireNonNull(this.tail));
         final EffectTransactor effectTransactor = new EffectTransactor(effect, parentTransaction, this.effect, this);
         this.effect = effect;
-        parentTransaction.getEffects().addLast(effect);
+        parentTransaction.addLast(effect);
         return effectTransactor;
     }
 
@@ -249,7 +248,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         snapshot.blockChange = BlockChange.MODIFY;
 
-        return new ReplaceTileEntity(proposed, existing, snapshot);
+        return new ReplaceBlockEntity(proposed, existing, snapshot);
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -276,7 +275,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     }
 
     public void logBlockEvent(final BlockState state, final TrackedWorldBridge serverWorld, final BlockPos pos,
-        final TrackerBlockEventDataBridge blockEvent
+        final TrackableBlockEventDataBridge blockEvent
     ) {
         final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
         final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
@@ -360,7 +359,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    private RemoveTileEntity createTileRemovalTransaction(final BlockEntity tileentity,
+    private RemoveBlockEntity createTileRemovalTransaction(final BlockEntity tileentity,
         final Supplier<ServerLevel> worldSupplier
     ) {
         final BlockState currentState = tileentity.getBlockState();
@@ -375,7 +374,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         );
         snapshot.blockChange = BlockChange.MODIFY;
 
-        return new RemoveTileEntity(tileentity, snapshot);
+        return new RemoveBlockEntity(tileentity, snapshot);
     }
 
     private AddTileEntity createTileAdditionTransaction(final BlockEntity tileentity,
@@ -462,7 +461,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             }
         }
         builder.build().asMap()
-            .forEach(TransactionType::createAndProcessPostEvents);
+            .forEach((transactionType, events) -> transactionType.createAndProcessPostEvents(context, events));
         return !cancelledAny;
     }
 
@@ -481,7 +480,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             if (batchDecider == null) {
                 batchDecider = pointer;
             }
-            if (batchDecider.getTransactionType() != pointer.getTransactionType() || !batchDecider.worldKey.equals(pointer.worldKey)) {
+            if (batchDecider.shouldBuildEventAndRestartBatch(pointer, context)) {
                 final ImmutableList<GameTransaction> transactions = accumilator.build();
                 accumilator = ImmutableList.builder();
                 TransactionalCaptureSupplier.generateEventForTransaction(
@@ -539,33 +538,30 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> frameMutator = pointer.getFrameMutator(parent);
         final PhaseTracker instance = PhaseTracker.getInstance();
         try (
-            final CauseStackManager.@Nullable StackFrame frame = frameMutator
+            final CauseStackManager.StackFrame frame = frameMutator
                 .map(mutator -> {
                     final CauseStackManager.StackFrame transactionFrame = instance.pushCauseFrame();
                     mutator.accept(context, transactionFrame);
                     return transactionFrame;
                 })
-                .orElse(null)
+                .orElseGet(instance::pushCauseFrame)
         ) {
-            pointer.generateEvent(context, parent, transactions, instance.currentCause(), transactionPostEventBuilder)
+            final Optional<E> generatedEvent = pointer.generateEvent(context, parent, transactions, instance.currentCause());
+            generatedEvent
                 // It's not guaranteed that a transaction has a valid world or some other artifact,
                 // and in those cases, we don't want to treat the transaction as being "cancellable"
                 .ifPresent(e -> {
                     final EventByTransaction<E> element = new EventByTransaction<>(e, transactions, parent, pointer);
                     builder.add(element);
                     ((ImmutableMultimap.Builder) transactionPostEventBuilder).put(pointer.getTransactionType(), e);
-                    if (frame != null) {
-                        // Note that by having the event in the cause, any mutations of the event by way of the cause
-                        // is not supported and *may* lead to unsupportable side effects, because by virtue, the event
-                        // was already posted for modifications.
-                        frame.pushCause(e);
-                    }
+
                 });
 
             for (final GameTransaction<E> transaction : transactions) {
-                if (transaction.sideEffects == null) {
+                if (transaction.sideEffects == null || transaction.sideEffects.isEmpty()) {
                     continue;
                 }
+                generatedEvent.ifPresent(frame::pushCause);
                 for (final ResultingTransactionBySideEffect sideEffect : transaction.sideEffects) {
                     if (sideEffect.head == null) {
                         continue;

@@ -28,12 +28,13 @@ import net.minecraft.world.level.levelgen.feature.configurations.StructureFeatur
 import org.spongepowered.api.world.generation.config.structure.SeparatedStructureConfig;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(StructureFeatureConfiguration.class)
-@Implements(@Interface(iface = SeparatedStructureConfig.class, prefix = "separatedStructureConfig$"))
+@Implements(@Interface(iface = SeparatedStructureConfig.class, prefix = "separatedStructureConfig$", remap = Remap.NONE))
 public abstract class StructureFeatureConfigurationMixin_API implements SeparatedStructureConfig {
 
     // @formatter:off

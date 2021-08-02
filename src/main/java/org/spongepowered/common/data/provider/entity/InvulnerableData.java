@@ -27,7 +27,7 @@ package org.spongepowered.common.data.provider.entity;
 import net.minecraft.world.entity.Entity;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.entity.player.SpongeUserData;
 
 public final class InvulnerableData {
 
@@ -41,10 +41,10 @@ public final class InvulnerableData {
                     .create(Keys.INVULNERABLE)
                         .get(Entity::isInvulnerable)
                         .set(Entity::setInvulnerable)
-                .asMutable(SpongeUser.class)
+                .asMutable(SpongeUserData.class)
                     .create(Keys.INVULNERABLE)
-                        .get(SpongeUser::isInvulnerable)
-                        .set(SpongeUser::setInvulnerable);
+                        .get(SpongeUserData::isInvulnerable)
+                        .set(SpongeUserData::setInvulnerable);
     }
     // @formatter:on
 }

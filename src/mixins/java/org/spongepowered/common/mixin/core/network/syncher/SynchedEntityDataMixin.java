@@ -102,7 +102,7 @@ public abstract class SynchedEntityDataMixin {
                             return;
                         }
                         try {
-                            value = converter.get().getValueFromEvent(currentValue, event.endResult().successfulData());
+                            value = converter.get().getValueFromEvent(currentValue, event.endResult());
                         } catch (final Exception e) {
                             // Worst case scenario, we don't want to cause an issue, so we just set the value
                             value = incomingValue;

@@ -37,13 +37,14 @@ import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.block.AbstractBlockBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.function.Function;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
-public abstract class AbstractMutableBlockEntityArchetypeBuffer<M extends AbstractMutableBlockEntityArchetypeBuffer<M>> extends AbstractBlockBuffer implements BlockEntityArchetypeVolume.Mutable<M> {
+public abstract class AbstractMutableBlockEntityArchetypeBuffer extends AbstractBlockBuffer implements BlockEntityArchetypeVolume.Mutable {
 
     // This is our backing block buffer
     private final ArrayMutableBlockBuffer blockBuffer;
@@ -54,14 +55,14 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer<M extends Abstra
     }
 
     protected AbstractMutableBlockEntityArchetypeBuffer(final ArrayMutableBlockBuffer buffer) {
-        super(buffer.blockMin(), buffer.blockSize());
+        super(buffer.min(), buffer.size());
         this.blockBuffer = buffer;
     }
 
     @Override
     public boolean setBlock(final int x, final int y, final int z, final BlockState block) {
         if (this.blockBuffer.setBlock(x, y, z, block)) {
-            if (((BlockStateBridge) block).bridge$hasTileEntity()) {
+            if (block instanceof BlockStateBridge && ((BlockStateBridge) block).bridge$hasTileEntity()) {
                 this.removeBlockEntity(x, y, z);
             }
         }
@@ -99,10 +100,10 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer<M extends Abstra
 
     @SuppressWarnings("unchecked")
     @Override
-    public VolumeStream<M, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
+    public VolumeStream<BlockEntityArchetypeVolume.Mutable, BlockState> blockStateStream(final Vector3i min, final Vector3i max,
         final StreamOptions options) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final ArrayMutableBlockBuffer buffer;
         if (options.carbonCopy()) {
@@ -110,12 +111,12 @@ public abstract class AbstractMutableBlockEntityArchetypeBuffer<M extends Abstra
         } else {
             buffer = this.blockBuffer;
         }
-        final Stream<VolumeElement<M, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
+        final Stream<VolumeElement<BlockEntityArchetypeVolume.Mutable, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
             .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
                 .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
-                    .mapToObj(y -> VolumeElement.of((M) this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
+                    .mapToObj(y -> VolumeElement.of((BlockEntityArchetypeVolume.Mutable) this, () -> buffer.block(x, y, z), new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
-        return new SpongeVolumeStream<>(stateStream, () -> (M) this);
+        return new SpongeVolumeStream<>(stateStream, () -> this);
     }
 }

@@ -27,6 +27,7 @@ val mixinVersion: String by project
 val pluginSpiVersion: String by project
 val guavaVersion: String by project
 val junitVersion: String by project
+val mockitoVersion: String by project
 val timingsVersion: String by project
 val checkerVersion: String by project
 
@@ -202,7 +203,12 @@ dependencies {
 
     // Tests
     testImplementation("org.junit.jupiter:junit-jupiter-api:$junitVersion")
+    testImplementation("org.junit.jupiter:junit-jupiter-params:$junitVersion")
     testRuntimeOnly("org.junit.jupiter:junit-jupiter-engine:$junitVersion")
+
+    testImplementation("org.mockito:mockito-core:$mockitoVersion")
+    testImplementation("org.mockito:mockito-junit-jupiter:$mockitoVersion")
+    testImplementation("org.mockito:mockito-inline:$mockitoVersion")
 }
 
 val organization: String by project
@@ -271,6 +277,9 @@ allprojects {
     java {
         sourceCompatibility = JavaVersion.VERSION_1_8
         targetCompatibility = JavaVersion.VERSION_1_8
+        if (!JavaVersion.current().isJava11Compatible) {
+            toolchain.languageVersion.set(JavaLanguageVersion.of(11))
+        }
     }
 
     tasks.withType<AbstractArchiveTask> {
@@ -284,10 +293,10 @@ allprojects {
         withType(JavaCompile::class).configureEach {
             options.compilerArgs.addAll(listOf("-Xmaxerrs", "1000"))
             options.encoding = "UTF-8"
-            if (JavaVersion.current().isJava10Compatible) {
-                options.release.set(8)
+            options.release.set(8)
+            if (project.name != "testplugins" && System.getProperty("idea.sync.active") != null) {
+                options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
             }
-            options.annotationProcessorPath = emptyAnnotationProcessors // hack so IntelliJ doesn't try to run Mixin AP
         }
 
         withType(PublishToMavenRepository::class).configureEach {

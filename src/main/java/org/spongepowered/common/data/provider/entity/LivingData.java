@@ -29,6 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.type.BodyParts;
 import org.spongepowered.api.effect.potion.PotionEffect;
 import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.util.Ticks;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.accessor.world.entity.LivingEntityAccessor;
 import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
@@ -73,6 +74,9 @@ public final class LivingData {
                             return false;
                         })
                         .delete(LivingEntity::releaseUsingItem)
+                    .create(Keys.AUTO_SPIN_ATTACK_TICKS)
+                        .get(h -> Ticks.of(((LivingEntityAccessor)h).accessor$autoSpinAttackTicks()))
+                        .set((h, v) -> h.startAutoSpinAttack((int) v.ticks()))
                     .create(Keys.BODY_ROTATIONS)
                         .get(h -> {
                             final double headYaw = h.getYHeadRot();
@@ -128,6 +132,8 @@ public final class LivingData {
                             h.setHealth(v.floatValue());
                             return true;
                         })
+                    .create(Keys.IS_AUTO_SPIN_ATTACK)
+                        .get(LivingEntity::isAutoSpinAttack)
                     .create(Keys.IS_ELYTRA_FLYING)
                         .get(LivingEntity::isFallFlying)
                         .set((h, v) -> ((EntityAccessor) h).invoker$setSharedFlag(Constants.Entity.ELYTRA_FLYING_FLAG, v))
@@ -141,9 +147,6 @@ public final class LivingData {
                             return false;
                         })
                         .delete(h -> h.setLastHurtByMob(null))
-                    .create(Keys.MAX_AIR)
-                        .get(LivingEntity::getMaxAirSupply)
-                        .set((h, v) -> ((LivingEntityBridge) h).bridge$setMaxAir(v))
                     .create(Keys.MAX_HEALTH)
                         .get(h -> (double) h.getMaxHealth())
                         .set((h, v) -> h.getAttribute(Attributes.MAX_HEALTH).setBaseValue(v))
@@ -159,18 +162,6 @@ public final class LivingData {
                             }
                         })
                         .delete(LivingEntity::removeAllEffects)
-                    .create(Keys.REMAINING_AIR)
-                        .get(h -> Math.max(0, h.getAirSupply()))
-                        .setAnd((h, v) -> {
-                            if (v < 0 || v > h.getMaxAirSupply()) {
-                                return false;
-                            }
-                            if (v == 0 && h.getAirSupply() < 0) {
-                                return false;
-                            }
-                            h.setAirSupply(v);
-                            return true;
-                        })
                     .create(Keys.SCALE)
                         .get(h -> (double) h.getScale())
                     .create(Keys.STUCK_ARROWS)

@@ -31,7 +31,6 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.block.SpongeBlockSnapshotBuilder;
 import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.effect.BlockAddedEffect;
@@ -168,7 +167,7 @@ public final class ChangeBlock extends BlockEventBasedTransaction {
 
     @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
-        final SpongeBlockSnapshotBuilder builder = SpongeBlockSnapshotBuilder.pooled()
+        final SpongeBlockSnapshot.BuilderImpl builder = SpongeBlockSnapshot.BuilderImpl.pooled()
                 .position(this.original.position())
                 .blockState((org.spongepowered.api.block.BlockState) this.newState);
         if (this.original.getServerWorld().isPresent()) {

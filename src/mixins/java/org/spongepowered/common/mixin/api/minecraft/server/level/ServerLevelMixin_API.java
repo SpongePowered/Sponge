@@ -58,7 +58,9 @@ import org.spongepowered.api.util.Ticks;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.ChunkRegenerateFlag;
 import org.spongepowered.api.world.border.WorldBorder;
+import org.spongepowered.api.world.chunk.WorldChunk;
 import org.spongepowered.api.world.generation.ChunkGenerator;
+import org.spongepowered.api.world.server.ChunkManager;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.WorldTemplate;
 import org.spongepowered.api.world.server.storage.ServerWorldProperties;
@@ -165,11 +167,6 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     }
 
     @Override
-    public Optional<org.spongepowered.api.world.chunk.Chunk> regenerateChunk(final int cx, final int cy, final int cz, final ChunkRegenerateFlag flag) {
-        throw new MissingImplementationException("ServerWorld", "regenerateChunk");
-    }
-
-    @Override
     public BlockSnapshot createSnapshot(final int x, final int y, final int z) {
         return ((ServerLevelBridge) this).bridge$createSnapshot(x, y, z);
     }
@@ -197,7 +194,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     }
 
     @Override
-    public boolean unloadChunk(final org.spongepowered.api.world.chunk.Chunk chunk) {
+    public boolean unloadChunk(final WorldChunk chunk) {
         this.shadow$unload((LevelChunk) Objects.requireNonNull(chunk, "chunk"));
         return true;
     }
@@ -230,7 +227,7 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
     // Volume
 
     @Override
-    public boolean containsBlock(final int x, final int y, final int z) {
+    public boolean contains(final int x, final int y, final int z) {
         return Level.isInWorldBounds(new BlockPos(x, y, z));
     }
 
@@ -307,6 +304,11 @@ public abstract class ServerLevelMixin_API extends LevelMixin_API<org.spongepowe
         }
         this.serverLevelData.setWorldBorder((net.minecraft.world.level.border.WorldBorder.Settings) border);
         return worldBorder;
+    }
+
+    @Override
+    public ChunkManager chunkManager() {
+        return (ChunkManager) this.shadow$getChunkSource().chunkMap;
     }
 
 }

@@ -63,7 +63,7 @@ public final class SpongeIPBanList extends IpBanList {
         }
 
         try {
-            return Sponge.server().serviceProvider().banService().banFor(InetAddress.getByName(entry)).join().isPresent();
+            return Sponge.server().serviceProvider().banService().find(InetAddress.getByName(entry)).join().isPresent();
         } catch (final UnknownHostException e) {
             throw new IllegalArgumentException("Error parsing Ban IP address!", e);
         }
@@ -76,7 +76,7 @@ public final class SpongeIPBanList extends IpBanList {
         }
 
         try {
-            return Sponge.server().serviceProvider().banService().banFor(InetAddress.getByName(obj)).join()
+            return Sponge.server().serviceProvider().banService().find(InetAddress.getByName(obj)).join()
                     .map(ban -> {
                         if (ban instanceof IpBanListEntry) {
                             return (IpBanListEntry) ban;
@@ -118,7 +118,7 @@ public final class SpongeIPBanList extends IpBanList {
 
     @Override
     public void add(final IpBanListEntry entry) {
-        Sponge.server().serviceProvider().banService().addBan((Ban) entry).join();
+        Sponge.server().serviceProvider().banService().add((Ban) entry).join();
     }
 
     @Override

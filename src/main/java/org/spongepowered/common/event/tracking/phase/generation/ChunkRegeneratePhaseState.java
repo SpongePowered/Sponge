@@ -50,8 +50,4 @@ public final class ChunkRegeneratePhaseState extends GeneralGenerationPhaseState
         return this.CHUNK_REGENERATE_MODIFIER;
     }
 
-    @Override
-    public boolean isRegeneration() {
-        return true;
-    }
 }

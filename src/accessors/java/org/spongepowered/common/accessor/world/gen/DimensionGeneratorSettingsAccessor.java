@@ -25,6 +25,7 @@
 package org.spongepowered.common.accessor.world.gen;
 
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.gen.Accessor;
 import org.spongepowered.asm.mixin.gen.Invoker;
 import org.spongepowered.common.UntransformedInvokerError;
@@ -44,5 +45,5 @@ public interface DimensionGeneratorSettingsAccessor {
 
     @Accessor("legacyCustomOptions") Optional<String> accessor$legacyCustomOptions();
 
-    @Accessor("dimensions") void accessor$dimensions(MappedRegistry<LevelStem> dimensions);
+    @Accessor("dimensions") @Mutable void accessor$dimensions(MappedRegistry<LevelStem> dimensions);
 }

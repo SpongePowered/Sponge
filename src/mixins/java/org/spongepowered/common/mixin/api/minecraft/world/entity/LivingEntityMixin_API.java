@@ -52,9 +52,8 @@ public abstract class LivingEntityMixin_API extends EntityMixin_API implements L
     // @formatter:off
     @Shadow public abstract float shadow$getHealth();
     @Shadow public abstract AttributeInstance shadow$getAttribute(net.minecraft.world.entity.ai.attributes.Attribute attribute);
-    // @formatter:on
-
     @Shadow public abstract boolean addEffect(MobEffectInstance p_195064_1_);
+    // @formatter:on
 
     @Override
     public Component teamRepresentation() {

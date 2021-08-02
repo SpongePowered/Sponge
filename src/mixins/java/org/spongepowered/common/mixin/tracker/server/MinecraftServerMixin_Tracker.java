@@ -101,7 +101,7 @@ public abstract class MinecraftServerMixin_Tracker extends BlockableEventLoopMix
         }
     }
 
-    @Inject(method = "wrapRunnable", at = @At("RETURN"))
+    @Inject(method = "wrapRunnable(Ljava/lang/Runnable;)Lnet/minecraft/server/TickTask;", at = @At("RETURN"))
     private void tracker$associatePhaseContextWithWrappedTask(final Runnable runnable, final CallbackInfoReturnable<TickTask> cir) {        final TickTask returnValue = cir.getReturnValue();
         if (!PhaseTracker.SERVER.onSidedThread()) {
             final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.getInstance().getPhaseContext();

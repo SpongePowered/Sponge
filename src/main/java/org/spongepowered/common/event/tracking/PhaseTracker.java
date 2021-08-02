@@ -27,15 +27,6 @@ package org.spongepowered.common.event.tracking;
 import static com.google.common.base.Preconditions.checkArgument;
 import static com.google.common.base.Preconditions.checkNotNull;
 
-import com.google.common.collect.MapMaker;
-import com.google.common.collect.Maps;
-import com.google.common.collect.Queues;
-import org.apache.logging.log4j.Level;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContext;
@@ -54,6 +45,23 @@ import org.spongepowered.common.util.Constants;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.ThreadUtil;
 
+import com.google.common.collect.MapMaker;
+import com.google.common.collect.Maps;
+import com.google.common.collect.Queues;
+import net.minecraft.core.BlockPos;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.block.Block;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.entity.BlockEntityType;
+import net.minecraft.world.level.chunk.LevelChunk;
+import org.apache.logging.log4j.Level;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.framework.qual.DefaultQualifier;
+
 import java.io.ByteArrayOutputStream;
 import java.io.PrintStream;
 import java.lang.ref.WeakReference;
@@ -70,14 +78,6 @@ import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.concurrent.CopyOnWriteArrayList;
 import java.util.concurrent.atomic.AtomicBoolean;
-import java.util.function.BiConsumer;
-import net.minecraft.core.BlockPos;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
-import net.minecraft.world.level.chunk.LevelChunk;
 
 /**
  * The core state machine of Sponge. Acts a as proxy between various engine objects by processing actions through
@@ -758,10 +758,10 @@ public final class PhaseTracker implements CauseStackManager {
         // to properly mimic as though the frames were created at the time of the
         // phase switches. It does not help the debugging of cause frames
         // except for this method call-point.
-        for (final Iterator<PhaseContext<?>> iterator = this.phaseContextProviders.descendingIterator(); iterator.hasNext(); ) {
-            final PhaseContext<?> tuple = iterator.next();
+        for (final Iterator<PhaseContext<@NonNull ?>> iterator = this.phaseContextProviders.descendingIterator(); iterator.hasNext(); ) {
+            final PhaseContext<@NonNull ?> context = iterator.next();
             final StackFrame frame = this.pushCauseFrame(); // these should auto close
-            ((BiConsumer) tuple.state.getFrameModifier()).accept(frame, tuple); // The frame will be auto closed by the phase context
+            context.getFrameModifier().accept(frame); // The frame will be auto closed by the phase context
         }
         // Clear the list since everything is now loaded.
         // PhaseStates will handle automatically closing their frames

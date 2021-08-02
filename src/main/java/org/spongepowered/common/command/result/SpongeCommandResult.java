@@ -28,6 +28,7 @@ import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.parameter.CommandContext;
 
 import java.util.Optional;
 

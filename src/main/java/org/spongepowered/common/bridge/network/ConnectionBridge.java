@@ -55,4 +55,5 @@ public interface ConnectionBridge {
     ClientType bridge$getClientType();
 
     void bridge$setClientType(ClientType clientType);
+
 }

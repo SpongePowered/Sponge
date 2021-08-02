@@ -31,7 +31,7 @@ import org.spongepowered.common.accessor.network.chat.StyleAccessor;
 import org.spongepowered.common.adventure.SpongeAdventure;
 import org.spongepowered.common.bridge.adventure.StyleBridge;
 
-@Mixin(targets = "net.kyori.adventure.text.format.StyleImpl")
+@Mixin(targets = "net.kyori.adventure.text.format.StyleImpl", remap = false)
 public abstract class StyleImplMixin implements StyleBridge {
     private Style bridge$vanilla;
 

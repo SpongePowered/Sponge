@@ -30,7 +30,6 @@ import net.minecraft.resources.ResourceKey;
 import net.minecraft.world.level.Level;
 
 import java.net.SocketAddress;
-import java.util.Optional;
 import java.util.concurrent.CompletableFuture;
 
 public interface PlayerListBridge {
@@ -39,5 +38,5 @@ public interface PlayerListBridge {
 
     void bridge$setOriginalDestinationDimension(ResourceKey<Level> dimension);
 
-    CompletableFuture<Optional<Component>> bridge$canPlayerLogin(SocketAddress param0, GameProfile param1);
+    CompletableFuture<Component> bridge$canPlayerLogin(SocketAddress param0, GameProfile param1);
 }

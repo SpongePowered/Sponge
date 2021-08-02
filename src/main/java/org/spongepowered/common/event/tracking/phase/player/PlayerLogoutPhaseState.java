@@ -37,7 +37,7 @@ final class PlayerLogoutPhaseState extends PooledPhaseState<GeneralizedContext> 
 
     @Override
     public GeneralizedContext createNewContext(final PhaseTracker tracker) {
-        return new GeneralizedContext(this, tracker).addCaptures();
+        return new GeneralizedContext(this, tracker);
     }
 
     @Override

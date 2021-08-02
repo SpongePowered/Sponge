@@ -31,7 +31,7 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.mixin.realtime.world.entity.EntityMixin_RealTime;
 
 @Mixin(ItemEntity.class)
@@ -43,7 +43,7 @@ public abstract class ItemEntityMixin_RealTime extends EntityMixin_RealTime {
     @Redirect(method = "tick",
         at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/item/ItemEntity;pickupDelay:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void realTimeImpl$adjustForRealTimePickupDelay(final ItemEntity self, final int modifier) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             this.pickupDelay = modifier;
             return;
         }
@@ -54,7 +54,7 @@ public abstract class ItemEntityMixin_RealTime extends EntityMixin_RealTime {
     @Redirect(method = "tick",
         at = @At(value = "FIELD", target = "Lnet/minecraft/world/entity/item/ItemEntity;age:I", opcode = Opcodes.PUTFIELD, ordinal = 0))
     private void realTimeImpl$adjustForRealTimeAge(final ItemEntity self, final int modifier) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             this.age = modifier;
             return;
         }

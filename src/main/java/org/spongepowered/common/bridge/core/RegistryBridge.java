@@ -26,10 +26,22 @@ package org.spongepowered.common.bridge.core;
 
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.registry.RegistryEntry;
+import org.spongepowered.api.registry.RegistryType;
 
-import java.util.Map;
+import java.util.Optional;
+import java.util.function.Supplier;
+import java.util.stream.Stream;
 
 public interface RegistryBridge<T> {
 
-    Map<ResourceKey, RegistryEntry<T>> bridge$getEntries();
+    RegistryType<T> bridge$type();
+
+    void bridge$overrideStream(Supplier<Stream<RegistryEntry<T>>> override);
+
+    void bridge$register(final RegistryEntry<T> entry);
+
+    Optional<RegistryEntry<T>> bridge$get(ResourceKey key);
+
+    Stream<RegistryEntry<T>> bridge$streamEntries();
+
 }

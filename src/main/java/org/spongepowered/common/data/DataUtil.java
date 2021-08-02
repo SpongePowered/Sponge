@@ -44,15 +44,15 @@ import java.lang.reflect.Type;
 import java.util.Collections;
 import java.util.Optional;
 
-public class DataUtil {
+public final class DataUtil {
 
-    public static void syncTagToData(Object dataHolder) {
+    public static void syncTagToData(final Object dataHolder) {
         if (dataHolder instanceof SpongeDataHolderBridge && dataHolder instanceof DataCompoundHolder) {
             DataUtil.deserializeSpongeData((SpongeDataHolderBridge & DataCompoundHolder) dataHolder);
         }
     }
 
-    public static boolean syncDataToTag(Object dataHolder) {
+    public static boolean syncDataToTag(final Object dataHolder) {
         if (dataHolder instanceof DataCompoundHolder) {
             return DataUtil.serializeSpongeData((DataCompoundHolder & SpongeDataHolderBridge) dataHolder);
         }
@@ -71,9 +71,9 @@ public class DataUtil {
         // Run content-updaters and collect failed data
         final Class<? extends DataHolder> typeToken = dataHolder.getClass().asSubclass(DataHolder.class);
         allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).ifPresent(customData -> {
-            for (DataQuery keyNamespace : customData.keys(false)) {
+            for (final DataQuery keyNamespace : customData.keys(false)) {
                 final DataView keyedData = customData.getView(keyNamespace).get();
-                for (DataQuery keyValue : keyedData.keys(false)) {
+                for (final DataQuery keyValue : keyedData.keys(false)) {
                     final ResourceKey dataStoreKey = ResourceKey.of(keyNamespace.asString("."), keyValue.asString("."));
                     final DataView dataStoreData = keyedData.getView(keyValue).get();
                     final Integer contentVersion = dataStoreData.getInt(Constants.Sponge.Data.V3.CONTENT_VERSION).orElse(1);
@@ -93,30 +93,30 @@ public class DataUtil {
         });
 
         dataHolder.bridge$mergeDeserialized(DataManipulator.mutableOf()); // Initialize sponge data holder
-        for (DataStore dataStore : SpongeDataManager.getDatastoreRegistry().getDataStoresForType(typeToken)) {
+        for (final DataStore dataStore : SpongeDataManager.getDatastoreRegistry().getDataStoresForType(typeToken)) {
             // Deserialize to Manipulator
             final DataManipulator.Mutable deserialized = dataStore.deserialize(allData);
             try {
                 // and set data in CustomDataHolderBridge
                 dataHolder.bridge$mergeDeserialized(deserialized);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 SpongeCommon.logger().error("Could not merge data from datastore: {}", deserialized, e);
             }
         }
     }
 
     @SuppressWarnings("deprecation")
-    public static void upgradeDataVersion(CompoundTag compound, DataContainer allData) {
+    public static void upgradeDataVersion(final CompoundTag compound, final DataContainer allData) {
         // Check for v2 data
         allData.getView(Constants.Forge.FORGE_DATA_ROOT).flatMap(forgeData -> forgeData.getView(Constants.Sponge.Data.V2.SPONGE_DATA_ROOT))
                 .ifPresent(spongeDataV2 -> DataUtil.upgradeV2CustomData(compound, allData, spongeDataV2));
     }
 
     @SuppressWarnings("deprecation")
-    private static void upgradeV2CustomData(CompoundTag compound, DataContainer allData, DataView spongeDataV2) {
+    private static void upgradeV2CustomData(final CompoundTag compound, final DataContainer allData, final DataView spongeDataV2) {
         // convert custom data v2 to v3
         final DataView spongeDataV3 = DataContainer.createNew();
-        for (DataView customDataV2 : spongeDataV2.getViewList(Constants.Sponge.Data.V2.CUSTOM_MANIPULATOR_LIST).orElse(Collections.emptyList())) {
+        for (final DataView customDataV2 : spongeDataV2.getViewList(Constants.Sponge.Data.V2.CUSTOM_MANIPULATOR_LIST).orElse(Collections.emptyList())) {
             try {
                 // ForgeData/SpongeData/CustomManipulators[{ContentVersion|ManipulatorId|ManipulatorData}]
                 final String id = customDataV2.getString(Constants.Sponge.Data.V2.MANIPULATOR_ID).get();
@@ -124,7 +124,7 @@ public class DataUtil {
                 final Integer contentVersion = customDataV2.getInt(Queries.CONTENT_VERSION).get();
 
                 // Fetch DataStore key for legacy registration or try to read it as a resouce key
-                ResourceKey key = SpongeDataManager.INSTANCE.getLegacyRegistration(id).orElse(ResourceKey.resolve(id));
+                final ResourceKey key = SpongeDataManager.INSTANCE.getLegacyRegistration(id).orElse(ResourceKey.resolve(id));
 
                 // Build new custom data structure
                 // sponeg-data/<datastore-namespace>/<datastore-value>/{version|content}
@@ -132,7 +132,7 @@ public class DataUtil {
                 dataStoreData.set(Constants.Sponge.Data.V3.CONTENT_VERSION, contentVersion);
                 dataStoreData.set(Constants.Sponge.Data.V3.CONTENT, data);
                 SpongeCommon.logger().info("Upgraded custom data for datastore: {}", key);
-            } catch (Exception e) {
+            } catch (final Exception e) {
                 SpongeCommon.logger().error("Error when upgrading V2 custom data", e);
             }
         }
@@ -140,7 +140,7 @@ public class DataUtil {
         spongeDataV2.remove(Constants.Sponge.Data.V2.CUSTOM_MANIPULATOR_LIST);
 
         // convert sponge data v2 to v3
-        for (DataQuery spongeDataKey : spongeDataV2.keys(false)) {
+        for (final DataQuery spongeDataKey : spongeDataV2.keys(false)) {
             final DataQuery query = SpongeDataManager.INSTANCE.legacySpongeDataQuery(spongeDataKey.toString());
             if (query == null) {
                 SpongeCommon.logger().error("Missing legacy sponge data query mapping {}", spongeDataKey.toString());
@@ -204,7 +204,7 @@ public class DataUtil {
         return true;
     }
 
-    private static boolean cleanupEmptySpongeData(DataContainer allData) {
+    private static boolean cleanupEmptySpongeData(final DataContainer allData) {
         return allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT).map(spongeData -> {
                 if (spongeData.isEmpty()) {
                     allData.remove(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT);
@@ -214,14 +214,14 @@ public class DataUtil {
             }).orElse(false);
     }
 
-    public static void setSpongeData(DataView allData, DataQuery dataStoreKey, DataView pluginData, int version) {
+    public static void setSpongeData(final DataView allData, final DataQuery dataStoreKey, final DataView pluginData, final int version) {
         final DataQuery dataStoreDataQuery = Constants.Sponge.Data.V3.SPONGE_DATA_ROOT.then(dataStoreKey);
         final DataView dataStoreDataView = allData.getView(dataStoreDataQuery).orElseGet(() -> allData.createView(dataStoreDataQuery));
         dataStoreDataView.set(Constants.Sponge.Data.V3.CONTENT_VERSION, version);
         dataStoreDataView.set(Constants.Sponge.Data.V3.CONTENT, pluginData);
     }
 
-    public static Optional<DataView> getSpongeData(DataView allData, DataQuery dataStoreKey, int version) {
+    public static Optional<DataView> getSpongeData(final DataView allData, final DataQuery dataStoreKey, final int version) {
         return allData.getView(Constants.Sponge.Data.V3.SPONGE_DATA_ROOT
                 .then(dataStoreKey)
                 .then(Constants.Sponge.Data.V3.CONTENT));

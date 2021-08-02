@@ -50,6 +50,7 @@ import net.minecraft.world.item.FireworkRocketItem;
 import net.minecraft.world.item.Rarity;
 import net.minecraft.world.item.Tiers;
 import net.minecraft.world.level.GameType;
+import net.minecraft.world.level.TickPriority;
 import net.minecraft.world.level.block.Mirror;
 import net.minecraft.world.level.block.Rotation;
 import net.minecraft.world.level.block.entity.BannerPattern;
@@ -190,17 +191,18 @@ final class VanillaRegistryLoader {
         this.automaticName(RegistryTypes.RAID_STATUS, Raid.RaidStatus.values());
         this.automaticName(RegistryTypes.ROTATION, Rotation.values());
         this.knownName(RegistryTypes.RAIL_DIRECTION, RailShape.values(), RailShape::getSerializedName);
-        this.knownName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values(), RedstoneSide::getSerializedName);
         this.knownName(RegistryTypes.SLAB_PORTION, SlabType.values(), SlabType::getSerializedName);
         this.automaticName(RegistryTypes.SPELL_TYPE, SpellcasterIllager.IllagerSpell.values());
         this.knownName(RegistryTypes.STAIR_SHAPE, StairsShape.values(), StairsShape::getSerializedName);
         this.knownName(RegistryTypes.STRUCTURE_MODE, StructureMode.values(), StructureMode::getSerializedName);
+        this.automaticName(RegistryTypes.TASK_PRIORITY, TickPriority.values());
         this.manualName(RegistryTypes.VISIBILITY, Team.Visibility.values(), map -> {
             map.put(Team.Visibility.ALWAYS, "always");
             map.put(Team.Visibility.NEVER, "never");
             map.put(Team.Visibility.HIDE_FOR_OTHER_TEAMS, "hide_for_other_teams");
             map.put(Team.Visibility.HIDE_FOR_OWN_TEAM, "hide_for_own_team");
         });
+        this.knownName(RegistryTypes.WIRE_ATTACHMENT_TYPE, RedstoneSide.values(), RedstoneSide::getSerializedName);
         this.knownName(RegistryTypes.ADVANCEMENT_TYPE, FrameType.values(), FrameType::getName);
         this.knownName(RegistryTypes.BANNER_PATTERN_SHAPE, BannerPattern.values(), b -> ((BannerPatternAccessor) (Object) b).accessor$filename());
         this.automaticName(RegistryTypes.TROPICAL_FISH_SHAPE, TropicalFish.Pattern.values());

@@ -28,12 +28,13 @@ import net.minecraft.world.entity.animal.Panda;
 import org.spongepowered.api.data.type.PandaGene;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(Panda.Gene.class)
-@Implements(@Interface(iface = PandaGene.class, prefix = "pandaGene$"))
+@Implements(@Interface(iface = PandaGene.class, prefix = "pandaGene$", remap = Remap.NONE))
 public abstract class Panda_GeneMixin_API implements PandaGene {
 
     // @formatter:off

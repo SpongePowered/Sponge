@@ -45,11 +45,9 @@ public final class Main {
         AnsiConsole.systemInstall();
     }
 
-    private final Logger logger;
     private final VanillaPluginPlatform pluginPlatform;
 
     public Main() {
-        this.logger = LogManager.getLogger("App Launch");
         this.pluginPlatform = AppLaunch.setPluginPlatform(new VanillaPluginPlatform(new PluginEnvironment()));
     }
 
@@ -76,7 +74,7 @@ public final class Main {
         }
         this.pluginPlatform.setPluginDirectories(pluginDirectories);
 
-        this.logger.info("Transitioning to ModLauncher, please wait...");
+        AppLaunch.logger().info("Transitioning to ModLauncher, please wait...");
         final ArgumentList lst = ArgumentList.from(AppCommandLine.RAW_ARGS);
         Launcher.main(lst.getArguments());
     }

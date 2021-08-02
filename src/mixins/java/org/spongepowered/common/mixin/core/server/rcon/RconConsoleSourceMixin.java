@@ -26,18 +26,32 @@ package org.spongepowered.common.mixin.core.server.rcon;
 
 import net.minecraft.commands.CommandSourceStack;
 import net.minecraft.server.rcon.RconConsoleSource;
+import net.minecraft.server.rcon.thread.RconClient;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
+import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
 import org.spongepowered.common.bridge.permissions.SubjectBridge;
+import org.spongepowered.common.bridge.server.rcon.RconConsoleSourceBridge;
+
+import java.util.UUID;
 
 @Mixin(RconConsoleSource.class)
-public abstract class RconConsoleSourceMixin implements CommandSourceProviderBridge, SubjectBridge {
+public abstract class RconConsoleSourceMixin implements CommandSourceProviderBridge, SubjectBridge, RconConsoleSourceBridge {
+
+    // @formatter:off
+    @Shadow @Final private StringBuffer buffer;
 
     @Shadow public abstract CommandSourceStack shadow$createCommandSourceStack();
+    // @formatter:on
+
+    private RconClient impl$client;
 
     @Override
     public CommandSourceStack bridge$getCommandSource(final Cause cause) {
@@ -52,6 +66,25 @@ public abstract class RconConsoleSourceMixin implements CommandSourceProviderBri
     @Override
     public String bridge$getSubjectCollectionIdentifier() {
         return PermissionService.SUBJECTS_SYSTEM;
+    }
+
+    /**
+     * Add newlines between output lines for a command
+     * @param component text coming in
+     */
+    @Inject(method = "sendMessage", at = @At("RETURN"))
+    private void impl$addNewlines(final net.minecraft.network.chat.Component component, final UUID uuid, final CallbackInfo ci) {
+        this.buffer.append('\n');
+    }
+
+    @Override
+    public void bridge$setClient(RconClient connection) {
+        this.impl$client = connection;
+    }
+
+    @Override
+    public RconClient bridge$getClient() {
+        return this.impl$client;
     }
 
 }

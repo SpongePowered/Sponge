@@ -25,6 +25,8 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.Transaction;
@@ -43,6 +45,7 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedInventoryBridge;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -53,8 +56,6 @@ import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
 
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Set;
@@ -123,14 +124,8 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     }
 
     @Override
-    public boolean shouldCaptureEntity() {
-        // Example: Furnaces dropping XP when an item is picked up
-        return true;
-    }
-
-    @Override
     public InventoryPacketContext createNewContext(final PhaseTracker tracker) {
-        return new InventoryPacketContext(this, tracker).addCaptures().addEntityDropCaptures(); // if for whatever reason there's a capture.. i don't know...
+        return new InventoryPacketContext(this, tracker);
     }
 
 
@@ -174,7 +169,7 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
             if (ShouldFire.SPAWN_ENTITY_EVENT && !capturedItems.isEmpty()) {
                 for (final Entity entiy: capturedItems) {
                     if (entiy instanceof CreatorTrackedBridge) {
-                        ((CreatorTrackedBridge) entiy).tracked$setCreatorReference(((ServerPlayer) player).user());
+                        ((CreatorTrackedBridge) entiy).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((ServerPlayer) player).uniqueId());
                     } else {
                         entiy.offer(Keys.CREATOR, player.getUUID());
                     }

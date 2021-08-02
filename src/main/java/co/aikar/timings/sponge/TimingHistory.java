@@ -48,7 +48,7 @@ public class TimingHistory {
     public static long timedTicks;
     public static long playerTicks;
     public static long entityTicks;
-    public static long tileEntityTicks;
+    public static long blockEntityTicks;
     public static long activatedEntityTicks;
     static int worldIdPool = 1;
     static Map<String, Integer> worldMap = LoadingMap.newHashMap((input) -> TimingHistory.worldIdPool++);
@@ -193,7 +193,7 @@ public class TimingHistory {
         }
         TimingHistory.lastMinuteTime = System.nanoTime();
         TimingHistory.playerTicks = 0;
-        TimingHistory.tileEntityTicks = 0;
+        TimingHistory.blockEntityTicks = 0;
         TimingHistory.entityTicks = 0;
         TimingHistory.activatedEntityTicks = 0;
     }
@@ -251,7 +251,7 @@ public class TimingHistory {
             this.timed = TimingHistory.timedTicks - (TimingsManager.MINUTE_REPORTS.size() * 1200);
             this.player = TimingHistory.playerTicks;
             this.entity = TimingHistory.entityTicks;
-            this.tileEntity = TimingHistory.tileEntityTicks;
+            this.tileEntity = TimingHistory.blockEntityTicks;
             this.activatedEntity = TimingHistory.activatedEntityTicks;
         }
 

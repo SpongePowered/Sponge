@@ -25,8 +25,6 @@
 package org.spongepowered.common.event.tracking.phase.generation;
 
 import org.spongepowered.common.event.tracking.IPhaseState;
-import org.spongepowered.common.event.tracking.phase.block.BlockPhase;
-import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 
 /**
  * A specific tracking phase to handle any point in which world or chunk
@@ -48,7 +46,7 @@ public final class GenerationPhase {
     @SuppressWarnings("unchecked")
     public static final class State {
 
-        public static final IPhaseState<ChunkLoadContext> CHUNK_LOADING = new ChunkLoadPhaseState().bake();
+        public static final IPhaseState<ChunkLoadContext> CHUNK_LOADING = new ChunkLoadPhaseState();
 
         public static final IPhaseState<DeferredScheduledUpdatePhaseState.Context> DEFERRED_SCHEDULED_UPDATE = new DeferredScheduledUpdatePhaseState();
 
@@ -56,7 +54,7 @@ public final class GenerationPhase {
 
         public static final IPhaseState<ChunkRegenerateContext> CHUNK_REGENERATING = new ChunkRegeneratePhaseState();
 
-        public static final IPhaseState<GenericGenerationContext> WORLD_SPAWNER_SPAWNING = new WorldSpawnerPhaseState().bake();
+        public static final IPhaseState<GenericGenerationContext> WORLD_SPAWNER_SPAWNING = new WorldSpawnerPhaseState();
 
         public static final IPhaseState<PopulatorPhaseContext> POPULATOR_RUNNING = new PopulatorGenerationPhaseState("POPULATOR_RUNNING");
 
@@ -66,56 +64,6 @@ public final class GenerationPhase {
 
         public static final IPhaseState<GenerationCompatibileContext> GENERATION_COMPATIBILITY = new GenerationCompatibilityState();
 
-        static {
-            ((GeneralGenerationPhaseState<?>) GenerationPhase.State.POPULATOR_RUNNING)
-                    .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
-                    .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
-                    .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
-                    .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
-                    .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
-                    .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
-                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
-                    .bake();
-            ((GeneralGenerationPhaseState<?>) GenerationPhase.State.FEATURE_PLACEMENT)
-                    .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
-                    .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
-                    .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
-                    .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
-                    .addCompatibleState(GenerationPhase.State.FEATURE_PLACEMENT)
-                    .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
-                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
-                    .bake();
-            ((GeneralGenerationPhaseState<?>) GenerationPhase.State.GENERATION_COMPATIBILITY)
-                    .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
-                    .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
-                    .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
-                    .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
-                    .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
-                    .addCompatibleState(GenerationPhase.State.FEATURE_PLACEMENT)
-                    .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
-                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
-                    .bake();
-            ((GeneralGenerationPhaseState<?>) GenerationPhase.State.TERRAIN_GENERATION)
-                    .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
-                    .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
-                    .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
-                    .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
-                    .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
-                    .addCompatibleState(GenerationPhase.State.FEATURE_PLACEMENT)
-                    .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
-                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
-                    .bake();
-            ((GeneralGenerationPhaseState<?>) GenerationPhase.State.CHUNK_REGENERATING)
-                    .addCompatibleState(BlockPhase.State.BLOCK_DECAY)
-                    .addCompatibleState(BlockPhase.State.BLOCK_DROP_ITEMS)
-                    .addCompatibleState(BlockPhase.State.RESTORING_BLOCKS)
-                    .addCompatibleState(GenerationPhase.State.WORLD_SPAWNER_SPAWNING)
-                    .addCompatibleState(GenerationPhase.State.POPULATOR_RUNNING)
-                    .addCompatibleState(GenerationPhase.State.FEATURE_PLACEMENT)
-                    .addCompatibleState(GenerationPhase.State.GENERATION_COMPATIBILITY)
-                    .addCompatibleState(GeneralPhase.Post.UNWINDING)
-                    .bake();
-        }
     }
 
     private GenerationPhase() {

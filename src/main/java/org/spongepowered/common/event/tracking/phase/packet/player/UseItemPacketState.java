@@ -24,18 +24,17 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.player;
 
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
-import org.spongepowered.common.event.tracking.IPhaseState;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
@@ -45,27 +44,27 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.BlockChange;
 
-import java.util.function.BiConsumer;
 import net.minecraft.core.BlockPos;
 import net.minecraft.network.protocol.Packet;
 import net.minecraft.network.protocol.game.ServerboundUseItemPacket;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.InteractionHand;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.item.SpawnEggItem;
 import net.minecraft.world.level.block.Block;
+
+import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 @SuppressWarnings("unchecked")
 public final class UseItemPacketState extends BasicPacketState {
 
     private BiConsumer<CauseStackManager.StackFrame, BasicPacketContext> BASIC_PACKET_MODIFIER =
-            ((BiConsumer<CauseStackManager.StackFrame, BasicPacketContext>) IPhaseState.DEFAULT_OWNER_NOTIFIER)
+            super.getFrameModifier()
                     .andThen((frame, ctx) -> {
                         frame.addContext(EventContextKeys.PLAYER_PLACE, ctx.getSpongePlayer().world());
                         frame.addContext(EventContextKeys.USED_HAND, ctx.getHandUsed());
                         frame.addContext(EventContextKeys.USED_ITEM, ctx.getItemUsedSnapshot());
-                        final ItemStack itemStack = ctx.getItemUsed();
-                        frame.addContext(EventContextKeys.SPAWN_TYPE,
-                                itemStack.type() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
                         frame.pushCause(ctx.getSpongePlayer());
                     });
 
@@ -79,8 +78,10 @@ public final class UseItemPacketState extends BasicPacketState {
         return true;
     }
 
+    @SuppressWarnings("ConstantConditions")
     @Override
-    public void populateContext(net.minecraft.server.level.ServerPlayer playerMP, Packet<?> packet, BasicPacketContext context) {
+    public void populateContext(
+        final net.minecraft.server.level.ServerPlayer playerMP, final Packet<?> packet, final BasicPacketContext context) {
         final ServerboundUseItemPacket placeBlock = (ServerboundUseItemPacket) packet;
         final net.minecraft.world.item.ItemStack usedItem = playerMP.getItemInHand(placeBlock.getHand());
         final ItemStack itemstack = ItemStackUtil.cloneDefensive(usedItem);
@@ -90,41 +91,39 @@ public final class UseItemPacketState extends BasicPacketState {
     }
 
     @Override
-    public void postBlockTransactionApplication(BlockChange blockChange, Transaction<? extends BlockSnapshot> transaction,
-        BasicPacketContext context) {
-        ServerPlayer player = context.getSpongePlayer();
-        BlockPos pos = VecHelper.toBlockPos(transaction.finalReplacement().location().get());
-        LevelChunkBridge spongeChunk = (LevelChunkBridge) ((ServerLevel) player.world()).getChunkAt(pos);
+    public void postBlockTransactionApplication(
+        final BasicPacketContext context, final BlockChange blockChange,
+        final BlockTransactionReceipt transaction
+    ) {
+        final ServerPlayer player = context.getSpongePlayer();
+        final BlockPos pos = VecHelper.toBlockPos(transaction.finalBlock().position());
+        final LevelChunkBridge spongeChunk = (LevelChunkBridge) ((ServerLevel) player.world()).getChunkAt(pos);
         if (blockChange == BlockChange.PLACE) {
-            spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.finalReplacement().state().type(), pos, player.user(), PlayerTracker.Type.CREATOR);
+            spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.finalBlock().state().type(), pos, player.uniqueId(), PlayerTracker.Type.CREATOR);
         }
 
-        spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.finalReplacement().state().type(), pos, player.user(), PlayerTracker.Type.NOTIFIER);
+        spongeChunk.bridge$addTrackedBlockPosition((Block) transaction.finalBlock().state().type(), pos, player.uniqueId(), PlayerTracker.Type.NOTIFIER);
+    }
+
+    @Override
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final BasicPacketContext context, final Entity entityToSpawn
+    ) {
+        final ItemStack itemStack = context.getItemUsed();
+        return itemStack.type() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT;
     }
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    public void unwind(BasicPacketContext context) {
+    public void unwind(final BasicPacketContext context) {
         final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
-        final ItemStack itemStack = context.getItemUsed();
         final ItemStackSnapshot snapshot = context.getItemUsedSnapshot();
         final HandType hand = context.getHandUsed();
-        try (CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE,
-                itemStack.type() instanceof SpawnEggItem ? SpawnTypes.SPAWN_EGG : SpawnTypes.PLACEMENT);
-//            context.getCapturedEntitySupplier()
-//                .acceptAndClearIfNotEmpty(entities -> {
-//                    SpongeCommonEventFactory.callSpawnEntity(entities, context);
-//                });
-            if (!context.getTransactor().isEmpty()) {
-                // TODO - Determine if we need to pass the supplier or perform some parameterized
-                //  process if not empty method on the capture object.
-                boolean success = TrackingUtil.processBlockCaptures(context);
-                if (!success && snapshot.isEmpty()) {
-                    PhaseTracker.getCauseStackManager().pushCause(player);
-                    PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), (InteractionHand) (Object) hand);
-                }
-            }
+        final ItemStack itemStack = context.getItemUsed();
+        final boolean success = TrackingUtil.processBlockCaptures(context);
+        if (!success && snapshot.isEmpty()) {
+            PhaseTracker.getCauseStackManager().pushCause(player);
+            PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), (InteractionHand) (Object) hand);
         }
     }
 }

@@ -28,6 +28,7 @@ import static org.objectweb.asm.Opcodes.ACONST_NULL;
 import static org.objectweb.asm.Opcodes.ALOAD;
 import static org.objectweb.asm.Opcodes.ARETURN;
 import static org.objectweb.asm.Opcodes.CHECKCAST;
+import static org.objectweb.asm.Opcodes.GETSTATIC;
 import static org.objectweb.asm.Opcodes.IFEQ;
 import static org.objectweb.asm.Opcodes.IFNE;
 import static org.objectweb.asm.Opcodes.INVOKEINTERFACE;
@@ -36,31 +37,45 @@ import org.objectweb.asm.ClassWriter;
 import org.objectweb.asm.Label;
 import org.objectweb.asm.MethodVisitor;
 import org.objectweb.asm.Type;
-import org.spongepowered.api.data.DataHolder;
+import org.spongepowered.api.data.Key;
+import org.spongepowered.api.data.value.ValueContainer;
 import org.spongepowered.api.event.filter.data.Supports;
 
+import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Parameter;
 
 public class SupportsDataFilterDelegate implements ParameterFilterDelegate {
 
+    private static final String SUPPORTS_DESC = Type.getMethodDescriptor(Type.BOOLEAN_TYPE, Type.getType(Key.class));
     private final Supports anno;
 
-    public SupportsDataFilterDelegate(Supports anno) {
+    public SupportsDataFilterDelegate(final Supports anno) {
         this.anno = anno;
     }
 
     @Override
-    public void write(ClassWriter cw, MethodVisitor mv, Method method, Parameter param, int localParam) {
-        if (!DataHolder.class.isAssignableFrom(param.getType())) {
-            throw new IllegalStateException("Annotated type for data filter is not a DataHolder");
+    public void write(final ClassWriter cw, final MethodVisitor mv, final Method method, final Parameter param, final int localParam) {
+        if (!ValueContainer.class.isAssignableFrom(param.getType())) {
+            throw new IllegalStateException("Annotated type for data filter is not a ValueContainer");
+        }
+
+        final Field targetField;
+        try {
+            targetField = this.anno.container().getField(this.anno.value());
+        } catch (final NoSuchFieldException ex) {
+            throw new IllegalArgumentException(String.format("Field %s specified by GetValue annotation was not found in container %s", this.anno.value(), this.anno.container()));
+        }
+
+        if (!Key.class.isAssignableFrom(targetField.getType())) {
+            throw new IllegalArgumentException(String.format("Field %s.%s was not a Key", targetField.getName(), targetField.getType()));
         }
 
         mv.visitVarInsn(ALOAD, localParam);
-        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(DataHolder.class));
-        mv.visitLdcInsn(Type.getType(this.anno.value()));
-        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(DataHolder.class), "supports", "(Ljava/lang/Class;)Z", true);
-        Label success = new Label();
+        mv.visitTypeInsn(CHECKCAST, Type.getInternalName(ValueContainer.class));
+        mv.visitFieldInsn(GETSTATIC, Type.getInternalName(this.anno.container()), this.anno.value(), Type.getDescriptor(Key.class));
+        mv.visitMethodInsn(INVOKEINTERFACE, Type.getInternalName(param.getType()), "supports", SupportsDataFilterDelegate.SUPPORTS_DESC, true);
+        final Label success = new Label();
         if (this.anno.inverse()) {
             mv.visitJumpInsn(IFEQ, success);
         } else {

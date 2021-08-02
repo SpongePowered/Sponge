@@ -45,9 +45,9 @@ import org.spongepowered.common.data.SpongeDataManager;
 import org.spongepowered.common.data.holder.SimpleNBTDataHolder;
 import org.spongepowered.common.entity.SpongeEntityArchetype;
 import org.spongepowered.common.entity.SpongeEntitySnapshot;
-import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.entity.player.SpongeUserData;
 
-@Mixin({BlockEntity.class, Entity.class, SpongeUser.class, ItemStack.class,
+@Mixin({BlockEntity.class, Entity.class, SpongeUserData.class, ItemStack.class,
         SpongeEntityArchetype.class,
         SpongeEntitySnapshot.class,
         SpongeBlockSnapshot.class,

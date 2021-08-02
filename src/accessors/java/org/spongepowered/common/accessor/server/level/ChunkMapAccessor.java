@@ -39,7 +39,8 @@ public interface ChunkMapAccessor {
 
     @Accessor("pendingUnloads") Long2ObjectLinkedOpenHashMap<ChunkHolder> accessor$pendingUnloads();
 
-    @Invoker("saveAllChunks") void invoker$saveAllChunks(final boolean flush);
+
+    @Invoker("saveAllChunks") void invoker$saveAllChunks(boolean flush);
 
     @Invoker("getChunks") Iterable<ChunkHolder> invoker$getChunks();
 

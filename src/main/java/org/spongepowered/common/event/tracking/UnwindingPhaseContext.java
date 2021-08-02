@@ -31,6 +31,7 @@ import org.spongepowered.common.event.tracking.phase.general.GeneralPhase;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
+import java.util.UUID;
 
 public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseContext> {
 
@@ -45,8 +46,6 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
         }
         return new UnwindingPhaseContext(context)
                 .source(context.getSource())
-                .addCaptures()
-                .addEntityDropCaptures()
                 .buildAndSwitch();
     }
 
@@ -65,12 +64,12 @@ public final class UnwindingPhaseContext extends PhaseContext<UnwindingPhaseCont
     }
 
     @Override
-    public Optional<User> getCreator() {
+    public Optional<UUID> getCreator() {
         return this.unwindingContext.getCreator();
     }
 
     @Override
-    public Optional<User> getNotifier() {
+    public Optional<UUID> getNotifier() {
         return this.unwindingContext.getNotifier();
     }
 

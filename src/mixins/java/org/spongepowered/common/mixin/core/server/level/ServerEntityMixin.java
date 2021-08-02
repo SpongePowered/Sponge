@@ -97,6 +97,7 @@ public abstract class ServerEntityMixin {
     @Redirect(method = "sendPairingData",
             at = @At(
                     value = "INVOKE",
+                    remap = false,
                     target = "Ljava/util/function/Consumer;accept(Ljava/lang/Object;)V",
                     ordinal = 0)
     )

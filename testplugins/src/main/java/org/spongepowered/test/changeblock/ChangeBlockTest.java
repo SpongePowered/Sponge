@@ -36,6 +36,7 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.BlockTypes;
 import org.spongepowered.api.block.transaction.BlockTransaction;
+import org.spongepowered.api.block.transaction.Operations;
 import org.spongepowered.api.command.Command;
 import org.spongepowered.api.command.CommandResult;
 import org.spongepowered.api.command.parameter.CommandContext;
@@ -64,6 +65,7 @@ public final class ChangeBlockTest implements LoadableModule {
     boolean printEntityHarvests = false;
     boolean printEntitySpawns = false;
     boolean printEntityDeaths = false;
+    boolean regressionTest = false;
 
     @Inject
     public ChangeBlockTest(final PluginContainer plugin) {
@@ -76,6 +78,7 @@ public final class ChangeBlockTest implements LoadableModule {
         Sponge.eventManager().registerListeners(this.plugin, new HarvestEntityListener());
         Sponge.eventManager().registerListeners(this.plugin, new SpawnEntityListener());
         Sponge.eventManager().registerListeners(this.plugin, new EntityDeathPrinter());
+        Sponge.eventManager().registerListeners(this.plugin, new RegressionTester());
     }
 
     @Listener
@@ -83,7 +86,8 @@ public final class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .executor(context -> {
                 this.cancelAll = !this.cancelAll;
-                final Component newState = Component.text(this.cancelAll ? "OFF" : "ON", this.cancelAll ? NamedTextColor.GREEN : NamedTextColor.RED);
+                final Component newState = Component.text(
+                    this.cancelAll ? "OFF" : "ON", this.cancelAll ? NamedTextColor.GREEN : NamedTextColor.RED);
                 context.sendMessage(Identity.nil(), Component.text("Turning Block Changes: ").append(newState));
                 return CommandResult.success();
             })
@@ -92,7 +96,10 @@ public final class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .executor(context -> {
                 this.waterProofRedstone = !this.waterProofRedstone;
-                final Component newState = Component.text(this.waterProofRedstone ? "ON" : "OFF", this.waterProofRedstone ? NamedTextColor.GREEN : NamedTextColor.RED);
+                final Component newState = Component.text(
+                    this.waterProofRedstone ? "ON" : "OFF",
+                    this.waterProofRedstone ? NamedTextColor.GREEN : NamedTextColor.RED
+                );
                 context.sendMessage(Identity.nil(), Component.text("Waterproof Redstone : ").append(newState));
                 return CommandResult.success();
             })
@@ -101,7 +108,10 @@ public final class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .executor(context -> {
                 this.printEntityHarvests = !this.printEntityHarvests;
-                final Component newState = Component.text(this.printEntityHarvests ? "ON" : "OFF", this.printEntityHarvests ? NamedTextColor.GREEN : NamedTextColor.RED);
+                final Component newState = Component.text(
+                    this.printEntityHarvests ? "ON" : "OFF",
+                    this.printEntityHarvests ? NamedTextColor.GREEN : NamedTextColor.RED
+                );
                 context.sendMessage(Identity.nil(), Component.text("Logging Entity Harvests : ").append(newState));
                 return CommandResult.success();
             })
@@ -110,7 +120,10 @@ public final class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .executor(context -> {
                 this.printEntityDeaths = !this.printEntityDeaths;
-                final Component newState = Component.text(this.printEntityDeaths ? "ON" : "OFF", this.printEntityDeaths ? NamedTextColor.GREEN : NamedTextColor.RED);
+                final Component newState = Component.text(
+                    this.printEntityDeaths ? "ON" : "OFF",
+                    this.printEntityDeaths ? NamedTextColor.GREEN : NamedTextColor.RED
+                );
                 context.sendMessage(Identity.nil(), Component.text("Logging Entity Harvests : ").append(newState));
                 return CommandResult.success();
             })
@@ -119,7 +132,10 @@ public final class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .executor(context -> {
                 this.printEntitySpawns = !this.printEntitySpawns;
-                final Component newState = Component.text(this.printEntitySpawns ? "ON" : "OFF", this.printEntitySpawns ? NamedTextColor.GREEN : NamedTextColor.RED);
+                final Component newState = Component.text(
+                    this.printEntitySpawns ? "ON" : "OFF",
+                    this.printEntitySpawns ? NamedTextColor.GREEN : NamedTextColor.RED
+                );
                 context.sendMessage(Identity.nil(), Component.text("Logging Entity Spawns : ").append(newState));
                 return CommandResult.success();
             })
@@ -128,11 +144,26 @@ public final class ChangeBlockTest implements LoadableModule {
         event.register(this.plugin, Command.builder()
             .executor(context -> {
                 this.cancelTransactions = !this.cancelTransactions;
-                final Component newState = Component.text(this.cancelTransactions ? "ON" : "OFF", this.cancelTransactions ? NamedTextColor.GREEN : NamedTextColor.RED);
+                final Component newState = Component.text(
+                    this.cancelTransactions ? "ON" : "OFF",
+                    this.cancelTransactions ? NamedTextColor.GREEN : NamedTextColor.RED
+                );
                 context.sendMessage(Identity.nil(), Component.text("Invalidating Transactions : ").append(newState));
                 return CommandResult.success();
             })
             .build(), "toggleBlockTransactions"
+        );
+        event.register(this.plugin, Command.builder()
+            .executor(context -> {
+                this.regressionTest = !this.regressionTest;
+                final Component newState = Component.text(
+                    this.regressionTest ? "ON" : "OFF",
+                    this.regressionTest ? NamedTextColor.GREEN : NamedTextColor.RED
+                );
+                context.sendMessage(Identity.nil(), Component.text("Regression Transactions Test: ").append(newState));
+                return CommandResult.success();
+            })
+            .build(), "regressionBlockTest"
         );
     }
 
@@ -207,11 +238,11 @@ public final class ChangeBlockTest implements LoadableModule {
                 // Leaves are the bane of all existence... they just spam so many events....
                 final BlockType type = ((LocatableBlock) post.cause().root()).blockState().type();
                 if (type == BlockTypes.ACACIA_LEAVES.get()
-                   || type == BlockTypes.BIRCH_LEAVES.get()
-                   || type == BlockTypes.OAK_LEAVES.get()
-                   || type == BlockTypes.DARK_OAK_LEAVES.get()
-                   || type == BlockTypes.JUNGLE_LEAVES.get()
-                   || type == BlockTypes.SPRUCE_LEAVES.get()) {
+                    || type == BlockTypes.BIRCH_LEAVES.get()
+                    || type == BlockTypes.OAK_LEAVES.get()
+                    || type == BlockTypes.DARK_OAK_LEAVES.get()
+                    || type == BlockTypes.JUNGLE_LEAVES.get()
+                    || type == BlockTypes.SPRUCE_LEAVES.get()) {
                     return;
                 }
             }
@@ -224,13 +255,29 @@ public final class ChangeBlockTest implements LoadableModule {
             if (ChangeBlockTest.this.waterProofRedstone) {
                 for (final BlockTransaction transaction : post.transactions()) {
                     final boolean wasRedstone = transaction.original().state().type() == BlockTypes.REDSTONE_WIRE.get();
-                    final boolean becomesLiquid = transaction.finalReplacement().state().get(Keys.MATTER_TYPE).get() == MatterTypes.LIQUID.get();
+                    final boolean becomesLiquid = transaction.finalReplacement().state().get(
+                        Keys.MATTER_TYPE).get() == MatterTypes.LIQUID.get();
                     if (wasRedstone && becomesLiquid) {
                         post.setCancelled(true);
                         return;
                     }
                 }
 
+            }
+        }
+    }
+
+    public class RegressionTester {
+
+        @Listener
+        public void onChangeBlock(final ChangeBlockEvent.All all) {
+            if (!ChangeBlockTest.this.regressionTest) {
+                return;
+            }
+            for (BlockTransaction transaction : all.transactions()) {
+                if (transaction.operation() == Operations.BREAK.get()) {
+                    transaction.setValid(false);
+                }
             }
         }
     }

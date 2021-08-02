@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -50,7 +49,7 @@ import java.util.function.BiConsumer;
 public abstract class GameTransaction<E extends Event & Cancellable> {
 
     private final TransactionType<? extends E> transactionType;
-    protected final ResourceKey worldKey;
+    final ResourceKey worldKey;
     boolean cancelled = false;
 
     // Children Definitions
@@ -81,6 +80,13 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
             this.sideEffects = new LinkedList<>();
         }
         return this.sideEffects;
+    }
+
+    public void addLast(final ResultingTransactionBySideEffect effect) {
+        if (this.sideEffects == null) {
+            this.sideEffects = new LinkedList<>();
+        }
+        this.sideEffects.addLast(effect);
     }
 
     public final boolean hasChildTransactions() {
@@ -133,8 +139,7 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
         PhaseContext<@NonNull ?> context,
         @Nullable GameTransaction<@NonNull ?> parent,
         ImmutableList<GameTransaction<E>> transactions,
-        Cause currentCause,
-        ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
+        Cause currentCause
     );
 
     void handleEmptyEvent() {
@@ -172,5 +177,10 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
 
     boolean acceptDrops(final PrepareBlockDropsTransaction transaction) {
         return false;
+    }
+
+    boolean shouldBuildEventAndRestartBatch(final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context) {
+        return this.getTransactionType() != pointer.getTransactionType()
+            || !this.worldKey.equals(pointer.worldKey);
     }
 }

@@ -25,7 +25,6 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
-import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.damagesource.DamageSource;
@@ -35,12 +34,10 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.HarvestEntityEvent;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 
@@ -100,8 +97,7 @@ public final class EntityPerformingDropsTransaction extends GameTransaction<Harv
     public Optional<HarvestEntityEvent> generateEvent(
         final PhaseContext<@NonNull ?> context, final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<GameTransaction<HarvestEntityEvent>> gameTransactions,
-        final Cause currentCause,
-        final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
+        final Cause currentCause
     ) {
         return Optional.of(SpongeEventFactory.createHarvestEntityEvent(currentCause, (org.spongepowered.api.entity.Entity) this.destroyingEntity));
     }

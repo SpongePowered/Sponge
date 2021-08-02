@@ -27,17 +27,18 @@ package org.spongepowered.common.mixin.tracker.world.level;
 import net.minecraft.world.level.BlockEventData;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.block.entity.BlockEntity;
-import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.world.LocatableBlock;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
+
+import java.util.UUID;
 
 @Mixin(BlockEventData.class)
-public abstract class BlockEventDataMixin_Tracker implements TrackerBlockEventDataBridge {
+public abstract class BlockEventDataMixin_Tracker implements TrackableBlockEventDataBridge {
 
     @Nullable private LocatableBlock bridge$TickingBlock = null;
     @Nullable private BlockEntity bridge$TileEntity = null;
-    @Nullable private User bridge$sourceUser = null;
+    @Nullable private UUID bridge$sourceUser = null;
 
     @Nullable
     @Override
@@ -61,14 +62,13 @@ public abstract class BlockEventDataMixin_Tracker implements TrackerBlockEventDa
         this.bridge$TileEntity = bridge$TileEntity;
     }
 
-    @Nullable
     @Override
-    public User bridge$getSourceUser() {
+    public @Nullable UUID bridge$getSourceUserUUID() {
         return this.bridge$sourceUser;
     }
 
     @Override
-    public void bridge$setSourceUser(@Nullable final User user) {
+    public void bridge$setSourceUserUUID(final @Nullable UUID user) {
         this.bridge$sourceUser = user;
     }
 

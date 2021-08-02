@@ -24,7 +24,13 @@
  */
 package org.spongepowered.common.event.tracking.phase.generation;
 
+import org.spongepowered.api.event.cause.entity.SpawnType;
+import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+
+import net.minecraft.world.entity.Entity;
+
+import java.util.function.Supplier;
 
 public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericGenerationContext> {
 
@@ -34,17 +40,13 @@ public class WorldSpawnerPhaseState extends GeneralGenerationPhaseState<GenericG
 
     @Override
     public GenericGenerationContext createNewContext(final PhaseTracker tracker) {
-        return new GenericGenerationContext(this, tracker)
-                .addCaptures();
+        return new GenericGenerationContext(this, tracker);
     }
 
     @Override
-    public boolean doesDenyChunkRequests(final GenericGenerationContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean ignoresBlockUpdateTick(final GenericGenerationContext context) {
-        return false;
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final GenericGenerationContext context, final Entity entityToSpawn
+    ) {
+        return SpawnTypes.WORLD_SPAWNER;
     }
 }

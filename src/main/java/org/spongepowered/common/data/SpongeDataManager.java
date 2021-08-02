@@ -50,6 +50,7 @@ import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
 import org.spongepowered.api.entity.EntityArchetype;
 import org.spongepowered.api.entity.EntitySnapshot;
+import org.spongepowered.api.event.EventListenerRegistration;
 import org.spongepowered.api.event.data.ChangeDataHolderEvent;
 import org.spongepowered.api.item.ItemType;
 import org.spongepowered.api.item.inventory.ItemStack;
@@ -70,7 +71,7 @@ import org.spongepowered.common.data.provider.CustomDataProvider;
 import org.spongepowered.common.data.provider.DataProviderRegistry;
 import org.spongepowered.common.entity.SpongeEntityArchetypeBuilder;
 import org.spongepowered.common.entity.SpongeEntitySnapshotBuilder;
-import org.spongepowered.common.item.SpongeItemStackBuilder;
+import org.spongepowered.common.item.SpongeItemStack;
 import org.spongepowered.common.map.canvas.SpongeMapCanvasDataBuilder;
 import org.spongepowered.common.map.decoration.SpongeMapDecorationDataBuilder;
 import org.spongepowered.common.profile.SpongeGameProfileDataBuilder;
@@ -92,7 +93,6 @@ import java.util.Map;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Set;
-
 
 @Singleton
 public final class SpongeDataManager implements DataManager {
@@ -239,7 +239,11 @@ public final class SpongeDataManager implements DataManager {
     }
 
     private void registerKeyListener0(final KeyBasedDataListener<?> listener) {
-        Sponge.eventManager().registerListener(listener.getOwner(), ChangeDataHolderEvent.ValueChange.class, listener);
+        Sponge.eventManager().registerListener(EventListenerRegistration.builder(ChangeDataHolderEvent.ValueChange.class)
+            .plugin(listener.getOwner())
+            .listener(listener)
+            .build()
+        );
     }
 
     @Override
@@ -328,10 +332,10 @@ public final class SpongeDataManager implements DataManager {
     }
 
     public void registerDefaultBuilders() {
-        this.registerBuilder(ItemStack.class, new SpongeItemStackBuilder());
+        this.registerBuilder(ItemStack.class, new SpongeItemStack.BuilderImpl());
         this.registerBuilder(ItemStackSnapshot.class, new SpongeItemStackSnapshotDataBuilder());
         this.registerBuilder(EntitySnapshot.class, new SpongeEntitySnapshotBuilder());
-        this.registerBuilder(EntityArchetype.class, new SpongeEntityArchetypeBuilder());
+        this.registerBuilder(EntityArchetype.class, SpongeEntityArchetypeBuilder.unpooled());
         this.registerBuilder(SpongePlayerData.class, new SpongePlayerDataBuilder());
         this.registerBuilder(BlockState.class, new SpongeBlockStateBuilder());
         this.registerBuilder(MapDecoration.class, new SpongeMapDecorationDataBuilder());

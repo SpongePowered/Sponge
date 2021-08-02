@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.parameter.managed.standard;
 
+import com.mojang.brigadier.CommandDispatcher;
 import net.kyori.adventure.text.Component;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.command.CommandCompletion;
@@ -75,7 +76,14 @@ public final class SpongeChoicesValueParameter<T> extends AbstractArgumentParser
 
     @Override
     public List<CommandCompletion> complete(final @NonNull CommandContext context, final String currentInput) {
-        return this.choices.get().stream().filter(x -> x.startsWith(currentInput))
+        return this.choices.get().stream()
+                .filter(x -> x.startsWith(currentInput))
+                .map(x -> {
+                    if (x.contains(CommandDispatcher.ARGUMENT_SEPARATOR)) {
+                        return "\"" + x + "\"";
+                    }
+                    return x;
+                })
                 .map(SpongeCommandCompletion::new)
                 .collect(Collectors.toList());
     }

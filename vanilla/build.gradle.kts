@@ -119,21 +119,10 @@ minecraft {
             server("runJava${it}Server") {
                 args("--nogui", "--launchTarget", "sponge_server_dev")
                 targetVersion(it)
-                allArgumentProviders += CommandLineArgumentProvider {
-                    mixinConfigs.asSequence()
-                            .flatMap { sequenceOf("--mixin.config", it) }
-                            .toList()
-                }
             }
             client("runJava${it}Client") {
                 args("--launchTarget", "sponge_client_dev")
-                jvmArgs("-Dmixin.debug.export=true", "-Dmixin.debug=true")
                 targetVersion(it)
-                allArgumentProviders += CommandLineArgumentProvider {
-                    mixinConfigs.asSequence()
-                            .flatMap { sequenceOf("--mixin.config", it) }
-                            .toList()
-                }
             }
         }
 
@@ -151,7 +140,13 @@ minecraft {
                 // IntelliJ does not properly report its compatibility
                 jvmArgs("-Dterminal.ansi=true", "-Djansi.mode=force")
             }
-            jvmArgs("-Dlog4j.configurationFile=log4j2_dev.xml", "-Dmixin.dumpTargetOnFailure=true")
+            jvmArgs(
+                    "-Dlog4j.configurationFile=log4j2_dev.xml",
+                    "-Dmixin.dumpTargetOnFailure=true",
+                    "-Dmixin.debug.verbose=true",
+                    "-Dmixin.debug.countInjections=true",
+                    "-Dmixin.debug.strict=true"
+            )
             allJvmArgumentProviders += CommandLineArgumentProvider {
                 // Resolve the Mixin artifact for use as a reload agent
                 val mixinJar = vanillaAppLaunchConfig.get().resolvedConfiguration
@@ -176,11 +171,15 @@ minecraft {
                     base
                 }
             }
+            allArgumentProviders += CommandLineArgumentProvider {
+                mixinConfigs.asSequence()
+                        .flatMap { sequenceOf("--mixin.config", it) }
+                        .toList()
+            }
             mainClass("org.spongepowered.vanilla.applaunch.Main")
             classpath.setFrom(
                 vanillaAppLaunch.output,
-                vanillaAppLaunch.runtimeClasspath,
-                configurations.minecraft
+                vanillaAppLaunch.runtimeClasspath
             )
             ideaRunSourceSet.set(vanillaAppLaunch)
         }

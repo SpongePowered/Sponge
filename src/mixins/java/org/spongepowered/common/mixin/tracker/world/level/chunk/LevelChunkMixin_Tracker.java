@@ -24,24 +24,37 @@
  */
 package org.spongepowered.common.mixin.tracker.world.level.chunk;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.TickList;
+import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraft.world.level.chunk.LevelChunk;
+import net.minecraft.world.level.chunk.LevelChunkSection;
+import net.minecraft.world.level.chunk.ProtoTickList;
+import net.minecraft.world.phys.AABB;
 import org.apache.logging.log4j.Level;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.event.entity.CollideEntityEvent;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Coerce;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.bridge.CreatorTrackedBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.block.state.BlockStateBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
+import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.bridge.world.level.chunk.TrackedLevelChunkBridge;
+import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -62,17 +75,6 @@ import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.TickList;
-import net.minecraft.world.level.block.Block;
-import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraft.world.level.chunk.LevelChunk;
-import net.minecraft.world.level.chunk.LevelChunkSection;
-import net.minecraft.world.level.chunk.ProtoTickList;
-import net.minecraft.world.phys.AABB;
 
 
 @Mixin(LevelChunk.class)
@@ -91,7 +93,7 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
     private void tracker$sanityCheckServerWorldSetBlockState(final BlockPos pos, final BlockState state, final boolean isMoving,
         final CallbackInfoReturnable<BlockState> cir
     ) {
-        if (!((WorldBridge) this.level).bridge$isFake()) {
+        if (!((LevelBridge) this.level).bridge$isFake()) {
             new PrettyPrinter(80).add("Illegal Direct Chunk Access")
                 .hr()
                 .add(new IllegalAccessException("No one should be accessing Chunk.setBlock in a ServerWorld's environment"))
@@ -117,7 +119,7 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
     @NonNull
     public ChunkPipeline bridge$createChunkPipeline(final BlockPos pos, final BlockState newState, final BlockState currentState,
             final SpongeBlockChangeFlag flag, final int limit) {
-        final boolean isFake = ((WorldBridge) this.level).bridge$isFake();
+        final boolean isFake = ((LevelBridge) this.level).bridge$isFake();
         if (isFake) {
             throw new IllegalStateException("Cannot call ChunkBridge.bridge$buildChunkPipeline in non-Server managed worlds");
         }
@@ -149,17 +151,11 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
         );
 
         // Pulled up from below
-        final Block newBlock = newState.getBlock();
-        final Block currentBlock = currentState.getBlock();
-
         final ChangeBlock transaction = context.createTransaction(snapshot, newState, flag);
 
         snapshot.blockChange = context.associateBlockChangeWithSnapshot(
             newState,
-            newBlock,
-            currentState,
-            snapshot,
-            currentBlock
+            currentState
         );
         if (((BlockStateBridge) snapshot.state()).bridge$hasTileEntity()
             && (snapshot.blockChange == BlockChange.BREAK || snapshot.blockChange == BlockChange.MODIFY)) {
@@ -238,16 +234,20 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
         ((ActiveChunkReferantBridge) tileEntityIn).bridge$setActiveChunk(this);
         // Make sure to set creator/notifier for TE if any chunk data exists
         // Failure to do this during chunk load will cause TE's to not have proper user tracking
-        // TODO - Reimplement player uuid tracking.
-//        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((ChunkBridge) this).bridge$getBlockCreatorUUID(pos).orElse(null));
-//        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, null);
+        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.CREATOR, ((LevelChunkBridge) this).bridge$getBlockCreatorUUID(pos).orElse(null));
+        ((CreatorTrackedBridge) tileEntityIn).tracked$setTrackedUUID(PlayerTracker.Type.NOTIFIER, null);
     }
 
-    @Inject(method = "getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V", at = @At("RETURN"))
-    private void tracker$ThrowCollisionEvent(final Entity entityIn, final AABB aabb, final List<Entity> listToFill,
-        final Predicate<? super Entity> filter, final CallbackInfo ci
+    @SuppressWarnings("InvalidInjectorMethodSignature")
+    @Inject(method = {
+        "getEntities(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V",
+        "getEntities(Lnet/minecraft/world/entity/EntityType;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V",
+        "getEntitiesOfClass(Ljava/lang/Class;Lnet/minecraft/world/phys/AABB;Ljava/util/List;Ljava/util/function/Predicate;)V",
+    }, at = @At("RETURN"))
+    private void tracker$ThrowCollisionEvent(final @Coerce Object entityIn, final AABB aabb, final List<Entity> listToFill,
+        final Predicate<?> filter, final CallbackInfo ci
     ) {
-        if (((WorldBridge) this.level).bridge$isFake() || PhaseTracker.getInstance().getPhaseContext().isCollision()) {
+        if (((LevelBridge) this.level).bridge$isFake() || !PhaseTracker.getInstance().getPhaseContext().allowsEntityCollisionEvents()) {
             return;
         }
 
@@ -259,38 +259,11 @@ public abstract class LevelChunkMixin_Tracker implements TrackedLevelChunkBridge
             return;
         }
 
-        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.level, entityIn, listToFill);
-
-        if (event == null || event.isCancelled()) {
-            if (event == null && !PhaseTracker.getInstance().getPhaseContext().isTicking()) {
-                return;
-            }
+        final @Nullable Entity entity = entityIn instanceof Entity ? ((Entity) entityIn) : null;
+        if (SpongeCommonEventFactory.callCollideEntityEvent(entity, listToFill).isCancelled()) {
             listToFill.clear();
         }
     }
-
-//    @Inject(method = "getEntitiesOfTypeWithinAABB", at = @At("RETURN"))
-//    private <T extends Entity> void tracker$throwCollsionEvent(final Class<? extends T> entityClass,
-//            final AxisAlignedBB aabb, final List<T> listToFill, final Predicate<? super T> filter,
-//            final CallbackInfo ci) {
-//        if (((WorldBridge) this.world).bridge$isFake()
-//                || PhaseTracker.getInstance().getCurrentState().ignoresEntityCollisions()) {
-//            return;
-//        }
-//
-//        if (listToFill.isEmpty()) {
-//            return;
-//        }
-//
-//        final CollideEntityEvent event = SpongeCommonEventFactory.callCollideEntityEvent(this.world, null, listToFill);
-//
-//        if (event == null || event.isCancelled()) {
-//            if (event == null && !PhaseTracker.getInstance().getCurrentState().isTicking()) {
-//                return;
-//            }
-//            listToFill.clear();
-//        }
-//    }
 
     @SuppressWarnings({"rawtypes", "unchecked"})
     @Redirect(method = "unpackTicks", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/chunk/ProtoTickList;copyOut(Lnet/minecraft/world/level/TickList;Ljava/util/function/Function;)V"))

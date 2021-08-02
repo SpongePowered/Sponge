@@ -29,7 +29,7 @@ import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.util.Identifiable;
 import org.spongepowered.common.SpongeServer;
 import org.spongepowered.common.data.provider.DataProviderRegistrator;
-import org.spongepowered.common.entity.player.SpongeUser;
+import org.spongepowered.common.entity.player.SpongeUserData;
 
 import java.time.Instant;
 import java.util.UUID;
@@ -51,7 +51,7 @@ public final class IdentifiableData {
                             final Instant played = ((SpongeServer) Sponge.server()).getPlayerDataManager().getFirstJoined(id).orElse(v);
                             ((SpongeServer) Sponge.server()).getPlayerDataManager().setPlayerInfo(id, played, v);
                         })
-                        .supports(h -> h instanceof Player || h instanceof SpongeUser)
+                        .supports(h -> h instanceof Player || h instanceof SpongeUserData)
                     .create(Keys.LAST_DATE_PLAYED)
                         .get(h -> ((SpongeServer) Sponge.server()).getPlayerDataManager().getLastPlayed(h.uniqueId()).orElse(null))
                         .set((h, v) -> {
@@ -59,7 +59,7 @@ public final class IdentifiableData {
                             final Instant played = ((SpongeServer) Sponge.server()).getPlayerDataManager().getFirstJoined(id).orElse(v);
                             ((SpongeServer) Sponge.server()).getPlayerDataManager().setPlayerInfo(id, played, v);
                         })
-                        .supports(h -> h instanceof Player || h instanceof SpongeUser);
+                        .supports(h -> h instanceof Player || h instanceof SpongeUserData);
     }
     // @formatter:on
 }

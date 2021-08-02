@@ -43,6 +43,7 @@ import org.spongepowered.api.command.registrar.CommandRegistrarType;
 import org.spongepowered.common.command.SpongeCommandCompletion;
 import org.spongepowered.common.command.SpongeParameterizedCommand;
 import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
+import org.spongepowered.common.command.exception.SpongeCommandResultException;
 import org.spongepowered.common.command.exception.SpongeCommandSyntaxException;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.plugin.PluginContainer;
@@ -119,6 +120,8 @@ public final class SpongeParameterizedCommandRegistrar implements BrigadierBased
             return CommandResult.builder().result(
                     dispatcher.execute(
                             dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause))).build();
+        } catch (final SpongeCommandResultException ex) {
+            return ex.result();
         } catch (final SpongeCommandSyntaxException ex) {
             throw ex.getCause();
         } catch (final CommandSyntaxException e) {

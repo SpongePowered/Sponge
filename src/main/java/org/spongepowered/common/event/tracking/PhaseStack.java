@@ -129,9 +129,6 @@ final class PhaseStack {
     @SuppressWarnings("rawtypes")
     boolean checkForRunaways(IPhaseState<?> state, @Nullable PhaseContext<?> phaseContext) {
         // first, check if the state is expected for re-entrance:
-        if (!state.isNotReEntrant()) {
-            return false;
-        }
         final int totalCount = this.phases.size();
         if (totalCount < 2) {
             return false;

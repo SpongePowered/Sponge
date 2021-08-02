@@ -71,13 +71,10 @@ final class TimingIdentifier {
     // identity comparison.
     @Override
     public boolean equals(Object o) {
-        if (o == null) {
-            return false;
-        }
         if (!(o instanceof TimingIdentifier)) {
             return false;
         }
-        TimingIdentifier that = (TimingIdentifier) o;
+        final TimingIdentifier that = (TimingIdentifier) o;
         return this.group == that.group && this.name == that.name;
     }
 

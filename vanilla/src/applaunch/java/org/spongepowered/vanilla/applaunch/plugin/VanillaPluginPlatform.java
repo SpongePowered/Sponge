@@ -44,6 +44,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.ServiceConfigurationError;
 import java.util.ServiceLoader;
+import java.util.Set;
 
 public final class VanillaPluginPlatform implements PluginPlatform {
 
@@ -51,7 +52,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     private final Map<String, PluginResourceLocatorService<PluginResource>> locatorServices;
     private final Map<String, PluginLanguageService<PluginResource>> languageServices;
 
-    private final Map<String, List<PluginResource>> locatorResources;
+    private final Map<String, Set<PluginResource>> locatorResources;
     private final Map<PluginLanguageService<PluginResource>, List<PluginCandidate<PluginResource>>> pluginCandidates;
 
     public VanillaPluginPlatform(final PluginEnvironment pluginEnvironment) {
@@ -110,7 +111,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
         return Collections.unmodifiableMap(this.languageServices);
     }
 
-    public Map<String, List<PluginResource>> getResources() {
+    public Map<String, Set<PluginResource>> getResources() {
         return Collections.unmodifiableMap(this.locatorResources);
     }
 
@@ -163,7 +164,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     public void locatePluginResources() {
         for (final Map.Entry<String, PluginResourceLocatorService<PluginResource>> locatorEntry : this.locatorServices.entrySet()) {
             final PluginResourceLocatorService<PluginResource> locatorService = locatorEntry.getValue();
-            final List<PluginResource> resources = locatorService.locatePluginResources(this.pluginEnvironment);
+            final Set<PluginResource> resources = locatorService.locatePluginResources(this.pluginEnvironment);
             if (!resources.isEmpty()) {
                 this.locatorResources.put(locatorEntry.getKey(), resources);
             }
@@ -173,7 +174,7 @@ public final class VanillaPluginPlatform implements PluginPlatform {
     public void createPluginCandidates() {
         for (final Map.Entry<String, PluginLanguageService<PluginResource>> languageEntry : this.languageServices.entrySet()) {
             final PluginLanguageService<PluginResource> languageService = languageEntry.getValue();
-            for (final Map.Entry<String, List<PluginResource>> resourcesEntry : this.locatorResources.entrySet()) {
+            for (final Map.Entry<String, Set<PluginResource>> resourcesEntry : this.locatorResources.entrySet()) {
 
                 for (final PluginResource pluginResource : resourcesEntry.getValue()) {
                     try {

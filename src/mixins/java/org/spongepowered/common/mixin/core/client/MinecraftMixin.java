@@ -45,14 +45,13 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.client.SpongeClient;
 import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.server.BootstrapProperties;
 
 import java.nio.file.Path;
@@ -101,8 +100,8 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     }
 
     @Inject(method = "close", at = @At(value = "INVOKE", target = "Lnet/minecraft/Util;shutdownExecutors()V"))
-    private void impl$shutdownAsyncScheduler(final CallbackInfo ci) {
-        SpongeCommon.game().asyncScheduler().close();
+    private void impl$callStoppedGame(final CallbackInfo ci) {
+        Launch.instance().lifecycle().callStoppedGameEvent();
     }
 
     @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/resources/RegistryReadOps;create(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/server/packs/resources/ResourceManager;Lnet/minecraft/core/RegistryAccess$RegistryHolder;)Lnet/minecraft/resources/RegistryReadOps;"))
@@ -113,7 +112,8 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     }
 
     @Redirect(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getDataTag(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/world/level/DataPackConfig;)Lnet/minecraft/world/level/storage/WorldData;"))
-    private static WorldData impl$setBootstrapProperties(final LevelStorageSource.LevelStorageAccess levelSave, final DynamicOps<Tag> p_237284_1_, final DataPackConfig p_237284_2_, final LevelStorageSource.LevelStorageAccess p_238181_0_, final RegistryAccess.RegistryHolder p_238181_1_) {
+    private static WorldData impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties(final LevelStorageSource.LevelStorageAccess levelSave, final DynamicOps<Tag> p_237284_1_, final DataPackConfig p_237284_2_, final LevelStorageSource.LevelStorageAccess p_238181_0_, final RegistryAccess.RegistryHolder p_238181_1_) {
+        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
         final WorldData saveData = levelSave.getDataTag(p_237284_1_, p_237284_2_);
         BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(), saveData.getDifficulty(), true, saveData.isHardcore(),
             saveData.getAllowCommands(), 10, p_238181_1_);
@@ -121,8 +121,10 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     }
 
     @Inject(method = "createLevel", at = @At("HEAD"))
-    private void impl$setBootstrapProperties(String levelName, LevelSettings settings, RegistryAccess.RegistryHolder registries,
-            WorldGenSettings dimensionGeneratorSettings, CallbackInfo ci) {
+    private void impl$setBootstrapProperties(final String levelName, final LevelSettings settings,
+                                             final RegistryAccess.RegistryHolder registries,
+                                             final WorldGenSettings dimensionGeneratorSettings,
+                                             final CallbackInfo ci) {
         BootstrapProperties.init(dimensionGeneratorSettings, settings.gameType(), settings.difficulty(), true, settings.hardcore(),
             settings.allowCommands(), 10, registries);
         BootstrapProperties.setIsNewLevel(true);
@@ -136,16 +138,10 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
 //        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
 //    }
 
-    @Inject(method = "loadWorldData", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getDataTag(Lcom/mojang/serialization/DynamicOps;Lnet/minecraft/world/level/DataPackConfig;)Lnet/minecraft/world/level/storage/WorldData;"))
-    private static void impl$serializeDelayedDataPackOnLoad(final LevelStorageSource.LevelStorageAccess param0, final RegistryAccess.RegistryHolder param1,
-            ResourceManager param2, DataPackConfig param3, CallbackInfoReturnable<WorldData> cir) {
-        SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
-    }
-
     @Redirect(method = "makeServerStem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/level/storage/LevelStorageSource$LevelStorageAccess;getLevelPath(Lnet/minecraft/world/level/storage/LevelResource;)Ljava/nio/file/Path;"))
     private Path impl$configurePackRepository(final LevelStorageSource.LevelStorageAccess levelSave, final LevelResource folderName) {
         final Path datapackDir = levelSave.getLevelPath(folderName);
-        SpongeBootstrap.lifecycle().callRegisterDataPackValueEvent(datapackDir);
+        Launch.instance().lifecycle().callRegisterDataPackValueEvent(datapackDir);
         return datapackDir;
     }
 }

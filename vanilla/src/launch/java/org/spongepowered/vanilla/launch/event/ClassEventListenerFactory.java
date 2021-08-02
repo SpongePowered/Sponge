@@ -59,6 +59,7 @@ import org.spongepowered.api.event.Event;
 import org.spongepowered.common.event.filter.EventFilter;
 import org.spongepowered.common.event.filter.FilterFactory;
 import org.spongepowered.common.event.gen.DefineableClassLoader;
+import org.spongepowered.common.event.gen.LoaderClassWriter;
 import org.spongepowered.common.util.generator.GeneratorUtils;
 
 import java.lang.reflect.Method;
@@ -122,7 +123,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
         }
         eventDescriptor += ")V";
 
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        ClassWriter cw = new LoaderClassWriter(handle.getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
         FieldVisitor fv;
 
@@ -191,7 +192,7 @@ public final class ClassEventListenerFactory implements AnnotatedEventListener.F
         final String handleDescriptor = Type.getDescriptor(handle);
         final String eventName = Type.getInternalName(eventClass);
 
-        ClassWriter cw = new ClassWriter(ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
+        ClassWriter cw = new LoaderClassWriter(handle.getClassLoader(), ClassWriter.COMPUTE_FRAMES | ClassWriter.COMPUTE_MAXS);
         MethodVisitor mv;
 
         cw.visit(V1_6, ACC_PUBLIC + ACC_FINAL + ACC_SUPER, name, null, ClassEventListenerFactory.BASE_HANDLER, null);

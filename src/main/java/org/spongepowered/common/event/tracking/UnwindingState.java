@@ -55,37 +55,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         return false;
     }
 
-    @Override
-    public boolean ignoresBlockUpdateTick(final UnwindingPhaseContext context) {
-        return true;
-    }
-
-    @Override
-    public boolean ignoresScheduledUpdates() {
-        return false;
-    }
-
-    @Override
-    public boolean alreadyCapturingEntitySpawns() {
-        return true;
-    }
-
-    @Override
-    public boolean alreadyCapturingEntityTicks() {
-        return true;
-    }
-
-    @Override
-    public boolean alreadyCapturingTileTicks() {
-        return true;
-    }
-
-    @Override
-    public boolean allowsGettingQueuedRemovedTiles() {
-        return true;
-    }
-
-
 
     @SuppressWarnings("unchecked")
     @Override
@@ -111,17 +80,6 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }
-    }
-
-    /**
-     * We want to allow the post state to do it's own thing and avoid entering extra states for block
-     * ticking from unwinds.
-     * @param context
-     * @return
-     */
-    @Override
-    public boolean alreadyCapturingBlockTicks(final UnwindingPhaseContext context) {
-        return true;
     }
 
     private final String desc = TrackingUtil.phaseStateToString("General", this);

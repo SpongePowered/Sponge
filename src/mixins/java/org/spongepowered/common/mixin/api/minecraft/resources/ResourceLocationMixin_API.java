@@ -29,13 +29,14 @@ import net.minecraft.resources.ResourceLocation;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 
 @Mixin(ResourceLocation.class)
 @Implements(value = {
-      @Interface(iface = Key.class, prefix = "adventure$"),
-      @Interface(iface = ResourceKey.class, prefix = "resourceKey$")
+      @Interface(iface = Key.class, prefix = "adventure$", remap = Remap.NONE),
+      @Interface(iface = ResourceKey.class, prefix = "resourceKey$", remap = Remap.NONE)
 })
 public abstract class ResourceLocationMixin_API {
 

@@ -29,7 +29,6 @@ import net.kyori.adventure.bossbar.BossBar;
 import net.kyori.adventure.identity.Identified;
 import net.kyori.adventure.identity.Identity;
 import net.kyori.adventure.inventory.Book;
-import net.kyori.adventure.key.Key;
 import net.kyori.adventure.text.Component;
 import net.kyori.adventure.text.format.NamedTextColor;
 import net.kyori.adventure.text.format.TextDecoration;
@@ -51,6 +50,7 @@ import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.Listener;
 import org.spongepowered.api.event.Order;
 import org.spongepowered.api.event.filter.cause.Root;
+import org.spongepowered.api.event.filter.data.GetValue;
 import org.spongepowered.api.event.lifecycle.ConstructPluginEvent;
 import org.spongepowered.api.event.lifecycle.RegisterCommandEvent;
 import org.spongepowered.api.event.message.PlayerChatEvent;
@@ -148,13 +148,14 @@ public class ChatTest implements LoadableModule {
         }
 
         @Listener(order = Order.LAST)
-        public void onChat(final PlayerChatEvent event, final @Root ServerPlayer player) {
+        public void onChat(final PlayerChatEvent event, final @Root ServerPlayer player, @GetValue("HEALTH") final double health) {
             ChatTest.LOGGER.info(Component.translatable("chattest.response.chat",
                                                                               event.message(),
                                                                               player.require(Keys.DISPLAY_NAME)
                                                                                       .decorate(TextDecoration.BOLD)
                                                                                       .colorIfAbsent(NamedTextColor.AQUA))
                                                                .color(NamedTextColor.DARK_AQUA));
+            ChatTest.LOGGER.info("Player has health of {}", health);
         }
     }
 }

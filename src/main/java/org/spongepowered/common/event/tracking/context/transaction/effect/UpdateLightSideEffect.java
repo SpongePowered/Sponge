@@ -41,10 +41,12 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
         return UpdateLightSideEffect.Holder.INSTANCE;
     }
 
-    UpdateLightSideEffect() {}
+    UpdateLightSideEffect() {
+    }
 
     @Override
-    public EffectResult processSideEffect(final BlockPipeline pipeline, final PipelineCursor oldState,
+    public EffectResult processSideEffect(
+        final BlockPipeline pipeline, final PipelineCursor oldState,
         final BlockState newState, final SpongeBlockChangeFlag flag, final int limit
     ) {
         if (!flag.updateLighting()) {
@@ -53,7 +55,25 @@ public final class UpdateLightSideEffect implements ProcessingSideEffect {
         final int originalOpactiy = oldState.opacity;
         final ServerLevel serverWorld = pipeline.getServerWorld();
         final BlockState currentState = pipeline.getAffectedChunk().getBlockState(oldState.pos);
-        if (oldState.state != currentState && (((BlockStateBridge) currentState).bridge$getLightValue(serverWorld, oldState.pos) != originalOpactiy || currentState.useShapeForLightOcclusion() || oldState.state.useShapeForLightOcclusion())) {
+        // local variable notes:
+        // var2 = oldState.state
+        // var3 = currentState
+        // if (
+        //      (param2 & 128) == 0 // this is handled above as flag.updateLighting()
+        //      && var3 != var2
+        //      && (
+        //          var3.getLightBlock(this, param0) != var2.getLightBlock(this, param0)
+        //          || var3.getLightEmission() != var2.getLightEmission()
+        //          || var3.useShapeForLightOcclusion()
+        //          || var2.useShapeForLightOcclusion()
+        //         )
+        //     ) {
+        if (oldState.state != currentState
+            && (currentState.getLightBlock(serverWorld, oldState.pos) != originalOpactiy
+            || currentState.getLightEmission() != oldState.state.getLightEmission()
+            || currentState.useShapeForLightOcclusion()
+            || oldState.state.useShapeForLightOcclusion()
+        )) {
             // this.profiler.startSection("queueCheckLight");
             serverWorld.getProfiler().push("queueCheckLight");
             // this.getChunkProvider().getLightManager().checkBlock(pos);

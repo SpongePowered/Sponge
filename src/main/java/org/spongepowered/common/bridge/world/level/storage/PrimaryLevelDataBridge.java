@@ -25,7 +25,10 @@
 package org.spongepowered.common.bridge.world.level.storage;
 
 import com.google.common.collect.BiMap;
+import com.mojang.serialization.Dynamic;
 import net.kyori.adventure.text.Component;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.Tag;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.Difficulty;
 import net.minecraft.world.level.dimension.DimensionType;
@@ -93,4 +96,12 @@ public interface PrimaryLevelDataBridge {
     void bridge$setMapUUIDIndex(BiMap<Integer, UUID> index);
 
     BiMap<Integer, UUID> bridge$getMapUUIDIndex();
+
+    int bridge$getIndexForUniqueId(UUID uuid);
+
+    Optional<UUID> bridge$getUniqueIdForIndex(int ownerIndex);
+
+    void bridge$readSpongeLevelData(Dynamic<Tag> impl$spongeLevelData);
+
+    CompoundTag bridge$writeSpongeLevelData();
 }

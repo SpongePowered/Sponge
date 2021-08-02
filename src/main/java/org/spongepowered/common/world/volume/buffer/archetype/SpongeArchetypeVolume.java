@@ -25,22 +25,33 @@
 package org.spongepowered.common.world.volume.buffer.archetype;
 
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockState;
 import org.spongepowered.api.block.BlockType;
 import org.spongepowered.api.block.entity.BlockEntityArchetype;
 import org.spongepowered.api.entity.EntityArchetype;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.fluid.FluidState;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryTypes;
+import org.spongepowered.api.util.transformation.Transformation;
+import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.api.world.biome.Biome;
 import org.spongepowered.api.world.schematic.Palette;
 import org.spongepowered.api.world.schematic.PaletteTypes;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.api.world.volume.archetype.ArchetypeVolume;
 import org.spongepowered.api.world.volume.archetype.block.entity.BlockEntityArchetypeVolume;
 import org.spongepowered.api.world.volume.archetype.entity.EntityArchetypeEntry;
 import org.spongepowered.api.world.volume.stream.StreamOptions;
+import org.spongepowered.api.world.volume.stream.VolumeApplicators;
+import org.spongepowered.api.world.volume.stream.VolumeCollectors;
 import org.spongepowered.api.world.volume.stream.VolumeElement;
+import org.spongepowered.api.world.volume.stream.VolumePositionTranslators;
 import org.spongepowered.api.world.volume.stream.VolumeStream;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.plugin.PluginPhase;
 import org.spongepowered.common.world.volume.SpongeVolumeStream;
 import org.spongepowered.common.world.volume.VolumeStreamUtils;
 import org.spongepowered.common.world.volume.buffer.AbstractVolumeBuffer;
@@ -48,13 +59,16 @@ import org.spongepowered.common.world.volume.buffer.archetype.blockentity.Mutabl
 import org.spongepowered.common.world.volume.buffer.archetype.entity.ObjectArrayMutableEntityArchetypeBuffer;
 import org.spongepowered.common.world.volume.buffer.biome.ByteArrayMutableBiomeBuffer;
 import org.spongepowered.common.world.volume.buffer.block.ArrayMutableBlockBuffer;
+import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
 import java.util.Collection;
 import java.util.Map;
+import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Function;
 import java.util.function.Predicate;
+import java.util.function.Supplier;
 import java.util.stream.IntStream;
 import java.util.stream.Stream;
 
@@ -62,7 +76,7 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
 
     private final ByteArrayMutableBiomeBuffer biomes;
     private final ArrayMutableBlockBuffer blocks;
-    private final BlockEntityArchetypeVolume.Mutable<@NonNull ?> blockEntities;
+    private final BlockEntityArchetypeVolume.Mutable blockEntities;
     private final ObjectArrayMutableEntityArchetypeBuffer entities;
 
     public SpongeArchetypeVolume(final Vector3i start, final Vector3i size, final RegistryHolder registries) {
@@ -72,6 +86,19 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         this.blockEntities = new MutableMapBlockEntityArchetypeBuffer(blocks);
         this.biomes = new ByteArrayMutableBiomeBuffer(
             PaletteTypes.BIOME_PALETTE.get().create(registries, RegistryTypes.BIOME),
+            start,
+            size
+        );
+        this.entities = new ObjectArrayMutableEntityArchetypeBuffer(start, size);
+    }
+
+    private SpongeArchetypeVolume(final Vector3i start, final Vector3i size, final Palette<Biome, Biome> biomePalette) {
+        super(start, size);
+        final ArrayMutableBlockBuffer blocks = new ArrayMutableBlockBuffer(start, size);
+        this.blocks = blocks;
+        this.blockEntities = new MutableMapBlockEntityArchetypeBuffer(blocks);
+        this.biomes = new ByteArrayMutableBiomeBuffer(
+            biomePalette.asImmutable().asMutable(Sponge.server().registries()),
             start,
             size
         );
@@ -93,8 +120,8 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         final StreamOptions options
     ) {
 
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final Stream<VolumeElement<ArchetypeVolume, BlockEntityArchetype>> stateStream = this.blockEntities.blockEntityArchetypeStream(min, max, options)
             .toStream()
@@ -108,6 +135,11 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     }
 
     @Override
+    public Collection<EntityArchetypeEntry> entityArchetypesByPosition() {
+        return this.entities.entityArchetypesByPosition();
+    }
+
+    @Override
     public Collection<EntityArchetype> entityArchetypes(final Predicate<EntityArchetype> filter) {
         return this.entities.entityArchetypes(filter);
     }
@@ -116,8 +148,8 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     public VolumeStream<ArchetypeVolume, EntityArchetype> entityArchetypeStream(
         final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final Stream<VolumeElement<ArchetypeVolume, EntityArchetype>> stateStream = this.entities.entityArchetypeStream(min, max, options).toStream()
             .map(element -> VolumeElement.of(this, element::type, element.position()));
@@ -157,8 +189,8 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     @Override
     public VolumeStream<ArchetypeVolume, BlockState> blockStateStream(final Vector3i min, final Vector3i max, final StreamOptions options
     ) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final ArrayMutableBlockBuffer buffer;
         if (options.carbonCopy()) {
@@ -166,10 +198,10 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         } else {
             buffer = this.blocks;
         }
-        final Stream<VolumeElement<ArchetypeVolume, BlockState>> stateStream = IntStream.range(blockMin.x(), blockMax.x() + 1)
-            .mapToObj(x -> IntStream.range(blockMin.z(), blockMax.z() + 1)
-                .mapToObj(z -> IntStream.range(blockMin.y(), blockMax.y() + 1)
-                    .mapToObj(y -> VolumeElement.of((ArchetypeVolume) this, () -> buffer.block(x, y, z), new Vector3i(x, y, z)))
+        final Stream<VolumeElement<ArchetypeVolume, BlockState>> stateStream = IntStream.range(min.x(), max.x() + 1)
+            .mapToObj(x -> IntStream.range(min.z(), max.z() + 1)
+                .mapToObj(z -> IntStream.range(min.y(), max.y() + 1)
+                    .mapToObj(y -> VolumeElement.of((ArchetypeVolume) this, () -> buffer.block(x, y, z), new Vector3d(x, y, z)))
                 ).flatMap(Function.identity())
             ).flatMap(Function.identity());
         return new SpongeVolumeStream<>(stateStream, () -> this);
@@ -209,8 +241,8 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
         final Vector3i max,
         final StreamOptions options
     ) {
-        final Vector3i blockMin = this.blockMin();
-        final Vector3i blockMax = this.blockMax();
+        final Vector3i blockMin = this.min();
+        final Vector3i blockMax = this.max();
         VolumeStreamUtils.validateStreamArgs(min, max, blockMin, blockMax, options);
         final Stream<VolumeElement<ArchetypeVolume, Biome>> stateStream = this.biomes.biomeStream(min, max, options)
             .toStream()
@@ -221,5 +253,49 @@ public class SpongeArchetypeVolume extends AbstractVolumeBuffer implements Arche
     @Override
     public boolean setBiome(final int x, final int y, final int z, final Biome biome) {
         return this.biomes.setBiome(x, y, z, biome);
+    }
+
+    @Override
+    public ArchetypeVolume transform(final Transformation transformation) {
+        return new ReferentArchetypeVolume(this, Objects.requireNonNull(transformation, "Transformation cannot be null"));
+    }
+
+    @Override
+    public void applyToWorld(
+        final ServerWorld target, final Vector3i placement, final Supplier<SpawnType> spawnContext
+    ) {
+        Objects.requireNonNull(target, "Target world cannot be null");
+        Objects.requireNonNull(placement, "Target position cannot be null");
+        try (final PhaseContext<@NonNull ?> context = PluginPhase.State.VOLUME_STREAM_APPLICATION
+            .createPhaseContext(PhaseTracker.SERVER)
+            .spawnType(spawnContext)
+            .source(this)) {
+            context.buildAndSwitch();
+            this.blockStateStream(this.min(), this.max(), StreamOptions.lazily())
+                .apply(VolumeCollectors.of(
+                    target,
+                    VolumePositionTranslators.relativeTo(placement),
+                    VolumeApplicators.applyBlocks(BlockChangeFlags.DEFAULT_PLACEMENT)
+                ));
+
+            this.biomeStream(this.min(), this.max(), StreamOptions.lazily())
+                .apply(VolumeCollectors.of(
+                    target,
+                    VolumePositionTranslators.relativeTo(placement),
+                    VolumeApplicators.applyBiomes()
+                ));
+            this.blockEntityArchetypeStream(this.min(), this.max(), StreamOptions.lazily())
+                .apply(VolumeCollectors.of(
+                    target,
+                    VolumePositionTranslators.relativeTo(placement),
+                    VolumeApplicators.applyBlockEntityArchetype()
+                ));
+            this.entityArchetypeStream(this.min(), this.max(), StreamOptions.lazily())
+                .apply(VolumeCollectors.of(
+                    target,
+                    VolumePositionTranslators.relativeTo(placement),
+                    VolumeApplicators.applyEntityArchetype()
+                ));
+        }
     }
 }

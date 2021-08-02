@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.api.minecraft.block;
 
+import net.minecraft.world.item.Item;
 import net.minecraft.world.level.block.SoundType;
 import net.minecraft.world.level.block.state.BlockBehaviour;
 import org.spongepowered.api.block.BlockSoundGroup;
@@ -37,6 +38,7 @@ public abstract class AbstractBlockMixin_API implements BlockType {
 
     // @formatter:off
     @Shadow @Final @org.spongepowered.asm.mixin.Mutable protected boolean isRandomlyTicking;
+    @Shadow public abstract Item shadow$asItem();
     @Shadow @Final protected SoundType soundType;
     // @formatter:on
 

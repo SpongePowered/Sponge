@@ -55,7 +55,7 @@ public abstract class CompoundTagMixin {
     @Shadow @Final private Map<String, Tag> tags;
     // @formatter:on
 
-    @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/Tag;copy()Lnet/minecraft/nbt/Tag;"))
+    @Redirect(method = "copy()Lnet/minecraft/nbt/CompoundTag;", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/Tag;copy()Lnet/minecraft/nbt/Tag;"))
     @Nullable
     private Tag impl$checkForOverflowOnCopy(Tag inbt) {
         try {
@@ -90,7 +90,7 @@ public abstract class CompoundTagMixin {
         }
     }
 
-    @Redirect(method = "copy", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundTag;put(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;"))
+    @Redirect(method = "copy()Lnet/minecraft/nbt/CompoundTag;", at = @At(value = "INVOKE", target = "Lnet/minecraft/nbt/CompoundTag;put(Ljava/lang/String;Lnet/minecraft/nbt/Tag;)Lnet/minecraft/nbt/Tag;"))
     private Tag impl$checkForNullNBTValuesDuringCopy(CompoundTag compound, String key, Tag value) {
         if (value == null) {
             final IllegalStateException exception = new IllegalStateException("There is a null NBT component in the compound for key: " + key);

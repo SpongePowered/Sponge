@@ -27,10 +27,8 @@ package org.spongepowered.common.data.datasync.entity;
 import org.spongepowered.api.data.DataTransactionResult;
 import org.spongepowered.api.data.Keys;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.api.data.value.Value.Immutable;
 import org.spongepowered.common.accessor.world.entity.MobAccessor;
 import org.spongepowered.common.data.datasync.DataParameterConverter;
-import java.util.List;
 import java.util.Optional;
 import net.minecraft.world.entity.Entity;
 
@@ -52,13 +50,9 @@ public final class MobEntityAIFlagsConverter extends DataParameterConverter<Byte
     }
 
     @Override
-    public Byte getValueFromEvent(Byte originalValue, final List<Immutable<?>> immutableValues) {
-        for (final Immutable<?> immutableValue : immutableValues) {
-            if (immutableValue.key() == Keys.IS_AI_ENABLED) {
-                final Boolean hasAi = (Boolean) immutableValue.get();
-                originalValue = hasAi ? (byte) (originalValue & -2) : (byte) (originalValue | 1);
-            }
-        }
-        return originalValue;
+    public Byte getValueFromEvent(final Byte originalValue, final DataTransactionResult result) {
+        return result.successfulValue(Keys.IS_AI_ENABLED)
+                .map(v -> v.get() ? (byte) (originalValue & -2) : (byte) (originalValue | 1))
+                .orElse(originalValue);
     }
 }

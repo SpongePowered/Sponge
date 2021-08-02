@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Implements;
 import org.spongepowered.asm.mixin.Interface;
+import org.spongepowered.asm.mixin.Interface.Remap;
 import org.spongepowered.asm.mixin.Intrinsic;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -44,7 +45,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.math.vector.Vector2d;
 
 @Mixin(DisplayInfo.class)
-@Implements(@Interface(iface = org.spongepowered.api.advancement.DisplayInfo.class, prefix = "displayInfo$"))
+@Implements(@Interface(iface = org.spongepowered.api.advancement.DisplayInfo.class, prefix = "displayInfo$", remap = Remap.NONE))
 public abstract class DisplayInfoMixin_API implements TreeLayoutElement, org.spongepowered.api.advancement.DisplayInfo {
 
     @Shadow @Final private FrameType frame;

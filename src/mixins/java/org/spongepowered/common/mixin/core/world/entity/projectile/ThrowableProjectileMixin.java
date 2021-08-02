@@ -33,7 +33,7 @@ import org.spongepowered.api.projectile.source.ProjectileSource;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 
@@ -46,7 +46,7 @@ public abstract class ThrowableProjectileMixin extends ProjectileMixin {
         )
     )
     private void impl$handleProjectileImpact(final ThrowableProjectile projectile, final HitResult movingObjectPosition) {
-        if (((WorldBridge) this.level).bridge$isFake() || movingObjectPosition.getType() == HitResult.Type.MISS) {
+        if (((LevelBridge) this.level).bridge$isFake() || movingObjectPosition.getType() == HitResult.Type.MISS) {
             this.shadow$onHit(movingObjectPosition);
             return;
         }

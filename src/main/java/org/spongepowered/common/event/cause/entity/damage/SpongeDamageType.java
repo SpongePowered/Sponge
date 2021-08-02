@@ -24,7 +24,10 @@
  */
 package org.spongepowered.common.event.cause.entity.damage;
 
+import org.jetbrains.annotations.NotNull;
 import org.spongepowered.api.event.cause.entity.damage.DamageType;
+
+import java.util.Objects;
 
 public final class SpongeDamageType implements DamageType {
 
@@ -37,5 +40,27 @@ public final class SpongeDamageType implements DamageType {
     @Override
     public String name() {
         return this.languageKey;
+    }
+
+    public static final class BuilderImpl implements DamageType.Builder {
+
+        private String name;
+
+        @Override
+        public DamageType.Builder name(final String name) {
+            this.name = Objects.requireNonNull(name, "name");
+            return this;
+        }
+
+        @Override
+        public DamageType.Builder reset() {
+            this.name = null;
+            return this;
+        }
+
+        @Override
+        public @NotNull DamageType build() {
+            return new SpongeDamageType(Objects.requireNonNull(this.name, "name"));
+        }
     }
 }

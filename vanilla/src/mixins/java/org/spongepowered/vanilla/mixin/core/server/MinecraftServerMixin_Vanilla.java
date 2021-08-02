@@ -43,8 +43,8 @@ import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.SpongeBootstrap;
 import org.spongepowered.common.hooks.PlatformHooks;
+import org.spongepowered.common.launch.Launch;
 import org.spongepowered.vanilla.VanillaServer;
 import org.spongepowered.vanilla.hooks.VanillaPacketHooks;
 
@@ -84,6 +84,6 @@ public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
 
     @Inject(method = "stopServer", at = @At(value = "HEAD"), cancellable = true)
     private void vanilla$callStoppingEngineEvent(final CallbackInfo ci) {
-        SpongeBootstrap.lifecycle().callStoppingEngineEvent(this);
+        Launch.instance().lifecycle().callStoppingEngineEvent(this);
     }
 }

@@ -60,7 +60,7 @@ public final class SchematicUpdater1_to_2 implements DataContentUpdater {
                 tile.remove(Queries.CONTENT_VERSION);
             });
             content.remove(Constants.Sponge.Schematic.Versions.V1_TILE_ENTITY_DATA);
-            content.set(Constants.Sponge.Schematic.BLOCKENTITY_DATA, tiles);
+            content.set(Constants.Sponge.Schematic.BLOCKENTITY_CONTAINER, tiles);
         });
         return content;
     }

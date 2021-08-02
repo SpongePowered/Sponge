@@ -45,7 +45,7 @@ public abstract class HopperBlockEntityMixin extends RandomizableContainerBlockE
     private static void impl$trackNotifierWhenTransferring(final Container inventory, final ItemEntity entityItem,
         final CallbackInfoReturnable<Boolean> callbackInfo) {
         if (entityItem instanceof CreatorTrackedBridge) {
-            ((CreatorTrackedBridge) entityItem).tracked$getCreatorReference().ifPresent(creator -> {
+            ((CreatorTrackedBridge) entityItem).tracked$getCreatorUUID().ifPresent(creator -> {
                 if (inventory instanceof ActiveChunkReferantBridge && inventory instanceof BlockEntity) {
                     final BlockEntity te = (BlockEntity) inventory;
                     final LevelChunkBridge spongeChunk = ((ActiveChunkReferantBridge) inventory).bridge$getActiveChunk();

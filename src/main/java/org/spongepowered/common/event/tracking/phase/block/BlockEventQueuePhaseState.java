@@ -28,7 +28,7 @@ import org.spongepowered.api.block.entity.BlockEntity;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.world.LocatableBlock;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 import java.util.function.BiConsumer;
@@ -36,7 +36,7 @@ import java.util.function.BiConsumer;
 public class BlockEventQueuePhaseState extends BlockPhaseState {
 
     public final BiConsumer<CauseStackManager.StackFrame, GeneralizedContext> FRAME_MODIFIER = super.getFrameModifier().andThen((frame, context) -> {
-        final TrackerBlockEventDataBridge blockEventData = context.getSource(TrackerBlockEventDataBridge.class).orElse(null);
+        final TrackableBlockEventDataBridge blockEventData = context.getSource(TrackableBlockEventDataBridge.class).orElse(null);
         if (blockEventData != null) {
             final BlockEntity tile = blockEventData.bridge$getTileEntity();
             if (tile != null) {

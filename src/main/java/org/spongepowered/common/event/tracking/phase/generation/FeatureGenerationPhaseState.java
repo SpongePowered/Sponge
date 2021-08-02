@@ -45,8 +45,6 @@ public final class FeatureGenerationPhaseState extends GeneralGenerationPhaseSta
     @Override
     public FeaturePhaseContext createNewContext(final PhaseTracker tracker) {
         return new FeaturePhaseContext(this, tracker)
-                .addBlockCaptures()
-                .addEntityCaptures()
             ;
     }
 

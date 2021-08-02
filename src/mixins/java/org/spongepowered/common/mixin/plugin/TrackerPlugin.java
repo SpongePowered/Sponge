@@ -29,7 +29,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 public class TrackerPlugin extends AbstractMixinConfigPlugin {
 
     @Override
-    public boolean shouldApplyMixin(String targetClassName, String mixinClassName) {
+    public boolean shouldApplyMixin(final String targetClassName, final String mixinClassName) {
         return SpongeConfigs.getCommon().get().modules.tracking;
     }
 

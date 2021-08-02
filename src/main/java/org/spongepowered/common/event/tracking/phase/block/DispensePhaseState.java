@@ -24,19 +24,10 @@
  */
 package org.spongepowered.common.event.tracking.phase.block;
 
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.GeneralizedContext;
 
 final class DispensePhaseState extends BlockPhaseState {
-
-    @Override
-    public GeneralizedContext createNewContext(final PhaseTracker tracker) {
-        return super.createNewContext(tracker)
-            .addBlockCaptures()
-            .addEntityCaptures()
-            .addEntityDropCaptures();
-    }
 
     @Override
     public void unwind(final GeneralizedContext phaseContext) {

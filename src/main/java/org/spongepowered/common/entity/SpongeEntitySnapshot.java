@@ -25,6 +25,7 @@
 package org.spongepowered.common.entity;
 
 import com.google.common.base.MoreObjects;
+import net.minecraft.nbt.CompoundTag;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
@@ -43,8 +44,8 @@ import org.spongepowered.api.util.Transform;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataContainerHolder;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.data.holder.SpongeImmutableDataHolder;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -56,8 +57,6 @@ import java.lang.ref.WeakReference;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.UUID;
-
-import net.minecraft.nbt.CompoundTag;
 
 public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableDataHolder<EntitySnapshot>, DataContainerHolder.Immutable<EntitySnapshot> {
 
@@ -129,7 +128,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     @Override
     public DataContainer toContainer() {
         final DataContainer unsafeNbt = NBTTranslator.INSTANCE.translateFrom(this.compound == null ? new CompoundTag() : this.compound);
-        final DataContainer container = DataContainer.createNew()
+        final DataContainer container = DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED)
                 .set(Queries.CONTENT_VERSION, this.contentVersion())
                 .set(Queries.WORLD_KEY, this.worldKey.formatted())
                 .createView(Constants.Sponge.SNAPSHOT_WORLD_POSITION)
@@ -244,7 +243,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
 
     @Override
     public EntityArchetype createArchetype() {
-        final EntityArchetype.Builder builder = new SpongeEntityArchetypeBuilder();
+        final EntityArchetype.Builder builder = SpongeEntityArchetypeBuilder.pooled();
         builder.type(this.entityType);
         if (this.compound != null) {
             builder.entityData(NBTTranslator.INSTANCE.translate(this.compound));
@@ -255,7 +254,7 @@ public class SpongeEntitySnapshot implements EntitySnapshot, SpongeImmutableData
     @Override
     public DataContainer data$getDataContainer() {
         if (this.compound == null) {
-            return DataContainer.createNew();
+            return DataContainer.createNew(DataView.SafetyMode.NO_DATA_CLONED);
         }
         return NBTTranslator.INSTANCE.translate(this.compound);
     }

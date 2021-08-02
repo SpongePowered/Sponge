@@ -53,31 +53,6 @@ public abstract class EntityPhaseState<E extends EntityContext<E>> extends Poole
         return this.desc;
     }
 
-    void standardSpawnCapturedEntities(final PhaseContext<?> context, final List<? extends Entity> entities) {
-        // Separate experience orbs from other entity drops
-        final List<Entity> experience = entities.stream()
-            .filter(entity -> entity instanceof ExperienceOrb)
-            .collect(Collectors.toList());
-        if (!experience.isEmpty()) {
-            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.EXPERIENCE);
-            SpongeCommonEventFactory.callSpawnEntity(experience, context);
-
-        }
-
-        // Now process other entities, this is separate from item drops specifically
-        final List<Entity> other = entities.stream()
-            .filter(entity -> !(entity instanceof ExperienceOrb))
-            .collect(Collectors.toList());
-        if (!other.isEmpty()) {
-            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpongeSpawnTypes.ENTITY_DEATH);
-            SpongeCommonEventFactory.callSpawnEntity(experience, context);
-        }
-    }
-
-    @Override
-    public boolean doesDenyChunkRequests(E context) {
-        return true;
-    }
 }
 
 

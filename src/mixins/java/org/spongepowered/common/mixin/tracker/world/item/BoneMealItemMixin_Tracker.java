@@ -29,7 +29,7 @@ import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -73,7 +73,7 @@ public abstract class BoneMealItemMixin_Tracker {
     )
     private static void tracker$wrapGrowWithPhaseEntry(BonemealableBlock iGrowable, ServerLevel worldIn, Random rand, BlockPos pos, BlockState state,
             ItemStack stack) {
-        if (((WorldBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_ALL) {
+        if (((LevelBridge) worldIn).bridge$isFake() || !ShouldFire.CHANGE_BLOCK_EVENT_ALL) {
             iGrowable.performBonemeal(worldIn, rand, pos, state);
             return;
         }

@@ -33,7 +33,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin_RealTime {
@@ -62,7 +62,7 @@ public abstract class EntityMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimeEntityCooldown(final Entity self, final int modifier) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             this.boardingCooldown = modifier;
             return;
         }
@@ -82,7 +82,7 @@ public abstract class EntityMixin_RealTime {
         )
     )
     private void realTimeImpl$adjustForRealTimePortalCounter(final Entity self, final int modifier) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             this.portalTime = modifier;
             return;
         }

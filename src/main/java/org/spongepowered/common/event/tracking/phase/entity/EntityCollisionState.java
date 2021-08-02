@@ -34,7 +34,7 @@ public final class EntityCollisionState extends EntityPhaseState<BasicEntityCont
     }
 
     @Override
-    public boolean isCollision() {
+    public boolean allowsEntityCollisionEvents() {
         return true;
     }
 }

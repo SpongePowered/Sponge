@@ -32,7 +32,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.Slice;
 import org.spongepowered.common.bridge.RealTimeTrackingBridge;
-import org.spongepowered.common.bridge.world.WorldBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.mixin.realtime.world.entity.LivingEntityMixin_RealTime;
 
 @Mixin(ZombieVillager.class)
@@ -60,7 +60,7 @@ public abstract class ZombieVillagerMixin_RealTime extends LivingEntityMixin_Rea
         )
     )
     private int realTimeImpl$adjustForRealTimeConversionTimeBoost(final ZombieVillager self) {
-        if (((WorldBridge) this.level).bridge$isFake()) {
+        if (((LevelBridge) this.level).bridge$isFake()) {
             return this.shadow$getConversionProgress();
         }
         final int ticks = (int) ((RealTimeTrackingBridge) self.getCommandSenderWorld()).realTimeBridge$getRealTimeTicks();

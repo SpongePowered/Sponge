@@ -38,8 +38,8 @@ import net.minecraft.SharedConstants;
 
 public class DataPackSerializer<T extends DataPackSerializedObject> {
 
-    private final String name;
-    private final String typeDirectoryName;
+    protected final String name;
+    protected final String typeDirectoryName;
 
     public DataPackSerializer(final String token, final String typeDirectoryName) {
         this.name = token;

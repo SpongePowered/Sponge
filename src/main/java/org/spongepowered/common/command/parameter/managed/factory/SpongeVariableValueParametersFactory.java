@@ -26,31 +26,31 @@ package org.spongepowered.common.command.parameter.managed.factory;
 
 import com.mojang.brigadier.arguments.StringArgumentType;
 import com.mojang.brigadier.exceptions.SimpleCommandExceptionType;
+import net.minecraft.network.chat.TextComponent;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.command.parameter.CommandContext;
 import org.spongepowered.api.command.parameter.managed.ValueParameter;
 import org.spongepowered.api.command.parameter.managed.standard.VariableValueParameters;
 import org.spongepowered.api.registry.DefaultedRegistryType;
-import org.spongepowered.api.registry.Registry;
 import org.spongepowered.api.registry.RegistryHolder;
 import org.spongepowered.api.registry.RegistryType;
 import org.spongepowered.common.command.brigadier.argument.StandardArgumentParser;
-import org.spongepowered.common.command.parameter.managed.builder.SpongeRegistryEntryParameterBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeDynamicChoicesBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeLiteralBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeNumberRangeBuilder;
+import org.spongepowered.common.command.parameter.managed.builder.SpongeRegistryEntryParameterBuilder;
 import org.spongepowered.common.command.parameter.managed.builder.SpongeStaticChoicesBuilder;
 import org.spongepowered.common.command.parameter.managed.standard.SpongeChoicesValueParameter;
 
 import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import java.util.function.Function;
 import java.util.function.Supplier;
 import java.util.regex.Pattern;
-import net.minecraft.network.chat.TextComponent;
 
 public final class SpongeVariableValueParametersFactory implements VariableValueParameters.Factory {
 
@@ -74,27 +74,25 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public <T> VariableValueParameters.@NonNull RegistryEntryBuilder<T> createRegistryEntryBuilder(
-            final @NonNull Function<CommandContext, @Nullable RegistryHolder> holderProvider,
-            final RegistryType<T> registryKey) {
-        return new SpongeRegistryEntryParameterBuilder<>(in -> {
-            final RegistryHolder holder = holderProvider.apply(in);
-            if (holder != null) {
-                return holder.registry(registryKey);
-            }
-            return null;
-        });
+    public <T> VariableValueParameters.@NonNull RegistryEntryBuilder<T> createRegistryEntryBuilder(final @NonNull RegistryType<T> registryKey) {
+        return new SpongeRegistryEntryParameterBuilder<>(registryKey);
     }
 
     @Override
     public <T> VariableValueParameters.@NonNull RegistryEntryBuilder<T> createRegistryEntryBuilder(
-            final @NonNull Function<CommandContext, ? extends Registry<? extends T>> returnType) {
-        return new SpongeRegistryEntryParameterBuilder<>(returnType);
+            final @NonNull List<Function<CommandContext, @Nullable RegistryHolder>> holderProviders,
+            final @NonNull RegistryType<T> type) {
+        final VariableValueParameters.RegistryEntryBuilder<T> builder = this.createRegistryEntryBuilder(type);
+        holderProviders.forEach(builder::addHolderFunction);
+        return builder;
     }
 
     @Override
-    public <T> VariableValueParameters.RegistryEntryBuilder<T> createRegistryEntryBuilder(final DefaultedRegistryType<T> type) {
-        return new SpongeRegistryEntryParameterBuilder<>(in -> type.get());
+    public <T> VariableValueParameters.@NonNull RegistryEntryBuilder<T> createRegistryEntryBuilder(
+            final @NonNull DefaultedRegistryType<T> type) {
+        final VariableValueParameters.RegistryEntryBuilder<T> builder = new SpongeRegistryEntryParameterBuilder<>(type);
+        builder.addHolderFunction(x -> type.defaultHolder().get());
+        return builder;
     }
 
     @Override
@@ -103,27 +101,27 @@ public final class SpongeVariableValueParametersFactory implements VariableValue
     }
 
     @Override
-    public VariableValueParameters.NumberRangeBuilder<@NonNull Integer> createIntegerNumberRangeBuilder() {
+    public VariableValueParameters.@NonNull NumberRangeBuilder<@NonNull Integer> createIntegerNumberRangeBuilder() {
         return SpongeNumberRangeBuilder.intBuilder();
     }
 
     @Override
-    public VariableValueParameters.NumberRangeBuilder<@NonNull Float> createFloatNumberRangeBuilder() {
+    public VariableValueParameters.@NonNull NumberRangeBuilder<@NonNull Float> createFloatNumberRangeBuilder() {
         return SpongeNumberRangeBuilder.floatBuilder();
     }
 
     @Override
-    public VariableValueParameters.NumberRangeBuilder<@NonNull Double> createDoubleNumberRangeBuilder() {
+    public VariableValueParameters.@NonNull NumberRangeBuilder<@NonNull Double> createDoubleNumberRangeBuilder() {
         return SpongeNumberRangeBuilder.doubleBuilder();
     }
 
     @Override
-    public VariableValueParameters.NumberRangeBuilder<@NonNull Long> createLongNumberRangeBuilder() {
+    public VariableValueParameters.@NonNull NumberRangeBuilder<@NonNull Long> createLongNumberRangeBuilder() {
         return SpongeNumberRangeBuilder.longBuilder();
     }
 
     @Override
-    public ValueParameter<String> createValidatedStringParameter(final @NonNull Pattern pattern) {
+    public @NonNull ValueParameter<String> createValidatedStringParameter(final @NonNull Pattern pattern) {
         Objects.requireNonNull(pattern);
 
         return StandardArgumentParser.createConverter(StringArgumentType.string(), (reader, contextBuilder, input) -> {

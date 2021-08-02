@@ -24,30 +24,32 @@
  */
 package org.spongepowered.common.event.tracking.phase.tick;
 
+import net.minecraft.core.BlockPos;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.level.block.Block;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.block.BlockSnapshot;
-import org.spongepowered.api.data.Transaction;
+import org.spongepowered.api.block.transaction.BlockTransactionReceipt;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.level.TrackerBlockEventDataBridge;
+import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.world.BlockChange;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.block.Block;
 import java.util.function.BiConsumer;
+import java.util.function.Supplier;
 
 class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     private final BiConsumer<CauseStackManager.StackFrame, BlockEventTickContext> FRAME_MODIFIER =
             super.getFrameModifier().andThen((frame, context) -> {
-                final TrackerBlockEventDataBridge blockEventData = context.getSource(TrackerBlockEventDataBridge.class).orElse(null);
+                final TrackableBlockEventDataBridge blockEventData = context.getSource(TrackableBlockEventDataBridge.class).orElse(null);
                 if (blockEventData != null) {
                     if (blockEventData.bridge$getTileEntity() != null) {
                         frame.pushCause(blockEventData.bridge$getTileEntity());
@@ -60,9 +62,7 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
 
     @Override
     public BlockEventTickContext createNewContext(final PhaseTracker tracker) {
-        return new BlockEventTickContext(tracker)
-                .addBlockCaptures()
-                .addEntityCaptures();
+        return new BlockEventTickContext(tracker);
     }
 
     @Override
@@ -83,30 +83,32 @@ class BlockEventTickPhaseState extends TickPhaseState<BlockEventTickContext> {
     }
 
     @Override
-    public void postBlockTransactionApplication(final BlockChange blockChange,
-        final Transaction<? extends BlockSnapshot> snapshotTransaction, final BlockEventTickContext context) {
-        final Block block = (Block) snapshotTransaction.original().state().type();
-        final SpongeBlockSnapshot original = (SpongeBlockSnapshot) snapshotTransaction.original();
+    public void postBlockTransactionApplication(
+        final BlockEventTickContext context, final BlockChange blockChange,
+        final BlockTransactionReceipt receipt
+    ) {
+        final Block block = (Block) receipt.originalBlock().state().type();
+        final SpongeBlockSnapshot original = (SpongeBlockSnapshot) receipt.originalBlock();
         final BlockPos changedBlockPos = original.getBlockPos();
         original.getServerWorld().ifPresent(worldServer -> {
             final LevelChunkBridge changedMixinChunk = (LevelChunkBridge) worldServer.getChunkAt(changedBlockPos);
-            changedMixinChunk.bridge$getBlockCreator(changedBlockPos)
+            changedMixinChunk.bridge$getBlockCreatorUUID(changedBlockPos)
                 .ifPresent(owner -> changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, owner, PlayerTracker.Type.CREATOR));
-            changedMixinChunk.bridge$getBlockNotifier(changedBlockPos)
+            changedMixinChunk.bridge$getBlockNotifierUUID(changedBlockPos)
                 .ifPresent(user -> changedMixinChunk.bridge$addTrackedBlockPosition(block, changedBlockPos, user, PlayerTracker.Type.NOTIFIER));
         });
     }
 
     @Override
     public void unwind(final BlockEventTickContext context) {
-        try (final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
-            frame.addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.CUSTOM);
-            TrackingUtil.processBlockCaptures(context);
-        }
+        TrackingUtil.processBlockCaptures(context);
     }
 
     @Override
-    public boolean doesCaptureNeighborNotifications(final BlockEventTickContext context) {
-        return true;
+    public Supplier<SpawnType> getSpawnTypeForTransaction(
+        final BlockEventTickContext context, final Entity entityToSpawn
+    ) {
+        return SpawnTypes.CUSTOM;
     }
+
 }

@@ -1,5 +1,4 @@
 {
-    "package": "config.is.only.for.inheriting.from",
     "minVersion": "0.8",
     "target": "@env(DEFAULT)",
     "compatibilityLevel": "JAVA_8",
