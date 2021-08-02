@@ -827,20 +827,26 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
         }
     }
 
-    @Inject(method = "setPlayerInput", at = @At("HEAD"))
+    @Inject(method = "setPlayerInput", at = @At("HEAD"), cancellable = true)
     public void onSetPlayerInput(final float sway, final float surge, final boolean jumping, final boolean dismount, final CallbackInfo ci) {
         if(isPassenger()) {
             if(sway == this.xxa && surge == this.zza && jumping == this.jumping) {
                 return;
             }
 
-            Sponge.eventManager().post(SpongeEventFactory.createSteerVehicleEvent(
+            final SteerVehicleEvent event = SpongeEventFactory.createSteerVehicleEvent(
                     PhaseTracker.getCauseStackManager().currentCause(),
                     (org.spongepowered.api.entity.living.player.server.ServerPlayer) this,
                     jumping,
                     surge,
                     sway
-            ));
+            );
+
+            Sponge.eventManager().post(event);
+
+            if(event.isCancelled()) {
+                ci.cancel();
+            }
         }
     }
 
