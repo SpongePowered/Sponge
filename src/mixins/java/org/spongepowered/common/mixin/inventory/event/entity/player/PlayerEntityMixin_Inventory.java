@@ -46,7 +46,9 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(value = Player.class)
 public class PlayerEntityMixin_Inventory {
@@ -62,11 +64,19 @@ public class PlayerEntityMixin_Inventory {
         if (slotIn == EquipmentSlot.MAINHAND) {
             final ItemStack orig = this.inventory.items.get(this.inventory.selected);
             final Slot slot = inventory.primary().hotbar().slot(this.inventory.selected).get();
-            phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, orig, stack, inventory);
+            if (phaseContext instanceof PacketContext) {
+                phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, ItemStackUtil.toNative(((PacketContext) phaseContext).getItemUsed()), stack, inventory);
+            } else {
+                phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, orig, stack, inventory);
+            }
         } else if (slotIn == EquipmentSlot.OFFHAND) {
             final ItemStack orig = this.inventory.offhand.get(0);
             final Slot slot = inventory.offhand();
-            phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, orig, stack, inventory);
+            if (phaseContext instanceof PacketContext) {
+                phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, ItemStackUtil.toNative(((PacketContext) phaseContext).getItemUsed()), stack, inventory);
+            } else {
+                phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, orig, stack, inventory);
+            }
         } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
             final ItemStack orig = this.inventory.armor.get(slotIn.getIndex());
             final Slot slot = inventory.equipment().slot((EquipmentType) (Object) slotIn).get();

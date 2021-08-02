@@ -348,6 +348,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             final Player player, final PhaseContext<@NonNull ?> phaseContext, final Slot slot, final ItemStack orig,
             final ItemStack newStack, final Inventory inventory
     ) {
+        if (ItemStack.matches(orig, newStack)) {
+            return; // ignore if no change
+        }
+
         final SlotTransaction newTransaction = new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(newStack));
         if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, inventory)) {
             return;
@@ -357,7 +361,9 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         // e.g. /give command
         // TODO PlaceBlockPacketState unwind
         // Dispenser equip
-        // TODO eating?
+        // eating
+        // throw item
+        // TODO use bow
         this.logPlayerInventoryChange(player, (c, inv, trans) -> trans.isEmpty() ? null : SpongeEventFactory.createChangeInventoryEvent(c, inv, trans));
         if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, inventory)) {
             return;

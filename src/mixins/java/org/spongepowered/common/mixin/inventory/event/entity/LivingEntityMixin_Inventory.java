@@ -24,27 +24,37 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity;
 
+import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.ChangeEntityEquipmentEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
+import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.bridge.world.entity.player.PlayerInventoryBridge;
 import org.spongepowered.common.bridge.world.inventory.InventoryBridge;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
 import org.spongepowered.common.inventory.lens.Lens;
@@ -63,6 +73,9 @@ public abstract class LivingEntityMixin_Inventory {
     @Shadow public abstract void shadow$setItemSlot(EquipmentSlot slotIn, ItemStack stack);
     @Shadow protected abstract ItemStack shadow$getLastHandItem(EquipmentSlot p_241347_1_);
     @Shadow protected abstract ItemStack shadow$getLastArmorItem(EquipmentSlot p_241346_1_);
+    @Shadow protected abstract void shadow$completeUsingItem();
+    @Shadow public abstract InteractionHand shadow$getUsedItemHand();
+    @Shadow public abstract ItemStack shadow$getItemInHand(InteractionHand param0);
     // @formatter:on
 
     @Inject(method = "handleHandSwap", cancellable = true, locals = LocalCapture.CAPTURE_FAILHARD,
@@ -100,6 +113,27 @@ public abstract class LivingEntityMixin_Inventory {
             }
             return this.impl$throwEquipmentEvent(entry.getKey(), slotAdapter, entry.getValue(), oldStack);
         });
+    }
+
+    @Redirect(method = "updatingUsingItem", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/LivingEntity;completeUsingItem()V"))
+    private void inventory$onUpdateUsingItem(final LivingEntity livingEntity) {
+        if (!(livingEntity instanceof Player)) {
+            this.shadow$completeUsingItem();
+            return;
+        }
+        final InteractionHand hand = this.shadow$getUsedItemHand();
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect((Player) livingEntity, SpongeEventFactory::createChangeInventoryEvent)) {
+            final ItemStack orig = this.shadow$getItemInHand(hand).copy();
+            this.shadow$completeUsingItem();
+            final ItemStack newStack = this.shadow$getItemInHand(hand);
+            final PlayerInventory inventory = (PlayerInventory) ((Player) livingEntity).inventory;
+            final Slot slot = hand == InteractionHand.MAIN_HAND ?
+                    inventory.equipment().slot(EquipmentTypes.MAIN_HAND).get() :
+                    inventory.equipment().slot(EquipmentTypes.OFF_HAND).get();
+            transactor.logPlayerInventorySlotTransaction((Player) livingEntity, context, slot, orig, newStack, inventory);
+        }
     }
 
     private boolean impl$throwEquipmentEvent(EquipmentSlot equipmentslottype, Slot slot, ItemStack newStack, ItemStack oldStack) {
