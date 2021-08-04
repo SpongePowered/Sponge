@@ -80,6 +80,8 @@ import java.util.stream.Stream;
 
 public abstract class SpongeEventManager implements EventManager {
 
+    private static final NoExceptionClosable NULL_CLOSABLE = new NoExceptionClosable();
+
     public final ListenerChecker checker;
     private final Object lock;
     private final Multimap<Class<?>, RegisteredListener<?>> handlersByEvent;
@@ -119,13 +121,13 @@ public abstract class SpongeEventManager implements EventManager {
             final ConcurrentHashMap<Class<? extends Event>, RegisteredListener.Cache> newBackingData =
                     new ConcurrentHashMap<>(150, 0.75f, 1);
             cacheData.set(innerCacheValue, newBackingData);
-        } catch (NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
+        } catch (final NoSuchFieldException | SecurityException | IllegalArgumentException | IllegalAccessException e) {
             SpongeCommon.logger().warn("Failed to set event cache backing array, type was " + this.handlersCache.getClass().getName());
             SpongeCommon.logger().warn("  Caused by: " + e.getClass().getName() + ": " + e.getMessage());
         }
     }
 
-    private static @Nullable String getHandlerErrorOrNull(Method method) {
+    private static @Nullable String getHandlerErrorOrNull(final Method method) {
         final int modifiers = method.getModifiers();
         final List<String> errors = new ArrayList<>();
         if (Modifier.isStatic(modifiers)) {
@@ -198,7 +200,7 @@ public abstract class SpongeEventManager implements EventManager {
         boolean changed = false;
 
         synchronized (this.lock) {
-            for (RegisteredListener<?> handler : handlers) {
+            for (final RegisteredListener<?> handler : handlers) {
                 final Class<?> raw = handler.getEventType().getType();
                 if (this.handlersByEvent.put(raw, handler)) {
                     changed = true;
@@ -288,7 +290,7 @@ public abstract class SpongeEventManager implements EventManager {
             }
         }
 
-        for (Map.Entry<Method, String> method : methodErrors.entrySet()) {
+        for (final Map.Entry<Method, String> method : methodErrors.entrySet()) {
             SpongeCommon.logger().warn("Invalid listener method {} in {}: {}", method.getKey(),
                     method.getKey().getDeclaringClass().getName(), method.getValue());
         }
@@ -357,7 +359,7 @@ public abstract class SpongeEventManager implements EventManager {
     }
 
     @SuppressWarnings("unchecked")
-    private boolean post(final Event event, final List<RegisteredListener<?>> handlers) {
+    protected final boolean post(final Event event, final List<RegisteredListener<?>> handlers) {
         final Engine engine = EngineUtil.determineEngine();
 
         // If this event is being posted asynchronously then we don't want
@@ -396,7 +398,7 @@ public abstract class SpongeEventManager implements EventManager {
                 }
                 SpongeCommon.setActivePlugin(handler.getPlugin());
                 handler.handle(event);
-            } catch (Throwable e) {
+            } catch (final Throwable e) {
                 SpongeCommon.logger().error("Could not pass {} to {}", event.getClass().getSimpleName(), handler.getPlugin().metadata().id(), e);
             } finally {
                 SpongeCommon.setActivePlugin(null);
@@ -418,18 +420,8 @@ public abstract class SpongeEventManager implements EventManager {
 
     @Override
     public boolean post(final Event event) {
-        try {
-            if (event instanceof InteractContainerEvent) { // Track usage of Containers
-                ((ContainerBridge) ((InteractContainerEvent) event).container()).bridge$setInUse(true);
-            }
-            // Allow the client thread by default so devs can actually
-            // call their own events inside the init events. Only allowing
-            // this as long that there is no server available
+        try (final NoExceptionClosable ignored = this.preparePost(event)) {
             return this.post(event, this.getHandlerCache(event).getListeners());
-        } finally {
-            if (event instanceof InteractContainerEvent) { // Finished using Container
-                ((ContainerBridge) ((InteractContainerEvent) event).container()).bridge$setInUse(false);
-            }
         }
     }
 
@@ -439,6 +431,42 @@ public abstract class SpongeEventManager implements EventManager {
                 .filter(l -> l.getPlugin() == plugin)
                 .collect(Collectors.toList());
         return this.post(event, pluginListeners);
+    }
+
+    protected final NoExceptionClosable preparePost(final Event event) {
+        if (event instanceof InteractContainerEvent) { // Track usage of Containers
+            final ContainerBridge bridge = ((ContainerBridge) ((InteractContainerEvent) event).container());
+            bridge.bridge$setInUse(true);
+            return new ContainerInUseClosable(bridge);
+        }
+        return SpongeEventManager.NULL_CLOSABLE;
+    }
+
+    protected static class NoExceptionClosable implements AutoCloseable {
+
+        NoExceptionClosable() {
+        }
+
+        @Override
+        public void close() {
+        }
+
+    }
+
+    protected static final class ContainerInUseClosable extends NoExceptionClosable {
+
+        final ContainerBridge containerBridge;
+
+        ContainerInUseClosable(final ContainerBridge containerBridge) {
+            super();
+            this.containerBridge = containerBridge;
+        }
+
+        @Override
+        public void close() {
+            this.containerBridge.bridge$setInUse(false);
+        }
+
     }
 
 }

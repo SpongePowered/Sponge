@@ -6,7 +6,13 @@
     "compatibilityLevel": "JAVA_8",
     "priority": 1301,
     "mixins": [
+        "api.event.EventMixin_Forge",
+        "api.event.block.ChangeBlockEvent_AllMixin_Forge",
+        "fml.FMLModContainerMixin_Forge",
         "fml.ModContainerMixin_Forge",
+        "forge.MinecraftForgeMixin_Forge",
+        "forge.event.world.BlockEventMixin_Forge",
+        "forge.event.world.BlockEvent_BreakEventMixin_Forge",
         "server.MainMixin_Forge",
         "server.level.ServerLevelMixin_Timings_Forge",
         "world.entity.item.ItemEntityMixin_Forge",

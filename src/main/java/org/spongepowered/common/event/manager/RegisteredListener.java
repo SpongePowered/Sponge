@@ -39,6 +39,7 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.EnumMap;
 import java.util.List;
+import java.util.Objects;
 
 public final class RegisteredListener<T extends Event> implements SpongeEventListener<T>, Comparable<RegisteredListener<?>> {
 
@@ -52,7 +53,8 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
     private final boolean beforeModifications;
     private Timing listenerTimer;
 
-    RegisteredListener(PluginContainer plugin, EventType<T> eventType, Order order, EventListener<? super T> listener, boolean beforeModifications) {
+    RegisteredListener(
+            final PluginContainer plugin, final EventType<T> eventType, final Order order, final EventListener<? super T> listener, final boolean beforeModifications) {
         this.plugin = checkNotNull(plugin, "plugin");
         this.eventType = checkNotNull(eventType, "eventType");
         this.order = checkNotNull(order, "order");
@@ -93,27 +95,34 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
     }
 
     @Override
-    public void handle(T event) throws Exception {
+    public void handle(final T event) throws Exception {
         this.listener.handle(event);
     }
 
     @Override
-    public int compareTo(RegisteredListener<?> handler) {
+    public int compareTo(final RegisteredListener<?> handler) {
         return this.order.compareTo(handler.order);
     }
 
     public static final class Cache {
 
         private final List<RegisteredListener<?>> listeners;
+        private final List<RegisteredListener<?>> beforeModifications = new ArrayList<>();
+        private final List<RegisteredListener<?>> afterModifications = new ArrayList<>();
         private final EnumMap<Order, List<RegisteredListener<?>>> listenersByOrder;
 
-        Cache(List<RegisteredListener<?>> listeners) {
+        Cache(final List<RegisteredListener<?>> listeners) {
             this.listeners = listeners;
 
             this.listenersByOrder = new EnumMap<>(Order.class);
-            for (RegisteredListener<?> handler : listeners) {
+            for (final RegisteredListener<?> handler : listeners) {
                 final List<RegisteredListener<?>> list = this.listenersByOrder.computeIfAbsent(handler.getOrder(), order -> new ArrayList<>());
                 list.add(handler);
+                if (handler.beforeModifications) {
+                    this.beforeModifications.add(handler);
+                } else {
+                    this.afterModifications.add(handler);
+                }
             }
         }
 
@@ -121,12 +130,20 @@ public final class RegisteredListener<T extends Event> implements SpongeEventLis
             return this.listeners;
         }
 
-        public List<RegisteredListener<?>> getListenersByOrder(Order order) {
-            final List<RegisteredListener<?>> list = this.listenersByOrder.get(checkNotNull(order, "order"));
+        public List<RegisteredListener<?>> getListenersByOrder(final Order order) {
+            final List<RegisteredListener<?>> list = this.listenersByOrder.get(Objects.requireNonNull(order, "order"));
             if (list == null) {
                 return Collections.emptyList();
             }
             return list;
+        }
+
+        public List<RegisteredListener<?>> beforeModifications() {
+            return Collections.unmodifiableList(this.beforeModifications);
+        }
+
+        public List<RegisteredListener<?>> afterModifications() {
+            return Collections.unmodifiableList(this.afterModifications);
         }
 
     }

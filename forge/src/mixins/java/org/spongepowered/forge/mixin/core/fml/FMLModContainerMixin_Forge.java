@@ -22,43 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge;
+package org.spongepowered.forge.mixin.core.fml;
 
 import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.WorldPersistenceHooks;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.launch.Launch;
+import net.minecraftforge.fml.javafmlmod.FMLModContainer;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.forge.launch.event.ForgeEventManager;
 
-@Mod(Constants.MOD_ID)
-public final class SpongeForge {
+@Mixin(value = FMLModContainer.class, remap = false)
+public abstract class FMLModContainerMixin_Forge extends ModContainerMixin_Forge {
 
-    private final Logger logger = LogManager.getLogger(Constants.MOD_ID);
+    // @formatter:off
+    @Shadow private Object modInstance;
+    // @formatter:on
 
-    public SpongeForge() {
-        WorldPersistenceHooks.addHook(SpongeLevelDataPersistence.INSTANCE);
-
-        final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-
-        // modBus: add all FML events with it
-        modBus.addListener(this::commonSetup);
-
-        // annotation events, for non-FML things
-        MinecraftForge.EVENT_BUS.register(this);
-    }
-
-    private void commonSetup(final FMLCommonSetupEvent event) {
-
-        Launch.instance().lifecycle().establishGameServices();
-
-        // TODO Add attributes for HumanEntity to relevant event
-
-        // common setup
-        this.logger.info("SpongeForge v{} initialized", Launch.instance().platformPlugin().metadata().version());
+    @Inject(method = "constructMod", at = @At("TAIL"))
+    private void forge$registerModForSpongeListeners(final CallbackInfo ci) {
+        if (this.modInstance != null) {
+            ((ForgeEventManager) MinecraftForge.EVENT_BUS).registerListeners(this, this.modInstance);
+        }
     }
 
 }

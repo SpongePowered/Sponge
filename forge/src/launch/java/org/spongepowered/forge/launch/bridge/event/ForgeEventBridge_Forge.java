@@ -22,21 +22,40 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.inject;
+package org.spongepowered.forge.launch.bridge.event;
 
-import com.google.inject.AbstractModule;
-import net.minecraftforge.common.MinecraftForge;
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.event.EventManager;
-import org.spongepowered.forge.launch.ForgePlatform;
-import org.spongepowered.forge.launch.event.ForgeEventManager;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.Event;
 
-public final class SpongeForgeModule extends AbstractModule {
+public interface ForgeEventBridge_Forge {
 
-    @Override
-    protected void configure() {
-        this.bind(Platform.class).to(ForgePlatform.class);
-        this.bind(EventManager.class).toProvider(() -> (ForgeEventManager) MinecraftForge.EVENT_BUS);
-    }
+    /**
+     * Syncs the Sponge event to this Forge event
+     *
+     * <p>Note that a Sponge event might service multiple Forge events, so any
+     * syncing should be limited to the remit of this event only (i.e., if the
+     * event fires for multiple positions, the sync should only consider the
+     * positions this event is concerned with)</p>
+     *
+     * @param event The Sponge event
+     */
+    void bridge$syncFrom(Event event);
+
+    /**
+     * Syncs the Forge event to this Sponge event
+     *
+     * <p>Note that a Sponge event might service multiple Forge events, so any
+     * syncing should be limited to the remit of this event only (that is, this
+     * should only affect the Sponge event as far as the remit of this event goes,
+     * most likely not cancelling events but invalidating transactions.)</p>
+     *
+     * @param event The Sponge event
+     */
+    void bridge$syncTo(Event event);
+
+    /**
+     * Creates a Sponge event from this Forge event
+     */
+    @Nullable Event bridge$createSpongeEvent();
 
 }
