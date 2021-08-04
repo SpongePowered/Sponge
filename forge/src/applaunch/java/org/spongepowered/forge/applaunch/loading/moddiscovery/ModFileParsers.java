@@ -40,12 +40,12 @@ import java.nio.file.Path;
 
 public final class ModFileParsers {
 
-    private static Constructor<ModFileInfo> modFileConstructor;
+    private static Constructor<ModFileInfo> modFileInfoConstructor;
     private static Field modFileInfoField;
 
     static {
         try {
-            ModFileParsers.modFileConstructor = ModFileInfo.class.getDeclaredConstructor(ModFile.class, IConfigurable.class);
+            ModFileParsers.modFileInfoConstructor = ModFileInfo.class.getDeclaredConstructor(ModFile.class, IConfigurable.class);
             ModFileParsers.modFileInfoField = NightConfigWrapper.class.getDeclaredField("file");
         } catch (final NoSuchMethodException | NoSuchFieldException e) {
             throw new RuntimeException(e);
@@ -66,9 +66,9 @@ public final class ModFileParsers {
             final NightConfigWrapper configWrapper = new NightConfigWrapper(fileConfig);
             ModFileInfo modFileInfo;
             try {
-                ModFileParsers.modFileConstructor.setAccessible(true);
-                modFileInfo = ModFileParsers.modFileConstructor.newInstance(modFile, configWrapper);
-                ModFileParsers.modFileConstructor.setAccessible(false);
+                ModFileParsers.modFileInfoConstructor.setAccessible(true);
+                modFileInfo = ModFileParsers.modFileInfoConstructor.newInstance(modFile, configWrapper);
+                ModFileParsers.modFileInfoConstructor.setAccessible(false);
                 ModFileParsers.modFileInfoField.setAccessible(true);
                 ModFileParsers.modFileInfoField.set(configWrapper, modFileInfo);
                 ModFileParsers.modFileInfoField.setAccessible(false);
