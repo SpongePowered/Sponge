@@ -22,21 +22,38 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.inject;
+package org.spongepowered.forge.launch.bridge.event;
 
-import com.google.inject.AbstractModule;
-import net.minecraftforge.common.MinecraftForge;
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.event.EventManager;
-import org.spongepowered.forge.launch.ForgePlatform;
-import org.spongepowered.forge.launch.event.ForgeEventManager;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.IEventBusInvokeDispatcher;
+import net.minecraftforge.eventbus.api.IEventListener;
+import org.checkerframework.checker.nullness.qual.Nullable;
 
-public final class SpongeForgeModule extends AbstractModule {
+import java.util.Collection;
 
-    @Override
-    protected void configure() {
-        this.bind(Platform.class).to(ForgePlatform.class);
-        this.bind(EventManager.class).toProvider(() -> (ForgeEventManager) MinecraftForge.EVENT_BUS);
+public interface SpongeEventBridge_Forge {
+
+    /**
+     * Creates a Forge {@link Event} that must also implement
+     * {@link ForgeEventBridge_Forge} - not doing so will cause
+     * an error.
+     *
+     * <p>By default, this returns null.</p>
+     *
+     * @return The Forge event
+     */
+    default @Nullable Collection<? extends Event> bridge$createForgeEvents() {
+        return null;
+    }
+
+    /**
+     * If there is a specialist dispatcher that we need to use for
+     * this given event, it can be defined here.
+     *
+     * @return The dispatcher to use.
+     */
+    default IEventBusInvokeDispatcher bridge$eventDispatcher() {
+        return IEventListener::invoke;
     }
 
 }

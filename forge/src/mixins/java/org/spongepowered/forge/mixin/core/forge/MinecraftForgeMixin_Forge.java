@@ -22,43 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge;
+package org.spongepowered.forge.mixin.core.forge;
 
 import net.minecraftforge.common.MinecraftForge;
+import net.minecraftforge.eventbus.api.BusBuilder;
 import net.minecraftforge.eventbus.api.IEventBus;
-import net.minecraftforge.fml.WorldPersistenceHooks;
-import net.minecraftforge.fml.common.Mod;
-import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
-import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.common.launch.Launch;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.forge.launch.event.ForgeEventManager;
 
-@Mod(Constants.MOD_ID)
-public final class SpongeForge {
+@Mixin(MinecraftForge.class)
+public abstract class MinecraftForgeMixin_Forge {
 
-    private final Logger logger = LogManager.getLogger(Constants.MOD_ID);
-
-    public SpongeForge() {
-        WorldPersistenceHooks.addHook(SpongeLevelDataPersistence.INSTANCE);
-
-        final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
-
-        // modBus: add all FML events with it
-        modBus.addListener(this::commonSetup);
-
-        // annotation events, for non-FML things
-        MinecraftForge.EVENT_BUS.register(this);
-    }
-
-    private void commonSetup(final FMLCommonSetupEvent event) {
-
-        Launch.instance().lifecycle().establishGameServices();
-
-        // TODO Add attributes for HumanEntity to relevant event
-
-        // common setup
-        this.logger.info("SpongeForge v{} initialized", Launch.instance().platformPlugin().metadata().version());
+    @Redirect(method = "<clinit>", at = @At(value = "INVOKE",
+            target = "Lnet/minecraftforge/eventbus/api/BusBuilder;build()Lnet/minecraftforge/eventbus/api/IEventBus;", remap = false))
+    private static IEventBus forge$substituteSpongeEventBus(final BusBuilder builder) {
+        return new ForgeEventManager(builder.build());
     }
 
 }

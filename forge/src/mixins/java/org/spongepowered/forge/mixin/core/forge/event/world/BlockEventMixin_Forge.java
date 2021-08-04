@@ -22,21 +22,22 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.inject;
+package org.spongepowered.forge.mixin.core.forge.event.world;
 
-import com.google.inject.AbstractModule;
-import net.minecraftforge.common.MinecraftForge;
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.event.EventManager;
-import org.spongepowered.forge.launch.ForgePlatform;
-import org.spongepowered.forge.launch.event.ForgeEventManager;
+import net.minecraft.core.BlockPos;
+import net.minecraft.world.level.LevelAccessor;
+import net.minecraft.world.level.block.state.BlockState;
+import net.minecraftforge.event.world.BlockEvent;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
 
-public final class SpongeForgeModule extends AbstractModule {
+@Mixin(value = BlockEvent.class, remap = false)
+public abstract class BlockEventMixin_Forge {
 
-    @Override
-    protected void configure() {
-        this.bind(Platform.class).to(ForgePlatform.class);
-        this.bind(EventManager.class).toProvider(() -> (ForgeEventManager) MinecraftForge.EVENT_BUS);
-    }
+    // @formatter:off
+    @Shadow public abstract LevelAccessor shadow$getWorld();
+    @Shadow public abstract BlockPos shadow$getPos();
+    @Shadow public abstract BlockState shadow$getState();
+    // @formatter:on
 
 }
