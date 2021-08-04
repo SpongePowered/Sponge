@@ -35,17 +35,17 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;
 
-import java.util.Optional;
-
 @Mod(Constants.MOD_ID)
 public final class SpongeForge {
 
-    private static final Logger LOGGER = LogManager.getLogger(Constants.MOD_ID);
+    private final Logger logger = LogManager.getLogger(Constants.MOD_ID);
 
     public SpongeForge() {
         WorldPersistenceHooks.addHook(SpongeLevelDataPersistence.INSTANCE);
 
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
+
+        Launch.instance().lifecycle().establishGameServices();
 
         // modBus: add all FML events with it
         modBus.addListener(this::commonSetup);
@@ -55,12 +55,10 @@ public final class SpongeForge {
     }
 
     private void commonSetup(final FMLCommonSetupEvent event) {
-        // common setup
-        SpongeForge.LOGGER.info("Setting up SpongeForge");
-
-        final Optional<PluginContainer> pluginContainer = Launch.instance().pluginManager().fromInstance(this);
-        final PluginContainer pluginContainer1 = pluginContainer.get();
 
         // TODO Add attributes for HumanEntity to relevant event
+
+        // common setup
+        this.logger.info("SpongeForge v{} initialized", Launch.instance().platformPlugin().metadata().version());
     }
 }

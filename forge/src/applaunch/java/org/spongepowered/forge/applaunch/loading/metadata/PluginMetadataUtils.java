@@ -48,7 +48,7 @@ public final class PluginMetadataUtils {
                 .version(info.getVersion().toString())
                 .description(info.getDescription())
                 .mainClass("unknown") // TODO Map main class to mod id
-                .addContributor(PluginContributor.builder().name(info.getConfigElement("author").orElse("unknown").toString())
+                .addContributor(PluginContributor.builder().name(info.getConfigElement("authors").orElse("unknown").toString())
                         .build());
         builder.links(PluginLinks.builder().issues(info.getOwningFile().getIssueURL()).build());
 

@@ -32,8 +32,7 @@ import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import net.minecraftforge.forgespi.locating.ModFileFactory;
-import org.apache.logging.log4j.LogManager;
-import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Sponge;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileFactory;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileInfoParser;
@@ -56,13 +55,11 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
     // does this even make sense?
     private static final String[] EXCLUDED_PATHS = {
         "org/spongepowered/common/applaunch/",
+        "org/spongepowered/forge/applaunch/loading/metadata",
         "org/spongepowered/forge/applaunch/loading/moddiscovery",
-        "org/spongepowered/forge/applaunch/loading/provider",
         "org/spongepowered/forge/applaunch/plugin",
         "org/spongepowered/forge/applaunch/service",
     };
-
-    private final Logger logger = LogManager.getLogger();
 
     @Override
     public List<IModFile> scanMods() {
@@ -127,9 +124,7 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
     @Override
     public void scanFile(final IModFile file, final Consumer<Path> pathConsumer) {
         super.scanFile(file, path -> {
-            if (this.isTCLExcluded(path)) {
-                this.logger.error("Excluded: {}", path.getFileName().toString());
-            } else {
+            if (!this.isTCLExcluded(path)) {
                 pathConsumer.accept(path);
             }
         });
@@ -157,7 +152,7 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
      */
     private boolean isLibrary(final Path path) {
         final String completePath = path.toString();
-        return completePath.contains("kyori") || completePath.contains("SpongeAPI");
+        return completePath.contains("kyori") || completePath.contains("SpongeAPI\\build\\libs");
     }
 
     private ModFile newDummySpongeFile(final Path path, final IModLocator locator, final String fileName) {

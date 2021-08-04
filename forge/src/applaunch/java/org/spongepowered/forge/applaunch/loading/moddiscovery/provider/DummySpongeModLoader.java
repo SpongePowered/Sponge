@@ -22,33 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.loading.provider;
+package org.spongepowered.forge.applaunch.loading.moddiscovery.provider;
 
-import net.minecraftforge.forgespi.language.ILifecycleEvent;
+import net.minecraftforge.forgespi.language.IModInfo;
 import net.minecraftforge.forgespi.language.IModLanguageProvider;
 import net.minecraftforge.forgespi.language.ModFileScanData;
+import org.spongepowered.common.applaunch.AppLaunch;
 
-import java.util.Collections;
-import java.util.function.Consumer;
-import java.util.function.Supplier;
+public final class DummySpongeModLoader implements IModLanguageProvider.IModLanguageLoader {
 
-public final class SpongeModLanguageProvider implements IModLanguageProvider {
+    private final String dummyInstance;
 
-    private static final String NAME = "sponge";
-
-    @Override
-    public String name() {
-        return SpongeModLanguageProvider.NAME;
+    public DummySpongeModLoader(final String dummyInstance) {
+        this.dummyInstance = dummyInstance;
     }
 
+    @SuppressWarnings("unchecked")
     @Override
-    public Consumer<ModFileScanData> getFileVisitor() {
-        return sd -> sd.addLanguageLoader(Collections.singletonMap(SpongeModLanguageProvider.NAME,
-                new DummySpongeModLoader(SpongeModLanguageProvider.NAME)));
-    }
-
-    @Override
-    public <R extends ILifecycleEvent<R>> void consumeLifecycleEvent(final Supplier<R> consumeEvent) {
-
+    public <T> T loadMod(final IModInfo info, final ClassLoader modClassLoader, final ModFileScanData modFileScanResults) {
+        try {
+            final Class<?> mcModClass = Class.forName("org.spongepowered.forge.applaunch.loading.container.DummySpongeModContainer", true,
+                    modClassLoader);
+            return (T)mcModClass.getConstructor(String.class, IModInfo.class).newInstance(this.dummyInstance, info);
+        } catch (final Exception ex) {
+            AppLaunch.logger().fatal("Unable to load DummySpongeModContainer!", ex);
+            throw new RuntimeException(ex);
+        }
     }
 }

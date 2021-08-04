@@ -1,2 +1,2 @@
-org.spongepowered.forge.applaunch.loading.provider.SpongeAPIModLanguageProvider
-org.spongepowered.forge.applaunch.loading.provider.SpongeModLanguageProvider
+org.spongepowered.forge.applaunch.loading.moddiscovery.provider.SpongeAPIModLanguageProvider
+org.spongepowered.forge.applaunch.loading.moddiscovery.provider.SpongeModLanguageProvider
