@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.loading.provider;
+package org.spongepowered.forge.applaunch.loading.moddiscovery.provider;
 
 import net.minecraftforge.forgespi.language.ILifecycleEvent;
 import net.minecraftforge.forgespi.language.IModLanguageProvider;
@@ -32,19 +32,19 @@ import java.util.Collections;
 import java.util.function.Consumer;
 import java.util.function.Supplier;
 
-public final class SpongeAPIModLanguageProvider implements IModLanguageProvider {
+public final class SpongeModLanguageProvider implements IModLanguageProvider {
 
-    private static final String NAME = "spongeapi";
+    private static final String NAME = "sponge";
 
     @Override
     public String name() {
-        return SpongeAPIModLanguageProvider.NAME;
+        return SpongeModLanguageProvider.NAME;
     }
 
     @Override
     public Consumer<ModFileScanData> getFileVisitor() {
-        return sd -> sd.addLanguageLoader(Collections.singletonMap(SpongeAPIModLanguageProvider.NAME,
-                new DummySpongeModLoader(SpongeAPIModLanguageProvider.NAME)));
+        return sd -> sd.addLanguageLoader(Collections.singletonMap(SpongeModLanguageProvider.NAME,
+                new DummySpongeModLoader(SpongeModLanguageProvider.NAME)));
     }
 
     @Override

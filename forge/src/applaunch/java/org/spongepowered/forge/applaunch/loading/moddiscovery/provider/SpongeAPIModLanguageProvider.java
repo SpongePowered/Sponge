@@ -22,31 +22,33 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.applaunch.loading.provider;
+package org.spongepowered.forge.applaunch.loading.moddiscovery.provider;
 
-import net.minecraftforge.forgespi.language.IModInfo;
+import net.minecraftforge.forgespi.language.ILifecycleEvent;
 import net.minecraftforge.forgespi.language.IModLanguageProvider;
 import net.minecraftforge.forgespi.language.ModFileScanData;
-import org.spongepowered.common.applaunch.AppLaunch;
 
-public final class DummySpongeModLoader implements IModLanguageProvider.IModLanguageLoader {
+import java.util.Collections;
+import java.util.function.Consumer;
+import java.util.function.Supplier;
 
-    private final String dummyInstance;
+public final class SpongeAPIModLanguageProvider implements IModLanguageProvider {
 
-    public DummySpongeModLoader(final String dummyInstance) {
-        this.dummyInstance = dummyInstance;
+    private static final String NAME = "spongeapi";
+
+    @Override
+    public String name() {
+        return SpongeAPIModLanguageProvider.NAME;
     }
 
-    @SuppressWarnings("unchecked")
     @Override
-    public <T> T loadMod(final IModInfo info, final ClassLoader modClassLoader, final ModFileScanData modFileScanResults) {
-        try {
-            final Class<?> mcModClass = Class.forName("org.spongepowered.forge.applaunch.loading.container.DummySpongeModContainer", true,
-                    modClassLoader);
-            return (T)mcModClass.getConstructor(String.class, IModInfo.class).newInstance(this.dummyInstance, info);
-        } catch (final Exception ex) {
-            AppLaunch.logger().fatal("Unable to load DummySpongeModContainer!", ex);
-            throw new RuntimeException(ex);
-        }
+    public Consumer<ModFileScanData> getFileVisitor() {
+        return sd -> sd.addLanguageLoader(Collections.singletonMap(SpongeAPIModLanguageProvider.NAME,
+                new DummySpongeModLoader(SpongeAPIModLanguageProvider.NAME)));
+    }
+
+    @Override
+    public <R extends ILifecycleEvent<R>> void consumeLifecycleEvent(final Supplier<R> consumeEvent) {
+
     }
 }

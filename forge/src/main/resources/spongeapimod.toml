@@ -1,12 +1,13 @@
 modLoader="spongeapi"
 loaderVersion="1"
-license="MIT"
+license = "MIT License"
+
+issueTrackerURL="https://github.com/SpongePowered/SpongeAPI/issues"
+
 [[mods]]
     modId="spongeapi"
     version="8.0.0"
     displayName="SpongeAPI"
     credits="SpongePowered and Contributors"
     authors="SpongePowered"
-    description='''
-    SpongeAPI, A Minecraft plugin API
-    '''
+    description="A Minecraft plugin API"
