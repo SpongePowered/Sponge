@@ -1,0 +1,12 @@
+modLoader="spongeapi"
+loaderVersion="1"
+license="MIT"
+[[mods]]
+    modId="spongeapi"
+    version="8.0.0"
+    displayName="SpongeAPI"
+    credits="SpongePowered and Contributors"
+    authors="SpongePowered"
+    description='''
+    SpongeAPI, A Minecraft plugin API
+    '''

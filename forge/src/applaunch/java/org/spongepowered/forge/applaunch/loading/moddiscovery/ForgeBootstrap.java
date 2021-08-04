@@ -30,6 +30,8 @@ import net.minecraftforge.fml.loading.FMLEnvironment;
 import net.minecraftforge.fml.loading.moddiscovery.AbstractJarFileLocator;
 import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.forgespi.locating.IModFile;
+import net.minecraftforge.forgespi.locating.IModLocator;
+import net.minecraftforge.forgespi.locating.ModFileFactory;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.AppLaunch;
@@ -54,7 +56,10 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
     // does this even make sense?
     private static final String[] EXCLUDED_PATHS = {
         "org/spongepowered/common/applaunch/",
-        "org/spongepowered/forge/applaunch/"
+        "org/spongepowered/forge/applaunch/loading/moddiscovery",
+        "org/spongepowered/forge/applaunch/loading/provider",
+        "org/spongepowered/forge/applaunch/plugin",
+        "org/spongepowered/forge/applaunch/service",
     };
 
     private final Logger logger = LogManager.getLogger();
@@ -66,9 +71,19 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
         final List<IModFile> jars = new ArrayList<>();
 
         try {
-            final ModFile file = ModFile.newFMLInstance(Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI()), this);
-            this.modJars.compute(file, (mf, fs) -> this.createFileSystem(mf));
-            jars.add(file);
+            final ModFile spongeapi = this.newDummySpongeFile(Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation()
+                    .toURI()), this, "spongeapimod");
+            this.modJars.compute(spongeapi, (mf, fs) -> this.createFileSystem(mf));
+            jars.add(spongeapi);
+
+            final ModFile sponge = this.newDummySpongeFile(Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation()
+                    .toURI()), this, "spongemod");
+            this.modJars.compute(sponge, (mf, fs) -> this.createFileSystem(mf));
+            jars.add(sponge);
+
+            final ModFile spongeforge = ModFile.newFMLInstance(Paths.get(ForgeBootstrap.class.getProtectionDomain().getCodeSource().getLocation().toURI()), this);
+            this.modJars.compute(spongeforge, (mf, fs) -> this.createFileSystem(mf));
+            jars.add(spongeforge);
         } catch (final URISyntaxException ex) {
             throw new RuntimeException(ex);
         }
@@ -143,5 +158,9 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
     private boolean isLibrary(final Path path) {
         final String completePath = path.toString();
         return completePath.contains("kyori") || completePath.contains("SpongeAPI");
+    }
+
+    private ModFile newDummySpongeFile(final Path path, final IModLocator locator, final String fileName) {
+        return (ModFile) ModFileFactory.FACTORY.build(path, locator, file -> ModFileParsers.dummySpongeModParser(fileName, file));
     }
 }

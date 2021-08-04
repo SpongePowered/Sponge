@@ -1,0 +1,12 @@
+modLoader="sponge"
+loaderVersion="1"
+license="MIT"
+[[mods]]
+    modId="sponge"
+    version="8.0.0"
+    displayName="Sponge"
+    credits="SpongePowered and Contributors"
+    authors="SpongePowered"
+    description='''
+    Sponge, The SpongeAPI implementation targeting vanilla Minecraft and 3rd party platforms.
+    '''
