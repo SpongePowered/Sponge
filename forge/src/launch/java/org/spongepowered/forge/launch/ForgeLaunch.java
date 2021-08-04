@@ -36,7 +36,7 @@ import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.forge.applaunch.loading.metadata.UnknownPluginMetadataRegistrar;
+import org.spongepowered.forge.applaunch.loading.metadata.PluginMetadataUtils;
 import org.spongepowered.forge.launch.inject.SpongeForgeModule;
 import org.spongepowered.forge.launch.plugin.ForgePluginManager;
 import org.spongepowered.plugin.PluginContainer;
@@ -93,6 +93,6 @@ public final class ForgeLaunch extends Launch {
     }
 
     public PluginMetadata metadataForMod(final ModInfo info) {
-        return UnknownPluginMetadataRegistrar.INSTANCE.forMod(info);
+        return PluginMetadataUtils.generateForMod(info);
     }
 }
