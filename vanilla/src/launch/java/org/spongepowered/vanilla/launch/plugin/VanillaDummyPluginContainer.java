@@ -22,10 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.launch.plugin;
+package org.spongepowered.vanilla.launch.plugin;
 
 import com.google.common.base.MoreObjects;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.common.applaunch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
@@ -35,13 +36,13 @@ import java.net.URL;
 import java.util.Objects;
 import java.util.Optional;
 
-public final class DummyPluginContainer implements PluginContainer {
+public final class VanillaDummyPluginContainer implements PluginContainer, DummyPluginContainer {
 
     private final PluginMetadata metadata;
     private final Logger logger;
     private final Object instance;
 
-    public DummyPluginContainer(final PluginMetadata metadata, final Logger logger, final Object instance) {
+    public VanillaDummyPluginContainer(final PluginMetadata metadata, final Logger logger, final Object instance) {
         this.metadata = metadata;
         this.logger = logger;
         this.instance = instance;

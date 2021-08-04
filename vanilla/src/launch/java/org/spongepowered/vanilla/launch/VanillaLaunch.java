@@ -32,13 +32,13 @@ import com.google.inject.Stage;
 import org.spongepowered.common.inject.SpongeCommonModule;
 import org.spongepowered.common.inject.SpongeModule;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.jvm.locator.JVMPluginResourceLocatorService;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 import org.spongepowered.plugin.metadata.util.PluginMetadataHelper;
 import org.spongepowered.vanilla.applaunch.plugin.VanillaPluginPlatform;
 import org.spongepowered.vanilla.launch.inject.SpongeVanillaModule;
+import org.spongepowered.vanilla.launch.plugin.VanillaDummyPluginContainer;
 import org.spongepowered.vanilla.launch.plugin.VanillaPluginManager;
 
 import java.io.IOException;
@@ -152,7 +152,7 @@ public abstract class VanillaLaunch extends Launch {
             }
 
             for (final PluginMetadata metadata : read) {
-                this.pluginManager().addPlugin(new DummyPluginContainer(metadata, this.logger(), this));
+                this.pluginManager().addPlugin(new VanillaDummyPluginContainer(metadata, this.logger(), this));
             }
         } catch (final IOException | URISyntaxException e) {
             throw new RuntimeException("Could not load metadata information for the implementation! This should be impossible!");

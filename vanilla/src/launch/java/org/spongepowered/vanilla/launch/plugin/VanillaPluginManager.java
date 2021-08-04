@@ -26,7 +26,6 @@ package org.spongepowered.vanilla.launch.plugin;
 
 import com.google.inject.Singleton;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import org.spongepowered.common.launch.plugin.DummyPluginContainer;
 import org.spongepowered.common.launch.plugin.SpongePluginManager;
 import org.spongepowered.plugin.InvalidPluginException;
 import org.spongepowered.plugin.PluginCandidate;
@@ -90,7 +89,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
             for (final PluginCandidate<PluginResource> candidate : candidates) {
                 PluginContainer plugin = this.plugins.get(candidate.metadata().id());
                 if (plugin != null) {
-                    if (plugin instanceof DummyPluginContainer) {
+                    if (plugin instanceof VanillaDummyPluginContainer) {
                         continue;
                     }
                     // TODO Print nasty message or do something about the dupe otherwise?
@@ -120,7 +119,7 @@ public final class VanillaPluginManager implements SpongePluginManager {
         this.plugins.put(plugin.metadata().id(), Objects.requireNonNull(plugin, "plugin"));
         this.sortedPlugins.add(plugin);
 
-        if (!(plugin instanceof DummyPluginContainer)) {
+        if (!(plugin instanceof VanillaDummyPluginContainer)) {
             this.instancesToPlugins.put(plugin.instance(), plugin);
         }
     }
