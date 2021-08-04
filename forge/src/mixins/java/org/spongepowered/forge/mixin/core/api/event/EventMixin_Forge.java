@@ -22,21 +22,13 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.launch.inject;
+package org.spongepowered.forge.mixin.core.api.event;
 
-import com.google.inject.AbstractModule;
-import net.minecraftforge.common.MinecraftForge;
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.event.EventManager;
-import org.spongepowered.forge.launch.ForgePlatform;
-import org.spongepowered.forge.launch.event.ForgeEventManager;
+import org.spongepowered.api.event.Event;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.forge.launch.bridge.event.SpongeEventBridge_Forge;
 
-public final class SpongeForgeModule extends AbstractModule {
-
-    @Override
-    protected void configure() {
-        this.bind(Platform.class).to(ForgePlatform.class);
-        this.bind(EventManager.class).toProvider(() -> (ForgeEventManager) MinecraftForge.EVENT_BUS);
-    }
+@Mixin(value = Event.class, remap = false)
+public interface EventMixin_Forge extends SpongeEventBridge_Forge {
 
 }

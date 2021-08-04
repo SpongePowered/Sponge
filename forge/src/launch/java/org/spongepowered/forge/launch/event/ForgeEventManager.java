@@ -24,36 +24,159 @@
  */
 package org.spongepowered.forge.launch.event;
 
-import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventListenerRegistration;
-import org.spongepowered.api.event.EventManager;
-import org.spongepowered.common.event.SpongeEventManager;
-import org.spongepowered.plugin.PluginContainer;
+import com.google.inject.Singleton;
+import net.minecraftforge.eventbus.api.Event;
+import net.minecraftforge.eventbus.api.EventPriority;
+import net.minecraftforge.eventbus.api.GenericEvent;
+import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.IEventBusInvokeDispatcher;
+import net.minecraftforge.eventbus.api.IEventListener;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.common.event.manager.RegisteredListener;
+import org.spongepowered.common.event.manager.SpongeEventManager;
+import org.spongepowered.forge.launch.bridge.event.ForgeEventBridge_Forge;
+import org.spongepowered.forge.launch.bridge.event.SpongeEventBridge_Forge;
 
-public final class ForgeEventManager implements SpongeEventManager {
+import java.util.Collection;
+import java.util.Collections;
+import java.util.List;
+import java.util.function.Consumer;
+
+@Singleton
+public final class ForgeEventManager extends SpongeEventManager implements IEventBus {
+
+    private final IEventBus wrappedEventBus;
+
+    public ForgeEventManager(final IEventBus eventBus) {
+        this.wrappedEventBus = eventBus;
+    }
+
+    // IEventBus
 
     @Override
-    public <E extends Event> EventManager registerListener(final EventListenerRegistration<E> registration) {
-        return null;
+    public void register(final Object target) {
+        this.wrappedEventBus.register(target);
     }
 
     @Override
-    public EventManager registerListeners(final PluginContainer plugin, final Object obj) {
-        return null;
+    public <T extends Event> void addListener(final Consumer<T> consumer) {
+        this.wrappedEventBus.addListener(consumer);
     }
 
     @Override
-    public EventManager unregisterListeners(final Object obj) {
-        return null;
+    public <T extends Event> void addListener(final EventPriority priority, final Consumer<T> consumer) {
+        this.wrappedEventBus.addListener(priority, consumer);
+    }
+
+    @Override
+    public <T extends Event> void addListener(final EventPriority priority, final boolean receiveCancelled, final Consumer<T> consumer) {
+        this.wrappedEventBus.addListener(priority, receiveCancelled, consumer);
+    }
+
+    @Override
+    public <T extends Event> void addListener(final EventPriority priority, final boolean receiveCancelled, final Class<T> eventType, final Consumer<T> consumer) {
+        this.wrappedEventBus.addListener(priority, receiveCancelled, eventType, consumer);
+    }
+
+    @Override
+    public <T extends GenericEvent<? extends F>, F> void addGenericListener(final Class<F> genericClassFilter, final Consumer<T> consumer) {
+        this.wrappedEventBus.addGenericListener(genericClassFilter, consumer);
+    }
+
+    @Override
+    public <T extends GenericEvent<? extends F>, F> void addGenericListener(final Class<F> genericClassFilter, final EventPriority priority,
+            final Consumer<T> consumer) {
+        this.wrappedEventBus.addGenericListener(genericClassFilter, priority, consumer);
+    }
+
+    @Override
+    public <T extends GenericEvent<? extends F>, F> void addGenericListener(final Class<F> genericClassFilter, final EventPriority priority,
+            final boolean receiveCancelled, final Consumer<T> consumer) {
+        this.wrappedEventBus.addGenericListener(genericClassFilter, priority, receiveCancelled, consumer);
+    }
+
+    @Override
+    public <T extends GenericEvent<? extends F>, F> void addGenericListener(final Class<F> genericClassFilter, final EventPriority priority,
+            final boolean receiveCancelled, final Class<T> eventType, final Consumer<T> consumer) {
+        this.wrappedEventBus.addGenericListener(genericClassFilter, priority, receiveCancelled, eventType, consumer);
+    }
+
+    @Override
+    public void unregister(final Object object) {
+        this.wrappedEventBus.unregister(object);
     }
 
     @Override
     public boolean post(final Event event) {
-        return false;
+        return this.post(event, IEventListener::invoke);
     }
 
     @Override
-    public boolean postToPlugin(final Event event, final PluginContainer plugin) {
-        return false;
+    public boolean post(final Event event, final IEventBusInvokeDispatcher wrapper) {
+        if (event instanceof ForgeEventBridge_Forge) {
+            // intercept!
+            final ForgeEventBridge_Forge forgeEvent = (ForgeEventBridge_Forge) event;
+            final org.spongepowered.api.event.@Nullable Event spongeEvent = forgeEvent.bridge$createSpongeEvent();
+            if (spongeEvent != null) {
+                return this.postDualBus(spongeEvent, Collections.singleton(event), wrapper);
+            }
+        }
+        // Do as Forge does - SpongeVanilla has no role to play here.
+        return this.wrappedEventBus.post(event, wrapper);
     }
+
+    @Override
+    public void shutdown() {
+        this.wrappedEventBus.shutdown();
+    }
+
+    @Override
+    public void start() {
+        this.wrappedEventBus.start();
+    }
+
+    // EventManager
+
+    @Override
+    public boolean post(final org.spongepowered.api.event.Event event) {
+        final SpongeEventBridge_Forge eventBridge = ((SpongeEventBridge_Forge) event);
+        final @Nullable Collection<? extends Event> forgeEvents = eventBridge.bridge$createForgeEvents();
+        if (forgeEvents == null || forgeEvents.isEmpty()) {
+            // Do as SpongeVanilla does - Forge has no role to play here.
+            return super.post(event);
+        }
+        return this.postDualBus(event, forgeEvents, eventBridge.bridge$eventDispatcher());
+    }
+
+    // Implementation
+
+    private boolean postDualBus(final org.spongepowered.api.event.Event spongeEvent, final Collection<? extends Event> forgeEvents,
+            final IEventBusInvokeDispatcher dispatcher) {
+        try (final NoExceptionClosable ignored = this.preparePost(spongeEvent)) {
+            final RegisteredListener.Cache listeners = this.getHandlerCache(spongeEvent);
+            final List<RegisteredListener<?>> beforeModifications = listeners.beforeModifications();
+            if (!beforeModifications.isEmpty()) {
+                // First, we fire the Sponge beforeModifications on the Sponge event
+                this.post(spongeEvent, beforeModifications);
+
+                // Then we sync to the Forge events
+                for (final Event forgeEvent : forgeEvents) {
+                    ((ForgeEventBridge_Forge) forgeEvent).bridge$syncFrom(spongeEvent);
+                }
+            }
+            // Then, we fire all our Forge events
+            for (final Event forgeEvent : forgeEvents) {
+                this.wrappedEventBus.post(forgeEvent, dispatcher);
+                // We must sync back the event's changes, if there are any.
+                // For complex events, this will be a partial sync.
+                ((ForgeEventBridge_Forge) forgeEvent).bridge$syncTo(spongeEvent);
+            }
+
+            // and now we do our standard event listener stuff.
+            return this.post(spongeEvent, listeners.afterModifications());
+        }
+
+    }
+
+
 }
