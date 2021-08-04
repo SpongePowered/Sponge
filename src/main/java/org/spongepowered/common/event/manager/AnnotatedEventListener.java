@@ -22,13 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event;
+package org.spongepowered.common.event.manager;
+
+import static com.google.common.base.Preconditions.checkNotNull;
 
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.EventManager;
-import org.spongepowered.plugin.PluginContainer;
+import org.spongepowered.common.event.SpongeEventListener;
 
-public interface SpongeEventManager extends EventManager {
+import java.lang.reflect.Method;
 
-    boolean postToPlugin(Event event, PluginContainer plugin);
+public abstract class AnnotatedEventListener implements SpongeEventListener<Event> {
+
+    protected final Object handle;
+
+    protected AnnotatedEventListener(Object handle) {
+        this.handle = checkNotNull(handle, "handle");
+    }
+
+    @Override
+    public final Object getHandle() {
+        return this.handle;
+    }
+
+    public interface Factory {
+
+        AnnotatedEventListener create(Object handle, Method method) throws Exception;
+
+    }
+
 }

@@ -64,7 +64,7 @@ import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.PlatformLevelBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.common.event.SpongeEventManager;
+import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.plugin.PluginContainer;

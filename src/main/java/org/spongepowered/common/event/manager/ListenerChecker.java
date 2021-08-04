@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.event;
+package org.spongepowered.common.event.manager;
 
 import com.google.common.base.CaseFormat;
 import io.leangen.geantyref.GenericTypeReflector;
