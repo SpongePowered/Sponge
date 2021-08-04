@@ -22,40 +22,11 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.fml;
+package org.spongepowered.forge.bridge.fml;
 
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.forgespi.language.IModInfo;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.forge.bridge.fml.ModContainerBridge;
-import org.spongepowered.forge.launch.ForgeLaunch;
-import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
-@Mixin(value = ModContainer.class, remap = false)
-public abstract class ModContainerMixin_Forge implements ModContainerBridge, PluginContainer {
+public interface ModContainerBridge {
 
-    // @formatter:off
-    @Shadow @Final protected IModInfo modInfo;
-    // @formatter:on
-
-    private PluginMetadata forge$pluginMetadata;
-
-    @Override
-    public PluginMetadata metadata() {
-        if (this.forge$pluginMetadata == null) {
-            this.forge$pluginMetadata = ((ForgeLaunch) Launch.instance()).metadataForMod((ModInfo) this.modInfo);
-        }
-
-        return this.forge$pluginMetadata;
-    }
-
-    @Override
-    public void bridge$setPluginMetadata(final PluginMetadata metadata) {
-        this.forge$pluginMetadata = metadata;
-    }
+    void bridge$setPluginMetadata(PluginMetadata metadata);
 }
