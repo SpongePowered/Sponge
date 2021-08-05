@@ -25,13 +25,15 @@
 package org.spongepowered.common.network.channel;
 
 import com.google.common.collect.ImmutableList;
+import net.minecraft.network.protocol.Packet;
+import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
+import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
+import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
+import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
+import net.minecraft.server.network.ServerLoginPacketListenerImpl;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.Game;
 import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContext;
-import org.spongepowered.api.event.lifecycle.RegisterChannelEvent;
 import org.spongepowered.api.network.EngineConnection;
 import org.spongepowered.api.network.channel.Channel;
 import org.spongepowered.api.network.channel.ChannelBuf;
@@ -42,7 +44,6 @@ import org.spongepowered.api.network.channel.packet.basic.BasicPacketChannel;
 import org.spongepowered.api.network.channel.raw.RawDataChannel;
 import org.spongepowered.api.registry.DuplicateRegistrationException;
 import org.spongepowered.api.util.Tuple;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.network.protocol.game.ClientboundCustomPayloadPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.game.ServerboundCustomPayloadPacketAccessor;
 import org.spongepowered.common.accessor.network.protocol.login.ClientboundCustomQueryPacketAccessor;
@@ -64,15 +65,12 @@ import java.util.Optional;
 import java.util.Set;
 import java.util.concurrent.CompletableFuture;
 import java.util.function.BiConsumer;
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ClientboundCustomPayloadPacket;
-import net.minecraft.network.protocol.game.ServerboundCustomPayloadPacket;
-import net.minecraft.network.protocol.login.ClientboundCustomQueryPacket;
-import net.minecraft.network.protocol.login.ServerboundCustomQueryPacket;
-import net.minecraft.server.network.ServerLoginPacketListenerImpl;
+
+import javax.inject.Singleton;
 
 @SuppressWarnings("unchecked")
-public class SpongeChannelManager implements ChannelManager {
+@Singleton
+public final class SpongeChannelManager implements ChannelManager {
 
     private final Map<ResourceKey, SpongeChannel> channels = new HashMap<>();
     private final Map<Class<?>, Tuple<Integer, CreateFunction<SpongeChannel>>> channelBuilders = new HashMap<>();
@@ -158,28 +156,6 @@ public class SpongeChannelManager implements ChannelManager {
         private ClientTypeSyncFuture(final CompletableFuture<Void> future) {
             this.future = future;
         }
-    }
-
-    public void postRegistryEvent() {
-        final Cause cause = Cause.of(EventContext.empty(), this);
-        final RegisterChannelEvent event = new RegisterChannelEvent() {
-
-            @Override
-            public <C extends Channel> C register(ResourceKey channelKey, Class<C> channelType) throws DuplicateRegistrationException {
-                return SpongeChannelManager.this.createChannel(channelKey, channelType);
-            }
-
-            @Override
-            public Game game() {
-                return SpongeCommon.game();
-            }
-
-            @Override
-            public Cause cause() {
-                return cause;
-            }
-        };
-        Sponge.eventManager().post(event);
     }
 
     public CompletableFuture<Void> requestClientType(final EngineConnection connection) {

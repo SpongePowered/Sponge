@@ -47,6 +47,7 @@ import org.spongepowered.common.datapack.SpongeDataPackManager;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryEvent;
 import org.spongepowered.common.event.lifecycle.AbstractRegisterRegistryValueEvent;
 import org.spongepowered.common.event.lifecycle.RegisterBuilderEventImpl;
+import org.spongepowered.common.event.lifecycle.RegisterChannelEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterDataEventImpl;
 import org.spongepowered.common.event.lifecycle.RegisterFactoryEventImpl;
 import org.spongepowered.common.event.manager.SpongeEventManager;
@@ -140,7 +141,8 @@ public final class SpongeLifecycle implements Lifecycle {
 
     @Override
     public void callRegisterChannelEvent() {
-        ((SpongeChannelManager) this.game.channelManager()).postRegistryEvent();
+        this.game.eventManager().post(new RegisterChannelEventImpl(Cause.of(EventContext.empty(), this.game), this.game,
+                (SpongeChannelManager) this.game.channelManager()));
     }
 
     @Override
@@ -163,13 +165,6 @@ public final class SpongeLifecycle implements Lifecycle {
         Sponge.server().serviceProvider().contextService().registerContextCalculator(new SpongeContextCalculator());
         // Yes this looks odd but prevents having to do sided lifecycle solely to always point at the Server
         ((SpongeServer) this.game.server()).getUsernameCache().load();
-    }
-
-    @Override
-    public void registerPluginListeners() {
-        for (final PluginContainer plugin : this.filterInternalPlugins(this.game.pluginManager().plugins())) {
-            this.game.eventManager().registerListeners(plugin, plugin.instance());
-        }
     }
 
     // Methods are in order of the SpongeCommon lifecycle

@@ -48,7 +48,6 @@ public final class VanillaBootstrap {
         lifecycle.establishBuilders();
         lifecycle.initTimings();
         ((VanillaPluginManager) Launch.instance().pluginManager()).loadPlugins((VanillaPluginPlatform) Launch.instance().pluginPlatform());
-        lifecycle.registerPluginListeners();
         lifecycle.callConstructEvent();
         lifecycle.callRegisterFactoryEvent();
         lifecycle.callRegisterBuilderEvent();

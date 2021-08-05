@@ -3,7 +3,6 @@
     "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.vanilla.mixin.api",
     "priority": 1300,
-    "server": [],
     "mixins": [
         "minecraft.server.MinecraftServerMixin_Vanilla_API"
     ],

@@ -50,7 +50,6 @@ public abstract class DedicatedServerMixin_Vanilla extends MinecraftServerMixin_
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.establishServerServices();
 
-
         lifecycle.establishServerFeatures();
 
         lifecycle.establishServerRegistries(this);

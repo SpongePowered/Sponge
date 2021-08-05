@@ -38,12 +38,9 @@ import java.util.Optional;
 
 public final class JavaPluginLoader extends JVMPluginLoader<JVMPluginContainer> {
 
-    public JavaPluginLoader() {
-    }
-
     @Override
     public Optional<JVMPluginContainer> createPluginContainer(final PluginCandidate<JVMPluginResource> candidate, final PluginEnvironment environment) {
-        return Optional.of(new JVMPluginContainer(candidate));
+        return Optional.of(new VanillaJavaPluginContainer(candidate));
     }
 
     @Override
