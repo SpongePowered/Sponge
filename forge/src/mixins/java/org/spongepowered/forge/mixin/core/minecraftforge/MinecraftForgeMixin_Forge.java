@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.forge;
+package org.spongepowered.forge.mixin.core.minecraftforge;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.BusBuilder;
@@ -37,7 +37,7 @@ public abstract class MinecraftForgeMixin_Forge {
 
     @Redirect(method = "<clinit>", at = @At(value = "INVOKE",
             target = "Lnet/minecraftforge/eventbus/api/BusBuilder;build()Lnet/minecraftforge/eventbus/api/IEventBus;", remap = false))
-    private static IEventBus forge$substituteSpongeEventBus(final BusBuilder builder) {
+    private static IEventBus forge$substituteForgeEventBus(final BusBuilder builder) {
         return new ForgeEventManager(builder.build());
     }
 

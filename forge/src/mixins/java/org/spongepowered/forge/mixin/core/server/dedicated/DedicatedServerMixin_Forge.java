@@ -22,40 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.fml;
+package org.spongepowered.forge.mixin.core.server.dedicated;
 
-import net.minecraftforge.fml.ModContainer;
-import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
-import net.minecraftforge.forgespi.language.IModInfo;
-import org.spongepowered.asm.mixin.Final;
+import net.minecraft.server.dedicated.DedicatedServer;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.launch.Launch;
-import org.spongepowered.forge.bridge.fml.ModContainerBridge;
-import org.spongepowered.forge.launch.ForgeLaunch;
-import org.spongepowered.plugin.PluginContainer;
-import org.spongepowered.plugin.metadata.PluginMetadata;
+import org.spongepowered.common.launch.Lifecycle;
+import org.spongepowered.forge.mixin.core.server.MinecraftServerMixin_Forge;
 
-@Mixin(value = ModContainer.class, remap = false)
-public abstract class ModContainerMixin_Forge implements ModContainerBridge, PluginContainer {
+@Mixin(DedicatedServer.class)
+public abstract class DedicatedServerMixin_Forge extends MinecraftServerMixin_Forge {
 
-    // @formatter:off
-    @Shadow @Final protected IModInfo modInfo;
-    // @formatter:on
+    @Inject(method = "initServer", at = @At("RETURN"))
+    private void forge$callLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
 
-    private PluginMetadata forge$pluginMetadata;
-
-    @Override
-    public PluginMetadata metadata() {
-        if (this.forge$pluginMetadata == null) {
-            this.forge$pluginMetadata = ((ForgeLaunch) Launch.instance()).metadataForMod((ModInfo) this.modInfo);
-        }
-
-        return this.forge$pluginMetadata;
+        lifecycle.callLoadedGameEvent();
     }
 
     @Override
-    public void bridge$setPluginMetadata(final PluginMetadata metadata) {
-        this.forge$pluginMetadata = metadata;
+    protected void loadLevel() {
+        this.shadow$detectBundledResources();
+        this.worldManager().loadLevel();
     }
 }
