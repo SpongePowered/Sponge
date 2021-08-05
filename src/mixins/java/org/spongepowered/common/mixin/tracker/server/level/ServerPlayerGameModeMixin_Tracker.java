@@ -31,6 +31,7 @@ import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.MenuProvider;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.context.UseOnContext;
@@ -38,11 +39,14 @@ import net.minecraft.world.level.GameType;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.phys.BlockHitResult;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
+import org.spongepowered.api.item.inventory.Slot;
+import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
@@ -51,11 +55,14 @@ import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.bridge.world.inventory.container.ContainerBridge;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -159,6 +166,13 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                     stackIn.setCount(i);
                 } else {
                     result = stackIn.useOn(itemusecontext);
+                    // Sponge start - log change in hand
+                    final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+                    final TransactionalCaptureSupplier transactor = context.getTransactor();
+                    final PlayerInventory playerInventory = (PlayerInventory) this.player.inventory;
+                    final Slot slot = handIn == InteractionHand.MAIN_HAND ? playerInventory.primary().hotbar().slot(this.player.inventory.selected).get() : playerInventory.offhand();
+                    transactor.logPlayerInventorySlotTransaction(this.player, context, slot, copiedStack, stackIn, playerInventory);
+                    // Sponge end
                 }
 
                 if (result.consumesAction()) {
@@ -170,6 +184,17 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                 return InteractionResult.PASS;
             }
         }
+    }
+
+    @Redirect(method = "destroyBlock", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;mineBlock(Lnet/minecraft/world/level/Level;Lnet/minecraft/world/level/block/state/BlockState;Lnet/minecraft/core/BlockPos;Lnet/minecraft/world/entity/player/Player;)V"))
+    public void impl$onMineBlock(final ItemStack itemStack, final Level param0, final BlockState param1, final BlockPos param2, final Player param3) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final PlayerInventory playerInventory = (PlayerInventory) this.player.inventory;
+        final Slot slot = playerInventory.primary().hotbar().slot(this.player.inventory.selected).get();
+        final ItemStack original = itemStack.copy();
+        itemStack.mineBlock(param0, param1, param2, param3);
+        transactor.logPlayerInventorySlotTransaction(this.player, context, slot, original, itemStack, playerInventory);
     }
 
 

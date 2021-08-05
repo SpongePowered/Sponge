@@ -120,21 +120,7 @@ public final class PlaceBlockPacketState extends BasicPacketState {
     @SuppressWarnings("ConstantConditions")
     @Override
     public void unwind(final BasicPacketContext context) {
-        final net.minecraft.server.level.ServerPlayer player = context.getPacketPlayer();
-        final ItemStack itemStack = context.getItemUsed();
-        final ItemStackSnapshot snapshot = context.getItemUsedSnapshot();
-        // We can rely on TrackingUtil.processBlockCaptures because it checks for empty contexts.
-        // Swap the items used, the item used is what we want to "restore" it to the player
-        final InteractionHand hand = (InteractionHand) (Object) context.getHandUsed();
-        final net.minecraft.world.item.ItemStack replaced = player.getItemInHand(hand);
-        // TODO setting is this needed?
-        player.setItemInHand(hand, ItemStackUtil.toNative(itemStack.copy()));
-        if (!TrackingUtil.processBlockCaptures(context) && !snapshot.isEmpty()) {
-            PacketPhaseUtil.handlePlayerSlotRestore(player, ItemStackUtil.toNative(itemStack), hand);
-        } else {
-            player.setItemInHand(hand, replaced);
-        }
-
+        TrackingUtil.processBlockCaptures(context);
     }
 
 }

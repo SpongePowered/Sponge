@@ -359,11 +359,13 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
 
         // Add a generic ChangeInventoryEvent for this player
         // e.g. /give command
-        // TODO PlaceBlockPacketState unwind
+        // ServerPlayerGameModeMixin_Tracker#useItemOn
         // Dispenser equip
         // eating
         // throw item
-        // TODO use bow
+        // breaking blocks ServerPlayerGameModeMixin_Tracker#impl$onMineBlock TODO but ChangeBlockEvent.All cancel no longer cancels entity spawns
+        // TODO use damageable item - ItemStack#hurtAndBreak?
+        // TODO consume arrow (BowItem#releaseUsing - shrink on stack)
         this.logPlayerInventoryChange(player, (c, inv, trans) -> trans.isEmpty() ? null : SpongeEventFactory.createChangeInventoryEvent(c, inv, trans));
         if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, inventory)) {
             return;
