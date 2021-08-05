@@ -8,17 +8,19 @@
     "mixins": [
         "api.event.EventMixin_Forge",
         "api.event.block.ChangeBlockEvent_AllMixin_Forge",
-        "fml.FMLModContainerMixin_Forge",
-        "fml.ModContainerMixin_Forge",
-        "forge.MinecraftForgeMixin_Forge",
-        "forge.event.world.BlockEventMixin_Forge",
-        "forge.event.world.BlockEvent_BreakEventMixin_Forge",
+        "minecraftforge.MinecraftForgeMixin_Forge",
+        "minecraftforge.event.world.BlockEvent_BreakEventMixin_Forge",
+        "minecraftforge.event.world.BlockEventMixin_Forge",
+        "minecraftforge.fml.FMLModContainerMixin_Forge",
+        "minecraftforge.fml.ModContainerMixin_Forge",
+        "server.BootstrapMixin_Forge",
         "server.MainMixin_Forge",
+        "server.MinecraftServerMixin_Forge",
+        "server.dedicated.DedicatedServerMixin_Forge",
         "server.level.ServerLevelMixin_Timings_Forge",
         "world.entity.item.ItemEntityMixin_Forge",
         "world.entity.vehicle.BoatMixin_Forge",
-        "world.level.LevelMixin_Forge",
-        "server.BootstrapMixin_Forge"
+        "world.level.LevelMixin_Forge"
     ],
     "client": [
         "client.main.MainMixin_Forge"

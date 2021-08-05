@@ -22,11 +22,9 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.bridge.fml;
+package org.spongepowered.forge;
 
-import org.spongepowered.plugin.metadata.PluginMetadata;
+import org.spongepowered.common.SpongeEngine;
 
-public interface ModContainerBridge {
-
-    void bridge$setPluginMetadata(PluginMetadata metadata);
+public interface ForgeEngine extends SpongeEngine {
 }

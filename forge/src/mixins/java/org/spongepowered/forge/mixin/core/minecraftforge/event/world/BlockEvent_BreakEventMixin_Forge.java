@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.forge.event.world;
+package org.spongepowered.forge.mixin.core.minecraftforge.event.world;
 
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraftforge.event.world.BlockEvent;

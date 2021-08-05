@@ -22,22 +22,18 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.forge.event.world;
+package org.spongepowered.forge.mixin.core.server;
 
-import net.minecraft.core.BlockPos;
-import net.minecraft.world.level.LevelAccessor;
-import net.minecraft.world.level.block.state.BlockState;
-import net.minecraftforge.event.world.BlockEvent;
+import net.minecraft.server.MinecraftServer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.forge.ForgeServer;
 
-@Mixin(value = BlockEvent.class, remap = false)
-public abstract class BlockEventMixin_Forge {
+@Mixin(MinecraftServer.class)
+public abstract class MinecraftServerMixin_Forge implements ForgeServer {
 
     // @formatter:off
-    @Shadow public abstract LevelAccessor shadow$getWorld();
-    @Shadow public abstract BlockPos shadow$getPos();
-    @Shadow public abstract BlockState shadow$getState();
+    @Shadow protected abstract void shadow$detectBundledResources();
+    @Shadow protected abstract void loadLevel();
     // @formatter:on
-
 }

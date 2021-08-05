@@ -26,13 +26,22 @@ package org.spongepowered.forge;
 
 import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.eventbus.api.IEventBus;
+import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.WorldPersistenceHooks;
 import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
+import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
+import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Server;
+import org.spongepowered.api.Sponge;
+import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.common.launch.Lifecycle;
+import org.spongepowered.common.network.channel.SpongeChannelManager;
+import org.spongepowered.common.network.packet.SpongePacketHandler;
 
 @Mod(Constants.MOD_ID)
 public final class SpongeForge {
@@ -45,20 +54,47 @@ public final class SpongeForge {
         final IEventBus modBus = FMLJavaModLoadingContext.get().getModEventBus();
 
         // modBus: add all FML events with it
-        modBus.addListener(this::commonSetup);
+        modBus.addListener(this::onCommonSetup);
 
         // annotation events, for non-FML things
         MinecraftForge.EVENT_BUS.register(this);
     }
 
-    private void commonSetup(final FMLCommonSetupEvent event) {
+    private void onCommonSetup(final FMLCommonSetupEvent event) {
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.callConstructEvent();
+        lifecycle.callRegisterFactoryEvent();
+        lifecycle.callRegisterBuilderEvent();
+        lifecycle.callRegisterChannelEvent();
+        lifecycle.establishGameServices();
+        lifecycle.establishDataKeyListeners();
 
-        Launch.instance().lifecycle().establishGameServices();
+        SpongePacketHandler.init((SpongeChannelManager) Sponge.channelManager());
 
         // TODO Add attributes for HumanEntity to relevant event
 
         // common setup
         this.logger.info("SpongeForge v{} initialized", Launch.instance().platformPlugin().metadata().version());
+    }
+
+    @SubscribeEvent
+    public void onServerAboutToStart(final FMLServerAboutToStartEvent event) {
+        // Save config now that registries have been initialized
+        ConfigHandle.setSaveSuppressed(false);
+
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.establishServerServices();
+
+        lifecycle.establishServerFeatures();
+
+        lifecycle.establishServerRegistries((Server) event.getServer());
+        lifecycle.callStartingEngineEvent((Server) event.getServer());
+    }
+
+    @SubscribeEvent
+    public void onServerStarted(final FMLServerStartedEvent event) {
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.callStartedEngineEvent((Server) event.getServer());
     }
 
 }
