@@ -22,28 +22,21 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.server;
+package org.spongepowered.forge.mixin.core.world.level.storage;
 
-import net.minecraft.server.MinecraftServer;
+import com.mojang.datafixers.DataFixer;
+import com.mojang.serialization.Dynamic;
+import net.minecraft.world.level.storage.LevelStorageSource;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.forge.ForgeServer;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Redirect;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Forge implements ForgeServer {
+@Mixin(LevelStorageSource.class)
+public abstract class LevelStorageSourceMixin_Forge {
 
-    // @formatter:off
-    @Shadow protected abstract void shadow$detectBundledResources();
-    @Shadow protected abstract void loadLevel();
-    // @formatter:on
-
-    /**
-     * @author Zidane
-     * @reason Apply our branding
-     */
-    @Overwrite
-    public String getServerModName() {
-        return "spongeforge";
+    @Redirect(method = "readWorldGenSettings", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;fixUpDimensionsData"
+            + "(Lcom/mojang/serialization/Dynamic;)Lcom/mojang/serialization/Dynamic;", remap = false))
+    private static Dynamic<?> forge$skipForgeDimensionsFixup(final Dynamic<?> data, final Dynamic<?> data2, DataFixer param1, int param2) {
+        return data;
     }
 }

@@ -22,28 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.server;
+package org.spongepowered.forge.world.server;
 
 import net.minecraft.server.MinecraftServer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.forge.ForgeServer;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Forge implements ForgeServer {
+public final class ForgeWorldManager extends SpongeWorldManager {
 
-    // @formatter:off
-    @Shadow protected abstract void shadow$detectBundledResources();
-    @Shadow protected abstract void loadLevel();
-    // @formatter:on
-
-    /**
-     * @author Zidane
-     * @reason Apply our branding
-     */
-    @Overwrite
-    public String getServerModName() {
-        return "spongeforge";
+    public ForgeWorldManager(final MinecraftServer server) {
+        super(server);
     }
 }
