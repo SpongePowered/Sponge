@@ -8,6 +8,7 @@
     "mixins": [
         "api.event.EventMixin_Forge",
         "api.event.block.ChangeBlockEvent_AllMixin_Forge",
+        "commands.CommandsMixin_Forge",
         "minecraftforge.MinecraftForgeMixin_Forge",
         "minecraftforge.event.world.BlockEvent_BreakEventMixin_Forge",
         "minecraftforge.event.world.BlockEventMixin_Forge",
@@ -20,7 +21,8 @@
         "server.level.ServerLevelMixin_Timings_Forge",
         "world.entity.item.ItemEntityMixin_Forge",
         "world.entity.vehicle.BoatMixin_Forge",
-        "world.level.LevelMixin_Forge"
+        "world.level.LevelMixin_Forge",
+        "world.level.storage.LevelStorageSourceMixin_Forge"
     ],
     "client": [
         "client.main.MainMixin_Forge"

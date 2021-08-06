@@ -40,7 +40,7 @@ import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.forge.ForgeServer;
-import org.spongepowered.forge.world.ForgeWorldManager;
+import org.spongepowered.forge.world.server.ForgeWorldManager;
 
 import java.net.Proxy;
 
