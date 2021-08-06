@@ -111,6 +111,9 @@ public final class PacketPhaseUtil {
                     ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(containerMenu);
                 }
             }
+            if (restoredAny && containerMenu == null && player instanceof net.minecraft.server.level.ServerPlayer) {
+                ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(player.inventoryMenu);
+            }
             return restoredAny;
         }
     }
