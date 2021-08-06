@@ -62,7 +62,10 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.inventory.InventoryEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.ResultingTransactionBySideEffect;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.registry.provider.DirectionFacingProvider;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
@@ -194,7 +197,9 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         final Slot slot = playerInventory.primary().hotbar().slot(this.player.inventory.selected).get();
         final ItemStack original = itemStack.copy();
         itemStack.mineBlock(param0, param1, param2, param3);
-        transactor.logPlayerInventorySlotTransaction(this.player, context, slot, original, itemStack, playerInventory);
+        try (EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
+            transactor.logPlayerInventorySlotTransaction(this.player, context, slot, original, itemStack, playerInventory);
+        }
     }
 
 

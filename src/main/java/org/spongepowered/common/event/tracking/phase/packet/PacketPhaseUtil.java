@@ -82,36 +82,37 @@ public final class PacketPhaseUtil {
 
     @SuppressWarnings("rawtypes")
     public static boolean handleSlotRestore(@Nullable final Player player, final @Nullable AbstractContainerMenu containerMenu, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
-        boolean restoredAny = false;
-        for (final SlotTransaction slotTransaction : slotTransactions) {
+        try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).buildAndSwitch()) {
+            boolean restoredAny = false;
+            for (final SlotTransaction slotTransaction : slotTransactions) {
 
-            if ((!slotTransaction.custom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
-                continue;
-            }
-            restoredAny = true;
-            final SlotAdapter slot = (SlotAdapter) slotTransaction.slot();
-            final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.original() : slotTransaction.custom().get();
-            if (containerMenu == null) {
-                slot.set(snapshot.createStack());
-            } else {
-                final int slotNumber = slot.getOrdinal();
-                final Slot nmsSlot = containerMenu.getSlot(slotNumber);
-                if (nmsSlot != null) {
-                    nmsSlot.set(ItemStackUtil.fromSnapshotToNative(snapshot));
+                if ((!slotTransaction.custom().isPresent() && slotTransaction.isValid()) && !eventCancelled) {
+                    continue;
+                }
+                restoredAny = true;
+                final SlotAdapter slot = (SlotAdapter) slotTransaction.slot();
+                final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.original() : slotTransaction.custom().get();
+                if (containerMenu == null || slot.viewedSlot() == slot) {
+                    slot.set(snapshot.createStack());
+                } else {
+                    final int slotNumber = slot.getOrdinal();
+                    final Slot nmsSlot = containerMenu.getSlot(slotNumber);
+                    if (nmsSlot != null) {
+                        nmsSlot.set(ItemStackUtil.fromSnapshotToNative(snapshot));
+                    }
                 }
             }
-        }
-        if (containerMenu != null && player != null) {
-            try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).buildAndSwitch()) {
+            if (containerMenu != null && player != null) {
                 containerMenu.broadcastChanges();
+
+                // If event is cancelled, always resync with player
+                // we must also validate the player still has the same container open after the event has been processed
+                if (eventCancelled && player.containerMenu == containerMenu && player instanceof net.minecraft.server.level.ServerPlayer) {
+                    ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(containerMenu);
+                }
             }
-            // If event is cancelled, always resync with player
-            // we must also validate the player still has the same container open after the event has been processed
-            if (eventCancelled && player.containerMenu == containerMenu && player instanceof net.minecraft.server.level.ServerPlayer) {
-                ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(containerMenu);
-            }
+            return restoredAny;
         }
-        return restoredAny;
     }
 
     public static void handleCursorRestore(final Player player, final Transaction<ItemStackSnapshot> cursorTransaction) {

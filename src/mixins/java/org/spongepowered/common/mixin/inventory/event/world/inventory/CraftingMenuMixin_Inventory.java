@@ -60,6 +60,7 @@ public abstract class CraftingMenuMixin_Inventory {
             final int param0, final Level param1, final Player player, final CraftingContainer craftingContainer, final ResultContainer resultcontainer) {
         resultContainer.setItem(slotId, itemStack);
 
+
         final Inventory inv = ((Inventory) player.containerMenu).query(QueryTypes.INVENTORY_TYPE.get().of(CraftingInventory.class));
         if (!(inv instanceof CraftingInventory)) {
             SpongeCommon.logger().warn("Detected crafting but Sponge could not get a CraftingInventory for " + player.containerMenu.getClass().getName());
@@ -67,9 +68,10 @@ public abstract class CraftingMenuMixin_Inventory {
         }
 
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
-
-        transactor.logCraftingPreview((ServerPlayer) player, (CraftingInventory) inv, craftingContainer);
+        if (!context.isRestoring()) {
+            final TransactionalCaptureSupplier transactor = context.getTransactor();
+            transactor.logCraftingPreview((ServerPlayer) player, (CraftingInventory) inv, craftingContainer);
+        }
     }
 
 

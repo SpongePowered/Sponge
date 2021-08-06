@@ -55,6 +55,7 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
     private final ServerPlayer player;
     private final boolean dropAll;
     private final @Nullable Slot slot;
+    private final @Nullable ItemStackSnapshot originalItem;
     private final ItemStackSnapshot originalCursor;
 
     public DropFromPlayerInventoryTransaction(final Player player, final boolean dropAll) {
@@ -63,6 +64,7 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
         this.dropAll = dropAll;
         this.originalCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         this.slot = ((PlayerInventory) player.inventory).equipment().slot(EquipmentTypes.MAIN_HAND).orElse(null);
+        this.originalItem = this.slot == null ? null : this.slot.peek().createSnapshot();
     }
 
     @Override
@@ -73,7 +75,7 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
     ) {
         if (this.slot != null) {
             final ItemStackSnapshot item = this.slot.peek().createSnapshot();
-            slotTransactions.add(new SlotTransaction(this.slot, item, item));
+            slotTransactions.add(new SlotTransaction(this.slot, this.originalItem, item));
         }
 
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.originalCursor, this.originalCursor);

@@ -287,9 +287,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
     }
 
-    public void logPlayerInventoryChange(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
+    private PlayerInventoryTransaction logPlayerInventoryChange(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
         final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player, eventCreator);
         this.logTransaction(transaction);
+        return transaction;
     }
 
     public EffectTransactor logPlayerCarriedItem(final Player player, final int newSlot) {
@@ -366,8 +367,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         // breaking blocks ServerPlayerGameModeMixin_Tracker#impl$onMineBlock TODO but ChangeBlockEvent.All cancel no longer cancels entity spawns
         // TODO use damageable item - ItemStack#hurtAndBreak?
         // TODO consume arrow (BowItem#releaseUsing - shrink on stack)
-        this.logPlayerInventoryChange(player, (c, inv, trans) -> trans.isEmpty() ? null : SpongeEventFactory.createChangeInventoryEvent(c, inv, trans));
-        if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, inventory)) {
+        final PlayerInventoryTransaction transaction = this.logPlayerInventoryChange(player, (c, inv, trans) -> trans.isEmpty() ? null : SpongeEventFactory.createChangeInventoryEvent(c, inv, trans));
+        if (transaction.acceptSlotTransaction(newTransaction, inventory)) {
             return;
         }
         throw new IllegalStateException("Player inventory slot transaction was not accepted!");
@@ -631,7 +632,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                     (ImmutableList) transactions,
                     transactionPostEventBuilder
                 );
-                accumilator.add(pointer);
+                // accumilator.add(pointer);
                 batchDecider = pointer;
                 continue;
             } else if (pointer.hasAnyPrimaryChildrenTransactions() || pointer.isUnbatchable() || pointer.next == null) {
