@@ -25,6 +25,8 @@
 package org.spongepowered.common.world.storage;
 
 
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.NbtIo;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.data.persistence.DataContainer;
@@ -49,9 +51,6 @@ import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.concurrent.ConcurrentHashMap;
-
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NbtIo;
 
 public final class SpongePlayerDataManager {
 

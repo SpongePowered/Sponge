@@ -39,7 +39,7 @@ import org.spongepowered.api.world.difficulty.Difficulty;
 
 public final class BootstrapProperties {
 
-    public static WorldGenSettings dimensionGeneratorSettings;
+    public static WorldGenSettings worldGenSettings;
     public static RegistryReference<GameMode> gameMode;
     public static RegistryReference<Difficulty> difficulty;
     public static SerializationBehavior serializationBehavior;
@@ -51,9 +51,9 @@ public final class BootstrapProperties {
     public static RegistryReadOps<?> worldSettingsAdapter;
     public static boolean isNewLevel = false;
 
-    public static void init(final WorldGenSettings dimensionGeneratorSettings, final GameType gameType, final net.minecraft.world.Difficulty difficulty,
+    public static void init(final WorldGenSettings worldGenSettings, final GameType gameType, final net.minecraft.world.Difficulty difficulty,
             final boolean pvp, final boolean hardcore, final boolean commands, final int viewDistance, final RegistryAccess registries) {
-        BootstrapProperties.dimensionGeneratorSettings = dimensionGeneratorSettings;
+        BootstrapProperties.worldGenSettings = worldGenSettings;
         BootstrapProperties.gameMode = RegistryKey.of(RegistryTypes.GAME_MODE, ResourceKey.sponge(gameType.getName())).asDefaultedReference(() -> Sponge.game().registries());
         BootstrapProperties.difficulty = RegistryKey.of(RegistryTypes.DIFFICULTY, ResourceKey.sponge(difficulty.getKey())).asDefaultedReference(() -> Sponge.game().registries());
         BootstrapProperties.pvp = pvp;

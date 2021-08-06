@@ -39,15 +39,16 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.world.server.SpongeWorldManager;
 import org.spongepowered.vanilla.VanillaServer;
-import org.spongepowered.vanilla.world.VanillaWorldManager;
+import org.spongepowered.vanilla.world.server.VanillaWorldManager;
 
 import java.net.Proxy;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla_API implements VanillaServer {
 
-    private VanillaWorldManager vanilla$worldManager;
+    private SpongeWorldManager vanilla$worldManager;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void vanilla$setupSpongeFields(Thread p_i232576_1_, RegistryAccess.RegistryHolder p_i232576_2_, LevelStorageSource.LevelStorageAccess p_i232576_3_,
@@ -59,7 +60,7 @@ public abstract class MinecraftServerMixin_Vanilla_API implements VanillaServer 
     }
 
     @Override
-    public VanillaWorldManager worldManager() {
+    public SpongeWorldManager worldManager() {
         return this.vanilla$worldManager;
     }
 }

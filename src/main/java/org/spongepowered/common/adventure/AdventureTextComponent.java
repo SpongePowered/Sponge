@@ -49,9 +49,7 @@ public class AdventureTextComponent implements net.minecraft.network.chat.Compon
     private @Nullable Locale deepConvertedLocalized;
     private final net.kyori.adventure.text.Component wrapped;
     private final @Nullable ComponentRenderer<Locale> renderer;
-    @OnlyIn(Dist.CLIENT)
     private @Nullable Locale lastLocale;
-    @OnlyIn(Dist.CLIENT)
     private @Nullable AdventureTextComponent lastRendered;
 
     public AdventureTextComponent(final net.kyori.adventure.text.Component wrapped, final @Nullable ComponentRenderer<Locale> renderer) {

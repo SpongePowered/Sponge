@@ -28,7 +28,6 @@ import com.mojang.authlib.GameProfileRepository;
 import com.mojang.authlib.minecraft.MinecraftSessionService;
 import com.mojang.datafixers.DataFixer;
 import net.minecraft.core.RegistryAccess;
-import net.minecraft.network.chat.Component;
 import net.minecraft.server.MinecraftServer;
 import net.minecraft.server.ServerResources;
 import net.minecraft.server.level.progress.ChunkProgressListenerFactory;
@@ -36,9 +35,8 @@ import net.minecraft.server.packs.repository.PackRepository;
 import net.minecraft.server.players.GameProfileCache;
 import net.minecraft.world.level.storage.LevelStorageSource;
 import net.minecraft.world.level.storage.WorldData;
-import org.apache.logging.log4j.Logger;
-import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -49,30 +47,24 @@ import org.spongepowered.vanilla.VanillaServer;
 import org.spongepowered.vanilla.hooks.VanillaPacketHooks;
 
 import java.net.Proxy;
-import java.util.UUID;
 
 @Mixin(MinecraftServer.class)
 public abstract class MinecraftServerMixin_Vanilla implements VanillaServer {
 
     // @formatter:off
-    @Shadow @Final private static Logger LOGGER;
-
     @Shadow protected abstract void shadow$detectBundledResources();
     @Shadow public abstract boolean shadow$isRunning();
     @Shadow protected abstract void loadLevel();
     // @formatter:on
 
     /**
-     * Render localized/formatted chat components
-     *
-     * @param input original component
+     * @author Zidane
+     * @reason Apply our branding
      */
-    @Inject(method = "sendMessage", at = @At("HEAD"), cancellable = true)
-    private void impl$useTranslatingLogger(final Component input, final UUID sender, final CallbackInfo ci) {
-        MinecraftServerMixin_Vanilla.LOGGER.info(input);
-        ci.cancel();
+    @Overwrite
+    public String getServerModName() {
+        return "spongevanilla";
     }
-
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void vanilla$setPacketHooks(final Thread p_i232576_1_, final RegistryAccess.RegistryHolder p_i232576_2_, final LevelStorageSource.LevelStorageAccess p_i232576_3_,

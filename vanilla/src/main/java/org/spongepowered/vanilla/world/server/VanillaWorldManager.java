@@ -22,13 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla;
+package org.spongepowered.vanilla.world.server;
 
-import org.spongepowered.common.SpongeServer;
+import net.minecraft.server.MinecraftServer;
 import org.spongepowered.common.world.server.SpongeWorldManager;
 
-public interface VanillaServer extends VanillaEngine, SpongeServer {
+public final class VanillaWorldManager extends SpongeWorldManager {
 
-    @Override
-    SpongeWorldManager worldManager();
+    public VanillaWorldManager(final MinecraftServer server) {
+        super(server);
+    }
 }

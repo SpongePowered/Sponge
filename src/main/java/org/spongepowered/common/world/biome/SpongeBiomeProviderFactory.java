@@ -25,6 +25,14 @@
 package org.spongepowered.common.world.biome;
 
 import com.mojang.datafixers.util.Pair;
+import net.minecraft.core.Registry;
+import net.minecraft.core.WritableRegistry;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
+import net.minecraft.world.level.biome.FixedBiomeSource;
+import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
+import net.minecraft.world.level.biome.OverworldBiomeSource;
+import net.minecraft.world.level.biome.TheEndBiomeSource;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.registry.RegistryReference;
 import org.spongepowered.api.world.biome.AttributedBiome;
@@ -45,14 +53,6 @@ import java.util.List;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.function.Supplier;
-import net.minecraft.core.Registry;
-import net.minecraft.core.WritableRegistry;
-import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.level.biome.CheckerboardColumnBiomeSource;
-import net.minecraft.world.level.biome.FixedBiomeSource;
-import net.minecraft.world.level.biome.MultiNoiseBiomeSource;
-import net.minecraft.world.level.biome.OverworldBiomeSource;
-import net.minecraft.world.level.biome.TheEndBiomeSource;
 
 @SuppressWarnings("unchecked")
 public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
@@ -72,7 +72,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public ConfigurableBiomeProvider<LayeredBiomeConfig> overworld() {
-        return (ConfigurableBiomeProvider<LayeredBiomeConfig>) new OverworldBiomeSource(BootstrapProperties.dimensionGeneratorSettings.seed(), false, false,
+        return (ConfigurableBiomeProvider<LayeredBiomeConfig>) new OverworldBiomeSource(BootstrapProperties.worldGenSettings.seed(), false, false,
             BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY));
     }
 
@@ -91,7 +91,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public ConfigurableBiomeProvider<MultiNoiseBiomeConfig> nether() {
-        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.NETHER.biomeSource(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY), BootstrapProperties.dimensionGeneratorSettings.seed());
+        return (ConfigurableBiomeProvider<MultiNoiseBiomeConfig>) MultiNoiseBiomeSource.Preset.NETHER.biomeSource(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY), BootstrapProperties.worldGenSettings.seed());
     }
 
     @Override
@@ -109,7 +109,7 @@ public final class SpongeBiomeProviderFactory implements BiomeProvider.Factory {
 
     @Override
     public ConfigurableBiomeProvider<EndStyleBiomeConfig> end() {
-        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) new TheEndBiomeSource(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY), BootstrapProperties.dimensionGeneratorSettings.seed());
+        return (ConfigurableBiomeProvider<EndStyleBiomeConfig>) new TheEndBiomeSource(BootstrapProperties.registries.registryOrThrow(Registry.BIOME_REGISTRY), BootstrapProperties.worldGenSettings.seed());
     }
 
     @Override
