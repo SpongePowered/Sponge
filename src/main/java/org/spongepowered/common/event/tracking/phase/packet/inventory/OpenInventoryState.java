@@ -26,4 +26,8 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 public final class OpenInventoryState extends BasicInventoryPacketState {
 
+    @Override
+    public boolean isRestoring() {
+        return true;
+    }
 }

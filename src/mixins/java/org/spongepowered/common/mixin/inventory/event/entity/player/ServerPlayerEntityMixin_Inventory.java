@@ -24,29 +24,34 @@
  */
 package org.spongepowered.common.mixin.inventory.event.entity.player;
 
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-
-import java.util.OptionalInt;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ContainerListener;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
+import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 
 @Mixin(value = ServerPlayer.class)
 public class ServerPlayerEntityMixin_Inventory extends PlayerEntityMixin_Inventory {
 
-    @Inject(method = "openMenu",
-            locals = LocalCapture.CAPTURE_FAILEXCEPTION,
+    @Redirect(method = "openMenu",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;addSlotListener(Lnet/minecraft/world/inventory/ContainerListener;)V"))
-    private void impl$onOpenMenu(final MenuProvider containerProvider, CallbackInfoReturnable<OptionalInt> cir, AbstractContainerMenu var2) {
-        ((TrackedContainerBridge) var2).bridge$trackViewable(containerProvider);
+    private void impl$onOpenMenu(final AbstractContainerMenu abstractContainerMenu, final ContainerListener param0, final @Nullable MenuProvider containerProvider) {
+        ((TrackedContainerBridge) abstractContainerMenu).bridge$trackViewable(containerProvider);
+        try (InventoryPacketContext context = PacketPhase.Inventory.OPEN_INVENTORY.createPhaseContext(PhaseTracker.SERVER)) {
+            context.buildAndSwitch();
+            abstractContainerMenu.addSlotListener(param0);
+        }
     }
 
     @Inject(method = "openHorseInventory", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;addSlotListener(Lnet/minecraft/world/inventory/ContainerListener;)V"))

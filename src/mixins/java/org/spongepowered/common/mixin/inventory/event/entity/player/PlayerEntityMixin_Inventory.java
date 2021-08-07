@@ -25,14 +25,18 @@
 package org.spongepowered.common.mixin.inventory.event.entity.player;
 
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.EquipmentSlot;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
+import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.api.Sponge;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -57,35 +61,12 @@ public class PlayerEntityMixin_Inventory {
 
     @Final @Shadow public net.minecraft.world.entity.player.Inventory inventory;
     @Shadow public AbstractContainerMenu containerMenu;
-
+    @Shadow @Final public InventoryMenu inventoryMenu;
     @Nullable private EffectTransactor inventory$effectTransactor = null;
 
-    @Inject(method = "setItemSlot", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;"))
-    private void onSetItemStackToSlot(final EquipmentSlot slotIn, final ItemStack stack, final CallbackInfo ci)
-    {
-        final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
-        final PlayerInventory inventory = (PlayerInventory) this.inventory;
-        if (slotIn == EquipmentSlot.MAINHAND) {
-            final ItemStack orig = this.inventory.items.get(this.inventory.selected);
-            final Slot slot = inventory.primary().hotbar().slot(this.inventory.selected).get();
-            if (phaseContext instanceof PacketContext) {
-                phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, ItemStackUtil.toNative(((PacketContext) phaseContext).getItemUsed()), stack, inventory);
-            } else {
-                phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, orig, stack, inventory);
-            }
-        } else if (slotIn == EquipmentSlot.OFFHAND) {
-            final ItemStack orig = this.inventory.offhand.get(0);
-            final Slot slot = inventory.offhand();
-            if (phaseContext instanceof PacketContext) {
-                phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, ItemStackUtil.toNative(((PacketContext) phaseContext).getItemUsed()), stack, inventory);
-            } else {
-                phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, orig, stack, inventory);
-            }
-        } else if (slotIn.getType() == EquipmentSlot.Type.ARMOR) {
-            final ItemStack orig = this.inventory.armor.get(slotIn.getIndex());
-            final Slot slot = inventory.equipment().slot((EquipmentType) (Object) slotIn).get();
-            phaseContext.getTransactor().logPlayerInventorySlotTransaction((Player) (Object) this, phaseContext, slot, orig, stack, inventory);
-        }
+    @Inject(method = "setItemSlot", at = @At(value = "RETURN"))
+    private void impl$afterSetItemSlot(final EquipmentSlot param0, final ItemStack param1, final CallbackInfo ci) {
+        this.inventoryMenu.broadcastChanges(); // for capture
     }
 
     @Inject(method = "drop(Z)Z",
@@ -127,11 +108,25 @@ public class PlayerEntityMixin_Inventory {
                 ctx.buildAndSwitch();
                 try (final EffectTransactor ignored = ctx.getTransactor().logCloseInventory(player, true)) {
                     container.removed(player); // Drop & capture cursor item
+                    this.inventoryMenu.broadcastChanges(); // capture
                 }
             }
         } else {
             // Proceed as normal with client code
             container.removed(player);
+        }
+    }
+
+    @Redirect(method = "touch", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;playerTouch(Lnet/minecraft/world/entity/player/Player;)V"))
+    private void inventory$onTouch(final Entity entity, final Player player) {
+        if (entity instanceof ItemEntity) {
+            entity.playerTouch(player); // ItemEntityMixin_Inventory creates transactions for pickup event
+            return;
+        }
+        final PhaseContext<?> context = PhaseTracker.SERVER.getPhaseContext();
+        try (EffectTransactor ignored = context.getTransactor().logPlayerInventoryChangeWithEffect(player, SpongeEventFactory::createChangeInventoryEvent)) {
+            entity.playerTouch(player);
+            this.inventoryMenu.broadcastChanges(); // capture
         }
     }
 

@@ -182,11 +182,20 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
             transaction.used = true;
         }
 
-        return containerBasedTransactions.stream()
-            .map(t -> t.createInventoryEvent(slotTransactions, entities, context, currentCause))
-            .filter(Optional::isPresent)
-            .map(Optional::get)
-            .findFirst();
+        final Optional<ClickContainerEvent> event = containerBasedTransactions.stream()
+                .map(t -> t.createInventoryEvent(slotTransactions, entities, context, currentCause))
+                .filter(Optional::isPresent)
+                .map(Optional::get)
+                .findFirst();
+        if (!event.isPresent()) {
+            SpongeCommon.logger().warn("Logged transactions without event! {}", gameTransactions.size(), new Exception(""));
+            for (SlotTransaction slotTransaction : slotTransactions) {
+                SpongeCommon.logger().warn(slotTransaction);
+            }
+
+
+        }
+        return event;
     }
 
     @SuppressWarnings({"unchecked", "rawtypes"})

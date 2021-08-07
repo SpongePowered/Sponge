@@ -28,7 +28,10 @@ import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.server.level.ServerPlayerGameMode;
 import net.minecraft.server.network.ServerGamePacketListenerImpl;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
@@ -36,7 +39,9 @@ import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
+import net.minecraft.world.level.Level;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
@@ -93,18 +98,22 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final int slotIdx = packet.getSlot();
-        try (final EffectTransactor ignored = transactor.logPlayerCarriedItem(this.player, slotIdx)) {
-            final PlayerInventory inventory = (PlayerInventory) this.player.inventory;
-            inventory.equipment().slot(this.player.inventory.selected).ifPresent(slot -> {
-                final ItemStack item = ItemStackUtil.toNative(slot.peek());
-                transactor.logPlayerInventorySlotTransaction(this.player, context, slot, item, item, inventory);
-            });
-            inventory.equipment().slot(slotIdx).ifPresent(slot -> {
-                final ItemStack item = ItemStackUtil.toNative(slot.peek());
-                transactor.logPlayerInventorySlotTransaction(this.player, context, slot, item, item, inventory);
-            });
-        }
+        transactor.logPlayerCarriedItem(this.player, slotIdx);
         // TrackingUtil.processBlockCaptures called by SwitchHotbarScrollState
+    }
+
+    @Redirect(method = "handleUseItem",
+            at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;useItem(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
+    private InteractionResult impl$onHandlePlayerCommandOpenInventory(final ServerPlayerGameMode serverPlayerGameMode, final ServerPlayer param0,
+            final Level param1, final ItemStack param2, final InteractionHand param3) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        try (EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(this.player, SpongeEventFactory::createChangeInventoryEvent)) {
+            final InteractionResult result = serverPlayerGameMode.useItem(param0, param1, param2, param3);
+            this.player.inventoryMenu.broadcastChanges(); // capture
+            return result;
+        }
+        // TrackingUtil.processBlockCaptures called by UseItemPacketState
     }
 
     @Redirect(method = "handlePlayerCommand",
@@ -125,6 +134,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logCloseInventory(player, true)) {
             this.player.doCloseContainer();
+            this.player.inventoryMenu.broadcastChanges(); // for capture
         }
         // TrackingUtil.processBlockCaptures called by CloseWindowState
     }

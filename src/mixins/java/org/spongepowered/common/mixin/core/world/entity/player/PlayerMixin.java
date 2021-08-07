@@ -64,6 +64,7 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.state.pattern.BlockInWorld;
 import net.minecraft.world.scores.Scoreboard;
 import net.minecraft.world.scores.Team;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.entity.living.Living;
 import org.spongepowered.api.entity.living.player.Player;
@@ -102,6 +103,8 @@ import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.food.FoodDataBridge;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.hooks.PlatformHooks;
@@ -595,6 +598,12 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                             if(itemstack1.isEmpty()) {
                                 this.shadow$setItemInHand(InteractionHand.MAIN_HAND, ItemStack.EMPTY);
                             }
+                            // Sponge Start
+                            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+                            final TransactionalCaptureSupplier transactor = context.getTransactor();
+                            transactor.logPlayerInventoryChange((net.minecraft.world.entity.player.Player) (Object) this, SpongeEventFactory::createChangeInventoryEvent);
+                            this.inventoryMenu.broadcastChanges(); // capture
+                            // Spong End
                         }
 
                         if (targetEntity instanceof LivingEntity) {

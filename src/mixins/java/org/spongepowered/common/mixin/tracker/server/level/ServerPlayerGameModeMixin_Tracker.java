@@ -43,6 +43,7 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.EventContextKeys;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.block.InteractBlockEvent;
 import org.spongepowered.api.event.item.inventory.InteractItemEvent;
 import org.spongepowered.api.item.inventory.Slot;
@@ -172,9 +173,8 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
                     // Sponge start - log change in hand
                     final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
                     final TransactionalCaptureSupplier transactor = context.getTransactor();
-                    final PlayerInventory playerInventory = (PlayerInventory) this.player.inventory;
-                    final Slot slot = handIn == InteractionHand.MAIN_HAND ? playerInventory.primary().hotbar().slot(this.player.inventory.selected).get() : playerInventory.offhand();
-                    transactor.logPlayerInventorySlotTransaction(this.player, context, slot, copiedStack, stackIn, playerInventory);
+                    transactor.logPlayerInventoryChange(this.player, SpongeEventFactory::createChangeInventoryEvent);
+                    this.player.inventoryMenu.broadcastChanges();
                     // Sponge end
                 }
 
@@ -193,12 +193,9 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
     public void impl$onMineBlock(final ItemStack itemStack, final Level param0, final BlockState param1, final BlockPos param2, final Player param3) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        final PlayerInventory playerInventory = (PlayerInventory) this.player.inventory;
-        final Slot slot = playerInventory.primary().hotbar().slot(this.player.inventory.selected).get();
-        final ItemStack original = itemStack.copy();
         itemStack.mineBlock(param0, param1, param2, param3);
-        try (EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
-            transactor.logPlayerInventorySlotTransaction(this.player, context, slot, original, itemStack, playerInventory);
+        try (EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(this.player, SpongeEventFactory::createChangeInventoryEvent)) {
+            this.player.inventoryMenu.broadcastChanges();
         }
     }
 

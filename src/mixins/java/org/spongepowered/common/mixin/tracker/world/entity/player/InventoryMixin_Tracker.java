@@ -59,24 +59,16 @@ public abstract class InventoryMixin_Tracker {
 
     @Inject(method = "add(ILnet/minecraft/world/item/ItemStack;)Z", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/NonNullList;set(ILjava/lang/Object;)Ljava/lang/Object;", ordinal = 0))
     private void impl$ifCaptureDoTransactions(final int index, final ItemStack stack, final CallbackInfoReturnable<Boolean> cir) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
         // Capture "damaged" items picked up
-        final Slot slot = this.impl$getSpongeSlotByIndex(index);
-        transactor.logPlayerInventorySlotTransaction(this.player, context, slot, ItemStack.EMPTY, stack, (Inventory) this);
+        this.player.inventoryMenu.broadcastChanges(); // capture
     }
 
     @Redirect(method = "addResource(Lnet/minecraft/world/item/ItemStack;)I", at = @At(value = "INVOKE", target =
             "Lnet/minecraft/world/entity/player/Inventory;addResource(ILnet/minecraft/world/item/ItemStack;)I"))
     private int impl$ifCaptureDoTransactions(final net.minecraft.world.entity.player.Inventory inv, final int index, final ItemStack stack) {
-        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
-
         // Capture items getting picked up
-        final Slot slot = index == 40 ? ((PlayerInventory) this).offhand() : this.impl$getSpongeSlotByIndex(index);
-        final ItemStack original = this.shadow$getItem(index).copy();
         final int result = this.shadow$addResource(index, stack);
-        transactor.logPlayerInventorySlotTransaction(this.player, context, slot, original, this.shadow$getItem(index), (Inventory) this);
+        this.player.inventoryMenu.broadcastChanges(); // capture
         return result;
     }
 }

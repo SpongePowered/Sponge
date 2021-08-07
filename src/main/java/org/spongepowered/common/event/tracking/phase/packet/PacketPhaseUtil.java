@@ -90,12 +90,12 @@ public final class PacketPhaseUtil {
                     continue;
                 }
                 restoredAny = true;
-                final SlotAdapter slot = (SlotAdapter) slotTransaction.slot();
+                final org.spongepowered.api.item.inventory.Slot slot = slotTransaction.slot();
                 final ItemStackSnapshot snapshot = eventCancelled || !slotTransaction.isValid() ? slotTransaction.original() : slotTransaction.custom().get();
                 if (containerMenu == null || slot.viewedSlot() == slot) {
                     slot.set(snapshot.createStack());
                 } else {
-                    final int slotNumber = slot.getOrdinal();
+                    final int slotNumber = ((SlotAdapter) slot).getOrdinal();
                     final Slot nmsSlot = containerMenu.getSlot(slotNumber);
                     if (nmsSlot != null) {
                         nmsSlot.set(ItemStackUtil.fromSnapshotToNative(snapshot));

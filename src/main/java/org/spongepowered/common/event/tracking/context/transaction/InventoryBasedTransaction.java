@@ -91,6 +91,7 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
             transaction.used = true;
         }
 
+        // TODO on pickup grouping does not work?
         final Map<Slot, List<SlotTransaction>> collected = slotTransactions.stream().collect(Collectors.groupingBy(SlotTransaction::slot));
         slotTransactions.clear();
         collected.values().forEach(list -> {
@@ -158,11 +159,20 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
 
     @Override
     public boolean acceptSlotTransaction(final SlotTransaction newTransaction, final Object inventory) {
+        // accept same inventory transactions
         if (this.inventory == inventory) {
             if (this.acceptedTransactions == null) {
                 this.acceptedTransactions = new ArrayList<>();
             }
             this.acceptedTransactions.add(newTransaction);
+            return true;
+        }
+        // or accept menu transactions as inventory transactions
+        if (newTransaction.slot().viewedSlot() != newTransaction.slot() && this.inventory == newTransaction.slot().viewedSlot().parent()) {
+            if (this.acceptedTransactions == null) {
+                this.acceptedTransactions = new ArrayList<>();
+            }
+            this.acceptedTransactions.add(new SlotTransaction(newTransaction.slot().viewedSlot(), newTransaction.original(), newTransaction.defaultReplacement()));
             return true;
         }
         return false;

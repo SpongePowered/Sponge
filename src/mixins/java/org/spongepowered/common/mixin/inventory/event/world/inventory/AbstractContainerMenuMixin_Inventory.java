@@ -492,7 +492,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                 final org.spongepowered.api.item.inventory.Slot adapter = this.inventoryAdapter$getSlot(index).get();
                 final SlotTransaction newTransaction = new SlotTransaction(adapter, oldItem, newItem);
                 final PhaseContext<@NonNull ?> phaseContext = PhaseTracker.SERVER.getPhaseContext();
-                phaseContext.getTransactor().logContainerSlotTransaction(phaseContext, newTransaction, (AbstractContainerMenu) (Object) this);
+                phaseContext.getTransactor().logSlotTransaction(phaseContext, newTransaction, (AbstractContainerMenu) (Object) this);
             } catch (final IndexOutOfBoundsException e) {
                 SpongeCommon.logger().error("SlotIndex out of LensBounds! Did the Container change after creation?", e);
             }

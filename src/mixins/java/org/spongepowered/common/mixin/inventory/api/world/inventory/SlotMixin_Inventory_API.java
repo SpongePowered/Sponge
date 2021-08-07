@@ -27,15 +27,25 @@ package org.spongepowered.common.mixin.inventory.api.world.inventory;
 import net.minecraft.world.Container;
 import net.minecraft.world.inventory.Slot;
 import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStack;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.InventoryTransactionResult;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.inventory.adapter.impl.DefaultImplementedAdapterInventory;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 @Mixin(Slot.class)
 public abstract class SlotMixin_Inventory_API implements org.spongepowered.api.item.inventory.Slot, DefaultImplementedAdapterInventory.WithClear {
 
+    // @formatter:off
     @Shadow @Final public Container container;
+    @Shadow public abstract void shadow$set(net.minecraft.world.item.ItemStack param0);
+    @Shadow public abstract net.minecraft.world.item.ItemStack shadow$getItem();
+    @Shadow public abstract int shadow$getMaxStackSize();
+    // @formatter:on
 
     @Override
     public Inventory parent() {
@@ -51,4 +61,25 @@ public abstract class SlotMixin_Inventory_API implements org.spongepowered.api.i
         return this;
     }
 
+    @Override
+    public InventoryTransactionResult set(ItemStack stack) {
+        final InventoryTransactionResult.Builder result = InventoryTransactionResult.builder().type(InventoryTransactionResult.Type.SUCCESS);
+        final net.minecraft.world.item.ItemStack nativeStack = ItemStackUtil.toNative(stack);
+
+        final net.minecraft.world.item.ItemStack old = this.shadow$getItem();
+        ItemStackSnapshot oldSnap = ItemStackUtil.snapshotOf(old);
+
+        int remaining = stack.quantity();
+        final int push = Math.min(remaining, this.shadow$getMaxStackSize());
+        net.minecraft.world.item.ItemStack newStack = ItemStackUtil.cloneDefensiveNative(nativeStack, push);
+        this.shadow$set(newStack);
+        result.transaction(new SlotTransaction(this, oldSnap, ItemStackUtil.snapshotOf(newStack)));
+        remaining -= push;
+
+        if (remaining > 0) {
+            result.reject(ItemStackUtil.cloneDefensive(nativeStack, remaining));
+        }
+
+        return result.build();
+    }
 }

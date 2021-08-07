@@ -77,6 +77,7 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
@@ -862,6 +863,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             if (!SpongeCommon.post(SpongeEventFactory.createUseItemStackEventStop(PhaseTracker.getCauseStackManager().currentCause(),
                 duration, duration, snapshot))) {
                 stack.releaseUsing(world, self, duration);
+                if (self instanceof net.minecraft.server.level.ServerPlayer) {
+                    // Log Change and capture SlotTransactions
+                    PhaseTracker.SERVER.getPhaseContext().getTransactor().logPlayerInventoryChange(((net.minecraft.server.level.ServerPlayer) self), SpongeEventFactory::createChangeInventoryEvent);
+                    ((net.minecraft.server.level.ServerPlayer) self).inventoryMenu.broadcastChanges();
+                }
             }
         }
     }

@@ -31,6 +31,7 @@ import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.units.qual.A;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.api.event.SpongeEventFactory;
@@ -65,6 +66,7 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.Map;
 import java.util.Optional;
+import java.util.function.Consumer;
 
 @Mixin(value = LivingEntity.class)
 public abstract class LivingEntityMixin_Inventory {
@@ -90,6 +92,19 @@ public abstract class LivingEntityMixin_Inventory {
         final boolean customOffHand = this.impl$throwEquipmentEvent(EquipmentSlot.OFFHAND, offHand, map.get(EquipmentSlot.OFFHAND), this.shadow$getLastHandItem(EquipmentSlot.OFFHAND));
         if (customMainHand || customOffHand) {
             ci.cancel(); // If canceled or customized let handleEquipmentChanges send packets instead
+        }
+    }
+
+    @Redirect(method = "updateFallFlying", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/item/ItemStack;hurtAndBreak(ILnet/minecraft/world/entity/LivingEntity;Ljava/util/function/Consumer;)V"))
+    private <T extends LivingEntity> void inventory$onElytraUse(final ItemStack itemStack, final int param0, final T param1, final Consumer<T> param2) {
+        itemStack.hurtAndBreak(param0, param1, param2);
+        if ((Object) this instanceof net.minecraft.server.level.ServerPlayer) {
+            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+            final TransactionalCaptureSupplier transactor = context.getTransactor();
+            final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
+            try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, SpongeEventFactory::createChangeInventoryEvent)) {
+                player.inventoryMenu.broadcastChanges(); // capture
+            }
         }
     }
 
@@ -121,18 +136,11 @@ public abstract class LivingEntityMixin_Inventory {
             this.shadow$completeUsingItem();
             return;
         }
-        final InteractionHand hand = this.shadow$getUsedItemHand();
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect((Player) livingEntity, SpongeEventFactory::createChangeInventoryEvent)) {
-            final ItemStack orig = this.shadow$getItemInHand(hand).copy();
             this.shadow$completeUsingItem();
-            final ItemStack newStack = this.shadow$getItemInHand(hand);
-            final PlayerInventory inventory = (PlayerInventory) ((Player) livingEntity).inventory;
-            final Slot slot = hand == InteractionHand.MAIN_HAND ?
-                    inventory.equipment().slot(EquipmentTypes.MAIN_HAND).get() :
-                    inventory.equipment().slot(EquipmentTypes.OFF_HAND).get();
-            transactor.logPlayerInventorySlotTransaction((Player) livingEntity, context, slot, orig, newStack, inventory);
+            ((Player) livingEntity).inventoryMenu.broadcastChanges();
         }
     }
 
