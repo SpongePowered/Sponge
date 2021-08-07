@@ -24,10 +24,15 @@
  */
 package org.spongepowered.forge.mixin.core.server;
 
+import net.minecraft.resources.ResourceKey;
 import net.minecraft.server.MinecraftServer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.Level;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.forge.ForgeServer;
 
 @Mixin(MinecraftServer.class)
@@ -36,6 +41,7 @@ public abstract class MinecraftServerMixin_Forge implements ForgeServer {
     // @formatter:off
     @Shadow protected abstract void shadow$detectBundledResources();
     @Shadow protected abstract void loadLevel();
+    @Shadow @Nullable public abstract ServerLevel shadow$getLevel(ResourceKey<Level> p_71218_1_);
     // @formatter:on
 
     /**
@@ -45,5 +51,14 @@ public abstract class MinecraftServerMixin_Forge implements ForgeServer {
     @Overwrite
     public String getServerModName() {
         return "spongeforge";
+    }
+
+    /**
+     * @author Zidane
+     * @reason We store the per-world tick time on the ServerLevel itself to more accurately track this.
+     */
+    @Overwrite(remap = false)
+    public long[] getTickTime(ResourceKey<Level> dim) {
+        return ((ServerLevelBridge) this.shadow$getLevel(dim)).bridge$recentTickTimes();
     }
 }
