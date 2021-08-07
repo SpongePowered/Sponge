@@ -31,7 +31,6 @@ import org.spongepowered.api.data.Key;
 import org.spongepowered.api.data.persistence.DataQuery;
 import org.spongepowered.api.data.persistence.DataView;
 import org.spongepowered.api.data.value.Value;
-import org.spongepowered.common.data.DataUtil;
 
 import java.util.Optional;
 
@@ -41,34 +40,16 @@ public interface SpongeDataHolderBridge {
 
     void bridge$clear();
 
-    default <E> Optional<E> bridge$get(Key<? extends Value<E>> key) {
-        return this.bridge$getManipulator().get(key);
+    default <E> Optional<E> bridge$get(final Key<? extends Value<E>> key) {
+        return DataHolderProcessor.bridge$get(this, key);
     }
 
-    default <E> DataTransactionResult bridge$offer(Key<? extends Value<E>> key, E value) {
-        final DataManipulator.Mutable manipulator = this.bridge$getManipulator();
-        final Value.Immutable<E> immutableValue = manipulator.getValue(key).map(Value::asImmutable).orElse(null);
-        final DataTransactionResult.Builder builder = DataTransactionResult.builder();
-        if (immutableValue != null) {
-            builder.replace(immutableValue);
-        }
-        manipulator.set(key, value);
-        builder.success(manipulator.getValue(key).get().asImmutable());
-
-        DataUtil.syncDataToTag(this);
-
-        return builder.result(DataTransactionResult.Type.SUCCESS).build();
+    default <E> DataTransactionResult bridge$offer(final Key<? extends Value<E>> key, final E value) {
+        return DataHolderProcessor.bridge$offer(this, key, value);
     }
 
-    default <E> DataTransactionResult bridge$remove(Key<? extends Value<E>> key) {
-        final DataManipulator.Mutable manipulator = this.bridge$getManipulator();
-        final Optional<? extends Value<E>> value = manipulator.getValue(key);
-        if (value.isPresent()) {
-            manipulator.remove(key);
-        }
-        DataUtil.syncDataToTag(this);
-        return value.map(Value::asImmutable).map(DataTransactionResult::successRemove)
-                .orElseGet(DataTransactionResult::successNoData);
+    default <E> DataTransactionResult bridge$remove(final Key<? extends Value<E>> key) {
+        return DataHolderProcessor.bridge$remove(this, key);
     }
 
     DataManipulator.Mutable bridge$getManipulator();
