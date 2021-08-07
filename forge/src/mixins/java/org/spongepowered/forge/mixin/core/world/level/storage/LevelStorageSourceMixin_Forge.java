@@ -27,6 +27,7 @@ package org.spongepowered.forge.mixin.core.world.level.storage;
 import com.mojang.datafixers.DataFixer;
 import com.mojang.serialization.Dynamic;
 import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraftforge.common.ForgeHooks;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
@@ -34,9 +35,16 @@ import org.spongepowered.asm.mixin.injection.Redirect;
 @Mixin(LevelStorageSource.class)
 public abstract class LevelStorageSourceMixin_Forge {
 
+    private static boolean forge$skipAdditionalFixupCalls = false;
+
     @Redirect(method = "readWorldGenSettings", at = @At(value = "INVOKE", target = "Lnet/minecraftforge/common/ForgeHooks;fixUpDimensionsData"
             + "(Lcom/mojang/serialization/Dynamic;)Lcom/mojang/serialization/Dynamic;", remap = false))
     private static Dynamic<?> forge$skipForgeDimensionsFixup(final Dynamic<?> data, final Dynamic<?> data2, DataFixer param1, int param2) {
+        if (!LevelStorageSourceMixin_Forge.forge$skipAdditionalFixupCalls) {
+            LevelStorageSourceMixin_Forge.forge$skipAdditionalFixupCalls = true;
+            return ForgeHooks.fixUpDimensionsData(data);
+        }
+
         return data;
     }
 }
