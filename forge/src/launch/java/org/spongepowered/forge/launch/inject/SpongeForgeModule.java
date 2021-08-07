@@ -28,7 +28,9 @@ import com.google.inject.AbstractModule;
 import net.minecraftforge.common.MinecraftForge;
 import org.spongepowered.api.Platform;
 import org.spongepowered.api.event.EventManager;
+import org.spongepowered.common.command.manager.SpongeCommandManager;
 import org.spongepowered.forge.launch.ForgePlatform;
+import org.spongepowered.forge.launch.command.ForgeCommandManager;
 import org.spongepowered.forge.launch.event.ForgeEventManager;
 
 public final class SpongeForgeModule extends AbstractModule {
@@ -37,6 +39,7 @@ public final class SpongeForgeModule extends AbstractModule {
     protected void configure() {
         this.bind(Platform.class).to(ForgePlatform.class);
         this.bind(EventManager.class).toProvider(() -> (ForgeEventManager) MinecraftForge.EVENT_BUS);
+        this.bind(SpongeCommandManager.class).to(ForgeCommandManager.class);
     }
 
 }
