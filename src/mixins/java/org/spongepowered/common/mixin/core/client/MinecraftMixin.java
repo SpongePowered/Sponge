@@ -148,6 +148,8 @@ public abstract class MinecraftMixin implements MinecraftBridge, SpongeClient {
     private static WorldData impl$serializeDelayedDataPackOnLoadAndSetBootstrapProperties(final LevelStorageSource.LevelStorageAccess levelSave, final DynamicOps<Tag> p_237284_1_, final DataPackConfig p_237284_2_, final LevelStorageSource.LevelStorageAccess p_238181_0_, final RegistryAccess.RegistryHolder p_238181_1_) {
         SpongeDataPackManager.INSTANCE.serializeDelayedDataPack(DataPackTypes.WORLD);
         final WorldData saveData = levelSave.getDataTag(p_237284_1_, p_237284_2_);
+        BootstrapProperties.init(saveData.worldGenSettings(), saveData.getGameType(), saveData.getDifficulty(), true, saveData.isHardcore(),
+                saveData.getAllowCommands(), 10, p_238181_1_);
         return saveData;
     }
 

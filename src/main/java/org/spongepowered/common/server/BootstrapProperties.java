@@ -46,7 +46,7 @@ public final class BootstrapProperties {
     public static boolean pvp;
     public static boolean hardcore;
     public static boolean commands;
-    public static int viewDistance;
+    public static int viewDistance = 10;
     public static RegistryAccess registries;
     public static RegistryReadOps<?> worldSettingsAdapter;
     public static boolean isNewLevel = false;
