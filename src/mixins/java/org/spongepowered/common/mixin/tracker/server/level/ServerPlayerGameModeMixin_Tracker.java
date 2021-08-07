@@ -194,7 +194,9 @@ public abstract class ServerPlayerGameModeMixin_Tracker {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         itemStack.mineBlock(param0, param1, param2, param3);
-        try (EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(this.player, SpongeEventFactory::createChangeInventoryEvent)) {
+        // Needs to get logged as a sideeffect under the BlockChange
+        try (EffectTransactor ignored = context.getTransactor().pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()))) {
+            transactor.logPlayerInventoryChange(this.player, SpongeEventFactory::createChangeInventoryEvent);
             this.player.inventoryMenu.broadcastChanges();
         }
     }

@@ -269,6 +269,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             return;
         }
 
+        if (this.effect != null && this.effect.tail != null && this.effect.tail.acceptSlotTransaction(newTransaction, abstractContainerMenu)) {
+            return;
+        }
+
         // commands - during CommandPhaseContext see below
         // place/use ServerPlayerGameModeMixin_Tracker#useItemOn
         // Dispenser equip PlayerEntityMixin_Inventory#setItemSlot
