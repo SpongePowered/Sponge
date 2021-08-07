@@ -112,6 +112,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
                 this.entities = new LinkedList<>();
             }
             this.entities.add(entityIn);
+            return true;
         }
         return super.acceptEntitySpawn(current, entityIn);
     }
