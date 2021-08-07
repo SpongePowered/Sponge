@@ -73,4 +73,10 @@ public final class DropItemOutsideWindowState extends BasicInventoryPacketState 
         }
     }
 
+    @Override
+    public boolean doesContainerCaptureEntitySpawn(
+        final InventoryPacketContext context, final net.minecraft.world.entity.Entity entityIn
+    ) {
+        return true;
+    }
 }
