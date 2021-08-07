@@ -25,9 +25,6 @@
 package org.spongepowered.common.bridge.world.inventory.container;
 
 import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-
-import java.util.List;
 
 public interface TrackedContainerBridge {
 
@@ -36,8 +33,6 @@ public interface TrackedContainerBridge {
     boolean bridge$isShiftCrafting();
 
     void bridge$setLastCraft(CraftItemEvent.Craft event);
-
-    CraftItemEvent.Craft bridge$getLastCraft();
 
     void bridge$setPreviousCursor(net.minecraft.world.item.ItemStack stack);
 

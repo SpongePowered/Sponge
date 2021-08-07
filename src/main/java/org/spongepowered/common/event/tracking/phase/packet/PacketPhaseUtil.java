@@ -80,8 +80,7 @@ import java.util.List;
 
 public final class PacketPhaseUtil {
 
-    @SuppressWarnings("rawtypes")
-    public static boolean handleSlotRestore(@Nullable final Player player, final @Nullable AbstractContainerMenu containerMenu, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
+    public static void handleSlotRestore(@Nullable final Player player, final @Nullable AbstractContainerMenu containerMenu, final List<SlotTransaction> slotTransactions, final boolean eventCancelled) {
         try (PhaseContext<@NonNull ?> ignored = BlockPhase.State.RESTORING_BLOCKS.createPhaseContext(PhaseTracker.SERVER).buildAndSwitch()) {
             boolean restoredAny = false;
             for (final SlotTransaction slotTransaction : slotTransactions) {
@@ -102,19 +101,16 @@ public final class PacketPhaseUtil {
                     }
                 }
             }
-            if (containerMenu != null && player != null) {
-                containerMenu.broadcastChanges();
-
-                // If event is cancelled, always resync with player
-                // we must also validate the player still has the same container open after the event has been processed
-                if (eventCancelled && player.containerMenu == containerMenu && player instanceof net.minecraft.server.level.ServerPlayer) {
-                    ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(containerMenu);
+            if (restoredAny && player instanceof net.minecraft.server.level.ServerPlayer) {
+                if (containerMenu != null) {
+                    containerMenu.broadcastChanges();
+                    if (player.containerMenu == containerMenu) {
+                        ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(containerMenu);
+                    }
+                } else {
+                    ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(player.inventoryMenu);
                 }
             }
-            if (restoredAny && containerMenu == null && player instanceof net.minecraft.server.level.ServerPlayer) {
-                ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(player.inventoryMenu);
-            }
-            return restoredAny;
         }
     }
 

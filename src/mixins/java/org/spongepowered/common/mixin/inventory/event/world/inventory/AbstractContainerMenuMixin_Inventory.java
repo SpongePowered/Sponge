@@ -30,9 +30,7 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.ContainerListener;
-import net.minecraft.world.inventory.CraftingMenu;
 import net.minecraft.world.inventory.DataSlot;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
@@ -105,11 +103,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Override
     public void bridge$setLastCraft(final CraftItemEvent.Craft event) {
         this.impl$lastCraft = event;
-    }
-
-    @Nullable @Override
-    public CraftItemEvent.Craft bridge$getLastCraft() {
-        return this.impl$lastCraft;
     }
 
     @Override
@@ -199,17 +192,9 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         if (((LevelBridge) player.level).bridge$isFake()) {
             return slot.onTake(player, stackToDrop);
         }
-        this.bridge$setLastCraft(null);
-        final ItemStack result = slot.onTake(player, stackToDrop);
-        final CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
-        if (lastCraft != null) {
-            if (slot instanceof ResultSlot) {
-                if (lastCraft.isCancelled()) {
-                    stackToDrop.setCount(0); // do not drop crafted item when cancelled
-                }
-            }
-        }
-        return result;
+        this.impl$lastCraft = null;
+
+        return slot.onTake(player, stackToDrop);
     }
 
     // ClickType.QUICK_MOVE (for Crafting) -------------------------
@@ -226,7 +211,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         if (!(slot instanceof ResultSlot)) { // is this crafting?
             return thisContainer.quickMoveStack(player, slotId);
         }
-        this.bridge$setLastCraft(null);
+        this.impl$lastCraft = null;
         this.bridge$setShiftCrafting(true);
         ItemStack result = thisContainer.quickMoveStack(player, slotId);
 
@@ -236,7 +221,7 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         TrackingUtil.processBlockCaptures(context); // ClickContainerEvent -> CraftEvent -> PreviewEvent
         this.bridge$setShiftCrafting(false);
 
-        final CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
+        final CraftItemEvent.Craft lastCraft = this.impl$lastCraft;
         if (lastCraft != null) {
             if (lastCraft.isCancelled()) {
                 result = ItemStack.EMPTY; // Return empty to stop shift-crafting
@@ -248,25 +233,12 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     // cleanup after slot click was captured
     @Inject(method = "doClick", at = @At("RETURN"))
-    private void impl$onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<ItemStack> cir) {
+    private void impl$resetLastCraft(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<ItemStack> cir) {
         if (!PhaseTracker.SERVER.onSidedThread()) {
             return;
         }
         // Reset variables needed for CraftItemEvent.Craft
-        this.bridge$setLastCraft(null);
-
-        // TODO check if when canceling crafting etc. the client is getting informed correctly already - maybe this is not needed
-        // previously from CraftingContainerMixin
-        if (((Object) this) instanceof CraftingMenu || ((Object) this) instanceof InventoryMenu) {
-            for (final ContainerListener listener : this.containerListeners) {
-                if (slotId == 0) {
-                    listener.refreshContainer((AbstractContainerMenu) (Object) this, this.shadow$getItems());
-                } else {
-                    listener.slotChanged((AbstractContainerMenu) (Object) this, 0, this.shadow$getItems().get(0));
-                }
-            }
-
-        }
+        this.impl$lastCraft = null;
     }
 
     @Redirect(

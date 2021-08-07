@@ -164,7 +164,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
 
         if (this.craftingInventory != null) { // Event with Preview transaction on crafting inventory?
             Slot slot = this.craftingInventory.result();
-            @Nullable SlotTransaction preview = this.findPreviewTransaction(this.craftingInventory.result(), slotTransactions);
+            @Nullable final SlotTransaction preview = this.findPreviewTransaction(this.craftingInventory.result(), slotTransactions);
             final ItemStackSnapshot previewItem = ItemStackUtil.snapshotOf(this.craftingInventory.peek());
             if (preview != null) {
                 slot = preview.slot();
@@ -178,7 +178,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
             }
         }
 
-        for (ContainerBasedTransaction transaction : containerBasedTransactions) {
+        for (final ContainerBasedTransaction transaction : containerBasedTransactions) {
             transaction.used = true;
         }
 
@@ -189,7 +189,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
                 .findFirst();
         if (!event.isPresent() && !slotTransactions.isEmpty()) {
             SpongeCommon.logger().warn("Logged slot transactions without event! {}", gameTransactions.size(), new Exception(""));
-            for (SlotTransaction slotTransaction : slotTransactions) {
+            for (final SlotTransaction slotTransaction : slotTransactions) {
                 SpongeCommon.logger().warn(slotTransaction);
             }
 
@@ -254,7 +254,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
         return cancelledAny;
     }
 
-    protected void handleEventResults(Player player, ClickContainerEvent event) {
+    protected void handleEventResults(final Player player, final ClickContainerEvent event) {
         PacketPhaseUtil.handleSlotRestore(player, this.menu, event.transactions(), event.isCancelled());
         PacketPhaseUtil.handleCursorRestore(player, event.cursorTransaction());
         if (event.isCancelled() && event instanceof SpawnEntityEvent) {
@@ -271,14 +271,14 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
         }
     }
 
-    private void handleCrafting(Player player, ClickContainerEvent event) {
+    private void handleCrafting(final Player player, final ClickContainerEvent event) {
         if (this.craftedStack != null && this.craftingInventory != null) {
             if (this.acceptedTransactions != null) {
                 this.acceptedTransactions.clear();
             }
             // TODO push event to cause?
             ItemStackSnapshot craftedItem = null;
-            for (SlotTransaction transaction : event.transactions()) {
+            for (final SlotTransaction transaction : event.transactions()) {
                 if (transaction.slot().equals(this.craftingInventory.result())) {
                     // Use transaction on slot if possible
                     craftedItem = transaction.original();
@@ -300,12 +300,12 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
         }
     }
 
-    private void handleCraftingPreview(Player player, ClickContainerEvent event) {
+    private void handleCraftingPreview(final Player player, final ClickContainerEvent event) {
         if (this.craftingInventory != null) {
             // TODO push event to cause?
             // TODO prevent event when there is no preview?
             final SlotTransaction previewTransaction = this.getPreviewTransaction(this.craftingInventory.result(), event.transactions());
-            Optional<CraftingRecipe> recipe = player.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftingContainer, player.level).map(CraftingRecipe.class::cast);
+            final Optional<CraftingRecipe> recipe = player.level.getRecipeManager().getRecipeFor(RecipeType.CRAFTING, this.craftingContainer, player.level).map(CraftingRecipe.class::cast);
             final CraftItemEvent.Preview previewEvent = SpongeEventFactory
                     .createCraftItemEventPreview(event.cause(), (Container) this.menu, this.craftingInventory, event.cursorTransaction(), previewTransaction, recipe, Optional.empty(), event
                             .transactions());
@@ -327,7 +327,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
     }
 
     protected SlotTransaction getPreviewTransaction(final CraftingOutput result, final List<SlotTransaction> slotTransactions) {
-        @Nullable SlotTransaction preview = this.findPreviewTransaction(result, slotTransactions);
+        @Nullable final SlotTransaction preview = this.findPreviewTransaction(result, slotTransactions);
         if (preview == null) {
             final ItemStackSnapshot previewItem = ItemStackUtil.snapshotOf(result.peek());
             return new SlotTransaction(result, previewItem, previewItem);
@@ -335,8 +335,8 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
         return preview;
     }
 
-    private @Nullable SlotTransaction findPreviewTransaction(CraftingOutput result, List<SlotTransaction> slotTransactions) {
-        for (SlotTransaction slotTransaction : slotTransactions) {
+    private @Nullable SlotTransaction findPreviewTransaction(final CraftingOutput result, final List<SlotTransaction> slotTransactions) {
+        for (final SlotTransaction slotTransaction : slotTransactions) {
             if (result.viewedSlot().equals(slotTransaction.slot().viewedSlot())) {
                 return slotTransaction; // get last transaction
             }
