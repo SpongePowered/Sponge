@@ -24,8 +24,27 @@
  */
 package org.spongepowered.common.command.registrar;
 
+import com.mojang.brigadier.ParseResults;
+import net.minecraft.commands.CommandSourceStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.exception.CommandException;
+import org.spongepowered.api.command.manager.CommandMapping;
+import org.spongepowered.api.command.registrar.CommandRegistrar;
+import org.spongepowered.common.command.brigadier.dispatcher.SpongeCommandDispatcher;
+
 /**
  * Indicates that the registrar places items into the standard command tree.
  */
-public interface BrigadierBasedRegistrar {
+public interface BrigadierBasedRegistrar<T> extends CommandRegistrar<T> {
+
+    SpongeCommandDispatcher dispatcher();
+
+    CommandResult process(
+            final @NonNull CommandCause cause,
+            final @NonNull CommandMapping mapping,
+            final @NonNull String command,
+            final @NonNull ParseResults<CommandSourceStack> arguments) throws CommandException;
+
 }

@@ -27,6 +27,7 @@ package org.spongepowered.common.command.manager;
 import com.google.common.collect.HashMultimap;
 import com.google.common.collect.ImmutableSet;
 import com.google.common.collect.Multimap;
+import com.mojang.brigadier.ParseResults;
 import io.leangen.geantyref.GenericTypeReflector;
 import io.leangen.geantyref.TypeToken;
 import com.google.inject.Inject;
@@ -113,7 +114,7 @@ import java.util.Set;
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.stream.Collectors;
 
-public final class SpongeCommandManager implements CommandManager.Mutable {
+public abstract class SpongeCommandManager implements CommandManager.Mutable {
 
     private static final CommandResult UNKNOWN_ERROR = new SpongeCommandResult(false, 0, null);
     private static final boolean ALWAYS_PRINT_STACKTRACES = System.getProperty("sponge.command.alwaysPrintStacktraces") != null;
@@ -305,7 +306,8 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
         }
     }
 
-    public CommandResult process(final CommandCause cause, final String arguments) throws CommandException, CommandSyntaxException {
+    public CommandResult process(final CommandCause cause, final String arguments)
+            throws CommandException, CommandSyntaxException {
         final String[] splitArg = arguments.split(" ", 2);
         final String originalCommand = splitArg[0];
         final String originalArgs = splitArg.length == 2 ? splitArg[1] : "";
@@ -354,7 +356,7 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
             //}
             context.buildAndSwitch();
             try {
-                result = mapping.registrar().process(cause, mapping, command, args);
+                result = this.processCommand(cause, mapping, arguments, command, args);
             } catch (final CommandException exception) {
                 final CommandResult errorResult = CommandResult.builder().result(0)
                         .error(exception.componentMessage()).build();
@@ -409,6 +411,10 @@ public final class SpongeCommandManager implements CommandManager.Mutable {
             return result;
         }
     }
+
+    // Used to support the Forge event for all commands.
+    protected abstract CommandResult processCommand(final CommandCause cause, final CommandMapping mapping,
+            final String original, final String command, final String args) throws Throwable;
 
     @Override
     public <T extends Subject & Audience> @NonNull CommandResult process(

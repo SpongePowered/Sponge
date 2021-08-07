@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.command.registrar;
 
+import com.mojang.brigadier.ParseResults;
 import com.mojang.brigadier.builder.LiteralArgumentBuilder;
 import com.mojang.brigadier.exceptions.CommandSyntaxException;
 import com.mojang.brigadier.suggestion.Suggestion;
@@ -66,7 +67,7 @@ import java.util.stream.Collectors;
  * {@link #register(PluginContainer, LiteralArgumentBuilder, String...)}
  * method.</p>
  */
-public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar, CommandRegistrar<LiteralArgumentBuilder<CommandSourceStack>> {
+public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar<LiteralArgumentBuilder<CommandSourceStack>> {
 
     public static final CommandRegistrarType<LiteralArgumentBuilder<CommandSourceStack>> TYPE =
             new SpongeCommandRegistrarType<>(
@@ -80,6 +81,11 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
     public BrigadierCommandRegistrar(final CommandManager.Mutable manager) {
         this.manager = (SpongeCommandManager) manager;
         this.dispatcher = new SpongeCommandDispatcher(this.manager);
+    }
+
+    @Override
+    public SpongeCommandDispatcher dispatcher() {
+        return this.dispatcher;
     }
 
     // For mods and others that use this. We get the plugin container from the CauseStack
@@ -180,8 +186,14 @@ public final class BrigadierCommandRegistrar implements BrigadierBasedRegistrar,
             final @NonNull CommandMapping mapping,
             final @NonNull String command,
             final @NonNull String arguments) throws CommandException {
+        return this.process(cause, mapping, command, this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause));
+    }
+
+    @Override
+    public @NonNull CommandResult process(@NonNull final CommandCause cause, @NonNull final CommandMapping mapping, @NonNull final String command,
+            @NonNull final ParseResults<CommandSourceStack> arguments) throws CommandException {
         try {
-            final int result = this.dispatcher.execute(this.dispatcher.parse(this.createCommandString(command, arguments), (CommandSourceStack) cause));
+            final int result = this.dispatcher.execute(arguments);
             return CommandResult.builder().result(result).build();
         } catch (final CommandSyntaxException e) {
             throw new CommandException(Component.text(e.getMessage()), e);

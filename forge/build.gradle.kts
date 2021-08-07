@@ -306,6 +306,10 @@ tasks.templateResources {
 
 }
 
+tasks.runServer {
+    standardInput = System.`in`
+}
+
 val sourcesJar by tasks.existing
 val forgeAppLaunchJar by tasks.existing
 val forgeLaunchJar by tasks.existing

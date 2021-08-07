@@ -22,22 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.launch.inject;
+package org.spongepowered.vanilla.launch.command;
 
-import com.google.inject.AbstractModule;
-import org.spongepowered.api.Platform;
-import org.spongepowered.api.event.EventManager;
+import com.google.inject.Inject;
+import com.google.inject.Provider;
+import org.spongepowered.api.Game;
+import org.spongepowered.api.command.CommandCause;
+import org.spongepowered.api.command.CommandResult;
+import org.spongepowered.api.command.manager.CommandMapping;
 import org.spongepowered.common.command.manager.SpongeCommandManager;
-import org.spongepowered.vanilla.launch.VanillaPlatform;
-import org.spongepowered.vanilla.launch.command.VanillaCommandManager;
-import org.spongepowered.vanilla.launch.event.VanillaEventManager;
+import org.spongepowered.common.command.sponge.SpongeCommand;
 
-public final class SpongeVanillaModule extends AbstractModule {
+public final class VanillaCommandManager extends SpongeCommandManager {
+
+    @Inject
+    public VanillaCommandManager(final Game game, final Provider<SpongeCommand> spongeCommand) {
+        super(game, spongeCommand);
+    }
 
     @Override
-    protected void configure() {
-        this.bind(Platform.class).to(VanillaPlatform.class);
-        this.bind(EventManager.class).to(VanillaEventManager.class);
-        this.bind(SpongeCommandManager.class).to(VanillaCommandManager.class);
+    protected CommandResult processCommand(final CommandCause cause, final CommandMapping mapping, final String original, final String command,
+            final String args) throws Throwable {
+        return mapping.registrar().process(cause, mapping, command, args);
     }
+
 }
