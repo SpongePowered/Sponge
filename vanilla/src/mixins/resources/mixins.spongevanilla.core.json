@@ -9,6 +9,7 @@
         "client.gui.screens.TitleScreenMixin_Vanilla",
         "client.multiplayer.ClientHandshakePacketListenerImplMixin_Vanilla",
         "client.multiplayer.ClientPacketListenerMixin_Vanilla",
+        "client.renderer.entity.EntityRenderDispatcherMixin_Vanilla",
         "client.server.IntegratedServerMixin_Vanilla"
     ],
     "server": [
@@ -18,7 +19,6 @@
     "mixins": [
         "CrashReportMixin_Vanilla",
         "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
-        "client.renderer.entity.EntityRenderDispatcherMixin_Vanilla",
         "entity.item.minecart.EnderPearlEntityMixin_Vanilla",
         "entity.player.EntityMixin_Vanilla",
         "server.BootstrapMixin_Vanilla",
