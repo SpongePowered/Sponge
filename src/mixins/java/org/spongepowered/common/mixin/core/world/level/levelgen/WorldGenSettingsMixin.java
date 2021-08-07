@@ -84,6 +84,10 @@ public abstract class WorldGenSettingsMixin implements WorldGenSettingsBridge {
 
     @Redirect(method = "overworld", at = @At(value = "INVOKE", target = "Lnet/minecraft/core/MappedRegistry;get(Lnet/minecraft/resources/ResourceKey;)Ljava/lang/Object;"))
     private Object impl$useBootstrapDimensionRegistryForGenerator(MappedRegistry registry, ResourceKey<LevelStem> registryKey) {
+        if (BootstrapProperties.worldGenSettings == null) {
+            BootstrapProperties.worldGenSettings = (WorldGenSettings) (Object) this;
+        }
+        
         if (BootstrapProperties.worldGenSettings == (Object) this) {
             return registry.get(registryKey);
         }

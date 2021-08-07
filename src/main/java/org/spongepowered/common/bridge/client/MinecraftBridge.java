@@ -33,7 +33,5 @@ public interface MinecraftBridge {
     
     void bridge$setTemporaryIntegratedServer(IntegratedServer server);
 
-    default ClientType bridge$getClientType() {
-        return ClientType.VANILLA;
-    }
+    ClientType bridge$getClientType();
 }

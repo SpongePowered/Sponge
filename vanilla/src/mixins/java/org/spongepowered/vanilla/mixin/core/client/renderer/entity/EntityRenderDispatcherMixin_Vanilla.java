@@ -22,33 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.client.server;
+package org.spongepowered.vanilla.mixin.core.client.renderer.entity;
 
-import net.minecraft.client.server.IntegratedServer;
+import net.minecraft.client.renderer.entity.EntityRenderDispatcher;
+import net.minecraft.client.renderer.entity.EntityRenderer;
+import net.minecraft.world.entity.EntityType;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.Lifecycle;
-import org.spongepowered.vanilla.mixin.core.server.MinecraftServerMixin_Vanilla;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.common.entity.living.human.HumanEntity;
 
-@Mixin(IntegratedServer.class)
-public abstract class IntegratedServerMixin_Vanilla extends MinecraftServerMixin_Vanilla  {
+import java.util.Map;
 
-    @Inject(method = "initServer", at = @At("HEAD"))
-    private void vanilla$runEngineStartLifecycle(final CallbackInfoReturnable<Boolean> cir) {
-        final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.establishServerServices();
-
-        lifecycle.establishServerFeatures();
-
-        lifecycle.establishServerRegistries(this);
-        lifecycle.callStartingEngineEvent(this);
-    }
-
-    @Inject(method = "initServer", at = @At("RETURN"))
-    private void vanilla$callStartedEngineAndLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
-        Launch.instance().lifecycle().callStartedEngineEvent(this);
+@Mixin(EntityRenderDispatcher.class)
+public abstract class EntityRenderDispatcherMixin_Vanilla {
+    @Redirect(
+            method = "<init>",
+            at = @At(
+                    value = "INVOKE",
+                    target = "Ljava/util/Map;containsKey(Ljava/lang/Object;)Z",
+                    remap = false
+            )
+    )
+    @SuppressWarnings("SuspiciousMethodCalls") // second parameter is Object, map keys are EntityType
+    private boolean vanilla$humanRequiresNoRenderer(final Map<EntityType<?>, EntityRenderer<?>> renderers, final Object type) {
+        // sponge:human renders as minecraft:player on the client, which
+        // means we do not need to register a custom renderer
+        return !(type != HumanEntity.TYPE && !renderers.containsKey(type));
     }
 }

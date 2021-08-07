@@ -18,6 +18,7 @@
     "mixins": [
         "CrashReportMixin_Vanilla",
         "brigadier.exceptions.CommandSyntaxExceptionMixin_Vanilla",
+        "client.renderer.entity.EntityRenderDispatcherMixin_Vanilla",
         "entity.item.minecart.EnderPearlEntityMixin_Vanilla",
         "entity.player.EntityMixin_Vanilla",
         "server.BootstrapMixin_Vanilla",

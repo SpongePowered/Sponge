@@ -59,6 +59,17 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
         p_i232601_11_.load();
     }
 
+    @Override
+    protected void loadLevel() {
+        this.shadow$detectBundledResources();
+        this.worldManager().loadLevel();
+    }
+
+    @Override
+    public boolean bridge$performAutosaveChecks() {
+        return this.shadow$isRunning();
+    }
+
     @Redirect(method = "initServer", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/players/GameProfileCache;save()V"))
     private void onSave(final GameProfileCache cache) {
         ((GameProfileCacheBridge) cache).bridge$setCanSave(true);
@@ -69,10 +80,5 @@ public abstract class DedicatedServerMixin extends MinecraftServerMixin {
     @Inject(method = "stopServer", at = @At("TAIL"))
     private void impl$callStoppedGame(final CallbackInfo ci) {
         Launch.instance().lifecycle().callStoppedGameEvent();
-    }
-
-    @Override
-    public boolean bridge$performAutosaveChecks() {
-        return this.shadow$isRunning();
     }
 }

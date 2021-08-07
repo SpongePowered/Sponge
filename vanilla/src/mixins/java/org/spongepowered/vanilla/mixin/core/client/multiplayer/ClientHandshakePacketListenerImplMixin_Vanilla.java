@@ -43,7 +43,9 @@ import org.spongepowered.common.network.channel.SpongeChannelManager;
 @Mixin(ClientHandshakePacketListenerImpl.class)
 public abstract class ClientHandshakePacketListenerImplMixin_Vanilla implements ClientLoginPacketListener {
 
+    // @formatter:off
     @Shadow @Final private Minecraft minecraft;
+    // @formatter:on
 
     @Inject(method = "handleCustomQuery", at = @At(value = "INVOKE",
             target = "Lnet/minecraft/network/Connection;send(Lnet/minecraft/network/protocol/Packet;)V"), cancellable = true)

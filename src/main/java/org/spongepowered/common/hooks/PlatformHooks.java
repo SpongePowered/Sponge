@@ -51,7 +51,6 @@ public final class PlatformHooks {
     private DimensionHooks dimensionHooks = new DimensionHooks() {};
     private EventHooks eventHooks = new EventHooks() {};
     private GeneralHooks generalHooks = new GeneralHooks() {};
-    private PacketHooks packetHooks = new PacketHooks() {};
     private WorldGenerationHooks worldGenerationHooks = new WorldGenerationHooks() {};
     private InventoryHooks inventoryHooks = new InventoryHooks() {};
     private WorldHooks worldHooks = new WorldHooks() {};
@@ -72,14 +71,6 @@ public final class PlatformHooks {
 
     public void setEventHooks(final EventHooks eventHooks) {
         this.eventHooks = Objects.requireNonNull(eventHooks);
-    }
-
-    public PacketHooks getPacketHooks() {
-        return this.packetHooks;
-    }
-
-    public void setPacketHooks(final PacketHooks packetHooks) {
-        this.packetHooks = Objects.requireNonNull(packetHooks);
     }
 
     public GeneralHooks getGeneralHooks() {

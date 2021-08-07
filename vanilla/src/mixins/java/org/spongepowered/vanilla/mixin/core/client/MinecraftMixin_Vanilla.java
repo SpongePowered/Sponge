@@ -25,38 +25,22 @@
 package org.spongepowered.vanilla.mixin.core.client;
 
 import net.minecraft.client.Minecraft;
-import net.minecraft.client.gui.screens.Screen;
-import net.minecraft.client.server.IntegratedServer;
-import org.objectweb.asm.Opcodes;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.common.applaunch.config.core.ConfigHandle;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
-import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.client.VanillaClient;
 
-import javax.annotation.Nullable;
-
 @Mixin(Minecraft.class)
-public abstract class MinecraftMixin_Vanilla implements VanillaClient {
+public abstract class MinecraftMixin_Vanilla implements MinecraftBridge, VanillaClient {
 
-    @Shadow @Nullable private IntegratedServer singleplayerServer;
-
-    @Inject(method = "<init>", at = @At("RETURN"))
-    private void vanilla$callStartedEngineAndLoadedGame(CallbackInfo ci) {
-        // Save config now that registries have been initialized
-        ConfigHandle.setSaveSuppressed(false);
-
-        final Lifecycle lifecycle = Launch.instance().lifecycle();
-        lifecycle.callStartedEngineEvent(this);
-        
-        lifecycle.callLoadedGameEvent();
+    @Override
+    public ClientType bridge$getClientType() {
+        return ClientType.SPONGE_VANILLA;
     }
 
     @Inject(method = "run", at = @At("HEAD"))
@@ -68,26 +52,5 @@ public abstract class MinecraftMixin_Vanilla implements VanillaClient {
 
         lifecycle.establishClientRegistries(this);
         lifecycle.callStartingEngineEvent(this);
-    }
-
-    @Inject(method = "destroy", at = @At("HEAD"))
-    private void vanilla$callStoppingEngineEvent(CallbackInfo ci) {
-        Launch.instance().lifecycle().callStoppingEngineEvent(this);
-    }
-
-    @Redirect(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At(value = "FIELD", target = "Lnet/minecraft/client/Minecraft;singleplayerServer:Lnet/minecraft/client/server/IntegratedServer;", opcode =
-            Opcodes.PUTFIELD))
-    private void vanilla$storeTemporaryServerRed(Minecraft minecraft, IntegratedServer server) {
-        ((MinecraftBridge) minecraft).bridge$setTemporaryIntegratedServer(this.singleplayerServer);
-        this.singleplayerServer = null;
-    }
-
-    @Inject(method = "clearLevel(Lnet/minecraft/client/gui/screens/Screen;)V", at = @At("TAIL"))
-    private void vanilla$nullServerRefAndPhaseTracker(Screen screenIn, CallbackInfo ci) {
-        ((MinecraftBridge) this).bridge$setTemporaryIntegratedServer(null);
-        try {
-            PhaseTracker.SERVER.setThread(null);
-        } catch (IllegalAccessException ignore) {
-        }
     }
 }

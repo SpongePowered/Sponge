@@ -34,7 +34,9 @@ import org.spongepowered.common.bridge.network.ConnectionHolderBridge;
 @Mixin(ClientPacketListener.class)
 public abstract class ClientPacketListenerMixin implements ConnectionHolderBridge {
 
+    // @formatter:off
     @Shadow @Final private Connection connection;
+    // @formatter:on
 
     @Override
     public Connection bridge$getConnection() {

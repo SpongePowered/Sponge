@@ -19,6 +19,7 @@
         "block.BedBlockMixin",
         "block.BlockMixin",
         "block.DyeColorBlockPropertiesMixin",
+        "client.server.IntegratedServerMixin",
         "commands.CommandsMixin",
         "commands.CommandSourceMixin",
         "commands.CommandSourceStackMixin",
@@ -241,7 +242,6 @@
         "client.multiplayer.ClientPacketListenerMixin",
         "client.network.chat.TranslatableComponentMixin",
         "client.player.AbstractClientPlayerMixin",
-        "client.renderer.entity.EntityRenderDispatcherMixin",
         "client.server.IntegratedPlayerListMixin",
         "server.network.MemoryServerHandshakePacketListenerImplMixin"
     ],
