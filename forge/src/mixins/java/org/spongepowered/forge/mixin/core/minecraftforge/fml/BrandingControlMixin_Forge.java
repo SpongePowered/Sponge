@@ -22,32 +22,30 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.server;
+package org.spongepowered.forge.mixin.core.minecraftforge.fml;
 
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
+import net.minecraftforge.fml.BrandingControl;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.forge.ForgeServer;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Forge implements ForgeServer {
-
-    // @formatter:off
-    @Shadow @Nullable public abstract ServerLevel shadow$getLevel(ResourceKey<Level> p_71218_1_);
-    // @formatter:on
+@Mixin(value = BrandingControl.class, remap = false)
+public abstract class BrandingControlMixin_Forge {
 
     /**
      * @author Zidane
-     * @reason We store the per-world tick time on the ServerLevel itself to more accurately track this.
+     * @reason This is also not Kansas anymore
      */
-    @Overwrite(remap = false)
-    public long[] getTickTime(ResourceKey<Level> dim) {
-        return ((ServerLevelBridge) this.shadow$getLevel(dim)).bridge$recentTickTimes();
+    @Overwrite
+    public static String getClientBranding() {
+        return "forge/spongeforge";
+    }
+
+    /**
+     * @author Zidane
+     * @reason What that said above
+     */
+    @Overwrite
+    public static String getServerBranding() {
+        return "forge/spongeforge";
     }
 }

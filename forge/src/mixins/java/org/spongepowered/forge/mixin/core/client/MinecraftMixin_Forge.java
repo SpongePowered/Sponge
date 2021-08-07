@@ -22,30 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.server.dedicated;
+package org.spongepowered.forge.mixin.core.client;
 
-import net.minecraft.server.dedicated.DedicatedServer;
+import net.minecraft.client.Minecraft;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.launch.Launch;
-import org.spongepowered.common.launch.Lifecycle;
-import org.spongepowered.forge.mixin.core.server.MinecraftServerMixin_Forge;
+import org.spongepowered.common.bridge.client.MinecraftBridge;
+import org.spongepowered.common.entity.player.ClientType;
+import org.spongepowered.forge.ForgeClient;
 
-@Mixin(DedicatedServer.class)
-public abstract class DedicatedServerMixin_Forge extends MinecraftServerMixin_Forge {
-
-    @Inject(method = "initServer", at = @At("RETURN"))
-    private void forge$callLoadedGame(final CallbackInfoReturnable<Boolean> cir) {
-        final Lifecycle lifecycle = Launch.instance().lifecycle();
-
-        lifecycle.callLoadedGameEvent();
-    }
+@Mixin(Minecraft.class)
+public abstract class MinecraftMixin_Forge implements ForgeClient, MinecraftBridge {
 
     @Override
-    protected void loadLevel() {
-        this.shadow$detectBundledResources();
-        this.worldManager().loadLevel();
+    public ClientType bridge$getClientType() {
+        return ClientType.SPONGE_FORGE;
     }
 }
