@@ -52,6 +52,7 @@
         "event.world.inventory.CraftingMenuMixin_Inventory",
         "event.world.inventory.ItemCombinerMenuMixin_Inventory",
         "event.world.inventory.ResultSlotMixin_Inventory",
+        "event.world.inventory.SlotMixin_Inventory",
         "event.world.level.block.DropperBlockMixin_Inventory",
         "event.world.level.block.entity.HopperBlockEntityMixin_Inventory",
         "impl.TraitMixin_ContainerBridge_Inventory",

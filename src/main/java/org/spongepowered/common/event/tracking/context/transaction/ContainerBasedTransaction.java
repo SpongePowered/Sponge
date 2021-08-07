@@ -84,6 +84,8 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
     @Nullable private ItemStack craftedStack;
     @Nullable private CraftingRecipe onTakeRecipe;
     protected boolean used = false;
+    private @Nullable ItemStack shiftCraftingResult;
+
 
     protected ContainerBasedTransaction(
         final ResourceKey worldKey,
@@ -133,11 +135,13 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
             SpongeCommon.logger().warn("No event will be fired for existing ContainerBasedTransactions: {}", containerBasedTransactions.size());
             return Optional.empty();
         }
-        // TODO for SpongeForge - detect !((TrackedContainerBridge) this.menu).isCapturePossible
-//        if (ContainerBasedTransaction.containersFailedCapture.add(this.menu.getClass())) {
-//            SpongeCommon.logger()
-//                .warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + this.menu.getClass());
-//        }
+        if (!((TrackedContainerBridge) this.menu).bridge$capturePossible()) {
+            //        if (ContainerBasedTransaction.containersFailedCapture.add(this.menu.getClass())) {
+            //            SpongeCommon.logger()
+            //                .warn("Changes in modded Container were not captured. Inventory events will not fire for this. Container: " + this.menu.getClass());
+            //        }
+        }
+
         final ImmutableList<Entity> entities = containerBasedTransactions.stream()
             .map(ContainerBasedTransaction::getEntitiesSpawned)
             .flatMap(List::stream)
@@ -173,7 +177,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
                     slotTransactions.remove(preview);
                     slotTransactions.add(new SlotTransaction(slot, preview.original(), previewItem));
                 }
-            } else {
+            } else if (!previewItem.isEmpty()) {
                 slotTransactions.add(new SlotTransaction(slot, previewItem, previewItem));
             }
         }
@@ -296,7 +300,9 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
                             Optional.ofNullable(this.onTakeRecipe), Optional.of(this.craftingInventory.result()), event.transactions());
             SpongeCommon.post(craftEvent);
             this.handleEventResults(player, craftEvent);
-            ((TrackedContainerBridge) this.menu).bridge$setLastCraft(craftEvent);
+            if (craftEvent.isCancelled() && this.shiftCraftingResult != null) {
+                this.shiftCraftingResult.setCount(0);
+            }
         }
     }
 
@@ -315,12 +321,14 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
             if (player instanceof ServerPlayer && previewEvent instanceof CraftItemEvent.Preview) {
                 final SlotTransaction preview = previewEvent.preview();
                 // Resend modified output if needed
-                if (!preview.isValid()) {
+                if (!preview.isValid() || previewEvent.isCancelled()) {
                     ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(0, 0,
                             ItemStackUtil.fromSnapshotToNative(previewEvent.preview().original())));
+                    // TODO handle preview event cancel during shift-crafting
                 } else if (preview.custom().isPresent()) {
                     ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(0, 0,
                             ItemStackUtil.fromSnapshotToNative(previewEvent.preview().finalReplacement())));
+                    // TODO handle preview event modification during shift-crafting
                 }
             }
         }
@@ -386,5 +394,9 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
             return true;
         }
         return false;
+    }
+
+    public void acceptShiftCraftingResult(ItemStack result) {
+        this.shiftCraftingResult = result;
     }
 }

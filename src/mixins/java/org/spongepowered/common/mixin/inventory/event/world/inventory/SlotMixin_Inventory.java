@@ -22,13 +22,23 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.inventory.container;
+package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
-public interface TrackedContainerBridge {
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
 
-    boolean bridge$capturePossible();
+@Mixin(Slot.class)
+public class SlotMixin_Inventory {
 
-    void bridge$detectAndSendChanges(boolean captureOnly);
-
-    void bridge$trackViewable(Object inventory);
+    @Inject(method = "onQuickCraft(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)V", at = @At("HEAD"))
+    private void inventory$onQuickCraft(final ItemStack slotStack, final ItemStack stackTaken, final CallbackInfo ci) {
+        final PhaseContext<?> ctx = PhaseTracker.SERVER.getPhaseContext();
+        ctx.getTransactor().logShiftCraftingResult(stackTaken);
+    }
 }

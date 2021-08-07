@@ -385,6 +385,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         throw new IllegalStateException("Crafting must be nested in another event");
     }
 
+    public void logShiftCraftingResult(ItemStack result) {
+        if (this.tail instanceof ClickMenuTransaction) {
+            ((ClickMenuTransaction) this.tail).acceptShiftCraftingResult(result);
+        }
+    }
+
     public void logCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory,
             final CraftingContainer craftSlots) {
         if (this.tail != null && this.tail.acceptCraftingPreview(player, craftingInventory, craftSlots)) {
