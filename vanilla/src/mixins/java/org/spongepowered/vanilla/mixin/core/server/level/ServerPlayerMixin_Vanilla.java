@@ -24,19 +24,19 @@
  */
 package org.spongepowered.vanilla.mixin.core.server.level;
 
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.level.dimension.DimensionType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.network.packet.ChangeViewerEnvironmentPacket;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
 import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
 import org.spongepowered.vanilla.mixin.core.entity.player.EntityMixin_Vanilla;
+
 import javax.annotation.Nullable;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.dimension.DimensionType;
 
 @Mixin(net.minecraft.server.level.ServerPlayer.class)
 public abstract class ServerPlayerMixin_Vanilla extends EntityMixin_Vanilla implements ServerPlayerBridge {

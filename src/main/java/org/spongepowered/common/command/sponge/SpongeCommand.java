@@ -61,8 +61,8 @@ import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
+import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.bridge.world.level.PlatformLevelBridge;
 import org.spongepowered.common.config.SpongeGameConfigs;
 import org.spongepowered.common.event.manager.SpongeEventManager;
 import org.spongepowered.common.event.tracking.PhaseTracker;
@@ -572,7 +572,7 @@ public class SpongeCommand {
                   Component.text()
                     .append(Component.text(world.key().asString(), TextColor.color(0xC9C9C9)))
                     .append(Component.text(": "));
-                tps.add(this.appendTickTime(((PlatformLevelBridge) world).bridge$recentTickTimes(), builder).build());
+                tps.add(this.appendTickTime(((ServerLevelBridge) world).bridge$recentTickTimes(), builder).build());
             }
 
             tps.add(Component.newline());

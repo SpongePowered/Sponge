@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.core.server.level;
 
 import co.aikar.timings.sponge.WorldTimingsHandler;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
+import net.minecraft.Util;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.RegistryAccess;
 import net.minecraft.network.chat.TranslatableComponent;
@@ -95,13 +96,14 @@ import org.spongepowered.common.registry.SpongeRegistryHolder;
 import org.spongepowered.math.vector.Vector3d;
 import org.spongepowered.math.vector.Vector3i;
 
-import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
 import java.util.List;
 import java.util.Map;
 import java.util.StringJoiner;
 import java.util.concurrent.Executor;
 import java.util.function.BooleanSupplier;
+
+import javax.annotation.Nonnull;
+import javax.annotation.Nullable;
 
 @Mixin(ServerLevel.class)
 public abstract class ServerLevelMixin extends LevelMixin implements ServerLevelBridge, PlatformServerLevelBridge, ResourceKeyBridge {
@@ -113,15 +115,17 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
     @Shadow protected abstract void shadow$saveLevelData();
     // @formatter:on
 
+    protected final WorldTimingsHandler impl$timings = new WorldTimingsHandler((ServerLevel) (Object) this);
+    private final long[] impl$recentTickTimes = new long[100];
+
     private LevelStorageSource.LevelStorageAccess impl$levelSave;
     private CustomBossEvents impl$bossBarManager;
     private SpongeRegistryHolder impl$registerHolder;
     private ChunkProgressListener impl$chunkStatusListener;
     private Map<Entity, Vector3d> impl$rotationUpdates;
     private Weather impl$prevWeather;
-
     private boolean impl$isManualSave = false;
-    protected WorldTimingsHandler impl$timings = new WorldTimingsHandler((ServerLevel) (Object) this);
+    private long impl$preTickTime = 0L;
 
     @Inject(method = "<init>", at = @At("TAIL"))
     private void impl$cacheLevelSave(final MinecraftServer p_i241885_1_, final Executor p_i241885_2_, final LevelStorageSource.LevelStorageAccess p_i241885_3_,
@@ -284,6 +288,16 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         return (ResourceKey) (Object) this.shadow$dimension().location();
     }
 
+    @Override
+    public WorldTimingsHandler bridge$getTimingsHandler() {
+        return this.impl$timings;
+    }
+
+    @Override
+    public long[] bridge$recentTickTimes() {
+        return this.impl$recentTickTimes;
+    }
+
     @Redirect(method = "saveLevelData", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/MinecraftServer;getWorldData()Lnet/minecraft/world/level/storage/WorldData;"))
     private WorldData impl$usePerWorldLevelDataForDragonFight(final MinecraftServer server) {
         return (WorldData) this.shadow$getLevelData();
@@ -410,13 +424,20 @@ public abstract class ServerLevelMixin extends LevelMixin implements ServerLevel
         return rainingAt;
     }
 
-    private void impl$setWorldOnBorder() {
-        ((WorldBorderBridge) this.shadow$getWorldBorder()).bridge$setAssociatedWorld(this.bridge$getKey());
+    @Inject(method = "tick", at = @At("HEAD"))
+    private void impl$capturePreTickTime(final BooleanSupplier param0, final CallbackInfo ci) {
+        this.impl$preTickTime = Util.getNanos();
     }
 
-    @Override
-    public WorldTimingsHandler bridge$getTimingsHandler() {
-        return this.impl$timings;
+    @Inject(method = "tick", at = @At("RETURN"))
+    private void impl$capturePostTickTime(final BooleanSupplier param0, final CallbackInfo ci) {
+        final long postTickTime = Util.getNanos();
+
+        this.impl$recentTickTimes[this.shadow$getServer().getTickCount() % 100] = postTickTime - this.impl$preTickTime;
+    }
+
+    private void impl$setWorldOnBorder() {
+        ((WorldBorderBridge) this.shadow$getWorldBorder()).bridge$setAssociatedWorld(this.bridge$getKey());
     }
 
     @Override

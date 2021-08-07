@@ -58,7 +58,6 @@ import org.spongepowered.asm.mixin.Mutable;
 import org.spongepowered.asm.mixin.Shadow;
 import org.spongepowered.common.accessor.world.entity.MobAccessor;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.bridge.world.level.PlatformLevelBridge;
 import org.spongepowered.common.data.persistence.NBTTranslator;
 import org.spongepowered.common.entity.projectile.UnknownProjectileSource;
 import org.spongepowered.common.util.Constants;
@@ -68,7 +67,7 @@ import org.spongepowered.math.vector.Vector3d;
 import java.util.function.Predicate;
 
 @Mixin(net.minecraft.world.level.Level.class)
-public abstract class LevelMixin implements LevelBridge, PlatformLevelBridge, LevelAccessor {
+public abstract class LevelMixin implements LevelBridge, LevelAccessor {
 
     // @formatter: off
     @Mutable @Shadow @Final private DimensionType dimensionType;
