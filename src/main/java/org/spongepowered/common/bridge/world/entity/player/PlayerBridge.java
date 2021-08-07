@@ -32,10 +32,6 @@ public interface PlayerBridge {
 
     boolean bridge$keepInventory();
 
-    void bridge$shouldRestoreInventory(boolean flag);
-
-    boolean bridge$shouldRestoreInventory();
-
     int bridge$getExperienceSinceLevel();
 
     void bridge$setExperienceSinceLevel(int experience);

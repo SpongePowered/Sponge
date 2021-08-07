@@ -50,8 +50,6 @@ import net.minecraft.world.phys.EntityHitResult;
 import net.minecraft.world.phys.HitResult;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import static org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil.handleCustomCursor;
-
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.block.BlockSnapshot;
 import org.spongepowered.api.block.BlockState;
@@ -112,10 +110,9 @@ import org.spongepowered.common.bridge.explosives.ExplosiveBridge;
 import org.spongepowered.common.bridge.map.MapIdTrackerBridge;
 import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
 import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.level.chunk.ActiveChunkReferantBridge;
 import org.spongepowered.common.bridge.world.level.chunk.LevelChunkBridge;
 import org.spongepowered.common.entity.PlayerTracker;
@@ -695,12 +692,6 @@ public final class SpongeCommonEventFactory {
      */
     public static @Nullable ItemStack throwDropItemAndConstructEvent(final net.minecraft.world.entity.Entity entity, final double posX, final double posY,
         final double posZ, final ItemStackSnapshot snapshot, final List<ItemStackSnapshot> original, final CauseStackManager.StackFrame frame) {
-        final PlayerBridge mixinPlayer;
-        if (entity instanceof PlayerBridge) {
-            mixinPlayer = (PlayerBridge) entity;
-        } else {
-            mixinPlayer = null;
-        }
         final ItemStack item;
 
         frame.pushCause(entity);
@@ -710,9 +701,6 @@ public final class SpongeCommonEventFactory {
             ImmutableList.of(snapshot), original);
         SpongeCommon.post(dropEvent);
         if (dropEvent.isCancelled()) {
-            if (mixinPlayer != null) {
-                mixinPlayer.bridge$shouldRestoreInventory(true);
-            }
             return null;
         }
         if (dropEvent.droppedItems().isEmpty()) {
@@ -725,19 +713,11 @@ public final class SpongeCommonEventFactory {
         frame.removeContext(EventContextKeys.SPAWN_TYPE);
         SpongeCommon.post(event);
         if (event.isCancelled()) {
-            // Make sure the player is restoring inventories
-            if (mixinPlayer != null) {
-                mixinPlayer.bridge$shouldRestoreInventory(true);
-            }
             return null;
         }
 
         item = event.isCancelled() ? null : ItemStackUtil.fromSnapshotToNative(dropEvent.droppedItems().get(0));
         if (item == null) {
-            // Make sure the player is restoring inventories
-            if (mixinPlayer != null) {
-                mixinPlayer.bridge$shouldRestoreInventory(true);
-            }
             return null;
         }
         return item;

@@ -24,42 +24,8 @@
  */
 package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
-import org.spongepowered.api.event.item.inventory.CraftItemEvent;
-import org.spongepowered.api.item.inventory.Carrier;
-import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.asm.mixin.Final;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.Redirect;
-import org.spongepowered.asm.mixin.injection.Slice;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
-import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
-import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
-import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
-import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
-import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
-import org.spongepowered.common.item.util.ItemStackUtil;
-
 import net.minecraft.core.NonNullList;
-import net.minecraft.network.protocol.game.ClientboundContainerSetSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
@@ -71,6 +37,34 @@ import net.minecraft.world.inventory.ResultSlot;
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
 import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.api.event.item.inventory.CraftItemEvent;
+import org.spongepowered.api.item.inventory.Carrier;
+import org.spongepowered.api.item.inventory.Inventory;
+import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.asm.mixin.Final;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.asm.mixin.injection.At;
+import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
+import org.spongepowered.asm.mixin.injection.Slice;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
+import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
+import org.spongepowered.common.SpongeCommon;
+import org.spongepowered.common.bridge.world.inventory.InventoryMenuBridge;
+import org.spongepowered.common.bridge.world.inventory.ViewableInventoryBridge;
+import org.spongepowered.common.bridge.world.inventory.container.MenuBridge;
+import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.inventory.adapter.InventoryAdapter;
+import org.spongepowered.common.inventory.custom.SpongeInventoryMenu;
+import org.spongepowered.common.item.util.ItemStackUtil;
 
 import javax.annotation.Nullable;
 import java.util.ArrayList;
@@ -80,6 +74,11 @@ import java.util.List;
 public abstract class AbstractContainerMenuMixin_Inventory implements TrackedContainerBridge, InventoryAdapter {
 
     //@formatter:off
+    @Final @Shadow private NonNullList<ItemStack> lastSlots;
+    @Final @Shadow public List<Slot> slots;
+    @Final @Shadow private List<ContainerListener> containerListeners;
+    @Final @Shadow private List<DataSlot> dataSlots;
+
     @Shadow public abstract NonNullList<ItemStack> shadow$getItems();
     @Shadow protected abstract ItemStack shadow$doClick(int param0, int param1, ClickType param2, Player param3);
     //@formatter:on
@@ -87,6 +86,11 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     private boolean impl$shiftCraft = false;
     private ItemStack impl$menuCapture;
+    // Detects if a mod overrides detectAndSendChanges
+    private boolean impl$captureSuccess = false;
+    @Nullable private CraftItemEvent.Craft impl$lastCraft = null;
+    @Nullable private Object impl$viewed;
+    private boolean impl$dropCancelled = false;
 
     @Override
     public void bridge$setShiftCrafting(final boolean flag) {
@@ -98,8 +102,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         return this.impl$shiftCraft;
     }
 
-    @Nullable private CraftItemEvent.Craft impl$lastCraft = null;
-
     @Override
     public void bridge$setLastCraft(final CraftItemEvent.Craft event) {
         this.impl$lastCraft = event;
@@ -109,9 +111,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     public CraftItemEvent.Craft bridge$getLastCraft() {
         return this.impl$lastCraft;
     }
-
-    // Detects if a mod overrides detectAndSendChanges
-    private boolean impl$captureSuccess = false;
 
     @Override
     public boolean bridge$capturePossible() {
@@ -123,7 +122,6 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
         this.impl$captureSuccess = true;
     }
 
-    @Nullable private Object impl$viewed;
 
     @Override
     public void bridge$trackViewable(Object inventory) {
@@ -158,86 +156,12 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
 
     @Inject(method = "removed", at = @At(value = "HEAD"))
     private void onOnContainerClosed(final Player player, final CallbackInfo ci) {
+        if (((LevelBridge) player.level).bridge$isFake()) {
+            return;
+        }
         this.impl$setViewed(null);
     }
 
-
-    // ClickType.PICKUP or ClickType.QUICK_MOVE with slotId == -999 ; Dropping Items --------------------------------------
-
-    private boolean impl$dropCancelled = false;
-
-    // Called when dropping a full itemstack out of the inventory ; PART 1/3
-    // Restores the cursor item if needed
-    @Nullable
-    @Redirect(method = "doClick",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/player/Player;drop(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/world/entity/item/ItemEntity;",
-                    ordinal = 0))
-    private ItemEntity impl$RestoreOnDragDrop(final Player player, final ItemStack itemStackIn, final boolean unused) {
-        final ItemStackSnapshot original = ItemStackUtil.snapshotOf(itemStackIn);
-        final ItemEntity entityItem = player.drop(itemStackIn, unused);
-        if (!((PlayerBridge) player).bridge$shouldRestoreInventory()) {
-            return entityItem;
-        }
-        if (entityItem == null) {
-            this.impl$dropCancelled = true;
-            PacketPhaseUtil.handleCustomCursor(player, original);
-        }
-        return entityItem;
-    }
-
-    // Called when dropping a full itemstack out of the inventory ; PART 2/3
-    // Resets Player and Container for canceled drop
-    @Redirect(method = "doClick",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/player/Inventory;setCarried(Lnet/minecraft/world/item/ItemStack;)V",
-                    ordinal = 1))
-    private void impl$ClearOnSlot(final net.minecraft.world.entity.player.Inventory inventoryPlayer, final ItemStack itemStackIn) {
-        if (!this.impl$dropCancelled || !((PlayerBridge) inventoryPlayer.player).bridge$shouldRestoreInventory()) {
-            inventoryPlayer.setCarried(itemStackIn); // original behaviour
-        }
-        ((PlayerBridge) inventoryPlayer.player).bridge$shouldRestoreInventory(false);
-        this.impl$dropCancelled = false;
-    }
-
-    // Called when splitting and dropping an itemstack out of the inventory ; PART 3/3
-    // Restores the cursor item if needed and resets Player and Container for canceled drop
-    @Redirect(method = "doClick",
-            at = @At(
-                    value = "INVOKE",
-                    target = "Lnet/minecraft/world/entity/player/Player;drop(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/world/entity/item/ItemEntity;",
-                    ordinal = 1))
-    @Nullable
-    private ItemEntity impl$restoreOnDragSplit(final Player player, final ItemStack itemStackIn, final boolean unused) {
-        final ItemEntity entityItem = player.drop(itemStackIn, unused);
-        if (!((PlayerBridge) player).bridge$shouldRestoreInventory()) {
-            return entityItem;
-        }
-        if (entityItem == null) {
-            final ItemStack original;
-            if (player.inventory.getCarried().isEmpty()) {
-                original = itemStackIn;
-            } else {
-                player.inventory.getCarried().grow(1);
-                original = player.inventory.getCarried();
-            }
-            player.inventory.setCarried(original);
-            ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(-1, -1, original));
-        }
-        ((PlayerBridge) player).bridge$shouldRestoreInventory(false);
-        return entityItem;
-    }
-
-    // ClickType.THROW ; throwing items out (Q) -------
-
-    private ItemStackSnapshot impl$itemStackSnapshot = ItemStackSnapshot.empty();
-    @Nullable private Slot impl$lastSlotUsed = null;
-
-    // Called before the item is thrown ; PART 1/2
-    // Captures the original state and affected slot
-    //
     @Redirect(method = "doClick",
         at = @At(
             value = "INVOKE",
@@ -253,42 +177,15 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
             )
         )
     )
-    public boolean onCanTakeStack(final Slot slot, final Player playerIn) {
-        boolean readonly = false;
+    public boolean impl$verifyReadOnlyMenu(final Slot slot, final Player playerIn) {
+        if (((LevelBridge) playerIn.level).bridge$isFake()) {
+            slot.mayPickup(playerIn);
+        }
         if (((MenuBridge) this).bridge$isReadonlyMenu(slot)) {
             ((MenuBridge) this).bridge$refreshListeners();
-            readonly = true;
+            return false;
         }
-        final boolean result = !readonly && slot.mayPickup(playerIn);
-        if (result) {
-            this.impl$itemStackSnapshot = ItemStackUtil.snapshotOf(slot.getItem());
-            this.impl$lastSlotUsed = slot;
-        } else {
-            this.impl$itemStackSnapshot = ItemStackSnapshot.empty();
-            this.impl$lastSlotUsed = null;
-        }
-        return result;
-    }
-
-    // Called dropping the item ; PART 2/2
-    // Restores the slot if needed
-    @Nullable
-    @Redirect(method = "doClick", at = @At(value = "INVOKE",
-            target = "Lnet/minecraft/world/entity/player/Player;drop(Lnet/minecraft/world/item/ItemStack;Z)Lnet/minecraft/world/entity/item/ItemEntity;",
-            ordinal = 3))
-    private ItemEntity onThrowClick(final Player player, final ItemStack itemStackIn, final boolean unused) {
-        final ItemEntity entityItem = player.drop(itemStackIn, true);
-        if (entityItem == null && ((PlayerBridge) player).bridge$shouldRestoreInventory()) {
-            final ItemStack original = ItemStackUtil.fromSnapshotToNative(this.impl$itemStackSnapshot);
-            this.impl$lastSlotUsed.set(original);
-            player.containerMenu.broadcastChanges(); // TODO check if this is needed?
-            ((ServerPlayer) player).ignoreSlotUpdateHack = false;
-            ((ServerPlayer) player).connection.send(new ClientboundContainerSetSlotPacket(player.containerMenu.containerId, this.impl$lastSlotUsed.index, original));
-        }
-        this.impl$itemStackSnapshot = ItemStackSnapshot.empty();
-        this.impl$lastSlotUsed = null;
-        ((PlayerBridge) player).bridge$shouldRestoreInventory(false);
-        return entityItem;
+        return slot.mayPickup(playerIn);
     }
 
     // ClickType.THROW (for Crafting) -------------------------
@@ -299,6 +196,9 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
                     target = "Lnet/minecraft/world/inventory/Slot;onTake(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/item/ItemStack;)Lnet/minecraft/world/item/ItemStack;",
                     ordinal = 5))
     private ItemStack redirectOnTakeThrow(final Slot slot, final Player player, final ItemStack stackToDrop) {
+        if (((LevelBridge) player.level).bridge$isFake()) {
+            return slot.onTake(player, stackToDrop);
+        }
         this.bridge$setLastCraft(null);
         final ItemStack result = slot.onTake(player, stackToDrop);
         final CraftItemEvent.Craft lastCraft = this.bridge$getLastCraft();
@@ -318,7 +218,10 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     @Redirect(method = "doClick",
             at = @At(value = "INVOKE",
                     target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;quickMoveStack(Lnet/minecraft/world/entity/player/Player;I)Lnet/minecraft/world/item/ItemStack;"))
-    private ItemStack redirectTransferStackInSlot(final AbstractContainerMenu thisContainer, final Player player, final int slotId) {
+    private ItemStack impl$transferStackInSlot(final AbstractContainerMenu thisContainer, final Player player, final int slotId) {
+        if (((LevelBridge) player.level).bridge$isFake()) {
+            return thisContainer.quickMoveStack(player, slotId);
+        }
         final Slot slot = thisContainer.getSlot(slotId);
         if (!(slot instanceof ResultSlot)) { // is this crafting?
             return thisContainer.quickMoveStack(player, slotId);
@@ -346,6 +249,9 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // cleanup after slot click was captured
     @Inject(method = "doClick", at = @At("RETURN"))
     private void impl$onReturn(final int slotId, final int dragType, final ClickType clickTypeIn, final Player player, final CallbackInfoReturnable<ItemStack> cir) {
+        if (!PhaseTracker.SERVER.onSidedThread()) {
+            return;
+        }
         // Reset variables needed for CraftItemEvent.Craft
         this.bridge$setLastCraft(null);
 
@@ -387,21 +293,22 @@ public abstract class AbstractContainerMenuMixin_Inventory implements TrackedCon
     // detectAndSendChanges
 
     /**
-     * @author bloodmc
-     * @reason All player fabric changes that need to be synced to
-     * client flow through this method. Overwrite is used as no mod
-     * should be touching this method.
+     * We inject at head and cancel for the server side, but on client side, we
+     * are still the same class, so we must consider that when we're on the
+     * client thread, don't perform any logic.
+     *
+     * @author gabizou
      */
-    @Overwrite
-    public void broadcastChanges() {
+    @Inject(method = "broadcastChanges", at = @At("HEAD"), cancellable = true)
+    public void impl$broadcastChangesWithTransactions(final CallbackInfo ci) {
+        if (!PhaseTracker.SERVER.onSidedThread()) {
+            return;
+        }
         this.bridge$detectAndSendChanges(false);
         this.bridge$setCapturePossible(); // Detect mod overrides
+        ci.cancel();
     }
 
-    @Final @Shadow private NonNullList<ItemStack> lastSlots;
-    @Final @Shadow public List<Slot> slots;
-    @Final @Shadow private List<ContainerListener> containerListeners;
-    @Final @Shadow private List<DataSlot> dataSlots;
 
     @Override
     public void bridge$detectAndSendChanges(final boolean captureOnly) {

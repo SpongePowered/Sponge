@@ -24,6 +24,16 @@
  */
 package org.spongepowered.common.mixin.tracker.world.entity.player;
 
+import net.minecraft.network.chat.Component;
+import net.minecraft.util.Mth;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.damagesource.DamageSource;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.item.ItemEntity;
+import net.minecraft.world.entity.player.Inventory;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
+import net.minecraft.world.level.ItemLike;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.entity.DestructEntityEvent;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
@@ -40,17 +50,8 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.tracker.world.entity.LivingEntityMixin_Tracker;
+
 import javax.annotation.Nullable;
-import net.minecraft.network.chat.Component;
-import net.minecraft.util.Mth;
-import net.minecraft.world.InteractionHand;
-import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.item.ItemEntity;
-import net.minecraft.world.entity.player.Inventory;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.ItemLike;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Random;
@@ -90,7 +91,6 @@ public abstract class PlayerMixin_Tracker extends LivingEntityMixin_Tracker {
         }
         // Sponge Start - redirect to our handling to capture and throw events.
         if (!((LevelBridge) this.level).bridge$isFake()) {
-            ((PlayerBridge) this).bridge$shouldRestoreInventory(false);
             final Player player = (Player) (PlayerBridge) this;
 
             final double posX1 = player.getX();

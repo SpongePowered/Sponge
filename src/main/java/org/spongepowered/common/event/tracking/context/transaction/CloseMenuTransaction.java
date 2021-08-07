@@ -77,9 +77,7 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
     public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
             @Nullable final GameTransaction<@NonNull ?> parent
     ) {
-        return Optional.of((context, frame) -> {
-            frame.pushCause(this.menu);
-        });
+        return Optional.empty();
     }
 
     @Override
@@ -97,7 +95,7 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
     public void restore(final PhaseContext<@NonNull ?> context, final InteractContainerEvent event) {
         if (this.clientSource) {
             // If client closed container we need to reopen it
-            this.reopen(player, this.menu);
+            this.reopen(this.player, this.menu);
         }
         PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
         if (event instanceof ChangeInventoryEvent) {
@@ -106,7 +104,7 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
     }
 
     @Override
-    public boolean acceptSlotTransaction(SlotTransaction newTransaction, Object inventory) {
+    public boolean acceptSlotTransaction(final SlotTransaction newTransaction, final Object inventory) {
         if (this.menu != inventory) {
             return false;
         }
@@ -118,12 +116,12 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
     }
 
     @Override
-    public void postProcessEvent(PhaseContext<@NonNull ?> context, InteractContainerEvent event) {
+    public void postProcessEvent(final PhaseContext<@NonNull ?> context, final InteractContainerEvent event) {
         // actually close container now
         if (this.clientSource) {
-            player.doCloseContainer(); // Already closed on client
+            this.player.doCloseContainer(); // Already closed on client
         } else {
-            player.closeContainer(); // Also send packet
+            this.player.closeContainer(); // Also send packet
         }
         // And restore cursor if needed
         PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
@@ -156,7 +154,7 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
             player.containerMenu = container;
             final Slot slot = container.getSlot(0);
             final net.minecraft.world.Container slotInventory = slot.container;
-            final net.minecraft.network.chat.Component title;
+            final net.minecraft.network.chat.@Nullable Component title;
             // TODO get name from last open
             if (slotInventory instanceof MenuProvider) {
                 title = ((MenuProvider) slotInventory).getDisplayName();
