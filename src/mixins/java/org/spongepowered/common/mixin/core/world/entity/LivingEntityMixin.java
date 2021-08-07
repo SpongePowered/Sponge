@@ -246,9 +246,11 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                         });
             }
 
+            boolean hurtStack = false;
             // Shield
             if (shieldFunction.isPresent()) {
                 this.shadow$hurtCurrentlyUsedShield((float) event.baseDamage());
+                hurtStack = true;
                 if (!damageSource.isProjectile()) {
                     final Entity entity = damageSource.getDirectEntity();
 
@@ -261,7 +263,16 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
             // Armor
             if (!damageSource.isBypassArmor() && armorFunction.isPresent()) {
                 this.shadow$hurtArmor(damageSource, (float) event.baseDamage());
+                hurtStack = true;
             }
+
+            // Sponge start - log inventory change due to taking damage
+            if (hurtStack && isHuman) {
+                PhaseTracker.SERVER.getPhaseContext().getTransactor().logPlayerInventoryChange((Player) (Object) this, SpongeEventFactory::createChangeInventoryEvent);
+                ((Player) (Object) this).inventoryMenu.broadcastChanges(); // capture
+            }
+            // Sponge end
+
             // Resistance modifier post calculation
             if (resistanceFunction.isPresent()) {
                 final float f2 = (float) event.damage(resistanceFunction.get().modifier()) - damage;

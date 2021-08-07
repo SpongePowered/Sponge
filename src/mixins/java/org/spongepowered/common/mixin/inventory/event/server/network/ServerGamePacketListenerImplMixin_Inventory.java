@@ -25,6 +25,7 @@
 package org.spongepowered.common.mixin.inventory.event.server.network;
 
 import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.network.protocol.game.ServerboundSelectTradePacket;
 import net.minecraft.network.protocol.game.ServerboundSetCarriedItemPacket;
 import net.minecraft.network.protocol.game.ServerboundSetCreativeModeSlotPacket;
 import net.minecraft.server.level.ServerPlayer;
@@ -36,6 +37,7 @@ import net.minecraft.world.entity.animal.horse.AbstractHorse;
 import net.minecraft.world.entity.item.ItemEntity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.InventoryMenu;
+import net.minecraft.world.inventory.MerchantMenu;
 import net.minecraft.world.inventory.RecipeBookMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
@@ -44,7 +46,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.query.QueryTypes;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -104,7 +105,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
 
     @Redirect(method = "handleUseItem",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayerGameMode;useItem(Lnet/minecraft/server/level/ServerPlayer;Lnet/minecraft/world/level/Level;Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
-    private InteractionResult impl$onHandlePlayerCommandOpenInventory(final ServerPlayerGameMode serverPlayerGameMode, final ServerPlayer param0,
+    private InteractionResult impl$onHandleUseItem(final ServerPlayerGameMode serverPlayerGameMode, final ServerPlayer param0,
             final Level param1, final ItemStack param2, final InteractionHand param3) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
@@ -134,7 +135,6 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         try (final EffectTransactor ignored = transactor.logCloseInventory(player, true)) {
             this.player.doCloseContainer();
-            this.player.inventoryMenu.broadcastChanges(); // for capture
         }
         // TrackingUtil.processBlockCaptures called by CloseWindowState
     }
@@ -156,6 +156,16 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         try (final EffectTransactor ignored = transactor.logPlaceRecipe(shift, recipe, player, (CraftingInventory) craftInv)) {
             recipeBookMenu.handlePlacement(shift, recipe, player);
             ((TrackedContainerBridge) player.containerMenu).bridge$detectAndSendChanges(true);
+        }
+    }
+
+    @Inject(method = "handleSelectTrade", at = @At("RETURN"))
+    private void impl$onHandleSelectTrade(final ServerboundSelectTradePacket param0, final CallbackInfo ci) {
+        if (this.player.containerMenu instanceof MerchantMenu) {
+            final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+            final TransactionalCaptureSupplier transactor = context.getTransactor();
+            transactor.logSelectTrade(this.player, param0.getItem());
+            this.player.containerMenu.broadcastChanges(); // capture
         }
     }
 

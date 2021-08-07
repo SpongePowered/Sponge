@@ -65,8 +65,19 @@ public class PlayerEntityMixin_Inventory {
     @Nullable private EffectTransactor inventory$effectTransactor = null;
 
     @Inject(method = "setItemSlot", at = @At(value = "RETURN"))
+    private void impl$beforeSetItemSlot(final EquipmentSlot param0, final ItemStack param1, final CallbackInfo ci) {
+        final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
+        final TransactionalCaptureSupplier transactor = context.getTransactor();
+        this.inventory$effectTransactor = transactor.logPlayerInventoryChangeWithEffect((Player) (Object) this, SpongeEventFactory::createChangeInventoryEvent);
+    }
+
+    @Inject(method = "setItemSlot", at = @At(value = "RETURN"))
     private void impl$afterSetItemSlot(final EquipmentSlot param0, final ItemStack param1, final CallbackInfo ci) {
-        this.inventoryMenu.broadcastChanges(); // for capture
+        try (final EffectTransactor ignored = this.inventory$effectTransactor) {
+            this.inventoryMenu.broadcastChanges(); // for capture
+        } finally {
+            this.inventory$effectTransactor = null;
+        }
     }
 
     @Inject(method = "drop(Z)Z",

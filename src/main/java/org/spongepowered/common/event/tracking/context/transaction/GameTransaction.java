@@ -209,5 +209,4 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
     public boolean acceptCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv, @Nullable final CraftingRecipe lastRecipe) {
         return false;
     }
-
 }

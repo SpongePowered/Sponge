@@ -75,12 +75,14 @@ import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
+import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
+import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
@@ -267,13 +269,36 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             return;
         }
 
+        // commands - during CommandPhaseContext see below
+        // place/use ServerPlayerGameModeMixin_Tracker#useItemOn
+        // Dispenser equip PlayerEntityMixin_Inventory#setItemSlot
+        // eating etc. LivingEntityMixin_Inventory#completeUsingItem
+        // throw/use ServerGamePacketListenerImplMixin_Inventory#impl$onHandleUseItem
+        // breaking blocks ServerPlayerGameModeMixin_Tracker#impl$onMineBlock
+        // exp pickup with mending PlayerEntityMixin_Inventory#inventory$onTouch
+        // attack PlayerMixin#attack
+        // armor/shield damage LivingEntityMixin#bridge$damageEntity
+        // elytra damage LivingEntityMixin#inventory$onElytraUse
+        // consume arrow (BowItem#releaseUsing - shrink on stack) LivingEntityMixin#impl$onStopPlayerUsing
+        // villager trade select ServerGamePacketListenerImplMixin_Inventory#impl$onHandleSelectTrade
+        // close inventory adding back to inventory ServerPlayerEntityMixin_Inventory#impl$onCloseContainer
+
         // Inventory change during command
-        if (phaseContext instanceof CommandPhaseContext && abstractContainerMenu instanceof InventoryMenu) {
-            this.logPlayerInventoryChange(((InventoryMenuAccessor) abstractContainerMenu).accessor$owner(), SpongeEventFactory::createChangeInventoryEvent);
-            if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, abstractContainerMenu)) {
+        if (abstractContainerMenu instanceof InventoryMenu) {
+            if (phaseContext instanceof CommandPhaseContext) {
+                this.logPlayerInventoryChange(((InventoryMenuAccessor) abstractContainerMenu).accessor$owner(),
+                        SpongeEventFactory::createChangeInventoryEvent);
+                if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, abstractContainerMenu)) {
+                    return;
+                }
+            }
+            if (phaseContext instanceof EntityTickContext || phaseContext instanceof UnwindingPhaseContext) {
+                // TODO remove warning when we got all cases covered
+                SpongeCommon.logger().warn("Ignoring slot transaction on InventoryMenu during {}. {}", phaseContext.getClass().getSimpleName(), newTransaction);
                 return;
             }
         }
+
         SpongeCommon.logger().warn("Logged slot transaction without event transaction!", new Exception());
 
         final Supplier<ResourceKey> worldSupplier = phaseContext.attemptWorldKey();
@@ -304,22 +329,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     public PlayerInventoryTransaction logPlayerInventoryChange(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
         final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player, eventCreator);
         this.logTransaction(transaction);
-        // Add a generic ChangeInventoryEvent for this player
-        // e.g. /give command
-        // ServerPlayerGameModeMixin_Tracker#useItemOn
-        // Dispenser equip
-        // eating
-        // throw item
-        // breaking blocks ServerPlayerGameModeMixin_Tracker#impl$onMineBlock
-        // exp pickup
-        // attacking
-        // damageable item - ItemStack#hurtAndBreak
-        // consume arrow (BowItem#releaseUsing - shrink on stack)
-        // TODO villager trade
-        // TODO dispenser
-        // TODO close inventory adding back to inventory
-
-        // TODO preview is broken
         return transaction;
     }
 
@@ -356,6 +365,11 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final PlaceRecipeTransaction transaction = new PlaceRecipeTransaction(player, shift, recipe, craftInv);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+    }
+
+    public void logSelectTrade(ServerPlayer player, int item) {
+        final SelectTradeTransaction transaction = new SelectTradeTransaction(player, item);
+        this.logTransaction(transaction);
     }
 
     public void logCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,

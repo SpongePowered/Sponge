@@ -29,15 +29,12 @@ import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.EventContextKeys;
 import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.SpawnTypes;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -55,11 +52,6 @@ public final class PrimaryInventoryClickState extends BasicInventoryPacketState 
             final ServerPlayer serverPlayer, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
             final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable
     final Slot slot) {
-        if (!capturedEntities.isEmpty()) {
-            PhaseTracker.getCauseStackManager().addContext(EventContextKeys.SPAWN_TYPE, SpawnTypes.DISPENSE);
-            return SpongeEventFactory.createClickContainerEventDropOutsidePrimary(cause,
-                    openContainer, transaction, capturedEntities, Optional.ofNullable(slot), slotTransactions);
-        }
         return SpongeEventFactory.createClickContainerEventPrimary(cause,
                 openContainer, transaction, Optional.ofNullable(slot), slotTransactions);
     }

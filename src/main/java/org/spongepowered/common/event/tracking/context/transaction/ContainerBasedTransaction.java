@@ -187,8 +187,8 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
                 .filter(Optional::isPresent)
                 .map(Optional::get)
                 .findFirst();
-        if (!event.isPresent()) {
-            SpongeCommon.logger().warn("Logged transactions without event! {}", gameTransactions.size(), new Exception(""));
+        if (!event.isPresent() && !slotTransactions.isEmpty()) {
+            SpongeCommon.logger().warn("Logged slot transactions without event! {}", gameTransactions.size(), new Exception(""));
             for (SlotTransaction slotTransaction : slotTransactions) {
                 SpongeCommon.logger().warn(slotTransaction);
             }

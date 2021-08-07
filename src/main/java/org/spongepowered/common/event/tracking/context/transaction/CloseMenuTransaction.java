@@ -32,15 +32,18 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.inventory.Slot;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
+import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
@@ -48,6 +51,9 @@ import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
@@ -57,6 +63,7 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
     private final ItemStackSnapshot cursor;
     private boolean clientSource;
     private final AbstractContainerMenu menu;
+    private @MonotonicNonNull List<SlotTransaction> slotTransactions;
 
     public CloseMenuTransaction(final Player player, final boolean clientSource) {
         super(TransactionTypes.INTERACT_CONTAINER_EVENT.get(), ((ServerWorld) player.level).key());
@@ -81,8 +88,8 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
             final ImmutableList<GameTransaction<InteractContainerEvent>> gameTransactions, final Cause currentCause) {
         final ItemStackSnapshot resultingCursor = ItemStackUtil.snapshotOf(this.player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.cursor, resultingCursor);
-
-        final InteractContainerEvent.Close event = SpongeEventFactory.createInteractContainerEventClose(currentCause, (Container) this.menu, cursorTransaction);
+        final InteractContainerEvent.Close event = SpongeEventFactory.createInteractContainerEventClose(currentCause, (Container) this.menu,
+                cursorTransaction, (Container) this.menu, this.slotTransactions == null ? Collections.emptyList() : this.slotTransactions);
         return Optional.of(event);
     }
 
@@ -93,6 +100,21 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
             this.reopen(player, this.menu);
         }
         PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
+        if (event instanceof ChangeInventoryEvent) {
+            PacketPhaseUtil.handleSlotRestore(this.player, this.menu, ((ChangeInventoryEvent) event).transactions(), event.isCancelled());
+        }
+    }
+
+    @Override
+    public boolean acceptSlotTransaction(SlotTransaction newTransaction, Object inventory) {
+        if (this.menu != inventory) {
+            return false;
+        }
+        if (this.slotTransactions == null) {
+            this.slotTransactions = new ArrayList<>();
+        }
+        this.slotTransactions.add(newTransaction);
+        return true;
     }
 
     @Override
@@ -105,6 +127,9 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
         }
         // And restore cursor if needed
         PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
+        if (event instanceof ChangeInventoryEvent) {
+            PacketPhaseUtil.handleSlotRestore(this.player, this.menu, ((ChangeInventoryEvent) event).transactions(), event.isCancelled());
+        }
     }
 
     @Override
