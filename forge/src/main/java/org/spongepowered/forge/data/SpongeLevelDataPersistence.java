@@ -22,32 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.server;
+package org.spongepowered.forge.data;
 
-import net.minecraft.resources.ResourceKey;
-import net.minecraft.server.MinecraftServer;
-import net.minecraft.server.level.ServerLevel;
-import net.minecraft.world.level.Level;
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.common.bridge.server.level.ServerLevelBridge;
-import org.spongepowered.forge.ForgeServer;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.level.storage.LevelStorageSource;
+import net.minecraft.world.level.storage.WorldData;
+import net.minecraftforge.fml.WorldPersistenceHooks;
 
-@Mixin(MinecraftServer.class)
-public abstract class MinecraftServerMixin_Forge implements ForgeServer {
+public final class SpongeLevelDataPersistence implements WorldPersistenceHooks.WorldPersistenceHook {
 
-    // @formatter:off
-    @Shadow @Nullable public abstract ServerLevel shadow$getLevel(ResourceKey<Level> p_71218_1_);
-    // @formatter:on
+    public static final SpongeLevelDataPersistence INSTANCE = new SpongeLevelDataPersistence();
 
     /**
-     * @author Zidane
-     * @reason We store the per-world tick time on the ServerLevel itself to more accurately track this.
+     * This is actually the tag name, no idea why they call this modid...
+     * @return The tag name
      */
-    @Overwrite(remap = false)
-    public long[] getTickTime(ResourceKey<Level> dim) {
-        return ((ServerLevelBridge) this.shadow$getLevel(dim)).bridge$recentTickTimes();
+    @Override
+    public String getModId() {
+        return "SpongeData";
+    }
+
+    @Override
+    public CompoundTag getDataForWriting(LevelStorageSource.LevelStorageAccess arg, WorldData arg2) {
+        return new CompoundTag();
+    }
+
+    @Override
+    public void readData(LevelStorageSource.LevelStorageAccess arg, WorldData arg2, CompoundTag arg3) {
     }
 }

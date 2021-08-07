@@ -24,30 +24,8 @@
  */
 package org.spongepowered.forge;
 
-import net.minecraft.nbt.CompoundTag;
-import net.minecraft.world.level.storage.LevelStorageSource;
-import net.minecraft.world.level.storage.WorldData;
-import net.minecraftforge.fml.WorldPersistenceHooks;
+import org.spongepowered.common.client.SpongeClient;
 
-public final class SpongeLevelDataPersistence implements WorldPersistenceHooks.WorldPersistenceHook {
+public interface ForgeClient extends ForgeEngine, SpongeClient {
 
-    public static final SpongeLevelDataPersistence INSTANCE = new SpongeLevelDataPersistence();
-
-    /**
-     * This is actually the tag name, no idea why they call this modid...
-     * @return The tag name
-     */
-    @Override
-    public String getModId() {
-        return "SpongeData";
-    }
-
-    @Override
-    public CompoundTag getDataForWriting(LevelStorageSource.LevelStorageAccess arg, WorldData arg2) {
-        return new CompoundTag();
-    }
-
-    @Override
-    public void readData(LevelStorageSource.LevelStorageAccess arg, WorldData arg2, CompoundTag arg3) {
-    }
 }

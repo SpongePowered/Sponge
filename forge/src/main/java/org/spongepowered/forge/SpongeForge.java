@@ -29,12 +29,15 @@ import net.minecraftforge.eventbus.api.IEventBus;
 import net.minecraftforge.eventbus.api.SubscribeEvent;
 import net.minecraftforge.fml.WorldPersistenceHooks;
 import net.minecraftforge.fml.common.Mod;
+import net.minecraftforge.fml.event.lifecycle.FMLClientSetupEvent;
 import net.minecraftforge.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.minecraftforge.fml.event.server.FMLServerAboutToStartEvent;
 import net.minecraftforge.fml.event.server.FMLServerStartedEvent;
+import net.minecraftforge.fml.event.server.FMLServerStoppedEvent;
 import net.minecraftforge.fml.javafmlmod.FMLJavaModLoadingContext;
 import org.apache.logging.log4j.LogManager;
 import org.apache.logging.log4j.Logger;
+import org.spongepowered.api.Client;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
@@ -42,6 +45,7 @@ import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
+import org.spongepowered.forge.data.SpongeLevelDataPersistence;
 
 @Mod(Constants.MOD_ID)
 public final class SpongeForge {
@@ -55,6 +59,7 @@ public final class SpongeForge {
 
         // modBus: add all FML events with it
         modBus.addListener(this::onCommonSetup);
+        modBus.addListener(this::onClientSetup);
 
         // annotation events, for non-FML things
         MinecraftForge.EVENT_BUS.register(this);
@@ -73,8 +78,17 @@ public final class SpongeForge {
 
         // TODO Add attributes for HumanEntity to relevant event
 
-        // common setup
         this.logger.info("SpongeForge v{} initialized", Launch.instance().platformPlugin().metadata().version());
+    }
+
+    private void onClientSetup(final FMLClientSetupEvent event) {
+        final Client minecraft = (Client) event.getMinecraftSupplier().get();
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.establishGlobalRegistries();
+        lifecycle.establishDataProviders();
+        lifecycle.callRegisterDataEvent();
+        lifecycle.establishClientRegistries(minecraft);
+        lifecycle.callStartingEngineEvent(minecraft);
     }
 
     @SubscribeEvent
@@ -95,6 +109,12 @@ public final class SpongeForge {
     public void onServerStarted(final FMLServerStartedEvent event) {
         final Lifecycle lifecycle = Launch.instance().lifecycle();
         lifecycle.callStartedEngineEvent((Server) event.getServer());
+    }
+
+    @SubscribeEvent
+    public void onGameStopped(final FMLServerStoppedEvent event) {
+        final Lifecycle lifecycle = Launch.instance().lifecycle();
+        lifecycle.callStoppingEngineEvent((Server) event.getServer());
     }
 
 }
