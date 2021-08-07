@@ -282,6 +282,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         // consume arrow (BowItem#releaseUsing - shrink on stack) LivingEntityMixin#impl$onStopPlayerUsing
         // villager trade select ServerGamePacketListenerImplMixin_Inventory#impl$onHandleSelectTrade
         // close inventory adding back to inventory ServerPlayerEntityMixin_Inventory#impl$onCloseContainer
+        // use on entity - ServerGamePacketListenerImplMixin_Inventory#impl$onInteractAt/impl$onInteractOn
 
         // Inventory change during command
         if (abstractContainerMenu instanceof InventoryMenu) {
