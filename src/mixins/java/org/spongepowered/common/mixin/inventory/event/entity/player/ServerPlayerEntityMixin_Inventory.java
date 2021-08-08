@@ -28,7 +28,6 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.Container;
 import net.minecraft.world.MenuProvider;
 import net.minecraft.world.entity.animal.horse.AbstractHorse;
-import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ContainerListener;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -49,7 +48,7 @@ public class ServerPlayerEntityMixin_Inventory extends PlayerEntityMixin_Invento
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;addSlotListener(Lnet/minecraft/world/inventory/ContainerListener;)V"))
     private void impl$onOpenMenu(final AbstractContainerMenu abstractContainerMenu, final ContainerListener param0, final @Nullable MenuProvider containerProvider) {
         ((TrackedContainerBridge) abstractContainerMenu).bridge$trackViewable(containerProvider);
-        try (InventoryPacketContext context = PacketPhase.Inventory.OPEN_INVENTORY.createPhaseContext(PhaseTracker.SERVER)) {
+        try (final InventoryPacketContext context = PacketPhase.Inventory.OPEN_INVENTORY.createPhaseContext(PhaseTracker.SERVER)) {
             context.buildAndSwitch();
             abstractContainerMenu.addSlotListener(param0);
         }
@@ -60,10 +59,14 @@ public class ServerPlayerEntityMixin_Inventory extends PlayerEntityMixin_Invento
         ((TrackedContainerBridge) this.containerMenu).bridge$trackViewable(inventoryIn);
     }
 
-    @Redirect(method = "doCloseContainer", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;removed(Lnet/minecraft/world/entity/player/Player;)V"))
-    private void impl$onCloseContainer(final AbstractContainerMenu abstractContainerMenu, final Player param0) {
-        abstractContainerMenu.removed(param0);
-        ((TrackedContainerBridge) abstractContainerMenu).bridge$detectAndSendChanges(true);
+    @Inject(method = "doCloseContainer",
+        at = @At(value = "INVOKE",
+            target = "Lnet/minecraft/world/inventory/AbstractContainerMenu;removed(Lnet/minecraft/world/entity/player/Player;)V",
+            shift = At.Shift.AFTER
+        )
+    )
+    private void impl$submitDetectChangesForClosure(final CallbackInfo ci) {
+        ((TrackedContainerBridge) this.containerMenu).bridge$detectAndSendChanges(true);
     }
 
 }
