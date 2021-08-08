@@ -36,6 +36,8 @@ import org.spongepowered.forge.launch.event.ForgeEventManager;
 @Mixin(value = FMLModContainer.class, remap = false)
 public abstract class FMLModContainerMixin_Forge extends ModContainerMixin_Forge {
 
+    private static final String forge$pluginModContainerName = "PluginModContainer";
+
     // @formatter:off
     @Shadow private Object modInstance;
     // @formatter:on
@@ -43,7 +45,7 @@ public abstract class FMLModContainerMixin_Forge extends ModContainerMixin_Forge
     // TODO Need to figure out a way to make constructMod public, this is a nasty hack
     @Inject(method = "constructMod", at = @At("HEAD"), cancellable = true)
     private void forge$skipConstructModIfNotThisClass(final CallbackInfo ci) {
-        if (FMLModContainer.class != (Class) this.getClass()) {
+        if (this.getClass().getSimpleName().equals(FMLModContainerMixin_Forge.forge$pluginModContainerName)) {
             ci.cancel();
         }
     }

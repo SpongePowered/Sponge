@@ -43,6 +43,7 @@ import org.spongepowered.forge.accessor.fml.javafmlmod.FMLModContainerAccessor;
 import org.spongepowered.forge.launch.event.ForgeEventManager;
 import org.spongepowered.plugin.PluginContainer;
 
+// If this class name changes, fix FMLModContainerMixin_Forge
 public final class PluginModContainer extends FMLModContainer {
 
     private static final Logger LOGGER = LogManager.getLogger();
@@ -72,7 +73,8 @@ public final class PluginModContainer extends FMLModContainer {
             AutomaticEventSubscriber.inject(this, accessor.accessor$scanResults(), accessor.accessor$modClass().getClassLoader());
             PluginModContainer.LOGGER.trace(Logging.LOADING, "Completed Automatic event subscribers for {}", getModId());
         } catch (final Throwable e) {
-            LOGGER.error(LOADING,"Failed to register automatic subscribers. ModID: {}, class {}", getModId(), accessor.accessor$modClass().getName(), e);
+            LOGGER.error(LOADING,"Failed to register automatic subscribers. PluginID: {}, class {}", getModId(),
+                    accessor.accessor$modClass().getName(), e);
             throw new ModLoadingException(this.modInfo, ModLoadingStage.CONSTRUCT, "fml.modloading.failedtoloadmod", e, accessor.accessor$modClass());
         }
     }
