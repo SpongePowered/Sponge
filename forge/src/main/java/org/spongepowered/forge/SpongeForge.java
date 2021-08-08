@@ -41,11 +41,13 @@ import org.spongepowered.api.Client;
 import org.spongepowered.api.Server;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.common.applaunch.config.core.ConfigHandle;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.common.network.channel.SpongeChannelManager;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
 import org.spongepowered.forge.data.SpongeLevelDataPersistence;
+import org.spongepowered.forge.hook.ForgeEventHooks;
 
 @Mod(Constants.MOD_ID)
 public final class SpongeForge {
@@ -63,6 +65,9 @@ public final class SpongeForge {
 
         // annotation events, for non-FML things
         MinecraftForge.EVENT_BUS.register(this);
+
+        // Set platform hooks as required
+        PlatformHooks.INSTANCE.setEventHooks(new ForgeEventHooks());
     }
 
     private void onCommonSetup(final FMLCommonSetupEvent event) {

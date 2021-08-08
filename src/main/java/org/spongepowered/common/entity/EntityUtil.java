@@ -29,6 +29,7 @@ import org.spongepowered.api.entity.living.player.User;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.entity.SpawnEntityEvent;
 import org.spongepowered.api.util.Identifiable;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.accessor.server.level.ServerPlayerAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
@@ -147,8 +148,16 @@ public final class EntityUtil {
             player.closeContainer();
         }
 
-        // Sponge Start - Call platform event hook after changing dimensions
-        PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost(player, fromWorld, originalToWorld);
+        // Sponge Start - Call event
+        Sponge.eventManager().post(
+                SpongeEventFactory.createChangeEntityWorldEventPost(
+                        PhaseTracker.getCauseStackManager().currentCause(),
+                        (org.spongepowered.api.entity.Entity) player,
+                        (ServerWorld) fromWorld,
+                        (ServerWorld) originalToWorld,
+                        (ServerWorld) toWorld
+                )
+        );
         // Sponge End
     }
 

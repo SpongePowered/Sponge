@@ -28,40 +28,32 @@ import org.spongepowered.api.event.cause.entity.MovementType;
 import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.world.portal.PortalType;
 import org.spongepowered.api.world.portal.PortalTypes;
-import org.spongepowered.common.accessor.world.entity.EntityAccessor;
-import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter.Holder;
-import org.spongepowered.math.vector.Vector3d;
 
 import java.util.function.Function;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.level.portal.PortalInfo;
 
-public abstract class VanillaPortalPlatformTeleporter implements PlatformTeleporter {
+public abstract class VanillaPortalLogic implements PortalLogic {
 
-    public static VanillaPortalPlatformTeleporter getNetherInstance() {
-        return Holder.NETHER_INSTANCE;
-    }
-
-    public static VanillaPortalPlatformTeleporter getEndInstance() {
+    public static VanillaPortalLogic getEndInstance() {
         return Holder.END_INSTANCE;
     }
 
-    static class Holder {
-        static final VanillaPortalPlatformTeleporter NETHER_INSTANCE = new VanillaPortalPlatformTeleporter.Nether();
-        static final VanillaPortalPlatformTeleporter END_INSTANCE = new VanillaPortalPlatformTeleporter.End();
+    final static class Holder {
+        static final VanillaPortalLogic END_INSTANCE = new VanillaPortalLogic.End();
     }
 
-    private VanillaPortalPlatformTeleporter() {
-    }
-
-    @Override
-    public PortalInfo getPortalInfo(final Entity entity, final ServerLevel currentWorld, final ServerLevel targetWorld, final Vector3d currentPosition) {
-        return ((EntityAccessor) entity).invoker$findDimensionEntryPoint(targetWorld);
+    private VanillaPortalLogic() {
     }
 
     @Override
-    public Entity performTeleport(final Entity entity, final ServerLevel currentWorld, final ServerLevel targetWorld, final float xRot,
+    public PortalInfo getPortalInfo(final Entity entity, final ServerLevel targetWorld, final Function<ServerLevel, PortalInfo> defaultPortalInfo) {
+        return defaultPortalInfo.apply(targetWorld);
+    }
+
+    @Override
+    public Entity placeEntity(final Entity entity, final ServerLevel currentWorld, final ServerLevel targetWorld, final float yRot,
             final Function<Boolean, Entity> entityRepositioner) {
         return entityRepositioner.apply(true);
     }
@@ -76,16 +68,7 @@ public abstract class VanillaPortalPlatformTeleporter implements PlatformTelepor
         return MovementTypes.PORTAL.get();
     }
 
-    public final static class Nether extends VanillaPortalPlatformTeleporter {
-
-        @Override
-        public PortalType getPortalType() {
-            return PortalTypes.NETHER.get();
-        }
-
-    }
-
-    public final static class End extends VanillaPortalPlatformTeleporter {
+    public final static class End extends VanillaPortalLogic {
 
         @Override
         public PortalType getPortalType() {

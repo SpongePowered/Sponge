@@ -88,40 +88,40 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.entity.EntityAccessor;
 import org.spongepowered.common.bridge.commands.CommandSourceProviderBridge;
-import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.DataCompoundHolder;
+import org.spongepowered.common.bridge.data.SpongeDataHolderBridge;
 import org.spongepowered.common.bridge.data.VanishableBridge;
+import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformEntityBridge;
-import org.spongepowered.common.bridge.world.damagesource.DamageSourceBridge;
-import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.bridge.world.level.LevelBridge;
+import org.spongepowered.common.bridge.world.level.PlatformServerLevelBridge;
 import org.spongepowered.common.data.DataUtil;
 import org.spongepowered.common.data.provider.nbt.NBTDataType;
 import org.spongepowered.common.data.provider.nbt.NBTDataTypes;
 import org.spongepowered.common.data.value.ImmutableSpongeValue;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.entity.EntityPhase;
 import org.spongepowered.common.event.tracking.phase.entity.TeleportContext;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.util.MinecraftBlockDamageSource;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.portal.NetherPortalType;
-import org.spongepowered.common.world.portal.PlatformTeleporter;
+import org.spongepowered.common.world.portal.PortalLogic;
 import org.spongepowered.common.world.portal.SpongePortalInfo;
 import org.spongepowered.common.world.portal.VanillaPortal;
 import org.spongepowered.math.vector.Vector3d;
-
-import javax.annotation.Nullable;
 
 import java.lang.ref.WeakReference;
 import java.util.List;
 import java.util.Optional;
 import java.util.Random;
+
+import javax.annotation.Nullable;
 
 @Mixin(Entity.class)
 public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge, VanishableBridge, CommandSourceProviderBridge, DataCompoundHolder {
@@ -202,6 +202,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract int shadow$getPermissionLevel();
     @Shadow protected abstract Vec3 shadow$collide(Vec3 param0);
     @Shadow protected abstract boolean shadow$fireImmune();
+    @Shadow @Nullable protected abstract PortalInfo shadow$findDimensionEntryPoint(ServerLevel param0);
     // @formatter:on
 
     private boolean impl$isConstructing = true;
@@ -262,16 +263,16 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
             frame.pushCause(SpongeCommon.activePlugin());
             frame.addContext(EventContextKeys.MOVEMENT_TYPE, MovementTypes.PLUGIN);
 
+            final net.minecraft.server.level.ServerLevel originalWorld = (ServerLevel) this.shadow$getCommandSenderWorld();
             final net.minecraft.server.level.ServerLevel originalDestinationWorld = (net.minecraft.server.level.ServerLevel) location.world();
             final net.minecraft.server.level.ServerLevel destinationWorld;
             final @org.checkerframework.checker.nullness.qual.Nullable Vector3d destinationPosition;
 
             final boolean isChangeOfWorld = this.shadow$getCommandSenderWorld() != originalDestinationWorld;
             if (isChangeOfWorld) {
-                final ChangeEntityWorldEvent.Pre event = SpongeEventFactory.createChangeEntityWorldEventPre(frame.currentCause(),
-                        (org.spongepowered.api.entity.Entity) this, (ServerWorld) this.shadow$getCommandSenderWorld(), location.world(),
-                        location.world());
-                if (SpongeCommon.post(event) && ((LevelBridge) event.destinationWorld()).bridge$isFake()) {
+                final ChangeEntityWorldEvent.Pre event = PlatformHooks.INSTANCE.getEventHooks()
+                        .callChangeEntityWorldEventPre((Entity) (Object) this, originalDestinationWorld);
+                if (event.isCancelled() || ((LevelBridge) event.destinationWorld()).bridge$isFake()) {
                     return false;
                 }
 
@@ -290,7 +291,17 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                 }
             }
 
-            return this.impl$setLocation(isChangeOfWorld, originalDestinationWorld, destinationWorld, destinationPosition);
+            final boolean completed = this.impl$setLocation(isChangeOfWorld, originalDestinationWorld, destinationWorld, destinationPosition);
+            if (isChangeOfWorld) {
+                Sponge.eventManager().post(SpongeEventFactory.createChangeEntityWorldEventPost(
+                        PhaseTracker.getCauseStackManager().currentCause(),
+                        (org.spongepowered.api.entity.Entity) this,
+                        (ServerWorld) originalWorld,
+                        (ServerWorld) originalDestinationWorld,
+                        (ServerWorld) destinationWorld
+                ));
+            }
+            return completed;
         }
     }
 
@@ -515,14 +526,15 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
      * Forge changing the signature.
      *
      * @author dualspiral - 18th December 2020 - 1.16.4
+     * @author dualspiral - 8th August 2021 - 1.16.5 (adjusted for SpongeForge)
      *
      * @param originalDestinationWorld The original target world
-     * @param platformTeleporter performs additional teleportation logic, as required.
+     * @param originalPortalLogic performs additional teleportation logic, as required.
      * @return The {@link Entity} that is either this one, or replaces this one
      */
     @SuppressWarnings("ConstantConditions")
     @org.checkerframework.checker.nullness.qual.Nullable
-    public Entity bridge$changeDimension(final net.minecraft.server.level.ServerLevel originalDestinationWorld, final PlatformTeleporter platformTeleporter) {
+    public Entity bridge$changeDimension(final net.minecraft.server.level.ServerLevel originalDestinationWorld, final PortalLogic originalPortalLogic) {
         // Sponge Start
         if (this.shadow$getCommandSenderWorld().isClientSide || this.removed) {
             return null;
@@ -538,33 +550,41 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         try (final TeleportContext context = contextToSwitchTo.buildAndSwitch();
                 final CauseStackManager.StackFrame frame = PhaseTracker.getCauseStackManager().pushCauseFrame()) {
             frame.pushCause(this);
-            frame.pushCause(platformTeleporter.getPortalType());
-            frame.addContext(EventContextKeys.MOVEMENT_TYPE, platformTeleporter.getMovementType());
+            frame.pushCause(originalPortalLogic.getPortalType());
+            frame.addContext(EventContextKeys.MOVEMENT_TYPE, originalPortalLogic.getMovementType());
 
             this.impl$originalDestinationWorld = new WeakReference<>((ServerWorld) originalDestinationWorld);
 
             final ChangeEntityWorldEvent.Pre preChangeEvent =
                     PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPre((Entity) (Object) this, originalDestinationWorld);
             if (preChangeEvent.isCancelled()) {
+                this.impl$onPreWorldChangeCanceled();
                 return null;
             }
             this.impl$customPortal = preChangeEvent.originalDestinationWorld() != preChangeEvent.destinationWorld();
+            final PortalLogic finalPortalLogic;
+            if (this.impl$customPortal && originalPortalLogic == originalDestinationWorld.getPortalForcer()) {
+                finalPortalLogic = (PortalLogic) ((ServerLevel) preChangeEvent.destinationWorld()).getPortalForcer();
+            } else {
+                finalPortalLogic = originalPortalLogic;
+            }
             final net.minecraft.server.level.ServerLevel targetWorld = (net.minecraft.server.level.ServerLevel) preChangeEvent.destinationWorld();
             final Vector3d currentPosition = VecHelper.toVector3d(this.shadow$position());
 
             // If a player, set the fact they are changing dimensions
-            this.impl$setChangingDimension();
+            this.impl$onChangingDimension(targetWorld);
 
             final net.minecraft.server.level.ServerLevel serverworld = (net.minecraft.server.level.ServerLevel) this.level;
             final ResourceKey<Level> registrykey = serverworld.dimension();
-            if (isPlayer && registrykey == Level.END && targetWorld.dimension() == Level.OVERWORLD && platformTeleporter.isVanilla()) { // avoids modded dimensions
+            if (isPlayer && registrykey == Level.END && targetWorld.dimension() == Level.OVERWORLD && finalPortalLogic.isVanilla()) { // avoids modded dimensions
                 return this.impl$postProcessChangeDimension(this.impl$performGameWinLogic());
             } else {
                 // Sponge Start: Redirect the find portal call to the teleporter.
 
                 // If this is vanilla, this will house our Reposition Event and return an appropriate
                 // portal info
-                final PortalInfo portalinfo = platformTeleporter.getPortalInfo((Entity) (Object) this, serverworld, targetWorld, currentPosition);
+                final PortalInfo portalinfo = originalPortalLogic.getPortalInfo((Entity) (Object) this, targetWorld,
+                        x -> this.shadow$findDimensionEntryPoint(x)); // don't make this a method reference, it'll crash vanilla.
                 // Sponge End
                 if (portalinfo != null) {
                     if (portalinfo instanceof SpongePortalInfo) {
@@ -576,22 +596,26 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                         // Sponge Start: wrap the teleportation logic within a function to allow for modification
                         // of the teleporter
                         final Vector3d originalDestination = new Vector3d(portalinfo.pos.x, portalinfo.pos.y, portalinfo.pos.z);
+
+                        // Note that impl$portalRepositioning is the lambda. As this will be different in ServerPlayer,
+                        // we transfer it to a method instead so we can override it.
                         final Entity transportedEntity =
-                                platformTeleporter.performTeleport((Entity) (Object) this, serverworld, targetWorld, this.xRot,
-                                        createEndPlatform -> this
-                                                .impl$portalRepositioning(createEndPlatform, serverworld, targetWorld, portalinfo));
+                                originalPortalLogic.placeEntity((Entity) (Object) this, serverworld, targetWorld, this.yRot,
+                                        createEndPlatform ->
+                                                this.impl$portalRepositioning(createEndPlatform, serverworld, targetWorld, portalinfo));
                         // Make sure the right object was returned
-                        this.impl$validateEntityAfterTeleport(transportedEntity, platformTeleporter);
+                        this.impl$validateEntityAfterTeleport(transportedEntity, originalPortalLogic);
 
                         // If we need to reposition: well... reposition.
                         // Downside: portals won't come with us, but with how it's implemented in Forge,
                         // not sure how we'd do this.
                         //
                         // If this is vanilla, we've already fired and dealt with the event
+                        final Cause cause = PhaseTracker.getCauseStackManager().currentCause();
                         if (transportedEntity != null && this.impl$shouldFireRepositionEvent) {
                             final Vector3d destination = VecHelper.toVector3d(this.shadow$position());
                             final ChangeEntityWorldEvent.Reposition reposition = SpongeEventFactory.createChangeEntityWorldEventReposition(
-                                    PhaseTracker.getCauseStackManager().currentCause(),
+                                    cause,
                                     (org.spongepowered.api.entity.Entity) transportedEntity,
                                     (org.spongepowered.api.world.server.ServerWorld) serverworld,
                                     currentPosition,
@@ -620,9 +644,18 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
                             }
                         }
 
-                        this.impl$postPortalForceChangeTasks(transportedEntity, targetWorld, platformTeleporter.getPortalType() instanceof NetherPortalType);
+                        // Used to perform player specific tasks.
+                        this.impl$postPortalForceChangeTasks(transportedEntity, targetWorld, originalPortalLogic.getPortalType() instanceof NetherPortalType);
                         // Call post event
-                        PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost((Entity) (Object) this, serverworld, targetWorld);
+                        Sponge.eventManager().post(
+                                SpongeEventFactory.createChangeEntityWorldEventPost(
+                                        cause,
+                                        (org.spongepowered.api.entity.Entity) this,
+                                        (ServerWorld) serverworld,
+                                        (ServerWorld) originalDestinationWorld,
+                                        (ServerWorld) targetWorld
+                                )
+                        );
                     } catch (final RuntimeException e) {
                         // nothing throws a checked exception in this block, but we want to catch unchecked stuff and try to recover
                         // just in case a mod does something less than clever.
@@ -647,8 +680,11 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         }
     }
 
+    protected void impl$onPreWorldChangeCanceled() {
+        // intentional no-op
+    }
 
-    protected void impl$setChangingDimension() {
+    protected void impl$onChangingDimension(final ServerLevel target) {
         // intentional no-op
     }
 
@@ -656,7 +692,7 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
         // intentional no-op
     }
 
-    protected void impl$validateEntityAfterTeleport(final Entity e, final PlatformTeleporter teleporter) {
+    protected void impl$validateEntityAfterTeleport(final Entity e, final PortalLogic teleporter) {
         // intentional no-op
     }
 

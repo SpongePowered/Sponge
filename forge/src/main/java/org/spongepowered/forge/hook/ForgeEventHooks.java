@@ -22,43 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.vehicle;
+package org.spongepowered.forge.hook;
 
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
+import org.spongepowered.common.hooks.EventHooks;
 
-import javax.annotation.Nullable;
-
-@Mixin(AbstractMinecartContainer.class)
-public abstract class AbstractMinecartContainerMixin extends AbstractMinecartMixin {
-
-    // @formatter:off
-    @Shadow private boolean dropEquipment;
-    // @formatter:on
+public final class ForgeEventHooks implements EventHooks {
 
     @Override
-    protected void impl$onPreWorldChangeCanceled() {
-        this.dropEquipment = true;
-    }
-
-    /**
-     * @author Zidane - June 2019 - 1.12.2
-     * @author i509VCB - Feb 2020 - 1.14.4
-     * @author dualspiral - 24th July 2021 - 1.16.5
-     * @reason Only have this Minecart not drop contents if we actually changed dimension
-     */
-    @Override
-    @Nullable
-    protected @org.checkerframework.checker.nullness.qual.Nullable Entity impl$postProcessChangeDimension(final Entity entity) {
-        if (!(entity instanceof AbstractMinecartContainer)) {
-            // it was false, if the entity returned by the teleporter is obviously not
-            // representing this, this should drop its equipment again.
-            this.dropEquipment = true;
+    public ChangeEntityWorldEvent.Pre callChangeEntityWorldEventPre(final Entity entity, final ServerLevel toWorld) {
+        final ChangeEntityWorldEvent.Pre pre = EventHooks.super.callChangeEntityWorldEventPre(entity, toWorld);
+        if (pre.isCancelled()) {
+            // Taken from ForgeHooks#onTravelToDimension
+            // Revert variable back to true as it would have been set to false
+            if (entity instanceof AbstractMinecartContainer)
+            {
+                ((AbstractMinecartContainer) entity).dropContentsWhenDead(true);
+            }
         }
-
-        return entity;
+        return pre;
     }
 
 }

@@ -22,33 +22,35 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.world.portal;
+package org.spongepowered.vanilla.mixin.core.world.entity;
 
-import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.event.cause.entity.MovementType;
-import org.spongepowered.api.world.portal.PortalType;
-import org.spongepowered.math.vector.Vector3d;
-
-import java.util.function.Function;
-import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.portal.PortalInfo;
+import net.minecraft.world.level.Level;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.world.portal.PortalLogic;
 
-/**
- * For wrapping around Forge's ITeleporter
- */
-public interface PlatformTeleporter {
+import javax.annotation.Nullable;
 
-    @Nullable PortalInfo getPortalInfo(Entity entity, ServerLevel currentWorld, ServerLevel targetWorld, Vector3d currentPosition);
+@Mixin(Entity.class)
+public abstract class EntityMixin_Vanilla implements EntityBridge {
 
-    // Implementor note: the final function Boolean is true if a portal exists
-    @Nullable Entity performTeleport(Entity entity, ServerLevel currentWorld, ServerLevel targetWorld, float xRot, Function<Boolean, Entity> teleportLogic);
-
-    // This isn't if it's a vanilla portal - it's if it's vanilla(ish) logic.
-    boolean isVanilla();
-
-    MovementType getMovementType();
-
-    PortalType getPortalType();
+    // @formatter:off
+    @Shadow public Level level;
+    // @formatter:on
+    
+    /**
+     * @author dualspiral - 19th December 2020 - 1.16.4
+     * @reason Overwrite to redirect call to
+     *         {@link #bridge$changeDimension(net.minecraft.server.level.ServerLevel, PortalLogic)}, this
+     *         is to support Forge mods and their ITeleporter
+     */
+    @Overwrite
+    @Nullable
+    public Entity changeDimension(final net.minecraft.server.level.ServerLevel originalDestinationWorld) {
+        return this.bridge$changeDimension(originalDestinationWorld, (PortalLogic) originalDestinationWorld.getPortalForcer());
+    }
 
 }

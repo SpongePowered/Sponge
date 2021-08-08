@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.mixin.core.server.commands;
 
+import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.EventContextKeys;
@@ -31,6 +32,7 @@ import org.spongepowered.api.event.cause.entity.MovementTypes;
 import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
+import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Overwrite;
 import org.spongepowered.common.SpongeCommon;
@@ -186,8 +188,13 @@ public abstract class TeleportCommandMixin {
                     worldIn.addFromAnotherDimension(result);
                     entityIn.removed = true;
 
-                    PlatformHooks.INSTANCE.getEventHooks().callChangeEntityWorldEventPost(result, fromWorld,
-                            (ServerLevel) preEvent.originalDestinationWorld());
+                    Sponge.eventManager().post(SpongeEventFactory.createChangeEntityWorldEventPost(
+                            PhaseTracker.getCauseStackManager().currentCause(),
+                            (org.spongepowered.api.entity.Entity) result,
+                            (ServerWorld) fromWorld,
+                            preEvent.originalDestinationWorld(),
+                            preEvent.destinationWorld()
+                    ));
                 }
             }
         }

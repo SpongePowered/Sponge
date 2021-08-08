@@ -304,6 +304,7 @@ import org.spongepowered.common.world.SpongeChunkRegenerateFlag;
 import org.spongepowered.common.world.SpongeLightType;
 import org.spongepowered.common.world.portal.EndPortalType;
 import org.spongepowered.common.world.portal.NetherPortalType;
+import org.spongepowered.common.world.portal.UnknownPortalType;
 import org.spongepowered.common.world.schematic.SpongePaletteType;
 import org.spongepowered.common.world.server.SpongeTicketType;
 import org.spongepowered.common.world.teleport.ConfigTeleportHelperFilter;
@@ -777,6 +778,7 @@ public final class SpongeRegistryLoaders {
         return RegistryLoader.of(l -> {
             l.add(PortalTypes.END, EndPortalType::new);
             l.add(PortalTypes.NETHER, NetherPortalType::new);
+            l.add(PortalTypes.UNKNOWN, UnknownPortalType::new);
         });
     }
 

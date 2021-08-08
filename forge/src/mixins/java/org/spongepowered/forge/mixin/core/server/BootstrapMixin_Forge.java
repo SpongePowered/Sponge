@@ -34,8 +34,11 @@ import org.spongepowered.asm.mixin.injection.Inject;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.SpongeLifecycle;
+import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.inject.SpongeGuice;
 import org.spongepowered.common.launch.Launch;
+import org.spongepowered.forge.hook.ForgeEventHooks;
+import org.spongepowered.forge.launch.ForgeLaunch;
 
 @Mixin(Bootstrap.class)
 public abstract class BootstrapMixin_Forge {
@@ -45,15 +48,16 @@ public abstract class BootstrapMixin_Forge {
     // @formatter:on
 
     @Inject(method = "bootStrap", at = @At("HEAD"))
-    private static void forge$startLifecycle(CallbackInfo ci) {
+    private static void forge$startLifecycle(final CallbackInfo ci) {
         if (BootstrapMixin_Forge.isBootstrapped) {
             return;
         }
-        final Stage stage = SpongeGuice.getInjectorStage(Launch.instance().injectionStage());
+        final ForgeLaunch launch = Launch.instance();
+        final Stage stage = SpongeGuice.getInjectorStage(launch.injectionStage());
         SpongeCommon.logger().debug("Creating injector in stage '{}'", stage);
-        final Injector bootstrapInjector = Launch.instance().createInjector();
+        final Injector bootstrapInjector = launch.createInjector();
         final SpongeLifecycle lifecycle = bootstrapInjector.getInstance(SpongeLifecycle.class);
-        Launch.instance().setLifecycle(lifecycle);
+        launch.setLifecycle(lifecycle);
         lifecycle.establishFactories();
         lifecycle.establishBuilders();
         lifecycle.initTimings();

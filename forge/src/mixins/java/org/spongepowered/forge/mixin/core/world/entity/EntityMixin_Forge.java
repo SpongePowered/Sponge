@@ -22,13 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.level.portal;
+package org.spongepowered.forge.mixin.core.world.entity;
 
-import net.minecraft.world.level.portal.PortalForcer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.entity.Entity;
+import net.minecraftforge.common.util.ITeleporter;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.common.bridge.world.level.portal.PlatformPortalForcerBridge;
+import org.spongepowered.asm.mixin.Overwrite;
+import org.spongepowered.common.bridge.world.entity.EntityBridge;
+import org.spongepowered.common.world.portal.PortalLogic;
 
-@Mixin(PortalForcer.class)
-public abstract class PortalForcerMixin implements PlatformPortalForcerBridge {
+@Mixin(Entity.class)
+public abstract class EntityMixin_Forge {
+
+    /**
+     * @author dualspiral - 8th August 2021, Minecraft 1.16.5
+     * @reason Redirects to our handling so we have common logic with Vanilla.
+     */
+    @Overwrite
+    @Nullable
+    public Entity changeDimension(final ServerLevel level, final ITeleporter teleporter) {
+        return ((EntityBridge) this).bridge$changeDimension(level, (PortalLogic) teleporter);
+    }
 
 }

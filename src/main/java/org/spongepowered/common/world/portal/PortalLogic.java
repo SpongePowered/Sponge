@@ -22,28 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.bridge.world.level.portal;
+package org.spongepowered.common.world.portal;
 
-import java.util.function.Function;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.level.portal.PortalForcer;
+import net.minecraft.world.level.portal.PortalInfo;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.cause.entity.MovementType;
+import org.spongepowered.api.world.portal.PortalType;
 
-/**
- * Bridge methods designed as hooks for various methods called on a {@link PortalForcer}.
- *
- * <p>The Forge platform adds a mod implementable "PortalForcer" that is meant to be passed to
- * methods where an {@link Entity} is changing dimensions. This bridge is modeled after that
- * hook</p>
- */
-public interface PlatformPortalForcerBridge {
+import java.util.function.Function;
 
-    default Entity bridge$placeEntity(final Entity entity, final ServerLevel fromWorld, final ServerLevel toWorld, final float yaw,
-        final Function<Boolean, Entity> repositionEntity) {
-        return repositionEntity.apply(true);
-    }
+public interface PortalLogic {
 
-    default boolean bridge$isVanilla() {
-        return this.getClass().equals(PortalForcer.class);
-    }
+    // Matches Forge ITeleporter
+    @Nullable PortalInfo getPortalInfo(Entity entity, ServerLevel targetWorld, Function<ServerLevel, PortalInfo> defaultPortalInfo);
+
+    // Matches Forge ITeleporter
+    // Implementor note: the final function Boolean is true if a portal exists
+    @Nullable Entity placeEntity(Entity entity, ServerLevel currentWorld, ServerLevel targetWorld, float yRot, Function<Boolean, Entity> teleportLogic);
+
+    // Matches Forge ITeleporter
+    // This isn't if it's a vanilla portal - it's if it's vanilla(ish) logic.
+    boolean isVanilla();
+
+    MovementType getMovementType();
+
+    PortalType getPortalType();
+
 }
