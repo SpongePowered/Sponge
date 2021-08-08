@@ -22,41 +22,19 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.forge.mixin.core.minecraftforge.fml;
+package org.spongepowered.forge.accessor.fml.javafmlmod;
 
-import net.minecraftforge.common.MinecraftForge;
 import net.minecraftforge.fml.javafmlmod.FMLModContainer;
+import net.minecraftforge.forgespi.language.ModFileScanData;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
-import org.spongepowered.asm.mixin.injection.At;
-import org.spongepowered.asm.mixin.injection.Inject;
-import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
-import org.spongepowered.forge.launch.event.ForgeEventManager;
+import org.spongepowered.asm.mixin.gen.Accessor;
 
-@Mixin(value = FMLModContainer.class, remap = false)
-public abstract class FMLModContainerMixin_Forge extends ModContainerMixin_Forge {
+@Mixin(FMLModContainer.class)
+public interface FMLModContainerAccessor {
 
-    // @formatter:off
-    @Shadow private Object modInstance;
-    // @formatter:on
+    @Accessor("scanResults") ModFileScanData accessor$scanResults();
 
-    // TODO Need to figure out a way to make constructMod public, this is a nasty hack
-    @Inject(method = "constructMod", at = @At("HEAD"), cancellable = true)
-    private void forge$skipConstructModIfNotThisClass(final CallbackInfo ci) {
-        if (FMLModContainer.class != (Class) this.getClass()) {
-            ci.cancel();
-        }
-    }
+    @Accessor("modClass") Class<?> accessor$modClass();
 
-    @Inject(method = "constructMod", at = @At("TAIL"))
-    private void forge$registerModForSpongeListeners(final CallbackInfo ci) {
-        if (this.modInstance != null) {
-            ((ForgeEventManager) MinecraftForge.EVENT_BUS).registerListeners(this, this.modInstance);
-        }
-    }
-
-    @Override
-    public Object instance() {
-        return this.modInstance;
-    }
+    @Accessor("modInstance") void accessor$setModInstance(Object instance);
 }

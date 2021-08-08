@@ -31,6 +31,8 @@ import net.minecraftforge.fml.loading.moddiscovery.NightConfigWrapper;
 import net.minecraftforge.forgespi.language.IConfigurable;
 import net.minecraftforge.forgespi.language.IModFileInfo;
 import net.minecraftforge.forgespi.locating.IModFile;
+import net.minecraftforge.forgespi.locating.IModLocator;
+import net.minecraftforge.forgespi.locating.ModFileFactory;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.forge.applaunch.loading.metadata.PluginFileConfigurable;
 import org.spongepowered.plugin.metadata.PluginMetadata;
@@ -108,6 +110,10 @@ public final class ModFileParsers {
         }
 
         return modFileInfo;
+    }
+
+    public static ModFile newPluginInstance(final Path path, final IModLocator locator, final String fileName) {
+        return (ModFile) ModFileFactory.FACTORY.build(path, locator, file -> ModFileParsers.pluginMetadataParser(fileName, file));
     }
 
     private ModFileParsers() {

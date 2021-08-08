@@ -66,6 +66,11 @@ public final class PluginFileConfigurable implements IConfigurable {
             return (Optional<T>) Optional.of("1.0");
         }
 
+        if ("license".equals(query)) {
+            // TODO PluginMetadata will require a "license" field
+            return (Optional<T>) Optional.of("MIT");
+        }
+
         if (key.length == 2) {
             final String plugin = key[1];
             final PluginMetadata metadata = this.container.metadata(plugin).orElse(null);

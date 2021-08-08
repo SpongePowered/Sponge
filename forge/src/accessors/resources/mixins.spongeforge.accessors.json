@@ -3,6 +3,7 @@
     "parent": "mixins.sponge.parent.json",
     "package": "org.spongepowered.forge.accessor",
     "mixins": [
-        "fml.ModListAccessor"
+        "fml.ModListAccessor",
+        "fml.javafmlmod.FMLModContainerAccessor"
     ]
 }

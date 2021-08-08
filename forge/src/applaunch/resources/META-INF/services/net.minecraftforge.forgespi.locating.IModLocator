@@ -1,1 +1,2 @@
 org.spongepowered.forge.applaunch.loading.moddiscovery.ForgeBootstrap
+org.spongepowered.forge.applaunch.loading.moddiscovery.locator.ClasspathPluginLocator

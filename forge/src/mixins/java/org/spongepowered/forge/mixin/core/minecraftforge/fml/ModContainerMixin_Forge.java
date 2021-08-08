@@ -27,6 +27,8 @@ package org.spongepowered.forge.mixin.core.minecraftforge.fml;
 import net.minecraftforge.fml.ModContainer;
 import net.minecraftforge.fml.loading.moddiscovery.ModInfo;
 import net.minecraftforge.forgespi.language.IModInfo;
+import org.apache.logging.log4j.LogManager;
+import org.apache.logging.log4j.Logger;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.Shadow;
@@ -36,13 +38,18 @@ import org.spongepowered.forge.launch.ForgeLaunch;
 import org.spongepowered.plugin.PluginContainer;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
+import java.util.function.Supplier;
+
 @Mixin(value = ModContainer.class, remap = false)
 public abstract class ModContainerMixin_Forge implements ModContainerBridge, PluginContainer {
 
     // @formatter:off
     @Shadow @Final protected IModInfo modInfo;
+    @Shadow @Final protected String modId;
     // @formatter:on
 
+    @Shadow protected Supplier<?> contextExtension;
+    private Logger forge$logger;
     private PluginMetadata forge$pluginMetadata;
 
     @Override
@@ -57,5 +64,19 @@ public abstract class ModContainerMixin_Forge implements ModContainerBridge, Plu
     @Override
     public void bridge$setPluginMetadata(final PluginMetadata metadata) {
         this.forge$pluginMetadata = metadata;
+    }
+
+    @Override
+    public Logger logger() {
+        if (this.forge$logger == null) {
+            this.forge$logger = LogManager.getLogger(this.modId);
+        }
+
+        return this.forge$logger;
+    }
+
+    @Override
+    public Object instance() {
+        return this.contextExtension.get();
     }
 }

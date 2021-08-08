@@ -25,10 +25,6 @@
 package org.spongepowered.forge.applaunch.loading.metadata;
 
 import net.minecraftforge.forgespi.language.IConfigurable;
-import net.minecraftforge.forgespi.language.IModInfo;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
 import java.util.Collections;
@@ -51,11 +47,11 @@ public final class PluginMetadataConfigurable implements IConfigurable {
             return Optional.empty();
         }
         final String query = key[0];
-        if ("modid".equals(query)) {
+        if ("modId".equals(query)) {
             return Optional.of((T) this.metadata.id());
         }
         if ("version".equals(query)) {
-            return Optional.of((T) this.versionToRange(this.metadata));
+            return Optional.of((T) this.metadata.version());
         }
         if ("displayName".equals(query)) {
             return (Optional<T>) this.metadata.name();
@@ -69,14 +65,5 @@ public final class PluginMetadataConfigurable implements IConfigurable {
     @Override
     public List<? extends IConfigurable> getConfigList(final String... key) {
         return Collections.emptyList();
-    }
-
-    private VersionRange versionToRange(final PluginMetadata metadata) {
-        try {
-            return VersionRange.createFromVersionSpec(metadata.version());
-        } catch (InvalidVersionSpecificationException e) {
-            AppLaunch.logger().error("Plugin '{}' with version '{}' violates maven specification", metadata.id(), metadata.version());
-            return IModInfo.UNBOUNDED;
-        }
     }
 }

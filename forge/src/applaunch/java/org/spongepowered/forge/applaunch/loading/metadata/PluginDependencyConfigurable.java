@@ -26,9 +26,6 @@ package org.spongepowered.forge.applaunch.loading.metadata;
 
 import net.minecraftforge.forgespi.language.IConfigurable;
 import net.minecraftforge.forgespi.language.IModInfo;
-import org.apache.maven.artifact.versioning.InvalidVersionSpecificationException;
-import org.apache.maven.artifact.versioning.VersionRange;
-import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.plugin.metadata.PluginDependency;
 import org.spongepowered.plugin.metadata.PluginMetadata;
 
@@ -55,20 +52,20 @@ public final class PluginDependencyConfigurable implements IConfigurable {
         }
 
         final String query = key[0];
-        if ("modid".equals(query)) {
+        if ("modId".equals(query)) {
             return (Optional<T>) Optional.of(this.dependency.id());
         }
         if ("mandatory".equals(query)) {
             return (Optional<T>) Optional.of(!this.dependency.optional());
         }
         if ("versionRange".equals(query)) {
-            return (Optional<T>) Optional.of(this.versionToRange(this.metadata, this.dependency));
+            return (Optional<T>) Optional.of(this.dependency.version());
         }
         if ("ordering".equals(query)) {
-            return (Optional<T>) Optional.of(this.loadToOrdering(this.dependency.loadOrder()));
+            return (Optional<T>) Optional.of(this.loadToOrdering(this.dependency.loadOrder()).toString());
         }
         if ("side".equals(query)) {
-            return (Optional<T>) Optional.of(IModInfo.DependencySide.BOTH);
+            return (Optional<T>) Optional.of(IModInfo.DependencySide.BOTH.toString());
         }
         return Optional.empty();
     }
@@ -84,15 +81,5 @@ public final class PluginDependencyConfigurable implements IConfigurable {
         }
 
         return IModInfo.Ordering.NONE;
-    }
-
-    private VersionRange versionToRange(final PluginMetadata metadata, final PluginDependency dependency) {
-        try {
-            return VersionRange.createFromVersionSpec(dependency.version());
-        } catch (InvalidVersionSpecificationException e) {
-            AppLaunch.logger().error("Dependency '{}' specified in plugin '{}' with version '{}' violates maven specification",
-                    dependency.id(), metadata.id(), dependency.version());
-            return IModInfo.UNBOUNDED;
-        }
     }
 }

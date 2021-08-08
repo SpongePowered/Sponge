@@ -41,7 +41,7 @@ public final class DummySpongeModLoader implements IModLanguageProvider.IModLang
     @Override
     public <T> T loadMod(final IModInfo info, final ClassLoader modClassLoader, final ModFileScanData modFileScanResults) {
         try {
-            final Class<?> mcModClass = Class.forName("org.spongepowered.forge.applaunch.loading.container.DummySpongeModContainer", true,
+            final Class<?> mcModClass = Class.forName("org.spongepowered.forge.launch.plugin.DummySpongeModContainer", true,
                     modClassLoader);
             return (T)mcModClass.getConstructor(String.class, IModInfo.class).newInstance(this.dummyInstance, info);
         } catch (final Exception ex) {
