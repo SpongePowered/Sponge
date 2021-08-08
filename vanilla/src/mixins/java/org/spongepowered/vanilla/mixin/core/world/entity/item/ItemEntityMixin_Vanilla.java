@@ -29,7 +29,7 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.Constant;
 import org.spongepowered.asm.mixin.injection.ModifyConstant;
 import org.spongepowered.common.config.SpongeGameConfigs;
-import org.spongepowered.vanilla.mixin.core.entity.player.EntityMixin_Vanilla;
+import org.spongepowered.vanilla.mixin.core.world.entity.EntityMixin_Vanilla;
 
 @Mixin(ItemEntity.class)
 public abstract class ItemEntityMixin_Vanilla extends EntityMixin_Vanilla {

@@ -22,43 +22,31 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.vehicle;
+package org.spongepowered.common.world.portal;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.api.entity.Entity;
+import org.spongepowered.api.util.Axis;
+import org.spongepowered.api.world.portal.Portal;
+import org.spongepowered.api.world.portal.PortalType;
+import org.spongepowered.api.world.server.ServerLocation;
 
-import javax.annotation.Nullable;
+import java.util.Optional;
 
-@Mixin(AbstractMinecartContainer.class)
-public abstract class AbstractMinecartContainerMixin extends AbstractMinecartMixin {
-
-    // @formatter:off
-    @Shadow private boolean dropEquipment;
-    // @formatter:on
+public final class UnknownPortalType implements PortalType {
 
     @Override
-    protected void impl$onPreWorldChangeCanceled() {
-        this.dropEquipment = true;
+    public boolean generatePortal(final ServerLocation location, final Axis axis) {
+        return false;
     }
 
-    /**
-     * @author Zidane - June 2019 - 1.12.2
-     * @author i509VCB - Feb 2020 - 1.14.4
-     * @author dualspiral - 24th July 2021 - 1.16.5
-     * @reason Only have this Minecart not drop contents if we actually changed dimension
-     */
     @Override
-    @Nullable
-    protected @org.checkerframework.checker.nullness.qual.Nullable Entity impl$postProcessChangeDimension(final Entity entity) {
-        if (!(entity instanceof AbstractMinecartContainer)) {
-            // it was false, if the entity returned by the teleporter is obviously not
-            // representing this, this should drop its equipment again.
-            this.dropEquipment = true;
-        }
+    public Optional<Portal> findPortal(final ServerLocation location) {
+        return Optional.empty();
+    }
 
-        return entity;
+    @Override
+    public boolean teleport(final Entity entity, final ServerLocation destination, final boolean generateDestinationPortal) {
+        return false;
     }
 
 }

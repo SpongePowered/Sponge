@@ -22,43 +22,32 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.mixin.core.world.entity.vehicle;
+package org.spongepowered.forge.mixin.core.api.event.entity;
 
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraftforge.event.entity.player.PlayerEvent;
+import net.minecraftforge.eventbus.api.Event;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
 import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Shadow;
+import org.spongepowered.forge.mixin.core.api.event.EventMixin_Forge;
 
-import javax.annotation.Nullable;
+import java.util.Collection;
+import java.util.Collections;
 
-@Mixin(AbstractMinecartContainer.class)
-public abstract class AbstractMinecartContainerMixin extends AbstractMinecartMixin {
-
-    // @formatter:off
-    @Shadow private boolean dropEquipment;
-    // @formatter:on
+@Mixin(ChangeEntityWorldEvent.Post.class)
+public interface ChangeEventWorldEvent_PostMixin_Forge extends EventMixin_Forge {
 
     @Override
-    protected void impl$onPreWorldChangeCanceled() {
-        this.dropEquipment = true;
-    }
+    default @Nullable Collection<? extends Event> bridge$createForgeEvents() {
+        if (((ChangeEntityWorldEvent.Post) this).entity() instanceof ServerPlayer) {
+            final ServerPlayer player = (ServerPlayer) ((ChangeEntityWorldEvent.Post) this).entity();
 
-    /**
-     * @author Zidane - June 2019 - 1.12.2
-     * @author i509VCB - Feb 2020 - 1.14.4
-     * @author dualspiral - 24th July 2021 - 1.16.5
-     * @reason Only have this Minecart not drop contents if we actually changed dimension
-     */
-    @Override
-    @Nullable
-    protected @org.checkerframework.checker.nullness.qual.Nullable Entity impl$postProcessChangeDimension(final Entity entity) {
-        if (!(entity instanceof AbstractMinecartContainer)) {
-            // it was false, if the entity returned by the teleporter is obviously not
-            // representing this, this should drop its equipment again.
-            this.dropEquipment = true;
+            return Collections.singletonList(new PlayerEvent.PlayerChangedDimensionEvent(player,
+                    ((ServerLevel) ((ChangeEntityWorldEvent.Post) this).originalWorld()).dimension(),
+                    ((ServerLevel) ((ChangeEntityWorldEvent.Post) this).destinationWorld()).dimension()));
         }
-
-        return entity;
+        return null;
     }
-
 }

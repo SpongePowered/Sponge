@@ -109,6 +109,4 @@ public interface EntityAccessor {
 
     @Invoker("getRelativePortalPosition") Vec3 invoker$getRelativePortalPosition(Direction.Axis axis, BlockUtil.FoundRectangle result);
 
-    @Invoker("findDimensionEntryPoint") PortalInfo invoker$findDimensionEntryPoint(ServerLevel targetWorld);
-
 }

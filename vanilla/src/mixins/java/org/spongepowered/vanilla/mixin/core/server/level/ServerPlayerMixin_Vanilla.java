@@ -33,8 +33,8 @@ import org.spongepowered.common.bridge.server.level.ServerPlayerBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.network.packet.ChangeViewerEnvironmentPacket;
 import org.spongepowered.common.network.packet.SpongePacketHandler;
-import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
-import org.spongepowered.vanilla.mixin.core.entity.player.EntityMixin_Vanilla;
+import org.spongepowered.common.world.portal.PortalLogic;
+import org.spongepowered.vanilla.mixin.core.world.entity.EntityMixin_Vanilla;
 
 import javax.annotation.Nullable;
 
@@ -66,7 +66,7 @@ public abstract class ServerPlayerMixin_Vanilla extends EntityMixin_Vanilla impl
     @Overwrite
     @Nullable
     public net.minecraft.world.entity.Entity changeDimension(final ServerLevel target) {
-        return this.bridge$changeDimension(target, VanillaPortalPlatformTeleporter.getNetherInstance());
+        return this.bridge$changeDimension(target, (PortalLogic) target.getPortalForcer());
     }
 
 }

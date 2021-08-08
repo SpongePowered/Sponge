@@ -31,14 +31,14 @@ import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
+import org.spongepowered.common.world.portal.VanillaPortalLogic;
 
 @Mixin(EndPortalBlock.class)
 public abstract class EndPortalBlockMixin {
 
     @Redirect(method = "entityInside", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;changeDimension(Lnet/minecraft/server/level/ServerLevel;)Lnet/minecraft/world/entity/Entity;"))
     private Entity impl$useEndPortalTeleporterWhenTeleporting(final Entity entity, final ServerLevel p_241206_1_) {
-        return ((EntityBridge) entity).bridge$changeDimension(p_241206_1_, VanillaPortalPlatformTeleporter.getEndInstance());
+        return ((EntityBridge) entity).bridge$changeDimension(p_241206_1_, VanillaPortalLogic.getEndInstance());
     }
 
 }

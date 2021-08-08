@@ -98,7 +98,6 @@ import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
 import org.spongepowered.api.util.Tristate;
 import org.spongepowered.api.util.locale.Locales;
-import org.spongepowered.api.world.server.ServerLocation;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.asm.mixin.Final;
 import org.spongepowered.asm.mixin.Mixin;
@@ -132,7 +131,7 @@ import org.spongepowered.common.mixin.core.world.entity.player.PlayerMixin;
 import org.spongepowered.common.util.LocaleCache;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.common.world.border.PlayerOwnBorderListener;
-import org.spongepowered.common.world.portal.PlatformTeleporter;
+import org.spongepowered.common.world.portal.PortalLogic;
 import org.spongepowered.math.vector.Vector3d;
 
 import java.util.HashSet;
@@ -465,8 +464,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
     }
 
     @Override
-    protected final void impl$setChangingDimension() {
-        this.isChangingDimension = true;
+    protected final void impl$onChangingDimension(final ServerLevel target) {
+        if (this.level == target) {
+            this.isChangingDimension = true;
+        }
     }
 
     @SuppressWarnings("ConstantConditions")
@@ -498,10 +499,10 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
 
     @SuppressWarnings("ConstantConditions")
     @Override
-    protected final void impl$validateEntityAfterTeleport(final Entity e, final PlatformTeleporter platformTeleporter) {
+    protected final void impl$validateEntityAfterTeleport(final Entity e, final PortalLogic portalLogic) {
         if (e != (Object) this) {
             throw new IllegalArgumentException(String.format("Teleporter %s "
-                    + "did not return the expected player entity: got %s, expected PlayerEntity %s", platformTeleporter, e, this));
+                    + "did not return the expected player entity: got %s, expected PlayerEntity %s", portalLogic, e, this));
         }
     }
 

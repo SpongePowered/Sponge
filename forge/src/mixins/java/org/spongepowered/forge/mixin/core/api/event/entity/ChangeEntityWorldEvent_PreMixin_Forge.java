@@ -22,29 +22,28 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.vanilla.mixin.core.world.entity.vehicle;
+package org.spongepowered.forge.mixin.core.api.event.entity;
 
-import org.spongepowered.asm.mixin.Mixin;
-import org.spongepowered.asm.mixin.Overwrite;
-import org.spongepowered.common.bridge.world.entity.EntityBridge;
-import org.spongepowered.common.world.portal.VanillaPortalPlatformTeleporter;
-
-import javax.annotation.Nullable;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.vehicle.AbstractMinecartContainer;
+import net.minecraftforge.event.entity.EntityTravelToDimensionEvent;
+import net.minecraftforge.eventbus.api.Event;
+import org.checkerframework.checker.nullness.qual.Nullable;
+import org.spongepowered.api.event.entity.ChangeEntityWorldEvent;
+import org.spongepowered.asm.mixin.Mixin;
+import org.spongepowered.forge.mixin.core.api.event.EventMixin_Forge;
 
-@Mixin(AbstractMinecartContainer.class)
-public abstract class AbstractMinecartContainerMixin_Vanilla implements EntityBridge {
+import java.util.Collection;
+import java.util.Collections;
 
-    /**
-     * @author dualspiral - 21 December 2020
-     * @reason Redirect to our platform teleporter method
-     */
-    @Overwrite
-    @Nullable
-    public Entity changeDimension(final ServerLevel serverWorld) {
-        return this.bridge$changeDimension(serverWorld, VanillaPortalPlatformTeleporter.getNetherInstance());
+@Mixin(ChangeEntityWorldEvent.Pre.class)
+public interface ChangeEntityWorldEvent_PreMixin_Forge extends EventMixin_Forge {
+
+    @Override
+    default @Nullable Collection<? extends Event> bridge$createForgeEvents() {
+        final ChangeEntityWorldEvent.Pre thisEvent = (ChangeEntityWorldEvent.Pre) this;
+        return Collections.singleton(
+                new EntityTravelToDimensionEvent((Entity) thisEvent.entity(), ((ServerLevel) thisEvent.destinationWorld()).dimension()));
     }
 
 }
