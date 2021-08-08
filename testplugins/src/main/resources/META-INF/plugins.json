@@ -27,7 +27,7 @@
             "name": "Channel Test",
             "version": "8.0.0",
             "main-class": "org.spongepowered.test.channel.ChannelTest",
-            "description": "Testing ChangeBlock rollbacks",
+            "description": "Testing Channels",
             "links": {
                 "homepage": "https://www.spongepowered.org",
                 "source": "https://www.spongepowered.org/source",
