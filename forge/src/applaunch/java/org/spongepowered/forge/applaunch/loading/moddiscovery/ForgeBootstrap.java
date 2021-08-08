@@ -32,7 +32,6 @@ import net.minecraftforge.fml.loading.moddiscovery.ModFile;
 import net.minecraftforge.forgespi.locating.IModFile;
 import net.minecraftforge.forgespi.locating.IModLocator;
 import net.minecraftforge.forgespi.locating.ModFileFactory;
-import org.spongepowered.api.Sponge;
 import org.spongepowered.common.applaunch.AppLaunch;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileFactory;
 import org.spongepowered.forge.applaunch.loading.moddiscovery.library.LibraryModFileInfoParser;
@@ -55,10 +54,7 @@ public final class ForgeBootstrap extends AbstractJarFileLocator {
     // does this even make sense?
     private static final String[] EXCLUDED_PATHS = {
         "org/spongepowered/common/applaunch/",
-        "org/spongepowered/forge/applaunch/loading/metadata",
-        "org/spongepowered/forge/applaunch/loading/moddiscovery",
-        "org/spongepowered/forge/applaunch/plugin",
-        "org/spongepowered/forge/applaunch/service",
+        "org/spongepowered/forge/applaunch/",
     };
 
     @Override

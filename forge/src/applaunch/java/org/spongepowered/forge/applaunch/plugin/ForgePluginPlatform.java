@@ -32,6 +32,8 @@ import org.apache.logging.log4j.Logger;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.applaunch.plugin.PluginPlatform;
 
+import java.io.IOException;
+import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.util.ArrayList;
@@ -88,6 +90,13 @@ public final class ForgePluginPlatform implements PluginPlatform {
     }
 
     public void init() {
-        this.pluginDirectories.add(Paths.get(SpongeConfigs.getCommon().get().general.pluginsDir.getParsed()));
+        final Path alternativePluginsDirectory = Paths.get(SpongeConfigs.getCommon().get().general.pluginsDir.getParsed());
+        try {
+            Files.createDirectories(alternativePluginsDirectory);
+        } catch (final IOException e) {
+            throw new RuntimeException(e);
+        }
+
+        this.pluginDirectories.add(alternativePluginsDirectory);
     }
 }

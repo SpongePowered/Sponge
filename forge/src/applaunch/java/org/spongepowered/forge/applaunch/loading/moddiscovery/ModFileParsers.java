@@ -84,7 +84,7 @@ public final class ModFileParsers {
         AppLaunch.logger().debug("Considering plugin file candidate {}", modFile.getFilePath());
         final Path metadataFile = modFile.getLocator().findPath(modFile, "META-INF/" + fileName + ".json");
         if (Files.notExists(metadataFile)) {
-            AppLaunch.logger().warn("Plugin file '{}' is missing a 'plugins.json' metadata file in META-INF", modFile);
+            AppLaunch.logger().debug("Plugin file '{}' is missing a 'plugins.json' metadata file in META-INF", modFile);
             return null;
         }
         try {
