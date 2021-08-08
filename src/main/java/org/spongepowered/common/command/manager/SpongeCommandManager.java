@@ -365,6 +365,14 @@ public abstract class SpongeCommandManager implements CommandManager.Mutable {
                     this.prettyPrintThrowableError(exception, command, args, cause);
                 }
                 throw exception;
+            } catch (final CommandSyntaxException cse) {
+                final CommandResult errorResult = CommandResult.builder().result(0)
+                        .error(SpongeAdventure.asAdventure(cse.getRawMessage())).build();
+                this.postExecuteCommandPostEvent(cause, originalArgs, args, originalCommand, command, errorResult);
+                if (SpongeCommandManager.ALWAYS_PRINT_STACKTRACES) {
+                    this.prettyPrintThrowableError(cse, command, args, cause);
+                }
+                throw cse;
             } catch (final net.minecraft.commands.CommandRuntimeException ex) {
                 final CommandResult errorResult = CommandResult.builder().result(0).error(
                     SpongeAdventure.asAdventure(ex.getComponent())).build();
