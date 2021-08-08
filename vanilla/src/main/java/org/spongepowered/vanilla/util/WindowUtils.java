@@ -66,7 +66,7 @@ public final class WindowUtils {
                 GLFW.glfwSetWindowIcon(windowRef, glfwImages);
                 STBImage.stbi_image_free(imgBuffer);
             } catch (IOException | NullPointerException var29) {
-                System.err.println("Failed to load forge logo");
+                System.err.println("Failed to load spongie logo");
             }
         }
     }
