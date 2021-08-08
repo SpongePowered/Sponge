@@ -93,6 +93,6 @@ public final class ForgeLaunch extends Launch {
     }
 
     public PluginMetadata metadataForMod(final ModInfo info) {
-        return PluginMetadataUtils.generateForMod(info);
+        return PluginMetadataUtils.modToPlugin(info);
     }
 }

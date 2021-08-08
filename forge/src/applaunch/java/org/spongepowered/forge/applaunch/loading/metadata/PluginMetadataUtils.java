@@ -39,7 +39,7 @@ import java.util.List;
  */
 public final class PluginMetadataUtils {
 
-    public static PluginMetadata generateForMod(final ModInfo info) {
+    public static PluginMetadata modToPlugin(final ModInfo info) {
         final PluginMetadata.Builder builder = PluginMetadata.builder();
         builder
                 .loader(info.getOwningFile().getModLoader())
@@ -57,7 +57,7 @@ public final class PluginMetadataUtils {
             final PluginDependency.Builder depBuilder = PluginDependency.builder();
             depBuilder
                     .id(dependency.getModId())
-                    .loadOrder(PluginMetadataUtils.fromOrdering(dependency.getOrdering()))
+                    .loadOrder(PluginMetadataUtils.orderingToLoad(dependency.getOrdering()))
                     .version(dependency.getVersionRange().toString())
             ;
 
@@ -71,7 +71,7 @@ public final class PluginMetadataUtils {
         return builder.build();
     }
 
-    private static PluginDependency.LoadOrder fromOrdering(final IModInfo.Ordering ordering) {
+    private static PluginDependency.LoadOrder orderingToLoad(final IModInfo.Ordering ordering) {
         if (ordering == IModInfo.Ordering.AFTER) {
             return PluginDependency.LoadOrder.AFTER;
         }
