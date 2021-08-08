@@ -24,16 +24,25 @@
  */
 package org.spongepowered.vanilla.mixin.core.client;
 
+import com.mojang.blaze3d.platform.Window;
 import net.minecraft.client.Minecraft;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.packs.PackType;
+import net.minecraft.server.packs.VanillaPackResources;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
+import org.spongepowered.asm.mixin.injection.Redirect;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.common.bridge.client.MinecraftBridge;
 import org.spongepowered.common.entity.player.ClientType;
 import org.spongepowered.common.launch.Launch;
 import org.spongepowered.common.launch.Lifecycle;
 import org.spongepowered.vanilla.client.VanillaClient;
+import org.spongepowered.vanilla.util.WindowUtils;
+
+import java.io.IOException;
+import java.io.InputStream;
 
 @Mixin(Minecraft.class)
 public abstract class MinecraftMixin_Vanilla implements MinecraftBridge, VanillaClient {
@@ -52,5 +61,19 @@ public abstract class MinecraftMixin_Vanilla implements MinecraftBridge, Vanilla
 
         lifecycle.establishClientRegistries(this);
         lifecycle.callStartingEngineEvent(this);
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/packs/VanillaPackResources;getResource(Lnet/minecraft/server/packs/PackType;Lnet/minecraft/resources/ResourceLocation;)Ljava/io/InputStream;"))
+    private InputStream vanilla$skipLoadingVanillaIcon(final VanillaPackResources vanillaPackResources, final PackType param0, final ResourceLocation param1) {
+        return null;
+    }
+
+    @Redirect(method = "<init>", at = @At(value = "INVOKE", target = "Lcom/mojang/blaze3d/platform/Window;setIcon(Ljava/io/InputStream;Ljava/io/InputStream;)V"))
+    private void vanilla$useSpongeIcon(final Window window, final InputStream param0, final InputStream param1) {
+        try (final InputStream stream = this.getClass().getClassLoader().getResourceAsStream("spongie_icon.png")) {
+            WindowUtils.setWindowIcon(window.getWindow(), stream);
+        } catch (final IOException e) {
+            e.printStackTrace();
+        }
     }
 }
