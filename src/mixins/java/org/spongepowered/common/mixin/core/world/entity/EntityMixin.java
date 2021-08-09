@@ -204,6 +204,8 @@ public abstract class EntityMixin implements EntityBridge, PlatformEntityBridge,
     @Shadow protected abstract boolean shadow$fireImmune();
     // @formatter:on
 
+    @Shadow public abstract boolean isPassenger();
+
     private boolean impl$isConstructing = true;
     private boolean impl$vanishPreventsTargeting = false;
     private boolean impl$isVanished = false;

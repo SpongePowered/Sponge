@@ -93,6 +93,7 @@ import org.spongepowered.api.event.entity.MoveEntityEvent;
 import org.spongepowered.api.event.entity.RotateEntityEvent;
 import org.spongepowered.api.event.entity.living.player.KickPlayerEvent;
 import org.spongepowered.api.event.entity.living.player.PlayerChangeClientSettingsEvent;
+import org.spongepowered.api.event.entity.living.player.SteerVehicleEvent;
 import org.spongepowered.api.registry.RegistryTypes;
 import org.spongepowered.api.scoreboard.Scoreboard;
 import org.spongepowered.api.service.permission.PermissionService;
@@ -830,6 +831,30 @@ public abstract class ServerPlayerMixin extends PlayerMixin implements SubjectBr
             }
         }
     }
+
+    @Inject(method = "setPlayerInput", at = @At("HEAD"), cancellable = true)
+    public void onSetPlayerInput(final float sway, final float surge, final boolean jumping, final boolean dismount, final CallbackInfo ci) {
+        if(isPassenger()) {
+            if(sway == this.xxa && surge == this.zza && jumping == this.jumping) {
+                return;
+            }
+
+            final SteerVehicleEvent event = SpongeEventFactory.createSteerVehicleEvent(
+                    PhaseTracker.getCauseStackManager().currentCause(),
+                    (org.spongepowered.api.entity.living.player.server.ServerPlayer) this,
+                    jumping,
+                    surge,
+                    sway
+            );
+
+            Sponge.eventManager().post(event);
+
+            if(event.isCancelled()) {
+                ci.cancel();
+            }
+        }
+    }
+
 }
 
 
