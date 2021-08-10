@@ -123,11 +123,10 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/animal/horse/AbstractHorse;openInventory(Lnet/minecraft/world/entity/player/Player;)V"))
     private void impl$onHandlePlayerCommandOpenInventory(final AbstractHorse abstractHorse, final Player player) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        final TransactionalCaptureSupplier transactor = context.getTransactor();
-        try (final EffectTransactor ignored = transactor.logOpenInventory(player)) {
+        try (final EffectTransactor ignored = context.getTransactor().logOpenInventory(player)) {
             abstractHorse.openInventory(player);
+            context.getTransactor().logContainerSet(player);
         }
-        // TrackingUtil.processBlockCaptures called by OpenInventoryState
     }
 
     @Redirect(method = "handleContainerClose",
@@ -138,29 +137,28 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         try (final EffectTransactor ignored = transactor.logCloseInventory(player, true)) {
             this.player.doCloseContainer();
         }
-        // TrackingUtil.processBlockCaptures called by CloseWindowState
     }
 
     @Redirect(method = "handleInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/world/entity/Entity;interactAt(Lnet/minecraft/world/entity/player/Player;Lnet/minecraft/world/phys/Vec3;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult impl$onInteractAt(final Entity entity, final Player param0, final Vec3 param1, final InteractionHand param2) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, SpongeEventFactory::createChangeInventoryEvent)) {
-            final InteractionResult result = entity.interactAt(param0, param1, param2);
+        final InteractionResult result = entity.interactAt(param0, param1, param2);
+        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(this.player, SpongeEventFactory::createChangeInventoryEvent)) {
             param0.inventoryMenu.broadcastChanges();
-            return result;
         }
+        return result;
     }
 
     @Redirect(method = "handleInteract", at = @At(value = "INVOKE", target = "Lnet/minecraft/server/level/ServerPlayer;interactOn(Lnet/minecraft/world/entity/Entity;Lnet/minecraft/world/InteractionHand;)Lnet/minecraft/world/InteractionResult;"))
     private InteractionResult impl$onInteractOn(final ServerPlayer player, final Entity param0, final InteractionHand param1) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final InteractionResult result = player.interactOn(param0, param1);
         try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, SpongeEventFactory::createChangeInventoryEvent)) {
-            final InteractionResult result = player.interactOn(param0, param1);
             player.inventoryMenu.broadcastChanges();
-            return result;
         }
+        return result;
     }
 
     @SuppressWarnings("UnresolvedMixinReference")

@@ -140,7 +140,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     This is achieved through captureNeighborNotification and logTileChange.
      */
 
-    @SuppressWarnings("unchecked")
     public EffectTransactor pushEffect(final ResultingTransactionBySideEffect effect) {
         final GameTransaction parentTransaction = Optional.ofNullable(this.effect)
             .map(child -> child.tail)
@@ -358,6 +357,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         final OpenMenuTransaction transaction = new OpenMenuTransaction(player);
         this.logTransaction(transaction);
         return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+    }
+
+    public void logContainerSet(final Player player) {
+        if (this.tail != null) {
+            this.tail.acceptContainerSet(player);
+        }
     }
 
     public EffectTransactor logCloseInventory(final Player player, final boolean clientSource) {

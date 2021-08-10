@@ -34,16 +34,16 @@ import java.util.function.Supplier;
 
 public class ContainerSlotTransaction extends ContainerBasedTransaction {
 
-    private final SlotTransaction transactoin;
+    private final SlotTransaction transaction;
 
     public ContainerSlotTransaction(final Supplier<ResourceKey> worldSupplier, final AbstractContainerMenu menu, final SlotTransaction newTransaction) {
         super(worldSupplier.get(), menu);
-        this.transactoin = newTransaction;
+        this.transaction = newTransaction;
     }
 
     @Override
     List<SlotTransaction> getSlotTransactions() {
-        return Collections.singletonList(this.transactoin);
+        return Collections.singletonList(this.transaction);
     }
 
     @Override

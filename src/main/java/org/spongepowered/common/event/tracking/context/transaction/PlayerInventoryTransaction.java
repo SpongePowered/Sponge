@@ -27,7 +27,6 @@ package org.spongepowered.common.event.tracking.context.transaction;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
@@ -42,7 +41,7 @@ import java.util.Optional;
 public class PlayerInventoryTransaction extends InventoryBasedTransaction {
 
     private final ServerPlayer player;
-    private EventCreator eventCreator;
+    private final EventCreator eventCreator;
 
     public PlayerInventoryTransaction(final Player player, final EventCreator eventCreator) {
         super(((ServerWorld) player.level).key(), (Inventory) player.inventory);
@@ -57,20 +56,20 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
             return Optional.empty();
         }
         final ChangeInventoryEvent event = this.eventCreator.create(cause, this.inventory, slotTransactions);
-        return Optional.ofNullable(event);
+        return Optional.of(event);
     }
 
     @Override
-    public void restore(PhaseContext<@NonNull ?> context, ChangeInventoryEvent event) {
-        PacketPhaseUtil.handleSlotRestore(player, null, event.transactions(), event.isCancelled());
+    public void restore(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
+        PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
     }
 
     @Override
-    public void postProcessEvent(PhaseContext<@NonNull ?> context, ChangeInventoryEvent event) {
-        PacketPhaseUtil.handleSlotRestore(player, null, event.transactions(), event.isCancelled());
+    public void postProcessEvent(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
+        PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
     }
 
     public interface EventCreator {
-        @Nullable ChangeInventoryEvent create(final Cause cause, final Inventory inventory, final List<SlotTransaction> slotTransactions);
+        ChangeInventoryEvent create(final Cause cause, final Inventory inventory, final List<SlotTransaction> slotTransactions);
     }
 }

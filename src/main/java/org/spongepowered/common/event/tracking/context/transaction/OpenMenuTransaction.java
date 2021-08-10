@@ -37,6 +37,7 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
@@ -51,7 +52,7 @@ public class OpenMenuTransaction extends GameTransaction<InteractContainerEvent>
 
     private final ServerPlayer player;
     private final ItemStackSnapshot cursor;
-    private final AbstractContainerMenu menu;
+    private AbstractContainerMenu menu;
 
     public OpenMenuTransaction(final Player player) {
         super(TransactionTypes.INTERACT_CONTAINER_EVENT.get(), ((ServerWorld) player.level).key());
@@ -87,7 +88,7 @@ public class OpenMenuTransaction extends GameTransaction<InteractContainerEvent>
     }
 
     @Override
-    public void postProcessEvent(PhaseContext<@NonNull ?> context, InteractContainerEvent event) {
+    public void postProcessEvent(final PhaseContext<@NonNull ?> context, final InteractContainerEvent event) {
         PacketPhaseUtil.handleCursorRestore(this.player, event.cursorTransaction());
     }
 
@@ -106,5 +107,15 @@ public class OpenMenuTransaction extends GameTransaction<InteractContainerEvent>
 
     }
 
+    @Override
+    public void acceptContainerSet(final Player player) {
+        this.menu = player.containerMenu;
+    }
 
+    @Override
+    public boolean acceptSlotTransaction(
+        final SlotTransaction newTransaction, final Object inventory
+    ) {
+        return true;
+    }
 }

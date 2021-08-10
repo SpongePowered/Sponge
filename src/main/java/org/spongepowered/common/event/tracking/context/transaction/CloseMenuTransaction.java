@@ -106,7 +106,7 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
     @Override
     public boolean acceptSlotTransaction(final SlotTransaction newTransaction, final Object inventory) {
         if (this.menu != inventory) {
-            return false;
+            return this.player.inventoryMenu == inventory;
         }
         if (this.slotTransactions == null) {
             this.slotTransactions = new ArrayList<>();
