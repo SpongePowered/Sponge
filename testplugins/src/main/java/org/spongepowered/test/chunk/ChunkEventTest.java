@@ -63,7 +63,7 @@ public final class ChunkEventTest implements LoadableModule {
 
         @Listener
         public void onChunkLoad(final ChunkEvent.Load event) {
-            Sponge.game().systemSubject().sendMessage(Component.text("Load Chunk " + event.targetChunk().chunkPosition() + " in " + event.worldKey().asString()));
+            Sponge.game().systemSubject().sendMessage(Component.text("Load Chunk " + event.chunk().chunkPosition() + " in " + event.worldKey().asString()));
         }
 
         @Listener
