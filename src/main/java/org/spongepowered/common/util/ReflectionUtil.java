@@ -29,6 +29,7 @@ import static org.apache.commons.lang3.ClassUtils.isAssignable;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.state.BlockBehaviour;
@@ -76,6 +77,9 @@ public final class ReflectionUtil {
         BlockPos.class,
         Entity.class
     };
+    private static final Class<?>[] PLAYER_TOUCH_METHOD_ARGS= {
+        Player.class
+    };
 
     public static boolean isNeighborChangedDeclared(final Class<?> targetClass) {
         return ReflectionUtil.doesMethodExist(
@@ -101,6 +105,15 @@ public final class ReflectionUtil {
             Block.class,
             "stepOn",
             ReflectionUtil.STEP_ON_METHOD_ARGS
+        );
+    }
+
+    public static boolean isPlayerTouchDeclared(final Class<?> targetClass) {
+        return ReflectionUtil.doesMethodExist(
+            targetClass,
+            Entity.class,
+            "playerTouch",
+            ReflectionUtil.PLAYER_TOUCH_METHOD_ARGS
         );
     }
 
