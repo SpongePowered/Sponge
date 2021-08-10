@@ -27,10 +27,12 @@ package org.spongepowered.common.event.tracking.phase.packet;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.util.PrettyPrinter;
 
 import net.minecraft.network.protocol.Packet;
@@ -112,6 +114,20 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
             .add(s + "- %s: %s", "Packet", this.packet)
             .add(s + "- %s: %s", "ItemStackUsed", this.itemUsed);
 
+    }
+
+    @Override
+    public void close() {
+        // Make sure to call any broadcast changes to capture any inventory transactions
+        // for events
+        try (final EffectTransactor ignored = this.getTransactor()
+            .logPlayerInventoryChangeWithEffect(
+                this.packetPlayer,
+                SpongeEventFactory::createChangeInventoryEvent
+            )) {
+            this.packetPlayer.containerMenu.broadcastChanges();
+        }
+        super.close();
     }
 
     @Override
