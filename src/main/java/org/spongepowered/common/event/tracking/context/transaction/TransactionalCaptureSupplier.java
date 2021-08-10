@@ -35,17 +35,9 @@ import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import net.minecraft.world.inventory.ClickType;
 import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.crafting.Recipe;
-import net.minecraft.world.level.Level;
-import net.minecraft.world.level.TickNextTickData;
-import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
@@ -54,40 +46,19 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.event.SpongeEventFactory;
-import org.spongepowered.api.event.cause.entity.SpawnType;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
-import org.spongepowered.api.world.BlockChangeFlag;
-import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
-import org.spongepowered.common.accessor.world.inventory.InventoryMenuAccessor;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.bridge.world.TrackedWorldBridge;
-import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.UnwindingPhaseContext;
 import org.spongepowered.common.event.tracking.context.ICaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.effect.EntityPerformingDropsEffect;
-import org.spongepowered.common.event.tracking.context.transaction.effect.InventoryEffect;
 import org.spongepowered.common.event.tracking.context.transaction.effect.PrepareBlockDrops;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
-import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
-import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
-import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-import org.spongepowered.common.item.util.ItemStackUtil;
-import org.spongepowered.common.util.Constants;
-import org.spongepowered.common.world.BlockChange;
-import org.spongepowered.common.world.SpongeBlockChangeFlag;
 
 import java.lang.ref.WeakReference;
+import java.util.Collections;
 import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
@@ -160,8 +131,19 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
         if (this.head == null) {
             this.head = transaction;
             this.tail = transaction;
-        } else if (this.effect != null) {
-            this.effect.addChild(transaction);
+            return;
+        }
+        if (transaction.canBeAbsorbed()) {
+            final Iterator<GameTransaction<?>> iterator = this.descendingIterator();
+            while (iterator.hasNext()) {
+                final GameTransaction<?> next = iterator.next();
+                if (transaction.absorbByParent(this.context, next)) {
+                    return;
+                }
+            }
+        }
+        if (this.effect != null) {
+            this.effect.addChild(this.context, transaction);
         } else {
             transaction.previous = this.tail;
             if (this.tail != null) {
@@ -500,6 +482,15 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
         if (this.effect != null) {
             this.effect = null;
         }
+    }
+
+    @Override
+    public Iterator<GameTransaction<@NonNull ?>> iterator() {
+        return this.head != null ? new DeepIterator(this.head) : Collections.emptyIterator();
+    }
+
+    public Iterator<GameTransaction<@NonNull ?>> descendingIterator() {
+        return this.tail != null ? new ReverseDeepIterator(this.tail) : Collections.emptyIterator();
     }
 
 }

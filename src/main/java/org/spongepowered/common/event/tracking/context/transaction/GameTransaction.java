@@ -25,12 +25,7 @@
 package org.spongepowered.common.event.tracking.context.transaction;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.level.block.entity.BlockEntity;
+import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.checkerframework.framework.qual.DefaultQualifier;
@@ -43,8 +38,11 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.util.PrettyPrinter;
 
+import java.util.Collections;
 import java.util.Deque;
+import java.util.Iterator;
 import java.util.LinkedList;
+import java.util.NoSuchElementException;
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
@@ -131,17 +129,7 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
 
     public final void markCancelled() {
         this.cancelled = true;
-        if (this.sideEffects != null) {
-            for (final ResultingTransactionBySideEffect sideEffect : this.sideEffects) {
-                if (sideEffect.head != null) {
-                    @Nullable GameTransaction<@NonNull ?> node = sideEffect.head;
-                    while (node != null) {
-                        node.markCancelled();
-                        node = node.next;
-                    }
-                }
-            }
-        }
+        this.childIterator().forEachRemaining(GameTransaction::markCancelled);
     }
 
     public abstract boolean markCancelledTransactions(E event, ImmutableList<? extends GameTransaction<E>> transactions);
@@ -162,6 +150,153 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
 
     boolean shouldBuildEventAndRestartBatch(final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context) {
         return this.getTransactionType() != pointer.getTransactionType();
+    }
+
+    final void append(final GameTransaction<@NonNull ?> child) {
+        this.next = child;
+        child.previous = this;
+    }
+
+    final Iterator<GameTransaction<@NonNull ?>> childIterator() {
+        return this.sideEffects != null ? new ChildIterator(this.sideEffects.iterator()) : Collections.emptyIterator();
+    }
+
+    final Iterator<GameTransaction<@NonNull ?>> reverseChildIterator() {
+        return this.sideEffects != null ? new ReverseChildIterator(this.sideEffects.descendingIterator()) : Collections.emptyIterator();
+    }
+
+    private static class ChildIterator implements Iterator<GameTransaction<@NonNull ?>> {
+        private final Iterator<ResultingTransactionBySideEffect> effectIterator;
+        private @Nullable GameTransaction<@NonNull ?> cachedNext;
+        private @MonotonicNonNull GameTransaction<@NonNull ?> pointer;
+        private boolean hasNoRemainingElements = false;
+
+        ChildIterator(final Iterator<ResultingTransactionBySideEffect> iterator) {
+            // We're going to search the iterator's effects until we find the first at least
+            this.effectIterator = iterator;
+            while (this.effectIterator.hasNext()) {
+                final ResultingTransactionBySideEffect next = this.effectIterator.next();
+                if (next.head != null) {
+                    this.cachedNext = next.head;
+                    this.pointer = next.head;
+                    break;
+                }
+            }
+            if (this.pointer == null) {
+                this.hasNoRemainingElements = true;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (this.cachedNext != null) {
+                return true;
+            }
+            if (this.hasNoRemainingElements) {
+                return false;
+            }
+            if (this.pointer.next != null) {
+                this.cachedNext = this.pointer.next;
+                return true;
+            }
+            // start search for the next, sadly because effects don't make a clean chain,
+            // there can be many effects with no transactions recorded
+            while (this.effectIterator.hasNext()) {
+                final ResultingTransactionBySideEffect next = this.effectIterator.next();
+                if (next.head != null) {
+                    this.cachedNext = next.head;
+                    return true;
+                }
+            }
+            this.hasNoRemainingElements = true;
+            return false;
+        }
+
+        @Override
+        public GameTransaction<@NonNull ?> next() {
+            if (this.cachedNext != null) {
+                final GameTransaction<@NonNull ?> next = this.cachedNext;
+                this.pointer = next;
+                this.cachedNext = null;
+                return next;
+            }
+            if (this.hasNoRemainingElements) {
+                throw new NoSuchElementException("No next GameTransaction to iterate to");
+            }
+            // But, because someone can *not* call next, we have to call it ourselves
+            if (this.hasNext()) {
+                return this.next();
+            }
+            throw new NoSuchElementException("No next GameTransaction to iterate to");
+        }
+    }
+
+
+    private static class ReverseChildIterator implements Iterator<GameTransaction<@NonNull ?>> {
+        private final Iterator<ResultingTransactionBySideEffect> effectIterator;
+        private @Nullable GameTransaction<@NonNull ?> cachedPrevious;
+        private @MonotonicNonNull GameTransaction<@NonNull ?> pointer;
+        private boolean hasNoRemainingElements = false;
+
+        ReverseChildIterator(final Iterator<ResultingTransactionBySideEffect> iterator) {
+            // We're going to search the iterator's effects until we find the first at least
+            this.effectIterator = iterator;
+            while (this.effectIterator.hasNext()) {
+                final ResultingTransactionBySideEffect next = this.effectIterator.next();
+                if (next.tail != null) {
+                    this.pointer = next.tail;
+                    this.cachedPrevious = next.tail;
+                    break;
+                }
+            }
+            if (this.pointer == null) {
+                this.hasNoRemainingElements = true;
+            }
+        }
+
+        @Override
+        public boolean hasNext() {
+            if (this.cachedPrevious != null) {
+                return true;
+            }
+            if (this.hasNoRemainingElements) {
+                return false;
+            }
+            if (this.pointer.previous != null) {
+                this.cachedPrevious = this.pointer.previous;
+                return true;
+            }
+
+            // start search for the next, sadly because effects don't make a clean chain,
+            // there can be many effects with no transactions recorded
+            while (this.effectIterator.hasNext()) {
+                final ResultingTransactionBySideEffect next = this.effectIterator.next();
+                if (next.tail != null) {
+                    this.cachedPrevious = next.tail;
+                    return true;
+                }
+            }
+            this.hasNoRemainingElements = true;
+            return false;
+        }
+
+        @Override
+        public GameTransaction<@NonNull ?> next() {
+            if (this.cachedPrevious != null) {
+                final GameTransaction<@NonNull ?> next = this.cachedPrevious;
+                this.cachedPrevious = null;
+                this.pointer = next;
+                return next;
+            }
+            if (this.hasNoRemainingElements) {
+                throw new NoSuchElementException("No next GameTransaction to iterate to");
+            }
+            // But, because someone can *not* call next, we have to call it ourselves
+            if (this.hasNext()) {
+                return this.next();
+            }
+            throw new NoSuchElementException("No next GameTransaction to iterate to");
+        }
     }
 
 }
