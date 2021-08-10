@@ -70,7 +70,7 @@ public abstract class PlayerMixin_Inventory extends LivingEntityMixin_Inventory 
         super.inventory$onHandleEquipmentChanges(map, ci);
     }
 
-    @Inject(method = "setItemSlot", at = @At(value = "RETURN"))
+    @Inject(method = "setItemSlot", at = @At(value = "HEAD"))
     protected void impl$beforeSetItemSlot(final EquipmentSlot param0, final ItemStack param1, final CallbackInfo ci) {
     }
 
