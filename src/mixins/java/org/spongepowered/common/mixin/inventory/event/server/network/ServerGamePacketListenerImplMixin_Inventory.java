@@ -144,9 +144,6 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final InteractionResult result = entity.interactAt(param0, param1, param2);
-        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(this.player, SpongeEventFactory::createChangeInventoryEvent)) {
-            param0.inventoryMenu.broadcastChanges();
-        }
         return result;
     }
 

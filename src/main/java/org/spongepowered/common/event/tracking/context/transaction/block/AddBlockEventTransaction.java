@@ -22,20 +22,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.block;
 
+import net.minecraft.world.level.BlockEventData;
+import net.minecraft.world.level.block.state.BlockState;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.block.ChangeBlockEvent;
 import org.spongepowered.common.accessor.server.level.ServerLevelAccessor;
 import org.spongepowered.common.block.SpongeBlockSnapshot;
 import org.spongepowered.common.bridge.world.level.TrackableBlockEventDataBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.util.PrettyPrinter;
-
-import net.minecraft.world.level.BlockEventData;
-import net.minecraft.world.level.block.state.BlockState;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.Optional;
 import java.util.StringJoiner;
@@ -47,7 +47,7 @@ public class AddBlockEventTransaction extends BlockEventBasedTransaction {
     private final SpongeBlockSnapshot original;
 
 
-    AddBlockEventTransaction(final SpongeBlockSnapshot original, final TrackableBlockEventDataBridge blockEvent) {
+    public AddBlockEventTransaction(final SpongeBlockSnapshot original, final TrackableBlockEventDataBridge blockEvent) {
         super(original.getBlockPos(), (BlockState) original.state(), original.world());
         this.blockEvent = (BlockEventData) blockEvent;
         this.original = original;

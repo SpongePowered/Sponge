@@ -43,9 +43,9 @@ import org.spongepowered.common.accessor.world.level.ExplosionAccessor;
 import org.spongepowered.common.bridge.CreatorTrackedBridge;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
-import org.spongepowered.common.event.tracking.context.transaction.ChangeBlock;
 import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.block.ChangeBlock;
 
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;

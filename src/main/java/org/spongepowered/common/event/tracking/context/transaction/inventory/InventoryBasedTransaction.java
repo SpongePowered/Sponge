@@ -22,13 +22,12 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import com.google.common.collect.ImmutableList;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
@@ -37,6 +36,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.util.PrettyPrinter;
 
@@ -54,11 +54,8 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
     @MonotonicNonNull private List<SlotTransaction> acceptedTransactions;
     protected boolean used = false;
 
-    protected InventoryBasedTransaction(
-        final ResourceKey worldKey,
-        final Inventory inventory
-    ) {
-        super(TransactionTypes.CHANGE_INVENTORY_EVENT.get(), worldKey);
+    protected InventoryBasedTransaction(final Inventory inventory) {
+        super(TransactionTypes.CHANGE_INVENTORY_EVENT.get());
         this.inventory = inventory;
     }
 
@@ -158,16 +155,18 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
     }
 
     @Override
-    public boolean acceptSlotTransaction(final SlotTransaction newTransaction, final Object inventory) {
-        // accept same inventory transactions
-        if (this.inventory == inventory) {
+    public boolean absorbSlotTransaction(
+        final ContainerSlotTransaction slotTransaction
+    ) {
+        if (this.inventory == slotTransaction.menu) {
             if (this.acceptedTransactions == null) {
                 this.acceptedTransactions = new ArrayList<>();
             }
-            this.acceptedTransactions.add(newTransaction);
+            this.acceptedTransactions.add(slotTransaction.transaction);
             return true;
         }
         // or accept menu transactions as inventory transactions
+        final SlotTransaction newTransaction = slotTransaction.transaction;
         if (newTransaction.slot().viewedSlot() != newTransaction.slot() && this.inventory == newTransaction.slot().viewedSlot().parent()) {
             if (this.acceptedTransactions == null) {
                 this.acceptedTransactions = new ArrayList<>();
@@ -177,7 +176,6 @@ abstract class InventoryBasedTransaction extends GameTransaction<ChangeInventory
         }
         return false;
     }
-
 
     @Override
     public void addToPrinter(final PrettyPrinter printer) {

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.protocol.Packet;
@@ -42,7 +42,6 @@ import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.equipment.EquipmentTypes;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -59,7 +58,7 @@ public class DropFromPlayerInventoryTransaction extends ContainerBasedTransactio
     private final ItemStackSnapshot originalCursor;
 
     public DropFromPlayerInventoryTransaction(final Player player, final boolean dropAll) {
-        super(((ServerWorld) player.level).key(), player.containerMenu);
+        super(player.containerMenu);
         this.player = (ServerPlayer) player;
         this.dropAll = dropAll;
         this.originalCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());

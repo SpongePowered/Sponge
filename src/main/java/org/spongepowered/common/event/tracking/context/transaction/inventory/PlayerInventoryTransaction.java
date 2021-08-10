@@ -22,58 +22,44 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
-import net.minecraft.network.protocol.game.ClientboundSetCarriedItemPacket;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
-import org.spongepowered.api.item.inventory.Slot;
-import org.spongepowered.api.item.inventory.entity.PlayerInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
 import java.util.List;
 import java.util.Optional;
 
-public class SetCarriedItemTransaction extends InventoryBasedTransaction {
+public class PlayerInventoryTransaction extends InventoryBasedTransaction {
 
     private final ServerPlayer player;
-    @Nullable private final Slot prevSlot;
-    @Nullable private final Slot newSlot;
-    private final int prevSlotId;
+    private final EventCreator eventCreator;
 
-    public SetCarriedItemTransaction(final Player player, int newSlot) {
-        super(((ServerWorld) player.level).key(), (Inventory) player.inventory);
+    public PlayerInventoryTransaction(final Player player, final EventCreator eventCreator) {
+        super((Inventory) player.inventory);
         this.player = (ServerPlayer) player;
-        final PlayerInventory inventory = (PlayerInventory) this.player.inventory;
-        this.prevSlotId = this.player.inventory.selected;
-        this.prevSlot = inventory.hotbar().slot(this.prevSlotId).orElse(null);
-        this.newSlot = inventory.hotbar().slot(newSlot).orElse(null);
+        this.eventCreator = eventCreator;
     }
 
     @Override
     Optional<ChangeInventoryEvent> createInventoryEvent(final List<SlotTransaction> slotTransactions, final PhaseContext<@NonNull ?> context,
             final Cause cause) {
-        if (this.newSlot == null || this.prevSlot == null) {
+        if (slotTransactions.isEmpty()) {
             return Optional.empty();
         }
-        final ChangeInventoryEvent.Held event = SpongeEventFactory
-                .createChangeInventoryEventHeld(cause, this.newSlot, (Inventory) this.player.inventory, this.prevSlot, slotTransactions);
+        final ChangeInventoryEvent event = this.eventCreator.create(cause, this.inventory, slotTransactions);
         return Optional.of(event);
     }
 
     @Override
     public void restore(final PhaseContext<@NonNull ?> context, final ChangeInventoryEvent event) {
-        this.player.connection.send(new ClientboundSetCarriedItemPacket(this.prevSlotId));
-        this.player.inventory.selected = this.prevSlotId;
         PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
     }
 
@@ -82,4 +68,7 @@ public class SetCarriedItemTransaction extends InventoryBasedTransaction {
         PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
     }
 
+    public interface EventCreator {
+        ChangeInventoryEvent create(final Cause cause, final Inventory inventory, final List<SlotTransaction> slotTransactions);
+    }
 }

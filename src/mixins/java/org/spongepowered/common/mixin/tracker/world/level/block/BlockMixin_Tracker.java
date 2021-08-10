@@ -32,7 +32,6 @@ import net.minecraft.world.level.Level;
 import net.minecraft.world.level.LevelAccessor;
 import net.minecraft.world.level.block.Block;
 import net.minecraft.world.level.block.entity.BlockEntity;
-import net.minecraft.world.level.block.entity.BlockEntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
@@ -104,7 +103,7 @@ public abstract class BlockMixin_Tracker implements TrackableBlockBridge, Regist
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
-            .logBlockDrops(context, worldIn, pos, state, null);
+            .logBlockDrops(worldIn, pos, state, null);
     }
 
     @Inject(
@@ -124,7 +123,7 @@ public abstract class BlockMixin_Tracker implements TrackableBlockBridge, Regist
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
-            .logBlockDrops(context, (Level) worldIn, pos, state, tileEntity);
+            .logBlockDrops((Level) worldIn, pos, state, tileEntity);
     }
 
     @Inject(
@@ -140,7 +139,7 @@ public abstract class BlockMixin_Tracker implements TrackableBlockBridge, Regist
         }
         final PhaseContext<@NonNull ?> context = server.getPhaseContext();
         BlockMixin_Tracker.tracker$effectTransactorForDrops = context.getTransactor()
-            .logBlockDrops(context, worldIn, pos, state, tileEntity);
+            .logBlockDrops(worldIn, pos, state, tileEntity);
     }
 
 

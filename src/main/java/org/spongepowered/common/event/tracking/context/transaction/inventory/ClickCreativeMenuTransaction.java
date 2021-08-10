@@ -22,8 +22,14 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
+import com.google.common.collect.ImmutableList;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.entity.player.Player;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
@@ -33,17 +39,9 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
-
-import com.google.common.collect.ImmutableList;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
-import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.entity.player.Player;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.common.item.util.ItemStackUtil;
 
 import java.util.List;
@@ -58,12 +56,12 @@ public class ClickCreativeMenuTransaction extends ContainerBasedTransaction {
     private final ItemStackSnapshot originalCursor;
 
     public ClickCreativeMenuTransaction(final Player player, final int slotNum, final ItemStackSnapshot creativeStack) {
-        super(((ServerWorld) player.level).key(), player.containerMenu);
+        super(player.containerMenu);
         this.player = (ServerPlayer) player;
         this.slotNum = slotNum;
         this.creativeStack = creativeStack;
         this.originalCursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
-        this.slot = slotNum >= 0 ? ((InventoryAdapter) menu).inventoryAdapter$getSlot(slotNum).orElse(null) : null;
+        this.slot = slotNum >= 0 ? ((InventoryAdapter) this.menu).inventoryAdapter$getSlot(slotNum).orElse(null) : null;
     }
 
     @Override

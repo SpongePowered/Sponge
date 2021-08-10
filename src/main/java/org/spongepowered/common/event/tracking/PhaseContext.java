@@ -36,7 +36,6 @@ import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.EventContextKeys;
-import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.applaunch.config.core.SpongeConfigs;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.util.MemoizedSupplier;
@@ -251,7 +250,7 @@ public class PhaseContext<P extends PhaseContext<P>> implements PhaseStateProxy<
 
     public TransactionalCaptureSupplier getTransactor() {
         if (this.transactor == null) {
-            this.transactor = new TransactionalCaptureSupplier();
+            this.transactor = new TransactionalCaptureSupplier(this);
         }
         return this.transactor;
     }

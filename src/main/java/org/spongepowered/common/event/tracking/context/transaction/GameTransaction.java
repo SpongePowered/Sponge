@@ -39,9 +39,6 @@ import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionType;
 import org.spongepowered.common.util.PrettyPrinter;
@@ -56,8 +53,7 @@ import java.util.function.BiConsumer;
 public abstract class GameTransaction<E extends Event & Cancellable> implements TransactionFlow {
 
     private final TransactionType<? extends E> transactionType;
-    final ResourceKey worldKey;
-    boolean cancelled = false;
+    protected boolean cancelled = false;
 
     // Children Definitions
     @Nullable LinkedList<ResultingTransactionBySideEffect> sideEffects;
@@ -66,9 +62,8 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
     @Nullable GameTransaction<@NonNull ?> previous;
     @Nullable GameTransaction<@NonNull ?> next;
 
-    protected GameTransaction(final TransactionType<? extends E> transactionType, final ResourceKey worldKey) {
+    protected GameTransaction(final TransactionType<? extends E> transactionType) {
         this.transactionType = transactionType;
-        this.worldKey = worldKey;
     }
 
     @Override
@@ -161,13 +156,12 @@ public abstract class GameTransaction<E extends Event & Cancellable> implements 
         }
     }
 
-    boolean acceptDrops(final PrepareBlockDropsTransaction transaction) {
-        return false;
+    Optional<ResourceKey> worldKey() {
+        return Optional.empty();
     }
 
     boolean shouldBuildEventAndRestartBatch(final GameTransaction<@NonNull ?> pointer, final PhaseContext<@NonNull ?> context) {
-        return this.getTransactionType() != pointer.getTransactionType()
-            || !this.worldKey.equals(pointer.worldKey);
+        return this.getTransactionType() != pointer.getTransactionType();
     }
 
 }

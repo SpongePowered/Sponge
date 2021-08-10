@@ -22,93 +22,84 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.block;
 
-import org.spongepowered.api.event.CauseStackManager;
-import org.spongepowered.api.event.block.ChangeBlockEvent;
-import org.spongepowered.api.world.BlockChangeFlags;
-import org.spongepowered.common.block.SpongeBlockSnapshot;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.util.PrettyPrinter;
-
-import net.minecraft.world.level.block.entity.BlockEntity;
+import net.minecraft.core.BlockPos;
 import net.minecraft.world.level.block.state.BlockState;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.checkerframework.framework.qual.DefaultQualifier;
+import org.spongepowered.api.event.CauseStackManager;
+import org.spongepowered.api.event.block.ChangeBlockEvent;
+import org.spongepowered.common.block.SpongeBlockSnapshot;
+import org.spongepowered.common.event.tracking.BlockChangeFlagManager;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.PrettyPrinter;
 
 import java.util.Optional;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 
-@DefaultQualifier(NonNull.class)
-public final class ReplaceBlockEntity extends BlockEventBasedTransaction {
+public final class PrepareBlockDropsTransaction extends BlockEventBasedTransaction {
 
-    final BlockEntity added;
-    final @Nullable BlockEntity removed;
-    final SpongeBlockSnapshot removedSnapshot;
+    private final SpongeBlockSnapshot originalState;
 
-    ReplaceBlockEntity(final BlockEntity added, final @Nullable BlockEntity removed,
-        final SpongeBlockSnapshot attachedSnapshot
+    public PrepareBlockDropsTransaction(
+        final BlockPos affectedPosition, final BlockState originalState, final SpongeBlockSnapshot original
     ) {
-        super(attachedSnapshot.getBlockPos(), (BlockState) attachedSnapshot.state(), attachedSnapshot.world());
-        this.added = added;
-        this.removed = removed;
-        this.removedSnapshot = attachedSnapshot;
-    }
-
-    @Override
-    public boolean acceptTileAddition(final BlockEntity tileEntity) {
-        if (this.added == tileEntity) {
-            return true;
-        }
-        return super.acceptTileAddition(tileEntity);
-    }
-
-    @Override
-    public void restore(PhaseContext<?> context, ChangeBlockEvent.All event) {
-        this.removedSnapshot.restore(true, BlockChangeFlags.NONE);
-    }
-
-    @Override
-    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
-        @Nullable GameTransaction<@NonNull ?> parent
-    ) {
-        return Optional.empty();
-    }
-
-    @Override
-    public void addToPrinter(final PrettyPrinter printer) {
-        printer.add("ReplaceTileEntity")
-            .add(" %s : %s", "Position", this.affectedPosition)
-            .add(" %s : %s", "Added", this.added)
-            .add(" %s : %s", "Removed", this.removed == null ? "null" : this.removed)
-        ;
+        super(affectedPosition, originalState, original.world());
+        this.originalState = original;
     }
 
     @Override
     protected SpongeBlockSnapshot getResultingSnapshot() {
-        return SpongeBlockSnapshot.BuilderImpl.pooled()
-            .from(this.removedSnapshot)
-            .tileEntity(this.added)
-            .build()
-            ;
+        return null;
     }
 
     @Override
     protected SpongeBlockSnapshot getOriginalSnapshot() {
-        return this.removedSnapshot;
+        return this.originalState;
+    }
+
+    @Override
+    public Optional<BiConsumer<PhaseContext<@NonNull ?>, CauseStackManager.StackFrame>> getFrameMutator(
+        @Nullable final GameTransaction<@NonNull ?> parent
+    ) {
+        return Optional.of((context, frame) -> frame.pushCause(this.originalState));
+    }
+
+    @Override
+    public void addToPrinter(final PrettyPrinter printer) {
+
+    }
+
+    @Override
+    public void restore(final PhaseContext<?> context, final ChangeBlockEvent.All event) {
+        this.originalState.restore(true, BlockChangeFlagManager.fromNativeInt(Constants.BlockChangeFlags.FORCED_RESTORE));
     }
 
     @Override
     public String toString() {
-        return new StringJoiner(", ", ReplaceBlockEntity.class.getSimpleName() + "[", "]")
+        return new StringJoiner(", ", PrepareBlockDropsTransaction.class.getSimpleName() + "[", "]")
             .add("affectedPosition=" + this.affectedPosition)
             .add("originalState=" + this.originalState)
             .add("worldKey=" + this.worldKey)
             .add("cancelled=" + this.cancelled)
-            .add("added=" + this.added)
-            .add("removed=" + this.removed)
+            .add("originalState=" + this.originalState)
             .toString();
+    }
+
+    @Override
+    public boolean absorbByParent(
+        final PhaseContext<@NonNull ?> context, final GameTransaction<@NonNull ?> transaction
+    ) {
+        return transaction.absorbBlockDropsPreparation(context, this);
+    }
+
+
+    @Override
+    public boolean canBeAbsorbed() {
+        return true;
     }
 }

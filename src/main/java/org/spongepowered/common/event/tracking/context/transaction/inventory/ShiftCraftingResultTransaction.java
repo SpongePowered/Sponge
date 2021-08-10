@@ -22,32 +22,29 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
-import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.spongepowered.api.ResourceKey;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import net.minecraft.world.inventory.Slot;
+import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
+import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 
-import java.util.Collections;
-import java.util.List;
-import java.util.function.Supplier;
+public class ShiftCraftingResultTransaction extends SlotBasedTransaction {
 
-public class ContainerSlotTransaction extends ContainerBasedTransaction {
-
-    private final SlotTransaction transaction;
-
-    public ContainerSlotTransaction(final Supplier<ResourceKey> worldSupplier, final AbstractContainerMenu menu, final SlotTransaction newTransaction) {
-        super(worldSupplier.get(), menu);
-        this.transaction = newTransaction;
+    public ShiftCraftingResultTransaction(final Slot slot, final ItemStack stack) {
+        super(slot, stack);
     }
 
     @Override
-    List<SlotTransaction> getSlotTransactions() {
-        return Collections.singletonList(this.transaction);
+    public boolean absorbByParent(
+        final PhaseContext<@NonNull ?> context, final GameTransaction<@NonNull ?> transaction
+    ) {
+        return transaction.absorbShiftClickResult(context, this);
     }
 
     @Override
-    public boolean acceptSlotTransaction(SlotTransaction newTransaction, Object menu) {
-        return false;
+    public boolean canBeAbsorbed() {
+        return true;
     }
 }

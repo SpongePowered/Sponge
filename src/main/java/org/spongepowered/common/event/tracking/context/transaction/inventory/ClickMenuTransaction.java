@@ -22,26 +22,24 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import com.google.common.collect.ImmutableList;
-import net.minecraft.network.protocol.game.ServerboundPlaceRecipePacket;
+import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
 import net.minecraft.server.level.ServerPlayer;
-import net.minecraft.world.inventory.MerchantMenu;
-import net.minecraft.world.item.trading.MerchantOffer;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.inventory.AbstractContainerMenu;
+import net.minecraft.world.inventory.ClickType;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
+import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.item.merchant.TradeOffer;
-import org.spongepowered.api.world.server.ServerWorld;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -49,15 +47,28 @@ import org.spongepowered.common.item.util.ItemStackUtil;
 import java.util.List;
 import java.util.Optional;
 
-public class SelectTradeTransaction extends ContainerBasedTransaction {
+public class ClickMenuTransaction extends ContainerBasedTransaction {
 
     private final ServerPlayer player;
-    private int tradeItem;
+    private final int slotNum;
+    private final int buttonNum;
+    private final ClickType clickType;
+    private final @Nullable Slot slot;
+    private final ItemStackSnapshot cursor;
 
-    public SelectTradeTransaction(final ServerPlayer player, final int tradeItem) {
-        super(((ServerWorld) player.level).key(), player.containerMenu);
-        this.player = player;
-        this.tradeItem = tradeItem;
+    public ClickMenuTransaction(
+        final Player player, final AbstractContainerMenu menu, final int slotNum, final int buttonNum,
+        final ClickType clickType,
+        final @Nullable Slot slot,
+        final ItemStackSnapshot cursor
+    ) {
+        super(menu);
+        this.player = (ServerPlayer) player;
+        this.slotNum = slotNum;
+        this.buttonNum = buttonNum;
+        this.clickType = clickType;
+        this.slot = slot;
+        this.cursor = cursor;
     }
 
     @Override
@@ -66,17 +77,20 @@ public class SelectTradeTransaction extends ContainerBasedTransaction {
         final PhaseContext<@NonNull ?> context,
         final Cause cause
     ) {
+        final ItemStackSnapshot resultingCursor = ItemStackUtil.snapshotOf(this.player.inventory.getCarried());
+        final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.cursor, resultingCursor);
+        final @Nullable ClickContainerEvent event = context.createContainerEvent(cause, this.player, (Container) this.menu,
+            cursorTransaction, slotTransactions, entities, this.buttonNum, this.slot);
 
-        final ItemStackSnapshot cursorItem = ItemStackUtil.snapshotOf(this.player.inventory.getCarried());
-        final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(cursorItem, cursorItem);
-        if (this.menu instanceof MerchantMenu) {
-            final MerchantOffer offer = ((MerchantMenu) this.menu).getOffers().get(this.tradeItem);
-            ClickContainerEvent.SelectTrade event = SpongeEventFactory.createClickContainerEventSelectTrade(cause, (Container) this.menu,
-                    cursorTransaction, Optional.empty(), (TradeOffer) offer, slotTransactions, this.tradeItem);
-            return Optional.of(event);
-        }
-        SpongeCommon.logger().warn("SelectTradeTransaction without MerchantMenu");
-        return Optional.empty();
+        return Optional.ofNullable(event);
+    }
+
+    @Override
+    public boolean absorbShiftClickResult(
+        final PhaseContext<@NonNull ?> context, final ShiftCraftingResultTransaction transaction
+    ) {
+        this.shiftCraftingResult = transaction.itemStack;
+        return true;
     }
 
     @Override
@@ -85,16 +99,18 @@ public class SelectTradeTransaction extends ContainerBasedTransaction {
     }
 
     @Override
-    public void postProcessEvent(PhaseContext<@NonNull ?> context, ClickContainerEvent event) {
+    public void postProcessEvent(final PhaseContext<@NonNull ?> context, final ClickContainerEvent event) {
         this.handleEventResults(this.player, event);
     }
 
     @Override
-    boolean isContainerEventAllowed(final PhaseContext<@Nullable ?> context) {
+    boolean isContainerEventAllowed(
+        final PhaseContext<@NonNull ?> context
+    ) {
         if (!(context instanceof InventoryPacketContext)) {
             return false;
         }
-        final int containerId = ((InventoryPacketContext) context).<ServerboundPlaceRecipePacket>getPacket().getContainerId();
+        final int containerId = ((InventoryPacketContext) context).<ServerboundContainerClickPacket>getPacket().getContainerId();
         return containerId != this.player.containerMenu.containerId;
     }
 }

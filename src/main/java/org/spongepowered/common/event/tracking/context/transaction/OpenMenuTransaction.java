@@ -37,9 +37,8 @@ import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.container.InteractContainerEvent;
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
-import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.ContainerSlotTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -55,7 +54,7 @@ public class OpenMenuTransaction extends GameTransaction<InteractContainerEvent>
     private AbstractContainerMenu menu;
 
     public OpenMenuTransaction(final Player player) {
-        super(TransactionTypes.INTERACT_CONTAINER_EVENT.get(), ((ServerWorld) player.level).key());
+        super(TransactionTypes.INTERACT_CONTAINER_EVENT.get());
         this.player = (ServerPlayer) player;
         this.menu = player.containerMenu;
         this.cursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
@@ -72,8 +71,9 @@ public class OpenMenuTransaction extends GameTransaction<InteractContainerEvent>
 
     @Override
     public Optional<InteractContainerEvent> generateEvent(
-            final PhaseContext<@NonNull ?> context, @Nullable final GameTransaction<@NonNull ?> parent,
-            final ImmutableList<GameTransaction<InteractContainerEvent>> gameTransactions, final Cause currentCause) {
+        final PhaseContext<@NonNull ?> context, @Nullable final GameTransaction<@NonNull ?> parent,
+        final ImmutableList<GameTransaction<InteractContainerEvent>> gameTransactions, final Cause currentCause
+    ) {
         final ItemStackSnapshot resultingCursor = ItemStackUtil.snapshotOf(this.player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.cursor, resultingCursor);
 
@@ -113,8 +113,8 @@ public class OpenMenuTransaction extends GameTransaction<InteractContainerEvent>
     }
 
     @Override
-    public boolean acceptSlotTransaction(
-        final SlotTransaction newTransaction, final Object inventory
+    public boolean absorbSlotTransaction(
+        final ContainerSlotTransaction slotTransaction
     ) {
         return true;
     }

@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import com.google.common.collect.ImmutableList;
 import it.unimi.dsi.fastutil.objects.ReferenceOpenHashSet;
@@ -37,7 +37,6 @@ import net.minecraft.world.item.crafting.RecipeType;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.entity.Entity;
 import org.spongepowered.api.event.Cause;
 import org.spongepowered.api.event.CauseStackManager;
@@ -56,6 +55,8 @@ import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.SpawnEntityTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.util.ContainerUtil;
@@ -71,10 +72,9 @@ import java.util.Set;
 import java.util.function.BiConsumer;
 import java.util.stream.Collectors;
 
-abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerEvent> {
+abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickContainerEvent> {
     private static Set<Class<?>> containersFailedCapture = new ReferenceOpenHashSet<>();
 
-    final AbstractContainerMenu menu;
     @MonotonicNonNull List<net.minecraft.world.entity.Entity> entities;
     @MonotonicNonNull private List<SlotTransaction> acceptedTransactions;
     // Crafting Preview
@@ -84,15 +84,13 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
     @Nullable private ItemStack craftedStack;
     @Nullable private CraftingRecipe onTakeRecipe;
     protected boolean used = false;
-    private @Nullable ItemStack shiftCraftingResult;
+    @Nullable ItemStack shiftCraftingResult;
 
 
     protected ContainerBasedTransaction(
-        final ResourceKey worldKey,
         final AbstractContainerMenu menu
     ) {
-        super(TransactionTypes.CLICK_CONTAINER_EVENT.get(), worldKey);
-        this.menu = menu;
+        super(TransactionTypes.CLICK_CONTAINER_EVENT.get(), menu);
     }
 
 
@@ -105,19 +103,6 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
         });
     }
 
-    @Override
-    public boolean acceptEntitySpawn(
-        final PhaseContext<@NonNull ?> current, final net.minecraft.world.entity.Entity entityIn
-    ) {
-        if (current.doesContainerCaptureEntitySpawn(entityIn)) {
-            if (this.entities == null) {
-                this.entities = new LinkedList<>();
-            }
-            this.entities.add(entityIn);
-            return true;
-        }
-        return super.acceptEntitySpawn(current, entityIn);
-    }
 
     @Override
     public Optional<ClickContainerEvent> generateEvent(
@@ -362,15 +347,29 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
     }
 
     @Override
-    public boolean acceptSlotTransaction(final SlotTransaction newTransaction, final Object menu) {
-        if (this.menu == menu) {
-            if (this.acceptedTransactions == null) {
-                this.acceptedTransactions = new ArrayList<>();
+    public boolean absorbSlotTransaction(
+        final ContainerSlotTransaction slotTransaction
+    ) {
+        if (this.menu != slotTransaction.menu) {
+            return false;
+        }
+        if (this.acceptedTransactions == null) {
+            this.acceptedTransactions = new ArrayList<>();
+        }
+        this.acceptedTransactions.add(slotTransaction.transaction);
+        return true;
+    }
+
+    @Override
+    public boolean absorbSpawnEntity(final PhaseContext<@NonNull ?> context, final SpawnEntityTransaction spawn) {
+        if (context.doesContainerCaptureEntitySpawn(spawn.entityToSpawn)) {
+            if (this.entities == null) {
+                this.entities = new LinkedList<>();
             }
-            this.acceptedTransactions.add(newTransaction);
+            this.entities.add(spawn.entityToSpawn);
             return true;
         }
-        return false;
+        return super.absorbSpawnEntity(context, spawn);
     }
 
     @Override
@@ -396,7 +395,7 @@ abstract class ContainerBasedTransaction extends GameTransaction<ClickContainerE
         return false;
     }
 
-    public void acceptShiftCraftingResult(ItemStack result) {
+    public void acceptShiftCraftingResult(final ItemStack result) {
         this.shiftCraftingResult = result;
     }
 }

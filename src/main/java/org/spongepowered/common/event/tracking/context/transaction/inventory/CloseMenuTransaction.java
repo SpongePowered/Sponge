@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.network.protocol.game.ClientboundOpenScreenPacket;
@@ -44,8 +44,8 @@ import org.spongepowered.api.event.item.inventory.container.InteractContainerEve
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.api.world.server.ServerWorld;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -57,18 +57,16 @@ import java.util.List;
 import java.util.Optional;
 import java.util.function.BiConsumer;
 
-public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent> {
+public class CloseMenuTransaction extends MenuBasedTransaction<InteractContainerEvent> {
 
     private final ServerPlayer player;
     private final ItemStackSnapshot cursor;
     private boolean clientSource;
-    private final AbstractContainerMenu menu;
     private @MonotonicNonNull List<SlotTransaction> slotTransactions;
 
     public CloseMenuTransaction(final Player player, final boolean clientSource) {
-        super(TransactionTypes.INTERACT_CONTAINER_EVENT.get(), ((ServerWorld) player.level).key());
+        super(TransactionTypes.INTERACT_CONTAINER_EVENT.get(), player.containerMenu);
         this.player = (ServerPlayer) player;
-        this.menu = player.containerMenu;
         this.cursor = ItemStackUtil.snapshotOf(player.inventory.getCarried());
         this.clientSource = clientSource;
     }
@@ -82,8 +80,9 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
 
     @Override
     public Optional<InteractContainerEvent> generateEvent(
-            final PhaseContext<@NonNull ?> context, @Nullable final GameTransaction<@NonNull ?> parent,
-            final ImmutableList<GameTransaction<InteractContainerEvent>> gameTransactions, final Cause currentCause) {
+        final PhaseContext<@NonNull ?> context, @Nullable final GameTransaction<@NonNull ?> parent,
+        final ImmutableList<GameTransaction<InteractContainerEvent>> gameTransactions, final Cause currentCause
+    ) {
         final ItemStackSnapshot resultingCursor = ItemStackUtil.snapshotOf(this.player.inventory.getCarried());
         final Transaction<ItemStackSnapshot> cursorTransaction = new Transaction<>(this.cursor, resultingCursor);
         final InteractContainerEvent.Close event = SpongeEventFactory.createInteractContainerEventClose(currentCause, (Container) this.menu,
@@ -104,14 +103,16 @@ public class CloseMenuTransaction extends GameTransaction<InteractContainerEvent
     }
 
     @Override
-    public boolean acceptSlotTransaction(final SlotTransaction newTransaction, final Object inventory) {
-        if (this.menu != inventory) {
-            return this.player.inventoryMenu == inventory;
+    public boolean absorbSlotTransaction(
+        final ContainerSlotTransaction slotTransaction
+    ) {
+        if (this.menu != slotTransaction.menu) {
+            return this.player.inventoryMenu == slotTransaction.menu;
         }
         if (this.slotTransactions == null) {
             this.slotTransactions = new ArrayList<>();
         }
-        this.slotTransactions.add(newTransaction);
+        this.slotTransactions.add(slotTransaction.transaction);
         return true;
     }
 
