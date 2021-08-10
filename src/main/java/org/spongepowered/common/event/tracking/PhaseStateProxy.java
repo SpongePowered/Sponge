@@ -287,7 +287,7 @@ public interface PhaseStateProxy<C extends PhaseContext<C>> {
         return this.getState().getSpawnTypeForTransaction(this.asContext(), entityToSpawn);
     }
 
-    default SpawnEntityEvent createSpawnEvent(final GameTransaction<@NonNull ?> parent,
+    default SpawnEntityEvent createSpawnEvent(final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
         final Cause currentCause
     ) {

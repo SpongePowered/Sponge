@@ -101,7 +101,7 @@ final class ExplosionState extends GeneralState<ExplosionContext> {
     @Override
     public SpawnEntityEvent createSpawnEvent(
         final ExplosionContext context,
-        final GameTransaction<@NonNull ?> parent,
+        final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
         final Cause currentCause
     ) {

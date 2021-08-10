@@ -370,7 +370,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
     }
 
     default SpawnEntityEvent createSpawnEvent(final C context,
-        final GameTransaction<@NonNull ?> parent,
+        final @Nullable GameTransaction<@NonNull ?> parent,
         final ImmutableList<Tuple<Entity, SpawnEntityTransaction.DummySnapshot>> collect,
         final Cause currentCause
     ) {
@@ -420,7 +420,7 @@ public interface IPhaseState<C extends PhaseContext<C>> {
         return null;
     }
 
-    default boolean doesContainerCaptureEntitySpawn(C context, Entity entityIn) {
+    default boolean doesContainerCaptureEntitySpawn(final C context, final Entity entityIn) {
         return false;
     }
 }

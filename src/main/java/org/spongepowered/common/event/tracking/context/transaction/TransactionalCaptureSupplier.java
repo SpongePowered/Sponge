@@ -608,7 +608,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
         final ImmutableMultimap.Builder<TransactionType, ? extends Event> builder = ImmutableMultimap.builder();
         final ImmutableList<EventByTransaction<@NonNull ?>> batched = TransactionalCaptureSupplier.batchTransactions(
-            this.head, this.head, context, builder
+            this.head, null, context, builder
         );
         boolean cancelledAny = false;
         for (final EventByTransaction<@NonNull ?> eventWithTransactions : batched) {
@@ -655,7 +655,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     @SuppressWarnings("unchecked")
     static ImmutableList<EventByTransaction<@NonNull ?>> batchTransactions(
         final GameTransaction head,
-        final GameTransaction parent,
+        @Nullable final GameTransaction parent,
         final PhaseContext<@NonNull ?> context,
         final ImmutableMultimap.Builder<TransactionType, ? extends Event> transactionPostEventBuilder
     ) {
