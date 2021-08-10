@@ -24,23 +24,14 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
+import net.minecraft.network.protocol.Packet;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.api.event.entity.SpawnEntityEvent;
-import org.spongepowered.api.event.item.inventory.container.ClickContainerEvent;
-import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseTracker;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.util.Constants;
-
-import net.minecraft.network.protocol.Packet;
-import net.minecraft.network.protocol.game.ServerboundContainerClickPacket;
-import org.checkerframework.checker.nullness.qual.Nullable;
 
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -123,11 +114,6 @@ public class BasicInventoryPacketState extends PacketState<InventoryPacketContex
     @Override
     public InventoryPacketContext createNewContext(final PhaseTracker tracker) {
         return new InventoryPacketContext(this, tracker);
-    }
-
-    @Override
-    public void unwind(final InventoryPacketContext context) {
-        super.unwind(context);
     }
 
 }

@@ -80,7 +80,9 @@ public final class UnwindingState implements IPhaseState<UnwindingPhaseContext> 
         final PhaseContext<@NonNull ?> unwindingContext = context.getUnwindingContext();
         try {
             // TODO - figure out what goes here.
-//            TrackingUtil.processBlockCaptures(unwindingContext);
+            if (!unwindingContext.getTransactor().isEmpty()) {
+                PhasePrinter.printUnprocessedPhaseContextObjects(context.createdTracker.stack, this, context);
+            }
         } catch (final Exception e) {
             PhasePrinter.printExceptionFromPhase(PhaseTracker.getInstance().stack, e, context);
         }

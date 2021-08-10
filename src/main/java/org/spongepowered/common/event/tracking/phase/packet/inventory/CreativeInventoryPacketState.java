@@ -25,21 +25,14 @@
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import net.minecraft.world.entity.Entity;
-
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.event.cause.entity.SpawnTypes;
-import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketContext;
 import org.spongepowered.common.event.tracking.phase.packet.BasicPacketState;
 
 import java.util.function.Supplier;
 
 public final class CreativeInventoryPacketState extends BasicPacketState {
-
-    @Override
-    public void unwind(final BasicPacketContext context) {
-        TrackingUtil.processBlockCaptures(context);
-    }
 
     @Override
     public Supplier<SpawnType> getSpawnTypeForTransaction(
