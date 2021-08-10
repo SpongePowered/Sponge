@@ -123,13 +123,15 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
             )
     )
     private void impl$onSetUnloaded(final ServerLevel level, final LevelChunk chunk) {
-        level.unload(chunk);
         final Vector3i chunkPos = new Vector3i(chunk.getPos().x, 0, chunk.getPos().z);
-        if (ShouldFire.CHUNK_EVENT_UNLOAD) {
-            final ChunkEvent.Unload event = SpongeEventFactory.createChunkEventUnload(PhaseTracker.getInstance().currentCause(), chunkPos,
-                    (ResourceKey) (Object) this.level.dimension().location());
+
+        if (ShouldFire.CHUNK_EVENT_UNLOAD_PRE) {
+            final ChunkEvent.Unload event = SpongeEventFactory.createChunkEventUnloadPre(PhaseTracker.getInstance().currentCause(),
+                (WorldChunk) chunk, chunkPos, (ResourceKey) (Object) this.level.dimension().location());
             SpongeCommon.post(event);
         }
+
+        level.unload(chunk);
 
         for (final Direction dir : Constants.Chunk.CARDINAL_DIRECTIONS) {
             final Vector3i neighborPos = chunkPos.add(dir.asBlockOffset());
@@ -140,6 +142,12 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
                 ((LevelChunkBridge) chunk).bridge$setNeighborChunk(index, null);
                 ((LevelChunkBridge) neighbor).bridge$setNeighborChunk(oppositeIndex, null);
             }
+        }
+
+        if (ShouldFire.CHUNK_EVENT_UNLOAD_POST) {
+            final ChunkEvent.Unload event = SpongeEventFactory.createChunkEventUnloadPost(PhaseTracker.getInstance().currentCause(), chunkPos,
+                (ResourceKey) (Object) this.level.dimension().location());
+            SpongeCommon.post(event);
         }
     }
 
@@ -192,7 +200,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
             if (ShouldFire.CHUNK_EVENT_SAVE_PRE) {
                 final Vector3i chunkPos = new Vector3i(var1.getPos().x, 0, var1.getPos().z);
                 final ChunkEvent.Save.Pre postSave = SpongeEventFactory.createChunkEventSavePre(PhaseTracker.getInstance().currentCause(),
-                        chunkPos, ((WorldChunk) var1), (ResourceKey) (Object) this.level.dimension().location());
+                    ((WorldChunk) var1), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
                 SpongeCommon.post(postSave);
                 if (postSave.isCancelled()) {
                     cir.setReturnValue(false);
@@ -213,7 +221,7 @@ public abstract class ChunkMapMixin implements ChunkMapBridge {
         final Vector3i chunkPos = new Vector3i(levelChunk.getPos().x, 0, levelChunk.getPos().z);
         if (ShouldFire.CHUNK_EVENT_LOAD) {
             final ChunkEvent.Load loadEvent = SpongeEventFactory.createChunkEventLoad(PhaseTracker.getInstance().currentCause(),
-                    chunkPos, ((WorldChunk) levelChunk), (ResourceKey) (Object) this.level.dimension().location());
+                ((WorldChunk) levelChunk), chunkPos, (ResourceKey) (Object) this.level.dimension().location());
             SpongeCommon.post(loadEvent);
         }
 
