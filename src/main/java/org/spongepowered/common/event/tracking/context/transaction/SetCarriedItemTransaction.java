@@ -55,8 +55,8 @@ public class SetCarriedItemTransaction extends InventoryBasedTransaction {
         this.player = (ServerPlayer) player;
         final PlayerInventory inventory = (PlayerInventory) this.player.inventory;
         this.prevSlotId = this.player.inventory.selected;
-        this.prevSlot = inventory.equipment().slot(this.prevSlotId).orElse(null);
-        this.newSlot = inventory.equipment().slot(newSlot).orElse(null);
+        this.prevSlot = inventory.hotbar().slot(this.prevSlotId).orElse(null);
+        this.newSlot = inventory.hotbar().slot(newSlot).orElse(null);
     }
 
     @Override
