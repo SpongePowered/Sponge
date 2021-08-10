@@ -97,7 +97,7 @@ import java.util.function.BiConsumer;
 import java.util.function.Supplier;
 
 @SuppressWarnings("rawtypes")
-public final class TransactionalCaptureSupplier implements ICaptureSupplier {
+public final class TransactionalCaptureSupplier implements ICaptureSupplier, TransactionSink, Iterable<GameTransaction<@NonNull ?>> {
 
     // We made BlockTransaction a Node and this is a pseudo LinkedList due to the nature of needing
     // to be able to track what block states exist at the time of the transaction while other transactions
@@ -106,11 +106,13 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     // processing). Example: When starting to perform neighbor notifications during piston movement, one
     // can feasibly see that the block state is changed already without being able to get the appropriate
     // block state.
-    private @Nullable GameTransaction tail;
-    private @Nullable GameTransaction head;
+    private @Nullable GameTransaction<@NonNull ?> tail;
+    private @Nullable GameTransaction<@NonNull ?> head;
     private @Nullable ResultingTransactionBySideEffect effect;
+    private final PhaseContext<@NonNull ?> context;
 
-    public TransactionalCaptureSupplier() {
+    public TransactionalCaptureSupplier(final PhaseContext<@NonNull ?> context) {
+        this.context = context;
     }
 
 
@@ -120,7 +122,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
      * @return {@code true} if empty
      */
     @Override
-    public final boolean isEmpty() {
+    public boolean isEmpty() {
         return this.head == null;
     }
 
@@ -138,9 +140,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
     This is achieved through captureNeighborNotification and logTileChange.
      */
 
+    @Override
     public EffectTransactor pushEffect(final ResultingTransactionBySideEffect effect) {
-        final GameTransaction parentTransaction = Optional.ofNullable(this.effect)
-            .map(child -> child.tail)
+        final GameTransaction<@NonNull ?> parentTransaction = Optional.ofNullable(this.effect)
+            .map(child -> (GameTransaction) child.tail)
             .orElse(Objects.requireNonNull(this.tail));
         final EffectTransactor effectTransactor = new EffectTransactor(effect, parentTransaction, this.effect, this);
         this.effect = effect;
@@ -152,7 +155,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         this.effect = transactor.previousEffect;
     }
 
-    private void logTransaction(final GameTransaction transaction) {
+    @Override
+    public void logTransaction(final GameTransaction<@NonNull ?> transaction) {
         if (this.head == null) {
             this.head = transaction;
             this.tail = transaction;
@@ -167,30 +171,21 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    public ChangeBlock logBlockChange(final SpongeBlockSnapshot originalBlockSnapshot, final BlockState newState,
-        final BlockChangeFlag flags
-    ) {
-        final ChangeBlock changeBlock = new ChangeBlock(
-            originalBlockSnapshot, newState, (SpongeBlockChangeFlag) flags
-        );
-        this.logTransaction(changeBlock);
-        return changeBlock;
-    }
-
-    public boolean logTileAddition(final BlockEntity tileEntity,
+    @Override
+    public boolean logTileAddition(
+        final BlockEntity tileEntity,
         final Supplier<ServerLevel> worldSupplier, final LevelChunk chunk
-        ) {
+    ) {
         if (this.tail != null) {
             final boolean newRecorded = this.tail.acceptTileAddition(tileEntity);
             if (newRecorded) {
                 return true;
             }
         }
-        this.logTransaction(this.createTileAdditionTransaction(tileEntity, worldSupplier, chunk));
-
-        return true;
+        return TransactionSink.super.logTileAddition(tileEntity, worldSupplier, chunk);
     }
 
+    @Override
     @SuppressWarnings({"ConstantConditions", "unchecked"})
     public boolean logTileRemoval(final @Nullable BlockEntity tileentity, final Supplier<ServerLevel> worldSupplier) {
         if (tileentity == null) {
@@ -219,11 +214,14 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 }
             }
         }
-        this.logTransaction(this.createTileRemovalTransaction(tileentity, worldSupplier));
-        return true;
+        return TransactionSink.super.logTileRemoval(tileentity, worldSupplier);
     }
 
-    public boolean logTileReplacement(final BlockPos pos, final @Nullable BlockEntity existing, final @Nullable BlockEntity proposed, final Supplier<ServerLevel> worldSupplier) {
+    @Override
+    public boolean logTileReplacement(
+        final BlockPos pos, final @Nullable BlockEntity existing, final @Nullable BlockEntity proposed,
+        final Supplier<ServerLevel> worldSupplier
+    ) {
         if (proposed == null) {
             return false;
         }
@@ -233,146 +231,13 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
                 return true;
             }
         }
-        this.logTransaction(this.createTileReplacementTransaction(pos, existing, proposed, worldSupplier));
-        return true;
-    }
-
-    public void logNeighborNotification(final Supplier<ServerLevel> serverWorldSupplier, final BlockPos immutableFrom, final Block blockIn,
-        final BlockPos immutableTarget, final BlockState targetBlockState,
-        final @Nullable BlockEntity existingTile
-    ) {
-        final NeighborNotification notificationTransaction = new NeighborNotification(serverWorldSupplier, targetBlockState, immutableTarget, blockIn, immutableFrom, existingTile);
-        this.logTransaction(notificationTransaction);
-    }
-
-    @SuppressWarnings({"ConstantConditions", "unchecked"})
-    public void logEntitySpawn(final PhaseContext<@NonNull ?> current, final TrackedWorldBridge serverWorld,
-        final Entity entityIn) {
-        if (this.tail != null && this.tail.acceptEntitySpawn(current, entityIn)) {
-            return;
-        }
-        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
-        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final Supplier<SpawnType> contextualType = current.getSpawnTypeForTransaction(entityIn);
-        final SpawnEntityTransaction transaction = new SpawnEntityTransaction(worldSupplier, entityIn, contextualType);
-        this.logTransaction(transaction);
-    }
-
-    public void logSlotTransaction(
-        final PhaseContext<@NonNull ?> phaseContext, final SlotTransaction newTransaction,
-        final AbstractContainerMenu abstractContainerMenu
-    ) {
-        if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, abstractContainerMenu)) {
-            return;
-        }
-
-        if (this.effect != null && this.effect.tail != null && this.effect.tail.acceptSlotTransaction(newTransaction, abstractContainerMenu)) {
-            return;
-        }
-
-        // commands - during CommandPhaseContext see below
-        // place/use ServerPlayerGameModeMixin_Tracker#useItemOn
-        // Dispenser equip PlayerEntityMixin_Inventory#setItemSlot
-        // eating etc. LivingEntityMixin_Inventory#completeUsingItem
-        // throw/use ServerGamePacketListenerImplMixin_Inventory#impl$onHandleUseItem
-        // breaking blocks ServerPlayerGameModeMixin_Tracker#impl$onMineBlock
-        // exp pickup with mending PlayerEntityMixin_Inventory#inventory$onTouch
-        // attack PlayerMixin#attack
-        // armor/shield damage LivingEntityMixin#bridge$damageEntity
-        // elytra damage LivingEntityMixin#inventory$onElytraUse
-        // consume arrow (BowItem#releaseUsing - shrink on stack) LivingEntityMixin#impl$onStopPlayerUsing
-        // villager trade select ServerGamePacketListenerImplMixin_Inventory#impl$onHandleSelectTrade
-        // close inventory adding back to inventory ServerPlayerEntityMixin_Inventory#impl$onCloseContainer
-        // use on entity - ServerGamePacketListenerImplMixin_Inventory#impl$onInteractAt/impl$onInteractOn
-
-        // Inventory change during command
-        if (abstractContainerMenu instanceof InventoryMenu) {
-            if (phaseContext instanceof CommandPhaseContext) {
-                this.logPlayerInventoryChange(((InventoryMenuAccessor) abstractContainerMenu).accessor$owner(),
-                        SpongeEventFactory::createChangeInventoryEvent);
-                if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, abstractContainerMenu)) {
-                    return;
-                }
-            }
-            if (phaseContext instanceof EntityTickContext || phaseContext instanceof UnwindingPhaseContext) {
-                // TODO remove warning when we got all cases covered
-                SpongeCommon.logger().warn("Ignoring slot transaction on InventoryMenu during {}. {}", phaseContext.getClass().getSimpleName(), newTransaction);
-                return;
-            }
-        }
-
-        SpongeCommon.logger().warn("Logged slot transaction without event transaction!", new Exception());
-    }
-
-    public EffectTransactor logClickContainer(
-        final AbstractContainerMenu menu, final int slotNum, final int buttonNum, final ClickType clickType, final Player player
-    ) {
-        @Nullable Slot slot = null;
-        if (buttonNum >= 0) { // Try to get valid slot - might not be present e.g. for drag-events
-            slot = ((InventoryAdapter) menu).inventoryAdapter$getSlot(slotNum).orElse(null);
-        }
-        final ClickMenuTransaction transaction = new ClickMenuTransaction(
-            player, menu, slotNum, buttonNum, clickType, slot, ItemStackUtil.snapshotOf(player.inventory.getCarried()));
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
-    }
-
-    public EffectTransactor logPlayerInventoryChangeWithEffect(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
-        final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player, eventCreator);
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
-    }
-
-    public PlayerInventoryTransaction logPlayerInventoryChange(final Player player, final PlayerInventoryTransaction.EventCreator eventCreator) {
-        final PlayerInventoryTransaction transaction = new PlayerInventoryTransaction(player, eventCreator);
-        this.logTransaction(transaction);
-        return transaction;
-    }
-
-    public void logPlayerCarriedItem(final Player player, final int newSlot) {
-        final SetCarriedItemTransaction transaction = new SetCarriedItemTransaction(player, newSlot);
-        this.logTransaction(transaction);
-    }
-
-    public EffectTransactor logCreativeClickContainer(final int slotNum, final ItemStackSnapshot creativeStack, final Player player) {
-        final ClickCreativeMenuTransaction transaction = new ClickCreativeMenuTransaction(player, slotNum, creativeStack);
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
-    }
-
-    public EffectTransactor logDropFromPlayerInventory(final Player player, final boolean dropAll) {
-        final DropFromPlayerInventoryTransaction transaction = new DropFromPlayerInventoryTransaction(player, dropAll);
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
-    }
-
-    public EffectTransactor logOpenInventory(final Player player) {
-        final OpenMenuTransaction transaction = new OpenMenuTransaction(player);
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
+        return TransactionSink.super.logTileReplacement(pos, existing, proposed, worldSupplier);
     }
 
     public void logContainerSet(final Player player) {
         if (this.tail != null) {
             this.tail.acceptContainerSet(player);
         }
-    }
-
-    public EffectTransactor logCloseInventory(final Player player, final boolean clientSource) {
-        final CloseMenuTransaction transaction = new CloseMenuTransaction(player, clientSource);
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
-    }
-
-    public EffectTransactor logPlaceRecipe(final boolean shift, final Recipe<?> recipe, final ServerPlayer player, final CraftingInventory craftInv) {
-        final PlaceRecipeTransaction transaction = new PlaceRecipeTransaction(player, shift, recipe, craftInv);
-        this.logTransaction(transaction);
-        return this.pushEffect(new ResultingTransactionBySideEffect(InventoryEffect.getInstance()));
-    }
-
-    public void logSelectTrade(ServerPlayer player, int item) {
-        final SelectTradeTransaction transaction = new SelectTradeTransaction(player, item);
-        this.logTransaction(transaction);
     }
 
     public void logCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,
@@ -383,98 +248,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         throw new IllegalStateException("Crafting must be nested in another event");
     }
 
-    public void logShiftCraftingResult(ItemStack result) {
-        if (this.tail instanceof ClickMenuTransaction) {
-            ((ClickMenuTransaction) this.tail).acceptShiftCraftingResult(result);
-        }
-    }
-
     public void logCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory,
             final CraftingContainer craftSlots) {
         if (this.tail != null && this.tail.acceptCraftingPreview(player, craftingInventory, craftSlots)) {
             return;
         }
         throw new IllegalStateException("Preview must be nested in another event");
-    }
-
-    private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable BlockEntity existing,
-        final BlockEntity proposed, final Supplier<ServerLevel> worldSupplier
-    ) {
-        final BlockState currentState = worldSupplier.get().getBlockState(pos);
-        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
-            currentState,
-            pos,
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            existing,
-            worldSupplier,
-            Optional::empty, Optional::empty
-        );
-        snapshot.blockChange = BlockChange.MODIFY;
-
-        return new ReplaceBlockEntity(proposed, existing, snapshot);
-    }
-
-    @SuppressWarnings("ConstantConditions")
-    public EffectTransactor logBlockDrops(
-        final PhaseContext<@NonNull ?> context, final Level serverWorld, final BlockPos pos, final BlockState state,
-        final @Nullable BlockEntity tileEntity) {
-        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
-        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
-            state,
-            pos,
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            tileEntity,
-            worldSupplier,
-            Optional::empty, Optional::empty
-        );
-        original.blockChange = BlockChange.MODIFY;
-        final PrepareBlockDropsTransaction transaction = new PrepareBlockDropsTransaction(pos, state, original);
-        if (this.tail == null || !this.tail.acceptDrops(transaction)) {
-            this.logTransaction(transaction);
-        }
-        return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
-    }
-
-    public void logBlockEvent(final BlockState state, final TrackedWorldBridge serverWorld, final BlockPos pos,
-        final TrackableBlockEventDataBridge blockEvent
-    ) {
-        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
-        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final @Nullable BlockEntity tileEntity = ((ServerLevel) serverWorld).getBlockEntity(pos);
-        final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
-            state,
-            pos,
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            tileEntity,
-            worldSupplier,
-            Optional::empty, Optional::empty
-        );
-        original.blockChange = BlockChange.MODIFY;
-        final AddBlockEventTransaction transaction = new AddBlockEventTransaction(original, blockEvent);
-        this.logTransaction(transaction);
-    }
-
-    public void logScheduledUpdate(final ServerLevel serverWorld, final TickNextTickData<?> data) {
-        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
-        final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
-        final @Nullable BlockEntity tileEntity = serverWorld.getBlockEntity(data.pos);
-        final BlockState existing = serverWorld.getBlockState(data.pos);
-        final SpongeBlockSnapshot original = TrackingUtil.createPooledSnapshot(
-            existing,
-            data.pos,
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            tileEntity,
-            worldSupplier,
-            Optional::empty, Optional::empty
-        );
-        original.blockChange = BlockChange.MODIFY;
-        final ScheduleUpdateTransaction transaction = new ScheduleUpdateTransaction(original, data);
-        this.logTransaction(transaction);
     }
 
     @SuppressWarnings({"ConstantConditions"})
@@ -523,55 +302,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
     }
 
-    private RemoveBlockEntity createTileRemovalTransaction(final BlockEntity tileentity,
-        final Supplier<ServerLevel> worldSupplier
-    ) {
-        final BlockState currentState = tileentity.getBlockState();
-        final SpongeBlockSnapshot snapshot = TrackingUtil.createPooledSnapshot(
-            currentState,
-            tileentity.getBlockPos().immutable(),
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            tileentity,
-            worldSupplier,
-            Optional::empty, Optional::empty
-        );
-        snapshot.blockChange = BlockChange.MODIFY;
-
-        return new RemoveBlockEntity(tileentity, snapshot);
-    }
-
-    private AddTileEntity createTileAdditionTransaction(final BlockEntity tileentity,
-        final Supplier<ServerLevel> worldSupplier, final LevelChunk chunk
-    ) {
-        final BlockPos pos = tileentity.getBlockPos().immutable();
-        final BlockState currentBlock = chunk.getBlockState(pos);
-        final @Nullable BlockEntity existingTile = chunk.getBlockEntity(pos, LevelChunk.EntityCreationType.CHECK);
-
-        final SpongeBlockSnapshot added = TrackingUtil.createPooledSnapshot(
-            currentBlock,
-            pos,
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            tileentity,
-            worldSupplier,
-            Optional::empty, Optional::empty
-        );
-        final SpongeBlockSnapshot existing = TrackingUtil.createPooledSnapshot(
-            currentBlock,
-            pos,
-            BlockChangeFlags.NONE,
-            Constants.World.DEFAULT_BLOCK_CHANGE_LIMIT,
-            existingTile,
-            worldSupplier,
-            Optional::empty,
-            Optional::empty
-        );
-        existing.blockChange = BlockChange.MODIFY;
-
-        return new AddTileEntity(tileentity, added, existing);
-    }
-
     public void clear() {
         this.head = null;
         this.tail = null;
@@ -580,7 +310,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
 
     @SuppressWarnings("unchecked")
     public boolean processTransactions(final PhaseContext<@NonNull ?> context) {
-        if ((GameTransaction<@NonNull ?>) this.head == null) {
+        if (this.head == null) {
             return false;
         }
         final ImmutableMultimap.Builder<TransactionType, ? extends Event> builder = ImmutableMultimap.builder();

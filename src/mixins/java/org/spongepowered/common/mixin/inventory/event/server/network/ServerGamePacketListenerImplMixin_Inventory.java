@@ -111,11 +111,11 @@ public class ServerGamePacketListenerImplMixin_Inventory {
             final Level param1, final ItemStack param2, final InteractionHand param3) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
+        final InteractionResult result = serverPlayerGameMode.useItem(param0, param1, param2, param3);
         try (EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(this.player, SpongeEventFactory::createChangeInventoryEvent)) {
-            final InteractionResult result = serverPlayerGameMode.useItem(param0, param1, param2, param3);
             this.player.inventoryMenu.broadcastChanges(); // capture
-            return result;
         }
+        return result;
         // TrackingUtil.processBlockCaptures called by UseItemPacketState
     }
 
@@ -161,7 +161,7 @@ public class ServerGamePacketListenerImplMixin_Inventory {
         return result;
     }
 
-    @SuppressWarnings("UnresolvedMixinReference")
+    @SuppressWarnings({"UnresolvedMixinReference", "unchecked", "rawtypes"})
     @Redirect(method = "lambda$handlePlaceRecipe$10",
             at = @At(value = "INVOKE", target = "Lnet/minecraft/world/inventory/RecipeBookMenu;handlePlacement(ZLnet/minecraft/world/item/crafting/Recipe;Lnet/minecraft/server/level/ServerPlayer;)V"))
     private void impl$onPlaceRecipe(final RecipeBookMenu recipeBookMenu, final boolean shift, final Recipe<?> recipe, final ServerPlayer player) {

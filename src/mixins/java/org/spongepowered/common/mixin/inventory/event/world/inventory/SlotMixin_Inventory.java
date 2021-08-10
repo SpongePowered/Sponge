@@ -26,6 +26,7 @@ package org.spongepowered.common.mixin.inventory.event.world.inventory;
 
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
+import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.asm.mixin.Mixin;
 import org.spongepowered.asm.mixin.injection.At;
 import org.spongepowered.asm.mixin.injection.Inject;
@@ -38,7 +39,7 @@ public class SlotMixin_Inventory {
 
     @Inject(method = "onQuickCraft(Lnet/minecraft/world/item/ItemStack;Lnet/minecraft/world/item/ItemStack;)V", at = @At("HEAD"))
     private void inventory$onQuickCraft(final ItemStack slotStack, final ItemStack stackTaken, final CallbackInfo ci) {
-        final PhaseContext<?> ctx = PhaseTracker.SERVER.getPhaseContext();
-        ctx.getTransactor().logShiftCraftingResult(stackTaken);
+        final PhaseContext<@NonNull ?> ctx = PhaseTracker.SERVER.getPhaseContext();
+        ctx.getTransactor().logShiftCraftingResult((Slot) (Object) this, stackTaken);
     }
 }

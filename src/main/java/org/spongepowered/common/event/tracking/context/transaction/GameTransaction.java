@@ -53,7 +53,7 @@ import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 
 @DefaultQualifier(NonNull.class)
-public abstract class GameTransaction<E extends Event & Cancellable> {
+public abstract class GameTransaction<E extends Event & Cancellable> implements TransactionFlow {
 
     private final TransactionType<? extends E> transactionType;
     final ResourceKey worldKey;
@@ -66,7 +66,7 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
     @Nullable GameTransaction<@NonNull ?> previous;
     @Nullable GameTransaction<@NonNull ?> next;
 
-    GameTransaction(final TransactionType<? extends E> transactionType, final ResourceKey worldKey) {
+    protected GameTransaction(final TransactionType<? extends E> transactionType, final ResourceKey worldKey) {
         this.transactionType = transactionType;
         this.worldKey = worldKey;
     }
@@ -77,19 +77,18 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
             .toString();
     }
 
-    public TransactionType<? extends E> getTransactionType() {
+    public final TransactionType<? extends E> getTransactionType() {
         return this.transactionType;
     }
 
-
-    Deque<ResultingTransactionBySideEffect> getEffects() {
+    final Deque<ResultingTransactionBySideEffect> getEffects() {
         if (this.sideEffects == null) {
             this.sideEffects = new LinkedList<>();
         }
         return this.sideEffects;
     }
 
-    public void addLast(final ResultingTransactionBySideEffect effect) {
+    public final void addLast(final ResultingTransactionBySideEffect effect) {
         if (this.sideEffects == null) {
             this.sideEffects = new LinkedList<>();
         }
@@ -122,22 +121,6 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
 
     public abstract void addToPrinter(PrettyPrinter printer);
 
-    public boolean acceptTileRemoval(final @Nullable BlockEntity tileentity) {
-        return false;
-    }
-
-    public boolean acceptTileAddition(final BlockEntity tileEntity) {
-        return false;
-    }
-
-    public boolean acceptTileReplacement(final @Nullable BlockEntity existing, final BlockEntity proposed) {
-        return false;
-    }
-
-    public boolean acceptEntityDrops(final Entity entity) {
-        return false;
-    }
-
     public boolean isUnbatchable() {
         return false;
     }
@@ -149,13 +132,9 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
         Cause currentCause
     );
 
-    void handleEmptyEvent() {
-        this.markCancelled();
-    }
+    public abstract void restore(PhaseContext<@NonNull ?> context, E event);
 
-    public abstract void restore(PhaseContext<?> context, E event);
-
-    public void markCancelled() {
+    public final void markCancelled() {
         this.cancelled = true;
         if (this.sideEffects != null) {
             for (final ResultingTransactionBySideEffect sideEffect : this.sideEffects) {
@@ -191,26 +170,4 @@ public abstract class GameTransaction<E extends Event & Cancellable> {
             || !this.worldKey.equals(pointer.worldKey);
     }
 
-    public boolean acceptSlotTransaction(
-        final SlotTransaction newTransaction,
-        final Object inventory
-    ) {
-        return false;
-    }
-
-    public boolean acceptEntitySpawn(final PhaseContext<@NonNull ?> current, final Entity entityIn) {
-        return false;
-    }
-
-    public boolean acceptCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory, final CraftingContainer craftSlots) {
-        return false;
-    }
-
-    public boolean acceptCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv, @Nullable final CraftingRecipe lastRecipe) {
-        return false;
-    }
-
-    public void acceptContainerSet(Player player) {
-
-    }
 }
