@@ -48,6 +48,7 @@ import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -134,13 +135,16 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
             return;
         }
         if (transaction.canBeAbsorbed()) {
-            final Iterator<GameTransaction<?>> iterator = this.descendingIterator();
+            final Iterator<GameTransaction<@NonNull ?>> iterator = this.descendingIterator();
             while (iterator.hasNext()) {
-                final GameTransaction<?> next = iterator.next();
+                final GameTransaction<@NonNull ?> next = iterator.next();
                 if (transaction.absorbByParent(this.context, next)) {
                     return;
                 }
             }
+        }
+        if (transaction.shouldHaveBeenAbsorbed()) {
+            SpongeCommon.logger().warn("Logged transaction without event transaction!", new Exception());
         }
         if (this.effect != null) {
             this.effect.addChild(this.context, transaction);
@@ -168,7 +172,7 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
     }
 
     @Override
-    @SuppressWarnings({"ConstantConditions", "unchecked"})
+    @SuppressWarnings({"ConstantConditions"})
     public boolean logTileRemoval(final @Nullable BlockEntity tileentity, final Supplier<ServerLevel> worldSupplier) {
         if (tileentity == null) {
             return false;

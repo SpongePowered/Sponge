@@ -77,30 +77,29 @@ import org.spongepowered.asm.mixin.injection.callback.CallbackInfo;
 import org.spongepowered.asm.mixin.injection.callback.CallbackInfoReturnable;
 import org.spongepowered.asm.mixin.injection.callback.LocalCapture;
 import org.spongepowered.common.SpongeCommon;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
-import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.bridge.world.entity.EntityTypeBridge;
 import org.spongepowered.common.bridge.world.entity.LivingEntityBridge;
 import org.spongepowered.common.bridge.world.entity.PlatformLivingEntityBridge;
 import org.spongepowered.common.bridge.world.entity.player.PlayerBridge;
+import org.spongepowered.common.bridge.world.level.LevelBridge;
 import org.spongepowered.common.entity.living.human.HumanEntity;
 import org.spongepowered.common.event.ShouldFire;
 import org.spongepowered.common.event.SpongeCommonEventFactory;
-import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.event.cause.entity.damage.SpongeDamageSources;
 import org.spongepowered.common.event.tracking.PhaseTracker;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.util.Constants;
+import org.spongepowered.common.util.DamageEventUtil;
 import org.spongepowered.common.util.PrettyPrinter;
 import org.spongepowered.common.util.VecHelper;
 import org.spongepowered.math.vector.Vector3d;
 
+import javax.annotation.Nullable;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.List;
 import java.util.Optional;
-
-import javax.annotation.Nullable;
 
 @SuppressWarnings("ConstantConditions")
 @Mixin(LivingEntity.class)
@@ -268,7 +267,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
 
             // Sponge start - log inventory change due to taking damage
             if (hurtStack && isHuman) {
-                PhaseTracker.SERVER.getPhaseContext().getTransactor().logPlayerInventoryChange((Player) (Object) this, SpongeEventFactory::createChangeInventoryEvent);
+                PhaseTracker.SERVER.getPhaseContext().getTransactor().logPlayerInventoryChange((Player) (Object) this, PlayerInventoryTransaction.EventCreator.STANDARD);
                 ((Player) (Object) this).inventoryMenu.broadcastChanges(); // capture
             }
             // Sponge end
@@ -876,7 +875,7 @@ public abstract class LivingEntityMixin extends EntityMixin implements LivingEnt
                 stack.releaseUsing(world, self, duration);
                 if (self instanceof net.minecraft.server.level.ServerPlayer) {
                     // Log Change and capture SlotTransactions
-                    PhaseTracker.SERVER.getPhaseContext().getTransactor().logPlayerInventoryChange(((net.minecraft.server.level.ServerPlayer) self), SpongeEventFactory::createChangeInventoryEvent);
+                    PhaseTracker.SERVER.getPhaseContext().getTransactor().logPlayerInventoryChange(((net.minecraft.server.level.ServerPlayer) self), PlayerInventoryTransaction.EventCreator.STANDARD);
                     ((net.minecraft.server.level.ServerPlayer) self).inventoryMenu.broadcastChanges();
                 }
             }

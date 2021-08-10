@@ -41,7 +41,6 @@ import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.objectweb.asm.Opcodes;
 import org.spongepowered.api.Sponge;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.equipment.EquipmentType;
@@ -58,6 +57,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.inventory.adapter.InventoryAdapter;
 import org.spongepowered.common.inventory.fabric.Fabric;
@@ -85,7 +85,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     protected void impl$beforeSetItemSlot(final EquipmentSlot param0, final ItemStack param1, final CallbackInfo ci) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        this.inventory$effectTransactor = transactor.logPlayerInventoryChangeWithEffect((Player) (Object) this, SpongeEventFactory::createChangeInventoryEvent);
+        this.inventory$effectTransactor = transactor.logPlayerInventoryChangeWithEffect((Player) (Object) this, PlayerInventoryTransaction.EventCreator.STANDARD);
     }
 
     @Override
@@ -145,7 +145,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
             return;
         }
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
-        try (final EffectTransactor ignored = context.getTransactor().logPlayerInventoryChangeWithEffect(player, SpongeEventFactory::createChangeInventoryEvent)) {
+        try (final EffectTransactor ignored = context.getTransactor().logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
             entity.playerTouch(player);
             this.inventoryMenu.broadcastChanges(); // capture
         }
@@ -162,7 +162,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
         final net.minecraft.server.level.ServerPlayer player = (net.minecraft.server.level.ServerPlayer) (Object) this;
-        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, SpongeEventFactory::createChangeInventoryEvent)) {
+        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.STANDARD)) {
             player.inventoryMenu.broadcastChanges(); // capture
         }
     }
@@ -171,7 +171,7 @@ public abstract class ServerPlayerMixin_Inventory extends PlayerMixin_Inventory 
     protected void inventory$onUpdateUsingItem(final LivingEntity thisPlayer) {
         final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
         final TransactionalCaptureSupplier transactor = context.getTransactor();
-        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect((ServerPlayer) (Object) this, SpongeEventFactory::createChangeInventoryEvent)) {
+        try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect((ServerPlayer) (Object) this, PlayerInventoryTransaction.EventCreator.STANDARD)) {
             this.shadow$completeUsingItem();
             this.inventoryMenu.broadcastChanges();
         }

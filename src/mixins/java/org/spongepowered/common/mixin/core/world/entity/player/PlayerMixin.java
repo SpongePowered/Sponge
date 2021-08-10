@@ -106,6 +106,7 @@ import org.spongepowered.common.event.SpongeCommonEventFactory;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.hooks.PlatformHooks;
 import org.spongepowered.common.item.util.ItemStackUtil;
 import org.spongepowered.common.mixin.core.world.entity.LivingEntityMixin;
@@ -590,7 +591,7 @@ public abstract class PlayerMixin extends LivingEntityMixin implements PlayerBri
                             // Sponge Start
                             final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
                             final TransactionalCaptureSupplier transactor = context.getTransactor();
-                            transactor.logPlayerInventoryChange((net.minecraft.world.entity.player.Player) (Object) this, SpongeEventFactory::createChangeInventoryEvent);
+                            transactor.logPlayerInventoryChange((net.minecraft.world.entity.player.Player) (Object) this, PlayerInventoryTransaction.EventCreator.STANDARD);
                             this.inventoryMenu.broadcastChanges(); // capture
                             // Spong End
                         }

@@ -28,7 +28,6 @@ import net.minecraft.network.protocol.Packet;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.item.inventory.ItemStack;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
@@ -36,6 +35,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
 import org.spongepowered.common.event.tracking.context.transaction.effect.BroadcastInventoryChangesEffect;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.util.PrettyPrinter;
 
 @SuppressWarnings("unchecked")
@@ -130,7 +130,7 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
         // Make sure to call any broadcast changes to capture any inventory transactions
         // for events
         final TransactionalCaptureSupplier transactor = this.getTransactor();
-        transactor.logPlayerInventoryChange(this.packetPlayer, SpongeEventFactory::createChangeInventoryEvent);
+        transactor.logPlayerInventoryChange(this.packetPlayer, PlayerInventoryTransaction.EventCreator.STANDARD);
         try (EffectTransactor ignored = BroadcastInventoryChangesEffect.transact(transactor)) {
             this.packetPlayer.containerMenu.broadcastChanges();
         }

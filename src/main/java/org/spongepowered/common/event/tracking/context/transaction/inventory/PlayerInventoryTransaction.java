@@ -28,10 +28,12 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.player.Player;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.event.Cause;
+import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.PhaseContext;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
 import java.util.List;
@@ -68,7 +70,34 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
         PacketPhaseUtil.handleSlotRestore(this.player, null, event.transactions(), event.isCancelled());
     }
 
+    @Override
+    public boolean canBeAbsorbed() {
+        return true;
+    }
+
+    @Override
+    public boolean absorbByParent(
+        final PhaseContext<@NonNull ?> context, final GameTransaction<@NonNull ?> transaction
+    ) {
+        return transaction.absorbPlayerInventoryChange(context, this);
+    }
+
+    @Override
+    public boolean absorbPlayerInventoryChange(
+        final PhaseContext<@NonNull ?> context, final PlayerInventoryTransaction playerInventoryTransaction
+    ) {
+        if (playerInventoryTransaction.player == this.player) {
+            return this.eventCreator == playerInventoryTransaction.eventCreator;
+        }
+        return false;
+    }
+
+    @SuppressWarnings("NullableProblems")
     public interface EventCreator {
+        EventCreator STANDARD = SpongeEventFactory::createChangeInventoryEvent;
+        EventCreator PICKUP = SpongeEventFactory::createChangeInventoryEventPickup;
+        EventCreator SWAP_HAND = SpongeEventFactory::createChangeInventoryEventSwapHand;
         ChangeInventoryEvent create(final Cause cause, final Inventory inventory, final List<SlotTransaction> slotTransactions);
     }
+
 }

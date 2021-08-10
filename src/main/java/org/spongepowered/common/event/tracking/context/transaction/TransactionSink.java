@@ -42,7 +42,6 @@ import net.minecraft.world.level.block.state.BlockState;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
@@ -335,7 +334,7 @@ interface TransactionSink {
         if (abstractContainerMenu instanceof InventoryMenu) {
             if (phaseContext instanceof CommandPhaseContext) {
                 this.logPlayerInventoryChange(((InventoryMenuAccessor) abstractContainerMenu).accessor$owner(),
-                    SpongeEventFactory::createChangeInventoryEvent);
+                    PlayerInventoryTransaction.EventCreator.STANDARD);
             }
             if (phaseContext instanceof EntityTickContext || phaseContext instanceof UnwindingPhaseContext) {
                 // TODO remove warning when we got all cases covered
@@ -343,7 +342,6 @@ interface TransactionSink {
                 return;
             }
         }
-        SpongeCommon.logger().warn("Logged slot transaction without event transaction!", new Exception());
         final ContainerSlotTransaction transaction = new ContainerSlotTransaction(
             abstractContainerMenu, newTransaction);
         this.logTransaction(transaction);

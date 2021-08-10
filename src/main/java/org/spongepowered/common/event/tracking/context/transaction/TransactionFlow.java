@@ -37,6 +37,7 @@ import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.block.PrepareBlockDropsTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ContainerSlotTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ShiftCraftingResultTransaction;
 
 interface TransactionFlow {
@@ -102,6 +103,17 @@ interface TransactionFlow {
      * @return
      */
     default boolean canBeAbsorbed() {
+        return false;
+    }
+
+    default boolean absorbPlayerInventoryChange(
+        final PhaseContext<@NonNull ?> context,
+        final PlayerInventoryTransaction playerInventoryTransaction
+    ) {
+        return false;
+    }
+
+    default boolean shouldHaveBeenAbsorbed() {
         return false;
     }
 }

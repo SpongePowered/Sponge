@@ -72,6 +72,7 @@ import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.TrackingUtil;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.inventory.util.ContainerUtil;
 import org.spongepowered.common.inventory.util.InventoryUtil;
@@ -108,7 +109,7 @@ public class InventoryEventFactory {
 
             final PhaseContext<@NonNull ?> context = PhaseTracker.SERVER.getPhaseContext();
             final TransactionalCaptureSupplier transactor = context.getTransactor();
-            try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, SpongeEventFactory::createChangeInventoryEventPickup)) {
+            try (final EffectTransactor ignored = transactor.logPlayerInventoryChangeWithEffect(player, PlayerInventoryTransaction.EventCreator.PICKUP)) {
                 for (final ItemStackSnapshot item : list) {
                     final org.spongepowered.api.item.inventory.ItemStack itemStack = item.createStack();
                     player.inventory.add(ItemStackUtil.toNative(itemStack));
