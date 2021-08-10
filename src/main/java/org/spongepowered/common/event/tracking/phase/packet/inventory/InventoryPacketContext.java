@@ -26,9 +26,7 @@ package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.phase.packet.PacketContext;
-import org.spongepowered.common.event.tracking.phase.packet.PacketPhase;
 import org.spongepowered.common.event.tracking.phase.packet.PacketState;
-import org.spongepowered.common.util.PrettyPrinter;
 
 public class InventoryPacketContext extends PacketContext<InventoryPacketContext> {
 
@@ -36,42 +34,4 @@ public class InventoryPacketContext extends PacketContext<InventoryPacketContext
         super(state, tracker);
     }
 
-    @Override
-    public boolean hasCaptures() {
-        if (super.hasCaptures()) {
-            return true;
-        }
-        if (this.state == PacketPhase.Inventory.DROP_ITEMS) {
-            return true;
-        }
-        if (this.state == PacketPhase.Inventory.DROP_ITEM_OUTSIDE_WINDOW) {
-            return true;
-        }
-        if (this.state == PacketPhase.Inventory.OPEN_INVENTORY) {
-            return true;
-        }
-        if (this.state == PacketPhase.Inventory.PLACE_RECIPE) {
-            return true;
-        }
-        if (this.state == PacketPhase.Inventory.SWAP_HAND_ITEMS) {
-            return true;
-        }
-        if (this.state == PacketPhase.Inventory.SET_CARRIED_ITEM) {
-            return true;
-        }
-        // Fire events even without captures
-        if (this.state == PacketPhase.Inventory.PRIMARY_INVENTORY_CLICK
-         || this.state == PacketPhase.Inventory.SECONDARY_INVENTORY_CLICK
-         || this.state == PacketPhase.Inventory.MIDDLE_INVENTORY_CLICK
-         || this.state == PacketPhase.Inventory.DROP_ITEM_WITH_HOTKEY
-         || this.state == PacketPhase.Inventory.PRIMARY_INVENTORY_SHIFT_CLICK
-         || this.state == PacketPhase.Inventory.SECONDARY_INVENTORY_SHIFT_CLICK
-         || this.state == PacketPhase.Inventory.SWITCH_HOTBAR_NUMBER_PRESS
-         || this.state == PacketPhase.Inventory.DROP_ITEM_OUTSIDE_WINDOW_NOOP
-        ) {
-            return true;
-        }
-
-        return super.hasCaptures();
-    }
 }

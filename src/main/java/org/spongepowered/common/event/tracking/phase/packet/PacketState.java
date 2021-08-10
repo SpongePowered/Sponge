@@ -110,6 +110,9 @@ public abstract class PacketState<P extends PacketContext<P>> extends PooledPhas
         return false;
     }
 
+    protected boolean alwaysUnwinds() {
+        return false;
+    }
 
     private final String desc = TrackingUtil.phaseStateToString("Packet", this);
 

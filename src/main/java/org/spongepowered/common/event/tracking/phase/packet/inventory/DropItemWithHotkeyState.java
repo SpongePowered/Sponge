@@ -70,7 +70,7 @@ public final class DropItemWithHotkeyState extends BasicInventoryPacketState {
     }
 
     @Override
-    public boolean doesContainerCaptureEntitySpawn(InventoryPacketContext context, net.minecraft.world.entity.Entity entityIn) {
+    public boolean doesContainerCaptureEntitySpawn(final InventoryPacketContext context, final net.minecraft.world.entity.Entity entityIn) {
         return true;
     }
 }

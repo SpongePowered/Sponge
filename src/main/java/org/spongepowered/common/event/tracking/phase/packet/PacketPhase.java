@@ -81,9 +81,9 @@ import org.spongepowered.common.event.tracking.phase.packet.inventory.PrimaryInv
 import org.spongepowered.common.event.tracking.phase.packet.inventory.PrimaryInventoryShiftClick;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.SecondaryInventoryClickState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.SecondaryInventoryShiftClickState;
+import org.spongepowered.common.event.tracking.phase.packet.inventory.SetCarriedItemState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.SwapHandItemsState;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.SwitchHotbarNumberPressState;
-import org.spongepowered.common.event.tracking.phase.packet.inventory.SetCarriedItemState;
 import org.spongepowered.common.event.tracking.phase.packet.player.AnimationPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.AttackEntityPacketState;
 import org.spongepowered.common.event.tracking.phase.packet.player.IgnoredPacketState;
@@ -141,19 +141,19 @@ public final class PacketPhase {
 
     public static final class Inventory {
         static final BasicInventoryPacketState INVENTORY = new BasicInventoryPacketState();
-        public static final BasicInventoryPacketState PRIMARY_INVENTORY_CLICK = new PrimaryInventoryClickState();
-        public static final BasicInventoryPacketState SECONDARY_INVENTORY_CLICK = new SecondaryInventoryClickState();
-        public static final BasicInventoryPacketState MIDDLE_INVENTORY_CLICK = new MiddleInventoryClickState();
-        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState(
+        static final BasicInventoryPacketState PRIMARY_INVENTORY_CLICK = new PrimaryInventoryClickState();
+        static final BasicInventoryPacketState SECONDARY_INVENTORY_CLICK = new SecondaryInventoryClickState();
+        static final BasicInventoryPacketState MIDDLE_INVENTORY_CLICK = new MiddleInventoryClickState();
+        static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW = new DropItemOutsideWindowState(
                 Constants.Networking.MODE_CLICK | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_OUTSIDE_WINDOW);
-        public static final BasicInventoryPacketState DROP_ITEM_WITH_HOTKEY = new DropItemWithHotkeyState();
-        public static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW_NOOP = new DropItemOutsideWindowState(
+        static final BasicInventoryPacketState DROP_ITEM_WITH_HOTKEY = new DropItemWithHotkeyState();
+        static final BasicInventoryPacketState DROP_ITEM_OUTSIDE_WINDOW_NOOP = new DropItemOutsideWindowState(
                 Constants.Networking.MODE_DROP | Constants.Networking.BUTTON_PRIMARY | Constants.Networking.BUTTON_SECONDARY | Constants.Networking.CLICK_OUTSIDE_WINDOW);
-        public static final BasicInventoryPacketState DROP_ITEMS = new BasicInventoryPacketState();
+        static final BasicInventoryPacketState DROP_ITEMS = new BasicInventoryPacketState();
         static final BasicInventoryPacketState DROP_INVENTORY = new DropInventoryState();
-        public static final BasicInventoryPacketState SWITCH_HOTBAR_NUMBER_PRESS = new SwitchHotbarNumberPressState();
-        public static final BasicInventoryPacketState PRIMARY_INVENTORY_SHIFT_CLICK = new PrimaryInventoryShiftClick();
-        public static final BasicInventoryPacketState SECONDARY_INVENTORY_SHIFT_CLICK = new SecondaryInventoryShiftClickState();
+        static final BasicInventoryPacketState SWITCH_HOTBAR_NUMBER_PRESS = new SwitchHotbarNumberPressState();
+        static final BasicInventoryPacketState PRIMARY_INVENTORY_SHIFT_CLICK = new PrimaryInventoryShiftClick();
+        static final BasicInventoryPacketState SECONDARY_INVENTORY_SHIFT_CLICK = new SecondaryInventoryShiftClickState();
         static final BasicInventoryPacketState DOUBLE_CLICK_INVENTORY = new DoubleClickInventoryState();
 
         static final BasicInventoryPacketState PRIMARY_DRAG_INVENTORY_START = new DragInventoryStartState("PRIMARY_DRAG_INVENTORY_START", Constants.Networking.DRAG_MODE_PRIMARY_BUTTON);
@@ -168,12 +168,12 @@ public final class PacketPhase {
         static final BasicInventoryPacketState SECONDARY_DRAG_INVENTORY_STOP = new SecondaryDragInventoryStopState();
         static final BasicInventoryPacketState MIDDLE_DRAG_INVENTORY_STOP = new MiddleDragInventoryStopState();
 
-        public static final BasicInventoryPacketState SET_CARRIED_ITEM = new SetCarriedItemState();
-        public static final BasicInventoryPacketState OPEN_INVENTORY = new OpenInventoryState();
+        static final BasicInventoryPacketState SET_CARRIED_ITEM = new SetCarriedItemState();
+        static final BasicInventoryPacketState OPEN_INVENTORY = new OpenInventoryState();
         static final BasicInventoryPacketState ENCHANT_ITEM = new EnchantItemPacketState();
-        public static final BasicInventoryPacketState SWAP_HAND_ITEMS = new SwapHandItemsState();
+        static final BasicInventoryPacketState SWAP_HAND_ITEMS = new SwapHandItemsState();
 
-        public static final BasicInventoryPacketState PLACE_RECIPE = new PlaceRecipePacketState();
+        static final BasicInventoryPacketState PLACE_RECIPE = new PlaceRecipePacketState();
 
         static final ImmutableList<BasicInventoryPacketState> VALUES = ImmutableList.<BasicInventoryPacketState>builder()
                 .add(Inventory.INVENTORY)

@@ -49,7 +49,7 @@ public final class CreativeInventoryPacketState extends BasicPacketState {
     }
 
     @Override
-    public boolean doesContainerCaptureEntitySpawn(BasicPacketContext context, Entity entityIn) {
+    public boolean doesContainerCaptureEntitySpawn(final BasicPacketContext context, final Entity entityIn) {
         return true;
     }
 }

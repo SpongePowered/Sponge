@@ -24,6 +24,7 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet;
 
+import net.minecraft.network.protocol.Packet;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.type.HandType;
 import org.spongepowered.api.entity.living.player.server.ServerPlayer;
@@ -34,8 +35,6 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
 import org.spongepowered.common.util.PrettyPrinter;
-
-import net.minecraft.network.protocol.Packet;
 
 @SuppressWarnings("unchecked")
 public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
@@ -114,6 +113,14 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
             .add(s + "- %s: %s", "Packet", this.packet)
             .add(s + "- %s: %s", "ItemStackUsed", this.itemUsed);
 
+    }
+
+    @Override
+    public boolean hasCaptures() {
+        if (((PacketState) this.state).alwaysUnwinds()) {
+            return true;
+        }
+        return super.hasCaptures();
     }
 
     @Override
