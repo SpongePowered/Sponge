@@ -108,7 +108,7 @@ public final class PacketPhaseUtil {
                         ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(containerMenu);
                     }
                 } else {
-                    ((net.minecraft.server.level.ServerPlayer) player).refreshContainer(player.inventoryMenu);
+                    player.inventoryMenu.broadcastChanges();
                 }
             }
         }
