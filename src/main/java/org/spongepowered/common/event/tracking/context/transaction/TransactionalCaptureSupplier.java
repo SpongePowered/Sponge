@@ -50,14 +50,12 @@ import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.ResourceKey;
 import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
 import org.spongepowered.api.event.SpongeEventFactory;
 import org.spongepowered.api.event.cause.entity.SpawnType;
-import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
@@ -304,11 +302,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
         }
 
         SpongeCommon.logger().warn("Logged slot transaction without event transaction!", new Exception());
-
-        final Supplier<ResourceKey> worldSupplier = phaseContext.attemptWorldKey();
-        final ContainerSlotTransaction transaction = new ContainerSlotTransaction(
-            worldSupplier, abstractContainerMenu, newTransaction);
-        this.logTransaction(transaction);
     }
 
     public EffectTransactor logClickContainer(
@@ -402,27 +395,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier {
             return;
         }
         throw new IllegalStateException("Preview must be nested in another event");
-    }
-
-    public void logPlayerInventorySlotTransaction(
-            final Player player, final PhaseContext<@NonNull ?> phaseContext, final Slot slot, final ItemStack orig,
-            final ItemStack newStack, final Inventory inventory
-    ) {
-        if (ItemStack.matches(orig, newStack)) {
-            return; // ignore if no change
-        }
-
-        final SlotTransaction newTransaction = new SlotTransaction(slot, ItemStackUtil.snapshotOf(orig), ItemStackUtil.snapshotOf(newStack));
-        if (this.tail != null && this.tail.acceptSlotTransaction(newTransaction, inventory)) {
-            return;
-        }
-
-
-        final PlayerInventoryTransaction transaction = this.logPlayerInventoryChange(player, (c, inv, trans) -> trans.isEmpty() ? null : SpongeEventFactory.createChangeInventoryEvent(c, inv, trans));
-        if (transaction.acceptSlotTransaction(newTransaction, inventory)) {
-            return;
-        }
-        throw new IllegalStateException("Player inventory slot transaction was not accepted!");
     }
 
     private GameTransaction createTileReplacementTransaction(final BlockPos pos, final @Nullable BlockEntity existing,
