@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -52,14 +53,12 @@ public final class PrimaryInventoryClickState extends BasicInventoryPacketState 
             final ServerPlayer serverPlayer, final Container openContainer, final Transaction<ItemStackSnapshot> transaction,
             final List<SlotTransaction> slotTransactions, final List<Entity> capturedEntities, final int usedButton, @Nullable
     final Slot slot) {
+        if (!capturedEntities.isEmpty()) {
+            SpongeCommon.logger().warn("Entities are being captured but not being processed");
+        }
+
         return SpongeEventFactory.createClickContainerEventPrimary(cause,
                 openContainer, transaction, Optional.ofNullable(slot), slotTransactions);
     }
 
-    @Override
-    public boolean doesContainerCaptureEntitySpawn(
-        final InventoryPacketContext context, final net.minecraft.world.entity.Entity entityIn
-    ) {
-        return true;
-    }
 }

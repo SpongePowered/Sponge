@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.phase.packet.inventory.InventoryPacketContext;
 import org.spongepowered.common.util.Constants;
 
@@ -55,7 +56,7 @@ public final class MiddleDragInventoryStopState extends DragInventoryStopState {
         @Nullable final Slot slot
     ) {
         if (!capturedEntities.isEmpty()) {
-            System.err.println("Captured entities but didn't have an event for it");
+            SpongeCommon.logger().warn("Entities are being captured but not being processed");
         }
         return SpongeEventFactory.createClickContainerEventDragMiddle(
             cause,

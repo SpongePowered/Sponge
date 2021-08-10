@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -59,7 +60,7 @@ public final class SecondaryInventoryShiftClickState extends BasicInventoryPacke
     ) {
 
         if (!capturedEntities.isEmpty()) {
-            System.err.println("Entities are being captured but not being processed");
+            SpongeCommon.logger().warn("Entities are being captured but not being processed");
         }
         return SpongeEventFactory.createClickContainerEventShiftSecondary(cause,
             openContainer, transaction, Optional.ofNullable(slot), slotTransactions

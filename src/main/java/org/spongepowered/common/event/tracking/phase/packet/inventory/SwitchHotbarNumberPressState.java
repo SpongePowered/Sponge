@@ -35,6 +35,7 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.util.Constants;
 
@@ -57,7 +58,7 @@ public final class SwitchHotbarNumberPressState extends BasicInventoryPacketStat
     ) {
 
         if (!capturedEntities.isEmpty()) {
-            System.err.println("Entities are being captured but not being processed");
+            SpongeCommon.logger().warn("Entities are being captured but not being processed");
         }
         return SpongeEventFactory.createClickContainerEventNumberPress(
             PhaseTracker.getCauseStackManager().currentCause(),

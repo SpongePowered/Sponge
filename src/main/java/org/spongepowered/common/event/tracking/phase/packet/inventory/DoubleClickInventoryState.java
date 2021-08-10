@@ -24,7 +24,6 @@
  */
 package org.spongepowered.common.event.tracking.phase.packet.inventory;
 
-import net.minecraft.network.protocol.Packet;
 import net.minecraft.server.level.ServerPlayer;
 import org.checkerframework.checker.nullness.qual.Nullable;
 import org.spongepowered.api.data.Transaction;
@@ -36,9 +35,8 @@ import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.bridge.world.inventory.container.TrackedContainerBridge;
+import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.event.ShouldFire;
-import org.spongepowered.common.event.tracking.phase.packet.drag.DragInventoryStopState;
 import org.spongepowered.common.util.Constants;
 
 import java.util.List;
@@ -66,7 +64,7 @@ public final class DoubleClickInventoryState extends BasicInventoryPacketState {
         final @Nullable Slot slot
     ) {
         if (!capturedEntities.isEmpty()) {
-            System.err.println("Entities are being captured but not being processed");
+            SpongeCommon.logger().warn("Entities are being captured but not being processed");
         }
         return SpongeEventFactory.createClickContainerEventDouble(cause,
             openContainer, transaction,
