@@ -34,6 +34,8 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.PhaseTracker;
 import org.spongepowered.common.event.tracking.context.transaction.EffectTransactor;
+import org.spongepowered.common.event.tracking.context.transaction.TransactionalCaptureSupplier;
+import org.spongepowered.common.event.tracking.context.transaction.effect.BroadcastInventoryChangesEffect;
 import org.spongepowered.common.util.PrettyPrinter;
 
 @SuppressWarnings("unchecked")
@@ -127,11 +129,9 @@ public class PacketContext<P extends PacketContext<P>> extends PhaseContext<P> {
     public void close() {
         // Make sure to call any broadcast changes to capture any inventory transactions
         // for events
-        try (final EffectTransactor ignored = this.getTransactor()
-            .logPlayerInventoryChangeWithEffect(
-                this.packetPlayer,
-                SpongeEventFactory::createChangeInventoryEvent
-            )) {
+        final TransactionalCaptureSupplier transactor = this.getTransactor();
+        transactor.logPlayerInventoryChange(this.packetPlayer, SpongeEventFactory::createChangeInventoryEvent);
+        try (EffectTransactor ignored = BroadcastInventoryChangesEffect.transact(transactor)) {
             this.packetPlayer.containerMenu.broadcastChanges();
         }
         super.close();
