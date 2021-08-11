@@ -40,6 +40,7 @@ import org.spongepowered.common.test.UnitTestExtension;
 import java.util.Iterator;
 import java.util.stream.Stream;
 
+@SuppressWarnings("deprecation")
 @ExtendWith(UnitTestExtension.class)
 public class GameTransactionIteratorTest {
 
@@ -58,7 +59,7 @@ public class GameTransactionIteratorTest {
         stubTransaction.addLast(effect);
         final StubTransaction child1 = new StubTransaction();
         effect.addChild(PhaseContext.empty(), child1);
-        final Iterator<GameTransaction<?>> iterator = stubTransaction.childIterator();
+        final Iterator<GameTransaction<@NonNull ?>> iterator = stubTransaction.childIterator();
         Assertions.assertTrue(iterator.hasNext());
         Assertions.assertEquals(child1, iterator.next());
     }

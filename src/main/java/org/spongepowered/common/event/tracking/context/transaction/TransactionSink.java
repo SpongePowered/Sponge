@@ -109,8 +109,10 @@ import java.util.function.Supplier;
  *
  * @see TransactionFlow#parentAbsorber()
  */
+@SuppressWarnings({"Deprecation", "DeprecatedIsStillUsed"})
 interface TransactionSink {
 
+    @Deprecated
     void logTransaction(GameTransaction<@NonNull ?> transaction);
 
     EffectTransactor pushEffect(final ResultingTransactionBySideEffect effect);
@@ -125,6 +127,7 @@ interface TransactionSink {
         return changeBlock;
     }
 
+    @SuppressWarnings("ConstantConditions")
     default void logBlockEvent(
         final BlockState state, final TrackedWorldBridge serverWorld, final BlockPos pos,
         final TrackableBlockEventDataBridge blockEvent
@@ -146,6 +149,7 @@ interface TransactionSink {
         this.logTransaction(transaction);
     }
 
+    @SuppressWarnings("ConstantConditions")
     default EffectTransactor logBlockDrops(
         final Level serverWorld, final BlockPos pos, final BlockState state,
         final @Nullable BlockEntity tileEntity
@@ -167,8 +171,9 @@ interface TransactionSink {
         return this.pushEffect(new ResultingTransactionBySideEffect(PrepareBlockDrops.getInstance()));
     }
 
+    @SuppressWarnings("ConstantConditions")
     default void logScheduledUpdate(final ServerLevel serverWorld, final TickNextTickData<?> data) {
-        final WeakReference<ServerLevel> worldRef = new WeakReference<>((ServerLevel) serverWorld);
+        final WeakReference<ServerLevel> worldRef = new WeakReference<>(serverWorld);
         final Supplier<ServerLevel> worldSupplier = () -> Objects.requireNonNull(worldRef.get(), "ServerWorld dereferenced");
         final @Nullable BlockEntity tileEntity = serverWorld.getBlockEntity(data.pos);
         final BlockState existing = serverWorld.getBlockState(data.pos);
@@ -195,6 +200,7 @@ interface TransactionSink {
         this.logTransaction(notificationTransaction);
     }
 
+    @SuppressWarnings("ConstantConditions")
     default void logEntitySpawn(
         final PhaseContext<@NonNull ?> current, final TrackedWorldBridge serverWorld,
         final Entity entityIn

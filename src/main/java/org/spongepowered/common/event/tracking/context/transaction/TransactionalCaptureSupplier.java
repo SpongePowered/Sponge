@@ -55,7 +55,6 @@ import org.spongepowered.common.event.tracking.context.transaction.type.Transact
 import java.lang.ref.WeakReference;
 import java.util.Collections;
 import java.util.Iterator;
-import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
 import java.util.Spliterator;
@@ -123,6 +122,8 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
         this.effect = transactor.previousEffect;
     }
 
+    @SuppressWarnings("DeprecatedIsStillUsed")
+    @Deprecated
     @Override
     public void logTransaction(final GameTransaction<@NonNull ?> transaction) {
         if (this.head == null) {
@@ -170,7 +171,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
     }
 
     @Override
-    @SuppressWarnings({"ConstantConditions"})
     public boolean logTileRemoval(final @Nullable BlockEntity tileentity, final Supplier<ServerLevel> worldSupplier) {
         if (tileentity == null) {
             return false;
@@ -182,19 +182,10 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
             }
             // Need to traverse children by "most recent" transactions to "oldest"
             // to verify which transaction could potentially absorb the tile removed
-            if (this.tail.hasChildTransactions()) {
-                final LinkedList<ResultingTransactionBySideEffect> sideEffects = this.tail.sideEffects;
-                final Iterator<ResultingTransactionBySideEffect> iter = sideEffects.descendingIterator();
-                // Nasty way at doing it with an iterator....
-                for (ResultingTransactionBySideEffect sideEffect = iter.next(); iter.hasNext(); sideEffect = iter.next()) {
-                    // Then we traverse our own manual doubly linked nodes.
-                    @Nullable GameTransaction<@NonNull ?> pointer = sideEffect.tail;
-                    while (pointer != null) {
-                        if (pointer.acceptTileRemoval(tileentity)) {
-                            return true;
-                        }
-                        pointer = pointer.previous;
-                    }
+            final Iterator<GameTransaction<@NonNull ?>> iterator = this.tail.reverseChildIterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().acceptTileRemoval(tileentity)) {
+                    return true;
                 }
             }
         }
@@ -213,6 +204,12 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
             final boolean newRecorded = this.tail.acceptTileReplacement(existing, proposed);
             if (newRecorded) {
                 return true;
+            }
+            final Iterator<GameTransaction<@NonNull ?>> iterator = this.tail.reverseChildIterator();
+            while (iterator.hasNext()) {
+                if (iterator.next().acceptTileReplacement(existing, proposed)) {
+                    return true;
+                }
             }
         }
         return TransactionSink.super.logTileReplacement(pos, existing, proposed, worldSupplier);
