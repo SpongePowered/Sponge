@@ -101,7 +101,7 @@ import java.util.function.Supplier;
  * <p>Most transactions are singularly contained, but some transactions are
  * markers for transaction boundaries and absorb certain transactions.
  *
- * @see GameTransaction#absorbByParent(PhaseContext, GameTransaction)
+ * @see TransactionFlow#parentAbsorber()
  */
 interface TransactionSink {
 

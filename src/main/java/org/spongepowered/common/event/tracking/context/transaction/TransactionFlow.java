@@ -40,12 +40,52 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Con
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ShiftCraftingResultTransaction;
 
-interface TransactionFlow {
+import java.util.Optional;
 
-    default boolean absorbByParent(
-        final PhaseContext<@NonNull ?> context, final GameTransaction<@NonNull ?> transaction
-    ) {
-        return false;
+/**
+ * A flow is a transaction being constructed or transformed in flight between
+ * a source, such as a block change, to the destination, the {@link TransactionSink}.
+ * Often times the sink just blindly accepts any transaction as the final
+ * destination in {@link TransactionSink#logTransaction(GameTransaction)}, but
+ * on certain cases, the transaction itself can have a specific flow as an
+ * intermediary step, specifically by usage of
+ * {@link #parentAbsorber()}.
+ * <p>This is to plainly say that not all transactions are treated equal, but
+ * from the source of creating a transaction, it's a "fire and forget" basis,
+ * whereas the transaction itself may have behaviors that involve batching with
+ * other transactions that effectively leave the transaction not being recorded
+ * by the {@link TransactionSink}.
+ */
+public interface TransactionFlow {
+
+    /**
+     * An abstract function to serve for {@link #parentAbsorber()} to handily
+     * call the conventional function onto the transaction without knowing
+     * whether the parent function itself is a valid target absorber. This
+     * function must not be mutative to the child transaction, but can call
+     * mutative functions on the target {@link TransactionFlow transaction}
+     * such that a {@code boolean} return value means the child transaction has
+     * been successfully absorbed and can be omitted from
+     * {@link TransactionSink#logTransaction(GameTransaction)}. This call can
+     * and will be called multiple times to exhause a full transaction tree if
+     * need be.
+     */
+    @FunctionalInterface
+    interface AbsorbingFlowStep {
+        boolean absorb(final PhaseContext<@NonNull ?> context, final TransactionFlow transaction);
+    }
+
+    /**
+     * Simple function used to verify whether this particular transaction has a
+     * behavior of being "merged" or "absorbed" by an already-recorded
+     * transaction. This has uses for cases where "fire-and-forget" tend to have
+     * unnatural recording behaviors that are non-deterministic based on their
+     * root alone, and often times need to be gathered by some parent target.
+     *
+     * @return The absorbing function, if meant to be absorbed
+     */
+    default Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.empty();
     }
 
     default boolean absorbSpawnEntity(
@@ -94,15 +134,7 @@ interface TransactionFlow {
         return false;
     }
 
-    default void acceptContainerSet(final Player player) {
-
-    }
-
-    /**
-     * Micro-optimization to avoid
-     * @return
-     */
-    default boolean canBeAbsorbed() {
+    default boolean acceptContainerSet(final Player player) {
         return false;
     }
 

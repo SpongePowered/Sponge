@@ -26,9 +26,8 @@ package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import net.minecraft.world.inventory.Slot;
 import net.minecraft.world.item.ItemStack;
-import org.checkerframework.checker.nullness.qual.NonNull;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
+
+import java.util.Optional;
 
 public class ShiftCraftingResultTransaction extends SlotBasedTransaction {
 
@@ -37,14 +36,8 @@ public class ShiftCraftingResultTransaction extends SlotBasedTransaction {
     }
 
     @Override
-    public boolean absorbByParent(
-        final PhaseContext<@NonNull ?> context, final GameTransaction<@NonNull ?> transaction
-    ) {
-        return transaction.absorbShiftClickResult(context, this);
+    public Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.of((ctx, tx) -> tx.absorbShiftClickResult(ctx, this));
     }
 
-    @Override
-    public boolean canBeAbsorbed() {
-        return true;
-    }
 }

@@ -25,13 +25,11 @@
 package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import net.minecraft.world.inventory.AbstractContainerMenu;
-import org.checkerframework.checker.nullness.qual.NonNull;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
-import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 
 import java.util.Collections;
 import java.util.List;
+import java.util.Optional;
 
 public class ContainerSlotTransaction extends ContainerBasedTransaction {
 
@@ -48,15 +46,8 @@ public class ContainerSlotTransaction extends ContainerBasedTransaction {
     }
 
     @Override
-    public boolean absorbByParent(
-        final PhaseContext<@NonNull ?> context, final GameTransaction<@NonNull ?> transaction
-    ) {
-        return transaction.absorbSlotTransaction(this);
-    }
-
-    @Override
-    public boolean canBeAbsorbed() {
-        return true;
+    public Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.of((ctx, tx) -> tx.absorbSlotTransaction(this));
     }
 
     @Override

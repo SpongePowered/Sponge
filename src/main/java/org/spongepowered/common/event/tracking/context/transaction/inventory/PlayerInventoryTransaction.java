@@ -33,7 +33,6 @@ import org.spongepowered.api.event.item.inventory.ChangeInventoryEvent;
 import org.spongepowered.api.item.inventory.Inventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 
 import java.util.List;
@@ -71,15 +70,8 @@ public class PlayerInventoryTransaction extends InventoryBasedTransaction {
     }
 
     @Override
-    public boolean canBeAbsorbed() {
-        return true;
-    }
-
-    @Override
-    public boolean absorbByParent(
-        final PhaseContext<@NonNull ?> context, final GameTransaction<@NonNull ?> transaction
-    ) {
-        return transaction.absorbPlayerInventoryChange(context, this);
+    public Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.of((ctx, tx) -> tx.absorbPlayerInventoryChange(ctx, this));
     }
 
     @Override

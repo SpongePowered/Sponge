@@ -91,15 +91,8 @@ public final class PrepareBlockDropsTransaction extends BlockEventBasedTransacti
     }
 
     @Override
-    public boolean absorbByParent(
-        final PhaseContext<@NonNull ?> context, final GameTransaction<@NonNull ?> transaction
-    ) {
-        return transaction.absorbBlockDropsPreparation(context, this);
+    public Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.of((ctx, tx) -> tx.absorbBlockDropsPreparation(ctx, this));
     }
 
-
-    @Override
-    public boolean canBeAbsorbed() {
-        return true;
-    }
 }

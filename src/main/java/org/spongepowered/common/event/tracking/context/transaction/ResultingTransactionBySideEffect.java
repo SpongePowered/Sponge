@@ -31,6 +31,7 @@ import org.spongepowered.common.event.tracking.context.transaction.effect.Proces
 
 import java.util.Collections;
 import java.util.Iterator;
+import java.util.Optional;
 
 public class ResultingTransactionBySideEffect {
     public final ProcessingSideEffect effect;
@@ -48,10 +49,12 @@ public class ResultingTransactionBySideEffect {
         // Basically attempt to climb up the chain to see if any of the existing
         // transactions will accept the child. This can get expensive at times
         // if the transaction tree reaches hundreds x hundreds of transactions.
-        if (child.canBeAbsorbed()) {
+        final Optional<TransactionFlow.AbsorbingFlowStep> absorbingFlowStep = child.parentAbsorber();
+        if (absorbingFlowStep.isPresent()) {
+            final TransactionFlow.AbsorbingFlowStep absorber = absorbingFlowStep.get();
             for (final Iterator<GameTransaction<@NonNull ?>> iterator = this.reverseDeepIterator();
                  iterator.hasNext(); ) {
-                if (child.absorbByParent(context, iterator.next())) {
+                if (absorber.absorb(context, iterator.next())) {
                     return;
                 }
             }

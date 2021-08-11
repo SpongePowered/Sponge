@@ -108,8 +108,13 @@ public class OpenMenuTransaction extends GameTransaction<InteractContainerEvent>
     }
 
     @Override
-    public void acceptContainerSet(final Player player) {
+    public boolean acceptContainerSet(final Player player) {
+        // Just to sanity check that we're not talking about the same player?
+        if (this.player != player) {
+            return false;
+        }
         this.menu = player.containerMenu;
+        return true;
     }
 
     @Override

@@ -64,6 +64,8 @@ import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.Objects;
 import java.util.Optional;
+import java.util.Spliterator;
+import java.util.Spliterators;
 import java.util.StringJoiner;
 import java.util.function.BiConsumer;
 import java.util.function.Supplier;
@@ -134,11 +136,13 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
             this.tail = transaction;
             return;
         }
-        if (transaction.canBeAbsorbed()) {
+        final Optional<TransactionFlow.AbsorbingFlowStep> absorbingFlowStep = transaction.parentAbsorber();
+        if (absorbingFlowStep.isPresent()) {
+            final TransactionFlow.AbsorbingFlowStep absorber = absorbingFlowStep.get();
             final Iterator<GameTransaction<@NonNull ?>> iterator = this.descendingIterator();
             while (iterator.hasNext()) {
                 final GameTransaction<@NonNull ?> next = iterator.next();
-                if (transaction.absorbByParent(this.context, next)) {
+                if (absorber.absorb(this.context, next)) {
                     return;
                 }
             }
@@ -491,6 +495,11 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
     @Override
     public Iterator<GameTransaction<@NonNull ?>> iterator() {
         return this.head != null ? new DeepIterator(this.head) : Collections.emptyIterator();
+    }
+
+    @Override
+    public Spliterator<GameTransaction<@NonNull ?>> spliterator() {
+        return Spliterators.spliteratorUnknownSize(this.iterator(), Spliterator.ORDERED | Spliterator.NONNULL);
     }
 
     public Iterator<GameTransaction<@NonNull ?>> descendingIterator() {

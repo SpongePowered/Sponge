@@ -114,15 +114,8 @@ public final class SpawnEntityTransaction extends WorldBasedTransaction<SpawnEnt
     }
 
     @Override
-    public boolean absorbByParent(
-        final PhaseContext<@NonNull ?> context, final GameTransaction<@NonNull ?> transaction
-    ) {
-        return transaction.absorbSpawnEntity(context, this);
-    }
-
-    @Override
-    public boolean canBeAbsorbed() {
-        return true;
+    public Optional<AbsorbingFlowStep> parentAbsorber() {
+        return Optional.of((ctx, tx) -> tx.absorbSpawnEntity(ctx, this));
     }
 
     @Override
