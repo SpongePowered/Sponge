@@ -224,12 +224,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
         return TransactionSink.super.logTileReplacement(pos, existing, proposed, worldSupplier);
     }
 
-    public void logContainerSet(final Player player) {
-        if (this.tail != null) {
-            this.tail.acceptContainerSet(player);
-        }
-    }
-
     public void logCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,
             @Nullable final CraftingRecipe lastRecipe) {
         if (this.tail != null && this.tail.acceptCrafting(player, craftedStack, craftInv, lastRecipe)) {

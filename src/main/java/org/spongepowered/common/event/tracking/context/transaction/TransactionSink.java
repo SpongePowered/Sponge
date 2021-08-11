@@ -73,10 +73,12 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Cli
 import org.spongepowered.common.event.tracking.context.transaction.inventory.CloseMenuTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ContainerSlotTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.DropFromPlayerInventoryTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.OpenMenuTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlaceRecipeTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.SelectTradeTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.SetCarriedItemTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.SetPlayerContainerTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ShiftCraftingResultTransaction;
 import org.spongepowered.common.event.tracking.phase.general.CommandPhaseContext;
 import org.spongepowered.common.event.tracking.phase.tick.EntityTickContext;
@@ -414,6 +416,10 @@ interface TransactionSink {
 
     default void logShiftCraftingResult(final net.minecraft.world.inventory.Slot slot, final ItemStack result) {
         final ShiftCraftingResultTransaction transaction = new ShiftCraftingResultTransaction(slot, result);
+        this.logTransaction(transaction);
+    }
+    default void logContainerSet(final Player player) {
+        final SetPlayerContainerTransaction transaction = new SetPlayerContainerTransaction(player);
         this.logTransaction(transaction);
     }
 }

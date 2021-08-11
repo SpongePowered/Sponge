@@ -38,6 +38,7 @@ import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.block.PrepareBlockDropsTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ContainerSlotTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.SetPlayerContainerTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ShiftCraftingResultTransaction;
 
 import java.util.Optional;
@@ -134,7 +135,7 @@ public interface TransactionFlow {
         return false;
     }
 
-    default boolean acceptContainerSet(final Player player) {
+    default boolean absorbContainerSet(final PhaseContext<@NonNull ?> ctx, final SetPlayerContainerTransaction transaction) {
         return false;
     }
 

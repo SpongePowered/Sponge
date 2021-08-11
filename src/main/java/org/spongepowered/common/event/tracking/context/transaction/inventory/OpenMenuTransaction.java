@@ -22,7 +22,7 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
  * THE SOFTWARE.
  */
-package org.spongepowered.common.event.tracking.context.transaction;
+package org.spongepowered.common.event.tracking.context.transaction.inventory;
 
 import com.google.common.collect.ImmutableList;
 import net.minecraft.server.level.ServerPlayer;
@@ -38,7 +38,7 @@ import org.spongepowered.api.event.item.inventory.container.InteractContainerEve
 import org.spongepowered.api.item.inventory.Container;
 import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.common.event.tracking.PhaseContext;
-import org.spongepowered.common.event.tracking.context.transaction.inventory.ContainerSlotTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.GameTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.type.TransactionTypes;
 import org.spongepowered.common.event.tracking.phase.packet.PacketPhaseUtil;
 import org.spongepowered.common.item.util.ItemStackUtil;
@@ -108,12 +108,12 @@ public class OpenMenuTransaction extends GameTransaction<InteractContainerEvent>
     }
 
     @Override
-    public boolean acceptContainerSet(final Player player) {
+    public boolean absorbContainerSet(final PhaseContext<@NonNull ?> ctx, final SetPlayerContainerTransaction transaction) {
         // Just to sanity check that we're not talking about the same player?
-        if (this.player != player) {
+        if (this.player != transaction.player) {
             return false;
         }
-        this.menu = player.containerMenu;
+        this.menu = transaction.menu;
         return true;
     }
 
