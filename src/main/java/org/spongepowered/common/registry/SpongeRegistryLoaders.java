@@ -383,6 +383,7 @@ public final class SpongeRegistryLoaders {
             l.add(TransactionTypes.NEIGHBOR_NOTIFICATION, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
             l.add(TransactionTypes.SPAWN_ENTITY, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
             l.add(TransactionTypes.CHANGE_INVENTORY_EVENT, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
+            l.add(TransactionTypes.SLOT_CHANGE, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
             l.add(TransactionTypes.INTERACT_CONTAINER_EVENT, k -> new NoOpTransactionType<>(false, k.value().toUpperCase(Locale.ROOT)));
         });
     }
