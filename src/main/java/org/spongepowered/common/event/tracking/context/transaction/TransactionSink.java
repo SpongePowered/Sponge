@@ -31,6 +31,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.inventory.AbstractContainerMenu;
 import net.minecraft.world.inventory.ClickType;
+import net.minecraft.world.inventory.CraftingContainer;
 import net.minecraft.world.inventory.InventoryMenu;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.crafting.Recipe;
@@ -47,6 +48,7 @@ import org.spongepowered.api.item.inventory.ItemStackSnapshot;
 import org.spongepowered.api.item.inventory.Slot;
 import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
 import org.spongepowered.api.item.inventory.transaction.SlotTransaction;
+import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.api.world.BlockChangeFlag;
 import org.spongepowered.api.world.BlockChangeFlags;
 import org.spongepowered.common.SpongeCommon;
@@ -72,6 +74,8 @@ import org.spongepowered.common.event.tracking.context.transaction.inventory.Cli
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ClickMenuTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.CloseMenuTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ContainerSlotTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.CraftingPreviewTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.CraftingTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.DropFromPlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.OpenMenuTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlaceRecipeTransaction;
@@ -420,6 +424,18 @@ interface TransactionSink {
     }
     default void logContainerSet(final Player player) {
         final SetPlayerContainerTransaction transaction = new SetPlayerContainerTransaction(player);
+        this.logTransaction(transaction);
+    }
+
+    default void logCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory,
+        final CraftingContainer craftSlots) {
+        final CraftingPreviewTransaction transaction = new CraftingPreviewTransaction(player, craftingInventory, craftSlots);
+        this.logTransaction(transaction);
+    }
+
+    default void logCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,
+        @Nullable final CraftingRecipe lastRecipe) {
+        final CraftingTransaction transaction = new CraftingTransaction(player, craftedStack, craftInv, lastRecipe);
         this.logTransaction(transaction);
     }
 }

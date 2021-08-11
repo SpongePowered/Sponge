@@ -29,14 +29,10 @@ import com.google.common.collect.ImmutableMultimap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.damagesource.CombatEntry;
 import net.minecraft.world.damagesource.DamageSource;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.LivingEntity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import net.minecraft.world.level.chunk.LevelChunk;
 import org.checkerframework.checker.nullness.qual.MonotonicNonNull;
@@ -46,8 +42,6 @@ import org.spongepowered.api.Sponge;
 import org.spongepowered.api.event.Cancellable;
 import org.spongepowered.api.event.CauseStackManager;
 import org.spongepowered.api.event.Event;
-import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.SpongeCommon;
 import org.spongepowered.common.accessor.world.damagesource.CombatEntryAccessor;
 import org.spongepowered.common.accessor.world.damagesource.CombatTrackerAccessor;
@@ -222,22 +216,6 @@ public final class TransactionalCaptureSupplier implements ICaptureSupplier, Tra
             }
         }
         return TransactionSink.super.logTileReplacement(pos, existing, proposed, worldSupplier);
-    }
-
-    public void logCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv,
-            @Nullable final CraftingRecipe lastRecipe) {
-        if (this.tail != null && this.tail.acceptCrafting(player, craftedStack, craftInv, lastRecipe)) {
-            return;
-        }
-        throw new IllegalStateException("Crafting must be nested in another event");
-    }
-
-    public void logCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory,
-            final CraftingContainer craftSlots) {
-        if (this.tail != null && this.tail.acceptCraftingPreview(player, craftingInventory, craftSlots)) {
-            return;
-        }
-        throw new IllegalStateException("Preview must be nested in another event");
     }
 
     @SuppressWarnings({"ConstantConditions"})

@@ -24,19 +24,15 @@
  */
 package org.spongepowered.common.event.tracking.context.transaction;
 
-import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.entity.Entity;
-import net.minecraft.world.entity.player.Player;
-import net.minecraft.world.inventory.CraftingContainer;
-import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.level.block.entity.BlockEntity;
 import org.checkerframework.checker.nullness.qual.NonNull;
 import org.checkerframework.checker.nullness.qual.Nullable;
-import org.spongepowered.api.item.inventory.crafting.CraftingInventory;
-import org.spongepowered.api.item.recipe.crafting.CraftingRecipe;
 import org.spongepowered.common.event.tracking.PhaseContext;
 import org.spongepowered.common.event.tracking.context.transaction.block.PrepareBlockDropsTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ContainerSlotTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.CraftingPreviewTransaction;
+import org.spongepowered.common.event.tracking.context.transaction.inventory.CraftingTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.PlayerInventoryTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.SetPlayerContainerTransaction;
 import org.spongepowered.common.event.tracking.context.transaction.inventory.ShiftCraftingResultTransaction;
@@ -127,15 +123,19 @@ public interface TransactionFlow {
         return false;
     }
 
-    default boolean acceptCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory, final CraftingContainer craftSlots) {
+    default boolean acceptCraftingPreview(
+        final PhaseContext<@NonNull ?> ctx, final CraftingPreviewTransaction transaction
+    ) {
         return false;
     }
 
-    default boolean acceptCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftInv, @Nullable final CraftingRecipe lastRecipe) {
+    default boolean acceptCrafting(final PhaseContext<@NonNull ?> ctx, final CraftingTransaction transaction) {
         return false;
     }
 
-    default boolean absorbContainerSet(final PhaseContext<@NonNull ?> ctx, final SetPlayerContainerTransaction transaction) {
+    default boolean absorbContainerSet(
+        final PhaseContext<@NonNull ?> ctx, final SetPlayerContainerTransaction transaction
+    ) {
         return false;
     }
 

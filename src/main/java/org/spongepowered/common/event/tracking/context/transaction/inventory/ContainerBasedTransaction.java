@@ -373,29 +373,38 @@ abstract class ContainerBasedTransaction extends MenuBasedTransaction<ClickConta
     }
 
     @Override
-    public boolean acceptCraftingPreview(final ServerPlayer player, final CraftingInventory craftingInventory, final CraftingContainer craftSlots) {
-        if (this.menu == player.containerMenu) {
-            this.craftingInventory = craftingInventory;
-            this.craftingContainer = craftSlots;
+    public boolean acceptCraftingPreview(
+        final PhaseContext<@NonNull ?> ctx, final CraftingPreviewTransaction transaction
+    ) {
+        if (this.menu == transaction.menu) {
+            this.craftingInventory = transaction.craftingInventory;
+            this.craftingContainer = transaction.craftSlots;
             return true;
         }
         return false;
     }
 
     @Override
-    public boolean acceptCrafting(final Player player, @Nullable final ItemStack craftedStack, final CraftingInventory craftingInventory,
-            @Nullable final CraftingRecipe onTakeRecipe) {
-        if (this.menu == player.containerMenu) {
+    public boolean acceptCrafting(
+        final PhaseContext<@NonNull ?> ctx, final CraftingTransaction transaction
+    ) {
+        if (this.menu == transaction.menu) {
             this.used = false;
-            this.craftedStack = craftedStack;
-            this.craftingInventory = craftingInventory;
-            this.onTakeRecipe = onTakeRecipe;
+            this.craftedStack = transaction.craftedStack;
+            this.craftingInventory = transaction.craftingInventory;
+            this.onTakeRecipe = transaction.recipe;
             return true;
         }
         return false;
     }
 
-    public void acceptShiftCraftingResult(final ItemStack result) {
-        this.shiftCraftingResult = result;
+    @Override
+    public boolean absorbShiftClickResult(
+        final PhaseContext<@NonNull ?> context, final ShiftCraftingResultTransaction transaction
+    ) {
+        // todo - maybe we might need to verify this?
+        this.shiftCraftingResult = transaction.itemStack;
+        return true;
     }
+
 }
